@@ -4,8 +4,8 @@
 
 // imports.
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Landing from './components/1landing/Landing'
-import Auth from './components/2auth/Auth'
+import Landing from './pages/1landing/Landing'
+import Auth from './pages/2auth/Auth'
 
 // ----------- main component -----------
 

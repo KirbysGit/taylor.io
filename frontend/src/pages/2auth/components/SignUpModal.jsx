@@ -3,23 +3,68 @@
 // sign up modal component.
 
 import { useState } from 'react'
+import { registerUser } from '@/api/services/auth'
 
-function SignUpModal({ isOpen, onClose, onSwitchToLogin }) {
+function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
   })
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // TODO: Add signup logic
+    setError('')
+    
+    // Basic validation
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match')
+      setError('Passwords do not match')
       return
     }
-    console.log('Sign Up:', formData)
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const userData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      }
+
+      const response = await registerUser(userData)
+      
+      // Store user data in localStorage
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user))
+      }
+
+      // Call success callback
+      if (onSignUpSuccess) {
+        onSignUpSuccess(response.data.user || response.data)
+      }
+
+      // Close modal
+      onClose()
+    } catch (err) {
+      console.error('Sign up failed:', err)
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail)
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message)
+      } else {
+        setError('Sign up failed. Please try again.')
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleChange = (e) => {
@@ -117,11 +162,18 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin }) {
             />
           </div>
 
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-brand-pink text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-colors"
+            disabled={isLoading}
+            className="w-full bg-brand-pink text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Account
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 

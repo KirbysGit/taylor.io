@@ -1,0 +1,15 @@
+// jsconfig.json
+
+// tells the js compiler what to do with our files.
+
+// imports.
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+        "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}
+

@@ -1,7 +1,7 @@
 # models / projects.py
 
 # imports.
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, ARRAY
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, JSON
 from sqlalchemy.orm import relationship
 from .base import Base
 
@@ -13,7 +13,7 @@ class Projects(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)       # foreign key to user.
     title = Column(String(200), nullable=False)                             # title.
     description = Column(String(500), nullable=True)                        # description.
-    tech_stack = Column(ARRAY(String), nullable=True)                       # tech stack as list of strings.
+    tech_stack = Column(JSON, nullable=True)                                # tech stack as list of strings.
 
     # relationship back to user.
     user = relationship("User", back_populates="projects")

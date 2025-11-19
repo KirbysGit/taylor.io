@@ -3,54 +3,63 @@
 # first file, best file!
 
 # imports.
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import os
-from dotenv import load_dotenv
-from fastapi import Depends, FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
 
-# import our models and base.
-from models import Base, User, Experience
+# import our base model.
+from models import Base
 
-# load .env vars (future)
-load_dotenv()
+# import database.
+from database import engine
 
-# ----- Database Setup -----
-
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg2://postgres:postgres@localhost:5432/tailor",
-)
+# import routers.
+from routers import auth_router, users_router
 
 
-# set up our sql connection.
-engine = create_engine(DATABASE_URL, future=True)                               # create db engine.
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)     # creates new session for engine.
-
-# for fastAPI, create, provide, then close db session.
-def get_db() -> Session:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-# ----- Backend Start -----
-
-# create all tables.
-def create_tables():
-    Base.metadata.create_all(bind=engine)
-
+# ---------------- backend startup ----------------
 
 # declares our app.
 app = FastAPI(title="taylor.io", version="0.1.0")
 
+# configure CORS.
+origins = [
+    'http://localhost:5173',
+    'http://localhost:8000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:8000',
+]
+
+
+
+# add the middleware for CORS.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=86400,  # cache preflight for 24 hours.
+)
+
+
+# register modular route groups.
+app.include_router(auth_router)
+app.include_router(users_router)
+
+# ---------------- routes startup ----------------
+
 # create tables on startup.
 @app.on_event("startup")
 async def startup_event():
-    create_tables()
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("Database tables created successfully")
+    except Exception as e:
+        print(f"Error creating database tables: {e}")
 
+# basic routes.
 @app.get("/health")
 async def health_check():
     return {"status": "chillin'"}
@@ -58,21 +67,3 @@ async def health_check():
 @app.get("/")
 async def root():
     return {"message": "yo"}
-
-
-# example route using the User model.
-@app.get("/users")
-async def get_users(db: Session = Depends(get_db)):
-    users = db.query(User).all()
-    return users
-
-
-# example route: get a user with their experiences.
-@app.get("/users/{user_id}/experiences")
-async def get_user_experiences(user_id: int, db: Session = Depends(get_db)):
-    """Get all experiences for a specific user."""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        return {"error": "User not found"}
-    return {"user_id": user_id, "experiences": user.experiences}
-
