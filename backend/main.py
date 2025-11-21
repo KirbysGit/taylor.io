@@ -6,6 +6,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import logging
+
+# configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 # import our base model.
 from models import Base
@@ -14,7 +22,7 @@ from models import Base
 from database import engine
 
 # import routers.
-from routers import auth_router, users_router
+from routers import auth_router, users_router, profile_router, resume_router
 
 
 # ---------------- backend startup ----------------
@@ -47,6 +55,8 @@ app.add_middleware(
 # register modular route groups.
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(profile_router)
+app.include_router(resume_router)
 
 # ---------------- routes startup ----------------
 

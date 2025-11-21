@@ -5,6 +5,8 @@
 
 # imports.
 from pydantic import BaseModel, EmailStr
+from typing import Optional, List
+from datetime import datetime
 
 
 # --------- user schemas ---------
@@ -32,4 +34,112 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str
     user: UserResponse
+
+
+# --------- experience schemas ---------
+
+class ExperienceCreate(BaseModel):
+    title: str
+    company: Optional[str] = None
+    description: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+
+
+class ExperienceResponse(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    company: Optional[str]
+    description: Optional[str]
+    start_date: Optional[datetime]
+    end_date: Optional[datetime]
+
+    model_config = {"from_attributes": True}
+
+
+# --------- project schemas ---------
+
+class ProjectCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    tech_stack: Optional[List[str]] = None
+
+
+class ProjectResponse(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    description: Optional[str]
+    tech_stack: Optional[List[str]]
+
+    model_config = {"from_attributes": True}
+
+
+# --------- skill schemas ---------
+
+class SkillCreate(BaseModel):
+    name: str
+
+
+class SkillResponse(BaseModel):
+    id: int
+    user_id: int
+    name: str
+
+    model_config = {"from_attributes": True}
+
+
+# --------- user profile schema ---------
+
+class UserProfileResponse(BaseModel):
+    user: UserResponse
+    experiences: List[ExperienceResponse]
+    projects: List[ProjectResponse]
+    skills: List[SkillResponse]
+
+
+# --------- parsed resume schemas ---------
+
+class ParsedContactInfo(BaseModel):
+    email: Optional[str] = None
+    phone: Optional[str] = None
+
+
+class ParsedEducation(BaseModel):
+    school: Optional[str] = None
+    degree: Optional[str] = None
+    field: Optional[str] = None
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+    current: bool = False
+
+
+class ParsedExperience(BaseModel):
+    title: Optional[str] = None
+    company: Optional[str] = None
+    description: Optional[str] = None
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+    current: bool = False
+
+
+class ParsedProject(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    techStack: Optional[List[str]] = None
+
+
+class ParsedSkill(BaseModel):
+    name: str
+    category: Optional[str] = None  # e.g., "Languages", "Frameworks", "Data Tools"
+
+
+class ParsedResumeResponse(BaseModel):
+    experiences: List[ParsedExperience] = []
+    education: List[ParsedEducation] = []
+    skills: List[ParsedSkill] = []
+    projects: List[ParsedProject] = []
+    contact_info: ParsedContactInfo = ParsedContactInfo()
+    warnings: List[str] = []
 

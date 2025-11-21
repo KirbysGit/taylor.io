@@ -1,0 +1,277 @@
+# routers/profile.py
+
+# user profile routes (experiences, projects, skills).
+
+# current:
+# - get_my_profile                -      gets user's profile w/ all experiences, projects, and skills.
+# - create_experience             -      creates a new experience for the current user.
+# - create_project                -      creates a new project for the current user.
+# - create_skill                  -      creates a new skill for the current user.
+# - create_experiences_bulk       -      creates multiple experiences for the current user.
+# - create_projects_bulk          -      creates multiple projects for the current user.
+# - create_skills_bulk            -      creates multiple skills for the current user.
+
+# imports.
+from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from typing import List
+
+# local imports.
+from models import User, Experience, Projects, Skills
+from database import get_db
+from schemas import (
+    ExperienceCreate, ExperienceResponse,
+    ProjectCreate, ProjectResponse,
+    SkillCreate, SkillResponse,
+    UserProfileResponse, UserResponse,
+    ParsedResumeResponse
+)
+from .auth import get_current_user_from_token
+from resume_parser import parse_resume_file
+
+# create router.
+router = APIRouter(prefix="/api/profile", tags=["profile"])
+
+# ------------------- routes -------------------
+
+# get current user's full profile.
+@router.get("/me", response_model=UserProfileResponse)
+async def get_my_profile(
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    # return the user's profile with all experiences, projects, and skills.
+    return {
+        "user": UserResponse.model_validate(current_user),
+        "experiences": [ExperienceResponse.model_validate(exp) for exp in current_user.experiences],
+        "projects": [ProjectResponse.model_validate(proj) for proj in current_user.projects],
+        "skills": [SkillResponse.model_validate(skill) for skill in current_user.skills],
+    }
+
+
+# create experience.
+@router.post("/experiences", response_model=ExperienceResponse)
+async def create_experience(
+    experience_data: ExperienceCreate,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    # create a new experience for the current user.
+    new_experience = Experience(
+        user_id=current_user.id,
+        title=experience_data.title,
+        company=experience_data.company,
+        description=experience_data.description,
+        start_date=experience_data.start_date,
+        end_date=experience_data.end_date,
+    )
+    
+    # add, commit, and refresh db.
+    db.add(new_experience)
+    db.commit()
+    db.refresh(new_experience)
+    
+    return ExperienceResponse.model_validate(new_experience)
+
+
+# create project.
+@router.post("/projects", response_model=ProjectResponse)
+async def create_project(
+    project_data: ProjectCreate,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    # create a new project for the current user.
+    new_project = Projects(
+        user_id=current_user.id,
+        title=project_data.title,
+        description=project_data.description,
+        tech_stack=project_data.tech_stack,
+    )
+    
+    # add, commit, and refresh db.
+    db.add(new_project)
+    db.commit()
+    db.refresh(new_project)
+    
+    return ProjectResponse.model_validate(new_project)
+
+
+# create skill.
+@router.post("/skills", response_model=SkillResponse)
+async def create_skill(
+    skill_data: SkillCreate,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+
+    # check if skill already exists for this user.
+    existing_skill = db.query(Skills).filter(
+        Skills.user_id == current_user.id,
+        Skills.name == skill_data.name
+    ).first()
+    
+    # if skill already exists, return it.
+    if existing_skill:
+        return SkillResponse.model_validate(existing_skill)
+    
+    # create a new skill for the current user.
+    new_skill = Skills(
+        user_id=current_user.id,
+        name=skill_data.name,
+    )
+    
+    # add, commit, and refresh db.
+    db.add(new_skill)
+    db.commit()
+    db.refresh(new_skill)
+    
+    return SkillResponse.model_validate(new_skill)
+
+
+# bulk create experiences.
+@router.post("/experiences/bulk", response_model=List[ExperienceResponse])
+async def create_experiences_bulk(
+    experiences_data: List[ExperienceCreate],
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    # create multiple experiences for the current user.
+    new_experiences = []
+    for exp_data in experiences_data:
+        new_exp = Experience(
+            user_id=current_user.id,
+            title=exp_data.title,
+            company=exp_data.company,
+            description=exp_data.description,
+            start_date=exp_data.start_date,
+            end_date=exp_data.end_date,
+        )
+        db.add(new_exp)
+        new_experiences.append(new_exp)
+    
+    # add, commit, and refresh db.
+    db.commit()
+    for exp in new_experiences:
+        db.refresh(exp)
+    
+    return [ExperienceResponse.model_validate(exp) for exp in new_experiences]
+
+
+# bulk create projects.
+@router.post("/projects/bulk", response_model=List[ProjectResponse])
+async def create_projects_bulk(
+    projects_data: List[ProjectCreate],
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    # create multiple projects for the current user.
+    new_projects = []
+    for proj_data in projects_data:
+        new_proj = Projects(
+            user_id=current_user.id,
+            title=proj_data.title,
+            description=proj_data.description,
+            tech_stack=proj_data.tech_stack,
+        )
+        db.add(new_proj)
+        new_projects.append(new_proj)
+    
+    # add, commit, and refresh db.
+    db.commit()
+    for proj in new_projects:
+        db.refresh(proj)
+    
+    return [ProjectResponse.model_validate(proj) for proj in new_projects]
+
+
+# bulk create skills.
+@router.post("/skills/bulk", response_model=List[SkillResponse])
+async def create_skills_bulk(
+    skills_data: List[SkillCreate],
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    # create multiple skills for the current user.
+    new_skills = []
+    for skill_data in skills_data:
+        # check if skill already exists.
+        existing_skill = db.query(Skills).filter(
+            Skills.user_id == current_user.id,
+            Skills.name == skill_data.name
+        ).first()
+        
+        # if skill already exists, add it to the list.
+        if existing_skill:
+            new_skills.append(existing_skill)
+        else:
+            # create a new skill for the current user.
+            new_skill = Skills(
+                user_id=current_user.id,
+                name=skill_data.name,
+            )
+            # add, commit, and refresh db.
+            db.add(new_skill)
+            new_skills.append(new_skill)
+    
+    # add, commit, and refresh db.
+    db.commit()
+    for skill in new_skills:
+        db.refresh(skill)
+    
+    return [SkillResponse.model_validate(skill) for skill in new_skills]
+
+
+# parse resume file.
+@router.post("/parse-resume", response_model=ParsedResumeResponse)
+async def parse_resume(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    """Parse a resume file (PDF or DOCX) and extract structured data."""
+    # validate file type.
+    if not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No filename provided"
+        )
+    
+    if not (file.filename.lower().endswith('.pdf') or file.filename.lower().endswith(('.docx', '.doc'))):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported file type. Only PDF and DOCX files are supported."
+        )
+    
+    # validate file size (max 10MB).
+    file_bytes = await file.read()
+    if len(file_bytes) > 10 * 1024 * 1024:  # 10MB
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File too large. Maximum size is 10MB."
+        )
+    
+    try:
+        # parse the resume file.
+        parsed_data = parse_resume_file(file_bytes, file.filename)
+        
+        # convert to response format.
+        return ParsedResumeResponse(
+            experiences=parsed_data.get("experiences", []),
+            education=parsed_data.get("education", []),
+            skills=parsed_data.get("skills", []),
+            projects=parsed_data.get("projects", []),
+            contact_info=parsed_data.get("contact_info", {}),
+            warnings=parsed_data.get("warnings", [])
+        )
+    except ImportError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Required library not installed: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error parsing resume: {str(e)}"
+        )
+

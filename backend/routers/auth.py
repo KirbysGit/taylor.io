@@ -2,15 +2,20 @@
 
 # authentication routes.
 
+# current:
+# - register                      -      registers a new user.
+# - login                         -      logs in a user.
+# - get_current_user_from_token   -      gets the current user from the token.
+
 # imports.
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 
 # local imports.
 from models import User
 from database import get_db
 from schemas import UserCreate, UserResponse, UserLogin, TokenResponse
-from .security import get_password_hash, verify_password, create_access_token
+from .security import get_password_hash, verify_password, create_access_token, verify_token
 
 # create router.
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -76,4 +81,60 @@ async def login(credentials: UserLogin, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user": UserResponse.model_validate(user)
     }
+
+
+# helper function to get current user from token.
+async def get_current_user_from_token(
+    authorization: str = Header(None),
+    db: Session = Depends(get_db)
+):
+    # if no authorization header, raise an error.
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not Authorized. Must Login to Access."
+        )
+    
+    # extract token from "Bearer <token>".
+    # split the header - if it fails, the header is malformed.
+    try:
+        parts = authorization.split()
+        if len(parts) != 2 or parts[0].lower() != "bearer":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authorization header. Expected 'Bearer <token>'"
+            )
+        token = parts[1]
+    except (ValueError, IndexError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization header format"
+        )
+    
+    # verify our token is valid.
+    payload = verify_token(token)
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or Expired Token. Please Login Again."
+        )
+    
+    # get user email from token.
+    email = payload.get("sub")
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Token Payload. Please Login Again."
+        )
+    
+    # get user from database.
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User Not Found. Please Login Again."
+        )
+    
+    # return the user.
+    return user
 

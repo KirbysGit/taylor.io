@@ -55,14 +55,14 @@ function Auth() {
 
     const handleSignUpSuccess = (user) => {
 		console.log('Sign up successful:', user)
-		// TODO : redirect to password verification page.
-		navigate('/')
+		// redirect to account setup page after successful signup.
+		navigate('/setup')
     }
 
     const handleLoginSuccess = (user) => {
 		console.log('Login successful:', user)
-		// TODO : redirect to dashboard page.
-		navigate('/')
+		// redirect to homepage after successful login.
+		navigate('/home')
     }
 
     return (

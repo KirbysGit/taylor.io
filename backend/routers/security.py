@@ -2,11 +2,17 @@
 
 # security utilities (password hashing, jwt tokens).
 
+# current:
+# - verify_password               -      verifies a password against a hash.
+# - get_password_hash             -      hashes a password.
+# - create_access_token           -      creates an access token.
+# - verify_token                  -      verifies a token and returns the payload.
+
 # imports.
 import jwt
-from datetime import datetime, timedelta
 from typing import Optional
 from passlib.context import CryptContext
+from datetime import datetime, timedelta
 
 # password hashing context.
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -14,41 +20,28 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # jwt secret key (in production, use environment variable).
 SECRET_KEY = "your-secret-key-change-this-in-production"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
 # --------- password hashing ---------
 
 # verify password against hash.
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against a hashed password."""
     try:
-        # bcrypt has a 72 byte limit, so truncate bytes if necessary (same as hashing).
-        password_bytes = plain_password.encode('utf-8')
-        if len(password_bytes) > 72:
-            password_bytes = password_bytes[:72]
-            plain_password = password_bytes.decode('utf-8', errors='ignore')
-        result = pwd_context.verify(plain_password, hashed_password)
-        return result
+        return pwd_context.verify(plain_password, hashed_password)
     except Exception:
         return False
 
 
 # hash password.
 def get_password_hash(password: str) -> str:
-    """Hash a password."""
-    # bcrypt has a 72 byte limit, so truncate bytes if necessary.
-    password_bytes = password.encode('utf-8')
-    if len(password_bytes) > 72:
-        password_bytes = password_bytes[:72]
-        password = password_bytes.decode('utf-8', errors='ignore')
+    # hash the password with bcrypt.
     return pwd_context.hash(password)
 
 
 # --------- jwt utilities ---------
 
-# create access token.
+#  create token, encode it, and return it.
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """Create a JWT access token."""
     to_encode = data.copy()
     
     # decide how long the token is valid for.
@@ -67,9 +60,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return encoded_jwt
 
 
-# verify token.
+# decode token and return the payload.
 def verify_token(token: str) -> Optional[dict]:
-    """Verify and decode a JWT token."""
     try:
         # decode the token with secret key & algorithm.
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

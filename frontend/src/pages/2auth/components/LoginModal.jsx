@@ -44,13 +44,13 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 				localStorage.setItem('user', JSON.stringify(response.data.user))
 			}
 
-			// call success callback.
+			// call success callback (this will handle navigation).
 			if (onLoginSuccess) {
 				onLoginSuccess(response.data.user || response.data)
+			} else {
+				// if no callback, close modal.
+				onClose()
 			}
-
-			// close modal.
-			onClose()
 		} catch (err) {
 			// log error.
 			console.error('Login failed:', err)

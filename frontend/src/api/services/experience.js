@@ -8,7 +8,7 @@
 // delete experience.
 
 // services.
-import { apiRequest } from './api'
+import { apiRequest } from '../api'
 
 // get user experiences.
 export async function getUserExperiences(userId) {

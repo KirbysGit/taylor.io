@@ -46,13 +46,13 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
         localStorage.setItem('user', JSON.stringify(response.data.user))
       }
 
-      // Call success callback
+      // Call success callback (this will handle navigation).
       if (onSignUpSuccess) {
         onSignUpSuccess(response.data.user || response.data)
+      } else {
+        // if no callback, close modal.
+        onClose()
       }
-
-      // Close modal
-      onClose()
     } catch (err) {
       console.error('Sign up failed:', err)
       if (err.response?.data?.detail) {
