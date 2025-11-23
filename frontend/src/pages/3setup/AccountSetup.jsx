@@ -17,6 +17,13 @@ function AccountSetup() {
 
 	// form data state.
 	const [formData, setFormData] = useState({
+		contact: {
+			email: '',
+			phone: '',
+			github: '',
+			linkedin: '',
+			portfolio: '',
+		},
 		education: [],
 		skills: [],
 		experiences: [],
@@ -52,12 +59,11 @@ function AccountSetup() {
 	// step titles.
 	const steps = [
 		{ title: 'Welcome', icon: '👋' },
+		{ title: 'Contact', icon: '📧' },
 		{ title: 'Education', icon: '🎓' },
-		{ title: 'Skills', icon: '⚡' },
 		{ title: 'Experience', icon: '💼' },
+		{ title: 'Skills', icon: '⚡' },
 		{ title: 'Projects', icon: '🚀' },
-		{ title: 'Extracurriculars', icon: '🌟' },
-		{ title: 'Coursework', icon: '📚' },
 		{ title: 'Complete', icon: '✅' },
 	]
 
@@ -119,6 +125,14 @@ function AccountSetup() {
 			// merge parsed data into form data
 			setFormData(prev => ({
 				...prev,
+				// merge contact info
+				contact: {
+					email: data.contact_info?.email || prev.contact.email,
+					phone: data.contact_info?.phone || prev.contact.phone,
+					github: data.contact_info?.github || prev.contact.github,
+					linkedin: data.contact_info?.linkedin || prev.contact.linkedin,
+					portfolio: data.contact_info?.portfolio || prev.contact.portfolio,
+				},
 				// merge education (backend returns list of education objects)
 				education: [
 					...prev.education,
@@ -149,7 +163,7 @@ function AccountSetup() {
 					...(data.experiences || []).map(exp => ({
 						title: exp.title || '',
 						company: exp.company || '',
-						description: exp.description || '',
+						description: exp.description || (Array.isArray(exp.description) ? [] : ''),
 						startDate: exp.startDate || '',
 						endDate: exp.endDate || '',
 						current: exp.current || false,
@@ -162,7 +176,7 @@ function AccountSetup() {
 					...prev.projects,
 					...(data.projects || []).map(proj => ({
 						title: proj.title || '',
-						description: proj.description || '',
+						description: proj.description || (Array.isArray(proj.description) ? [] : ''),
 						techStack: proj.techStack || [],
 						id: Date.now() + Math.random(),
 						fromParsed: true
@@ -220,7 +234,9 @@ function AccountSetup() {
 					return {
 						title: exp.title,
 						company: exp.company || null,
-						description: exp.description || null,
+						description: Array.isArray(exp.description) 
+							? exp.description.map(item => `• ${item}`).join('\n')
+							: exp.description || null,
 						start_date: start_date,
 						end_date: end_date,
 					}
@@ -232,7 +248,9 @@ function AccountSetup() {
 			if (formData.projects.length > 0) {
 				const projectsData = formData.projects.map(proj => ({
 					title: proj.title,
-					description: proj.description || null,
+					description: Array.isArray(proj.description)
+						? proj.description.map(item => `• ${item}`).join('\n')
+						: proj.description || null,
 					tech_stack: proj.techStack || null,
 				}))
 				promises.push(createProjectsBulk(projectsData))
@@ -287,7 +305,7 @@ function AccountSetup() {
 		switch (currentStep) {
 			case 0: // Welcome
 				return (
-					<div className="text-center py-8">
+					<div className="py-8">
 						<div className="text-6xl mb-6">👋</div>
 						<h2 className="text-3xl font-bold text-gray-900 mb-4">
 							Welcome, {user?.name || 'there'}!
@@ -339,30 +357,40 @@ function AccountSetup() {
 								)}
 
 								{parsedData && (
-									<div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-left w-full">
-										<p className="font-semibold text-green-800 mb-2">✓ Resume parsed successfully!</p>
-										<div className="text-green-700 space-y-1">
-											{parsedData.experiences?.length > 0 && (
-												<p>• Found {parsedData.experiences.length} experience(s)</p>
-											)}
-											{parsedData.skills?.length > 0 && (
-												<p>• Found {parsedData.skills.length} skill(s)</p>
-											)}
-											{parsedData.projects?.length > 0 && (
-												<p>• Found {parsedData.projects.length} project(s)</p>
-											)}
-											{parsedData.education?.length > 0 && (
-												<p>• Found {parsedData.education.length} education entry/entries</p>
+									<div className="mt-4 w-full">
+										<div className="p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-left mb-4">
+											<p className="font-semibold text-green-800 mb-2">✓ Resume parsed successfully!</p>
+											<div className="text-green-700 space-y-1">
+												{parsedData.contact_info && (parsedData.contact_info.email || parsedData.contact_info.github || parsedData.contact_info.linkedin || parsedData.contact_info.portfolio) && (
+													<p>• Found contact information</p>
+												)}
+												{parsedData.education?.length > 0 && (
+													<p>• Found {parsedData.education.length} education entry/entries</p>
+												)}
+												{parsedData.experiences?.length > 0 && (
+													<p>• Found {parsedData.experiences.length} experience(s)</p>
+												)}
+												{parsedData.skills?.length > 0 && (
+													<p>• Found {parsedData.skills.length} skill(s)</p>
+												)}
+												{parsedData.projects?.length > 0 && (
+													<p>• Found {parsedData.projects.length} project(s)</p>
+												)}
+											</div>
+											{parsedData.warnings?.length > 0 && (
+												<div className="mt-2 text-yellow-700">
+													<p className="font-semibold">Note:</p>
+													{parsedData.warnings.map((warning, i) => (
+														<p key={i}>• {warning}</p>
+													))}
+												</div>
 											)}
 										</div>
-										{parsedData.warnings?.length > 0 && (
-											<div className="mt-2 text-yellow-700">
-												<p className="font-semibold">Note:</p>
-												{parsedData.warnings.map((warning, i) => (
-													<p key={i}>• {warning}</p>
-												))}
-											</div>
-										)}
+										<div className="mt-4 p-4 bg-gray-900 rounded-lg overflow-auto max-h-96">
+											<pre className="text-xs text-green-400 font-mono whitespace-pre-wrap">
+												{JSON.stringify(parsedData, null, 2)}
+											</pre>
+										</div>
 									</div>
 								)}
 
@@ -385,22 +413,24 @@ function AccountSetup() {
 					</div>
 				)
 
-			case 1: // Education
+			case 1: // Contact
+				return (
+					<ContactStep
+						contact={formData.contact}
+						onUpdate={(field, value) => setFormData(prev => ({
+							...prev,
+							contact: { ...prev.contact, [field]: value }
+						}))}
+					/>
+				)
+
+			case 2: // Education
 				return (
 					<EducationStep
 						education={formData.education}
 						onAdd={(item) => addItem('education', item)}
 						onRemove={(index) => removeItem('education', index)}
 						onUpdate={(index, item) => updateItem('education', index, item)}
-					/>
-				)
-
-			case 2: // Skills
-				return (
-					<SkillsStep
-						skills={formData.skills}
-						onAdd={(item) => addItem('skills', item)}
-						onRemove={(index) => removeItem('skills', index)}
 					/>
 				)
 
@@ -414,7 +444,16 @@ function AccountSetup() {
 					/>
 				)
 
-			case 4: // Projects
+			case 4: // Skills
+				return (
+					<SkillsStep
+						skills={formData.skills}
+						onAdd={(item) => addItem('skills', item)}
+						onRemove={(index) => removeItem('skills', index)}
+					/>
+				)
+
+			case 5: // Projects
 				return (
 					<ProjectsStep
 						projects={formData.projects}
@@ -424,41 +463,61 @@ function AccountSetup() {
 					/>
 				)
 
-			case 5: // Extracurriculars
+			case 6: // Complete
 				return (
-					<ExtracurricularsStep
-						extracurriculars={formData.extracurriculars}
-						onAdd={(item) => addItem('extracurriculars', item)}
-						onRemove={(index) => removeItem('extracurriculars', index)}
-						onUpdate={(index, item) => updateItem('extracurriculars', index, item)}
-					/>
-				)
+					<div className="py-8">
+						<div className="text-center mb-8">
+							<div className="text-6xl mb-6">🎉</div>
+							<h2 className="text-3xl font-bold text-gray-900 mb-4">
+								You're All Set!
+							</h2>
+							<p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+								Great job! You've completed your initial setup. You can always add more information later from your dashboard.
+							</p>
+						</div>
 
-			case 6: // Coursework
-				return (
-					<CourseworkStep
-						coursework={formData.coursework}
-						onAdd={(item) => addItem('coursework', item)}
-						onRemove={(index) => removeItem('coursework', index)}
-					/>
-				)
+						{/* Optional: Extracurriculars */}
+						{(formData.extracurriculars.length > 0 || formData.coursework.length > 0) && (
+							<div className="mb-8 p-6 bg-gray-50 rounded-lg">
+								<h3 className="text-xl font-semibold text-gray-900 mb-4">Additional Information</h3>
+								
+								{formData.extracurriculars.length > 0 && (
+									<div className="mb-4">
+										<h4 className="font-medium text-gray-700 mb-2">Extracurriculars:</h4>
+										<div className="space-y-2">
+											{formData.extracurriculars.map((extra, index) => (
+												<div key={extra.id || index} className="bg-white p-3 rounded border border-gray-200">
+													<p className="font-medium text-gray-900">{extra.name}</p>
+													{extra.role && <p className="text-sm text-gray-600">{extra.role}</p>}
+												</div>
+											))}
+										</div>
+									</div>
+								)}
 
-			case 7: // Complete
-				return (
-					<div className="text-center py-8">
-						<div className="text-6xl mb-6">🎉</div>
-						<h2 className="text-3xl font-bold text-gray-900 mb-4">
-							You're All Set!
-						</h2>
-						<p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-							Great job! You've completed your initial setup. You can always add more information later from your dashboard.
-						</p>
-						<button
-							onClick={handleComplete}
-							className="px-8 py-3 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all"
-						>
-							Go to Dashboard →
-						</button>
+								{formData.coursework.length > 0 && (
+									<div>
+										<h4 className="font-medium text-gray-700 mb-2">Coursework:</h4>
+										<div className="flex flex-wrap gap-2">
+											{formData.coursework.map((course, index) => (
+												<span key={course.id || index} className="bg-white px-3 py-1 rounded border border-gray-200 text-sm">
+													{course.name}
+												</span>
+											))}
+										</div>
+									</div>
+								)}
+							</div>
+						)}
+
+						<div className="text-center">
+							<button
+								onClick={handleComplete}
+								className="px-8 py-3 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all"
+							>
+								Go to Dashboard →
+							</button>
+						</div>
 					</div>
 				)
 
@@ -554,6 +613,69 @@ function AccountSetup() {
 }
 
 // ----------- Step Components -----------
+
+// Contact Step Component.
+function ContactStep({ contact, onUpdate }) {
+	return (
+		<div>
+			<h2 className="text-2xl font-bold text-gray-900 mb-6">Your Contact Information</h2>
+			<p className="text-gray-600 mb-6">Add your contact details and professional links.</p>
+
+			<div className="space-y-4">
+				<div>
+					<label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+					<input
+						type="email"
+						value={contact.email}
+						onChange={(e) => onUpdate('email', e.target.value)}
+						className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
+						placeholder="your.email@example.com"
+					/>
+				</div>
+				<div>
+					<label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+					<input
+						type="tel"
+						value={contact.phone}
+						onChange={(e) => onUpdate('phone', e.target.value)}
+						className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
+						placeholder="(123) 456-7890"
+					/>
+				</div>
+				<div>
+					<label className="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
+					<input
+						type="url"
+						value={contact.github}
+						onChange={(e) => onUpdate('github', e.target.value)}
+						className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
+						placeholder="https://github.com/username"
+					/>
+				</div>
+				<div>
+					<label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
+					<input
+						type="url"
+						value={contact.linkedin}
+						onChange={(e) => onUpdate('linkedin', e.target.value)}
+						className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
+						placeholder="https://linkedin.com/in/username"
+					/>
+				</div>
+				<div>
+					<label className="block text-sm font-medium text-gray-700 mb-1">Portfolio/Website</label>
+					<input
+						type="url"
+						value={contact.portfolio}
+						onChange={(e) => onUpdate('portfolio', e.target.value)}
+						className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
+						placeholder="https://yourwebsite.com"
+					/>
+				</div>
+			</div>
+		</div>
+	)
+}
 
 // Education Step Component.
 function EducationStep({ education, onAdd, onRemove, onUpdate }) {
@@ -1132,22 +1254,32 @@ function ExperienceStep({ experiences, onAdd, onRemove, onUpdate }) {
 									{/* Description */}
 									{exp.description && (
 										<div className="mb-2">
-											<div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-												{exp.description.split('\n').map((line, idx) => {
-													// format bullet points
-													if (line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*')) {
+											<div className="text-sm text-gray-600 leading-relaxed">
+												{Array.isArray(exp.description) ? (
+													// description is an array of bullet points
+													exp.description.map((item, idx) => (
+														<div key={idx} className="ml-4 mb-1">
+															• {item}
+														</div>
+													))
+												) : (
+													// description is a string
+													exp.description.split('\n').map((line, idx) => {
+														// format bullet points
+														if (line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*')) {
+															return (
+																<div key={idx} className="ml-4 mb-1">
+																	{line.trim()}
+																</div>
+															)
+														}
 														return (
-															<div key={idx} className="ml-4 mb-1">
-																{line.trim()}
+															<div key={idx} className="mb-1">
+																{line}
 															</div>
 														)
-													}
-													return (
-														<div key={idx} className="mb-1">
-															{line}
-														</div>
-													)
-												})}
+													})
+												)}
 											</div>
 										</div>
 									)}
@@ -1268,9 +1400,19 @@ function ProjectsStep({ projects, onAdd, onRemove, onUpdate }) {
 									{/* Description */}
 									{project.description && (
 										<div className="mb-3">
-											<p className="text-sm text-gray-600 leading-relaxed">
-												{project.description}
-											</p>
+											<div className="text-sm text-gray-600 leading-relaxed">
+												{Array.isArray(project.description) ? (
+													// description is an array of bullet points
+													project.description.map((item, idx) => (
+														<div key={idx} className="ml-4 mb-1">
+															• {item}
+														</div>
+													))
+												) : (
+													// description is a string
+													<p>{project.description}</p>
+												)}
+											</div>
 										</div>
 									)}
 									

@@ -28,16 +28,34 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
             "startDate": None,
             "endDate": None,
             "current": False,
+            "gpa": None,
+            "honorsAwards": None,
+            "clubsExtracurriculars": None,
+            "location": None,
+            "relevantCoursework": None,
         }
         
         lines = [line.strip() for line in entry.split('\n') if line.strip()]
         if not lines:
             continue
         
-        # extract school name - look for university/college patterns or first line
+        # extract school name and GPA - look for university/college patterns or first line
         for i, line in enumerate(lines):
             if i == 0 or re.search(r'(?i)(university|college|institute|school|academy)', line):
-                school_name = re.sub(r'\s*\([^\)]+\)', '', line).strip()
+                # Extract GPA from parentheses or after "GPA"
+                gpa_patterns = [
+                    r'\(GPA\s+([\d.]+(?:\s*/\s*[\d.]+)?)\)',  # (GPA 3.78 / 4.0)
+                    r'GPA\s*:?\s*([\d.]+(?:\s*/\s*[\d.]+)?)',  # GPA: 3.78 / 4.0
+                    r'\(([\d.]+(?:\s*/\s*[\d.]+)?)\s*GPA\)',  # (3.78 / 4.0 GPA)
+                ]
+                for gpa_pattern in gpa_patterns:
+                    gpa_match = re.search(gpa_pattern, line, re.IGNORECASE)
+                    if gpa_match:
+                        edu_item["gpa"] = gpa_match.group(1).strip()
+                        break
+                
+                school_name = re.sub(r'\s*\([^\)]+\)', '', line).strip()  # Remove parentheses (may contain GPA)
+                school_name = re.sub(r'\s*GPA\s*:?\s*[\d.]+(?:\s*/\s*[\d.]+)?', '', school_name, flags=re.IGNORECASE)  # Remove GPA text
                 school_name = re.sub(r'\s*[A-Z][a-z]+\s+\d{4}\s*[-–—]\s*([A-Z][a-z]+\s+)?\d{4}', '', school_name, flags=re.IGNORECASE)
                 school_name = re.sub(r'\s*\d{4}\s*[-–—]\s*\d{4}', '', school_name)
                 school_name = re.sub(r'\s+[A-Z][a-z]+,\s*[A-Z]{2}\s*$', '', school_name)
@@ -137,6 +155,62 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
                     edu_item["current"] = True
                 else:
                     edu_item["endDate"] = f"{end_date}-01"
+        
+        # Extract additional fields from the entry text
+        entry_lower = entry.lower()
+        
+        # Extract honors & awards
+        honors_patterns = [
+            r'(?i)honors?\s*[&]?\s*awards?\s*:?\s*(.+?)(?=\n|clubs|extracurriculars|coursework|relevant|$)',
+            r'(?i)awards?\s*:?\s*(.+?)(?=\n|clubs|extracurriculars|coursework|relevant|$)',
+        ]
+        for pattern in honors_patterns:
+            honors_match = re.search(pattern, entry, re.IGNORECASE | re.DOTALL)
+            if honors_match:
+                honors_text = honors_match.group(1).strip()
+                # Clean up the text
+                honors_text = re.sub(r'\s+', ' ', honors_text)
+                honors_text = re.sub(r'^\s*[:\-]\s*', '', honors_text)
+                if honors_text:
+                    edu_item["honorsAwards"] = honors_text
+                    break
+        
+        # Extract clubs & extracurriculars
+        clubs_patterns = [
+            r'(?i)clubs?\s*[&]?\s*extracurriculars?\s*:?\s*(.+?)(?=\n|honors|awards|coursework|relevant|$)',
+            r'(?i)extracurriculars?\s*:?\s*(.+?)(?=\n|honors|awards|coursework|relevant|$)',
+        ]
+        for pattern in clubs_patterns:
+            clubs_match = re.search(pattern, entry, re.IGNORECASE | re.DOTALL)
+            if clubs_match:
+                clubs_text = clubs_match.group(1).strip()
+                clubs_text = re.sub(r'\s+', ' ', clubs_text)
+                clubs_text = re.sub(r'^\s*[:\-]\s*', '', clubs_text)
+                if clubs_text:
+                    edu_item["clubsExtracurriculars"] = clubs_text
+                    break
+        
+        # Extract location (City, State pattern)
+        location_pattern = r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?),\s*([A-Z]{2})\s*$'
+        location_match = re.search(location_pattern, entry)
+        if location_match:
+            location = location_match.group(0).strip()
+            edu_item["location"] = location
+        
+        # Extract relevant coursework
+        coursework_patterns = [
+            r'(?i)relevant\s+coursework\s*:?\s*(.+?)(?=\n|honors|awards|clubs|extracurriculars|$)',
+            r'(?i)coursework\s*:?\s*(.+?)(?=\n|honors|awards|clubs|extracurriculars|$)',
+        ]
+        for pattern in coursework_patterns:
+            coursework_match = re.search(pattern, entry, re.IGNORECASE | re.DOTALL)
+            if coursework_match:
+                coursework_text = coursework_match.group(1).strip()
+                coursework_text = re.sub(r'\s+', ' ', coursework_text)
+                coursework_text = re.sub(r'^\s*[:\-]\s*', '', coursework_text)
+                if coursework_text:
+                    edu_item["relevantCoursework"] = coursework_text
+                    break
         
         if edu_item["school"] or edu_item["degree"]:
             education.append(edu_item)

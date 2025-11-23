@@ -169,6 +169,106 @@ function Home() {
 						<section className="mb-12">
 							<h2 className="text-2xl font-bold text-gray-900 mb-6">Your Information</h2>
 							
+							{/* Contact Information Display */}
+							{profile.contact && (
+								<div className="bg-white-bright rounded-xl shadow-sm p-6 mb-6">
+									<h3 className="text-xl font-bold mb-4 text-gray-900">Contact Information</h3>
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+										{profile.contact.email && (
+											<div>
+												<span className="text-sm font-medium text-gray-600">Email:</span>
+												<p className="text-gray-900">{profile.contact.email}</p>
+											</div>
+										)}
+										{profile.contact.phone && (
+											<div>
+												<span className="text-sm font-medium text-gray-600">Phone:</span>
+												<p className="text-gray-900">{profile.contact.phone}</p>
+											</div>
+										)}
+										{profile.contact.github && (
+											<div>
+												<span className="text-sm font-medium text-gray-600">GitHub:</span>
+												<a 
+													href={profile.contact.github} 
+													target="_blank" 
+													rel="noopener noreferrer"
+													className="text-brand-pink hover:underline"
+												>
+													{profile.contact.github}
+												</a>
+											</div>
+										)}
+										{profile.contact.linkedin && (
+											<div>
+												<span className="text-sm font-medium text-gray-600">LinkedIn:</span>
+												<a 
+													href={profile.contact.linkedin} 
+													target="_blank" 
+													rel="noopener noreferrer"
+													className="text-brand-pink hover:underline"
+												>
+													{profile.contact.linkedin}
+												</a>
+											</div>
+										)}
+										{profile.contact.portfolio && (
+											<div>
+												<span className="text-sm font-medium text-gray-600">Portfolio:</span>
+												<a 
+													href={profile.contact.portfolio} 
+													target="_blank" 
+													rel="noopener noreferrer"
+													className="text-brand-pink hover:underline"
+												>
+													{profile.contact.portfolio}
+												</a>
+											</div>
+										)}
+									</div>
+								</div>
+							)}
+							
+							{/* Education Display */}
+							{profile.education && profile.education.length > 0 && (
+								<div className="bg-white-bright rounded-xl shadow-sm p-6 mb-6">
+									<h3 className="text-xl font-bold mb-4 text-gray-900">Education</h3>
+									<div className="space-y-4">
+										{profile.education.map((edu) => (
+											<div key={edu.id} className="border-l-4 border-brand-pink pl-4">
+												{edu.school && <h4 className="font-semibold text-gray-900">{edu.school}</h4>}
+												{edu.degree && <p className="text-sm text-gray-700">{edu.degree}</p>}
+												{edu.field && <p className="text-sm text-gray-600">{edu.field}</p>}
+												<div className="flex flex-wrap gap-4 mt-2 text-xs text-gray-500">
+													{edu.gpa && <span>GPA: {edu.gpa}</span>}
+													{edu.location && <span>{edu.location}</span>}
+													{edu.start_date && (
+														<span>
+															{new Date(edu.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - {edu.end_date ? new Date(edu.end_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Present'}
+														</span>
+													)}
+												</div>
+												{edu.honors_awards && (
+													<p className="text-xs text-gray-600 mt-2">
+														<span className="font-medium">Honors & Awards:</span> {edu.honors_awards}
+													</p>
+												)}
+												{edu.clubs_extracurriculars && (
+													<p className="text-xs text-gray-600 mt-1">
+														<span className="font-medium">Clubs & Extracurriculars:</span> {edu.clubs_extracurriculars}
+													</p>
+												)}
+												{edu.relevant_coursework && (
+													<p className="text-xs text-gray-600 mt-1">
+														<span className="font-medium">Relevant Coursework:</span> {edu.relevant_coursework}
+													</p>
+												)}
+											</div>
+										))}
+									</div>
+								</div>
+							)}
+							
 							{/* Skills Display */}
 							{profile.skills && profile.skills.length > 0 && (
 								<div className="bg-white-bright rounded-xl shadow-sm p-6 mb-6">
@@ -234,7 +334,8 @@ function Home() {
 							{/* Empty State */}
 							{(!profile.skills || profile.skills.length === 0) &&
 							 (!profile.experiences || profile.experiences.length === 0) &&
-							 (!profile.projects || profile.projects.length === 0) && (
+							 (!profile.projects || profile.projects.length === 0) &&
+							 (!profile.education || profile.education.length === 0) && (
 								<div className="bg-white-bright rounded-xl shadow-sm p-8 text-center">
 									<p className="text-gray-600 mb-4">You haven't added any information yet.</p>
 									<button

@@ -1,0 +1,52 @@
+=== PRE-PIPELINE (RAW EXTRACTED TEXT) ===
+
+Colin Kirby
+kirbycolin26@gmail.com | github.com/KirbysGit | linkedin.com/in/colinwkirby/ | https://colinkirby.dev
+Education
+University of Central Florida (GPA 3.78 / 4.0) August 2021 – May 2025
+Bachelor of Science in Computer Engineering Orlando, FL
+Honors & Awards: Dean’s List 2021 , President’s Honor Roll 2023 – 2025 , Pegasus Gold Scholarship
+Clubs & Extracurriculars: AI @ UCF , Knight Hacks , SHPE @ UCF
+Relevant Coursework: Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design
+Experience
+Software Engineering Intern May 2024 – June 2025
+BitGo | Python, Django, React, PostgreSQL, AWS EC2 Remote
+• Built and shipped React dashboards and data visualization tools used by product and compliance teams, improving
+internal workflow visibility and decision-making.
+• Collaborated with design to implement responsive, pixel-perfect UI components aligned with BitGo’s product
+guidelines and accessibility standards (WCAG 2.1).
+• Integrated Django REST APIs with React components for dynamic updates and real-time state management.
+• Collaborated cross-functionally with design and compliance teams to deliver secure, production-grade dashboards
+enhancing data visibility and decision-making.
+Projects
+SentimentTrader – Real-Time Stock Sentiment Pipeline | Python, SQL, FinBERT, XGBoost
+• Built data ingestion and NLP pipelines (Python, SQL) processing 1K+ Reddit finance posts per run using FinBERT and
+entity resolution to reduce false positives by 85%.
+• Engineered 40+ predictive and behavioral features per ticker and trained ML models (XGBoost, FinBERT) achieving
+55–70% ROC-AUC.
+• Automated end-to-end data collection, preprocessing, and model inference workflows, enabling scalable real-time
+analytics.
+ShelfVision – Dense Retail Shelf Object Detector | PyTorch, ResNet-50, FPN
+• Built a custom anchor-based object detection system (PyTorch, ResNet-50, FPN) for 11K+ dense retail images with
+domain-specific anchor tuning.
+• Implemented dynamic IoU matching and modular training components, resolving baseline collapse and achieving
+measurable convergence (0.0069 mAP, IoU ≈ 0.38).
+• Delivered interpretable, production-ready detection pipeline outperforming YOLOv5 baseline in cluttered shelf
+environments.
+Centi – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev
+• Designed RESTful APIs and ETL pipelines integrating Plaid data from 3+ financial sources into normalized PostgreSQL
+schemas for account analytics.
+• Implemented real-time account insights with optimized SQL queries (↑ 40% query performance) and modular, testable
+backend architecture using FastAPI.
+• Built responsive React dashboards with OAuth/JWT authentication and CI/CD-based deployments, ensuring 99%
+uptime and secure data handling.
+SecureScape – Portable Smart Security System | Python, Flutter, Arduino C++, TensorFlow Lite
+• Built edge IoT monitoring system with on-device ML (TensorFlow Lite, ESP32-CAM) and Flutter interface for real-time
+alerts.
+• Designed asynchronous communication layer achieving <3.5 s latency and improving alert accuracy by 25%.
+• Implemented fault-tolerant networking and modular backend design ensuring reliable cross-node synchronization.
+Skills
+Languages : JavaScript, Python, TypeScript, SQL
+Frameworks : React, Node.js, FastAPI, Django
+Data Tools : PostgreSQL, MySQL, MongoDB, Pandas, NumPy, AWS (EC2)
+Focus Areas : REST API Design, UI / UX Design, Data Modeling, Performance Optimization

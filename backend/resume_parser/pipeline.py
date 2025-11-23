@@ -1,14 +1,12 @@
 # pipeline.py
 
-# Main resume parsing pipeline.
-
 import logging
+import re
 from typing import Dict
 
 from .Aextractor import extract_pdf, extract_docx
-from .Bcleaner import clean_text_regex, clean_with_openai
 from .Csegmenter import split_into_sections
-from .Dparsers import (
+from .Eparsers import (
     parse_contact,
     parse_education,
     parse_experience,
@@ -19,106 +17,90 @@ from .Dparsers import (
 logger = logging.getLogger(__name__)
 
 
-def parse_resume_file(file_bytes: bytes, filename: str) -> Dict:
-    """Parse resume file (PDF or DOCX) and return structured data.
-    
-    Pipeline: Extract → Clean (regex) → Clean (OpenAI if enabled) → Segment → Parse
+def minimal_clean(text: str) -> str:
     """
+    Minimal text cleaning that preserves dashes, casing, and spacing.
+    Only normalizes bullets and removes excessive newlines.
+    """
+    # Normalize bullet characters to consistent format (•)
+    text = re.sub(r'^[\s]*[-*•∙▪▫]\s*', '• ', text, flags=re.MULTILINE)
+    
+    # Remove excessive newlines (3+ → 2)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    
+    return text.strip()
+
+
+def parse_resume_file(file_bytes: bytes, filename: str) -> Dict:
+    """
+    Simplified Resume Parsing Pipeline:
+        1. Extract text
+        2. Minimal clean (bullets + newlines only)
+        3. Section segmentation (keyword-based)
+        4. Parse each section
+    """
+
     result = {
-        "experiences": [],
+        "contact_info": {},
         "education": [],
+        "experiences": [],
         "skills": [],
         "projects": [],
-        "contact_info": {},
-        "warnings": [],
+        "warnings": []
     }
-    
+
     try:
-        # 1. Extract text from file
-        logger.info(f"Starting extraction for file: {filename}")
-        if filename.lower().endswith('.pdf'):
+        # -------------------------
+        # 1. Extract raw text
+        # -------------------------
+        if filename.lower().endswith(".pdf"):
             raw_text = extract_pdf(file_bytes)
-        elif filename.lower().endswith(('.docx', '.doc')):
+        elif filename.lower().endswith(".docx"):
             raw_text = extract_docx(file_bytes)
         else:
-            raise ValueError(f"Unsupported file type: {filename}. Only PDF and DOCX are supported.")
-        
-        logger.info("=" * 80)
-        logger.info("RAW EXTRACTED TEXT (before cleaning):")
-        logger.info("=" * 80)
-        logger.info(f"Length: {len(raw_text)} characters")
-        logger.info(f"First 2000 characters:\n{raw_text[:2000]}")
-        if len(raw_text) > 2000:
-            logger.info(f"... (truncated, showing first 2000 of {len(raw_text)} total chars)")
-        logger.info("=" * 80)
-        
-        # 2. Clean text (regex first)
-        text = clean_text_regex(raw_text)
-        
-        logger.info("=" * 80)
-        logger.info("TEXT AFTER REGEX CLEANING:")
-        logger.info("=" * 80)
-        logger.info(f"Length: {len(text)} characters")
-        logger.info(f"First 2000 characters:\n{text[:2000]}")
-        if len(text) > 2000:
-            logger.info(f"... (truncated, showing first 2000 of {len(text)} total chars)")
-        logger.info("=" * 80)
-        
-        # 3. Optional: Clean with OpenAI if enabled
-        text = clean_with_openai(text)
-        
-        # 4. Segment into sections
-        sections = split_into_sections(text)
-        
-        logger.info("=" * 80)
-        logger.info("SECTION BREAKDOWN:")
-        logger.info("=" * 80)
-        for section_name, section_text in sections.items():
-            logger.info(f"\n[{section_name.upper()} SECTION]")
-            logger.info(f"Length: {len(section_text)} characters")
-            logger.info(f"Content (first 500 chars):\n{section_text[:500]}")
-            if len(section_text) > 500:
-                logger.info(f"... (truncated, total: {len(section_text)} chars)")
-        logger.info("=" * 80)
-        
-        # 5. Parse each section
-        try:
-            result["contact_info"] = parse_contact(text)  # Contact info from full text
-        except Exception as e:
-            logger.warning(f"Could not extract contact info: {str(e)}")
-            result["warnings"].append(f"Could not extract contact info: {str(e)}")
-        
-        try:
-            education_text = sections.get("education", "")
-            result["education"] = parse_education(education_text) if education_text else []
-        except Exception as e:
-            logger.warning(f"Could not extract education: {str(e)}")
-            result["warnings"].append(f"Could not extract education: {str(e)}")
-        
-        try:
-            experience_text = sections.get("experience", "")
-            result["experiences"] = parse_experience(experience_text) if experience_text else []
-        except Exception as e:
-            logger.warning(f"Could not extract experiences: {str(e)}")
-            result["warnings"].append(f"Could not extract experiences: {str(e)}")
-        
-        try:
-            skills_text = sections.get("skills", "")
-            result["skills"] = parse_skills(skills_text) if skills_text else []
-        except Exception as e:
-            logger.warning(f"Could not extract skills: {str(e)}")
-            result["warnings"].append(f"Could not extract skills: {str(e)}")
-        
-        try:
-            projects_text = sections.get("projects", "")
-            result["projects"] = parse_projects(projects_text) if projects_text else []
-        except Exception as e:
-            logger.warning(f"Could not extract projects: {str(e)}")
-            result["warnings"].append(f"Could not extract projects: {str(e)}")
-        
-    except Exception as e:
-        logger.error(f"Error parsing resume: {str(e)}")
-        result["warnings"].append(f"Error parsing resume: {str(e)}")
-    
-    return result
+            raise ValueError("Unsupported file type (PDF/DOCX only)")
 
+        # DEBUG: Write pre-pipeline text
+        try:
+            with open("debug_pre_pipeline.txt", "w", encoding="utf-8") as f:
+                f.write("=== PRE-PIPELINE (RAW EXTRACTED TEXT) ===\n\n")
+                f.write(raw_text)
+        except Exception:
+            pass
+
+        # -------------------------
+        # 2. Minimal clean (bullets + newlines only)
+        # -------------------------
+        text = minimal_clean(raw_text)
+        
+        # DEBUG: Write after minimal cleaning
+        try:
+            with open("debug_after_minimal_clean.txt", "w", encoding="utf-8") as f:
+                f.write("=== AFTER MINIMAL_CLEAN ===\n\n")
+                f.write(text)
+        except Exception:
+            pass
+
+        # -------------------------
+        # 3. Split into sections (keyword-based)
+        # -------------------------
+        sections = split_into_sections(text)
+
+        # -------------------------
+        # 4. Parse contact (use full text, pass sections to exclude project/experience URLs)
+        # -------------------------
+        result["contact_info"] = parse_contact(text, sections=sections)
+
+        # -------------------------
+        # 5. Parse structured sections
+        # -------------------------
+        result["education"] = parse_education(sections.get("education", ""))
+        result["experiences"] = parse_experience(sections.get("experience", ""))
+        result["skills"] = parse_skills(sections.get("skills", ""))
+        result["projects"] = parse_projects(sections.get("projects", ""))
+
+    except Exception as e:
+        logger.error(f"Error parsing resume: {e}")
+        result["warnings"].append(f"Pipeline failed: {str(e)}")
+
+    return result

@@ -5,7 +5,7 @@
 
 # imports.
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime
 
 
@@ -36,6 +36,40 @@ class TokenResponse(BaseModel):
     user: UserResponse
 
 
+# --------- education schemas ---------
+
+class EducationCreate(BaseModel):
+    school: Optional[str] = None
+    degree: Optional[str] = None
+    field: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    current: bool = False
+    gpa: Optional[str] = None
+    honors_awards: Optional[str] = None
+    clubs_extracurriculars: Optional[str] = None
+    location: Optional[str] = None
+    relevant_coursework: Optional[str] = None
+
+
+class EducationResponse(BaseModel):
+    id: int
+    user_id: int
+    school: Optional[str] = None
+    degree: Optional[str] = None
+    field: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    current: bool = False
+    gpa: Optional[str] = None
+    honors_awards: Optional[str] = None
+    clubs_extracurriculars: Optional[str] = None
+    location: Optional[str] = None
+    relevant_coursework: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
 # --------- experience schemas ---------
 
 class ExperienceCreate(BaseModel):
@@ -44,6 +78,8 @@ class ExperienceCreate(BaseModel):
     description: Optional[str] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
+    location: Optional[str] = None
+    role_type: Optional[str] = None
 
 
 class ExperienceResponse(BaseModel):
@@ -54,6 +90,8 @@ class ExperienceResponse(BaseModel):
     description: Optional[str]
     start_date: Optional[datetime]
     end_date: Optional[datetime]
+    location: Optional[str] = None
+    role_type: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -64,6 +102,7 @@ class ProjectCreate(BaseModel):
     title: str
     description: Optional[str] = None
     tech_stack: Optional[List[str]] = None
+    url: Optional[str] = None
 
 
 class ProjectResponse(BaseModel):
@@ -72,6 +111,7 @@ class ProjectResponse(BaseModel):
     title: str
     description: Optional[str]
     tech_stack: Optional[List[str]]
+    url: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -90,6 +130,28 @@ class SkillResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# --------- contact schemas ---------
+
+class ContactCreate(BaseModel):
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    github: Optional[str] = None
+    linkedin: Optional[str] = None
+    portfolio: Optional[str] = None
+
+
+class ContactResponse(BaseModel):
+    id: int
+    user_id: int
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    github: Optional[str] = None
+    linkedin: Optional[str] = None
+    portfolio: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
 # --------- user profile schema ---------
 
 class UserProfileResponse(BaseModel):
@@ -97,6 +159,8 @@ class UserProfileResponse(BaseModel):
     experiences: List[ExperienceResponse]
     projects: List[ProjectResponse]
     skills: List[SkillResponse]
+    education: List[EducationResponse] = []
+    contact: Optional[ContactResponse] = None
 
 
 # --------- parsed resume schemas ---------
@@ -104,6 +168,9 @@ class UserProfileResponse(BaseModel):
 class ParsedContactInfo(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
+    github: Optional[str] = None
+    linkedin: Optional[str] = None
+    portfolio: Optional[str] = None
 
 
 class ParsedEducation(BaseModel):
@@ -113,21 +180,29 @@ class ParsedEducation(BaseModel):
     startDate: Optional[str] = None
     endDate: Optional[str] = None
     current: bool = False
+    gpa: Optional[str] = None
+    honorsAwards: Optional[str] = None
+    clubsExtracurriculars: Optional[str] = None
+    location: Optional[str] = None
+    relevantCoursework: Optional[str] = None
 
 
 class ParsedExperience(BaseModel):
     title: Optional[str] = None
     company: Optional[str] = None
-    description: Optional[str] = None
+    description: Optional[Union[str, List[str]]] = None
     startDate: Optional[str] = None
     endDate: Optional[str] = None
     current: bool = False
+    location: Optional[str] = None
+    roleType: Optional[str] = None
 
 
 class ParsedProject(BaseModel):
     title: Optional[str] = None
-    description: Optional[str] = None
+    description: Optional[Union[str, List[str]]] = None
     techStack: Optional[List[str]] = None
+    url: Optional[str] = None
 
 
 class ParsedSkill(BaseModel):

@@ -1,6 +1,6 @@
 // services / profile.js
 
-// profile-related api calls (experiences, projects, skills).
+// profile-related api calls (experiences, projects, skills, education).
 
 // services.
 import { apiRequest } from '../api'
@@ -57,6 +57,22 @@ export async function createSkillsBulk(skillsData) {
 	return apiRequest('/api/profile/skills/bulk', {
 		method: 'POST',
 		body: JSON.stringify(skillsData),
+	})
+}
+
+// create education.
+export async function createEducation(educationData) {
+	return apiRequest('/api/profile/education', {
+		method: 'POST',
+		body: JSON.stringify(educationData),
+	})
+}
+
+// bulk create education.
+export async function createEducationBulk(educationData) {
+	return apiRequest('/api/profile/education/bulk', {
+		method: 'POST',
+		body: JSON.stringify(educationData),
 	})
 }
 
