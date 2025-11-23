@@ -15,8 +15,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)    # email.
     password_hash = Column(String(255), nullable=False)                     # password.
 
-    # one user has many experiences, projects, skills, and education entries.
-    # one user has one contact info.
+    # one user has many experiences, projects, skills, education, and contact entries.
     
     experiences = relationship("Experience", back_populates="user", cascade="all, delete-orphan")
     

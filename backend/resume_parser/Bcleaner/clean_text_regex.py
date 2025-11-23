@@ -1,15 +1,13 @@
 # cleaner/clean_text_regex.py
 
+# not used right now.
+
+# imports.
 import re
 
-# ------------------------------------------------------------------------------
-# 1. Fix extremely common split words
-# ------------------------------------------------------------------------------
+# ------------------- 1. fix extremely common split words -------------------
 def fix_common_splits(text: str) -> str:
-    """
-    Fix high-confidence splits only.
-    Avoid risky patterns.
-    """
+    # fix high-confidence splits only.
     patterns = {
         r'\bDe\s+sign\b': 'Design',
         r'\bDe\s+velopment\b': 'Development',
@@ -33,11 +31,8 @@ def fix_common_splits(text: str) -> str:
     return text
 
 
-# ------------------------------------------------------------------------------
-# 2. Fix CamelCase merges (safe)
-# ------------------------------------------------------------------------------
+# ------------------- 2. fix camel case merges (safe) -------------------
 def fix_camel_case(text: str) -> str:
-    """Split camelCase words except acronyms and words with dashes."""
     def _split(match):
         word = match.group(0)
         if word.isupper():
@@ -50,16 +45,12 @@ def fix_camel_case(text: str) -> str:
     return re.sub(r'\b([a-z]+[A-Z][A-Za-z]+)\b', _split, text)
 
 
-# ------------------------------------------------------------------------------
-# 3. Clean bullet formatting
-# ------------------------------------------------------------------------------
+# ------------------- 3. clean bullet formatting -------------------
 def clean_bullets(text: str) -> str:
-    """
-    Standardize bullets:
-    - Convert -, *, • into "• "
-    - Ensure one bullet per line
-    """
-    # Normalize any bullet marker to "• "
+    # standardize bullets:
+    # - convert -, *, • into "• ".
+    # - ensure one bullet per line.
+    # normalize any bullet marker to "• ".
     text = re.sub(r'^[\s]*[-*•∙▪▫]\s*', '• ', text, flags=re.MULTILINE)
 
     # Make sure bullets are not joined on the same line
@@ -68,16 +59,8 @@ def clean_bullets(text: str) -> str:
     return text
 
 
-# ------------------------------------------------------------------------------
-# 4. Normalize spacing (safe)
-# ------------------------------------------------------------------------------
+# ------------------- 4. normalize spacing (safe) -------------------
 def normalize_spacing(text: str) -> str:
-    """
-    Safe whitespace normalization:
-    - Collapse multi-spaces (but preserve spaces around dashes)
-    - Remove trailing spaces
-    - Preserve blank lines (double newline)
-    """
     # Don't collapse spaces that are around dashes
     # First protect dash patterns
     dash_patterns = []
@@ -107,14 +90,10 @@ def normalize_spacing(text: str) -> str:
     return text.strip()
 
 
-# ------------------------------------------------------------------------------
-# 5. MAIN CLEANER
-# ------------------------------------------------------------------------------
+# ------------------- 5. main cleaner -------------------
 def clean_text_regex(text: str) -> str:
-    """
-    Phase-1 safe text cleaning pipeline.
-    Order matters.
-    """
+    # phase-1 safe text cleaning pipeline.
+    # order matters.
     text = fix_common_splits(text)
     text = fix_camel_case(text)
     text = clean_bullets(text)

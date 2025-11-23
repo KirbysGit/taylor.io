@@ -6,7 +6,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getMyProfile } from '@/api/services/profile'
-import { generateResumePDF } from '@/api/services/resume'
 import AddExperienceModal from '@/components/modals/AddExperienceModal'
 import AddProjectModal from '@/components/modals/AddProjectModal'
 import AddSkillModal from '@/components/modals/AddSkillModal'
@@ -21,7 +20,8 @@ function Home() {
 	const [showExperienceModal, setShowExperienceModal] = useState(false)
 	const [showProjectModal, setShowProjectModal] = useState(false)
 	const [showSkillModal, setShowSkillModal] = useState(false)
-	const [isGeneratingResume, setIsGeneratingResume] = useState(false)
+	const [resumeFormat, setResumeFormat] = useState('pdf') // 'pdf' or 'docx'
+	const [docxTemplate, setDocxTemplate] = useState('modern') // template for DOCX
 
 	// get user profile from backend on mount.
 	useEffect(() => {
@@ -69,18 +69,10 @@ function Home() {
 		}
 	}
 
-	// function to handle resume generation.
-	const handleGenerateResume = async () => {
-		setIsGeneratingResume(true)
-		try {
-			await generateResumePDF()
-			// Success - file will download automatically
-		} catch (error) {
-			console.error('Error generating resume:', error)
-			alert('Failed to generate resume. Please try again.')
-		} finally {
-			setIsGeneratingResume(false)
-		}
+	// function to handle resume generation - navigate to preview page.
+	const handleGenerateResume = () => {
+		// navigate to preview page with format and template params.
+		navigate(`/resume/preview?format=${resumeFormat}&template=${docxTemplate}`)
 	}
 
 	// function to handle logout.
@@ -124,17 +116,58 @@ function Home() {
 							<p className="text-gray-600 mb-4">
 								Your professional database is ready. Start by adding a job description to tailor your resume, or customize your information below.
 							</p>
-							<div className="mt-4">
-								<button className="px-6 py-2 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all mr-3">
-									Add Job Description
-								</button>
-								<button
-									onClick={handleGenerateResume}
-									disabled={isGeneratingResume}
-									className="px-6 py-2 border-2 border-brand-pink text-brand-pink font-semibold rounded-lg hover:bg-brand-pink/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									{isGeneratingResume ? 'Generating...' : 'Generate Resume PDF'}
-								</button>
+							<div className="mt-4 space-y-4">
+								<div className="flex flex-wrap gap-3">
+									<button className="px-6 py-2 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all">
+										Add Job Description
+									</button>
+									<button
+										onClick={handleGenerateResume}
+										className="px-6 py-2 border-2 border-brand-pink text-brand-pink font-semibold rounded-lg hover:bg-brand-pink/10 transition-all"
+									>
+										Preview & Generate Resume
+									</button>
+								</div>
+								{/* Format Selection */}
+								<div className="flex items-center gap-4">
+									<label className="text-sm font-medium text-gray-700">Format:</label>
+									<div className="flex gap-2">
+										<button
+											onClick={() => setResumeFormat('pdf')}
+											className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+												resumeFormat === 'pdf'
+													? 'bg-brand-pink text-white'
+													: 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+											}`}
+										>
+											PDF
+										</button>
+										<button
+											onClick={() => setResumeFormat('docx')}
+											className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+												resumeFormat === 'docx'
+													? 'bg-brand-pink text-white'
+													: 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+											}`}
+										>
+											Word (DOCX)
+										</button>
+									</div>
+								</div>
+								{/* Template Selection (only for DOCX) */}
+								{resumeFormat === 'docx' && (
+									<div className="flex items-center gap-4">
+										<label className="text-sm font-medium text-gray-700">Template:</label>
+										<select
+											value={docxTemplate}
+											onChange={(e) => setDocxTemplate(e.target.value)}
+											className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+										>
+											<option value="modern">Modern</option>
+											<option value="classic">Classic</option>
+										</select>
+									</div>
+								)}
 							</div>
 						</div>
 					</section>

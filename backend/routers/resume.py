@@ -4,6 +4,7 @@
 
 # current:
 # - generate_resume_pdf            -      generates a PDF resume for the current user.
+# - generate_resume_docx           -      generates a DOCX resume for the current user.
 # - generate_resume_html_preview   -      generates an HTML resume for preview.
 
 # imports.
@@ -18,6 +19,7 @@ from models import User
 from database import get_db
 from .auth import get_current_user_from_token
 from .resume_generator import generate_resume_html, html_to_pdf
+from resume_generator import generate_resume_docx
 
 # create router.
 router = APIRouter(prefix="/api/resume", tags=["resume"])
@@ -28,7 +30,8 @@ router = APIRouter(prefix="/api/resume", tags=["resume"])
 @router.get("/pdf")
 async def generate_resume_pdf(
     current_user: User = Depends(get_current_user_from_token),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    preview: bool = False
 ):
     # generate a PDF resume for the current user.
     try:
@@ -44,10 +47,46 @@ async def generate_resume_pdf(
         safe_name = safe_name.replace(' ', '_')
         filename = f"{safe_name}_Resume.pdf"
         
+        # determine content disposition based on preview parameter.
+        disposition = "inline" if preview else "attachment"
+        
         # return the PDF as a response.
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'{disposition}; filename="{filename}"; filename*=UTF-8\'\'{filename}'
+            }
+        )
+    except Exception as e:
+        # if an error occurs, raise an error.
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error generating resume: {str(e)}"
+        )
+
+
+# generate resume as DOCX.
+@router.get("/docx")
+async def generate_resume_docx_endpoint(
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+    template: str = "modern"
+):
+    # generate a DOCX resume for the current user.
+    try:
+        # generate DOCX resume.
+        docx_bytes = generate_resume_docx(current_user, template=template)
+        
+        # clean filename - remove special characters and ensure .docx extension.
+        safe_name = "".join(c for c in current_user.name if c.isalnum() or c in (' ', '-', '_')).strip()
+        safe_name = safe_name.replace(' ', '_')
+        filename = f"{safe_name}_Resume.docx"
+        
+        # return the DOCX as a response.
+        return Response(
+            content=docx_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             headers={
                 "Content-Disposition": f'attachment; filename="{filename}"; filename*=UTF-8\'\'{filename}'
             }

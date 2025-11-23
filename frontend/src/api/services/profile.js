@@ -12,6 +12,14 @@ export async function getMyProfile() {
 	})
 }
 
+// create education.
+export async function createEducation(educationData) {
+	return apiRequest('/api/profile/education', {
+		method: 'POST',
+		body: JSON.stringify(educationData),
+	})
+}
+
 // create experience.
 export async function createExperience(experienceData) {
 	return apiRequest('/api/profile/experiences', {
@@ -57,14 +65,6 @@ export async function createSkillsBulk(skillsData) {
 	return apiRequest('/api/profile/skills/bulk', {
 		method: 'POST',
 		body: JSON.stringify(skillsData),
-	})
-}
-
-// create education.
-export async function createEducation(educationData) {
-	return apiRequest('/api/profile/education', {
-		method: 'POST',
-		body: JSON.stringify(educationData),
 	})
 }
 

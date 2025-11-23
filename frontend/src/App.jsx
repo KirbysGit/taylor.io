@@ -8,6 +8,7 @@ import Landing from './pages/1landing/Landing'
 import Auth from './pages/2auth/Auth'
 import AccountSetup from './pages/3setup/AccountSetup'
 import Home from './pages/4home/Home'
+import ResumePreview from './pages/5resume/ResumePreview'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // ----------- main component -----------
@@ -31,6 +32,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/resume/preview" 
+          element={
+            <ProtectedRoute>
+              <ResumePreview />
             </ProtectedRoute>
           } 
         />

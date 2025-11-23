@@ -12,12 +12,12 @@
 # - create_skills_bulk            -      creates multiple skills for the current user.
 
 # imports.
+from typing import List
+from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
-from typing import List
 
 # local imports.
-from models import User, Experience, Projects, Skills, Contact, Education
 from database import get_db
 from schemas import (
     ExperienceCreate, ExperienceResponse,
@@ -28,8 +28,9 @@ from schemas import (
     ParsedResumeResponse,
     ContactCreate, ContactResponse
 )
-from .auth import get_current_user_from_token
 from resume_parser import parse_resume_file
+from .auth import get_current_user_from_token
+from models import User, Experience, Projects, Skills, Contact, Education
 
 # create router.
 router = APIRouter(prefix="/api/profile", tags=["profile"])
@@ -222,6 +223,7 @@ async def create_or_update_contact(
         if contact_data.portfolio is not None:
             existing_contact.portfolio = contact_data.portfolio
         
+        # add, commit, and refresh db.
         db.commit()
         db.refresh(existing_contact)
         return ContactResponse.model_validate(existing_contact)
@@ -235,6 +237,8 @@ async def create_or_update_contact(
             linkedin=contact_data.linkedin,
             portfolio=contact_data.portfolio,
         )
+
+        # add, commit, and refresh db.
         db.add(new_contact)
         db.commit()
         db.refresh(new_contact)
@@ -323,7 +327,7 @@ async def create_skills_bulk(
             Skills.name == skill_data.name
         ).first()
         
-        # if skill already exists, add it to the list.
+        # if skill already exists, append it to the list.
         if existing_skill:
             new_skills.append(existing_skill)
         else:
@@ -332,6 +336,7 @@ async def create_skills_bulk(
                 user_id=current_user.id,
                 name=skill_data.name,
             )
+
             # add, commit, and refresh db.
             db.add(new_skill)
             new_skills.append(new_skill)
@@ -351,8 +356,9 @@ async def parse_resume(
     current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db)
 ):
-    """Parse a resume file (PDF or DOCX) and extract structured data."""
-    # validate file type.
+    # parse a resume file (PDF or DOCX) and extract structured data.
+    
+    # validate file type (only PDF and DOCX are supported).
     if not file.filename:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -365,9 +371,9 @@ async def parse_resume(
             detail="Unsupported file type. Only PDF and DOCX files are supported."
         )
     
-    # validate file size (max 10MB).
+    # validate file size (maximum size is 10MB).
     file_bytes = await file.read()
-    if len(file_bytes) > 10 * 1024 * 1024:  # 10MB
+    if len(file_bytes) > 10 * 1024 * 1024:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File too large. Maximum size is 10MB."
@@ -377,26 +383,27 @@ async def parse_resume(
         # parse the resume file.
         parsed_data = parse_resume_file(file_bytes, file.filename)
         
-        # save contact info to database if present
+        # helper function to parse date strings.
+        def parse_date(date_str: str) -> datetime | None:
+            if not date_str:
+                return None
+            try:
+                return datetime.strptime(date_str, "%Y-%m")
+            except (ValueError, TypeError):
+                return None
+        
+        # save contact info to database if present.
         contact_info = parsed_data.get("contact_info", {})
-        if contact_info and any(contact_info.values()):  # if any field has a value
+        if contact_info and any(contact_info.values()):
             existing_contact = db.query(Contact).filter(Contact.user_id == current_user.id).first()
             
             if existing_contact:
-                # update existing contact (only update fields that are not None)
-                if contact_info.get("email"):
-                    existing_contact.email = contact_info.get("email")
-                if contact_info.get("phone"):
-                    existing_contact.phone = contact_info.get("phone")
-                if contact_info.get("github"):
-                    existing_contact.github = contact_info.get("github")
-                if contact_info.get("linkedin"):
-                    existing_contact.linkedin = contact_info.get("linkedin")
-                if contact_info.get("portfolio"):
-                    existing_contact.portfolio = contact_info.get("portfolio")
-                db.commit()
+                # update existing contact (only update fields that are not None).
+                for field in ["email", "phone", "github", "linkedin", "portfolio"]:
+                    if contact_info.get(field):
+                        setattr(existing_contact, field, contact_info[field])
             else:
-                # create new contact
+                # create new contact.
                 new_contact = Contact(
                     user_id=current_user.id,
                     email=contact_info.get("email"),
@@ -406,50 +413,30 @@ async def parse_resume(
                     portfolio=contact_info.get("portfolio"),
                 )
                 db.add(new_contact)
-                db.commit()
         
-        # save education to database if present
+        # save education to database if present.
         education_list = parsed_data.get("education", [])
-        if education_list:
-            from datetime import datetime
-            
-            for edu_data in education_list:
-                # Convert date strings to datetime objects if present
-                start_date = None
-                end_date = None
-                
-                if edu_data.get("startDate"):
-                    try:
-                        # Parse "YYYY-MM" format
-                        start_date = datetime.strptime(edu_data["startDate"], "%Y-%m")
-                    except:
-                        pass
-                
-                if edu_data.get("endDate"):
-                    try:
-                        end_date = datetime.strptime(edu_data["endDate"], "%Y-%m")
-                    except:
-                        pass
-                
-                new_education = Education(
-                    user_id=current_user.id,
-                    school=edu_data.get("school"),
-                    degree=edu_data.get("degree"),
-                    field=edu_data.get("field"),
-                    start_date=start_date,
-                    end_date=end_date,
-                    current=edu_data.get("current", False),
-                    gpa=edu_data.get("gpa"),
-                    honors_awards=edu_data.get("honorsAwards"),
-                    clubs_extracurriculars=edu_data.get("clubsExtracurriculars"),
-                    location=edu_data.get("location"),
-                    relevant_coursework=edu_data.get("relevantCoursework"),
-                )
-                db.add(new_education)
-            
-            db.commit()
+        for edu_data in education_list:
+            new_education = Education(
+                user_id=current_user.id,
+                school=edu_data.get("school"),
+                degree=edu_data.get("degree"),
+                field=edu_data.get("field"),
+                start_date=parse_date(edu_data.get("startDate")),
+                end_date=parse_date(edu_data.get("endDate")),
+                current=edu_data.get("current", False),
+                gpa=edu_data.get("gpa"),
+                honors_awards=edu_data.get("honorsAwards"),
+                clubs_extracurriculars=edu_data.get("clubsExtracurriculars"),
+                location=edu_data.get("location"),
+                relevant_coursework=edu_data.get("relevantCoursework"),
+            )
+            db.add(new_education)
         
-        # convert to response format.
+        # commit all changes at once.
+        db.commit()
+        
+        # convert parsed data to response format.
         return ParsedResumeResponse(
             experiences=parsed_data.get("experiences", []),
             education=parsed_data.get("education", []),
