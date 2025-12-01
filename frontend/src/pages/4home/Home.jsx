@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getMyProfile } from '@/api/services/profile'
+import { listTemplates } from '@/api/services/resume'
 import AddExperienceModal from '@/components/modals/AddExperienceModal'
 import AddProjectModal from '@/components/modals/AddProjectModal'
 import AddSkillModal from '@/components/modals/AddSkillModal'
@@ -21,7 +22,8 @@ function Home() {
 	const [showProjectModal, setShowProjectModal] = useState(false)
 	const [showSkillModal, setShowSkillModal] = useState(false)
 	const [resumeFormat, setResumeFormat] = useState('pdf') // 'pdf' or 'docx'
-	const [docxTemplate, setDocxTemplate] = useState('modern') // template for DOCX
+	const [docxTemplate, setDocxTemplate] = useState('main') // template for DOCX
+	const [availableTemplates, setAvailableTemplates] = useState(['main']) // available templates
 
 	// get user profile from backend on mount.
 	useEffect(() => {
@@ -43,6 +45,16 @@ function Home() {
 				// fetch full profile from backend.
 				const response = await getMyProfile()
 				setProfile(response.data)
+				
+				// fetch available templates.
+				const templatesResponse = await listTemplates()
+				if (templatesResponse?.data?.templates) {
+					setAvailableTemplates(templatesResponse.data.templates)
+					// if current template not in list, use first available
+					if (!templatesResponse.data.templates.includes('main')) {
+						setDocxTemplate(templatesResponse.data.templates[0] || 'main')
+					}
+				}
 			} catch (error) {
 				console.error('Error fetching profile:', error)
 				// if error, still show user from localStorage
@@ -163,8 +175,11 @@ function Home() {
 											onChange={(e) => setDocxTemplate(e.target.value)}
 											className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
 										>
-											<option value="modern">Modern</option>
-											<option value="classic">Classic</option>
+											{availableTemplates.map(template => (
+												<option key={template} value={template}>
+													{template.charAt(0).toUpperCase() + template.slice(1)}
+												</option>
+											))}
 										</select>
 									</div>
 								)}

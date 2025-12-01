@@ -10,12 +10,12 @@
 import { apiRequest, API_BASE_URL } from '../api'
 
 // generate resume as PDF (download).
-export async function generateResumePDF() {
+export async function generateResumePDF(template = 'main') {
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
 	
-	// construct url for request.
-	const url = `${API_BASE_URL}/api/resume/pdf`
+	// construct url for request with template parameter.
+	const url = `${API_BASE_URL}/api/resume/pdf?template=${encodeURIComponent(template)}`
 	
 	// try to generate resume.
 	try {
@@ -126,6 +126,13 @@ export async function generateResumeDOCX(template = 'modern') {
 // generate resume as HTML (preview).
 export async function generateResumeHTML() {
 	return apiRequest('/api/resume/html', {
+		method: 'GET',
+	})
+}
+
+// list available templates.
+export async function listTemplates() {
+	return apiRequest('/api/resume/templates', {
 		method: 'GET',
 	})
 }
