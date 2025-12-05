@@ -12,6 +12,14 @@ export async function getMyProfile() {
 	})
 }
 
+// create or update contact info (header section)
+export async function upsertContact(contactData) {
+	return apiRequest('/api/profile/contact', {
+		method: 'POST',
+		body: JSON.stringify(contactData),
+	})
+}
+
 // create education.
 export async function createEducation(educationData) {
 	return apiRequest('/api/profile/education', {

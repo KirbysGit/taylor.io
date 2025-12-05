@@ -30,7 +30,14 @@ def list_available_templates() -> list[str]:
     return sorted(templates)
 
 
-def generate_resume_docx(user: User, template: str = "main") -> bytes:
+def generate_resume_docx(
+    user: User,
+    template: str = "main",
+    overrides: dict | None = None,
+    margin_overrides: dict | None = None,
+    header_line: str | None = None,
+    header_alignment: str | None = None,
+) -> bytes:
     """
     Generate DOCX resume from user data and template.
     
@@ -47,7 +54,14 @@ def generate_resume_docx(user: User, template: str = "main") -> bytes:
     template_path = os.path.join(template_dir, f"{template}.docx")
     
     # build the document.
-    doc = build_docx(user, template_path)
+    doc = build_docx(
+        user,
+        template_path,
+        overrides=overrides,
+        margin_overrides=margin_overrides,
+        header_line=header_line,
+        header_alignment=header_alignment,
+    )
     
     # save to bytes buffer.
     buffer = BytesIO()

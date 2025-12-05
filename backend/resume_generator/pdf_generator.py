@@ -11,7 +11,14 @@ from docx2pdf import convert
 from .generator import generate_resume_docx
 
 
-def generate_resume_pdf_from_docx(user, template: str = "main") -> bytes:
+def generate_resume_pdf_from_docx(
+    user,
+    template: str = "main",
+    overrides: dict | None = None,
+    margin_overrides: dict | None = None,
+    header_line: str | None = None,
+    header_alignment: str | None = None,
+) -> bytes:
     """
     Generate PDF from DOCX template using docx2pdf.
     
@@ -26,7 +33,14 @@ def generate_resume_pdf_from_docx(user, template: str = "main") -> bytes:
         bytes: Raw .pdf file bytes ready for download/preview
     """
     # 1. Generate DOCX bytes in memory.
-    docx_bytes = generate_resume_docx(user, template)
+    docx_bytes = generate_resume_docx(
+        user,
+        template,
+        overrides=overrides,
+        margin_overrides=margin_overrides,
+        header_line=header_line,
+        header_alignment=header_alignment,
+    )
     
     # 2. Use temporary directory for file conversion.
     with tempfile.TemporaryDirectory() as tmpdir:

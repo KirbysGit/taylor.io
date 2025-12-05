@@ -67,6 +67,9 @@ class ResumeRenderContext(BaseModel):
     github: Optional[str] = None
     linkedin: Optional[str] = None
     portfolio: Optional[str] = None
+    phone: Optional[str] = None
+    location: Optional[str] = None
+    header_line: Optional[str] = None
 
     # sections (full collections)
     education: List[EducationEntryContext] = []
@@ -228,6 +231,8 @@ def build_resume_render_context(user) -> ResumeRenderContext:
     github = getattr(contact, "github", None)
     linkedin = getattr(contact, "linkedin", None)
     portfolio = getattr(contact, "portfolio", None)
+    phone = getattr(contact, "phone", None)
+    location = getattr(contact, "location", None) or getattr(user, "location", None)
 
     # education
     edu_entries: List[EducationEntryContext] = []
@@ -302,6 +307,8 @@ def build_resume_render_context(user) -> ResumeRenderContext:
         github=github,
         linkedin=linkedin,
         portfolio=portfolio,
+        phone=phone,
+        location=location,
         education=edu_entries,
         experiences=exp_entries,
         projects=proj_entries,

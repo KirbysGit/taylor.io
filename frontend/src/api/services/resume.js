@@ -10,12 +10,26 @@
 import { apiRequest, API_BASE_URL } from '../api'
 
 // generate resume as PDF (download).
-export async function generateResumePDF(template = 'main') {
+export async function generateResumePDF(template = 'main', overrides = {}) {
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
 	
 	// construct url for request with template parameter.
-	const url = `${API_BASE_URL}/api/resume/pdf?template=${encodeURIComponent(template)}`
+	const params = new URLSearchParams({ template })
+	if (overrides.header_order && Array.isArray(overrides.header_order)) {
+		params.append('header_order', overrides.header_order.join(','))
+		delete overrides.header_order
+	}
+	if (overrides.header_alignment) {
+		params.append('header_align', overrides.header_alignment)
+		delete overrides.header_alignment
+	}
+	Object.entries(overrides || {}).forEach(([key, value]) => {
+		if (value !== undefined && value !== null) {
+			params.append(key, value)
+		}
+	})
+	const url = `${API_BASE_URL}/api/resume/pdf?${params.toString()}`
 	
 	// try to generate resume.
 	try {
@@ -67,12 +81,26 @@ export async function generateResumePDF(template = 'main') {
 }
 
 // generate resume as DOCX (download).
-export async function generateResumeDOCX(template = 'modern') {
+export async function generateResumeDOCX(template = 'modern', overrides = {}) {
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
 	
 	// construct url for request with template parameter.
-	const url = `${API_BASE_URL}/api/resume/docx?template=${encodeURIComponent(template)}`
+	const params = new URLSearchParams({ template })
+	if (overrides.header_order && Array.isArray(overrides.header_order)) {
+		params.append('header_order', overrides.header_order.join(','))
+		delete overrides.header_order
+	}
+	if (overrides.header_alignment) {
+		params.append('header_align', overrides.header_alignment)
+		delete overrides.header_alignment
+	}
+	Object.entries(overrides || {}).forEach(([key, value]) => {
+		if (value !== undefined && value !== null) {
+			params.append(key, value)
+		}
+	})
+	const url = `${API_BASE_URL}/api/resume/docx?${params.toString()}`
 	
 	// try to generate resume.
 	try {
