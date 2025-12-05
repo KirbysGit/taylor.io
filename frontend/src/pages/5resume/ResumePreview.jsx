@@ -3,7 +3,7 @@
 // resume preview and customization page.
 
 // imports.
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { generateResumePDF, generateResumeDOCX, listTemplates } from '@/api/services/resume'
 import { getMyProfile } from '@/api/services/profile'
@@ -16,18 +16,27 @@ function ResumePreview() {
 	const [searchParams] = useSearchParams()
 	
 	// get initial template from URL params or defaults.
-	const initialTemplate = searchParams.get('template') || 'main'
+	const initialTemplate = searchParams.get('template') || 'testing'
 	
 	const [profile, setProfile] = useState(null)
 	const [template, setTemplate] = useState(initialTemplate) // template for resume
-	const [availableTemplates, setAvailableTemplates] = useState(['main']) // available templates
+	const [availableTemplates, setAvailableTemplates] = useState(['Testing']) // available templates
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [isLoadingPreview, setIsLoadingPreview] = useState(true) // loading state for preview only
 	const [previewPdfUrl, setPreviewPdfUrl] = useState(null)
 	const [previewError, setPreviewError] = useState(null)
 
+	// guard so fetchData only runs once even under React.StrictMode in dev.
+	const hasFetchedInitialData = useRef(false)
+
 	// fetch profile and templates on mount (page loads immediately).
 	useEffect(() => {
+		// prevent double-fetch in React.StrictMode (dev) by guarding with a ref.
+		if (hasFetchedInitialData.current) {
+			return
+		}
+		hasFetchedInitialData.current = true
+
 		const fetchData = async () => {
 			const token = localStorage.getItem('token')
 			const userData = localStorage.getItem('user')
