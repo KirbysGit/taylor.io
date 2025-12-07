@@ -63,6 +63,7 @@ async def generate_resume_docx_endpoint(
     margin_right: Optional[float] = None,
     header_order: Optional[str] = None,  # comma-separated keys
     header_align: Optional[str] = None,  # left | center | right
+    font_family: Optional[str] = None,
 ):
     # generate a DOCX resume for the current user.
     try:
@@ -85,6 +86,7 @@ async def generate_resume_docx_endpoint(
                 "portfolio": portfolio,
                 "phone": phone,
                 "location": location,
+                "font_family": font_family,
             }.items()
             if v is not None
         }
@@ -162,6 +164,7 @@ async def generate_resume_docx_endpoint(
             margin_overrides=margin_overrides or None,
             header_line=header_line,
             header_alignment=header_align,
+            font_family=font_family,
         )
         
         # clean filename - remove special characters and ensure .docx extension.
@@ -205,6 +208,7 @@ async def generate_resume_pdf(
     margin_right: Optional[float] = None,
     header_order: Optional[str] = None,  # comma-separated keys
     header_align: Optional[str] = None,  # left | center | right
+    font_family: Optional[str] = None,
 ):
     """Generate PDF from DOCX template (same styling as Word doc)."""
     try:
@@ -227,6 +231,7 @@ async def generate_resume_pdf(
                 "portfolio": portfolio,
                 "phone": phone,
                 "location": location,
+                "font_family": font_family,
             }.items()
             if v is not None
         }
@@ -295,7 +300,7 @@ async def generate_resume_pdf(
                 if val:
                     values.append(val)
             header_line = " | ".join(values)
-
+        
         # generate PDF from DOCX template.
         pdf_bytes = generate_resume_pdf_from_docx(
             user,
@@ -304,6 +309,7 @@ async def generate_resume_pdf(
             margin_overrides=margin_overrides or None,
             header_line=header_line,
             header_alignment=header_align,
+            font_family=font_family,
         )
         
         # clean filename.

@@ -18,6 +18,7 @@ def generate_resume_pdf_from_docx(
     margin_overrides: dict | None = None,
     header_line: str | None = None,
     header_alignment: str | None = None,
+    font_family: str | None = None,
 ) -> bytes:
     """
     Generate PDF from DOCX template using docx2pdf.
@@ -40,6 +41,7 @@ def generate_resume_pdf_from_docx(
         margin_overrides=margin_overrides,
         header_line=header_line,
         header_alignment=header_alignment,
+        font_family=font_family,
     )
     
     # 2. Use temporary directory for file conversion.

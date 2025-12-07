@@ -24,6 +24,10 @@ export async function generateResumePDF(template = 'main', overrides = {}) {
 		params.append('header_align', overrides.header_alignment)
 		delete overrides.header_alignment
 	}
+	if (overrides.font_family) {
+		params.append('font_family', overrides.font_family)
+		delete overrides.font_family
+	}
 	Object.entries(overrides || {}).forEach(([key, value]) => {
 		if (value !== undefined && value !== null) {
 			params.append(key, value)
@@ -94,6 +98,10 @@ export async function generateResumeDOCX(template = 'modern', overrides = {}) {
 	if (overrides.header_alignment) {
 		params.append('header_align', overrides.header_alignment)
 		delete overrides.header_alignment
+	}
+	if (overrides.font_family) {
+		params.append('font_family', overrides.font_family)
+		delete overrides.font_family
 	}
 	Object.entries(overrides || {}).forEach(([key, value]) => {
 		if (value !== undefined && value !== null) {

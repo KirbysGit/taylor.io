@@ -9,6 +9,7 @@ import { generateResumePDF, generateResumeDOCX, listTemplates } from '@/api/serv
 import { getMyProfile, upsertContact } from '@/api/services/profile'
 import { API_BASE_URL } from '@/api/api'
 import HeaderFieldsPanel from './components/HeaderFieldsPanel'
+import ResumeStylingPanel from './components/ResumeStylingPanel'
 
 // ----------- main component -----------
 
@@ -28,6 +29,7 @@ function ResumePreview() {
 	const [previewError, setPreviewError] = useState(null)
 	const [isSavingHeader, setIsSavingHeader] = useState(false)
 	const lastPreviewKeyRef = useRef(null)
+	const [activeTab, setActiveTab] = useState('style') // 'style' | 'data'
 
 // header fields + visibility
 const [headerFields, setHeaderFields] = useState({
@@ -58,6 +60,18 @@ const [headerOrder, setHeaderOrder] = useState([
 	'location',
 ])
 const [headerAlignment, setHeaderAlignment] = useState('center') // left | center | right
+const [fontFamily, setFontFamily] = useState('Calibri')
+const [educationFields, setEducationFields] = useState({
+	school: '',
+	degree: '',
+	field: '',
+	location: '',
+	date: '',
+	gpa: '',
+	honors: '',
+	clubs: '',
+	coursework: ''
+})
 
 // margins and header alignment
 const [marginPreset, setMarginPreset] = useState('normal') // normal | narrow | wide | custom
@@ -68,15 +82,17 @@ const [marginCustom, setMarginCustom] = useState({
 	left: '0.6'
 })
 
+const stripProtocol = (value) => (value || '').replace(/^https?:\/\//i, '')
+
 // build overrides for preview/download (non-destructive): header + margins
 const buildOverrides = () => {
 	const map = {}
 	const fields = [
 		{ key: 'name', value: headerFields.name },
 		{ key: 'email', value: headerFields.email },
-		{ key: 'github', value: headerFields.github },
-		{ key: 'linkedin', value: headerFields.linkedin },
-		{ key: 'portfolio', value: headerFields.portfolio },
+		{ key: 'github', value: stripProtocol(headerFields.github) },
+		{ key: 'linkedin', value: stripProtocol(headerFields.linkedin) },
+		{ key: 'portfolio', value: stripProtocol(headerFields.portfolio) },
 		{ key: 'phone', value: headerFields.phone_number },
 		{ key: 'location', value: headerFields.location },
 	]
@@ -88,9 +104,20 @@ const buildOverrides = () => {
 				: headerVisibility[key] ?? true
 		map[key] = visible ? (value ?? '') : '' // send empty string to hide when not visible
 	})
-	map.header_order = headerOrder
+	map.header_order = Array.isArray(headerOrder) ? headerOrder.join(',') : headerOrder
 	map.header_alignment = headerAlignment
-	map.header_alignment = headerAlignment
+	map.font_family = fontFamily
+
+	// education overrides (single-entry template)
+	const eduDegree = [educationFields.degree, educationFields.field].filter(Boolean).join(' ')
+	map.edu_name = educationFields.school
+	map.edu_degree = eduDegree
+	map.edu_location = educationFields.location
+	map.edu_gpa = educationFields.gpa
+	map.edu_date = educationFields.date
+	map.edu_honors = educationFields.honors
+	map.edu_clubs = educationFields.clubs
+	map.edu_coursework = educationFields.coursework
 
 	const presetMargins = {
 		extraNarrow: { top: 0.25, right: 0.25, bottom: 0.25, left: 0.25 },
@@ -115,14 +142,27 @@ const buildOverrides = () => {
 	return map
 	}
 
-// simple heuristic to warn when header contact line may overflow
+// simple heuristic to warn when header contact line may overflow (includes prefixes)
 const isHeaderOverflowing = () => {
+	const prefixMap = {
+		github: 'https://github.com/',
+		linkedin: 'https://linkedin.com/in/',
+		portfolio: 'https://',
+	}
+	const withPrefix = (key, value) => {
+		if (!value) return ''
+		const prefix = prefixMap[key]
+		if (!prefix) return value
+		return value.startsWith(prefix) ? value : `${prefix}${value}`
+	}
+
 	const parts = []
 	if (headerVisibility.phone_number && headerFields.phone_number) parts.push(headerFields.phone_number)
 	if (headerVisibility.email && headerFields.email) parts.push(headerFields.email)
-	if (headerVisibility.github && headerFields.github) parts.push(headerFields.github)
-	if (headerVisibility.linkedin && headerFields.linkedin) parts.push(headerFields.linkedin)
-	if (headerVisibility.portfolio && headerFields.portfolio) parts.push(headerFields.portfolio)
+	if (headerVisibility.github && headerFields.github) parts.push(withPrefix('github', headerFields.github))
+	if (headerVisibility.linkedin && headerFields.linkedin) parts.push(withPrefix('linkedin', headerFields.linkedin))
+	if (headerVisibility.portfolio && headerFields.portfolio) parts.push(withPrefix('portfolio', headerFields.portfolio))
+	if (headerVisibility.location && headerFields.location) parts.push(headerFields.location)
 	// estimate length including separators
 	const estimated = parts.join(' | ')
 
@@ -160,13 +200,25 @@ const isHeaderOverflowing = () => {
 			}
 
 			try {
-				// fetch profile.
+		// fetch profile.
 				const response = await getMyProfile()
 				const profileData = response.data || {}
 				setProfile(profileData)
 
 				const userInfo = profileData.user || {}
 				const contact = profileData.contact || {}
+		const edu0 = (profileData.education && profileData.education[0]) || {}
+		const fmtDate = (start, end, current) => {
+			const toText = (d) => {
+				if (!d) return ''
+				const dt = new Date(d)
+				return dt.toLocaleString('en-US', { month: 'short', year: 'numeric' })
+			}
+			const s = toText(start)
+			const e = toText(end) || (current ? 'Present' : '')
+			if (s && e) return `${s} – ${e}`
+			return s || e || ''
+		}
 				// prefill header fields from profile/contact
 				setHeaderFields((prev) => ({
 					...prev,
@@ -178,6 +230,19 @@ const isHeaderOverflowing = () => {
 					phone_number: contact.phone || prev.phone_number,
 					location: userInfo.location || contact.location || profileData.location || prev.location
 				}))
+		// prefill education fields from first education entry
+		setEducationFields((prev) => ({
+			...prev,
+			school: edu0.school || prev.school,
+			degree: edu0.degree || prev.degree,
+			field: edu0.field || prev.field,
+			location: edu0.location || prev.location,
+			date: fmtDate(edu0.start_date, edu0.end_date, edu0.current),
+			gpa: edu0.gpa || prev.gpa,
+			honors: edu0.honors_awards || prev.honors,
+			clubs: edu0.clubs_extracurriculars || prev.clubs,
+			coursework: edu0.relevant_coursework || prev.coursework
+		}))
 				
 				// fetch available templates.
 				const templatesResponse = await listTemplates()
@@ -220,6 +285,17 @@ const isHeaderOverflowing = () => {
 			overrides.portfolio || '',
 			overrides.phone || '',
 			overrides.location || '',
+			overrides.header_order || '',
+			overrides.header_alignment || '',
+			overrides.font_family || '',
+			overrides.edu_name || '',
+			overrides.edu_degree || '',
+			overrides.edu_location || '',
+			overrides.edu_gpa || '',
+			overrides.edu_date || '',
+			overrides.edu_honors || '',
+			overrides.edu_clubs || '',
+			overrides.edu_coursework || '',
 			overrides.margin_top || '',
 			overrides.margin_right || '',
 			overrides.margin_bottom || '',
@@ -231,7 +307,7 @@ const isHeaderOverflowing = () => {
 		}
 		lastPreviewKeyRef.current = key
 		loadPreview()
-	}, [template, profile])
+	}, [template, profile, headerAlignment, headerOrder, fontFamily, educationFields])
 
 	// function to load PDF preview.
 	const loadPreview = async () => {
@@ -246,11 +322,12 @@ const isHeaderOverflowing = () => {
 				preview: 'true',
 			})
 			const overrides = buildOverrides()
-			Object.entries(overrides).forEach(([k, v]) => {
-				if (v !== undefined && v !== null) {
-					params.append(k, v)
-				}
-			})
+		// map UI keys to API expectations before appending
+		Object.entries(overrides).forEach(([k, v]) => {
+			if (v === undefined || v === null) return
+			const key = k === 'header_alignment' ? 'header_align' : k
+			params.append(key, v)
+		})
 			const pdfUrl = `${API_BASE_URL}/api/resume/pdf?${params.toString()}`
 			const response = await fetch(pdfUrl, {
 				method: 'GET',
@@ -318,6 +395,10 @@ const isHeaderOverflowing = () => {
 	const handleHeaderFieldChange = (field, value) => {
 		setHeaderFields((prev) => ({ ...prev, [field]: value }))
 	}
+
+const handleEducationFieldChange = (field, value) => {
+	setEducationFields((prev) => ({ ...prev, [field]: value }))
+}
 
 	const toggleHeaderVisibility = (field) => {
 		setHeaderVisibility((prev) => ({ ...prev, [field]: !prev[field] }))
@@ -403,111 +484,170 @@ const isHeaderOverflowing = () => {
 				{/* Left Sidebar - Customization */}
 				<div className="w-[38rem] bg-white-bright border-r border-gray-200 p-6 overflow-y-auto">
 					<h2 className="text-xl font-bold mb-6 text-gray-900">Customization</h2>
-					
-					{/* Template Selection */}
-					<div className="mb-6">
-						<label className="block text-sm font-medium text-gray-700 mb-3">Template</label>
-						<select
-							value={template}
-							onChange={(e) => setTemplate(e.target.value)}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-						>
-							{availableTemplates.map(t => (
-								<option key={t} value={t}>
-									{t.charAt(0).toUpperCase() + t.slice(1)}
-								</option>
-							))}
-						</select>
-					</div>
 
-					{/* Header alignment */}
-					<div className="mb-6">
-						<label className="block text-sm font-medium text-gray-700 mb-3">Header alignment</label>
-						<div className="grid grid-cols-3 gap-2 text-sm">
-							{['left', 'center', 'right'].map((opt) => (
-								<button
-									type="button"
-									key={opt}
-									onClick={() => setHeaderAlignment(opt)}
-									className={`px-3 py-2 rounded-lg border ${
-										headerAlignment === opt
-											? 'bg-brand-pink text-white border-brand-pink'
-											: 'bg-white text-gray-700 border-gray-300 hover:border-brand-pink'
-									}`}
-								>
-									{opt.charAt(0).toUpperCase() + opt.slice(1)}
-								</button>
-							))}
-						</div>
-					</div>
-
-					{/* Margin controls */}
-					<div className="mb-6 p-4 bg-white rounded-lg border border-gray-200">
-						<div className="flex items-center justify-between mb-3">
-							<h3 className="text-sm font-semibold text-gray-900">Margins</h3>
-							<select
-								value={marginPreset}
-								onChange={(e) => setMarginPreset(e.target.value)}
-								className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-pink"
+					{/* Tabs */}
+					<div className="mb-6 flex gap-2">
+						{[
+							{ key: 'style', label: 'Styling' },
+							{ key: 'data', label: 'Header data' },
+						].map((tab) => (
+							<button
+								key={tab.key}
+								type="button"
+								onClick={() => setActiveTab(tab.key)}
+								className={`px-4 py-2 rounded-lg text-sm font-semibold border ${
+									activeTab === tab.key
+										? 'bg-brand-pink text-white border-brand-pink'
+										: 'bg-white text-gray-700 border-gray-300 hover:border-brand-pink'
+								}`}
 							>
-								<option value="extraNarrow">Extra narrow (≈0.25")</option>
-								<option value="narrow">Narrow (≈0.35")</option>
-								<option value="normal">Normal (≈0.5")</option>
-								<option value="wide">Wide (≈0.65")</option>
-								<option value="custom">Custom</option>
-							</select>
-						</div>
-						{marginPreset === 'custom' && (
-							<div className="grid grid-cols-2 gap-3 text-sm">
-								{[
-									{ key: 'top', label: 'Top' },
-									{ key: 'bottom', label: 'Bottom' },
-									{ key: 'left', label: 'Left' },
-									{ key: 'right', label: 'Right' }
-								].map((m) => (
-									<div key={m.key} className="flex flex-col">
-										<label className="text-gray-700 mb-1">{m.label} (inches)</label>
-										<input
-											type="number"
-											step="0.1"
-											min="0"
-											value={marginCustom[m.key]}
-											onChange={(e) =>
-												setMarginCustom((prev) => ({ ...prev, [m.key]: e.target.value }))
-											}
-											className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-pink"
-										/>
-									</div>
-								))}
-							</div>
-						)}
+								{tab.label}
+							</button>
+						))}
 					</div>
 
-					<HeaderFieldsPanel
-						headerFields={headerFields}
-						headerVisibility={headerVisibility}
-						headerOrder={headerOrder}
-						onFieldChange={handleHeaderFieldChange}
-						onToggleVisibility={toggleHeaderVisibility}
-						onReorder={handleReorderHeader}
-					/>
-
-					{isHeaderOverflowing() && (
-						<div className="mb-4 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm">
-							Looks like the contact line may overflow. We recommend keeping it on one line; you can shorten fields or hide some items, or continue as-is.
-						</div>
+					{activeTab === 'style' && (
+						<>
+							<ResumeStylingPanel
+								template={template}
+								availableTemplates={availableTemplates}
+								onTemplateChange={setTemplate}
+								headerAlignment={headerAlignment}
+								onHeaderAlignmentChange={setHeaderAlignment}
+								marginPreset={marginPreset}
+								onMarginPresetChange={setMarginPreset}
+								marginCustom={marginCustom}
+								onMarginCustomChange={setMarginCustom}
+								fontFamily={fontFamily}
+								onFontFamilyChange={setFontFamily}
+							/>
+						</>
 					)}
 
-					<div className="mb-6 flex justify-end">
-						<button
-							type="button"
-							onClick={handleSaveHeader}
-							disabled={isSavingHeader}
-							className="px-4 py-2 bg-brand-pink text-white rounded-lg text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							{isSavingHeader ? 'Saving...' : 'Save header'}
-						</button>
-					</div>
+					{activeTab === 'data' && (
+						<>
+							<HeaderFieldsPanel
+								headerFields={headerFields}
+								headerVisibility={headerVisibility}
+								headerOrder={headerOrder}
+								onFieldChange={handleHeaderFieldChange}
+								onToggleVisibility={toggleHeaderVisibility}
+								onReorder={handleReorderHeader}
+							/>
+
+							<div className="mt-6 mb-4">
+								<h3 className="text-sm font-semibold text-gray-900 mb-3">Education data</h3>
+								<div className="space-y-3">
+									<div className="grid grid-cols-2 gap-3">
+										<div className="flex flex-col">
+											<label className="text-sm text-gray-700 mb-1">School</label>
+											<input
+												type="text"
+												value={educationFields.school}
+												onChange={(e) => handleEducationFieldChange('school', e.target.value)}
+												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+											/>
+										</div>
+										<div className="flex flex-col">
+											<label className="text-sm text-gray-700 mb-1">Location</label>
+											<input
+												type="text"
+												value={educationFields.location}
+												onChange={(e) => handleEducationFieldChange('location', e.target.value)}
+												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+											/>
+										</div>
+									</div>
+									<div className="grid grid-cols-2 gap-3">
+										<div className="flex flex-col">
+											<label className="text-sm text-gray-700 mb-1">Degree</label>
+											<input
+												type="text"
+												value={educationFields.degree}
+												onChange={(e) => handleEducationFieldChange('degree', e.target.value)}
+												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+											/>
+										</div>
+										<div className="flex flex-col">
+											<label className="text-sm text-gray-700 mb-1">Field</label>
+											<input
+												type="text"
+												value={educationFields.field}
+												onChange={(e) => handleEducationFieldChange('field', e.target.value)}
+												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+											/>
+										</div>
+									</div>
+									<div className="grid grid-cols-2 gap-3">
+										<div className="flex flex-col">
+											<label className="text-sm text-gray-700 mb-1">Date range</label>
+											<input
+												type="text"
+												value={educationFields.date}
+												onChange={(e) => handleEducationFieldChange('date', e.target.value)}
+												placeholder="Aug 2021 – May 2025"
+												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+											/>
+										</div>
+										<div className="flex flex-col">
+											<label className="text-sm text-gray-700 mb-1">GPA</label>
+											<input
+												type="text"
+												value={educationFields.gpa}
+												onChange={(e) => handleEducationFieldChange('gpa', e.target.value)}
+												placeholder="3.8 / 4.0"
+												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+											/>
+										</div>
+									</div>
+									<div className="flex flex-col">
+										<label className="text-sm text-gray-700 mb-1">Honors & Awards</label>
+										<textarea
+											value={educationFields.honors}
+											onChange={(e) => handleEducationFieldChange('honors', e.target.value)}
+											rows={2}
+											className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+										/>
+									</div>
+									<div className="flex flex-col">
+										<label className="text-sm text-gray-700 mb-1">Clubs & Extracurriculars</label>
+										<textarea
+											value={educationFields.clubs}
+											onChange={(e) => handleEducationFieldChange('clubs', e.target.value)}
+											rows={2}
+											className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+										/>
+									</div>
+									<div className="flex flex-col">
+										<label className="text-sm text-gray-700 mb-1">Relevant Coursework</label>
+										<textarea
+											value={educationFields.coursework}
+											onChange={(e) => handleEducationFieldChange('coursework', e.target.value)}
+											rows={2}
+											className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+										/>
+									</div>
+								</div>
+							</div>
+
+							{isHeaderOverflowing() && (
+								<div className="mb-4 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+									Looks like the contact line may overflow. We recommend keeping it on one line; you can shorten fields or hide some items, or continue as-is.
+								</div>
+							)}
+
+							<div className="mb-6 flex justify-end">
+								<button
+									type="button"
+									onClick={handleSaveHeader}
+									disabled={isSavingHeader}
+									className="px-4 py-2 bg-brand-pink text-white rounded-lg text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									{isSavingHeader ? 'Saving...' : 'Save header'}
+								</button>
+							</div>
+						</>
+					)}
 
 					{/* Quick Stats */}
 					{profile && (

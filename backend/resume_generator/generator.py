@@ -6,7 +6,7 @@
 from io import BytesIO
 import os
 from models import User
-from .builder.docx_builder import build_docx
+from .builder import build_docx
 
 
 def list_available_templates() -> list[str]:
@@ -37,6 +37,7 @@ def generate_resume_docx(
     margin_overrides: dict | None = None,
     header_line: str | None = None,
     header_alignment: str | None = None,
+    font_family: str | None = None,
 ) -> bytes:
     """
     Generate DOCX resume from user data and template.
@@ -61,6 +62,7 @@ def generate_resume_docx(
         margin_overrides=margin_overrides,
         header_line=header_line,
         header_alignment=header_alignment,
+        font_family=font_family,
     )
     
     # save to bytes buffer.

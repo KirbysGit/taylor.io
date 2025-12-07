@@ -17,11 +17,25 @@ function HeaderFieldsPanel({
 	const fieldsMap = {
 		name: { key: 'name', label: 'Name' },
 		email: { key: 'email', label: 'Email' },
-		github: { key: 'github', label: 'GitHub' },
-		linkedin: { key: 'linkedin', label: 'LinkedIn' },
-		portfolio: { key: 'portfolio', label: 'Portfolio' },
+		github: { key: 'github', label: 'GitHub', prefix: 'https://github.com/' },
+		linkedin: { key: 'linkedin', label: 'LinkedIn', prefix: 'https://linkedin.com/in/' },
+		portfolio: { key: 'portfolio', label: 'Portfolio', prefix: 'https://' },
 		phone_number: { key: 'phone_number', label: 'Phone' },
 		location: { key: 'location', label: 'Location' },
+	}
+
+	const getDisplayValue = (field) => {
+		const raw = headerFields[field.key] || ''
+		if (!field.prefix) return raw
+		return raw.startsWith(field.prefix) ? raw.slice(field.prefix.length) : raw
+	}
+
+	const handleChange = (field, value) => {
+		if (field.prefix) {
+			onFieldChange(field.key, value ? field.prefix + value : '')
+		} else {
+			onFieldChange(field.key, value)
+		}
 	}
 
 	const handleDragStart = (e, key) => {
@@ -92,16 +106,23 @@ function HeaderFieldsPanel({
 									</div>
 								</div>
 								<label className="text-sm font-medium text-gray-800 whitespace-nowrap">{field.label}</label>
-								<input
-									type="text"
-									value={headerFields[field.key] || ''}
-									onChange={(e) => onFieldChange(field.key, e.target.value)}
-									disabled={!headerVisibility[field.key]}
-									className={`flex-1 px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink ${
-										headerVisibility[field.key] ? '' : 'bg-gray-100 text-gray-500 cursor-not-allowed'
-									}`}
-									placeholder={`Enter ${field.label.toLowerCase()}`}
-								/>
+								<div className={`flex items-center gap-2 flex-1 ${!headerVisibility[field.key] ? 'opacity-70' : ''}`}>
+									{field.prefix && (
+										<span className="px-2 py-1 text-xs text-gray-600 bg-gray-100 border border-gray-200 rounded-md select-none">
+											{field.prefix}
+										</span>
+									)}
+									<input
+										type="text"
+										value={getDisplayValue(field)}
+										onChange={(e) => handleChange(field, e.target.value)}
+										disabled={!headerVisibility[field.key]}
+										className={`flex-1 px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink ${
+											headerVisibility[field.key] ? '' : 'bg-gray-100 text-gray-500 cursor-not-allowed'
+										}`}
+										placeholder={`Enter ${field.label.toLowerCase()}`}
+									/>
+								</div>
 								<span
 									onClick={() => onToggleVisibility(field.key)}
 									className={`h-3 w-3 rounded-full cursor-pointer transition ${
