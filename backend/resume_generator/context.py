@@ -83,6 +83,7 @@ class ResumeRenderContext(BaseModel):
     # education (first entry)
     edu_name: Optional[str] = None
     edu_degree: Optional[str] = None
+    edu_minor: Optional[str] = None
     edu_location: Optional[str] = None
     edu_gpa: Optional[str] = None
     edu_date: Optional[str] = None
@@ -316,6 +317,7 @@ def build_resume_render_context(user) -> ResumeRenderContext:
         # education shortcuts
         edu_name=(primary_edu.name if primary_edu else None),
         edu_degree=(primary_edu.degree if primary_edu else None),
+        edu_minor=None,  # current model has no minor; override-driven
         edu_location=(primary_edu.loc if primary_edu else None),
         edu_gpa=(primary_edu.gpa if primary_edu else None),
         edu_date=(primary_edu.date if primary_edu else None),

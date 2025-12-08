@@ -108,9 +108,8 @@ def replace_placeholders_in_doc(doc: Document, field_values: Dict[str, str]) -> 
                 run_idx, _ = char_map[cursor]
                 segments.append((segment_text, runs[run_idx].font))
             run_idx, _ = char_map[start]
-            # prefer formatting from the run BEFORE the placeholder, since the placeholder run is often unstyled
-            fmt_run_idx = max(run_idx - 1, 0)
-            segments.append((replacement, runs[fmt_run_idx].font))
+            # dynamic text should inherit formatting from the placeholder run itself
+            segments.append((replacement, runs[run_idx].font))
             cursor = end
         if cursor < len(full_text):
             segment_text = full_text[cursor:]

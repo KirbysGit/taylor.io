@@ -64,6 +64,16 @@ async def generate_resume_docx_endpoint(
     header_order: Optional[str] = None,  # comma-separated keys
     header_align: Optional[str] = None,  # left | center | right
     font_family: Optional[str] = None,
+    # education overrides (single-entry templates)
+    edu_name: Optional[str] = None,
+    edu_degree: Optional[str] = None,
+    edu_minor: Optional[str] = None,
+    edu_location: Optional[str] = None,
+    edu_gpa: Optional[str] = None,
+    edu_date: Optional[str] = None,
+    edu_honors: Optional[str] = None,
+    edu_clubs: Optional[str] = None,
+    edu_coursework: Optional[str] = None,
 ):
     # generate a DOCX resume for the current user.
     try:
@@ -86,6 +96,16 @@ async def generate_resume_docx_endpoint(
                 "portfolio": portfolio,
                 "phone": phone,
                 "location": location,
+                # education (single-entry)
+                "edu_name": edu_name,
+                "edu_degree": edu_degree,
+                "edu_minor": edu_minor,
+                "edu_location": edu_location,
+                "edu_gpa": edu_gpa,
+                "edu_date": edu_date,
+                "edu_honors": edu_honors,
+                "edu_clubs": edu_clubs,
+                "edu_coursework": edu_coursework,
                 "font_family": font_family,
             }.items()
             if v is not None
@@ -209,6 +229,16 @@ async def generate_resume_pdf(
     header_order: Optional[str] = None,  # comma-separated keys
     header_align: Optional[str] = None,  # left | center | right
     font_family: Optional[str] = None,
+    # education overrides (single-entry templates)
+    edu_name: Optional[str] = None,
+    edu_degree: Optional[str] = None,
+    edu_minor: Optional[str] = None,
+    edu_location: Optional[str] = None,
+    edu_gpa: Optional[str] = None,
+    edu_date: Optional[str] = None,
+    edu_honors: Optional[str] = None,
+    edu_clubs: Optional[str] = None,
+    edu_coursework: Optional[str] = None,
 ):
     """Generate PDF from DOCX template (same styling as Word doc)."""
     try:
@@ -231,6 +261,16 @@ async def generate_resume_pdf(
                 "portfolio": portfolio,
                 "phone": phone,
                 "location": location,
+                # education (single-entry)
+                "edu_name": edu_name,
+                "edu_degree": edu_degree,
+                "edu_minor": edu_minor,
+                "edu_location": edu_location,
+                "edu_gpa": edu_gpa,
+                "edu_date": edu_date,
+                "edu_honors": edu_honors,
+                "edu_clubs": edu_clubs,
+                "edu_coursework": edu_coursework,
                 "font_family": font_family,
             }.items()
             if v is not None

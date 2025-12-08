@@ -10,6 +10,13 @@ import { getMyProfile, upsertContact } from '@/api/services/profile'
 import { API_BASE_URL } from '@/api/api'
 import HeaderFieldsPanel from './components/HeaderFieldsPanel'
 import ResumeStylingPanel from './components/ResumeStylingPanel'
+import HeaderTab from './components/HeaderTab'
+import EducationTab from './components/EducationTab'
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
+import pdfWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
+
+// configure pdf.js worker (bundler-friendly)
+GlobalWorkerOptions.workerSrc = pdfWorkerSrc
 
 // ----------- main component -----------
 
@@ -25,11 +32,12 @@ function ResumePreview() {
 	const [availableTemplates, setAvailableTemplates] = useState(['Testing']) // available templates
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [isLoadingPreview, setIsLoadingPreview] = useState(true) // loading state for preview only
-	const [previewPdfUrl, setPreviewPdfUrl] = useState(null)
+	const [previewPdfBuffer, setPreviewPdfBuffer] = useState(null) // Uint8Array
 	const [previewError, setPreviewError] = useState(null)
 	const [isSavingHeader, setIsSavingHeader] = useState(false)
 	const lastPreviewKeyRef = useRef(null)
-	const [activeTab, setActiveTab] = useState('style') // 'style' | 'data'
+const previewDebounceRef = useRef(null)
+	const [activeTab, setActiveTab] = useState('style') // 'style' | 'header' | 'education'
 
 // header fields + visibility
 const [headerFields, setHeaderFields] = useState({
@@ -50,6 +58,14 @@ const [headerVisibility, setHeaderVisibility] = useState({
 	phone_number: true,
 	location: true
 })
+const [educationVisibility, setEducationVisibility] = useState({
+	date: true,
+	gpa: true,
+	honors: true,
+	clubs: true,
+	coursework: true,
+	minor: true
+})
 // ordering of header pills
 const [headerOrder, setHeaderOrder] = useState([
 	'phone_number',
@@ -61,10 +77,14 @@ const [headerOrder, setHeaderOrder] = useState([
 ])
 const [headerAlignment, setHeaderAlignment] = useState('center') // left | center | right
 const [fontFamily, setFontFamily] = useState('Calibri')
+const [sidebarWidth, setSidebarWidth] = useState(608) // px (≈38rem default)
+const [pdfScale, setPdfScale] = useState(1.05)
+const canvasRef = useRef(null)
 const [educationFields, setEducationFields] = useState({
 	school: '',
 	degree: '',
 	field: '',
+	minor: '',
 	location: '',
 	date: '',
 	gpa: '',
@@ -83,6 +103,34 @@ const [marginCustom, setMarginCustom] = useState({
 })
 
 const stripProtocol = (value) => (value || '').replace(/^https?:\/\//i, '')
+
+// drag-to-resize sidebar
+const isDraggingRef = useRef(false)
+const dragStartRef = useRef({ x: 0, width: 608 })
+
+const handleResizeStart = (e) => {
+	isDraggingRef.current = true
+	dragStartRef.current = { x: e.clientX, width: sidebarWidth }
+}
+
+useEffect(() => {
+	const handleMouseMove = (e) => {
+		if (!isDraggingRef.current) return
+		const delta = e.clientX - dragStartRef.current.x
+		const next = Math.max(420, Math.min(900, dragStartRef.current.width + delta))
+		setSidebarWidth(next)
+		e.preventDefault()
+	}
+	const handleMouseUp = () => {
+		isDraggingRef.current = false
+	}
+	window.addEventListener('mousemove', handleMouseMove)
+	window.addEventListener('mouseup', handleMouseUp)
+	return () => {
+		window.removeEventListener('mousemove', handleMouseMove)
+		window.removeEventListener('mouseup', handleMouseUp)
+	}
+}, [sidebarWidth])
 
 // build overrides for preview/download (non-destructive): header + margins
 const buildOverrides = () => {
@@ -109,15 +157,19 @@ const buildOverrides = () => {
 	map.font_family = fontFamily
 
 	// education overrides (single-entry template)
-	const eduDegree = [educationFields.degree, educationFields.field].filter(Boolean).join(' ')
+	const eduDegree =
+		educationFields.degree && educationFields.field
+			? `${educationFields.degree} in ${educationFields.field}`
+			: [educationFields.degree, educationFields.field].filter(Boolean).join(' ')
 	map.edu_name = educationFields.school
 	map.edu_degree = eduDegree
 	map.edu_location = educationFields.location
-	map.edu_gpa = educationFields.gpa
-	map.edu_date = educationFields.date
-	map.edu_honors = educationFields.honors
-	map.edu_clubs = educationFields.clubs
-	map.edu_coursework = educationFields.coursework
+	map.edu_gpa = educationVisibility.gpa ? educationFields.gpa : ''
+	map.edu_date = educationVisibility.date ? educationFields.date : ''
+	map.edu_honors = educationVisibility.honors ? educationFields.honors : ''
+	map.edu_clubs = educationVisibility.clubs ? educationFields.clubs : ''
+	map.edu_coursework = educationVisibility.coursework ? educationFields.coursework : ''
+	map.edu_minor = educationVisibility.minor ? educationFields.minor : ''
 
 	const presetMargins = {
 		extraNarrow: { top: 0.25, right: 0.25, bottom: 0.25, left: 0.25 },
@@ -296,6 +348,7 @@ const isHeaderOverflowing = () => {
 			overrides.edu_honors || '',
 			overrides.edu_clubs || '',
 			overrides.edu_coursework || '',
+			overrides.edu_minor || '',
 			overrides.margin_top || '',
 			overrides.margin_right || '',
 			overrides.margin_bottom || '',
@@ -305,9 +358,37 @@ const isHeaderOverflowing = () => {
 		if (lastPreviewKeyRef.current === key) {
 			return
 		}
-		lastPreviewKeyRef.current = key
-		loadPreview()
-	}, [template, profile, headerAlignment, headerOrder, fontFamily, educationFields])
+		// debounce preview reload to avoid per-keystroke API calls
+		if (previewDebounceRef.current) {
+			clearTimeout(previewDebounceRef.current)
+		}
+		previewDebounceRef.current = setTimeout(() => {
+			lastPreviewKeyRef.current = key
+			loadPreview()
+			previewDebounceRef.current = null
+		}, 500)
+	}, [
+		template,
+		profile,
+		headerAlignment,
+		headerOrder,
+		fontFamily,
+		educationFields,
+		headerFields,
+		headerVisibility,
+		educationVisibility,
+		marginPreset,
+		marginCustom,
+	])
+
+	// cleanup debounce timer on unmount
+	useEffect(() => {
+		return () => {
+			if (previewDebounceRef.current) {
+				clearTimeout(previewDebounceRef.current)
+			}
+		}
+	}, [])
 
 	// function to load PDF preview.
 	const loadPreview = async () => {
@@ -339,8 +420,8 @@ const isHeaderOverflowing = () => {
 			}
 
 			const blob = await response.blob()
-			const blobUrl = URL.createObjectURL(blob)
-			setPreviewPdfUrl(blobUrl)
+			const buffer = await blob.arrayBuffer()
+			setPreviewPdfBuffer(new Uint8Array(buffer))
 		} catch (error) {
 			console.error('Error loading preview:', error)
 			setPreviewError('Failed to load preview. Please try again.')
@@ -353,15 +434,36 @@ const isHeaderOverflowing = () => {
 	const handleRefreshPDF = () => {
 		loadPreview()
 	}
-	
-	// cleanup blob URL on unmount or when preview URL changes.
+
+	// render PDF buffer to canvas when available / scale changes
 	useEffect(() => {
-		return () => {
-			if (previewPdfUrl) {
-				URL.revokeObjectURL(previewPdfUrl)
+		const render = async () => {
+			if (!previewPdfBuffer || !canvasRef.current) return
+			try {
+				// clone to avoid detached buffer on re-render
+				const pdfData =
+					previewPdfBuffer instanceof Uint8Array
+						? previewPdfBuffer.slice()
+						: new Uint8Array(previewPdfBuffer)
+				const pdf = await getDocument({ data: pdfData }).promise
+				const page = await pdf.getPage(1)
+				const viewport = page.getViewport({ scale: pdfScale })
+				const canvas = canvasRef.current
+				const ctx = canvas.getContext('2d')
+				canvas.height = viewport.height
+				canvas.width = viewport.width
+				await page.render({ canvasContext: ctx, viewport }).promise
+			} catch (err) {
+				console.error('Error rendering PDF', err)
+				setPreviewError('Failed to render preview')
 			}
 		}
-	}, [previewPdfUrl])
+		render()
+	}, [previewPdfBuffer, pdfScale])
+
+	const handleZoom = (delta) => {
+		setPdfScale((prev) => Math.min(2.0, Math.max(0.7, prev + delta)))
+	}
 
 	// function to handle PDF download.
 	const handleDownloadPDF = async () => {
@@ -396,12 +498,21 @@ const isHeaderOverflowing = () => {
 		setHeaderFields((prev) => ({ ...prev, [field]: value }))
 	}
 
-const handleEducationFieldChange = (field, value) => {
-	setEducationFields((prev) => ({ ...prev, [field]: value }))
-}
+	const handleEducationFieldChange = (field, value) => {
+		setEducationFields((prev) => ({ ...prev, [field]: value }))
+	}
 
 	const toggleHeaderVisibility = (field) => {
 		setHeaderVisibility((prev) => ({ ...prev, [field]: !prev[field] }))
+	}
+
+	const toggleEducationVisibility = (field) => {
+		setEducationVisibility((prev) => ({ ...prev, [field]: !prev[field] }))
+	}
+
+	const handleSaveEducation = () => {
+		// education is preview-only for now; re-run preview
+		loadPreview()
 	}
 
 	const handleReorderHeader = (fromKey, toKey) => {
@@ -480,16 +591,20 @@ const handleEducationFieldChange = (field, value) => {
 			</header>
 
 			{/* Main Content - Split Layout */}
-			<main className="flex-1 flex overflow-hidden">
+			<main className="flex-1 flex overflow-hidden min-h-0">
 				{/* Left Sidebar - Customization */}
-				<div className="w-[38rem] bg-white-bright border-r border-gray-200 p-6 overflow-y-auto">
+				<div
+					className="bg-white-bright border-r border-gray-200 p-6 overflow-y-auto h-full min-h-0"
+					style={{ width: `${sidebarWidth}px`, minWidth: '420px', maxWidth: '900px' }}
+				>
 					<h2 className="text-xl font-bold mb-6 text-gray-900">Customization</h2>
 
 					{/* Tabs */}
 					<div className="mb-6 flex gap-2">
 						{[
-							{ key: 'style', label: 'Styling' },
-							{ key: 'data', label: 'Header data' },
+							{ key: 'style', label: 'Your Styling' },
+							{ key: 'header', label: 'Header' },
+							{ key: 'education', label: 'Education' },
 						].map((tab) => (
 							<button
 								key={tab.key}
@@ -507,146 +622,44 @@ const handleEducationFieldChange = (field, value) => {
 					</div>
 
 					{activeTab === 'style' && (
-						<>
-							<ResumeStylingPanel
-								template={template}
-								availableTemplates={availableTemplates}
-								onTemplateChange={setTemplate}
-								headerAlignment={headerAlignment}
-								onHeaderAlignmentChange={setHeaderAlignment}
-								marginPreset={marginPreset}
-								onMarginPresetChange={setMarginPreset}
-								marginCustom={marginCustom}
-								onMarginCustomChange={setMarginCustom}
-								fontFamily={fontFamily}
-								onFontFamilyChange={setFontFamily}
-							/>
-						</>
+						<ResumeStylingPanel
+							template={template}
+							availableTemplates={availableTemplates}
+							onTemplateChange={setTemplate}
+							headerAlignment={headerAlignment}
+							onHeaderAlignmentChange={setHeaderAlignment}
+							marginPreset={marginPreset}
+							onMarginPresetChange={setMarginPreset}
+							marginCustom={marginCustom}
+							onMarginCustomChange={setMarginCustom}
+							fontFamily={fontFamily}
+							onFontFamilyChange={setFontFamily}
+						/>
 					)}
 
-					{activeTab === 'data' && (
-						<>
-							<HeaderFieldsPanel
-								headerFields={headerFields}
-								headerVisibility={headerVisibility}
-								headerOrder={headerOrder}
-								onFieldChange={handleHeaderFieldChange}
-								onToggleVisibility={toggleHeaderVisibility}
-								onReorder={handleReorderHeader}
-							/>
+					{activeTab === 'header' && (
+						<HeaderTab
+							headerFields={headerFields}
+							headerVisibility={headerVisibility}
+							headerOrder={headerOrder}
+							onHeaderFieldChange={handleHeaderFieldChange}
+							onToggleHeaderVisibility={toggleHeaderVisibility}
+							onReorderHeader={handleReorderHeader}
+							onSaveHeader={handleSaveHeader}
+							isSavingHeader={isSavingHeader}
+							showHeaderOverflow={isHeaderOverflowing()}
+						/>
+					)}
 
-							<div className="mt-6 mb-4">
-								<h3 className="text-sm font-semibold text-gray-900 mb-3">Education data</h3>
-								<div className="space-y-3">
-									<div className="grid grid-cols-2 gap-3">
-										<div className="flex flex-col">
-											<label className="text-sm text-gray-700 mb-1">School</label>
-											<input
-												type="text"
-												value={educationFields.school}
-												onChange={(e) => handleEducationFieldChange('school', e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-										</div>
-										<div className="flex flex-col">
-											<label className="text-sm text-gray-700 mb-1">Location</label>
-											<input
-												type="text"
-												value={educationFields.location}
-												onChange={(e) => handleEducationFieldChange('location', e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-										</div>
-									</div>
-									<div className="grid grid-cols-2 gap-3">
-										<div className="flex flex-col">
-											<label className="text-sm text-gray-700 mb-1">Degree</label>
-											<input
-												type="text"
-												value={educationFields.degree}
-												onChange={(e) => handleEducationFieldChange('degree', e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-										</div>
-										<div className="flex flex-col">
-											<label className="text-sm text-gray-700 mb-1">Field</label>
-											<input
-												type="text"
-												value={educationFields.field}
-												onChange={(e) => handleEducationFieldChange('field', e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-										</div>
-									</div>
-									<div className="grid grid-cols-2 gap-3">
-										<div className="flex flex-col">
-											<label className="text-sm text-gray-700 mb-1">Date range</label>
-											<input
-												type="text"
-												value={educationFields.date}
-												onChange={(e) => handleEducationFieldChange('date', e.target.value)}
-												placeholder="Aug 2021 – May 2025"
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-										</div>
-										<div className="flex flex-col">
-											<label className="text-sm text-gray-700 mb-1">GPA</label>
-											<input
-												type="text"
-												value={educationFields.gpa}
-												onChange={(e) => handleEducationFieldChange('gpa', e.target.value)}
-												placeholder="3.8 / 4.0"
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-										</div>
-									</div>
-									<div className="flex flex-col">
-										<label className="text-sm text-gray-700 mb-1">Honors & Awards</label>
-										<textarea
-											value={educationFields.honors}
-											onChange={(e) => handleEducationFieldChange('honors', e.target.value)}
-											rows={2}
-											className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-										/>
-									</div>
-									<div className="flex flex-col">
-										<label className="text-sm text-gray-700 mb-1">Clubs & Extracurriculars</label>
-										<textarea
-											value={educationFields.clubs}
-											onChange={(e) => handleEducationFieldChange('clubs', e.target.value)}
-											rows={2}
-											className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-										/>
-									</div>
-									<div className="flex flex-col">
-										<label className="text-sm text-gray-700 mb-1">Relevant Coursework</label>
-										<textarea
-											value={educationFields.coursework}
-											onChange={(e) => handleEducationFieldChange('coursework', e.target.value)}
-											rows={2}
-											className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-										/>
-									</div>
-								</div>
-							</div>
-
-							{isHeaderOverflowing() && (
-								<div className="mb-4 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm">
-									Looks like the contact line may overflow. We recommend keeping it on one line; you can shorten fields or hide some items, or continue as-is.
-								</div>
-							)}
-
-							<div className="mb-6 flex justify-end">
-								<button
-									type="button"
-									onClick={handleSaveHeader}
-									disabled={isSavingHeader}
-									className="px-4 py-2 bg-brand-pink text-white rounded-lg text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									{isSavingHeader ? 'Saving...' : 'Save header'}
-								</button>
-							</div>
-						</>
+					{activeTab === 'education' && (
+						<EducationTab
+							educationFields={educationFields}
+							educationVisibility={educationVisibility}
+							onEducationFieldChange={handleEducationFieldChange}
+							onToggleEducationVisibility={toggleEducationVisibility}
+							onSaveEducation={handleSaveEducation}
+							isSavingEducation={isLoadingPreview}
+						/>
 					)}
 
 					{/* Quick Stats */}
@@ -675,8 +688,18 @@ const handleEducationFieldChange = (field, value) => {
 					)}
 				</div>
 
+				{/* Drag handle */}
+				<div
+					role="separator"
+					aria-orientation="vertical"
+					onMouseDown={handleResizeStart}
+					className="w-3 cursor-col-resize bg-gray-200 hover:bg-gray-300 transition-colors flex items-center justify-center"
+				>
+					<div className="w-1 h-10 bg-gray-500 rounded-full" />
+				</div>
+
 				{/* Right Side - Preview */}
-				<div className="flex-1 flex flex-col bg-gray-100">
+				<div className="flex-1 flex flex-col bg-gray-100 min-h-0">
 					{/* Preview Header */}
 					<div className="bg-white-bright border-b border-gray-200 p-4">
 						<div className="flex items-center justify-between gap-4">
@@ -688,30 +711,33 @@ const handleEducationFieldChange = (field, value) => {
 								<button
 									onClick={handleRefreshPDF}
 									disabled={isLoadingPreview}
-									className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg text-sm hover:opacity-90 transition disabled:opacity-50"
+									className="p-3 bg-gray-200 text-gray-800 rounded-lg text-sm hover:opacity-90 transition disabled:opacity-50"
+									title="Refresh PDF"
 								>
-									Refresh PDF
+									↻
 								</button>
 								<button
 									onClick={handleDownloadPDF}
 									disabled={isGenerating}
-									className="px-4 py-2 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+									className="p-3 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+									title="Download PDF"
 								>
-									{isGenerating ? 'Generating...' : 'Download PDF'}
+									⬇︎ PDF
 								</button>
 								<button
 									onClick={handleDownloadDOCX}
 									disabled={isGenerating}
-									className="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+									className="p-3 bg-gray-700 text-white font-semibold rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+									title="Download DOCX"
 								>
-									{isGenerating ? 'Generating...' : 'Download DOCX'}
+									⬇︎ DOCX
 								</button>
 							</div>
 						</div>
 					</div>
 
 					{/* Preview Content */}
-					<div className="flex-1 overflow-auto px-6 py-8 bg-gray-50 relative">
+					<div className="flex-1 overflow-auto bg-gray-50 relative min-h-0">
 						{isLoadingPreview ? (
 							<div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-90 z-10">
 								<div className="text-center">
@@ -731,16 +757,23 @@ const handleEducationFieldChange = (field, value) => {
 									</button>
 								</div>
 							</div>
-						) : previewPdfUrl ? (
-							// PDF Preview
-							<div className="max-w-4xl mx-auto bg-white shadow-lg" style={{ minHeight: '800px' }}>
-								<iframe
-									src={previewPdfUrl}
-									title="PDF Resume Preview"
-									className="w-full h-full border-0"
-									style={{ minHeight: '800px' }}
-									type="application/pdf"
-								/>
+						) : previewPdfBuffer ? (
+							<div className="w-full h-full flex flex-col items-center gap-3 py-4">
+								<div className="flex gap-2">
+									<button
+										onClick={() => handleZoom(-0.1)}
+										className="px-3 py-1 text-sm rounded border border-gray-300 hover:border-brand-pink"
+									>
+										-
+									</button>
+									<button
+										onClick={() => handleZoom(0.1)}
+										className="px-3 py-1 text-sm rounded border border-gray-300 hover:border-brand-pink"
+									>
+										+
+									</button>
+								</div>
+								<canvas ref={canvasRef} className="bg-white shadow-md" style={{ maxWidth: '100%', height: 'auto' }} />
 							</div>
 						) : null}
 					</div>
