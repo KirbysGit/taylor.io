@@ -12,11 +12,8 @@ import TopNav from '@/components/TopNav'
 function Home() {
 	const navigate = useNavigate()
 	const [user, setUser] = useState(null)
-	const [profile, setProfile] = useState(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [resumeFormat, setResumeFormat] = useState('pdf') // 'pdf' or 'docx'
-	const [docxTemplate, setDocxTemplate] = useState('main') // template for DOCX
-	const [availableTemplates, setAvailableTemplates] = useState(['main']) // available templates
 
 	// get user profile from backend on mount.
 	useEffect(() => {
@@ -34,16 +31,6 @@ function Home() {
 				// parse user data from localStorage.
 				const parsedUser = JSON.parse(userData)
 				setUser(parsedUser)
-
-				// fetch available templates.
-				const templatesResponse = await listTemplates()
-				if (templatesResponse?.data?.templates) {
-					setAvailableTemplates(templatesResponse.data.templates)
-					// if current template not in list, use first available
-					if (!templatesResponse.data.templates.includes('main')) {
-						setDocxTemplate(templatesResponse.data.templates[0] || 'main')
-					}
-				}
 			} catch (error) {
 				console.error('Error fetching profile:', error)
 				// if error, still show user from localStorage
@@ -63,7 +50,12 @@ function Home() {
 	// function to handle resume generation - navigate to preview page.
 	const handleGenerateResume = () => {
 		// navigate to preview page with format and template params.
-		navigate(`/resume/preview?format=${resumeFormat}&template=${docxTemplate}`)
+		// Use 'main' as default template for DOCX
+		const template = resumeFormat === 'docx' ? 'main' : undefined
+		const url = template 
+			? `/resume/preview?format=${resumeFormat}&template=${template}`
+			: `/resume/preview?format=${resumeFormat}`
+		navigate(url)
 	}
 
 	// function to handle logout.
@@ -127,23 +119,6 @@ function Home() {
 										</button>
 									</div>
 								</div>
-								{/* Template Selection (only for DOCX) */}
-								{resumeFormat === 'docx' && (
-									<div className="flex items-center gap-4">
-										<label className="text-sm font-medium text-gray-700">Template:</label>
-										<select
-											value={docxTemplate}
-											onChange={(e) => setDocxTemplate(e.target.value)}
-											className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-										>
-											{availableTemplates.map(template => (
-												<option key={template} value={template}>
-													{template.charAt(0).toUpperCase() + template.slice(1)}
-												</option>
-											))}
-										</select>
-									</div>
-								)}
 							</div>
 						</div>
 					</section>

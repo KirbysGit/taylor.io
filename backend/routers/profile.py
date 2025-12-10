@@ -26,7 +26,8 @@ from schemas import (
     EducationCreate, EducationResponse,
     UserProfileResponse, UserResponse,
     ParsedResumeResponse,
-    ContactCreate, ContactResponse
+    ContactCreate, ContactResponse,
+    SectionLabelsUpdate,
 )
 from resume_parser import parse_resume_file
 from .auth import get_current_user_from_token
@@ -50,12 +51,26 @@ async def get_my_profile(
     
     return {
         "user": UserResponse.model_validate(current_user),
+        "contact": contact_response,
+        "education": [EducationResponse.model_validate(edu) for edu in current_user.education],
         "experiences": [ExperienceResponse.model_validate(exp) for exp in current_user.experiences],
         "projects": [ProjectResponse.model_validate(proj) for proj in current_user.projects],
         "skills": [SkillResponse.model_validate(skill) for skill in current_user.skills],
-        "education": [EducationResponse.model_validate(edu) for edu in current_user.education],
-        "contact": contact_response,
     }
+
+
+# update section header labels.
+@router.post("/section-labels", response_model=UserResponse)
+async def update_section_labels(
+    payload: SectionLabelsUpdate,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    current_user.section_labels = payload.section_labels
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return UserResponse.model_validate(current_user)
 
 
 # create experience.
@@ -222,6 +237,8 @@ async def create_or_update_contact(
             existing_contact.linkedin = contact_data.linkedin
         if contact_data.portfolio is not None:
             existing_contact.portfolio = contact_data.portfolio
+        if getattr(contact_data, "location", None) is not None:
+            existing_contact.location = contact_data.location
         
         # add, commit, and refresh db.
         db.commit()
@@ -236,6 +253,7 @@ async def create_or_update_contact(
             github=contact_data.github,
             linkedin=contact_data.linkedin,
             portfolio=contact_data.portfolio,
+            location=getattr(contact_data, "location", None),
         )
 
         # add, commit, and refresh db.
@@ -266,6 +284,8 @@ async def create_education(
         clubs_extracurriculars=education_data.clubs_extracurriculars,
         location=education_data.location,
         relevant_coursework=education_data.relevant_coursework,
+        minor=education_data.minor,
+        label_overrides=education_data.label_overrides,
     )
     
     # add, commit, and refresh db.
@@ -283,6 +303,9 @@ async def create_education_bulk(
     current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db)
 ):
+    # delete all existing education entries for this user first (replace all pattern).
+    db.query(Education).filter(Education.user_id == current_user.id).delete()
+    
     # create multiple education entries for the current user.
     new_education_list = []
     for edu_data in education_data:
@@ -299,6 +322,8 @@ async def create_education_bulk(
             clubs_extracurriculars=edu_data.clubs_extracurriculars,
             location=edu_data.location,
             relevant_coursework=edu_data.relevant_coursework,
+            minor=edu_data.minor,
+            label_overrides=edu_data.label_overrides,
         )
         db.add(new_edu)
         new_education_list.append(new_edu)
@@ -396,10 +421,10 @@ async def parse_resume(
         contact_info = parsed_data.get("contact_info", {})
         if contact_info and any(contact_info.values()):
             existing_contact = db.query(Contact).filter(Contact.user_id == current_user.id).first()
-            
+
             if existing_contact:
                 # update existing contact (only update fields that are not None).
-                for field in ["email", "phone", "github", "linkedin", "portfolio"]:
+                for field in ["email", "phone", "github", "linkedin", "portfolio", "location"]:
                     if contact_info.get(field):
                         setattr(existing_contact, field, contact_info[field])
             else:
@@ -411,6 +436,7 @@ async def parse_resume(
                     github=contact_info.get("github"),
                     linkedin=contact_info.get("linkedin"),
                     portfolio=contact_info.get("portfolio"),
+                    location=contact_info.get("location"),
                 )
                 db.add(new_contact)
         

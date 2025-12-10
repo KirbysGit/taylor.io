@@ -84,3 +84,11 @@ export async function createEducationBulk(educationData) {
 	})
 }
 
+// update section labels (per-user section header overrides)
+export async function updateSectionLabels(sectionLabels) {
+	return apiRequest('/api/profile/section-labels', {
+		method: 'POST',
+		body: JSON.stringify({ section_labels: sectionLabels }),
+	})
+}
+

@@ -1,7 +1,7 @@
 # models / education.py
 
 # imports.
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, Boolean, JSON
 from sqlalchemy.orm import relationship
 from .base import Base
 
@@ -23,6 +23,9 @@ class Education(Base):
     clubs_extracurriculars = Column(Text, nullable=True)                        # clubs and extracurriculars.
     location = Column(String(100), nullable=True)                               # location.
     relevant_coursework = Column(Text, nullable=True)                           # relevant coursework.
+    minor = Column(String(200), nullable=True)                                  # minor field of study.
+    # optional per-entry label overrides (e.g., honors label, coursework label)
+    label_overrides = Column(JSON, nullable=True)                               # JSON mapping of key -> label.
 
     # relationship back to user.
     user = relationship("User", back_populates="education")

@@ -288,6 +288,7 @@ const isHeaderOverflowing = () => {
 			school: edu0.school || prev.school,
 			degree: edu0.degree || prev.degree,
 			field: edu0.field || prev.field,
+			minor: edu0.minor || prev.minor,
 			location: edu0.location || prev.location,
 			date: fmtDate(edu0.start_date, edu0.end_date, edu0.current),
 			gpa: edu0.gpa || prev.gpa,
@@ -660,31 +661,6 @@ const isHeaderOverflowing = () => {
 							onSaveEducation={handleSaveEducation}
 							isSavingEducation={isLoadingPreview}
 						/>
-					)}
-
-					{/* Quick Stats */}
-					{profile && (
-						<div className="mt-6 pt-6 border-t border-gray-200">
-							<h3 className="text-sm font-semibold text-gray-900 mb-3">Your Resume Stats</h3>
-							<div className="space-y-2 text-sm">
-								<div className="flex justify-between">
-									<span className="text-gray-600">Experiences:</span>
-									<span className="font-medium text-gray-900">{profile.experiences?.length || 0}</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-gray-600">Projects:</span>
-									<span className="font-medium text-gray-900">{profile.projects?.length || 0}</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-gray-600">Skills:</span>
-									<span className="font-medium text-gray-900">{profile.skills?.length || 0}</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-gray-600">Education:</span>
-									<span className="font-medium text-gray-900">{profile.education?.length || 0}</span>
-								</div>
-							</div>
-						</div>
 					)}
 				</div>
 

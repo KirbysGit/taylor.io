@@ -12,7 +12,7 @@ See `builder/docx_builder.py` for details on how placeholders are applied.
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from pydantic import BaseModel
 
@@ -24,12 +24,14 @@ class EducationEntryContext(BaseModel):
 
     name: str  # university / school
     degree: str  # full degree text
+    minor: Optional[str] = None
     loc: Optional[str] = None
     gpa: Optional[str] = None
     date: Optional[str] = None  # e.g. "Aug 2021 – May 2025"
     honors: Optional[str] = None
     clubs: Optional[str] = None
     coursework: Optional[str] = None
+    label_overrides: Optional[Dict[str, str]] = None
 
 
 class ExperienceEntryContext(BaseModel):
@@ -75,6 +77,8 @@ class ResumeRenderContext(BaseModel):
     education: List[EducationEntryContext] = []
     experiences: List[ExperienceEntryContext] = []
     projects: List[ProjectEntryContext] = []
+    # optional per-section header labels
+    section_labels: Optional[Dict[str, str]] = None
 
     # pre-rendered multiline skills block used by {skills}/{?skills}
     skills: Optional[str] = None
@@ -249,6 +253,7 @@ def build_resume_render_context(user) -> ResumeRenderContext:
             EducationEntryContext(
                 name=(getattr(edu, "school", "") or ""),
                 degree=degree_text or "",
+                minor=getattr(edu, "minor", None) or None,
                 loc=getattr(edu, "location", None) or None,
                 gpa=(str(getattr(edu, "gpa")) if getattr(edu, "gpa", None) else None),
                 date=_format_date_range(
@@ -259,6 +264,7 @@ def build_resume_render_context(user) -> ResumeRenderContext:
                 honors=getattr(edu, "honors_awards", None) or None,
                 clubs=getattr(edu, "clubs_extracurriculars", None) or None,
                 coursework=getattr(edu, "relevant_coursework", None) or None,
+                label_overrides=getattr(edu, "label_overrides", None) or None,
             )
         )
 
@@ -310,6 +316,7 @@ def build_resume_render_context(user) -> ResumeRenderContext:
         portfolio=portfolio,
         phone=phone,
         location=location,
+        section_labels=getattr(user, "section_labels", None) or None,
         education=edu_entries,
         experiences=exp_entries,
         projects=proj_entries,
@@ -317,7 +324,7 @@ def build_resume_render_context(user) -> ResumeRenderContext:
         # education shortcuts
         edu_name=(primary_edu.name if primary_edu else None),
         edu_degree=(primary_edu.degree if primary_edu else None),
-        edu_minor=None,  # current model has no minor; override-driven
+        edu_minor=(primary_edu.minor if primary_edu else None),
         edu_location=(primary_edu.loc if primary_edu else None),
         edu_gpa=(primary_edu.gpa if primary_edu else None),
         edu_date=(primary_edu.date if primary_edu else None),

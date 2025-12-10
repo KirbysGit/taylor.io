@@ -1,7 +1,7 @@
 # models / user.py
 
 # imports.
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, JSON
 from sqlalchemy.orm import relationship
 from .base import Base
 
@@ -26,4 +26,7 @@ class User(Base):
     education = relationship("Education", back_populates="user", cascade="all, delete-orphan")
     
     contact = relationship("Contact", back_populates="user", uselist=False, cascade="all, delete-orphan")
+
+    # optional per-user section header overrides, e.g., {"education": "Academics"}
+    section_labels = Column(JSON, nullable=True)
 

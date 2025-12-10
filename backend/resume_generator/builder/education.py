@@ -6,6 +6,14 @@ from docx import Document
 from docx.oxml.table import CT_Tc
 
 
+def italicize_runs(runs, text_to_match: str) -> None:
+    """Italicize any run containing the given text."""
+    if not text_to_match:
+        return
+    for r in runs:
+        if r.text and text_to_match in r.text:
+            r.font.italic = True
+
 def render_education(doc, ctx) -> None:
     """
     Render primary education placeholders for single-entry templates.
@@ -14,7 +22,6 @@ def render_education(doc, ctx) -> None:
         "edu_name": ctx.edu_name or "",
         "edu_degree": ctx.edu_degree or "",
         "edu_minor": ctx.edu_minor or "",
-        # wrap location in parentheses only when present
         "edu_location": f"( {ctx.edu_location} )" if ctx.edu_location else "",
         "edu_gpa": ctx.edu_gpa or "",
         "edu_date": ctx.edu_date or "",
@@ -42,13 +49,16 @@ def _process_inline(doc: Document, field: str, value: str) -> None:
     """
     Handle `{? field:INLINE}` markers across paragraphs and table paragraphs:
       - if value is truthy: remove the marker text, preserving run formatting
-      - if value is falsy: clear visible content (runs) but keep paragraph structure
+      - if value is falsy: remove only the marker and any immediately preceding separator (comma, dash, etc.)
     """
     if field not in INLINE_PATTERN_CACHE:
         INLINE_PATTERN_CACHE[field] = re.compile(
             r"\{\?\s*" + re.escape(field) + r"\s*:\s*INLINE\s*\}", re.IGNORECASE
         )
     pat = INLINE_PATTERN_CACHE[field]
+    
+    # Pattern to match separators before the marker (comma, dash, space combinations)
+    separator_pat = re.compile(r'[\s,–—\-]+\{\?\s*' + re.escape(field) + r'\s*:\s*INLINE\s*\}', re.IGNORECASE)
 
     def _process_para(para):
         combined = "".join(run.text for run in para.runs)
@@ -60,16 +70,28 @@ def _process_inline(doc: Document, field: str, value: str) -> None:
                 if run.text:
                     run.text = pat.sub("", run.text)
         else:
-            # hide line: strip marker and clear remaining content, keep structure
+            # Remove marker and any preceding separator IN-PLACE to preserve run styling
+            def clean_text(text: str) -> str:
+                t = separator_pat.sub("", text)
+                t = pat.sub("", t)
+                fl = field.lower()
+                if fl == "edu_gpa":
+                    t = re.sub(r"\bGPA\b[:\-\s]*", "", t, flags=re.IGNORECASE)
+                elif fl == "edu_minor":
+                    t = re.sub(r"\s*[–—-]\s*Minor\s+in\s*$", "", t, flags=re.IGNORECASE)
+                    t = re.sub(r"\s*[–—-]\s*Minor\s+in\s+", " ", t, flags=re.IGNORECASE)
+                elif fl == "edu_honors":
+                    t = re.sub(r"\bHonors\s*&\s*Awards:?\s*", "", t, flags=re.IGNORECASE)
+                elif fl == "edu_clubs":
+                    t = re.sub(r"\bClubs\s*&\s*Extracurriculars:?\s*", "", t, flags=re.IGNORECASE)
+                elif fl == "edu_coursework":
+                    t = re.sub(r"\bRelevant\s*Coursework:?\s*", "", t, flags=re.IGNORECASE)
+                t = re.sub(r"\s{2,}", " ", t).strip()
+                return t
+
             for run in para.runs:
-                if not run.text:
-                    continue
-                run.text = pat.sub("", run.text)
-                if run.text.strip():
-                    run.text = ""
-            # safe removal/compaction to avoid gaps or corruption
-            if not (para.text or "").strip():
-                _safe_remove_paragraph(para)
+                if run.text:
+                    run.text = clean_text(run.text)
 
     for para in doc.paragraphs:
         _process_para(para)

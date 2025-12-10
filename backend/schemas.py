@@ -5,7 +5,7 @@
 
 # imports.
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Dict
 from datetime import datetime
 
 
@@ -21,6 +21,7 @@ class UserResponse(BaseModel):
     id: int
     name: str
     email: str
+    section_labels: Optional[Dict[str, str]] = None
 
     model_config = {"from_attributes": True}
 
@@ -42,6 +43,7 @@ class EducationCreate(BaseModel):
     school: Optional[str] = None
     degree: Optional[str] = None
     field: Optional[str] = None
+    minor: Optional[str] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     current: bool = False
@@ -50,6 +52,7 @@ class EducationCreate(BaseModel):
     clubs_extracurriculars: Optional[str] = None
     location: Optional[str] = None
     relevant_coursework: Optional[str] = None
+    label_overrides: Optional[Dict[str, str]] = None
 
 
 class EducationResponse(BaseModel):
@@ -58,6 +61,7 @@ class EducationResponse(BaseModel):
     school: Optional[str] = None
     degree: Optional[str] = None
     field: Optional[str] = None
+    minor: Optional[str] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     current: bool = False
@@ -66,6 +70,7 @@ class EducationResponse(BaseModel):
     clubs_extracurriculars: Optional[str] = None
     location: Optional[str] = None
     relevant_coursework: Optional[str] = None
+    label_overrides: Optional[Dict[str, str]] = None
 
     model_config = {"from_attributes": True}
 
@@ -138,6 +143,7 @@ class ContactCreate(BaseModel):
     github: Optional[str] = None
     linkedin: Optional[str] = None
     portfolio: Optional[str] = None
+    location: Optional[str] = None
 
 
 class ContactResponse(BaseModel):
@@ -148,6 +154,7 @@ class ContactResponse(BaseModel):
     github: Optional[str] = None
     linkedin: Optional[str] = None
     portfolio: Optional[str] = None
+    location: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -163,6 +170,11 @@ class UserProfileResponse(BaseModel):
     contact: Optional[ContactResponse] = None
 
 
+# --------- section labels ---------
+class SectionLabelsUpdate(BaseModel):
+    section_labels: Dict[str, str]
+
+
 # --------- parsed resume schemas ---------
 
 class ParsedContactInfo(BaseModel):
@@ -171,6 +183,7 @@ class ParsedContactInfo(BaseModel):
     github: Optional[str] = None
     linkedin: Optional[str] = None
     portfolio: Optional[str] = None
+    location: Optional[str] = None
 
 
 class ParsedEducation(BaseModel):
