@@ -1,8 +1,10 @@
 import re
 from typing import Dict, List, Tuple, Optional
+from copy import deepcopy
 
 from docx import Document
 from docx.shared import Inches
+from docx.text.run import Run
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
@@ -100,40 +102,38 @@ def replace_placeholders_in_doc(doc: Document, field_values: Dict[str, str]) -> 
             return
         spans.sort(key=lambda x: x[0])
 
-        segments: List[Tuple[str, object]] = []
+        segments: List[Tuple[str, Run]] = []
         cursor = 0
         for start, end, replacement in spans:
             if cursor < start:
                 segment_text = full_text[cursor:start]
                 run_idx, _ = char_map[cursor]
-                segments.append((segment_text, runs[run_idx].font))
+                segments.append((segment_text, runs[run_idx]))
             run_idx, _ = char_map[start]
             # dynamic text should inherit formatting from the placeholder run itself
-            segments.append((replacement, runs[run_idx].font))
+            segments.append((replacement, runs[run_idx]))
             cursor = end
         if cursor < len(full_text):
             segment_text = full_text[cursor:]
             run_idx, _ = char_map[cursor]
-            segments.append((segment_text, runs[run_idx].font))
+            segments.append((segment_text, runs[run_idx]))
 
         paragraph.clear()
-        for text, font_obj in segments:
+        for text, src_run in segments:
             if not text:
                 continue
             new_run = paragraph.add_run(text)
-            try:
-                new_run.font.size = font_obj.size
-                new_run.font.bold = font_obj.bold
-                new_run.font.italic = font_obj.italic
-                if font_obj.color and font_obj.color.rgb:
-                    new_run.font.color.rgb = font_obj.color.rgb
-            except Exception:
-                pass
 
-        final_text = paragraph.text
-        collapsed = collapse_pipe_separators(final_text)
-        if collapsed != final_text:
-            paragraph.text = collapsed
+            # clone full styling from the source run
+            src_r = src_run._element
+            new_r = new_run._element
+
+            # remove any default rPr first
+            if new_r.rPr is not None:
+                new_r.remove(new_r.rPr)
+
+            if src_r.rPr is not None:
+                new_r.append(deepcopy(src_r.rPr))
 
     for para in doc.paragraphs:
         _replace_in_paragraph(para)

@@ -30,6 +30,7 @@ def render_education(doc, ctx) -> None:
         "edu_coursework": ctx.edu_coursework or "",
     }
 
+    # fill in placeholders in document.
     replace_placeholders_in_doc(doc, field_values)
 
     # handle inline conditionals `{? field:INLINE}` for education across all paragraphs (including tables)
@@ -60,38 +61,43 @@ def _process_inline(doc: Document, field: str, value: str) -> None:
     # Pattern to match separators before the marker (comma, dash, space combinations)
     separator_pat = re.compile(r'[\s,–—\-]+\{\?\s*' + re.escape(field) + r'\s*:\s*INLINE\s*\}', re.IGNORECASE)
 
+    def clean_text(text: str) -> str:
+        t = separator_pat.sub("", text)
+        t = pat.sub("", t)
+        fl = field.lower()
+        if fl == "edu_gpa":
+            t = re.sub(r"\bGPA\b[:\-\s]*", "", t, flags=re.IGNORECASE)
+        elif fl == "edu_minor":
+            t = re.sub(r"\s*[–—-]\s*Minor\s+in\s*$", "", t, flags=re.IGNORECASE)
+            t = re.sub(r"\s*[–—-]\s*Minor\s+in\s+", " ", t, flags=re.IGNORECASE)
+        elif fl == "edu_honors":
+            t = re.sub(r"\bHonors\s*&\s*Awards:?\s*", "", t, flags=re.IGNORECASE)
+        elif fl == "edu_clubs":
+            t = re.sub(r"\bClubs\s*&\s*Extracurriculars:?\s*", "", t, flags=re.IGNORECASE)
+        elif fl == "edu_coursework":
+            t = re.sub(r"\bRelevant\s*Coursework:?\s*", "", t, flags=re.IGNORECASE)
+        t = re.sub(r"\s{2,}", " ", t).strip()
+        return t
+
     def _process_para(para):
         combined = "".join(run.text for run in para.runs)
+
         if not pat.search(combined):
             return
+
         if value:
-            # remove marker only, leave styling on other text
             for run in para.runs:
                 if run.text:
                     run.text = pat.sub("", run.text)
         else:
-            # Remove marker and any preceding separator IN-PLACE to preserve run styling
-            def clean_text(text: str) -> str:
-                t = separator_pat.sub("", text)
-                t = pat.sub("", t)
-                fl = field.lower()
-                if fl == "edu_gpa":
-                    t = re.sub(r"\bGPA\b[:\-\s]*", "", t, flags=re.IGNORECASE)
-                elif fl == "edu_minor":
-                    t = re.sub(r"\s*[–—-]\s*Minor\s+in\s*$", "", t, flags=re.IGNORECASE)
-                    t = re.sub(r"\s*[–—-]\s*Minor\s+in\s+", " ", t, flags=re.IGNORECASE)
-                elif fl == "edu_honors":
-                    t = re.sub(r"\bHonors\s*&\s*Awards:?\s*", "", t, flags=re.IGNORECASE)
-                elif fl == "edu_clubs":
-                    t = re.sub(r"\bClubs\s*&\s*Extracurriculars:?\s*", "", t, flags=re.IGNORECASE)
-                elif fl == "edu_coursework":
-                    t = re.sub(r"\bRelevant\s*Coursework:?\s*", "", t, flags=re.IGNORECASE)
-                t = re.sub(r"\s{2,}", " ", t).strip()
-                return t
-
             for run in para.runs:
                 if run.text:
                     run.text = clean_text(run.text)
+
+        combined_after = "".join(run.text for run in para.runs).strip()
+
+        if combined_after == "":
+            _safe_remove_paragraph(para)
 
     for para in doc.paragraphs:
         _process_para(para)
@@ -103,24 +109,33 @@ def _process_inline(doc: Document, field: str, value: str) -> None:
                     _process_para(para)
 
 
+# this is how we safely remove a paragraph from a document if its empty after toggle.
 def _safe_remove_paragraph(para):
-    """
-    Safely hide an empty paragraph.
-
-    - If it's inside a table cell: collapse it (cannot remove).
-    - If it's a top-level paragraph: remove only if parent won't break.
-    """
     p = para._element
     parent = p.getparent()
 
-    # CASE 1: inside a table cell — do NOT remove, just collapse
+    if parent is None:
+        return
+
+    # CASE #1 : inside a table cell - do NOT remove, just collapse
     if isinstance(parent, CT_Tc):
-        try:
+        cell_paras = parent.findall(".//w:p", parent.nsmap)
+
+        if len(cell_paras) > 1:
+            try:
+                parent.remove(p)
+            except Exception:
+                para.text = ""
+        else:
+            # LAST paragraph -> collapse instead of removing
+            para.text = ""
+            
             for run in para.runs:
                 try:
-                    run._element.clear_content()  # type: ignore[attr-defined]
+                    run._element.clear_content()
                 except Exception:
                     run.text = ""
+            
             fmt = para.paragraph_format
             fmt.space_before = 0
             fmt.space_after = 0
@@ -128,16 +143,12 @@ def _safe_remove_paragraph(para):
             fmt.right_indent = 0
             fmt.first_line_indent = 0
             fmt.line_spacing = 1
-        except Exception:
-            para.text = ""
+        
         return
-
-    # CASE 2: top-level — remove only if parent won't be emptied
-    if parent is not None and len(parent.findall("./")) <= 1:
-        para.text = ""
-        return
-
-    # safe to remove
-    if parent is not None:
+    
+    # CASE #2: normal paragraph
+    try:
         parent.remove(p)
+    except:
+        para.text = ""
 
