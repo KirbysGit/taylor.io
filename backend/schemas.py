@@ -12,14 +12,16 @@ from datetime import datetime
 # --------- user schemas ---------
 
 class UserCreate(BaseModel):
-    name: str
+    first_name: str
+    last_name: str
     email: EmailStr
     password: str
 
 
 class UserResponse(BaseModel):
     id: int
-    name: str
+    first_name: str
+    last_name: str
     email: str
     section_labels: Optional[Dict[str, str]] = None
 

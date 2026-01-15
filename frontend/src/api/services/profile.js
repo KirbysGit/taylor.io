@@ -53,7 +53,7 @@ export async function createSkill(skillData) {
 }
 
 // bulk create experiences.
-export async function createExperiencesBulk(experiencesData) {
+export async function setupExperiences(experiencesData) {
 	return apiRequest('/api/profile/experiences/bulk', {
 		method: 'POST',
 		body: JSON.stringify(experiencesData),
@@ -61,7 +61,7 @@ export async function createExperiencesBulk(experiencesData) {
 }
 
 // bulk create projects.
-export async function createProjectsBulk(projectsData) {
+export async function setupProjects(projectsData) {
 	return apiRequest('/api/profile/projects/bulk', {
 		method: 'POST',
 		body: JSON.stringify(projectsData),
@@ -69,7 +69,7 @@ export async function createProjectsBulk(projectsData) {
 }
 
 // bulk create skills.
-export async function createSkillsBulk(skillsData) {
+export async function setupSkills(skillsData) {
 	return apiRequest('/api/profile/skills/bulk', {
 		method: 'POST',
 		body: JSON.stringify(skillsData),
@@ -77,7 +77,7 @@ export async function createSkillsBulk(skillsData) {
 }
 
 // bulk create education.
-export async function createEducationBulk(educationData) {
+export async function setupEducation(educationData) {
 	return apiRequest('/api/profile/education/bulk', {
 		method: 'POST',
 		body: JSON.stringify(educationData),

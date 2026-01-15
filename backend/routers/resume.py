@@ -10,10 +10,11 @@
 # imports.
 from io import BytesIO
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any, Dict
 from sqlalchemy.orm import Session, joinedload
 from fastapi.responses import Response
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 
 # local imports.
 from models import User
@@ -29,6 +30,83 @@ from resume_generator import (
 router = APIRouter(prefix="/api/resume", tags=["resume"])
 
 # ------------------- routes -------------------
+
+class ResumeGenerateRequest(BaseModel):
+    template: str = "main"
+    preview: bool = False
+    overrides: Optional[Dict[str, Any]] = None
+
+
+def _load_user_with_resume_relationships(db: Session, user_id: int) -> Optional[User]:
+    return (
+        db.query(User)
+        .options(
+            joinedload(User.experiences),
+            joinedload(User.projects),
+            joinedload(User.skills),
+            joinedload(User.education),
+            joinedload(User.contact),
+        )
+        .filter(User.id == user_id)
+        .first()
+    )
+
+
+def _build_header_line(user: User, overrides: Optional[Dict[str, Any]], header_order: Optional[str]) -> Optional[str]:
+    if not header_order:
+        return None
+
+    order_list = [item.strip() for item in header_order.split(",") if item.strip()]
+
+    def _get_val(key: str):
+        k = key.lower()
+        if k == "name":
+            return (overrides or {}).get("name", getattr(user, "name", ""))
+        if k == "email":
+            val = (overrides or {}).get("email", None)
+            if val is None:
+                contact = getattr(user, "contact", None)
+                val = getattr(contact, "email", None) or getattr(user, "email", "")
+            return val
+        if k == "github":
+            val = (overrides or {}).get("github", None)
+            if val is None:
+                contact = getattr(user, "contact", None)
+                val = getattr(contact, "github", None)
+            return val
+        if k == "linkedin":
+            val = (overrides or {}).get("linkedin", None)
+            if val is None:
+                contact = getattr(user, "contact", None)
+                val = getattr(contact, "linkedin", None)
+            return val
+        if k == "portfolio":
+            val = (overrides or {}).get("portfolio", None)
+            if val is None:
+                contact = getattr(user, "contact", None)
+                val = getattr(contact, "portfolio", None)
+            return val
+        if k in {"phone", "phone_number"}:
+            val = (overrides or {}).get("phone", None)
+            if val is None:
+                contact = getattr(user, "contact", None)
+                val = getattr(contact, "phone", None)
+            return val
+        if k == "location":
+            val = (overrides or {}).get("location", None)
+            if val is None:
+                contact = getattr(user, "contact", None)
+                val = getattr(contact, "location", None) or getattr(user, "location", None)
+            return val
+        return None
+
+    values = []
+    for key in order_list:
+        val = _get_val(key)
+        if val:
+            values.append(val)
+    return " | ".join(values)
+
 
 # list available templates.
 @router.get("/templates")
@@ -78,13 +156,7 @@ async def generate_resume_docx_endpoint(
     # generate a DOCX resume for the current user.
     try:
         # load user with all relationships.
-        user = db.query(User).options(
-            joinedload(User.experiences),
-            joinedload(User.projects),
-            joinedload(User.skills),
-            joinedload(User.education),
-            joinedload(User.contact)
-        ).filter(User.id == current_user.id).first()
+        user = _load_user_with_resume_relationships(db, current_user.id)
         
         overrides = {
             k: v
@@ -123,58 +195,7 @@ async def generate_resume_docx_endpoint(
         }
 
         # build header_line if header_order provided
-        header_line = None
-        if header_order:
-            order_list = [item.strip() for item in header_order.split(",") if item.strip()]
-
-            def _get_val(key: str):
-                k = key.lower()
-                if k == "name":
-                    return overrides.get("name", getattr(user, "name", "")) if overrides else getattr(user, "name", "")
-                if k == "email":
-                    val = overrides.get("email", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "email", None) or getattr(user, "email", "")
-                    return val
-                if k == "github":
-                    val = overrides.get("github", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "github", None)
-                    return val
-                if k == "linkedin":
-                    val = overrides.get("linkedin", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "linkedin", None)
-                    return val
-                if k == "portfolio":
-                    val = overrides.get("portfolio", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "portfolio", None)
-                    return val
-                if k in {"phone", "phone_number"}:
-                    val = overrides.get("phone", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "phone", None)
-                    return val
-                if k == "location":
-                    val = overrides.get("location", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "location", None) or getattr(user, "location", None)
-                    return val
-                return None
-
-            values = []
-            for key in order_list:
-                val = _get_val(key)
-                if val:
-                    values.append(val)
-            header_line = " | ".join(values)
+        header_line = _build_header_line(user, overrides or None, header_order)
 
         # generate DOCX resume.
         docx_bytes = generate_resume_docx(
@@ -205,6 +226,60 @@ async def generate_resume_docx_endpoint(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error generating resume: {str(e)}"
+        )
+
+
+# generate resume as DOCX (POST body, avoids huge query strings).
+@router.post("/docx")
+async def generate_resume_docx_post(
+    payload: ResumeGenerateRequest,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    try:
+        user = _load_user_with_resume_relationships(db, current_user.id)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+        overrides_in = payload.overrides or {}
+        # allow either header_alignment or header_align for frontend convenience
+        header_order = overrides_in.get("header_order")
+        header_align = overrides_in.get("header_align", overrides_in.get("header_alignment"))
+        font_family = overrides_in.get("font_family")
+
+        # extract margins into margin_overrides if present
+        margin_overrides = {}
+        for k in ["margin_top", "margin_bottom", "margin_left", "margin_right"]:
+            if k in overrides_in and overrides_in[k] is not None:
+                margin_overrides[k] = overrides_in[k]
+
+        header_line = _build_header_line(user, overrides_in, header_order)
+
+        docx_bytes = generate_resume_docx(
+            user,
+            template=payload.template,
+            overrides=overrides_in or None,
+            margin_overrides=margin_overrides or None,
+            header_line=header_line,
+            header_alignment=header_align,
+            font_family=font_family,
+        )
+
+        safe_name = "".join(c for c in current_user.name if c.isalnum() or c in (" ", "-", "_")).strip()
+        safe_name = safe_name.replace(" ", "_")
+        filename = f"{safe_name}_Resume.docx"
+
+        return Response(
+            content=docx_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"; filename*=UTF-8\'\'{filename}'},
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error generating resume: {str(e)}",
         )
 
 
@@ -243,13 +318,7 @@ async def generate_resume_pdf(
     """Generate PDF from DOCX template (same styling as Word doc)."""
     try:
         # load user with all relationships.
-        user = db.query(User).options(
-            joinedload(User.experiences),
-            joinedload(User.projects),
-            joinedload(User.skills),
-            joinedload(User.education),
-            joinedload(User.contact)
-        ).filter(User.id == current_user.id).first()
+        user = _load_user_with_resume_relationships(db, current_user.id)
         
         overrides = {
             k: v
@@ -288,58 +357,7 @@ async def generate_resume_pdf(
         }
 
         # build header_line if header_order provided
-        header_line = None
-        if header_order:
-            order_list = [item.strip() for item in header_order.split(",") if item.strip()]
-
-            def _get_val(key: str):
-                k = key.lower()
-                if k == "name":
-                    return overrides.get("name", getattr(user, "name", "")) if overrides else getattr(user, "name", "")
-                if k == "email":
-                    val = overrides.get("email", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "email", None) or getattr(user, "email", "")
-                    return val
-                if k == "github":
-                    val = overrides.get("github", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "github", None)
-                    return val
-                if k == "linkedin":
-                    val = overrides.get("linkedin", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "linkedin", None)
-                    return val
-                if k == "portfolio":
-                    val = overrides.get("portfolio", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "portfolio", None)
-                    return val
-                if k in {"phone", "phone_number"}:
-                    val = overrides.get("phone", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "phone", None)
-                    return val
-                if k == "location":
-                    val = overrides.get("location", None) if overrides else None
-                    if val is None:
-                        contact = getattr(user, "contact", None)
-                        val = getattr(contact, "location", None) or getattr(user, "location", None)
-                    return val
-                return None
-
-            values = []
-            for key in order_list:
-                val = _get_val(key)
-                if val:
-                    values.append(val)
-            header_line = " | ".join(values)
+        header_line = _build_header_line(user, overrides or None, header_order)
         
         # generate PDF from DOCX template.
         pdf_bytes = generate_resume_pdf_from_docx(
@@ -371,5 +389,60 @@ async def generate_resume_pdf(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error generating PDF: {str(e)}"
+        )
+
+
+# generate PDF from DOCX template (POST body, avoids huge query strings).
+@router.post("/pdf")
+async def generate_resume_pdf_post(
+    payload: ResumeGenerateRequest,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    """Generate PDF from DOCX template using JSON body instead of query params."""
+    try:
+        user = _load_user_with_resume_relationships(db, current_user.id)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+        overrides_in = payload.overrides or {}
+        header_order = overrides_in.get("header_order")
+        header_align = overrides_in.get("header_align", overrides_in.get("header_alignment"))
+        font_family = overrides_in.get("font_family")
+
+        margin_overrides = {}
+        for k in ["margin_top", "margin_bottom", "margin_left", "margin_right"]:
+            if k in overrides_in and overrides_in[k] is not None:
+                margin_overrides[k] = overrides_in[k]
+
+        header_line = _build_header_line(user, overrides_in, header_order)
+
+        pdf_bytes = generate_resume_pdf_from_docx(
+            user,
+            template=payload.template,
+            overrides=overrides_in or None,
+            margin_overrides=margin_overrides or None,
+            header_line=header_line,
+            header_alignment=header_align,
+            font_family=font_family,
+        )
+
+        safe_name = "".join(c for c in current_user.name if c.isalnum() or c in (" ", "-", "_")).strip()
+        safe_name = safe_name.replace(" ", "_")
+        filename = f"{safe_name}_Resume.pdf"
+
+        disposition = "inline" if payload.preview else "attachment"
+
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'{disposition}; filename="{filename}"; filename*=UTF-8\'\'{filename}'},
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error generating PDF: {str(e)}",
         )
 

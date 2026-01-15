@@ -13,31 +13,25 @@ import { apiRequest, API_BASE_URL } from '../api'
 export async function generateResumePDF(template = 'main', overrides = {}) {
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
-	
-	// construct url for request with template parameter.
-	const params = new URLSearchParams({ template })
-	if (overrides.header_order && Array.isArray(overrides.header_order)) {
-		params.append('header_order', overrides.header_order.join(','))
-		delete overrides.header_order
+
+	// POST body avoids huge query strings; backend still supports overrides when needed.
+	const url = `${API_BASE_URL}/api/resume/pdf`
+	const payload = {
+		template,
+		preview: false,
+		overrides: { ...(overrides || {}) },
 	}
-	if (overrides.header_alignment) {
-		params.append('header_align', overrides.header_alignment)
-		delete overrides.header_alignment
-	}
-	if (overrides.font_family) {
-		params.append('font_family', overrides.font_family)
-		delete overrides.font_family
-	}
-	Object.entries(overrides || {}).forEach(([key, value]) => {
-		if (value !== undefined && value !== null) {
-			params.append(key, value)
-		}
-	})
-	const url = `${API_BASE_URL}/api/resume/pdf?${params.toString()}`
 	
 	// try to generate resume.
 	try {
-		const response = await fetch(url, { method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(payload),
+		})
 
 		if (!response.ok) {
 			throw new Error('Failed to generate resume')
@@ -88,31 +82,25 @@ export async function generateResumePDF(template = 'main', overrides = {}) {
 export async function generateResumeDOCX(template = 'modern', overrides = {}) {
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
-	
-	// construct url for request with template parameter.
-	const params = new URLSearchParams({ template })
-	if (overrides.header_order && Array.isArray(overrides.header_order)) {
-		params.append('header_order', overrides.header_order.join(','))
-		delete overrides.header_order
+
+	// POST body avoids huge query strings; backend still supports overrides when needed.
+	const url = `${API_BASE_URL}/api/resume/docx`
+	const payload = {
+		template,
+		preview: false,
+		overrides: { ...(overrides || {}) },
 	}
-	if (overrides.header_alignment) {
-		params.append('header_align', overrides.header_alignment)
-		delete overrides.header_alignment
-	}
-	if (overrides.font_family) {
-		params.append('font_family', overrides.font_family)
-		delete overrides.font_family
-	}
-	Object.entries(overrides || {}).forEach(([key, value]) => {
-		if (value !== undefined && value !== null) {
-			params.append(key, value)
-		}
-	})
-	const url = `${API_BASE_URL}/api/resume/docx?${params.toString()}`
 	
 	// try to generate resume.
 	try {
-		const response = await fetch(url, { method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(payload),
+		})
 
 		if (!response.ok) {
 			throw new Error('Failed to generate resume')

@@ -10,9 +10,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        'brand-pink': '#CF4747',
-        'cream': '#FCFAF0',
-        'white-bright': '#FFFFFF',
+        'brand-pink': 'rgb(214, 86, 86)',
+        'cream': 'rgb(252, 250, 240)',
+        'white-bright': 'rgb(255, 255, 255)',
       },
     },
   },

@@ -1,19 +1,24 @@
-// pages/2.5setup/AccountSetup.jsx
+// pages / 3setup/AccountSetup.jsx
 
 // account setup page - multi-step onboarding form.
 
 // imports.
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createExperiencesBulk, createProjectsBulk, createSkillsBulk } from '@/api/services/profile'
+
+// services imports.
 import { parseResume } from '@/api/services/resume'
+import { setupEducation, setupExperiences, setupProjects, setupSkills } from '@/api/services/profile'
 
 // ----------- main component -----------
 
 function AccountSetup() {
+
 	const navigate = useNavigate()
-	const [currentStep, setCurrentStep] = useState(0)
-	const [user, setUser] = useState(null)
+
+	// ---- states ----
+	const [currentStep, setCurrentStep] = useState(0) 	// current step of onboarding process.
+	const [user, setUser] = useState(null)				// current user data.
 
 	// form data state.
 	const [formData, setFormData] = useState({
@@ -38,24 +43,8 @@ function AccountSetup() {
 	const [parseError, setParseError] = useState('')
 	const [uploadedFile, setUploadedFile] = useState(null)
 
-	// check authentication on mount.
-	useEffect(() => {
-		const token = localStorage.getItem('token')
-		const userData = localStorage.getItem('user')
-		
-		if (!token || !userData) {
-			navigate('/auth')
-			return
-		}
-
-		try {
-			setUser(JSON.parse(userData))
-		} catch (error) {
-			console.error('Error parsing user data:', error)
-			navigate('/auth')
-		}
-	}, [navigate])
-
+	// ---- variables ----
+	
 	// step titles.
 	const steps = [
 		{ title: 'Welcome', icon: '👋' },
@@ -70,150 +59,170 @@ function AccountSetup() {
 	// calculate progress percentage.
 	const progress = ((currentStep + 1) / steps.length) * 100
 
-	// function to handle next step.
+	// ---- helpers ----
+
+	// normalizes parsed item with defaults and metadata.
+	const normalizeParsedItem = (item, defaults = {}) => ({
+		...defaults,
+		...item,
+		id: Date.now() + Math.random(),
+		fromParsed: true
+	})
+
+	// merges contact info.
+	const mergeContact = (parsed, existing) => ({
+		email: parsed?.email || existing.email,
+		phone: parsed?.phone || existing.phone,
+		github: parsed?.github || existing.github,
+		linkedin: parsed?.linkedin || existing.linkedin,
+		portfolio: parsed?.portfolio || existing.portfolio,
+	})
+
+	// ---- functions ----
+
+	// check authentication on mount.
+	useEffect(() => {
+		// grab token and user data from localStorage.
+		const token = localStorage.getItem('token')
+		const userData = localStorage.getItem('user')
+		
+		// if no token or user data, redirect to auth page.
+		if (!token || !userData) {
+			navigate('/auth')
+			return
+		}
+
+		// try to parse user data from localStorage.
+		try {
+			setUser(JSON.parse(userData))
+		} catch (error) {
+			// if error, redirect to auth page.
+			console.error('Error parsing user data:', error)
+			navigate('/auth')
+		}
+	}, [navigate])
+
+	// handles incrementing to the next step.
 	const handleNext = () => {
 		if (currentStep < steps.length - 1) {
 			setCurrentStep(currentStep + 1)
 		}
 	}
 
-	// function to handle previous step.
+	// handles decrementing to the previous step.
 	const handlePrevious = () => {
 		if (currentStep > 0) {
 			setCurrentStep(currentStep - 1)
 		}
 	}
 
-	// function to handle file upload.
+	// handles file upload.
 	const handleFileUpload = (e) => {
+		
+		// grab file from event target.
 		const file = e.target.files?.[0]
+
 		if (file) {
-			// validate file type
+			// validate file type (only PDF and DOCX are supported).
 			const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword']
 			const validExtensions = ['.pdf', '.docx', '.doc']
 			const fileExtension = '.' + file.name.split('.').pop().toLowerCase()
 			
+			// if file type is not valid, set error and return.
 			if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
 				setParseError('Invalid file type. Please upload a PDF or DOCX file.')
 				return
 			}
 			
-			// validate file size (max 10MB)
+			// validate file size (max 10MB).
 			if (file.size > 10 * 1024 * 1024) {
 				setParseError('File size too large. Please upload a file smaller than 10MB.')
 				return
 			}
 			
+			// set uploaded file state.
 			setUploadedFile(file)
 			setParseError('')
 		}
 	}
 
-	// function to handle resume parsing.
+	// handles resume parsing.
 	const handleParseResume = async () => {
+		// if no file uploaded, return.
 		if (!uploadedFile) return
 
+		// set parsing state to true.
 		setIsParsing(true)
 		setParseError('')
 
 		try {
 			const response = await parseResume(uploadedFile)
 			const data = response.data
-			
+
+			// set parsed data state.
 			setParsedData(data)
 
-			// merge parsed data into form data
+			// merge parsed data into form data.
 			setFormData(prev => ({
 				...prev,
-				// merge contact info
-				contact: {
-					email: data.contact_info?.email || prev.contact.email,
-					phone: data.contact_info?.phone || prev.contact.phone,
-					github: data.contact_info?.github || prev.contact.github,
-					linkedin: data.contact_info?.linkedin || prev.contact.linkedin,
-					portfolio: data.contact_info?.portfolio || prev.contact.portfolio,
-				},
-				// merge education (backend returns list of education objects)
+				contact: mergeContact(data.contact_info, prev.contact),
 				education: [
 					...prev.education,
-					...(data.education || []).map(edu => ({
-						school: edu.school || '',
-						degree: edu.degree || '',
-						field: edu.field || '',
-						startDate: edu.startDate || '',
-						endDate: edu.endDate || '',
-						current: edu.current || false,
-						id: Date.now() + Math.random(),
-						fromParsed: true
+					...(data.education || []).map(edu => normalizeParsedItem(edu, {
+						school: '', degree: '', field: '', startDate: '', endDate: '', current: false
 					}))
 				],
-				// merge skills (backend returns list of {name: string, category?: string} objects)
 				skills: [
 					...prev.skills,
-					...(data.skills || []).map(skill => ({
-						name: skill.name || skill,
-						category: skill.category || null,
-						id: Date.now() + Math.random(),
-						fromParsed: true
-					}))
+					...(data.skills || []).map(skill => normalizeParsedItem(
+						typeof skill === 'string' ? { name: skill } : skill,
+						{ name: '', category: null }
+					))
 				],
-				// merge experiences (backend returns list of experience objects)
 				experiences: [
 					...prev.experiences,
-					...(data.experiences || []).map(exp => ({
-						title: exp.title || '',
-						company: exp.company || '',
-						description: exp.description || (Array.isArray(exp.description) ? [] : ''),
-						startDate: exp.startDate || '',
-						endDate: exp.endDate || '',
-						current: exp.current || false,
-						id: Date.now() + Math.random(),
-						fromParsed: true
+					...(data.experiences || []).map(exp => normalizeParsedItem(exp, {
+						title: '', company: '', description: Array.isArray(exp?.description) ? [] : '',
+						startDate: '', endDate: '', current: false
 					}))
 				],
-				// merge projects (backend returns list of project objects)
 				projects: [
 					...prev.projects,
-					...(data.projects || []).map(proj => ({
-						title: proj.title || '',
-						description: proj.description || (Array.isArray(proj.description) ? [] : ''),
-						techStack: proj.techStack || [],
-						id: Date.now() + Math.random(),
-						fromParsed: true
+					...(data.projects || []).map(proj => normalizeParsedItem(proj, {
+						title: '', description: Array.isArray(proj?.description) ? [] : '', techStack: []
 					}))
 				],
-				// extracurriculars and coursework are not parsed from resume, so keep existing
 			}))
 		} catch (error) {
+			// if error, set error state and return.
 			console.error('Resume parsing failed:', error)
-			setParseError(error.response?.data?.detail || 'Failed to parse resume. Please try again or enter manually.')
+			setParseError(error.response?.data?.detail || 'Failed to parse resume. Please try again or enter information manually.')
 		} finally {
 			setIsParsing(false)
 		}
 	}
 
-	// function to handle form completion.
+	// handles form completion.
 	const handleComplete = async () => {
 		try {
-			// Save experiences, projects, and skills to backend
+			// save experiences, projects, and skills to backend.
 			const promises = []
 			
-			// Helper function to convert month string to ISO date string
+			// helper function to convert month string to ISO date. (YYYY-MM -> YYYY-MM-DDT00:00:00).
 			const monthToDate = (monthStr) => {
 				if (!monthStr) return null
-				// monthStr is like "2024-01", convert to "2024-01-01T00:00:00"
 				return `${monthStr}-01T00:00:00`
 			}
 			
-			// Convert experiences (handle date strings)
+			// set up experiences data.
 			if (formData.experiences.length > 0) {
 				const experiencesData = formData.experiences.map(exp => {
 					// handle dates - could be in "YYYY-MM" format from parsing or "YYYY-MM-DD" format
 					let start_date = null
 					let end_date = null
 					
+					// if there's a start date, convert it to ISO format.
 					if (exp.startDate) {
-						// if already in ISO format, use it; otherwise convert
 						if (exp.startDate.includes('T')) {
 							start_date = exp.startDate
 						} else {
@@ -221,6 +230,7 @@ function AccountSetup() {
 						}
 					}
 					
+					// if the experience is current, set end date to null, else if there's an end date, convert it to ISO format.
 					if (exp.current) {
 						end_date = null
 					} else if (exp.endDate) {
@@ -231,6 +241,7 @@ function AccountSetup() {
 						}
 					}
 					
+					// return the experience data.
 					return {
 						title: exp.title,
 						company: exp.company || null,
@@ -241,10 +252,11 @@ function AccountSetup() {
 						end_date: end_date,
 					}
 				})
-				promises.push(createExperiencesBulk(experiencesData))
+				// push the experiences data to the promises array.
+				promises.push(setupExperiences(experiencesData))
 			}
 			
-			// Convert projects
+			// set up projects data.
 			if (formData.projects.length > 0) {
 				const projectsData = formData.projects.map(proj => ({
 					title: proj.title,
@@ -253,25 +265,25 @@ function AccountSetup() {
 						: proj.description || null,
 					tech_stack: proj.techStack || null,
 				}))
-				promises.push(createProjectsBulk(projectsData))
+				promises.push(setupProjects(projectsData))
 			}
 			
-			// Convert skills
+			// set up skills data.
 			if (formData.skills.length > 0) {
 				const skillsData = formData.skills.map(skill => ({
 					name: skill.name,
 				}))
-				promises.push(createSkillsBulk(skillsData))
+				promises.push(setupSkills(skillsData))
 			}
 			
-			// Wait for all saves to complete
+			// wait for all promises to complete.
 			await Promise.all(promises)
 			
-			// Redirect to home
+			// redirect to home.
 			navigate('/home')
 		} catch (error) {
 			console.error('Error saving profile data:', error)
-			// Still redirect even if there's an error
+			// still redirect even if there's an error.
 			navigate('/home')
 		}
 	}

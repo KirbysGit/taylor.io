@@ -8,9 +8,10 @@
 // delete user.
 
 // services.
-import { apiRequest } from './api'
+import { apiRequest } from '../api'
 
 // get user by id.
+//
 export async function getUser(userId) {
   return apiRequest(`/users/${userId}`, {
     method: 'GET',

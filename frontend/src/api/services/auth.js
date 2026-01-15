@@ -2,15 +2,17 @@
 
 // authentication api calls.
 
-// register.
-// login.
-// get current user.
-// logout.
+// services in order :
+// - register user.
+// - login user.
+// - get current user.
+// - logout user.
 
-// services.
+// services imports.
 import { apiRequest } from '../api'
 
-// register a new user.
+// ---- register user ----
+
 export async function registerUser(userData) {
 	// api call to register user.
 	const response = await apiRequest('/api/auth/register', {
@@ -26,7 +28,8 @@ export async function registerUser(userData) {
 	return response
 }
 
-// login a user.
+// ---- login user ----
+
 export async function loginUser(credentials) {
 	// api call to login user.
 	const response = await apiRequest('/api/auth/login', {
@@ -42,7 +45,8 @@ export async function loginUser(credentials) {
 	return response
 }
 
-// get current user (if authenticated).
+// ---- get current user ----
+
 export async function getCurrentUser() {
 	// api call to get current user.
 	return apiRequest('/api/auth/me', {
@@ -50,7 +54,8 @@ export async function getCurrentUser() {
 	})
 }
 
-// logout user (clear token).
+// ---- logout user ----
+
 export function logoutUser() {
 	// remove token and user from localStorage.
 	localStorage.removeItem('token')

@@ -2,6 +2,9 @@
 
 // authentication page containing login and signup modals.
 
+// add background features that show on the side.
+// still need to brainstorm, maybe like user reviews, demo videos, etc.
+
 // imports.
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -9,7 +12,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 // components.
 import LoginModal from './components/LoginModal'
 import SignUpModal from './components/SignUpModal'
-
 
 // ----------- main component -----------
 function Auth() {
@@ -26,51 +28,47 @@ function Auth() {
 	// effect to change modal based on set mode.
     useEffect(() => {
 		if (mode === 'signup') {
-				setShowLogin(false)
-				setShowSignUp(true)
+			setShowLogin(false)
+			setShowSignUp(true)
 		} else {
-				setShowLogin(true)
-				setShowSignUp(false)
+			setShowLogin(true)
+			setShowSignUp(false)
 		}
     }, [mode])
 
 	// ------------------ functions ------------------
 
-	// function to close modal and navigate to home.
+	// close modal and navigate to home.
     const handleClose = () => {
-      navigate('/')
+      	navigate('/')
     }
 
-	// function to switch to sign up modal.
+	// switches to sign up modal.
     const switchToSignUp = () => {
-      setShowLogin(false)
-      setShowSignUp(true)
+		setShowLogin(false)
+		setShowSignUp(true)
     }
 
-	// function to switch to login modal.
+	// switches to login modal.
     const switchToLogin = () => {
-      setShowSignUp(false)
-      setShowLogin(true)
+		setShowSignUp(false)
+		setShowLogin(true)
     }
 
+	// handles if sign up is successful.
     const handleSignUpSuccess = (user) => {
-		console.log('Sign up successful:', user)
-		// redirect to account setup page after successful signup.
+		console.log(user)
 		navigate('/setup')
     }
 
+	// handles if login is successful.
     const handleLoginSuccess = (user) => {
-		console.log('Login successful:', user)
-		// redirect to homepage after successful login.
+		console.log(user)
 		navigate('/home')
     }
 
     return (
 		<div className="min-h-screen flex items-center justify-center bg-cream">
-			<div className="text-center">
-				<h1 className="text-4xl font-bold text-brand-pink mb-4">taylor.io</h1>
-				<p className="text-gray-600 mb-8">Welcome to your portfolio</p>
-			</div>
 
 			<LoginModal
 				isOpen={showLogin}

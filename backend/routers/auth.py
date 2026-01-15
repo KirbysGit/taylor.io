@@ -35,10 +35,13 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # create new user and hash password.
+    # hash the user's password.
     hashed_password = get_password_hash(user_data.password)
+
+    # create a new user object.
     new_user = User(
-        name=user_data.name,
+        first_name=user_data.first_name,
+        last_name=user_data.last_name,
         email=user_data.email,
         password_hash=hashed_password
     )
@@ -57,7 +60,6 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user": UserResponse.model_validate(new_user)
     }
-
 
 # login a user.
 @router.post("/login", response_model=TokenResponse)

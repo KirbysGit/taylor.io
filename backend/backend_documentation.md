@@ -1,6 +1,6 @@
-# Backend Documentation
+# my backend documentation
 
-My directory :
+current directory set up :
 
 ```
 /backend
@@ -72,13 +72,13 @@ My directory :
 		security.py		-	handles security (passwords, tokens)
 		users.py		-	handles user-related routes?
 
-database.py		-	general database set up.
-main.py			-	sets up routers.
-schemas.py		-	general schema for endpoint data transfer.
-tailor.db 		-	holds sqlite db.
-.env			-	holds .env info.
-requirements.txt	-	dependency array.
-documentation.md <- you are here!
+database.py			-	general database set up.
+main.py				-	sets up routers.
+schemas.py			-	general schema for endpoint data transfer.
+tailor.db 			-	holds sqlite db.
+.env				-	holds .env info.
+requirements.txt		-	dependency array.
+backend_documentation.md 	<- 	you are here!
 ```
 
 above is how i've organized the directory thus far. really just want to take a look at it coming back, it still feels like too much, i want to clean it up a bit but im going to work through the frontend too and decide on how to proceed.
