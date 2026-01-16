@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom'
 // api imports.
 import { listTemplates } from '@/api/services/resume'
 
+// icons imports.
+import { XIcon, RequiredAsterisk, ChevronDown, ChevronUp } from '@/components/icons'
 
 // ----------- main component -----------
 function ResumePreview() {
@@ -17,20 +19,42 @@ function ResumePreview() {
 	const navigate = useNavigate()
 
     // ----- page states -----
-	const [user, setUser] = useState(() => {
-		// optional: hydrate from cached auth payload first.
-		try {
-			const raw = localStorage.getItem('user')
-			return raw ? JSON.parse(raw) : null
-		} catch {
-			return null
-		}
-	})
+	const [user, setUser] = useState(null)										// user's data.
+
+	// welcome message states.
+	const [welcomeMessage, setWelcomeMessage] = useState(true);					// if welcome message should be shown.
+
+	// template states.
 	const [template, setTemplate] = useState('main')                            // template being used for resume.
 	const [availableTemplates, setAvailableTemplates] = useState(['main'])      // available templates to choose from.
 	const [isLoadingTemplates, setIsLoadingTemplates] = useState(true)          // loading state for templates.
+	
+	// panel states.
+	const [leftPanelWidth, setLeftPanelWidth] = useState(560);                  // width of left panel.
+	const [isResizing, setIsResizing] = useState(false);						// if user is currently resizing panel.
+	
+	// collapsible section states.
+	const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);			// if resume header section is expanded.
 
-    // ----- use effects -----
+	// ----- handlers -----
+
+	const handleMouseDown = (e) => {
+		setIsResizing(true);
+		e.preventDefault();
+	}
+
+	const handleMouseMove = (e) => {
+		if (!isResizing) return;
+		const newWidth = e.clientX
+		setLeftPanelWidth(Math.min(Math.max(300, newWidth), 800))
+		console.log(newWidth)
+	}
+
+	const handleMouseUp = () => {
+		setIsResizing(false);
+	}
+
+	// ----- use effects -----
 
 	// auth guard on mount.
 	useEffect(() => {
@@ -77,6 +101,23 @@ function ResumePreview() {
 		}
 	}, [])
 
+	// resizing global listener.
+	useEffect(() => {
+		if (isResizing) {
+			document.addEventListener('mousemove', handleMouseMove)
+			document.addEventListener('mouseup', handleMouseUp)
+			document.body.style.cursor = 'col-resize'
+			document.body.style.userSelect = 'none'
+		}
+
+		return () => {
+			document.removeEventListener('mousemove', handleMouseMove)
+			document.removeEventListener('mouseup', handleMouseUp)
+			document.body.style.cursor = ''
+			document.body.style.userSelect = ''
+		}
+	}, [isResizing])
+
 	return (
 		<div className="min-h-screen flex flex-col bg-cream">
 			<header className="bg-brand-pink text-white py-4 shadow-md">
@@ -93,13 +134,93 @@ function ResumePreview() {
 			</header>
 
 			<main className="flex-1 flex overflow-hidden min-h-0">
-				{/* Left: controls */}
-				<aside className="w-[420px] max-w-[520px] bg-white-bright border-r border-gray-200 p-6 overflow-y-auto">
-					<h2 className="text-2xl font-semibold text-gray-900 mb-1">
-						{user?.name ? `Hi, ${user.name}` : 'Controls'}
-					</h2>
-					{user?.email && <p className="text-sm text-gray-600 mb-4">{user.email}</p>}
-					{!user?.email && <div className="mb-4" />}
+				
+				{/* left panel : inputs / controls */}
+				<aside style = {{ width: `${leftPanelWidth}px` }} className="flex-shrink-0 bg-white-bright border-r border-gray-200 p-6 overflow-y-auto">
+					{ welcomeMessage && (
+						<div className="flex flex-col gap-0.5 p-3 border-[2px] rounded-md border-brand-pink-light mb-4 relative">
+							<h2 className="text-[1.25rem] font-semibold text-gray-900 mb-1">
+								{user?.first_name ? `Hey, ${user.first_name}! 👋` : 'Hey there! 👋'}
+							</h2>
+							<span className="text-[0.875rem] text-gray-500">Welcome to the <b>Builder</b>! This is where you will customize your resume.</span>
+							<span className="text-[0.875rem] text-gray-500">We’ve filled in what we know. Feel free to tweak or add anything. 😄</span>
+							<button
+								type="button"
+								onClick={() => setWelcomeMessage(false)}
+								className="absolute top-2 right-2 flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+							>
+								<XIcon />
+							</button>
+						</div>
+					)}
+					
+					{/* resume header section */}
+					<div className="flex flex-col mb-4">
+						{/* header with chevron */}
+						<button
+							type="button"
+							onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
+							className="flex items-center gap-3 w-full transition-colors"
+						>
+							{/* title */}
+							<h1 className="text-[1.375rem] font-semibold text-gray-900">Resume Header</h1>
+							
+							{/* divider */}
+							<div className="flex-1 h-[3px] rounded bg-gray-300"></div>
+							
+							{/* chevron in circle */}
+							<div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+								{isHeaderExpanded ? (
+									<ChevronUp className="w-4 h-4 text-gray-600" />
+								) : (
+									<ChevronDown className="w-4 h-4 text-gray-600" />
+								)}
+							</div>
+						</button>
+						
+						{isHeaderExpanded && (
+							<div>
+								<p className="text-[0.875rem] text-gray-500 mb-2">This is the top of your resume. It's your brand.</p>
+								{/* name & email */}
+								<div className="flex gap-4 mb-2">
+									<div className="labelInputPair">
+										<label className="label">Your Name <RequiredAsterisk /></label>
+										<input
+											type="text"
+											value={user?.first_name + ' ' + user?.last_name}
+											className="input"
+											required
+										/>
+									</div>
+									<div className="labelInputPair">
+										<label className="label">Email <RequiredAsterisk /></label>
+										<input
+											type="text"
+											value={user?.email}
+											className="input"
+											required
+										/>
+									</div>
+								</div>
+								<div className="flex flex-col">
+									<h2 className="text-[1.125rem] font-semibold text-gray-900 mb-2">Nice To Haves</h2>
+									<div className="labelInputPair">
+										<label className="label">Phone Number</label>
+										<input
+											type="text"
+											value={user?.phone_number || ''}
+											className="input"
+										/>
+									</div>
+								</div>
+							</div>
+						)}
+						
+						{/* Divider */}
+						<div className="mt-6 border-t border-gray-200"></div>
+					</div>
+					
+					
 
 					<label className="block text-sm font-medium text-gray-700 mb-1">Template</label>
 					<select
@@ -139,7 +260,13 @@ function ResumePreview() {
 					</p>
 				</aside>
 
-				{/* Right: preview placeholder */}
+				{/* resizable divider */}
+				<div
+					onMouseDown={handleMouseDown}
+					className={`w-1 bg-gray-300 hover:bg-brand-pink cursor-col-resize transition-colors ${isResizing ? 'bg-brand-pink' : ''}`}
+				/>
+				
+				{/* right panel : preview placeholder */}
 				<section className="flex-1 bg-gray-50 overflow-auto p-8">
 					<div className="max-w-3xl mx-auto">
 						<div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">

@@ -38,8 +38,6 @@ origins = [
     'http://127.0.0.1:8000',
 ]
 
-
-
 # add the middleware for CORS.
 app.add_middleware(
     CORSMiddleware,
@@ -50,7 +48,6 @@ app.add_middleware(
     expose_headers=["*"],
     max_age=86400,  # cache preflight for 24 hours.
 )
-
 
 # register modular route groups.
 app.include_router(auth_router)

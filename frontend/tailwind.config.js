@@ -11,8 +11,13 @@ export default {
     extend: {
       colors: {
         'brand-pink': 'rgb(214, 86, 86)',
+        'brand-pink-light': 'rgb(238, 155, 155)',
+        'brand-pink-lighter': 'rgb(250, 205, 205)',
         'cream': 'rgb(252, 250, 240)',
         'white-bright': 'rgb(255, 255, 255)',
+      },
+      fontFamily: {
+        'sans': ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },

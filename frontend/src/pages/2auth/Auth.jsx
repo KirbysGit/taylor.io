@@ -69,7 +69,7 @@ function Auth() {
 
     return (
 		<div className="min-h-screen flex items-center justify-center bg-cream">
-
+			{/* login modal */}
 			<LoginModal
 				isOpen={showLogin}
 				onClose={handleClose}
@@ -77,6 +77,7 @@ function Auth() {
 				onLoginSuccess={handleLoginSuccess}
 			/>
 
+			{/* sign up modal */}
 			<SignUpModal
 				isOpen={showSignUp}
 				onClose={handleClose}

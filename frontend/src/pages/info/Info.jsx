@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import {
 	getMyProfile,
 	upsertContact,
-	createEducationBulk,
-	createExperiencesBulk,
-	createProjectsBulk,
-	createSkillsBulk,
+	setupEducation,
+	setupExperiences,
+	setupProjects,
+	setupSkills,
 	updateSectionLabels,
 } from '@/api/services/profile'
 import TopNav from '@/components/TopNav'
