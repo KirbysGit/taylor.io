@@ -4,12 +4,13 @@
 import { useState } from 'react'
 
 // icons imports.
-import { RequiredAsterisk, ChevronDown, ChevronUp } from '@/components/icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
+import { RequiredAsterisk, ChevronDown, ChevronUp } from '@/components/icons'
 
 // ----------- component -----------
-const ResumeHeader = ({ user }) => {
+const ResumeHeader = ({ headerData, onHeaderChange }) => {
+	
 	// collapsible section state.
 	const [isHeaderExpanded, setIsHeaderExpanded] = useState(true)
 
@@ -19,6 +20,8 @@ const ResumeHeader = ({ user }) => {
 	const [showLinkedin, setShowLinkedin] = useState(true)
 	const [showGithub, setShowGithub] = useState(true)
 	const [showPortfolio, setShowPortfolio] = useState(true)
+
+	console.log(headerData);
 
 	return (
 		<div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
@@ -53,7 +56,18 @@ const ResumeHeader = ({ user }) => {
 							<label className="label">Your Name <RequiredAsterisk /></label>
 							<input
 								type="text"
-								value={user?.first_name + ' ' + user?.last_name}
+								value={`${headerData?.first_name || ''} ${headerData?.last_name || ''}`.trim()}
+								onChange={(e) => {
+									const fullName = e.target.value.trim()
+									const parts = fullName.split(' ')
+									const firstName = parts[0] || ''
+									const lastName = parts.slice(1).join(' ') || ''
+									onHeaderChange({ 
+										...(headerData || {}), 
+										first_name: firstName,
+										last_name: lastName
+									})
+								}}
 								className="input"
 								required
 							/>
@@ -62,7 +76,8 @@ const ResumeHeader = ({ user }) => {
 							<label className="label">Email <RequiredAsterisk /></label>
 							<input
 								type="text"
-								value={user?.email}
+								value={headerData?.email || ''}
+								onChange={(e) => onHeaderChange({ ...headerData, email: e.target.value })}
 								className="input"
 								required
 							/>
@@ -77,7 +92,8 @@ const ResumeHeader = ({ user }) => {
 							<label className="labelHoriz">Phone Number</label>
 							<input
 								type="text"
-								value={user?.phone_number || ''}
+								value={headerData?.phone || ''}
+								onChange={(e) => onHeaderChange({ ...headerData, phone: e.target.value })}
 								className="input flex-1"
 							/>
 							<button
@@ -95,7 +111,8 @@ const ResumeHeader = ({ user }) => {
 							<label className="labelHoriz">Location</label>
 							<input
 								type="text"
-								value={user?.location || ''}
+								value={headerData?.location || ''}
+								onChange={(e) => onHeaderChange({ ...headerData, location: e.target.value })}
 								className="input flex-1"
 							/>
 							<button
@@ -113,7 +130,8 @@ const ResumeHeader = ({ user }) => {
 							<label className="labelHoriz">LinkedIn</label>
 							<input
 								type="text"
-								value={user?.linkedin || ''}
+								value={headerData?.linkedin || ''}
+								onChange={(e) => onHeaderChange({ ...headerData, linkedin: e.target.value })}
 								className="input flex-1"
 							/>
 							<button
@@ -131,7 +149,8 @@ const ResumeHeader = ({ user }) => {
 							<label className="labelHoriz">GitHub</label>
 							<input
 								type="text"
-								value={user?.github || ''}
+								value={headerData?.github || ''}
+								onChange={(e) => onHeaderChange({ ...headerData, github: e.target.value })}
 								className="input flex-1"
 							/>
 							<button
@@ -149,7 +168,8 @@ const ResumeHeader = ({ user }) => {
 							<label className="labelHoriz">Portfolio</label>
 							<input
 								type="text"
-								value={user?.portfolio || ''}
+								value={headerData?.portfolio || ''}
+								onChange={(e) => onHeaderChange({ ...headerData, portfolio: e.target.value })}
 								className="input flex-1"
 							/>
 							<button
@@ -169,4 +189,4 @@ const ResumeHeader = ({ user }) => {
 	)
 }
 
-export default ResumeHeader
+export default ResumeHeader;

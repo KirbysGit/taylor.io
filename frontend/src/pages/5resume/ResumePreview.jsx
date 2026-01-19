@@ -7,7 +7,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // api imports.
-import { listTemplates } from '@/api/services/resume'
+import { listTemplates } from '@/api/services/templates'
+import { getMyProfile } from '@/api/services/profile'
+import { generateResumePreview } from '@/api/services/resume'
 
 // icons imports.
 import { XIcon } from '@/components/icons'
@@ -36,6 +38,24 @@ function ResumePreview() {
 	const [leftPanelWidth, setLeftPanelWidth] = useState(560);                  // width of left panel.
 	const [isResizing, setIsResizing] = useState(false);						// if user is currently resizing panel.
 
+	// preview states.
+	const [previewUrl, setPreviewUrl] = useState(null)
+	const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
+
+	// resume data state.
+	const [resumeData, setResumeData] = useState({
+		header: {
+			first_name: '',
+			last_name: '',
+			email: '',
+			phone: '',
+			location: '',
+			github: '',
+			linkedin: '',
+			portfolio: '',
+		},
+	})
+
 	// ----- handlers -----
 
 	const handleMouseDown = (e) => {
@@ -47,58 +67,73 @@ function ResumePreview() {
 		if (!isResizing) return;
 		const newWidth = e.clientX
 		setLeftPanelWidth(Math.min(Math.max(300, newWidth), 800))
-		console.log(newWidth)
 	}
 
 	const handleMouseUp = () => {
 		setIsResizing(false);
 	}
 
+
 	// ----- use effects -----
 
 	// auth guard on mount.
 	useEffect(() => {
+
+		// if user not logged in, redirect to auth page.
 		const token = localStorage.getItem('token')
 		if (!token) {
 			navigate('/auth')
 			return
 		}
 
-		// simplest: rely on cached user payload from localStorage (no network call).
+		// fetch user data from backend.
 		try {
-			const raw = localStorage.getItem('user')
-			setUser(raw ? JSON.parse(raw) : null)
+			
+			// step 1 : fetch user data from local storage.
+			// we can immediately display name & email.
+			const userData = localStorage.getItem('user')
+			if (userData) {
+				setUser(JSON.parse(userData))
+			}
+
+			// step 2 : fetch user data from backend.
+			const fetchCurrentUser = async () => {
+				const response = await getMyProfile()
+				const responseData = response.data
+				const userData = responseData.user  // Extract user object from response
+				setUser(userData)
+
+				setResumeData({
+					header: {
+						first_name: userData.first_name,
+						last_name: userData.last_name,
+						email: userData.email,
+						phone: responseData.contact?.phone || '',
+						location: responseData.contact?.location || '',
+						portfolio: responseData.contact?.portfolio || '',
+						linkedin: responseData.contact?.linkedin || '',
+						github: responseData.contact?.github || '',
+					}
+				})
+			}
+
+			fetchCurrentUser();
 		} catch {
 			setUser(null)
 		}
 	}, [navigate])
 
-	// on mount fetches.
 	useEffect(() => {
-		let cancelled = false
+		setIsLoadingTemplates(true)
 
-		const loadTemplates = async () => {
-			try {
-				const res = await listTemplates()
-				const templates = res?.data?.templates
-				if (cancelled) return
-
-				if (Array.isArray(templates) && templates.length) {
-					setAvailableTemplates(templates)
-					setTemplate(templates[0])
-				}
-			} catch (err) {
-				console.error('Failed to load templates', err)
-			} finally {
-				if (!cancelled) setIsLoadingTemplates(false)
-			}
+		const fetchTemplates = async () => {
+			const response = await listTemplates()
+			const responseData = response.data
+			setAvailableTemplates(responseData.templates)
+			setIsLoadingTemplates(false)
 		}
 
-		loadTemplates()
-
-		return () => {
-			cancelled = true
-		}
+		fetchTemplates()
 	}, [])
 
 	// resizing global listener.
@@ -117,6 +152,35 @@ function ResumePreview() {
 			document.body.style.userSelect = ''
 		}
 	}, [isResizing])
+
+	useEffect(() => {
+		setIsGeneratingPreview(true)
+
+		if (!resumeData.header.first_name && !resumeData.header.email) {
+			console.log("Skipping Preview")
+			return
+		}
+
+		const timer = setTimeout(async () => {
+			try {
+				const pdfBlob = await generateResumePreview(template, resumeData)
+				
+				const url = URL.createObjectURL(pdfBlob)
+
+				if (previewUrl) {
+					URL.revokeObjectURL(previewUrl)
+				}
+
+				setPreviewUrl(url)
+			} catch (error) {
+				console.error('Failed to generate preview: ', error)
+			} finally {
+				setIsGeneratingPreview(false)
+			}
+		}, 1000)
+
+		return () => clearTimeout(timer)
+	}, [template, resumeData])
 
 	return (
 		<div className="min-h-screen flex flex-col bg-cream">
@@ -155,7 +219,10 @@ function ResumePreview() {
 					)}
 					
 					{/* resume header section */}
-					<ResumeHeader user={user} />
+					<ResumeHeader 
+						headerData = {resumeData.header}
+						onHeaderChange = {(updatedData) => setResumeData(prev => ({ ...prev, header: updatedData }))}
+					/>
 					
 
 					<label className="block text-sm font-medium text-gray-700 mb-1">Template</label>
@@ -204,16 +271,22 @@ function ResumePreview() {
 				
 				{/* right panel : preview placeholder */}
 				<section className="flex-1 bg-gray-50 overflow-auto p-8">
-					<div className="max-w-3xl mx-auto">
-						<div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-							<h2 className="text-lg font-semibold text-gray-900">Preview</h2>
-							<p className="text-sm text-gray-600 mt-1">
-								Selected template: <span className="font-medium">{template}</span>
-							</p>
-							<div className="mt-6 h-[520px] rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-500">
+					<div className="mt-6 h-[520px] rounded-lg border-2 border-dashed border-gray-300">
+						{isGeneratingPreview ? (
+							<div className="flex items-center justify-center h-full">
+								<p className="text-gray-500">Generating preview...</p>
+							</div>
+						) : previewUrl ? (
+							<iframe 
+								src={previewUrl} 
+								className="w-full h-full rounded-lg"
+								title="Resume Preview"
+							/>
+						) : (
+							<div className="flex items-center justify-center h-full text-gray-500">
 								PDF preview will render here.
 							</div>
-						</div>
+						)}
 					</div>
 				</section>
 			</main>
