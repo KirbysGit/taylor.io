@@ -3,19 +3,22 @@
 // building back incrementally.
 
 // imports.
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // api imports.
 import { listTemplates } from '@/api/services/templates'
 import { getMyProfile } from '@/api/services/profile'
-import { generateResumePreview } from '@/api/services/resume'
+import { generateResumePreview, generateResumePDF } from '@/api/services/resume'
 
 // icons imports.
 import { XIcon } from '@/components/icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faRefresh, faDownload } from '@fortawesome/free-solid-svg-icons'
 
 // component imports.
 import ResumeHeader from './components/ResumeHeader'
+import Education from './components/Education'
 
 // ----------- main component -----------
 function ResumePreview() {
@@ -30,8 +33,8 @@ function ResumePreview() {
 	const [welcomeMessage, setWelcomeMessage] = useState(true);					// if welcome message should be shown.
 
 	// template states.
-	const [template, setTemplate] = useState('main')                            // template being used for resume.
-	const [availableTemplates, setAvailableTemplates] = useState(['main'])      // available templates to choose from.
+	const [template, setTemplate] = useState('default')                            // template being used for resume.
+	const [availableTemplates, setAvailableTemplates] = useState(['default'])      // available templates to choose from.
 	const [isLoadingTemplates, setIsLoadingTemplates] = useState(true)          // loading state for templates.
 	
 	// panel states.
@@ -39,8 +42,15 @@ function ResumePreview() {
 	const [isResizing, setIsResizing] = useState(false);						// if user is currently resizing panel.
 
 	// preview states.
-	const [previewUrl, setPreviewUrl] = useState(null)
+	const [previewHtml, setPreviewHtml] = useState(null)
 	const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
+
+	// download states.
+	const [isDownloadingPDF, setIsDownloadingPDF] = useState(false)
+
+	// header data state.
+	const [headerData, setHeaderData] = useState(null)
+	const [educationData, setEducationData] = useState([])
 
 	// resume data state.
 	const [resumeData, setResumeData] = useState({
@@ -54,7 +64,9 @@ function ResumePreview() {
 			linkedin: '',
 			portfolio: '',
 		},
+		education: [],
 	})
+
 
 	// ----- handlers -----
 
@@ -73,6 +85,42 @@ function ResumePreview() {
 		setIsResizing(false);
 	}
 
+	const handleRefreshPreview = async () => {
+		setIsGeneratingPreview(true)
+		const htmlContent = await generateResumePreview(template, resumeData)
+		setPreviewHtml(htmlContent)
+		setIsGeneratingPreview(false)
+	}
+
+	const handleDownloadPDF = async () => {
+		setIsDownloadingPDF(true)
+		try {
+			const pdfBlob = await generateResumePDF(template, resumeData)
+			setIsDownloadingPDF(false)
+			const url = URL.createObjectURL(pdfBlob)
+			const link = document.createElement('a')
+			link.href = url
+			link.download = 'resume.pdf'
+
+			document.body.appendChild(link)
+			link.click()
+			document.body.removeChild(link)
+			URL.revokeObjectURL(url)
+		} catch (error) {
+			console.error('Failed to generate PDF:', error)
+			setIsDownloadingPDF(false)
+		}
+	}
+
+	// memoized header changes.
+	const handleHeaderChange = useCallback((exportedHeader) => {
+		setResumeData(prev => ({ ...prev, header: exportedHeader }))
+	}, [])
+
+	// memoized education changes.
+	const handleEducationChange = useCallback((exportedEducation) => {
+		setResumeData(prev => ({ ...prev, education: exportedEducation }))
+	}, [])
 
 	// ----- use effects -----
 
@@ -103,18 +151,31 @@ function ResumePreview() {
 				const userData = responseData.user  // Extract user object from response
 				setUser(userData)
 
-				setResumeData({
-					header: {
-						first_name: userData.first_name,
-						last_name: userData.last_name,
-						email: userData.email,
-						phone: responseData.contact?.phone || '',
-						location: responseData.contact?.location || '',
-						portfolio: responseData.contact?.portfolio || '',
-						linkedin: responseData.contact?.linkedin || '',
-						github: responseData.contact?.github || '',
-					}
-				})
+				// set initial header data for ResumeHeader component.
+				const initialHeader = {
+					first_name: userData.first_name,
+					last_name: userData.last_name,
+					email: userData.email,
+					phone: responseData.contact?.phone || '',
+					location: responseData.contact?.location || '',
+					portfolio: responseData.contact?.portfolio || '',
+					linkedin: responseData.contact?.linkedin || '',
+					github: responseData.contact?.github || '',
+				}
+				setHeaderData(initialHeader)
+				setResumeData(prev => ({ ...prev, header: initialHeader }))
+
+				const initialEducation = responseData.education.map(edu => ({
+					school: edu.school,
+					degree: edu.degree,
+					field: edu.field,
+					start_date: edu.start_date,
+					end_date: edu.end_date,
+					current: edu.current,
+				}))
+				setEducationData(initialEducation)
+				setResumeData(prev => ({ ...prev, education: initialEducation }))
+				console.log(resumeData)
 			}
 
 			fetchCurrentUser();
@@ -154,24 +215,17 @@ function ResumePreview() {
 	}, [isResizing])
 
 	useEffect(() => {
-		setIsGeneratingPreview(true)
-
 		if (!resumeData.header.first_name && !resumeData.header.email) {
 			console.log("Skipping Preview")
 			return
 		}
 
+		setIsGeneratingPreview(true)
+
 		const timer = setTimeout(async () => {
 			try {
-				const pdfBlob = await generateResumePreview(template, resumeData)
-				
-				const url = URL.createObjectURL(pdfBlob)
-
-				if (previewUrl) {
-					URL.revokeObjectURL(previewUrl)
-				}
-
-				setPreviewUrl(url)
+				const htmlContent = await generateResumePreview(template, resumeData)
+				setPreviewHtml(htmlContent)
 			} catch (error) {
 				console.error('Failed to generate preview: ', error)
 			} finally {
@@ -219,11 +273,20 @@ function ResumePreview() {
 					)}
 					
 					{/* resume header section */}
-					<ResumeHeader 
-						headerData = {resumeData.header}
-						onHeaderChange = {(updatedData) => setResumeData(prev => ({ ...prev, header: updatedData }))}
-					/>
+					{headerData && (
+						<ResumeHeader 
+							headerData={headerData}
+							onHeaderChange={handleHeaderChange}
+						/>
+					)}
 					
+					{/* education section */}
+					{educationData && (
+						<Education 
+							educationData={educationData}
+							onEducationChange={handleEducationChange}
+						/>
+					)}
 
 					<label className="block text-sm font-medium text-gray-700 mb-1">Template</label>
 					<select
@@ -271,20 +334,40 @@ function ResumePreview() {
 				
 				{/* right panel : preview placeholder */}
 				<section className="flex-1 bg-gray-50 overflow-auto p-8">
-					<div className="mt-6 h-[520px] rounded-lg border-2 border-dashed border-gray-300">
+					{/* control buttons */}
+					<div className="flex items-center justify-end">
+						<button
+							type="button"
+							className="px-2 py-1 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all"
+							onClick={handleDownloadPDF}
+							disabled={isDownloadingPDF}
+						>
+							<FontAwesomeIcon icon={faDownload} />
+						</button>
+						<button
+							type="button"
+							className="px-2 py-1 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all"
+							onClick={handleRefreshPreview}
+						>
+							<FontAwesomeIcon icon={faRefresh} />
+						</button>
+					</div>
+					<div className="mt-4 h-[520px] rounded-lg border-2 border-dashed border-gray-300 p-8 overflow-auto bg-gray-100">
 						{isGeneratingPreview ? (
 							<div className="flex items-center justify-center h-full">
 								<p className="text-gray-500">Generating preview...</p>
 							</div>
-						) : previewUrl ? (
-							<iframe 
-								src={previewUrl} 
-								className="w-full h-full rounded-lg"
-								title="Resume Preview"
-							/>
+						) : previewHtml ? (
+							<div className="w-full h-full flex items-center justify-center box-shadow">
+								<iframe 
+									srcdoc={previewHtml}
+									className="w-full h-full rounded-lg"
+									title="Resume Preview"
+								/>
+							</div>
 						) : (
 							<div className="flex items-center justify-center h-full text-gray-500">
-								PDF preview will render here.
+								Resume preview will render here.
 							</div>
 						)}
 					</div>

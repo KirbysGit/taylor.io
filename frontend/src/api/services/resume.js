@@ -7,7 +7,7 @@
 // parse resume file (PDF or DOCX).
 
 // services.
-import { apiRequest, apiRequestBlob, API_BASE_URL } from '../api'
+import { apiRequestText, apiRequestBlob, API_BASE_URL } from '../api'
 
 // parse resume file (PDF or DOCX).
 export async function parseResume(file) {
@@ -42,7 +42,6 @@ export async function parseResume(file) {
 	}
 }
 
-
 export async function generateResumePreview(template, resumeData) {
 
 	// get token from localStorage.
@@ -60,12 +59,38 @@ export async function generateResumePreview(template, resumeData) {
 
 	// make request to backend.
 	try {
-		return await apiRequestBlob(url, {
+		return await apiRequestText(url, {
 			method: 'POST',
 			body: JSON.stringify(payload),
 		})
 	} catch (error) {
 		console.error('Error generating resume preview:', error)
+		throw error
+	}
+}
+
+export async function generateResumePDF(template, resumeData) {
+
+	// get token from localStorage.
+	const token = localStorage.getItem('token')
+
+	// construct url for request.
+	const url = `/api/resume/generator/pdf`
+
+	// create payload for request.
+	const payload = {
+		template: template,
+		resume_data: resumeData,
+	}
+
+	// make request to backend.
+	try {
+		return await apiRequestBlob(url, {
+			method: 'POST',
+			body: JSON.stringify(payload),
+		})
+	} catch (error) {
+		console.error('Error generating resume PDF:', error)
 		throw error
 	}
 }

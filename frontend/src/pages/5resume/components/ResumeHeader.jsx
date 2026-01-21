@@ -1,7 +1,16 @@
 // pages / 5resume / components / ResumeHeader.jsx
 
+// smooth closing / opening of collapsible section.
+// friendlier text between fields to clarify what each field is for.
+// placeholder text for each field.
+// input validation, like @ . com for email, etc.
+// ability to do a header line.
+// ability to add a header image.
+// toggle for "https://".
+// add your own link sort of thing (more for people not on linkedin, github, etc.)
+
 // imports.
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // icons imports.
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -21,7 +30,30 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 	const [showGithub, setShowGithub] = useState(true)
 	const [showPortfolio, setShowPortfolio] = useState(true)
 
-	console.log(headerData);
+	// internal state for all header fields.
+	const [firstName, setFirstName] = useState(headerData?.first_name || '')
+	const [lastName, setLastName] = useState(headerData?.last_name || '')
+	const [email, setEmail] = useState(headerData?.email || '')
+	const [phoneValue, setPhoneValue] = useState(headerData?.phone || '')
+	const [locationValue, setLocationValue] = useState(headerData?.location || '')
+	const [linkedinValue, setLinkedinValue] = useState(headerData?.linkedin || '')
+	const [githubValue, setGithubValue] = useState(headerData?.github || '')
+	const [portfolioValue, setPortfolioValue] = useState(headerData?.portfolio || '')
+
+	// export header data whenever any header-related states change.
+	useEffect(() => {
+		const exportedData = {
+			first_name: firstName,
+			last_name: lastName,
+			email: email,
+			phone: showPhone ? phoneValue : '',
+			location: showLocation ? locationValue : '',
+			linkedin: showLinkedin ? linkedinValue : '',
+			github: showGithub ? githubValue : '',
+			portfolio: showPortfolio ? portfolioValue : '',
+		}
+		onHeaderChange(exportedData)
+	}, [firstName, lastName, email, phoneValue, locationValue, linkedinValue, githubValue, portfolioValue, showPhone, showLocation, showLinkedin, showGithub, showPortfolio])
 
 	return (
 		<div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
@@ -56,17 +88,12 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 							<label className="label">Your Name <RequiredAsterisk /></label>
 							<input
 								type="text"
-								value={`${headerData?.first_name || ''} ${headerData?.last_name || ''}`.trim()}
+								value={`${firstName} ${lastName}`.trim()}
 								onChange={(e) => {
 									const fullName = e.target.value.trim()
 									const parts = fullName.split(' ')
-									const firstName = parts[0] || ''
-									const lastName = parts.slice(1).join(' ') || ''
-									onHeaderChange({ 
-										...(headerData || {}), 
-										first_name: firstName,
-										last_name: lastName
-									})
+									setFirstName(parts[0] || '')
+									setLastName(parts.slice(1).join(' ') || '')
 								}}
 								className="input"
 								required
@@ -76,8 +103,8 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 							<label className="label">Email <RequiredAsterisk /></label>
 							<input
 								type="text"
-								value={headerData?.email || ''}
-								onChange={(e) => onHeaderChange({ ...headerData, email: e.target.value })}
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
 								className="input"
 								required
 							/>
@@ -92,18 +119,19 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 							<label className="labelHoriz">Phone Number</label>
 							<input
 								type="text"
-								value={headerData?.phone || ''}
-								onChange={(e) => onHeaderChange({ ...headerData, phone: e.target.value })}
+								value={phoneValue}
+								onChange={(e) => setPhoneValue(e.target.value)}
 								className="input flex-1"
+								disabled={!showPhone}
 							/>
 							<button
 								type="button"
-								onClick={() => setShowPhone(!showPhone)}
+								onClick={() => setShowPhone(prev => !prev)}
 								className="visibilityToggle"
 								aria-label={showPhone ? 'Hide phone number' : 'Show phone number'}
 								tabIndex={-1}
 							>
-								<FontAwesomeIcon icon={showPhone ? faEyeSlash : faEye} className="w-5 h-5" />
+								<FontAwesomeIcon icon={showPhone ? faEye : faEyeSlash} className="w-5 h-5" />
 							</button>
 						</div>
 						{/* location */}
@@ -111,18 +139,19 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 							<label className="labelHoriz">Location</label>
 							<input
 								type="text"
-								value={headerData?.location || ''}
-								onChange={(e) => onHeaderChange({ ...headerData, location: e.target.value })}
+								value={locationValue}
+								onChange={(e) => setLocationValue(e.target.value)}
 								className="input flex-1"
+								disabled={!showLocation}
 							/>
 							<button
 								type="button"
-								onClick={() => setShowLocation(!showLocation)}
+								onClick={() => setShowLocation(prev => !prev)}
 								className="visibilityToggle"
 								aria-label={showLocation ? 'Hide location' : 'Show location'}
 								tabIndex={-1}
 							>
-								<FontAwesomeIcon icon={showLocation ? faEyeSlash : faEye} className="w-5 h-5" />
+								<FontAwesomeIcon icon={showLocation ? faEye : faEyeSlash} className="w-5 h-5" />
 							</button>
 						</div>
 						{/* linkedin */}
@@ -130,18 +159,19 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 							<label className="labelHoriz">LinkedIn</label>
 							<input
 								type="text"
-								value={headerData?.linkedin || ''}
-								onChange={(e) => onHeaderChange({ ...headerData, linkedin: e.target.value })}
+								value={linkedinValue}
+								onChange={(e) => setLinkedinValue(e.target.value)}
 								className="input flex-1"
+								disabled={!showLinkedin}
 							/>
 							<button
 								type="button"
-								onClick={() => setShowLinkedin(!showLinkedin)}
+								onClick={() => setShowLinkedin(prev => !prev)}
 								className="visibilityToggle"
 								aria-label={showLinkedin ? 'Hide linkedin' : 'Show linkedin'}
 								tabIndex={-1}
 							>
-								<FontAwesomeIcon icon={showLinkedin ? faEyeSlash : faEye} className="w-5 h-5" />
+								<FontAwesomeIcon icon={showLinkedin ? faEye : faEyeSlash} className="w-5 h-5" />
 							</button>
 						</div>
 						{/* github */}
@@ -149,18 +179,19 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 							<label className="labelHoriz">GitHub</label>
 							<input
 								type="text"
-								value={headerData?.github || ''}
-								onChange={(e) => onHeaderChange({ ...headerData, github: e.target.value })}
+								value={githubValue}
+								onChange={(e) => setGithubValue(e.target.value)}
 								className="input flex-1"
+								disabled={!showGithub}
 							/>
 							<button
 								type="button"
-								onClick={() => setShowGithub(!showGithub)}
+								onClick={() => setShowGithub(prev => !prev)}
 								className="visibilityToggle"
 								aria-label={showGithub ? 'Hide github' : 'Show github'}
 								tabIndex={-1}
 							>
-								<FontAwesomeIcon icon={showGithub ? faEyeSlash : faEye} className="w-5 h-5" />
+								<FontAwesomeIcon icon={showGithub ? faEye : faEyeSlash} className="w-5 h-5" />
 							</button>
 						</div>
 						{/* portfolio */}
@@ -168,18 +199,19 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 							<label className="labelHoriz">Portfolio</label>
 							<input
 								type="text"
-								value={headerData?.portfolio || ''}
-								onChange={(e) => onHeaderChange({ ...headerData, portfolio: e.target.value })}
+								value={portfolioValue}
+								onChange={(e) => setPortfolioValue(e.target.value)}
 								className="input flex-1"
+								disabled={!showPortfolio}
 							/>
 							<button
 								type="button"
-								onClick={() => setShowPortfolio(!showPortfolio)}
+								onClick={() => setShowPortfolio(prev => !prev)}
 								className="visibilityToggle"
 								aria-label={showPortfolio ? 'Hide portfolio' : 'Show portfolio'}
 								tabIndex={-1}
 							>
-								<FontAwesomeIcon icon={showPortfolio ? faEyeSlash : faEye} className="w-5 h-5" />
+								<FontAwesomeIcon icon={showPortfolio ? faEye : faEyeSlash} className="w-5 h-5" />
 							</button>
 						</div>
 					</div>

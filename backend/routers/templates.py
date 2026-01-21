@@ -10,13 +10,13 @@ router = APIRouter(prefix="/api/templates", tags=["templates"])
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
 @router.get("/list")
-# list all of templates in TEMPLATES_DIR if .docx files.
+# list all template folders in TEMPLATES_DIR.
 async def list_templates():
     templates = []
 
     if not TEMPLATES_DIR.exists():
         return {"templates": []}
 
-    templates = [item.stem for item in TEMPLATES_DIR.iterdir() if item.is_file() and item.suffix == ".docx"]
+    templates = [item.name for item in TEMPLATES_DIR.iterdir() if item.is_dir()]
 
     return {"templates": sorted(templates)}

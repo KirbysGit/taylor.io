@@ -14,7 +14,7 @@ class Education(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)       # foreign key to user.
     school = Column(String(200), nullable=True)                                 # school name.
     degree = Column(String(200), nullable=True)                                 # degree type.
-    field = Column(String(200), nullable=True)                                  # field of study.
+    discipline = Column(String(200), nullable=True)                                  # field of study.
     start_date = Column(DateTime, nullable=True)                                # start date.
     end_date = Column(DateTime, nullable=True)                                  # end date (null if current).
     current = Column(Boolean, nullable=False, default=False)                    # current status.

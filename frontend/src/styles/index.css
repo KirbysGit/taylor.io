@@ -21,6 +21,10 @@
 		@apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-brand-pink focus:border-brand-pink hover:border-gray-400 bg-white transition-all duration-300 ease-in-out;
 	}
 
+	.input:disabled {
+		@apply bg-gray-100 text-gray-500 opacity-60;
+	}
+
 	.labelInputPair {
 		@apply flex flex-1 flex-col;
 	}

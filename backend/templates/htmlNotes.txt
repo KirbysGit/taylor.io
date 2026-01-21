@@ -1,0 +1,19 @@
+
+Layout will be handled by CSS, not markup.
+Content is data-driven, not hardcoded visually.
+
+Need to break down our sections from data into HTML plans :
+- header
+- education
+- experience
+- projects
+- skills
+
+Important for future implementations as :
+- pdf renders understand this structure well
+- docx translators can walk it more deterministically
+- ats systems prefer the clarity
+
+starting with our Default/template.html
+
+we want to begin setting up our placeholder and notes for design.

@@ -5,9 +5,9 @@
 // base url for connecting to backend.
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-// helper function to make api requests.
-export async function apiRequest(endpoint, options = {}) {
-
+// unified helper function to make api requests.
+// options.responseType: 'json' (default, returns { data }), 'blob', or 'text'
+async function apiRequestCore(endpoint, options = {}) {
     // construct full url for request.
     const url = `${baseURL}${endpoint}`
     
@@ -17,7 +17,7 @@ export async function apiRequest(endpoint, options = {}) {
     // construct config object for request.
     const config = {
         method: options.method || 'GET',
-        credentials: 'include',  // important: allows cookies/credentials in cross-origin requests (like axios withCredentials: true)
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             ...(token && { 'Authorization': `Bearer ${token}` }),
@@ -31,51 +31,8 @@ export async function apiRequest(endpoint, options = {}) {
         // make request.
         const response = await fetch(url, config)
         
-        // parse response body as json.
-        const data = await response.json()
-
-        // if response is not ok, throw error.
+        // if response is not ok, handle error.
         if (!response.ok) {
-            throw { response: { data, status: response.status } }
-        }
-        
-        // return response data.
-        return { data }
-
-    // if error, throw error.
-    } catch (error) {
-        throw error
-    }
-}
-
-// helper function to make api requests that return blobs.
-export async function apiRequestBlob(endpoint, options = {}) {
-    // construct full url for request.
-    const url = `${baseURL}${endpoint}`
-    
-    // get token from localStorage if it exists.
-    const token = localStorage.getItem('token')
-    
-    // construct config object for request.
-    const config = {
-        method: options.method || 'GET',
-        credentials: 'include',  // important: allows cookies/credentials in cross-origin requests
-        headers: {
-            'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` }),
-            ...options.headers,
-        },
-        ...(options.body && { body: options.body }),
-    }
-
-    // try to make request.
-    try {
-        // make request.
-        const response = await fetch(url, config)
-        
-        // if response is not ok, try to parse error message.
-        if (!response.ok) {
-            // Try to get error message from response (might be JSON or text)
             let errorData
             const contentType = response.headers.get('content-type')
             if (contentType && contentType.includes('application/json')) {
@@ -86,8 +43,17 @@ export async function apiRequestBlob(endpoint, options = {}) {
             throw { response: { data: errorData, status: response.status } }
         }
         
-        // return blob response.
-        return await response.blob()
+        // parse response based on responseType.
+        const responseType = options.responseType || 'json'
+        
+        if (responseType === 'blob') {
+            return await response.blob()
+        } else if (responseType === 'text') {
+            return await response.text()
+        } else {
+            const data = await response.json()
+            return { data }
+        }
 
     // if error, throw error.
     } catch (error) {
@@ -95,6 +61,18 @@ export async function apiRequestBlob(endpoint, options = {}) {
     }
 }
 
+// convenience functions for backward compatibility.
+export async function apiRequest(endpoint, options = {}) {
+    return apiRequestCore(endpoint, { ...options, responseType: 'json' })
+}
+
+export async function apiRequestBlob(endpoint, options = {}) {
+    return apiRequestCore(endpoint, { ...options, responseType: 'blob' })
+}
+
+export async function apiRequestText(endpoint, options = {}) {
+    return apiRequestCore(endpoint, { ...options, responseType: 'text' })
+}
 // export base url for use in other files.
 export const API_BASE_URL = baseURL
 

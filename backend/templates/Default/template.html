@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html class="body-wrapper" lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{name} - Resume</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>{{template_css}}</style>
+    </head>
+
+    <body>
+        <main class="resume">
+
+            <!-- Header -->
+            <header class="resume-header">
+            <h1 class="name">{name}</h1>
+            <p class="contact">
+                <span>{header_line}</span>
+            </p>
+            </header>
+
+            
+            <section class="section">
+            <h2 class="section-title">
+                Education
+                <div class="divider"></div>
+            </h2>
+
+            <div class="entry">
+                <div class="entry-header">
+                <span class="entry-title">{school}</span>
+                <span class="entry-meta">{location}</span>
+                </div>
+
+                <div class="entry-subheader">
+                <span>B.S. in Computer Engineering</span>
+                <span>Aug 2021 – May 2025</span>
+                </div>
+
+                <p class="entry-details">
+                GPA: 3.78 / 4.0
+                </p>
+
+                <p class="entry-details">
+                <strong>Honors:</strong> Dean’s List (2021), President’s Honor Roll (2023–2025), Pegasus Gold Scholarship
+                </p>
+
+                <p class="entry-details">
+                <strong>Activities:</strong> AI @ UCF, Knight Hacks, SHPE @ UCF
+                </p>
+
+                <p class="entry-details">
+                <strong>Relevant Coursework:</strong> Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design
+                </p>
+            </div>
+            </section>
+            <!-- Education 
+            <section class="section">
+            <h2 class="section-title">Experience</h2>
+
+            <div class="entry">
+                <div class="entry-header">
+                <span class="entry-title">Software Engineering Intern</span>
+                <span class="entry-meta">May 2024 – June 2025</span>
+                </div>
+
+                <div class="entry-subheader">
+                <span>BitGo</span>
+                <span>Remote</span>
+                </div>
+
+                <ul class="bullets">
+                <li>Designed and maintained backend services and REST APIs in Python/Django supporting secure data flows across financial and compliance systems.</li>
+                <li>Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.</li>
+                <li>Built internal dashboards using React and Django APIs to improve visibility across distributed teams.</li>
+                <li>Optimized Python data-processing pipelines and PostgreSQL queries, reducing latency by approximately 40%.</li>
+                </ul>
+            </div>
+            </section>
+
+            <section class="section">
+            <h2 class="section-title">Projects</h2>
+
+            <div class="entry">
+                <div class="entry-header">
+                <span class="entry-title">SentimentTrader</span>
+                <span class="entry-meta">Python, SQL, FinBERT, XGBoost</span>
+                </div>
+
+                <ul class="bullets">
+                <li>Designed and implemented a full ML-driven pipeline processing 1K+ Reddit finance posts per run via multi-stage ETL.</li>
+                <li>Engineered 40+ predictive features per ticker and trained XGBoost models achieving 55–70% ROC-AUC.</li>
+                <li>Built modular ingestion, transformation, and inference components aligned with message-driven architectures.</li>
+                </ul>
+            </div>
+
+            </section>
+
+            <section class="section">
+            <h2 class="section-title">Skills</h2>
+
+            <p><strong>Languages:</strong> Python, Java, JavaScript, SQL</p>
+            <p><strong>Frameworks:</strong> Django, FastAPI, React, Node.js, PyTorch, TensorFlow Lite</p>
+            <p><strong>Data & Tools:</strong> PostgreSQL, MySQL, MongoDB, Pandas, NumPy, AWS EC2, ETL Pipelines</p>
+            <p><strong>Focus Areas:</strong> Full-Stack Development, ML/NLP Engineering, REST API Design, UI/UX Design</p>
+            </section>
+        -->
+        </main>
+    </body>
+</html>
