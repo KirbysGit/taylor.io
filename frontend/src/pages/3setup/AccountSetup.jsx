@@ -132,7 +132,7 @@ function AccountSetup() {
 				const educationData = formData.education.map(edu => ({
 					school: edu.school,
 					degree: edu.degree,
-					field: edu.field,
+					discipline: edu.discipline,
 					minor: edu.minor || null,
 					start_date: edu.start_date,
 					end_date: edu.end_date,

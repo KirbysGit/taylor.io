@@ -113,7 +113,7 @@ function Info() {
 								// Ensure all string fields are never null
 								school: e.school ?? '',
 								degree: e.degree ?? '',
-								field: e.field ?? '',
+								discipline: e.discipline ?? '',
 								minor: e.minor ?? '',
 								location: e.location ?? '',
 								start_date: e.start_date ?? '',
@@ -224,7 +224,7 @@ function Info() {
 				end_date: end_date && end_date.trim() ? end_date : null,
 			}))
 		try {
-			await createEducationBulk(payload)
+			await setupEducation(payload)
 			// Refresh the profile data after successful save
 			const response = await getMyProfile()
 			const data = response.data || {}
@@ -250,7 +250,7 @@ function Info() {
 						// Ensure all string fields are never null
 						school: e.school ?? '',
 						degree: e.degree ?? '',
-						field: e.field ?? '',
+						discipline: e.discipline ?? '',
 						minor: e.minor ?? '',
 						location: e.location ?? '',
 						start_date: e.start_date ?? '',
@@ -449,12 +449,12 @@ function Info() {
 														/>
 													</div>
 													<div className="flex flex-col gap-1">
-														<label className="text-sm font-medium text-gray-700">Field</label>
+														<label className="text-sm font-medium text-gray-700">Discipline</label>
 														<input
 															type="text"
 															placeholder="Computer Engineering"
-															value={edu.field}
-															onChange={(e) => onEducationChange(edu.id, 'field', e.target.value)}
+															value={edu.discipline}
+															onChange={(e) => onEducationChange(edu.id, 'discipline', e.target.value)}
 															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
 														/>
 													</div>

@@ -44,7 +44,7 @@ class TokenResponse(BaseModel):
 class EducationCreate(BaseModel):
     school: Optional[str] = None
     degree: Optional[str] = None
-    field: Optional[str] = None
+    discipline: Optional[str] = None
     minor: Optional[str] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
@@ -62,7 +62,7 @@ class EducationResponse(BaseModel):
     user_id: int
     school: Optional[str] = None
     degree: Optional[str] = None
-    field: Optional[str] = None
+    discipline: Optional[str] = None
     minor: Optional[str] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
@@ -191,7 +191,7 @@ class ParsedContactInfo(BaseModel):
 class ParsedEducation(BaseModel):
     school: Optional[str] = None
     degree: Optional[str] = None
-    field: Optional[str] = None
+    discipline: Optional[str] = None
     startDate: Optional[str] = None
     endDate: Optional[str] = None
     current: bool = False

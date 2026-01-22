@@ -4,6 +4,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import Dict, Any
 import asyncio
+from datetime import datetime
 from playwright.sync_api import sync_playwright
 
 # get abs path to templates directory.
@@ -20,6 +21,68 @@ def build_header(header: Dict[str, Any]) -> str:
     ]
     return " | ".join([field for field in fields if field.strip()])
 
+def format_date_month_year(date: str) -> str:
+    if not date:
+        return ''
+
+    try:
+        # Handle ISO datetime strings (e.g., "2021-08-01T00:00:00")
+        # Extract just the date part (first 10 characters: YYYY-MM-DD)
+        date_str = date[:10] if len(date) >= 10 else date
+        
+        # Parse the date
+        if len(date_str) == 7:  # YYYY-MM format
+            dt = datetime.strptime(date_str, '%Y-%m')
+        elif len(date_str) == 10:  # YYYY-MM-DD format
+            dt = datetime.strptime(date_str, '%Y-%m-%d')
+        else:
+            return date  # Return original if format is unexpected
+        
+        # Format as "August 2021"
+        return dt.strftime('%B %Y')
+    except Exception as e:
+        # If parsing fails, return original date
+        return date
+
+def build_education_entry(edu: Dict[str, Any]) -> str:
+    
+    # build degree line.
+    degree = edu.get('degree', '')
+    discipline = edu.get('discipline', '')
+    minor = edu.get('minor', '')
+    
+    degree_text = f"{degree} in {discipline}"
+    if minor:
+        degree_text += f", Minor in {minor}"
+
+    # build date range.
+    start_date = format_date_month_year(edu.get('start_date', ''))
+    end_date = format_date_month_year(edu.get('end_date', ''))
+    current = edu.get('current', False)
+    if current:
+        date_range = f"{start_date} - Present"
+    else:
+        date_range = f"{start_date} - {end_date}"
+
+    gpa = edu.get('gpa', '')
+    gpa_text = f" (GPA: {gpa})" if gpa else ""
+    
+    return f'''
+    <div class="education-entry">
+        <div class="school-line">
+            <div class="school-gpa-line">
+                <div class="school-name">{edu.get('school', '')}</div>
+                <div class="school-gpa">{gpa_text}</div>
+            </div>
+            <div class="school-dates">{date_range}</div>
+        </div>
+        <div class="degree-line">
+            <div class="degree-type">{degree_text}</div>
+            <div class="school-location">{edu.get('location', '')}</div>
+        </div>
+    </div>
+    '''
+
 def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
 
     # -- 1. fill header.
@@ -35,6 +98,14 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
 
     # -- 2. fill education.
     education = resume_data.get("education", [])
+
+    education_entries = []
+
+    for edu in education:
+        education_entries.append(build_education_entry(edu))
+    
+    html_content = html_content.replace("{education_entries}", "\n".join(education_entries))
+
 
     return html_content
 

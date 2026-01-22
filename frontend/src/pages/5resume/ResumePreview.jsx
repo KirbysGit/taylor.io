@@ -26,7 +26,8 @@ function ResumePreview() {
     // allows us to navigate to other pages.
 	const navigate = useNavigate()
 
-    // ----- page states -----
+    // ----- states -----
+
 	const [user, setUser] = useState(null)										// user's data.
 
 	// welcome message states.
@@ -168,10 +169,13 @@ function ResumePreview() {
 				const initialEducation = responseData.education.map(edu => ({
 					school: edu.school,
 					degree: edu.degree,
-					field: edu.field,
+					discipline: edu.discipline,
+					minor: edu.minor,
+					location: edu.location,
 					start_date: edu.start_date,
 					end_date: edu.end_date,
 					current: edu.current,
+					gpa: edu.gpa,
 				}))
 				setEducationData(initialEducation)
 				setResumeData(prev => ({ ...prev, education: initialEducation }))
@@ -184,6 +188,7 @@ function ResumePreview() {
 		}
 	}, [navigate])
 
+	// fetch available templates.
 	useEffect(() => {
 		setIsLoadingTemplates(true)
 

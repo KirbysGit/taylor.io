@@ -57,13 +57,11 @@ function Auth() {
 
 	// handles if sign up is successful.
     const handleSignUpSuccess = (user) => {
-		console.log(user)
 		navigate('/setup')
     }
 
 	// handles if login is successful.
     const handleLoginSuccess = (user) => {
-		console.log(user)
 		navigate('/home')
     }
 

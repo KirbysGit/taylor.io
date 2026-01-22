@@ -6,7 +6,7 @@ const EducationStep = ({ education, onAdd, onRemove, onUpdate }) => {
 	const [form, setForm] = useState({
 		school: '',
 		degree: '',
-		field: '',
+		discipline: '',
 		startDate: '',
 		endDate: '',
 		current: false,
@@ -35,7 +35,7 @@ const EducationStep = ({ education, onAdd, onRemove, onUpdate }) => {
 		e.preventDefault()
 		if (form.school && form.degree) {
 			onAdd({ ...form, id: Date.now() })
-			setForm({ school: '', degree: '', field: '', startDate: '', endDate: '', current: false })
+			setForm({ school: '', degree: '', discipline: '', startDate: '', endDate: '', current: false })
 		}
 	}
 
@@ -71,8 +71,8 @@ const EducationStep = ({ education, onAdd, onRemove, onUpdate }) => {
 						<label className="block text-sm font-medium text-gray-700 mb-1">Field of Study</label>
 						<input
 							type="text"
-							value={form.field}
-							onChange={(e) => setForm({ ...form, field: e.target.value })}
+							value={form.discipline}
+							onChange={(e) => setForm({ ...form, discipline: e.target.value })}
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
 							placeholder="e.g., Computer Science"
 						/>
@@ -138,9 +138,9 @@ const EducationStep = ({ education, onAdd, onRemove, onUpdate }) => {
 										<p className="text-base text-gray-700 font-medium">
 											{edu.degree || 'Degree not specified'}
 										</p>
-										{edu.field && (
+										{edu.discipline && (
 											<p className="text-sm text-gray-600 mt-0.5">
-												Field: <span className="font-medium">{edu.field}</span>
+												Discipline: <span className="font-medium">{edu.discipline}</span>
 											</p>
 										)}
 									</div>

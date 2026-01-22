@@ -63,7 +63,7 @@
     font-family: Georgia, "Times New Roman", serif;
     font-size: 14pt;
     font-weight: bold;
-    margin-bottom: 10pt;
+    padding: 0 1.25pt;
 }
 
 .divider {
@@ -71,5 +71,76 @@
     height: 0.25pt;
     background-color: #000;
     opacity: 0.75;
-    margin-bottom: 10pt;
+    margin-bottom: 3pt;
+}
+
+/* education entry */
+
+.education-entry {
+    display: flex;
+    flex-direction: column;
+    padding: 0 2.5pt;
+}
+
+.school-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5pt;
+    line-height: 1;
+}
+
+.school-gpa-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4pt;
+}
+
+.school-name {
+    justify-self: flex-start;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+.school-gpa {
+    font-family: "Times New Roman", serif;
+    font-size: 11pt;
+    font-weight: normal;
+    font-style: italic;
+}
+
+.degree-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.degree-type {
+    font-family: "Times New Roman", serif;
+    font-size: 12pt;
+    font-weight: normal;
+    font-style: italic;
+    margin-bottom: 2.5pt;
+}
+
+.school-location {
+    justify-self: flex-end;
+    font-family: "Times New Roman", serif;
+    font-size: 12pt;
+    font-weight: normal;
+    font-style: italic;
+    margin-bottom: 2.5pt;
+}
+
+.school-dates {
+    font-family: "Times New Roman", serif;
+    font-size: 12pt;
+    font-weight: normal;
+    font-style: italic;
+    margin-bottom: 2.5pt;
 }
