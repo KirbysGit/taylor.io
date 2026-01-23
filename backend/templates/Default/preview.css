@@ -82,6 +82,9 @@
     padding: 0 2.5pt;
 }
 
+/* SCHOOL GPA DATES PAIRING */
+
+/* school, gpa, dates line */
 .school-line {
     display: flex;
     flex-direction: row;
@@ -91,6 +94,7 @@
     line-height: 1;
 }
 
+/* school, gpa pairing */
 .school-gpa-line {
     display: flex;
     flex-direction: row;
@@ -99,6 +103,7 @@
     gap: 4pt;
 }
 
+/* school name */
 .school-name {
     justify-self: flex-start;
     font-family: Georgia, "Times New Roman", serif;
@@ -106,6 +111,7 @@
     font-weight: bold;
 }
 
+/* school gpa */
 .school-gpa {
     font-family: "Times New Roman", serif;
     font-size: 11pt;
@@ -113,6 +119,17 @@
     font-style: italic;
 }
 
+.school-dates {
+    font-family: "Times New Roman", serif;
+    font-size: 12pt;
+    font-weight: normal;
+    font-style: italic;
+    margin-bottom: 2.5pt;
+}
+
+/* DEGREE, DISCIPLINE, MINOR, LOCATION PAIRING */
+
+/* degree, location pairing */
 .degree-line {
     display: flex;
     flex-direction: row;
@@ -120,6 +137,7 @@
     align-items: center;
 }
 
+/* degree type */
 .degree-type {
     font-family: "Times New Roman", serif;
     font-size: 12pt;
@@ -128,6 +146,7 @@
     margin-bottom: 2.5pt;
 }
 
+/* school location */
 .school-location {
     justify-self: flex-end;
     font-family: "Times New Roman", serif;
@@ -137,10 +156,30 @@
     margin-bottom: 2.5pt;
 }
 
-.school-dates {
-    font-family: "Times New Roman", serif;
-    font-size: 12pt;
+/* HIGHLIGHTS SECTION */
+
+.highlights-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 3pt;
+}
+
+.highlight-line {
+    display: flex;
+    flex-direction: row;
+}
+
+.highlight-title {
+    display: flex;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 10pt;
+    font-weight: bold;
+    margin-right: 4pt;
+}
+
+.highlight-content {
+    display: flex;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 10pt;
     font-weight: normal;
-    font-style: italic;
-    margin-bottom: 2.5pt;
 }

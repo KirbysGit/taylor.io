@@ -45,6 +45,8 @@ def format_date_month_year(date: str) -> str:
         return date
 
 def build_education_entry(edu: Dict[str, Any]) -> str:
+
+    print(f"edu: {edu}")
     
     # build degree line.
     degree = edu.get('degree', '')
@@ -65,8 +67,19 @@ def build_education_entry(edu: Dict[str, Any]) -> str:
         date_range = f"{start_date} - {end_date}"
 
     gpa = edu.get('gpa', '')
-    gpa_text = f" (GPA: {gpa})" if gpa else ""
-    
+    gpa_text = f"(GPA: {gpa})" if gpa else ""
+
+    # build highlights lines.
+    highlights_lines = []
+    for title, content in edu.get('subsections', {}).items():
+        highlights_lines.append(
+            f'''<div class='highlight-line'>
+                <div class='highlight-title'>{title}: </div>
+                <div class='highlight-content'>{content}</div>
+            </div>'''
+        )
+    highlights_lines = "\n".join(highlights_lines)
+
     return f'''
     <div class="education-entry">
         <div class="school-line">
@@ -79,6 +92,9 @@ def build_education_entry(edu: Dict[str, Any]) -> str:
         <div class="degree-line">
             <div class="degree-type">{degree_text}</div>
             <div class="school-location">{edu.get('location', '')}</div>
+        </div>
+        <div class="highlights-lines">
+            {highlights_lines}
         </div>
     </div>
     '''

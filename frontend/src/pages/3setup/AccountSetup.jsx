@@ -2,6 +2,9 @@
 
 // account setup page - multi-step onboarding form.
 
+// first page, don't allow user to move on until they parsed if they inputted a resume.
+// allow users to edit the fields that were parsed.
+
 // imports.
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -138,10 +141,8 @@ function AccountSetup() {
 					end_date: edu.end_date,
 					current: edu.current || false,
 					gpa: edu.gpa || null,
-					honors_awards: edu.honorsAwards || null,
-					clubs_extracurriculars: edu.clubsExtracurriculars || null,
 					location: edu.location || null,
-					relevant_coursework: edu.relevantCoursework || null,
+					subsections: edu.subsections || null,
 				}))
 
 				// push the education data to the promises array.

@@ -8,14 +8,17 @@
 // making degree and disciple necessary fields.
 // potentially reorganizing the start date, end date, and current checkbox.
 
-
-
+// imports.
 import React, { useState, useEffect } from 'react';
 import Switch from 'react-switch';
-
-import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faPlus} from '@fortawesome/free-solid-svg-icons'
+import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
+
+// local imports.
+import EduSubSection from './EduSubSection';
+
+// -- external helpers --
 
 // helper function to convert ISO datetime string to date-only format (YYYY-MM-DD)
 const formatDateForInput = (dateString) => {
@@ -31,20 +34,26 @@ const formatDateForInput = (dateString) => {
 }
 
 // helper function to normalize education entries.
-const normalizeEducation = (edu = null) => ({
-    school: edu?.school || '',
-    degree: edu?.degree || '',
-    discipline: edu?.discipline || '',
-    location: edu?.location || '',
-    start_date: formatDateForInput(edu?.start_date),
-    end_date: formatDateForInput(edu?.end_date),
-    current: edu?.current || false,
-    gpa: edu?.gpa || '',
-    minor: edu?.minor || '',
-    honors_awards: edu?.honors_awards || '',
-    clubs_extracurriculars: edu?.clubs_extracurriculars || '',
-    relevant_coursework: edu?.relevant_coursework || '',
-})
+const normalizeEducation = (edu = null) => {
+    // Initialize subsections with default "Relevant Coursework" if empty
+    let subsections = edu?.subsections || {}
+    if (!subsections || Object.keys(subsections).length === 0) {
+        subsections = { 'Relevant Coursework': '' }
+    }
+    
+    return {
+        school: edu?.school || '',
+        degree: edu?.degree || '',
+        discipline: edu?.discipline || '',
+        location: edu?.location || '',
+        start_date: formatDateForInput(edu?.start_date),
+        end_date: formatDateForInput(edu?.end_date),
+        current: edu?.current || false,
+        gpa: edu?.gpa || '',
+        minor: edu?.minor || '',
+        subsections: subsections,
+    }
+}
 
 const Education = ({ educationData, onEducationChange }) => {
 
@@ -84,6 +93,63 @@ const Education = ({ educationData, onEducationChange }) => {
         setEducations(prev => {
             if (prev.length <= 1) return prev // keep at least one entry.
             return prev.filter((_, i) => i !== index)
+        })
+    }
+
+	// ----- subsection helpers -----
+
+    // update subsection title for a specific education entry.
+    const updateSubsectionTitle = (eduIndex, oldTitle, newTitle) => {
+        if (!newTitle.trim() || oldTitle === newTitle) return
+        
+        setEducations(prev => {
+            const updated = [...prev]
+            const subsections = { ...updated[eduIndex].subsections }
+            const content = subsections[oldTitle] || ''
+            delete subsections[oldTitle]
+            subsections[newTitle] = content
+            updated[eduIndex] = { ...updated[eduIndex], subsections }
+            return updated
+        })
+    }
+
+    // update subsection content for a specific education entry.
+    const updateSubsectionContent = (eduIndex, title, content) => {
+        setEducations(prev => {
+            const updated = [...prev]
+            updated[eduIndex] = {
+                ...updated[eduIndex],
+                subsections: { ...updated[eduIndex].subsections, [title]: content }
+            }
+            return updated
+        })
+    }
+
+    // add a new subsection to a specific education entry.
+    const addSubsection = (eduIndex) => {
+        setEducations(prev => {
+            const updated = [...prev]
+            const newTitle = `New Section ${Object.keys(updated[eduIndex].subsections).length + 1}`
+            updated[eduIndex] = {
+                ...updated[eduIndex],
+                subsections: { ...updated[eduIndex].subsections, [newTitle]: '' }
+            }
+            return updated
+        })
+    }
+
+    // remove a subsection from a specific education entry.
+    const removeSubsection = (eduIndex, title) => {
+        setEducations(prev => {
+            const updated = [...prev]
+            const subsections = { ...updated[eduIndex].subsections }
+            delete subsections[title]
+            // Ensure at least one subsection exists
+            if (Object.keys(subsections).length === 0) {
+                subsections['Relevant Coursework'] = ''
+            }
+            updated[eduIndex] = { ...updated[eduIndex], subsections }
+            return updated
         })
     }
 
@@ -281,6 +347,42 @@ const Education = ({ educationData, onEducationChange }) => {
 											className="input"
 										/>
 									</div>
+								</div>
+							</div>
+
+							{/* highlights section */}
+							<div className="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-300">
+								{/* highlights header with plus icon */}
+								<div className="flex items-center gap-2">
+									<h4 className="text-base font-semibold text-gray-800">Highlights</h4>
+									<button
+										type="button"
+										onClick={() => addSubsection(index)}
+										className="text-brand-pink-light hover:text-brand-pink transition-colors"
+										title="Add new subsection"
+									>
+										<FontAwesomeIcon icon={faPlus} className="w-4 h-4" />
+									</button>
+								</div>
+
+								{/* subsections list */}
+								<div className="flex flex-col gap-3">
+									{Object.entries(education.subsections).map(([title, content], subsectionIndex) => {
+										// use a stable key based on education index and subsection index
+										const subsectionKey = `edu-${index}-sub-${subsectionIndex}`
+										
+										return (
+											<EduSubSection
+												key={subsectionKey}
+												eduIndex={index}
+												title={title}
+												content={content}
+												onTitleChange={(newTitle) => updateSubsectionTitle(index, title, newTitle)}
+												onContentChange={(newContent) => updateSubsectionContent(index, title, newContent)}
+												onDelete={() => removeSubsection(index, title)}
+											/>
+										)
+									})}
 								</div>
 							</div>
 						</div>

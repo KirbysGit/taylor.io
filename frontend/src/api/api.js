@@ -61,7 +61,7 @@ async function apiRequestCore(endpoint, options = {}) {
     }
 }
 
-// convenience functions for backward compatibility.
+// --- convenience functions.
 export async function apiRequest(endpoint, options = {}) {
     return apiRequestCore(endpoint, { ...options, responseType: 'json' })
 }

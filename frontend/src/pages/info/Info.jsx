@@ -25,10 +25,7 @@ const emptyEducation = () => ({
 	start_date: '',
 	end_date: '',
 	gpa: '',
-	honors_awards: '',
-	clubs_extracurriculars: '',
-	relevant_coursework: '',
-	label_overrides: {},
+	subsections: {},
 })
 
 // Normalize date strings for <input type="date">
@@ -119,10 +116,7 @@ function Info() {
 								start_date: e.start_date ?? '',
 								end_date: e.end_date ?? '',
 								gpa: e.gpa ?? '',
-								honors_awards: e.honors_awards ?? '',
-								clubs_extracurriculars: e.clubs_extracurriculars ?? '',
-								relevant_coursework: e.relevant_coursework ?? '',
-								label_overrides: e.label_overrides || {},
+								subsections: e.subsections || {},
 						  }))
 						: [emptyEducation()]
 				)
@@ -256,10 +250,7 @@ function Info() {
 						start_date: e.start_date ?? '',
 						end_date: e.end_date ?? '',
 						gpa: e.gpa ?? '',
-						honors_awards: e.honors_awards ?? '',
-						clubs_extracurriculars: e.clubs_extracurriculars ?? '',
-						relevant_coursework: e.relevant_coursework ?? '',
-						label_overrides: e.label_overrides || {},
+						subsections: e.subsections || {},
 					}))
 					: [emptyEducation()]
 			)
@@ -472,9 +463,6 @@ function Info() {
 											</div>
 
 											<div className="space-y-3">
-												<div className="text-xs font-semibold uppercase text-gray-500 tracking-wide">
-													Location & Dates
-												</div>
 												<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 													<div className="flex flex-col gap-1">
 														<label className="text-sm font-medium text-gray-700">Location</label>
@@ -508,6 +496,17 @@ function Info() {
 													</div>
 												</div>
 											</div>
+											
+											<div className="flex flex-col gap-1">
+												<label className="text-sm font-medium text-gray-700">GPA</label>
+												<input
+													type="text"
+													placeholder="e.g., 3.8 / 4.0"
+													value={edu.gpa}
+													onChange={(e) => onEducationChange(edu.id, 'gpa', e.target.value)}
+													className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+												/>
+											</div>
 
 											<div className="space-y-3">
 												<div className="text-xs font-semibold uppercase text-gray-500 tracking-wide">
@@ -515,84 +514,19 @@ function Info() {
 												</div>
 												<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 													<div className="flex flex-col gap-1">
-														<label className="text-sm font-medium text-gray-700">GPA</label>
+														<label className="text-sm font-medium text-gray-700">{sectionLabels.subsections || 'Subsections'}</label>
 														<input
 															type="text"
-															placeholder="e.g., 3.8 / 4.0"
-															value={edu.gpa}
-															onChange={(e) => onEducationChange(edu.id, 'gpa', e.target.value)}
+															placeholder="Subsections"
+															value={edu.subsections}
+															onChange={(e) => onEducationChange(edu.id, 'subsections', e.target.value)}
 															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
 														/>
-													</div>
-													<div className="flex flex-col gap-1">
-														<label className="text-sm font-medium text-gray-700">Honors & Awards</label>
-														<input
-															type="text"
-															placeholder="Dean’s List, Scholarships"
-															value={edu.honors_awards}
-															onChange={(e) => onEducationChange(edu.id, 'honors_awards', e.target.value)}
-															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-														/>
-													</div>
-													<div className="flex flex-col gap-1">
-														<label className="text-sm font-medium text-gray-700">Clubs & Extracurriculars</label>
-														<input
-															type="text"
-															placeholder="Clubs, leadership, hackathons"
-															value={edu.clubs_extracurriculars}
-															onChange={(e) =>
-																onEducationChange(edu.id, 'clubs_extracurriculars', e.target.value)
-															}
-															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-														/>
-													</div>
-													<div className="flex flex-col gap-1 md:col-span-2">
-														<label className="text-sm font-medium text-gray-700">Relevant Coursework</label>
-														<input
-															type="text"
-															placeholder="Separate with commas"
-															value={edu.relevant_coursework}
-															onChange={(e) => onEducationChange(edu.id, 'relevant_coursework', e.target.value)}
-															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-														/>
-													</div>
+													 </div>
 												</div>
 											</div>
 
-											{/* Label overrides inline editor */}
-											<div className="md:col-span-2 border border-dashed border-gray-200 rounded-lg p-3 space-y-2">
-												<div className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-													Customize labels
-													<FontAwesomeIcon icon={faPenToSquare} className="h-4 w-4 text-gray-500" />
-												</div>
-												<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-													<input
-														type="text"
-														placeholder="Honors label (default: Honors & Awards)"
-														value={edu.label_overrides?.honors_awards || ''}
-														onChange={(e) => onEducationLabelChange(edu.id, 'honors_awards', e.target.value)}
-														className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-													/>
-													<input
-														type="text"
-														placeholder="Coursework label (default: Relevant Coursework)"
-														value={edu.label_overrides?.relevant_coursework || ''}
-														onChange={(e) =>
-															onEducationLabelChange(edu.id, 'relevant_coursework', e.target.value)
-														}
-														className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-													/>
-													<input
-														type="text"
-														placeholder="Clubs label (default: Clubs & Extracurriculars)"
-														value={edu.label_overrides?.clubs_extracurriculars || ''}
-														onChange={(e) =>
-															onEducationLabelChange(edu.id, 'clubs_extracurriculars', e.target.value)
-														}
-														className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-													/>
-												</div>
-											</div>
+											
 										</div>
 									))}
 								</div>

@@ -50,11 +50,8 @@ class EducationCreate(BaseModel):
     end_date: Optional[datetime] = None
     current: bool = False
     gpa: Optional[str] = None
-    honors_awards: Optional[str] = None
-    clubs_extracurriculars: Optional[str] = None
     location: Optional[str] = None
-    relevant_coursework: Optional[str] = None
-    label_overrides: Optional[Dict[str, str]] = None
+    subsections: Optional[Dict[str, str]] = None
 
 
 class EducationResponse(BaseModel):
@@ -68,11 +65,8 @@ class EducationResponse(BaseModel):
     end_date: Optional[datetime] = None
     current: bool = False
     gpa: Optional[str] = None
-    honors_awards: Optional[str] = None
-    clubs_extracurriculars: Optional[str] = None
     location: Optional[str] = None
-    relevant_coursework: Optional[str] = None
-    label_overrides: Optional[Dict[str, str]] = None
+    subsections: Optional[Dict[str, str]] = None
 
     model_config = {"from_attributes": True}
 
@@ -196,10 +190,8 @@ class ParsedEducation(BaseModel):
     endDate: Optional[str] = None
     current: bool = False
     gpa: Optional[str] = None
-    honorsAwards: Optional[str] = None
-    clubsExtracurriculars: Optional[str] = None
     location: Optional[str] = None
-    relevantCoursework: Optional[str] = None
+    subsections: Optional[Dict[str, str]] = None
 
 
 class ParsedExperience(BaseModel):

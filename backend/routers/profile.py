@@ -280,12 +280,9 @@ async def create_education(
         end_date=education_data.end_date,
         current=education_data.current,
         gpa=education_data.gpa,
-        honors_awards=education_data.honors_awards,
-        clubs_extracurriculars=education_data.clubs_extracurriculars,
         location=education_data.location,
-        relevant_coursework=education_data.relevant_coursework,
         minor=education_data.minor,
-        label_overrides=education_data.label_overrides,
+        subsections=education_data.subsections,
     )
     
     # add, commit, and refresh db.
@@ -318,12 +315,9 @@ async def create_education_bulk(
             end_date=edu_data.end_date,
             current=edu_data.current,
             gpa=edu_data.gpa,
-            honors_awards=edu_data.honors_awards,
-            clubs_extracurriculars=edu_data.clubs_extracurriculars,
             location=edu_data.location,
-            relevant_coursework=edu_data.relevant_coursework,
             minor=edu_data.minor,
-            label_overrides=edu_data.label_overrides,
+            subsections=edu_data.subsections,
         )
         db.add(new_edu)
         new_education_list.append(new_edu)
@@ -452,10 +446,8 @@ async def parse_resume(
                 end_date=parse_date(edu_data.get("endDate")),
                 current=edu_data.get("current", False),
                 gpa=edu_data.get("gpa"),
-                honors_awards=edu_data.get("honorsAwards"),
-                clubs_extracurriculars=edu_data.get("clubsExtracurriculars"),
                 location=edu_data.get("location"),
-                relevant_coursework=edu_data.get("relevantCoursework"),
+                subsections=edu_data.get("subsections"),
             )
             db.add(new_education)
         
