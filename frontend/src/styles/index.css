@@ -58,6 +58,10 @@ input:focus {
 	outline: none;
 }
 
+textarea:focus {
+	outline: none;
+}
+
 /* hide browser's default password reveal button ( Edge / Chrome) */
 input[type="password"]::-ms-reveal {
 	display: none;

@@ -7,6 +7,8 @@
 // make it a bank of universities, so users can choose from a list.
 // making degree and disciple necessary fields.
 // potentially reorganizing the start date, end date, and current checkbox.
+// option to save their data.
+// bank for location (idk some API)
 
 // imports.
 import React, { useState, useEffect } from 'react';
@@ -17,28 +19,22 @@ import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
 
 // local imports.
 import EduSubSection from './EduSubSection';
+import { formatDateForInput } from '@/pages/utils/DataFormatting';
 
 // -- external helpers --
 
-// helper function to convert ISO datetime string to date-only format (YYYY-MM-DD)
-const formatDateForInput = (dateString) => {
-    if (!dateString) return ''
-    // If it's already in YYYY-MM-DD format, return as-is
-    if (dateString.length === 10) return dateString
-    // If it's an ISO datetime string (YYYY-MM-DDTHH:mm:ss), extract just the date part
-    if (dateString.includes('T')) {
-		console.log(dateString.split('T')[0])
-        return dateString.split('T')[0]
-    }
-    return dateString
-}
-
 // helper function to normalize education entries.
 const normalizeEducation = (edu = null) => {
-    // Initialize subsections with default "Relevant Coursework" if empty
-    let subsections = edu?.subsections || {}
-    if (!subsections || Object.keys(subsections).length === 0) {
+
+    // if edu is null (new entry), start with default "relevant coursework".
+    // if edu exists (from backend), use its subsections (even if empty) - respect user's choice
+    let subsections = {}
+    if (edu === null) {
+        // brand new entry - add default
         subsections = { 'Relevant Coursework': '' }
+    } else {
+        // existing entry - use what's in the data (or empty object if null/undefined)
+        subsections = edu.subsections || {}
     }
     
     return {
@@ -144,10 +140,6 @@ const Education = ({ educationData, onEducationChange }) => {
             const updated = [...prev]
             const subsections = { ...updated[eduIndex].subsections }
             delete subsections[title]
-            // Ensure at least one subsection exists
-            if (Object.keys(subsections).length === 0) {
-                subsections['Relevant Coursework'] = ''
-            }
             updated[eduIndex] = { ...updated[eduIndex], subsections }
             return updated
         })
@@ -358,7 +350,7 @@ const Education = ({ educationData, onEducationChange }) => {
 									<button
 										type="button"
 										onClick={() => addSubsection(index)}
-										className="text-brand-pink-light hover:text-brand-pink transition-colors"
+										className="text-white rounded-full bg-brand-pink w-7 h-7 hover:text-white hover:bg-brand-pink-dark transition-colors"
 										title="Add new subsection"
 									>
 										<FontAwesomeIcon icon={faPlus} className="w-4 h-4" />
@@ -367,22 +359,28 @@ const Education = ({ educationData, onEducationChange }) => {
 
 								{/* subsections list */}
 								<div className="flex flex-col gap-3">
-									{Object.entries(education.subsections).map(([title, content], subsectionIndex) => {
-										// use a stable key based on education index and subsection index
-										const subsectionKey = `edu-${index}-sub-${subsectionIndex}`
-										
-										return (
-											<EduSubSection
-												key={subsectionKey}
-												eduIndex={index}
-												title={title}
-												content={content}
-												onTitleChange={(newTitle) => updateSubsectionTitle(index, title, newTitle)}
-												onContentChange={(newContent) => updateSubsectionContent(index, title, newContent)}
-												onDelete={() => removeSubsection(index, title)}
-											/>
-										)
-									})}
+									{Object.keys(education.subsections).length === 0 ? (
+										// empty state
+										<div className="flex flex-col items-center justify-center py-8 text-gray-400">
+											<span className="text-4xl mb-2">😞</span>
+											<p className="text-sm">No highlights</p>
+										</div>
+									) : (
+										Object.entries(education.subsections).map(([title, content], subsectionIndex) => {
+											const subsectionKey = `edu-${index}-sub-${subsectionIndex}`
+											return (
+												<EduSubSection
+													key={subsectionKey}
+													eduIndex={index}
+													title={title}
+													content={content}
+													onTitleChange={(newTitle) => updateSubsectionTitle(index, title, newTitle)}
+													onContentChange={(newContent) => updateSubsectionContent(index, title, newContent)}
+													onDelete={() => removeSubsection(index, title)}
+												/>
+											)
+										})
+									)}
 								</div>
 							</div>
 						</div>
@@ -393,9 +391,9 @@ const Education = ({ educationData, onEducationChange }) => {
 						<button
 							type="button"
 							onClick={addEducation}
-							className="px-3 py-2 bg-brand-pink-light text-white rounded-full hover:bg-brand-pink transition-colors"
+							className="px-4 py-2 bg-brand-pink-light text-white rounded-full hover:bg-brand-pink transition-colors"
 						>
-							<FontAwesomeIcon icon={faPlus} className="w-4 h-4 color-white" />
+							<FontAwesomeIcon icon={faPlus} className="w-4 h-4 color-white mr-2" /> Add Another Education
 						</button>
 					</div>
 				</div>

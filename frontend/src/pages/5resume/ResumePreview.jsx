@@ -1,6 +1,11 @@
 // pages/5resume/ResumePreview.jsx
 
 // building back incrementally.
+// loading state for downloading and processing.
+// templates up top.
+// welcome message only appears on first load.
+// save banner shouldn't appear if visibility change.
+// add like recommendations for features, like you should at least have a linkedin or something else.
 
 // imports.
 import { useEffect, useState, useCallback } from 'react'
@@ -8,8 +13,8 @@ import { useNavigate } from 'react-router-dom'
 
 // api imports.
 import { listTemplates } from '@/api/services/templates'
-import { getMyProfile } from '@/api/services/profile'
 import { generateResumePreview, generateResumePDF } from '@/api/services/resume'
+import { getMyProfile, upsertContact, setupEducation } from '@/api/services/profile'
 
 // icons imports.
 import { XIcon } from '@/components/icons'
@@ -19,6 +24,10 @@ import { faRefresh, faDownload } from '@fortawesome/free-solid-svg-icons'
 // component imports.
 import ResumeHeader from './components/ResumeHeader'
 import Education from './components/Education'
+
+// util imports.
+import { formatDateForInput } from '@/pages/utils/DataFormatting'
+import { applyVisibilityFilters, hasResumeDataChanged, downloadBlob } from './utils/resumeDataTransform'
 
 // ----------- main component -----------
 function ResumePreview() {
@@ -52,6 +61,19 @@ function ResumePreview() {
 	// header data state.
 	const [headerData, setHeaderData] = useState(null)
 	const [educationData, setEducationData] = useState([])
+
+	// save banner state.
+	const [showSaveBanner, setShowSaveBanner] = useState(false)
+	const [isSaving, setIsSaving] = useState(false)
+
+	// baseline data for comparison (original data from fetch).
+	const [baselineData, setBaselineData] = useState({
+		header: null,
+		education: null,
+	})
+
+	// flag to track if we've set baseline after Education component normalization.
+	const [hasSetBaseline, setHasSetBaseline] = useState(false)
 
 	// resume data state.
 	const [resumeData, setResumeData] = useState({
@@ -88,7 +110,10 @@ function ResumePreview() {
 
 	const handleRefreshPreview = async () => {
 		setIsGeneratingPreview(true)
-		const htmlContent = await generateResumePreview(template, resumeData)
+		// apply visibility filters for preview.
+		const previewData = applyVisibilityFilters(resumeData)
+		
+		const htmlContent = await generateResumePreview(template, previewData)
 		setPreviewHtml(htmlContent)
 		setIsGeneratingPreview(false)
 	}
@@ -96,32 +121,83 @@ function ResumePreview() {
 	const handleDownloadPDF = async () => {
 		setIsDownloadingPDF(true)
 		try {
-			const pdfBlob = await generateResumePDF(template, resumeData)
+			// apply visibility filters for PDF.
+			const pdfData = applyVisibilityFilters(resumeData)
+			
+			const pdfBlob = await generateResumePDF(template, pdfData)
 			setIsDownloadingPDF(false)
-			const url = URL.createObjectURL(pdfBlob)
-			const link = document.createElement('a')
-			link.href = url
-			link.download = 'resume.pdf'
-
-			document.body.appendChild(link)
-			link.click()
-			document.body.removeChild(link)
-			URL.revokeObjectURL(url)
+			downloadBlob(pdfBlob, 'resume.pdf')
 		} catch (error) {
 			console.error('Failed to generate PDF:', error)
 			setIsDownloadingPDF(false)
 		}
 	}
 
-	// memoized header changes.
+	const handleDiscardChanges = () => {
+		// reset to baseline data.
+		if (baselineData.header) {
+			setResumeData(prev => ({
+				...prev,
+				header: JSON.parse(JSON.stringify(baselineData.header)),
+				education: JSON.parse(JSON.stringify(baselineData.education)),
+			}))
+			setHeaderData(JSON.parse(JSON.stringify(baselineData.header)))
+			setEducationData(JSON.parse(JSON.stringify(baselineData.education)))
+		}
+		setShowSaveBanner(false)
+	}
+
+	// ----- data changers / savers -----
+
 	const handleHeaderChange = useCallback((exportedHeader) => {
 		setResumeData(prev => ({ ...prev, header: exportedHeader }))
 	}, [])
 
-	// memoized education changes.
 	const handleEducationChange = useCallback((exportedEducation) => {
 		setResumeData(prev => ({ ...prev, education: exportedEducation }))
 	}, [])
+
+	const handleSaveChanges = async () => {
+		setIsSaving(true)
+		try {
+			// save contact/header info - use actual values, ignore visibility.
+			const header = resumeData.header
+			await upsertContact({
+				phone: header.phone || null,
+				location: header.location || null,
+				github: header.github || null,
+				linkedin: header.linkedin || null,
+				portfolio: header.portfolio || null,
+			})
+
+			// save education (bulk replace).
+			const educationToSave = resumeData.education.map(edu => ({
+				school: edu.school || null,
+				degree: edu.degree || null,
+				discipline: edu.discipline || null,
+				minor: edu.minor || null,
+				location: edu.location || null,
+				start_date: edu.start_date || null,
+				end_date: edu.end_date || null,
+				current: edu.current || false,
+				gpa: edu.gpa || null,
+				subsections: edu.subsections || {},
+			}))
+			await setupEducation(educationToSave)
+
+			// update baseline to current data.
+			setBaselineData({
+				header: JSON.parse(JSON.stringify(resumeData.header)),
+				education: JSON.parse(JSON.stringify(resumeData.education)),
+			})
+			setShowSaveBanner(false)
+		} catch (error) {
+			console.error('Failed to save changes:', error)
+			alert('Failed to save changes. Please try again.')
+		} finally {
+			setIsSaving(false)
+		}
+	}
 
 	// ----- use effects -----
 
@@ -147,39 +223,54 @@ function ResumePreview() {
 
 			// step 2 : fetch user data from backend.
 			const fetchCurrentUser = async () => {
+
+				// --- grab user data from backend.
 				const response = await getMyProfile()
 				const responseData = response.data
-				const userData = responseData.user  // Extract user object from response
+				const userData = responseData.user
 				setUser(userData)
 
-				// set initial header data for ResumeHeader component.
+				// --- set initial header data.
 				const initialHeader = {
 					first_name: userData.first_name,
 					last_name: userData.last_name,
 					email: userData.email,
 					phone: responseData.contact?.phone || '',
 					location: responseData.contact?.location || '',
-					portfolio: responseData.contact?.portfolio || '',
 					linkedin: responseData.contact?.linkedin || '',
 					github: responseData.contact?.github || '',
+					portfolio: responseData.contact?.portfolio || '',
+					visibility: {
+						showPhone: true,
+						showLocation: true,
+						showLinkedin: true,
+						showGithub: true,
+						showPortfolio: true,
+					},
 				}
-				setHeaderData(initialHeader)
-				setResumeData(prev => ({ ...prev, header: initialHeader }))
 
 				const initialEducation = responseData.education.map(edu => ({
-					school: edu.school,
-					degree: edu.degree,
-					discipline: edu.discipline,
-					minor: edu.minor,
-					location: edu.location,
-					start_date: edu.start_date,
-					end_date: edu.end_date,
-					current: edu.current,
-					gpa: edu.gpa,
+					school: edu.school || '',
+					degree: edu.degree || '',
+					discipline: edu.discipline || '',
+					location: edu.location || '',
+					start_date: formatDateForInput(edu.start_date),
+					end_date: formatDateForInput(edu.end_date),
+					current: edu.current || false,
+					gpa: edu.gpa || '',
+					minor: edu.minor || '',
+					subsections: edu.subsections || {},
 				}))
+
+				// ---set all data at once.
+				setHeaderData(initialHeader)
 				setEducationData(initialEducation)
-				setResumeData(prev => ({ ...prev, education: initialEducation }))
-				console.log(resumeData)
+				
+				setResumeData({
+					header: initialHeader,
+					education: initialEducation,
+				})
+				
 			}
 
 			fetchCurrentUser();
@@ -219,17 +310,15 @@ function ResumePreview() {
 		}
 	}, [isResizing])
 
+	// generate preview on data change.
 	useEffect(() => {
-		if (!resumeData.header.first_name && !resumeData.header.email) {
-			console.log("Skipping Preview")
-			return
-		}
-
 		setIsGeneratingPreview(true)
 
 		const timer = setTimeout(async () => {
 			try {
-				const htmlContent = await generateResumePreview(template, resumeData)
+				// --- apply visibility filters for preview, then generate preview, and set preview.
+				const previewData = applyVisibilityFilters(resumeData)
+				const htmlContent = await generateResumePreview(template, previewData)
 				setPreviewHtml(htmlContent)
 			} catch (error) {
 				console.error('Failed to generate preview: ', error)
@@ -240,6 +329,29 @@ function ResumePreview() {
 
 		return () => clearTimeout(timer)
 	}, [template, resumeData])
+
+	// set baseline data after components mount.
+	useEffect(() => {
+		if (hasSetBaseline) return
+		if (!resumeData.header || !resumeData.education || resumeData.education.length === 0) return
+		if (!educationData || educationData.length === 0) return
+		
+		// --- set baseline with the normalized data from components.
+		setBaselineData({
+			header: JSON.parse(JSON.stringify(resumeData.header)),
+			education: JSON.parse(JSON.stringify(resumeData.education)),
+		})
+		setHasSetBaseline(true)
+	}, [resumeData, educationData, hasSetBaseline])
+
+	// check for changes from og data and show save banner.
+	useEffect(() => {
+		// --- skip change detection until baseline is set.
+		if (!hasSetBaseline) return
+		
+		const hasChanges = hasResumeDataChanged(resumeData, baselineData)
+		setShowSaveBanner(hasChanges)
+	}, [resumeData, baselineData, hasSetBaseline])
 
 	return (
 		<div className="min-h-screen flex flex-col bg-cream">
@@ -260,6 +372,33 @@ function ResumePreview() {
 				
 				{/* left panel : inputs / controls */}
 				<aside style = {{ width: `${leftPanelWidth}px` }} className="flex-shrink-0 bg-white-bright border-r border-gray-200 p-6 overflow-y-auto">
+					{/* save changes banner */}
+					{showSaveBanner && (
+						<div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 mb-4 flex items-center justify-between">
+							<div className="flex items-center gap-3">
+								<span className="text-yellow-800 font-medium text-sm">You have unsaved changes</span>
+							</div>
+							<div className="flex items-center gap-2">
+								<button
+									type="button"
+									onClick={handleDiscardChanges}
+									disabled={isSaving}
+									className="px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+								>
+									Discard
+								</button>
+								<button
+									type="button"
+									onClick={handleSaveChanges}
+									disabled={isSaving}
+									className="px-3 py-1.5 text-sm bg-brand-pink text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-50"
+								>
+									{isSaving ? 'Saving...' : 'Save Changes'}
+								</button>
+							</div>
+						</div>
+					)}
+
 					{ welcomeMessage && (
 						<div className="flex flex-col gap-0.5 p-3 border-[2px] rounded-md border-brand-pink-light mb-4 relative">
 							<h2 className="text-[1.25rem] font-semibold text-gray-900 mb-1">
@@ -276,6 +415,22 @@ function ResumePreview() {
 							</button>
 						</div>
 					)}
+
+					<div className="flex flex-col gap-2 mb-4">
+						<label className="block text-sm font-medium text-gray-700 mb-1">Template</label>	
+                        <select
+                            value={template}
+                            onChange={(e) => setTemplate(e.target.value)}
+                            disabled={isLoadingTemplates}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent bg-white"
+                        >
+                            {availableTemplates.map((t) => (
+                                <option key={t} value={t}>
+                                    {t}
+                                </option>
+                            ))}
+                        </select>
+					</div>
 					
 					{/* resume header section */}
 					{headerData && (
@@ -292,20 +447,6 @@ function ResumePreview() {
 							onEducationChange={handleEducationChange}
 						/>
 					)}
-
-					<label className="block text-sm font-medium text-gray-700 mb-1">Template</label>
-					<select
-						value={template}
-						onChange={(e) => setTemplate(e.target.value)}
-						disabled={isLoadingTemplates}
-						className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent bg-white"
-					>
-						{availableTemplates.map((t) => (
-							<option key={t} value={t}>
-								{t}
-							</option>
-						))}
-					</select>
 
 					<div className="mt-6 flex gap-2">
 						<button
@@ -325,10 +466,6 @@ function ResumePreview() {
 							Download
 						</button>
 					</div>
-
-					<p className="mt-4 text-sm text-gray-600">
-						This is a minimal skeleton. Next we’ll add: preview generation, then style controls, then content editing.
-					</p>
 				</aside>
 
 				{/* resizable divider */}

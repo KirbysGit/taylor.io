@@ -41,16 +41,26 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 	const [portfolioValue, setPortfolioValue] = useState(headerData?.portfolio || '')
 
 	// export header data whenever any header-related states change.
+	// export both actual values and visibility states separately.
 	useEffect(() => {
 		const exportedData = {
+			// actual values (always exported, regardless of visibility).
 			first_name: firstName,
 			last_name: lastName,
 			email: email,
-			phone: showPhone ? phoneValue : '',
-			location: showLocation ? locationValue : '',
-			linkedin: showLinkedin ? linkedinValue : '',
-			github: showGithub ? githubValue : '',
-			portfolio: showPortfolio ? portfolioValue : '',
+			phone: phoneValue,
+			location: locationValue,
+			linkedin: linkedinValue,
+			github: githubValue,
+			portfolio: portfolioValue,
+			// visibility states.
+			visibility: {
+				showPhone,
+				showLocation,
+				showLinkedin,
+				showGithub,
+				showPortfolio,
+			},
 		}
 		onHeaderChange(exportedData)
 	}, [firstName, lastName, email, phoneValue, locationValue, linkedinValue, githubValue, portfolioValue, showPhone, showLocation, showLinkedin, showGithub, showPortfolio])

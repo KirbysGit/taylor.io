@@ -10,6 +10,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        'brand-pink-dark': 'rgb(190, 70, 70)',
         'brand-pink': 'rgb(214, 86, 86)',
         'brand-pink-light': 'rgb(238, 155, 155)',
         'brand-pink-lighter': 'rgb(250, 205, 205)',

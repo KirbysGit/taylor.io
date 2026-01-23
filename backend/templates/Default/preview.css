@@ -29,7 +29,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    margin-bottom: 6pt;
+    margin-bottom: 3pt;
     box-sizing: border-box;
 }
 
@@ -38,21 +38,22 @@
     font-family: "Palatino Linotype", Georgia, "Times New Roman", serif;
     font-size: 32pt;
     letter-spacing: 0.5pt;
-    margin-bottom: 3pt;
     font-weight: bold;
 }
   
 .contact {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 10.5pt;
-    line-height: 1.15pt;
-    margin-top: 3pt;
-    margin-bottom: 2pt;
+    line-height: 1.15;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .contact span {
     letter-spacing: -0.4pt;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
 }
 
 /* ===== section styling ===== */

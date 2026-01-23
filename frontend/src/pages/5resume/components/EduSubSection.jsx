@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
-// Subsection item component with local state for title editing
+// subsection item component with local state for title editing
 const EduSubSection = ({ eduIndex, title, content, onTitleChange, onContentChange, onDelete }) => {
     const [editingTitle, setEditingTitle] = useState(title)
     
-    // Sync local title with prop when it changes externally
+    // sync local title with prop when it changes externally
     useEffect(() => {
         setEditingTitle(title)
     }, [title])
@@ -16,14 +16,14 @@ const EduSubSection = ({ eduIndex, title, content, onTitleChange, onContentChang
         if (editingTitle.trim() && editingTitle !== title) {
             onTitleChange(editingTitle.trim())
         } else if (!editingTitle.trim()) {
-            // Reset to original if empty
+            // reset to original title if empty
             setEditingTitle(title)
         }
     }
     
     return (
         <div className="flex flex-col gap-2 p-3 border border-gray-200 rounded-md bg-gray-50">
-            {/* Subsection header with title input and delete button */}
+            {/* subsection header with title input and delete button */}
             <div className="flex items-center gap-2">
                 <input
                     type="text"
@@ -43,7 +43,7 @@ const EduSubSection = ({ eduIndex, title, content, onTitleChange, onContentChang
                 </button>
             </div>
             
-            {/* Subsection content input */}
+            {/* subsection content input */}
             <textarea
                 value={content}
                 onChange={(e) => onContentChange(e.target.value)}
