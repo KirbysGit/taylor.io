@@ -7,97 +7,11 @@ import asyncio
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 
+# import builders.
+from .builders import build_header, build_education_entry, build_experience_entry
+
 # get abs path to templates directory.
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
-
-def build_header(header: Dict[str, Any]) -> str:
-    fields = [
-        header.get("email", ""),
-        header.get("phone", ""),
-        header.get("github", ""),
-        header.get("linkedin", ""),
-        header.get("location", ""),
-        header.get("portfolio", ""),
-    ]
-    return " | ".join([field for field in fields if field.strip()])
-
-def format_date_month_year(date: str) -> str:
-    if not date:
-        return ''
-
-    try:
-        # Handle ISO datetime strings (e.g., "2021-08-01T00:00:00")
-        # Extract just the date part (first 10 characters: YYYY-MM-DD)
-        date_str = date[:10] if len(date) >= 10 else date
-        
-        # Parse the date
-        if len(date_str) == 7:  # YYYY-MM format
-            dt = datetime.strptime(date_str, '%Y-%m')
-        elif len(date_str) == 10:  # YYYY-MM-DD format
-            dt = datetime.strptime(date_str, '%Y-%m-%d')
-        else:
-            return date  # Return original if format is unexpected
-        
-        # Format as "August 2021"
-        return dt.strftime('%B %Y')
-    except Exception as e:
-        # If parsing fails, return original date
-        return date
-
-def build_education_entry(edu: Dict[str, Any]) -> str:
-
-    print(f"edu: {edu}")
-    
-    # build degree line.
-    degree = edu.get('degree', '')
-    discipline = edu.get('discipline', '')
-    minor = edu.get('minor', '')
-    
-    degree_text = f"{degree} in {discipline}"
-    if minor:
-        degree_text += f", Minor in {minor}"
-
-    # build date range.
-    start_date = format_date_month_year(edu.get('start_date', ''))
-    end_date = format_date_month_year(edu.get('end_date', ''))
-    current = edu.get('current', False)
-    if current:
-        date_range = f"{start_date} - Present"
-    else:
-        date_range = f"{start_date} - {end_date}"
-
-    gpa = edu.get('gpa', '')
-    gpa_text = f"(GPA: {gpa})" if gpa else ""
-
-    # build highlights lines.
-    highlights_lines = []
-    for title, content in edu.get('subsections', {}).items():
-        highlights_lines.append(
-            f'''<div class='highlight-line'>
-                <div class='highlight-title'>{title}: </div>
-                <div class='highlight-content'>{content}</div>
-            </div>'''
-        )
-    highlights_lines = "\n".join(highlights_lines)
-
-    return f'''
-    <div class="education-entry">
-        <div class="school-line">
-            <div class="school-gpa-line">
-                <div class="school-name">{edu.get('school', '')}</div>
-                <div class="school-gpa">{gpa_text}</div>
-            </div>
-            <div class="school-dates">{date_range}</div>
-        </div>
-        <div class="degree-line">
-            <div class="degree-type">{degree_text}</div>
-            <div class="school-location">{edu.get('location', '')}</div>
-        </div>
-        <div class="highlights-lines">
-            {highlights_lines}
-        </div>
-    </div>
-    '''
 
 def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
 
@@ -122,6 +36,15 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
     
     html_content = html_content.replace("{education_entries}", "\n".join(education_entries))
 
+    # -- 3. fill experience.
+    experience = resume_data.get("experience", [])
+
+    experience_entries = []
+
+    for exp in experience:
+        experience_entries.append(build_experience_entry(exp))
+    
+    html_content = html_content.replace("{experience_entries}", "\n".join(experience_entries))
 
     return html_content
 
@@ -149,7 +72,7 @@ def generate_resume(template_name: str, resume_data: Dict[str, Any]) -> str:
     # return filled document.
     return filled_html
 
-def _convert_html_to_pdf_sync(html_content: str) -> bytes:
+def convert_html_to_pdf_sync(html_content: str) -> bytes:
     # convert html to pdf using playwright.
     # has to run in a thread pool to avoid windows asyncio subprocess issues.
     with sync_playwright() as playwright:
@@ -166,7 +89,7 @@ async def generate_pdf(template_name: str, resume_data: Dict[str, Any]) -> bytes
     html_content = generate_resume(template_name, resume_data)
 
     # generate pdf from html content using thread pool (fixes Windows asyncio issue).
-    pdf_bytes = await asyncio.to_thread(_convert_html_to_pdf_sync, html_content)
+    pdf_bytes = await asyncio.to_thread(convert_html_to_pdf_sync, html_content)
 
     # return pdf bytes.
     return pdf_bytes

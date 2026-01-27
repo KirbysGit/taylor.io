@@ -105,6 +105,7 @@ function AccountSetup() {
 
 	// handles form completion.
 	const handleComplete = async () => {
+		console.log('🚀 [DEBUG] handleComplete called')
 		try {
 			// save education, experiences, projects, and skills to backend.
 			const promises = []
@@ -115,42 +116,58 @@ function AccountSetup() {
 				return `${monthStr}-01T00:00:00`
 			}
 			
+			console.log('formData', formData)
+			
 			// set up education data.
 			if (formData.education.length > 0) {
-				let start_date = null
-				let end_date = null
-				
-				// update start date to ISO format.
-				if (edu.startDate) {
-					start_date = monthToDate(edu.startDate)
-				}
-
-				// update end date to ISO format.
-				if (edu.current) {
-					end_date = null
-				} else if (edu.endDate) {
-					end_date = monthToDate(edu.endDate)
-				}
-
-				const educationData = formData.education.map(edu => ({
-					school: edu.school,
-					degree: edu.degree,
-					discipline: edu.discipline,
-					minor: edu.minor || null,
-					start_date: edu.start_date,
-					end_date: edu.end_date,
-					current: edu.current || false,
-					gpa: edu.gpa || null,
-					location: edu.location || null,
-					subsections: edu.subsections || null,
-				}))
+				const educationData = formData.education.map(edu => {
+					// handle dates - could be in "YYYY-MM" format from parsing or "YYYY-MM-DD" format
+					let start_date = null
+					let end_date = null
+					
+					// if there's a start date, convert it to ISO format.
+					if (edu.startDate) {
+						if (edu.startDate.includes('T')) {
+							start_date = edu.startDate
+						} else {
+							start_date = monthToDate(edu.startDate)
+						}
+					}
+					
+					// if the education is current, set end date to null, else if there's an end date, convert it to ISO format.
+					if (edu.current) {
+						end_date = null
+					} else if (edu.endDate) {
+						if (edu.endDate.includes('T')) {
+							end_date = edu.endDate
+						} else {
+							end_date = monthToDate(edu.endDate)
+						}
+					}
+					
+					return {
+						school: edu.school,
+						degree: edu.degree,
+						discipline: edu.discipline,
+						minor: edu.minor || null,
+						start_date: start_date,
+						end_date: end_date,
+						current: edu.current || false,
+						gpa: edu.gpa || null,
+						location: edu.location || null,
+						subsections: edu.subsections || null,
+					}
+				})
 
 				// push the education data to the promises array.
 				promises.push(setupEducation(educationData))
 			}
 			
 			// set up experiences data.
+			console.log('🔍 [DEBUG] Checking experiences:', formData.experiences.length, 'items')
 			if (formData.experiences.length > 0) {
+				console.log('🔍 [DEBUG] Raw experiences from formData:', formData.experiences)
+				
 				const experiencesData = formData.experiences.map(exp => {
 					// handle dates - could be in "YYYY-MM" format from parsing or "YYYY-MM-DD" format
 					let start_date = null
@@ -187,8 +204,24 @@ function AccountSetup() {
 						end_date: end_date,
 					}
 				})
+				
+				console.log('📤 [DEBUG] Mapped experiences data being sent:', experiencesData)
+				console.log('📤 [DEBUG] Calling setupExperiences endpoint...')
+				
 				// push the experiences data to the promises array.
-				promises.push(setupExperiences(experiencesData))
+				const experiencePromise = setupExperiences(experiencesData)
+					.then(response => {
+						console.log('✅ [DEBUG] setupExperiences response:', response)
+						return response
+					})
+					.catch(error => {
+						console.error('❌ [DEBUG] setupExperiences error:', error)
+						throw error
+					})
+				
+				promises.push(experiencePromise)
+			} else {
+				console.log('⚠️ [DEBUG] No experiences to save')
 			}
 			
 			// set up projects data.
@@ -212,7 +245,9 @@ function AccountSetup() {
 			}
 			
 			// wait for all promises to complete.
+			console.log('⏳ [DEBUG] Waiting for', promises.length, 'promises to complete...')
 			await Promise.all(promises)
+			console.log('✅ [DEBUG] All promises completed successfully')
 			
 			// redirect to home.
 			navigate('/home')

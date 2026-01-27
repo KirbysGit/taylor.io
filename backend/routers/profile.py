@@ -163,6 +163,7 @@ async def create_experiences_bulk(
     current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db)
 ):
+    print(experiences_data)
     # create multiple experiences for the current user.
     new_experiences = []
     for exp_data in experiences_data:

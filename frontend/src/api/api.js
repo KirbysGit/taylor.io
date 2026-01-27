@@ -73,6 +73,7 @@ export async function apiRequestBlob(endpoint, options = {}) {
 export async function apiRequestText(endpoint, options = {}) {
     return apiRequestCore(endpoint, { ...options, responseType: 'text' })
 }
-// export base url for use in other files.
+
+// --- export base url for use in other files. ---
 export const API_BASE_URL = baseURL
 

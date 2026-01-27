@@ -9,6 +9,7 @@
 // potentially reorganizing the start date, end date, and current checkbox.
 // option to save their data.
 // bank for location (idk some API)
+// able to have no education entries if needed (like bootcamps).
 
 // imports.
 import React, { useState, useEffect } from 'react';

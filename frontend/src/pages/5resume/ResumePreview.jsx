@@ -6,6 +6,9 @@
 // welcome message only appears on first load.
 // save banner shouldn't appear if visibility change.
 // add like recommendations for features, like you should at least have a linkedin or something else.
+// more contrast in fields just for sake of "easy on the eyes".
+// preview scrolls to where the user is in input fields.
+// always have padding on left side for scroll bar (like the left panel).
 
 // imports.
 import { useEffect, useState, useCallback } from 'react'
@@ -24,10 +27,11 @@ import { faRefresh, faDownload } from '@fortawesome/free-solid-svg-icons'
 // component imports.
 import ResumeHeader from './components/ResumeHeader'
 import Education from './components/Education'
+import Experience from './components/Experience'
 
 // util imports.
 import { formatDateForInput } from '@/pages/utils/DataFormatting'
-import { applyVisibilityFilters, hasResumeDataChanged, downloadBlob } from './utils/resumeDataTransform'
+import { applyVisibilityFilters, hasResumeDataChanged, getResumeChangeDescriptions, downloadBlob } from './utils/resumeDataTransform'
 
 // ----------- main component -----------
 function ResumePreview() {
@@ -61,15 +65,17 @@ function ResumePreview() {
 	// header data state.
 	const [headerData, setHeaderData] = useState(null)
 	const [educationData, setEducationData] = useState([])
-
+	const [experienceData, setExperienceData] = useState([])
 	// save banner state.
 	const [showSaveBanner, setShowSaveBanner] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
+	const [changeDescriptions, setChangeDescriptions] = useState([])
 
 	// baseline data for comparison (original data from fetch).
 	const [baselineData, setBaselineData] = useState({
 		header: null,
 		education: null,
+		experience: null,
 	})
 
 	// flag to track if we've set baseline after Education component normalization.
@@ -88,6 +94,7 @@ function ResumePreview() {
 			portfolio: '',
 		},
 		education: [],
+		experience: [],
 	})
 
 
@@ -155,6 +162,10 @@ function ResumePreview() {
 
 	const handleEducationChange = useCallback((exportedEducation) => {
 		setResumeData(prev => ({ ...prev, education: exportedEducation }))
+	}, [])
+
+	const handleExperienceChange = useCallback((exportedExperience) => {
+		setResumeData(prev => ({ ...prev, experience: exportedExperience }))
 	}, [])
 
 	const handleSaveChanges = async () => {
@@ -262,13 +273,26 @@ function ResumePreview() {
 					subsections: edu.subsections || {},
 				}))
 
+				const initialExperience = responseData.experiences.map(exp => ({
+					title: exp.title || '',
+					company: exp.company || '',
+					description: exp.description || '',
+					start_date: formatDateForInput(exp.start_date),
+					end_date: formatDateForInput(exp.end_date),
+					current: exp.current || false,
+					location: exp.location || '',
+					role_type: exp.role_type || '',
+				}))
+				
 				// ---set all data at once.
 				setHeaderData(initialHeader)
 				setEducationData(initialEducation)
+				setExperienceData(initialExperience)
 				
 				setResumeData({
 					header: initialHeader,
 					education: initialEducation,
+					experience: initialExperience,
 				})
 				
 			}
@@ -350,11 +374,13 @@ function ResumePreview() {
 		if (!hasSetBaseline) return
 		
 		const hasChanges = hasResumeDataChanged(resumeData, baselineData)
+		const descriptions = hasChanges ? getResumeChangeDescriptions(resumeData, baselineData) : []
 		setShowSaveBanner(hasChanges)
+		setChangeDescriptions(descriptions)
 	}, [resumeData, baselineData, hasSetBaseline])
 
 	return (
-		<div className="min-h-screen flex flex-col bg-cream">
+		<div className="h-screen flex flex-col bg-cream overflow-hidden">
 			<header className="bg-brand-pink text-white py-4 shadow-md">
 				<div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
 					<h1 className="text-2xl font-bold">Resume</h1>
@@ -374,28 +400,35 @@ function ResumePreview() {
 				<aside style = {{ width: `${leftPanelWidth}px` }} className="flex-shrink-0 bg-white-bright border-r border-gray-200 p-6 overflow-y-auto">
 					{/* save changes banner */}
 					{showSaveBanner && (
-						<div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 mb-4 flex items-center justify-between">
-							<div className="flex items-center gap-3">
+						<div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 mb-4">
+							<div className="flex items-center justify-between mb-2">
 								<span className="text-yellow-800 font-medium text-sm">You have unsaved changes</span>
+								<div className="flex items-center gap-2">
+									<button
+										type="button"
+										onClick={handleDiscardChanges}
+										disabled={isSaving}
+										className="px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+									>
+										Discard
+									</button>
+									<button
+										type="button"
+										onClick={handleSaveChanges}
+										disabled={isSaving}
+										className="px-3 py-1.5 text-sm bg-brand-pink text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-50"
+									>
+										{isSaving ? 'Saving...' : 'Save Changes'}
+									</button>
+								</div>
 							</div>
-							<div className="flex items-center gap-2">
-								<button
-									type="button"
-									onClick={handleDiscardChanges}
-									disabled={isSaving}
-									className="px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-								>
-									Discard
-								</button>
-								<button
-									type="button"
-									onClick={handleSaveChanges}
-									disabled={isSaving}
-									className="px-3 py-1.5 text-sm bg-brand-pink text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-50"
-								>
-									{isSaving ? 'Saving...' : 'Save Changes'}
-								</button>
-							</div>
+							{changeDescriptions.length > 0 && (
+								<div className="text-xs text-yellow-700 space-y-1">
+									{changeDescriptions.map((desc, idx) => (
+										<div key={idx}>• {desc}</div>
+									))}
+								</div>
+							)}
 						</div>
 					)}
 
@@ -448,6 +481,13 @@ function ResumePreview() {
 						/>
 					)}
 
+					
+					{experienceData && (
+						<Experience 
+							experienceData={experienceData}
+							onExperienceChange={handleExperienceChange}
+						/>
+					)}
 					<div className="mt-6 flex gap-2">
 						<button
 							type="button"
@@ -475,9 +515,9 @@ function ResumePreview() {
 				/>
 				
 				{/* right panel : preview placeholder */}
-				<section className="flex-1 bg-gray-50 overflow-auto p-8">
+				<section className="flex-1 bg-gray-50 overflow-hidden p-4 flex flex-col">
 					{/* control buttons */}
-					<div className="flex items-center justify-end">
+					<div className="flex items-center justify-end flex-shrink-0">
 						<button
 							type="button"
 							className="px-2 py-1 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all"
@@ -494,18 +534,20 @@ function ResumePreview() {
 							<FontAwesomeIcon icon={faRefresh} />
 						</button>
 					</div>
-					<div className="mt-4 h-[520px] rounded-lg border-2 border-dashed border-gray-300 p-8 overflow-auto bg-gray-100">
+					<div className="mt-4 flex-1 rounded-lg border-2 border-dashed border-gray-300 p-8 overflow-hidden bg-gray-100 min-h-0">
 						{isGeneratingPreview ? (
 							<div className="flex items-center justify-center h-full">
 								<p className="text-gray-500">Generating preview...</p>
 							</div>
 						) : previewHtml ? (
 							<div className="w-full h-full flex items-center justify-center box-shadow">
-								<iframe 
-									srcdoc={previewHtml}
-									className="w-full h-full rounded-lg"
-									title="Resume Preview"
-								/>
+								<div className="w-full h-[100%] overflow-auto">
+									<iframe 
+										srcDoc={previewHtml}
+										className="w-full h-[100%] rounded-lg"
+										title="Resume Preview"
+									/>
+								</div>
 							</div>
 						) : (
 							<div className="flex items-center justify-center h-full text-gray-500">
