@@ -80,7 +80,7 @@ class ExperienceCreate(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     location: Optional[str] = None
-    role_type: Optional[str] = None
+    skills: Optional[str] = None
 
 
 class ExperienceResponse(BaseModel):
@@ -92,7 +92,7 @@ class ExperienceResponse(BaseModel):
     start_date: Optional[datetime]
     end_date: Optional[datetime]
     location: Optional[str] = None
-    role_type: Optional[str] = None
+    skills: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -202,8 +202,7 @@ class ParsedExperience(BaseModel):
     endDate: Optional[str] = None
     current: bool = False
     location: Optional[str] = None
-    roleType: Optional[str] = None
-
+    skills: Optional[str] = None
 
 class ParsedProject(BaseModel):
     title: Optional[str] = None

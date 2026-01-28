@@ -65,7 +65,7 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
             "endDate": None,
             "current": False,
             "location": None,
-            "roleType": None,
+            "skills": None,
         }
         
         lines = [line.strip() for line in entry.split('\n') if line.strip()]
@@ -148,14 +148,6 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
                     if re.match(r'^(Remote|On-site|Onsite|Hybrid)$', part, re.IGNORECASE):
                         if not exp_item["location"]:
                             exp_item["location"] = part
-                    elif re.match(r'^(Full-time|Part-time|Contract|Internship|Freelance|Temporary)$', part, re.IGNORECASE):
-                        if not exp_item["roleType"]:
-                            exp_item["roleType"] = part
-                    else:
-                        # Check if it's a city, state pattern
-                        city_state_match = re.match(r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*),\s*([A-Z]{2})$', part)
-                        if city_state_match and not exp_item["location"]:
-                            exp_item["location"] = part
             else:
                 company_name = company_line
             
@@ -217,12 +209,6 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
                 # Remove location keyword from company name
                 company_name = re.sub(r'\s*\b' + re.escape(location) + r'\b\s*', '', company_name, flags=re.IGNORECASE).strip()
             
-            # extract role type from company line if present
-            role_type_match = re.search(r'\b(Full-time|Part-time|Contract|Internship|Freelance|Temporary)\b', company_name, re.IGNORECASE)
-            if role_type_match and not exp_item["roleType"]:
-                exp_item["roleType"] = role_type_match.group(1)
-                # Remove role type from company name
-                company_name = re.sub(r'\s*\b' + re.escape(role_type_match.group(1)) + r'\b\s*', '', company_name, flags=re.IGNORECASE).strip()
             
             # Final cleanup: remove any remaining location/role keywords
             company_name = re.sub(r'\s+(Remote|On-site|Onsite|Hybrid|Full-time|Part-time|Contract|Internship|Freelance|Temporary)\s*$', '', company_name, flags=re.IGNORECASE)
@@ -239,9 +225,7 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
                     if not exp_item["location"]:
                         exp_item["location"] = line
                 else:
-                    if not exp_item["roleType"]:
-                        exp_item["roleType"] = line
-                continue
+                    continue
         
         # extract description
         description_lines = []
@@ -259,24 +243,55 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
         
         if description_lines:
             description = "\n".join(description_lines)
-            # normalize bullets
-            description = re.sub(r'^[\s]*[•\-\*]\s*', '• ', description, flags=re.MULTILINE)
-            # split by bullets into list
-            bullet_items = re.split(r'•\s+', description)
-            bullet_items = [item.strip() for item in bullet_items if item.strip()]
+            # normalize bullets - match more Unicode bullet characters (same as pipeline.py)
+            # normalize any bullet marker to "• " at start of lines
+            description = re.sub(r'^[\s]*[-*•∙▪▫]\s*', '• ', description, flags=re.MULTILINE)
+            
+            # extract bullet items: find all lines that start with bullets
+            lines = description.split('\n')
+            bullet_items = []
+            current_bullet = []
+            
+            for line in lines:
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                
+                # check if this line starts with a bullet
+                if stripped.startswith('•'):
+                    # save previous bullet if exists
+                    if current_bullet:
+                        bullet_text = ' '.join(current_bullet)
+                        bullet_text = re.sub(r'^•\s+', '', bullet_text)  # remove leading bullet
+                        if bullet_text.strip():
+                            bullet_items.append(bullet_text.strip())
+                    # start new bullet
+                    current_bullet = [stripped]
+                elif current_bullet:
+                    # continuation of current bullet (multi-line bullet)
+                    current_bullet.append(stripped)
+                # else: skip non-bullet lines that come before any bullets
+            
+            # save last bullet
+            if current_bullet:
+                bullet_text = ' '.join(current_bullet)
+                bullet_text = re.sub(r'^•\s+', '', bullet_text)  # remove leading bullet
+                if bullet_text.strip():
+                    bullet_items.append(bullet_text.strip())
+            
             # clean each bullet item
             cleaned_items = []
             for item in bullet_items:
-                # remove newlines and replace with spaces
-                item = re.sub(r'\n+', ' ', item)
+                # remove extra whitespace
                 item = re.sub(r'[ \t]+', ' ', item)
                 item = re.sub(r'\s+([,\.;:!?])', r'\1', item)
                 item = item.strip()
                 if item:
                     cleaned_items.append(item)
+            
             # return as list if we have bullets, otherwise as string
             if cleaned_items:
-                exp_item["description"] = cleaned_items
+                exp_item["description"] = "• " + "\n• ".join(cleaned_items)
             else:
                 exp_item["description"] = description.strip()
         

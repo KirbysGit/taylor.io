@@ -18,7 +18,7 @@ class Experience(Base):
     start_date = Column(DateTime, nullable=True)                            # start date.
     end_date = Column(DateTime, nullable=True)                              # end date (null if current).
     location = Column(String(100), nullable=True)                           # location (e.g., Remote, On-site, Hybrid).
-    role_type = Column(String(50), nullable=True)                           # role type (e.g., Full-time, Part-time, Contract).
+    skills = Column(String(200), nullable=True)                             # skills (e.g. relevant tech stack or skills used in role).
 
     # relationship back to user.
     user = relationship("User", back_populates="experiences")

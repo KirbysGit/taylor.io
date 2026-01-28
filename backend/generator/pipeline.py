@@ -8,7 +8,7 @@ from datetime import datetime
 from playwright.sync_api import sync_playwright
 
 # import builders.
-from .builders import build_header, build_education_entry, build_experience_entry
+from .builders import build_header, build_education_entry, build_experience_entry, build_project_entry, build_skill_entry
 
 # get abs path to templates directory.
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
@@ -45,6 +45,22 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
         experience_entries.append(build_experience_entry(exp))
     
     html_content = html_content.replace("{experience_entries}", "\n".join(experience_entries))
+
+    # -- 4. fill projects.
+    projects = resume_data.get("projects", [])
+
+    project_entries = []
+
+    for proj in projects:
+        project_entries.append(build_project_entry(proj))
+    
+    html_content = html_content.replace("{project_entries}", "\n".join(project_entries))
+
+    # -- 5. fill skills.
+    skills = resume_data.get("skills", [])
+    skill_entries_html = build_skill_entry(skills)
+    
+    html_content = html_content.replace("{skill_entries}", skill_entries_html)
 
     return html_content
 

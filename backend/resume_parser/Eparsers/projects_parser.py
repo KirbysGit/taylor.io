@@ -30,20 +30,51 @@ def parse_projects(section_text: str) -> List[Dict[str, Optional[str]]]:
                 # convert description list to string if needed
                 if isinstance(current_project["description"], list):
                     description = "\n".join(current_project["description"])
-                    description = re.sub(r'^[\s]*[•\-\*]\s*', '• ', description, flags=re.MULTILINE)
-                    # split by bullets into list
-                    bullet_items = re.split(r'•\s+', description)
-                    bullet_items = [item.strip() for item in bullet_items if item.strip()]
-                    # clean each bullet item (remove newlines)
+                    # normalize bullets - match more Unicode bullet characters (same as experience_parser.py)
+                    description = re.sub(r'^[\s]*[-*•∙▪▫]\s*', '• ', description, flags=re.MULTILINE)
+                    
+                    # extract bullet items: find all lines that start with bullets
+                    lines = description.split('\n')
+                    bullet_items = []
+                    current_bullet = []
+                    
+                    for line in lines:
+                        stripped = line.strip()
+                        if not stripped:
+                            continue
+                        
+                        # check if this line starts with a bullet
+                        if stripped.startswith('•'):
+                            # save previous bullet if exists
+                            if current_bullet:
+                                bullet_text = ' '.join(current_bullet)
+                                bullet_text = re.sub(r'^•\s+', '', bullet_text)  # remove leading bullet
+                                if bullet_text.strip():
+                                    bullet_items.append(bullet_text.strip())
+                            # start new bullet
+                            current_bullet = [stripped]
+                        elif current_bullet:
+                            # continuation of current bullet (multi-line bullet)
+                            current_bullet.append(stripped)
+                        # else: skip non-bullet lines that come before any bullets
+                    
+                    # save last bullet
+                    if current_bullet:
+                        bullet_text = ' '.join(current_bullet)
+                        bullet_text = re.sub(r'^•\s+', '', bullet_text)  # remove leading bullet
+                        if bullet_text.strip():
+                            bullet_items.append(bullet_text.strip())
+                    
+                    # clean each bullet item
                     cleaned_items = []
                     for item in bullet_items:
-                        # remove newlines and replace with spaces
-                        item = re.sub(r'\n+', ' ', item)
+                        # remove extra whitespace
                         item = re.sub(r'[ \t]+', ' ', item)
                         item = re.sub(r'\s+([,\.;:!?])', r'\1', item)
                         item = item.strip()
                         if item:
                             cleaned_items.append(item)
+                    
                     # return as list if we have bullets, otherwise as string
                     if cleaned_items:
                         current_project["description"] = cleaned_items
@@ -109,20 +140,51 @@ def parse_projects(section_text: str) -> List[Dict[str, Optional[str]]]:
     if current_project and current_project.get("title"):
         if isinstance(current_project["description"], list):
             description = "\n".join(current_project["description"])
-            description = re.sub(r'^[\s]*[•\-\*]\s*', '• ', description, flags=re.MULTILINE)
-            # split by bullets into list
-            bullet_items = re.split(r'•\s+', description)
-            bullet_items = [item.strip() for item in bullet_items if item.strip()]
-            # clean each bullet item (remove newlines)
+            # normalize bullets - match more Unicode bullet characters (same as experience_parser.py)
+            description = re.sub(r'^[\s]*[-*•∙▪▫]\s*', '• ', description, flags=re.MULTILINE)
+            
+            # extract bullet items: find all lines that start with bullets
+            lines = description.split('\n')
+            bullet_items = []
+            current_bullet = []
+            
+            for line in lines:
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                
+                # check if this line starts with a bullet
+                if stripped.startswith('•'):
+                    # save previous bullet if exists
+                    if current_bullet:
+                        bullet_text = ' '.join(current_bullet)
+                        bullet_text = re.sub(r'^•\s+', '', bullet_text)  # remove leading bullet
+                        if bullet_text.strip():
+                            bullet_items.append(bullet_text.strip())
+                    # start new bullet
+                    current_bullet = [stripped]
+                elif current_bullet:
+                    # continuation of current bullet (multi-line bullet)
+                    current_bullet.append(stripped)
+                # else: skip non-bullet lines that come before any bullets
+            
+            # save last bullet
+            if current_bullet:
+                bullet_text = ' '.join(current_bullet)
+                bullet_text = re.sub(r'^•\s+', '', bullet_text)  # remove leading bullet
+                if bullet_text.strip():
+                    bullet_items.append(bullet_text.strip())
+            
+            # clean each bullet item
             cleaned_items = []
             for item in bullet_items:
-                # remove newlines and replace with spaces
-                item = re.sub(r'\n+', ' ', item)
+                # remove extra whitespace
                 item = re.sub(r'[ \t]+', ' ', item)
                 item = re.sub(r'\s+([,\.;:!?])', r'\1', item)
                 item = item.strip()
                 if item:
                     cleaned_items.append(item)
+            
             # return as list if we have bullets, otherwise as string
             if cleaned_items:
                 current_project["description"] = cleaned_items

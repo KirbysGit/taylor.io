@@ -202,6 +202,9 @@ function AccountSetup() {
 							: exp.description || null,
 						start_date: start_date,
 						end_date: end_date,
+						current: exp.current || false,
+						location: exp.location || null,
+						skills: exp.skills || null,
 					}
 				})
 				

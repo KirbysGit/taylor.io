@@ -17,7 +17,7 @@ const normalizeExperience = (exp = null) => {
         end_date: formatDateForInput(exp?.end_date),
         current: exp?.current || false,
         location: exp?.location || '',
-        role_type: exp?.role_type || '',
+        skills: exp?.skills || '',
     }
 }
 
@@ -217,23 +217,18 @@ const Experience = ({ experienceData, onExperienceChange }) => {
                                 </div>
                             </div>
 
-                            {/* role type */}
-                            <div className="flex mb-2">
-                                <div className="labelInputPair">
-                                    <label className="label">Role Type</label>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="labelInputPair">
-                                        <label className="label">Role Type</label>
-                                        <input
-                                            type="text"
-                                            value={experience.role_type}
-                                            onChange={(e) => updateExperience(index, 'role_type', e.target.value)}
-                                            className="input"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+							{/* skills (like the project's relevant tech stack) */}
+							<div className="flex mb-2">
+								<div className="labelInputPair">
+									<label className="label">Skills</label>
+									<input
+										type="text"
+										value={experience.skills}
+										onChange={(e) => updateExperience(index, 'skills', e.target.value)}
+										className="input"
+									/>
+								</div>
+							</div>
 						</div>
 					))}
 

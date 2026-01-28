@@ -89,7 +89,7 @@ async def create_experience(
         start_date=experience_data.start_date,
         end_date=experience_data.end_date,
         location=experience_data.location,
-        role_type=experience_data.role_type,
+        skills=experience_data.skills,
     )
     
     # add, commit, and refresh db.
@@ -175,7 +175,7 @@ async def create_experiences_bulk(
             start_date=exp_data.start_date,
             end_date=exp_data.end_date,
             location=exp_data.location,
-            role_type=exp_data.role_type,
+            skills=exp_data.skills,
         )
         db.add(new_exp)
         new_experiences.append(new_exp)
