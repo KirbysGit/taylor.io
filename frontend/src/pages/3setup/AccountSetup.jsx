@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // services imports.
-import { setupEducation, setupExperiences, setupProjects, setupSkills } from '@/api/services/profile'
+import { setupEducation, setupExperiences, setupProjects, setupSkills, createSummary } from '@/api/services/profile'
 
 // steps imports.
 import WelcomeStep from './steps/WelcomeStep'
@@ -20,6 +20,7 @@ import ExperienceStep from './steps/ExperienceStep'
 import SkillsStep from './steps/SkillsStep'
 import ProjectsStep from './steps/ProjectsStep'
 import CompleteScreen from './steps/CompleteScreen'
+import SummaryStep from './steps/SummaryStep'
 
 // ----------- main component -----------
 
@@ -44,6 +45,7 @@ function AccountSetup() {
 		skills: [],
 		experiences: [],
 		projects: [],
+		summary: '',
 		extracurriculars: [],
 		coursework: [],
 	})
@@ -59,6 +61,7 @@ function AccountSetup() {
 		{ title: 'Experience', icon: '💼' },
 		{ title: 'Skills', icon: '⚡' },
 		{ title: 'Projects', icon: '🚀' },
+		{ title: 'Summary', icon: '📝' },
 		{ title: 'Complete', icon: '✅' },
 	]
 
@@ -105,7 +108,6 @@ function AccountSetup() {
 
 	// handles form completion.
 	const handleComplete = async () => {
-		console.log('🚀 [DEBUG] handleComplete called')
 		try {
 			// save education, experiences, projects, and skills to backend.
 			const promises = []
@@ -115,8 +117,6 @@ function AccountSetup() {
 				if (!monthStr) return null
 				return `${monthStr}-01T00:00:00`
 			}
-			
-			console.log('formData', formData)
 			
 			// set up education data.
 			if (formData.education.length > 0) {
@@ -164,9 +164,7 @@ function AccountSetup() {
 			}
 			
 			// set up experiences data.
-			console.log('🔍 [DEBUG] Checking experiences:', formData.experiences.length, 'items')
 			if (formData.experiences.length > 0) {
-				console.log('🔍 [DEBUG] Raw experiences from formData:', formData.experiences)
 				
 				const experiencesData = formData.experiences.map(exp => {
 					// handle dates - could be in "YYYY-MM" format from parsing or "YYYY-MM-DD" format
@@ -208,23 +206,17 @@ function AccountSetup() {
 					}
 				})
 				
-				console.log('📤 [DEBUG] Mapped experiences data being sent:', experiencesData)
-				console.log('📤 [DEBUG] Calling setupExperiences endpoint...')
 				
 				// push the experiences data to the promises array.
 				const experiencePromise = setupExperiences(experiencesData)
 					.then(response => {
-						console.log('✅ [DEBUG] setupExperiences response:', response)
 						return response
 					})
 					.catch(error => {
-						console.error('❌ [DEBUG] setupExperiences error:', error)
 						throw error
 					})
 				
 				promises.push(experiencePromise)
-			} else {
-				console.log('⚠️ [DEBUG] No experiences to save')
 			}
 			
 			// set up projects data.
@@ -246,11 +238,17 @@ function AccountSetup() {
 				}))
 				promises.push(setupSkills(skillsData))
 			}
+
+			// set up summary data.
+			if (formData.summary) {
+				const summaryData = {
+					summary: formData.summary,
+				}
+				promises.push(createSummary(summaryData))
+			}
 			
 			// wait for all promises to complete.
-			console.log('⏳ [DEBUG] Waiting for', promises.length, 'promises to complete...')
 			await Promise.all(promises)
-			console.log('✅ [DEBUG] All promises completed successfully')
 			
 			// redirect to home.
 			navigate('/home')
@@ -347,7 +345,15 @@ function AccountSetup() {
 					/>
 				)
 
-			case 6: // Complete
+			case 6: // Summary
+				return (
+					<SummaryStep
+						summary={formData.summary}
+						onUpdate={(value) => setFormData(prev => ({ ...prev, summary: value }))}
+					/>
+				)
+
+			case 7: // Complete
 				return (
 					<CompleteScreen
 						formData={formData}

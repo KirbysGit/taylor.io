@@ -12,7 +12,7 @@ from .Aextractor import extract_pdf, extract_docx
 # from .Bcleaner import clean_text_regex.py, openai_cleaner.py
 from .Csegmenter import split_into_sections
 # from .Dnlp import nlp_utils.py, normalizer.py, skill_matcher.py, spacy_loader.py
-from .Eparsers import parse_contact, parse_education, parse_experience, parse_skills, parse_projects
+from .Eparsers import parse_contact, parse_education, parse_experience, parse_skills, parse_projects, parse_summary
 
 # create logger.
 logger = logging.getLogger(__name__)
@@ -28,6 +28,7 @@ def minimal_clean(text: str) -> str:
     return text.strip()
 
 def parse_resume_file(file_bytes: bytes, filename: str) -> Dict:
+    
     # create a dictionary to store the results.
     result = {
         "contact_info": {},
@@ -35,6 +36,7 @@ def parse_resume_file(file_bytes: bytes, filename: str) -> Dict:
         "experiences": [],
         "skills": [],
         "projects": [],
+        "summary": "",
         "warnings": []
     }
 
@@ -77,6 +79,7 @@ def parse_resume_file(file_bytes: bytes, filename: str) -> Dict:
         result["experiences"] = parse_experience(sections.get("experience", ""))
         result["skills"] = parse_skills(sections.get("skills", ""))
         result["projects"] = parse_projects(sections.get("projects", ""))
+        result["summary"] = parse_summary(sections.get("summary", ""))
 
     except Exception as e:
         logger.error(f"Error parsing resume: {e}")

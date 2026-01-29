@@ -7,39 +7,19 @@
 // parse resume file (PDF or DOCX).
 
 // services.
-import { apiRequestText, apiRequestBlob, API_BASE_URL } from '../api'
+import { apiRequest, apiRequestText, apiRequestBlob } from '../api'
 
 // parse resume file (PDF or DOCX).
 export async function parseResume(file) {
-	// get token from localStorage.
-	const token = localStorage.getItem('token')
-	
-	// construct url for request.
-	const url = `${API_BASE_URL}/api/profile/parse-resume`
-	
 	// create form data for file upload.
 	const formData = new FormData()
 	formData.append('file', file)
 	
-	try {
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: { 'Authorization': `Bearer ${token}` },
-			body: formData,
-		})
-
-		if (!response.ok) {
-			const errorData = await response.json()
-			throw { response: { data: errorData, status: response.status } }
-		}
-
-		// parse response body as json.
-		const data = await response.json()
-		return { data }
-	} catch (error) {
-		console.error('Error parsing resume:', error)
-		throw error
-	}
+	// use apiRequest - FormData handling is automatic in apiRequestCore.
+	return await apiRequest('/api/profile/parse-resume', {
+		method: 'POST',
+		body: formData,
+	})
 }
 
 export async function generateResumePreview(template, resumeData) {

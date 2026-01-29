@@ -6,13 +6,14 @@ import re
 from typing import Dict
 
 
-# Focus on 5 key sections: Experience, Education, Skills, Contact, Projects
+# Focus on 6 key sections: Experience, Education, Skills, Contact, Projects, Summary
 SECTION_HEADERS = {
     "contact": r"(contact|contact information|contact info|personal information|personal info)",
     "education": r"(education|academic|qualifications|degrees?|educational background)",
     "experience": r"(experience|employment|work history|professional experience|work experience|employment history|career)",
     "skills": r"(skills|technical skills|core competencies|proficiencies?|competencies|expertise)",
     "projects": r"(projects|personal projects|key projects|project experience|portfolio)",
+    "summary": r"(summary|professional summary|profile|objective|career objective|executive summary|about)",
 }
 
 
@@ -20,7 +21,7 @@ def split_into_sections(text: str) -> Dict[str, str]:
     """Split resume text into sections based on keyword headers.
     
     Returns a dictionary mapping section names to their text content.
-    Focuses on: Experience, Education, Skills, Contact, Projects.
+    Focuses on: Experience, Education, Skills, Contact, Projects, Summary.
     Handles variations in header formatting and multi-column layouts.
     """
     sections = {}

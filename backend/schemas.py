@@ -8,7 +8,6 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Union, Dict
 from datetime import datetime
 
-
 # --------- user schemas ---------
 
 class UserCreate(BaseModel):
@@ -16,7 +15,6 @@ class UserCreate(BaseModel):
     last_name: str
     email: EmailStr
     password: str
-
 
 class UserResponse(BaseModel):
     id: int
@@ -27,17 +25,26 @@ class UserResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
-
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
-
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
     user: UserResponse
 
+# --------- summary schemas ---------
+
+class SummaryCreate(BaseModel):
+    summary: str
+
+class SummaryResponse(BaseModel):
+    id: int
+    user_id: int
+    summary: str
+
+    model_config = {"from_attributes": True}
 
 # --------- education schemas ---------
 
@@ -52,7 +59,6 @@ class EducationCreate(BaseModel):
     gpa: Optional[str] = None
     location: Optional[str] = None
     subsections: Optional[Dict[str, str]] = None
-
 
 class EducationResponse(BaseModel):
     id: int
@@ -70,7 +76,6 @@ class EducationResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
-
 # --------- experience schemas ---------
 
 class ExperienceCreate(BaseModel):
@@ -81,7 +86,6 @@ class ExperienceCreate(BaseModel):
     end_date: Optional[datetime] = None
     location: Optional[str] = None
     skills: Optional[str] = None
-
 
 class ExperienceResponse(BaseModel):
     id: int
@@ -96,7 +100,6 @@ class ExperienceResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
-
 # --------- project schemas ---------
 
 class ProjectCreate(BaseModel):
@@ -104,7 +107,6 @@ class ProjectCreate(BaseModel):
     description: Optional[str] = None
     tech_stack: Optional[List[str]] = None
     url: Optional[str] = None
-
 
 class ProjectResponse(BaseModel):
     id: int
@@ -116,12 +118,10 @@ class ProjectResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
-
 # --------- skill schemas ---------
 
 class SkillCreate(BaseModel):
     name: str
-
 
 class SkillResponse(BaseModel):
     id: int
@@ -129,7 +129,6 @@ class SkillResponse(BaseModel):
     name: str
 
     model_config = {"from_attributes": True}
-
 
 # --------- contact schemas ---------
 
@@ -140,7 +139,6 @@ class ContactCreate(BaseModel):
     linkedin: Optional[str] = None
     portfolio: Optional[str] = None
     location: Optional[str] = None
-
 
 class ContactResponse(BaseModel):
     id: int
@@ -154,9 +152,11 @@ class ContactResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+# --------- section labels ---------
+class SectionLabelsUpdate(BaseModel):
+    section_labels: Dict[str, str]
 
-# --------- user profile schema ---------
-
+# --------- user profile response ---------
 class UserProfileResponse(BaseModel):
     user: UserResponse
     experiences: List[ExperienceResponse]
@@ -164,12 +164,7 @@ class UserProfileResponse(BaseModel):
     skills: List[SkillResponse]
     education: List[EducationResponse] = []
     contact: Optional[ContactResponse] = None
-
-
-# --------- section labels ---------
-class SectionLabelsUpdate(BaseModel):
-    section_labels: Dict[str, str]
-
+    summary: Optional[SummaryResponse] = None
 
 # --------- parsed resume schemas ---------
 
@@ -181,7 +176,6 @@ class ParsedContactInfo(BaseModel):
     portfolio: Optional[str] = None
     location: Optional[str] = None
 
-
 class ParsedEducation(BaseModel):
     school: Optional[str] = None
     degree: Optional[str] = None
@@ -192,7 +186,6 @@ class ParsedEducation(BaseModel):
     gpa: Optional[str] = None
     location: Optional[str] = None
     subsections: Optional[Dict[str, str]] = None
-
 
 class ParsedExperience(BaseModel):
     title: Optional[str] = None
@@ -210,11 +203,9 @@ class ParsedProject(BaseModel):
     techStack: Optional[List[str]] = None
     url: Optional[str] = None
 
-
 class ParsedSkill(BaseModel):
     name: str
     category: Optional[str] = None  # e.g., "Languages", "Frameworks", "Data Tools"
-
 
 class ParsedResumeResponse(BaseModel):
     experiences: List[ParsedExperience] = []
@@ -222,5 +213,6 @@ class ParsedResumeResponse(BaseModel):
     skills: List[ParsedSkill] = []
     projects: List[ParsedProject] = []
     contact_info: ParsedContactInfo = ParsedContactInfo()
+    summary: Optional[str] = None
     warnings: List[str] = []
 

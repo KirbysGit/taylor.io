@@ -17,6 +17,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)                     # password.
 
     # one user has many experiences, projects, skills, education, and contact entries.
+    summary = relationship("Summary", back_populates="user", uselist=False, cascade="all, delete-orphan")
     
     experiences = relationship("Experience", back_populates="user", cascade="all, delete-orphan")
     

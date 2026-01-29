@@ -1,27 +1,32 @@
+// pages / 5resume / components / Skills.jsx
+
+// imports.
 import React from 'react';
 import { useState, useEffect } from 'react'
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus} from '@fortawesome/free-solid-svg-icons'
-import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
+import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { ChevronDown, ChevronUp } from '@/components/icons'
 
+// parse bulk text (comma or newline separated)
+const parseBulkSkills = (text) => {
+    return text
+        .split(/[,\n]/)
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+}
 
-// normalize skills data from backend (flat list with category)
+// normalize from backend
 const normalizeFromBackend = (skillsData) => {
     if (!skillsData || skillsData.length === 0) return { mode: 'list', categories: [], skills: [] }
     
-    // check if any skills have categories
     const hasCategories = skillsData.some(skill => skill.category && skill.category.trim())
     
     if (hasCategories) {
-        // group by category
         const categoriesMap = {}
         skillsData.forEach(skill => {
             if (skill.name) {
                 const cat = skill.category || 'Uncategorized'
-                if (!categoriesMap[cat]) {
-                    categoriesMap[cat] = []
-                }
+                if (!categoriesMap[cat]) categoriesMap[cat] = []
                 categoriesMap[cat].push(skill.name)
             }
         })
@@ -33,68 +38,145 @@ const normalizeFromBackend = (skillsData) => {
         
         return { mode: 'categorical', categories, skills: [] }
     } else {
-        // list mode - just skill names
         const skills = skillsData.filter(skill => skill.name).map(skill => skill.name)
         return { mode: 'list', categories: [], skills }
     }
 }
 
-// convert to flat format for backend
+// normalize skills: convert null category to empty string for consistent comparison.
+const normalizeSkills = (skills) => {
+    if (!skills || !Array.isArray(skills)) return []
+    return skills.map(skill => ({
+        name: skill.name || '',
+        category: skill.category === null ? '' : (skill.category || '')
+    }))
+}
+
+// convert to backend format
 const convertToBackendFormat = (mode, categories, skills) => {
+    let result = []
     if (mode === 'categorical') {
-        const result = []
         categories.forEach(cat => {
             cat.skills.forEach(skillName => {
                 if (skillName.trim()) {
                     result.push({
                         name: skillName.trim(),
-                        category: cat.category.trim() || null
+                        category: cat.category.trim() || ''
                     })
                 }
             })
         })
-        return result
     } else {
-        // list mode
-        return skills.filter(skill => skill.trim()).map(skill => ({
+        result = skills.filter(skill => skill.trim()).map(skill => ({
             name: skill.trim(),
-            category: null
+            category: ''
         }))
     }
+    // normalize to ensure consistent format (null -> empty string)
+    return normalizeSkills(result)
 }
 
+// Pill component
+const SkillPill = ({ skill, onRemove }) => (
+    <div className="inline-flex items-center gap-1 px-3 py-1 bg-brand-pink-light text-white rounded-full text-sm">
+        <span>{skill}</span>
+        <button
+            type="button"
+            onClick={onRemove}
+            className="hover:bg-brand-pink rounded-full p-0.5 transition-colors"
+        >
+            <FontAwesomeIcon icon={faTimes} className="w-3 h-3" />
+        </button>
+    </div>
+)
+
 const Skills = ({ skillsData, onSkillsChange }) => {
-    
     const [isSkillsExpanded, setIsSkillsExpanded] = useState(true)
-    const [mode, setMode] = useState('categorical') // 'categorical' or 'list'
-    const [categories, setCategories] = useState([{ category: '', skills: [''] }])
-    const [skills, setSkills] = useState([''])
+    const [mode, setMode] = useState('categorical')
+    const [categories, setCategories] = useState([{ category: '', skills: [] }])
+    const [skills, setSkills] = useState([])
+    const [categoryInputs, setCategoryInputs] = useState({ 0: '' })
+    const [currentInput, setCurrentInput] = useState('')
+    const [showBulkPaste, setShowBulkPaste] = useState(false)
+    const [bulkText, setBulkText] = useState('')
 
     // initialize from props
     useEffect(() => {
         if (skillsData && skillsData.length > 0) {
             const normalized = normalizeFromBackend(skillsData)
             setMode(normalized.mode)
-            setCategories(normalized.categories.length > 0 ? normalized.categories : [{ category: '', skills: [''] }])
-            setSkills(normalized.skills.length > 0 ? normalized.skills : [''])
+            setCategories(normalized.categories.length > 0 ? normalized.categories : [{ category: '', skills: [] }])
+            setSkills(normalized.skills.length > 0 ? normalized.skills : [])
+            // initialize category inputs
+            if (normalized.mode === 'categorical' && normalized.categories.length > 0) {
+                const inputs = {}
+                normalized.categories.forEach((_, idx) => {
+                    inputs[idx] = ''
+                })
+                setCategoryInputs(inputs)
+            }
         }
     }, [skillsData])
 
-    // export to parent whenever data changes
+    // export to parent
     useEffect(() => {
         const backendFormat = convertToBackendFormat(mode, categories, skills)
         onSkillsChange(backendFormat)
     }, [mode, categories, skills, onSkillsChange])
 
-    // ----- categorical mode functions -----
+    // add skill to array (removes duplicates)
+    const addSkillToArray = (skillsArray, skillName) => {
+        const trimmed = skillName.trim()
+        if (!trimmed || skillsArray.includes(trimmed)) return skillsArray
+        return [...skillsArray, trimmed]
+    }
+
+    // handle input keydown (Enter or comma)
+    const handleInputKeyDown = (e, addFn, inputValue, setInputValue) => {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault()
+            if (inputValue.trim()) {
+                addFn(inputValue)
+                setInputValue('')
+            }
+        }
+    }
+
+    // categorical mode functions
+    const addSkillToCategory = (catIndex, skillName) => {
+        setCategories(prev => {
+            const updated = [...prev]
+            updated[catIndex].skills = addSkillToArray(updated[catIndex].skills, skillName)
+            return updated
+        })
+    }
+
+    const removeSkillFromCategory = (catIndex, skillIndex) => {
+        setCategories(prev => {
+            const updated = [...prev]
+            updated[catIndex].skills = updated[catIndex].skills.filter((_, i) => i !== skillIndex)
+            return updated
+        })
+    }
+
     const addCategory = () => {
-        setCategories(prev => [...prev, { category: '', skills: [''] }])
+        setCategories(prev => [...prev, { category: '', skills: [] }])
+        setCategoryInputs(prev => ({ ...prev, [categories.length]: '' }))
     }
 
     const removeCategory = (index) => {
-        setCategories(prev => {
-            if (prev.length <= 1) return prev
-            return prev.filter((_, i) => i !== index)
+        setCategories(prev => prev.length > 1 ? prev.filter((_, i) => i !== index) : prev)
+        setCategoryInputs(prev => {
+            const updated = { ...prev }
+            delete updated[index]
+            // reindex
+            const newInputs = {}
+            Object.keys(updated).forEach(key => {
+                const keyNum = parseInt(key)
+                if (keyNum < index) newInputs[keyNum] = updated[key]
+                else if (keyNum > index) newInputs[keyNum - 1] = updated[key]
+            })
+            return newInputs
         })
     }
 
@@ -106,226 +188,229 @@ const Skills = ({ skillsData, onSkillsChange }) => {
         })
     }
 
-    const addSkillToCategory = (categoryIndex) => {
-        setCategories(prev => {
-            const updated = [...prev]
-            updated[categoryIndex].skills.push('')
-            return updated
-        })
+    // list mode functions
+    const addSkillToList = (skillName) => {
+        setSkills(prev => addSkillToArray(prev, skillName))
     }
 
-    const removeSkillFromCategory = (categoryIndex, skillIndex) => {
-        setCategories(prev => {
-            const updated = [...prev]
-            if (updated[categoryIndex].skills.length <= 1) {
-                updated[categoryIndex].skills = ['']
-            } else {
-                updated[categoryIndex].skills = updated[categoryIndex].skills.filter((_, i) => i !== skillIndex)
-            }
-            return updated
-        })
+    const removeSkillFromList = (index) => {
+        setSkills(prev => prev.filter((_, i) => i !== index))
     }
 
-    const updateSkillInCategory = (categoryIndex, skillIndex, value) => {
-        setCategories(prev => {
-            const updated = [...prev]
-            updated[categoryIndex].skills[skillIndex] = value
-            return updated
-        })
+    // bulk paste handlers
+    const handleBulkPaste = () => {
+        const parsed = parseBulkSkills(bulkText)
+        if (mode === 'categorical') {
+            // add to first category or create one
+            setCategories(prev => {
+                const updated = [...prev]
+                if (updated.length === 0 || !updated[0].category) {
+                    updated[0] = { category: updated[0]?.category || '', skills: [...(updated[0]?.skills || []), ...parsed] }
+                } else {
+                    updated[0].skills = [...updated[0].skills, ...parsed]
+                }
+                return updated
+            })
+        } else {
+            parsed.forEach(skill => addSkillToList(skill))
+        }
+        setBulkText('')
+        setShowBulkPaste(false)
     }
 
-    // ----- list mode functions -----
-    const addSkill = () => {
-        setSkills(prev => [...prev, ''])
-    }
-
-    const removeSkill = (index) => {
-        setSkills(prev => {
-            if (prev.length <= 1) return prev
-            return prev.filter((_, i) => i !== index)
-        })
-    }
-
-    const updateSkill = (index, value) => {
-        setSkills(prev => {
-            const updated = [...prev]
-            updated[index] = value
-            return updated
-        })
-    }
-
-    // handle mode switch
     const handleModeChange = (newMode) => {
         setMode(newMode)
         if (newMode === 'categorical' && categories.length === 0) {
-            setCategories([{ category: '', skills: [''] }])
+            setCategories([{ category: '', skills: [] }])
+            setCategoryInputs({ 0: '' })
         } else if (newMode === 'list' && skills.length === 0) {
-            setSkills([''])
+            setSkills([])
         }
+        setCurrentInput('')
     }
 
     return (
         <div>
             <div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
-			{/* header with chevron */}
-			<button
-				type="button"
-				onClick={() => setIsSkillsExpanded(!isSkillsExpanded)}
-				className="flex items-center gap-3 w-full transition-colors"
-			>
-				{/* title */}
-				<h1 className="text-[1.375rem] font-semibold text-gray-900">Skills</h1>
-				
-				{/* divider */}
-				<div className="flex-1 h-[3px] rounded bg-gray-300"></div>
-				
-				{/* chevron in circle */}
-				<div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-					{isSkillsExpanded ? (
-						<ChevronUp className="w-4 h-4 text-gray-600" />
-					) : (
-						<ChevronDown className="w-4 h-4 text-gray-600" />
-					)}
-				</div>
-			</button>
-			
-			{isSkillsExpanded && (
-				<div>
-					<p className="text-[0.875rem] text-gray-500 mb-4">Choose how you want to organize your skills.</p>
-					
-					{/* mode selector */}
-					<div className="flex gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
-						<label className="flex items-center gap-2 cursor-pointer">
-							<input
-								type="radio"
-								name="skillMode"
-								value="categorical"
-								checked={mode === 'categorical'}
-								onChange={(e) => handleModeChange('categorical')}
-								className="w-4 h-4"
-							/>
-							<span className="text-sm font-medium">By Category</span>
-						</label>
-						<label className="flex items-center gap-2 cursor-pointer">
-							<input
-								type="radio"
-								name="skillMode"
-								value="list"
-								checked={mode === 'list'}
-								onChange={(e) => handleModeChange('list')}
-								className="w-4 h-4"
-							/>
-							<span className="text-sm font-medium">Simple List</span>
-						</label>
-					</div>
+                <button
+                    type="button"
+                    onClick={() => setIsSkillsExpanded(!isSkillsExpanded)}
+                    className="flex items-center gap-3 w-full transition-colors"
+                >
+                    <h1 className="text-[1.375rem] font-semibold text-gray-900">Skills</h1>
+                    <div className="flex-1 h-[3px] rounded bg-gray-300"></div>
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                        {isSkillsExpanded ? (
+                            <ChevronUp className="w-4 h-4 text-gray-600" />
+                        ) : (
+                            <ChevronDown className="w-4 h-4 text-gray-600" />
+                        )}
+                    </div>
+                </button>
+                
+                {isSkillsExpanded && (
+                    <div>
+                        <p className="text-[0.875rem] text-gray-500 mb-4">Choose how you want to organize your skills.</p>
+                        
+                        {/* mode selector */}
+                        <div className="flex gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="skillMode"
+                                    value="categorical"
+                                    checked={mode === 'categorical'}
+                                    onChange={(e) => handleModeChange('categorical')}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-sm font-medium">By Category</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="skillMode"
+                                    value="list"
+                                    checked={mode === 'list'}
+                                    onChange={(e) => handleModeChange('list')}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-sm font-medium">Simple List</span>
+                            </label>
+                        </div>
 
-					{mode === 'categorical' ? (
-						<div>
-							{/* categorical mode */}
-							{categories.map((cat, catIndex) => (
-								<div key={catIndex} className="mb-4 p-4 border border-gray-300 rounded-md">
-									<div className="flex items-center justify-between mb-3 border-b-2 border-brand-pink-light pb-2">
-										<div className="flex-1 mr-2">
-											<label className="label">Category Name</label>
-											<input
-												type="text"
-												value={cat.category}
-												onChange={(e) => updateCategoryName(catIndex, e.target.value)}
-												className="input"
-												placeholder="e.g., Languages, Frameworks, Data Tools"
-											/>
-										</div>
-										{categories.length > 1 && (
-											<button
-												type="button"
-												onClick={() => removeCategory(catIndex)}
-												className="text-red-500 hover:text-red-700 text-sm mt-6"
-											>
-												Remove Category
-											</button>
-										)}
-									</div>
-									
-									<div className="space-y-2">
-										{cat.skills.map((skill, skillIndex) => (
-											<div key={skillIndex} className="flex items-center gap-2">
-												<div className="flex-1">
-													<input
-														type="text"
-														value={skill}
-														onChange={(e) => updateSkillInCategory(catIndex, skillIndex, e.target.value)}
-														className="input"
-														placeholder="Skill name"
-													/>
-												</div>
-												{cat.skills.length > 1 && (
-													<button
-														type="button"
-														onClick={() => removeSkillFromCategory(catIndex, skillIndex)}
-														className="text-red-500 hover:text-red-700 text-sm px-2"
-													>
-														Remove
-													</button>
-												)}
-											</div>
-										))}
-										<button
-											type="button"
-											onClick={() => addSkillToCategory(catIndex)}
-											className="text-sm text-brand-pink hover:text-brand-pink-dark"
-										>
-											+ Add Skill
-										</button>
-									</div>
-								</div>
-							))}
-							
-							<button
-								type="button"
-								onClick={addCategory}
-								className="w-full px-4 py-2 bg-brand-pink-light text-white rounded-full hover:bg-brand-pink transition-colors mt-2"
-							>
-								<FontAwesomeIcon icon={faPlus} className="w-4 h-4 color-white mr-2" /> Add Another Category
-							</button>
-						</div>
-					) : (
-						<div>
-							{/* list mode */}
-							{skills.map((skill, index) => (
-								<div key={index} className="mb-2 flex items-center gap-2">
-									<div className="flex-1">
-										<input
-											type="text"
-											value={skill}
-											onChange={(e) => updateSkill(index, e.target.value)}
-											className="input"
-											placeholder="Skill name"
-										/>
-									</div>
-									{skills.length > 1 && (
-										<button
-											type="button"
-											onClick={() => removeSkill(index)}
-											className="text-red-500 hover:text-red-700 text-sm px-2"
-										>
-											Remove
-										</button>
-									)}
-								</div>
-							))}
-							
-							<button
-								type="button"
-								onClick={addSkill}
-								className="w-full px-4 py-2 bg-brand-pink-light text-white rounded-full hover:bg-brand-pink transition-colors mt-2"
-							>
-								<FontAwesomeIcon icon={faPlus} className="w-4 h-4 color-white mr-2" /> Add Another Skill
-							</button>
-						</div>
-					)}
-				</div>
-			)}
-		</div>
+                        {mode === 'categorical' ? (
+                            <div className="space-y-4">
+                                {categories.map((cat, catIndex) => (
+                                    <div key={catIndex} className="p-4 border border-gray-300 rounded-md">
+                                        <div className="flex items-center justify-between mb-3 border-b-2 border-brand-pink-light pb-2">
+                                            <div className="flex-1 mr-2">
+                                                <label className="label">Category Name</label>
+                                                <input
+                                                    type="text"
+                                                    value={cat.category}
+                                                    onChange={(e) => updateCategoryName(catIndex, e.target.value)}
+                                                    className="input"
+                                                    placeholder="e.g., Languages, Frameworks"
+                                                />
+                                            </div>
+                                            {categories.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeCategory(catIndex)}
+                                                    className="text-red-500 hover:text-red-700 text-sm mt-6"
+                                                >
+                                                    Remove
+                                                </button>
+                                            )}
+                                        </div>
+                                        
+                                        {/* pills */}
+                                        {cat.skills.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mb-2">
+                                                {cat.skills.map((skill, skillIndex) => (
+                                                    <SkillPill
+                                                        key={skillIndex}
+                                                        skill={skill}
+                                                        onRemove={() => removeSkillFromCategory(catIndex, skillIndex)}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                        
+                                        {/* input */}
+                                        <input
+                                            type="text"
+                                            value={categoryInputs[catIndex] || ''}
+                                            onChange={(e) => setCategoryInputs(prev => ({ ...prev, [catIndex]: e.target.value }))}
+                                            onKeyDown={(e) => handleInputKeyDown(
+                                                e,
+                                                (skill) => addSkillToCategory(catIndex, skill),
+                                                categoryInputs[catIndex] || '',
+                                                (val) => setCategoryInputs(prev => ({ ...prev, [catIndex]: val }))
+                                            )}
+                                            className="input"
+                                            placeholder="Type skill and press Enter or comma"
+                                        />
+                                    </div>
+                                ))}
+                                
+                                <button
+                                    type="button"
+                                    onClick={addCategory}
+                                    className="w-full px-4 py-2 bg-brand-pink-light text-white rounded-full hover:bg-brand-pink transition-colors"
+                                >
+                                    <FontAwesomeIcon icon={faPlus} className="w-4 h-4 mr-2" /> Add Category
+                                </button>
+                            </div>
+                        ) : (
+                            <div>
+                                {/* pills */}
+                                {skills.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mb-3">
+                                        {skills.map((skill, index) => (
+                                            <SkillPill
+                                                key={index}
+                                                skill={skill}
+                                                onRemove={() => removeSkillFromList(index)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                                
+                                {/* input */}
+                                <input
+                                    type="text"
+                                    value={currentInput}
+                                    onChange={(e) => setCurrentInput(e.target.value)}
+                                    onKeyDown={(e) => handleInputKeyDown(e, addSkillToList, currentInput, setCurrentInput)}
+                                    className="input mb-3"
+                                    placeholder="Type skill and press Enter or comma"
+                                />
+                            </div>
+                        )}
+
+                        {/* bulk paste */}
+                        {!showBulkPaste ? (
+                            <button
+                                type="button"
+                                onClick={() => setShowBulkPaste(true)}
+                                className="text-sm text-brand-pink hover:text-brand-pink-dark mt-2"
+                            >
+                                + Paste multiple skills
+                            </button>
+                        ) : (
+                            <div className="mt-3 p-3 border border-gray-300 rounded-md">
+                                <textarea
+                                    value={bulkText}
+                                    onChange={(e) => setBulkText(e.target.value)}
+                                    className="input mb-2"
+                                    rows="3"
+                                    placeholder="Paste skills separated by commas or new lines"
+                                />
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleBulkPaste}
+                                        className="px-3 py-1 bg-brand-pink-light text-white rounded hover:bg-brand-pink text-sm"
+                                    >
+                                        Add Skills
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowBulkPaste(false)
+                                            setBulkText('')
+                                        }}
+                                        className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

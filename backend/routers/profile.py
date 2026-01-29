@@ -28,10 +28,11 @@ from schemas import (
     ParsedResumeResponse,
     ContactCreate, ContactResponse,
     SectionLabelsUpdate,
+    SummaryCreate, SummaryResponse,
 )
 from resume_parser import parse_resume_file
 from .auth import get_current_user_from_token
-from models import User, Experience, Projects, Skills, Contact, Education
+from models import User, Experience, Projects, Skills, Contact, Education, Summary
 
 # create router.
 router = APIRouter(prefix="/api/profile", tags=["profile"])
@@ -44,10 +45,14 @@ async def get_my_profile(
     current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db)
 ):
-    # return the user's profile with all experiences, projects, skills, education, and contact info.
+    # return the user's profile with all experiences, projects, skills, education, contact info, and summary.
     contact_response = None
     if current_user.contact:
         contact_response = ContactResponse.model_validate(current_user.contact)
+    
+    summary_response = None
+    if current_user.summary:
+        summary_response = SummaryResponse.model_validate(current_user.summary)
     
     return {
         "user": UserResponse.model_validate(current_user),
@@ -56,6 +61,7 @@ async def get_my_profile(
         "experiences": [ExperienceResponse.model_validate(exp) for exp in current_user.experiences],
         "projects": [ProjectResponse.model_validate(proj) for proj in current_user.projects],
         "skills": [SkillResponse.model_validate(skill) for skill in current_user.skills],
+        "summary": summary_response,
     }
 
 
@@ -155,6 +161,33 @@ async def create_skill(
     
     return SkillResponse.model_validate(new_skill)
 
+# 
+# create or update summary.
+@router.post("/summary", response_model=SummaryResponse)
+async def create_or_update_summary(
+    summary_data: SummaryCreate,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    # check if summary already exists for this user (one-to-one relationship).
+    existing_summary = db.query(Summary).filter(Summary.user_id == current_user.id).first()
+    
+    if existing_summary:
+        # update existing summary.
+        existing_summary.summary = summary_data.summary
+        db.commit()
+        db.refresh(existing_summary)
+        return SummaryResponse.model_validate(existing_summary)
+    else:
+        # create new summary.
+        new_summary = Summary(
+            user_id=current_user.id,
+            summary=summary_data.summary,
+        )
+        db.add(new_summary)
+        db.commit()
+        db.refresh(new_summary)
+        return SummaryResponse.model_validate(new_summary)
 
 # bulk create experiences.
 @router.post("/experiences/bulk", response_model=List[ExperienceResponse])
@@ -163,29 +196,79 @@ async def create_experiences_bulk(
     current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db)
 ):
-    print(experiences_data)
-    # create multiple experiences for the current user.
-    new_experiences = []
-    for exp_data in experiences_data:
-        new_exp = Experience(
-            user_id=current_user.id,
-            title=exp_data.title,
-            company=exp_data.company,
-            description=exp_data.description,
-            start_date=exp_data.start_date,
-            end_date=exp_data.end_date,
-            location=exp_data.location,
-            skills=exp_data.skills,
-        )
-        db.add(new_exp)
-        new_experiences.append(new_exp)
+    # get all existing experiences for this user.
+    existing_experiences = db.query(Experience).filter(
+        Experience.user_id == current_user.id
+    ).all()
     
-    # add, commit, and refresh db.
+    # normalize None values for matching (treat empty string as None).
+    def normalize_for_match(value):
+        return None if value is None or (isinstance(value, str) and value.strip() == '') else value
+    
+    # create a matching key function for experiences (title + company + start_date).
+    def get_match_key(exp):
+        return (
+            exp.title.strip().lower() if exp.title else '',
+            normalize_for_match(exp.company) or '',
+            exp.start_date
+        )
+    
+    # build a map of existing experiences by match key.
+    existing_map = {}
+    for exp in existing_experiences:
+        key = get_match_key(exp)
+        existing_map[key] = exp
+    
+    # process incoming experiences: update existing or create new.
+    result_experiences = []
+    matched_keys = set()
+    
+    for exp_data in experiences_data:
+        # normalize incoming data for matching.
+        incoming_key = (
+            exp_data.title.strip().lower() if exp_data.title else '',
+            normalize_for_match(exp_data.company) or '',
+            exp_data.start_date
+        )
+        
+        if incoming_key in existing_map:
+            # update existing experience.
+            existing_exp = existing_map[incoming_key]
+            existing_exp.title = exp_data.title
+            existing_exp.company = exp_data.company
+            existing_exp.description = exp_data.description
+            existing_exp.start_date = exp_data.start_date
+            existing_exp.end_date = exp_data.end_date
+            existing_exp.location = exp_data.location
+            existing_exp.skills = exp_data.skills
+            result_experiences.append(existing_exp)
+            matched_keys.add(incoming_key)
+        else:
+            # create new experience.
+            new_exp = Experience(
+                user_id=current_user.id,
+                title=exp_data.title,
+                company=exp_data.company,
+                description=exp_data.description,
+                start_date=exp_data.start_date,
+                end_date=exp_data.end_date,
+                location=exp_data.location,
+                skills=exp_data.skills,
+            )
+            db.add(new_exp)
+            result_experiences.append(new_exp)
+    
+    # delete existing experiences that weren't matched.
+    for key, exp in existing_map.items():
+        if key not in matched_keys:
+            db.delete(exp)
+    
+    # commit all changes.
     db.commit()
-    for exp in new_experiences:
+    for exp in result_experiences:
         db.refresh(exp)
     
-    return [ExperienceResponse.model_validate(exp) for exp in new_experiences]
+    return [ExperienceResponse.model_validate(exp) for exp in result_experiences]
 
 
 # bulk create projects.
@@ -195,25 +278,57 @@ async def create_projects_bulk(
     current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db)
 ):
-    # create multiple projects for the current user.
-    new_projects = []
-    for proj_data in projects_data:
-        new_proj = Projects(
-            user_id=current_user.id,
-            title=proj_data.title,
-            description=proj_data.description,
-            tech_stack=proj_data.tech_stack,
-            url=proj_data.url,
-        )
-        db.add(new_proj)
-        new_projects.append(new_proj)
+    # get all existing projects for this user.
+    existing_projects = db.query(Projects).filter(
+        Projects.user_id == current_user.id
+    ).all()
     
-    # add, commit, and refresh db.
+    # build a map of existing projects by title (case-insensitive).
+    existing_map = {}
+    for proj in existing_projects:
+        key = proj.title.strip().lower() if proj.title else ''
+        existing_map[key] = proj
+    
+    # process incoming projects: update existing or create new.
+    result_projects = []
+    matched_keys = set()
+    
+    for proj_data in projects_data:
+        # normalize title for matching.
+        incoming_key = proj_data.title.strip().lower() if proj_data.title else ''
+        
+        if incoming_key and incoming_key in existing_map:
+            # update existing project.
+            existing_proj = existing_map[incoming_key]
+            existing_proj.title = proj_data.title
+            existing_proj.description = proj_data.description
+            existing_proj.tech_stack = proj_data.tech_stack
+            existing_proj.url = proj_data.url
+            result_projects.append(existing_proj)
+            matched_keys.add(incoming_key)
+        else:
+            # create new project.
+            new_proj = Projects(
+                user_id=current_user.id,
+                title=proj_data.title,
+                description=proj_data.description,
+                tech_stack=proj_data.tech_stack,
+                url=proj_data.url,
+            )
+            db.add(new_proj)
+            result_projects.append(new_proj)
+    
+    # delete existing projects that weren't matched.
+    for key, proj in existing_map.items():
+        if key not in matched_keys:
+            db.delete(proj)
+    
+    # commit all changes.
     db.commit()
-    for proj in new_projects:
+    for proj in result_projects:
         db.refresh(proj)
     
-    return [ProjectResponse.model_validate(proj) for proj in new_projects]
+    return [ProjectResponse.model_validate(proj) for proj in result_projects]
 
 
 # create or update contact info.
@@ -452,6 +567,20 @@ async def parse_resume(
             )
             db.add(new_education)
         
+        # save summary to database if present.
+        summary = parsed_data.get("summary", "")
+        print(parsed_data)
+        if summary:
+            existing_summary = db.query(Summary).filter(Summary.user_id == current_user.id).first()
+            if existing_summary:
+                existing_summary.summary = summary
+            else:
+                new_summary = Summary(
+                    user_id=current_user.id,
+                    summary=summary,
+                )
+                db.add(new_summary)
+        
         # commit all changes at once.
         db.commit()
         
@@ -462,6 +591,7 @@ async def parse_resume(
             skills=parsed_data.get("skills", []),
             projects=parsed_data.get("projects", []),
             contact_info=parsed_data.get("contact_info", {}),
+            summary=parsed_data.get("summary", ""),
             warnings=parsed_data.get("warnings", [])
         )
     except ImportError as e:

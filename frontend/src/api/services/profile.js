@@ -76,6 +76,14 @@ export async function setupSkills(skillsData) {
 	})
 }
 
+// create summary.
+export async function createSummary(summaryData) {
+	return apiRequest('/api/profile/summary', {
+		method: 'POST',
+		body: JSON.stringify(summaryData),
+	})
+}
+
 // bulk create education.
 export async function setupEducation(educationData) {
 	return apiRequest('/api/profile/education/bulk', {

@@ -25,7 +25,7 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
     # fill header line.
     html_content = html_content.replace("{name}", name)
     html_content = html_content.replace("{header_line}", build_header(header))
-
+    
     # -- 2. fill education.
     education = resume_data.get("education", [])
 
@@ -45,7 +45,7 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
         experience_entries.append(build_experience_entry(exp))
     
     html_content = html_content.replace("{experience_entries}", "\n".join(experience_entries))
-
+    
     # -- 4. fill projects.
     projects = resume_data.get("projects", [])
 
@@ -61,6 +61,17 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
     skill_entries_html = build_skill_entry(skills)
     
     html_content = html_content.replace("{skill_entries}", skill_entries_html)
+
+    # -- 6. fill summary.
+    summary = resume_data.get("summary", {})
+    summary_text = summary.get("summary", "") if isinstance(summary, dict) else ""
+    
+    # add indent to first line only.
+    if summary_text:
+        print("in here!")
+        summary_text = f"&emsp; &ensp;{summary_text}"
+    
+    html_content = html_content.replace("{summary}", summary_text)
 
     return html_content
 

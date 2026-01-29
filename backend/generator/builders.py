@@ -233,7 +233,9 @@ def build_project_entry(proj: Dict[str, Any]) -> str:
 
 # ----- build skills entries.
 def build_skill_entry(skills: list) -> str:
-    """Build skills section grouped by category."""
+    
+    print("skills: ", skills)
+
     if not skills:
         return ''
     

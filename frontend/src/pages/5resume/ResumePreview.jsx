@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom'
 // api imports.
 import { listTemplates } from '@/api/services/templates'
 import { generateResumePreview, generateResumePDF } from '@/api/services/resume'
-import { getMyProfile, upsertContact, setupEducation, setupProjects, setupSkills } from '@/api/services/profile'
+import { getMyProfile, upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary } from '@/api/services/profile'
 
 // icons imports.
 import { XIcon } from '@/components/icons'
@@ -30,6 +30,7 @@ import Education from './components/Education'
 import Experience from './components/Experience'
 import Projects from './components/Projects'
 import Skills from './components/Skills'
+import Summary from './components/Summary'
 
 // util imports.
 import { formatDateForInput } from '@/pages/utils/DataFormatting'
@@ -70,6 +71,7 @@ function ResumePreview() {
 	const [experienceData, setExperienceData] = useState([])
 	const [projectsData, setProjectsData] = useState([])
 	const [skillsData, setSkillsData] = useState([])
+	const [summaryData, setSummaryData] = useState(null)
 	
 	// save banner state.
 	const [showSaveBanner, setShowSaveBanner] = useState(false)
@@ -83,6 +85,7 @@ function ResumePreview() {
 		experience: null,
 		projects: null,
 		skills: null,
+		summary: null,
 	})
 
 	// flag to track if we've set baseline after Education component normalization.
@@ -104,6 +107,7 @@ function ResumePreview() {
 		experience: [],
 		projects: [],
 		skills: [],
+		summary: { summary: '' },
 	})
 
 
@@ -158,11 +162,13 @@ function ResumePreview() {
 				education: JSON.parse(JSON.stringify(baselineData.education)),
 				projects: JSON.parse(JSON.stringify(baselineData.projects || [])),
 				skills: JSON.parse(JSON.stringify(baselineData.skills || [])),
+				summary: JSON.parse(JSON.stringify(baselineData.summary || { summary: '' })),
 			}))
 			setHeaderData(JSON.parse(JSON.stringify(baselineData.header)))
 			setEducationData(JSON.parse(JSON.stringify(baselineData.education)))
 			setProjectsData(JSON.parse(JSON.stringify(baselineData.projects || [])))
 			setSkillsData(JSON.parse(JSON.stringify(baselineData.skills || [])))
+			setSummaryData(JSON.parse(JSON.stringify(baselineData.summary || { summary: '' })))
 		}
 		setShowSaveBanner(false)
 	}
@@ -187,6 +193,10 @@ function ResumePreview() {
 
 	const handleSkillsChange = useCallback((exportedSkills) => {
 		setResumeData(prev => ({ ...prev, skills: exportedSkills }))
+	}, [])
+
+	const handleSummaryChange = useCallback((exportedSummary) => {
+		setResumeData(prev => ({ ...prev, summary: exportedSummary }))
 	}, [])
 
 	const handleSaveChanges = async () => {
@@ -244,7 +254,11 @@ function ResumePreview() {
 			}))
 			await setupSkills(skillsToSave)
 
-			console.log('resumeData: ', resumeData)
+			// save summary (UPSERT).
+			if (resumeData.summary && resumeData.summary.summary) {
+				await createSummary({ summary: resumeData.summary.summary })
+			}
+
 			// update baseline to current data.
 			setBaselineData({
 				header: JSON.parse(JSON.stringify(resumeData.header)),
@@ -252,6 +266,7 @@ function ResumePreview() {
 				experience: JSON.parse(JSON.stringify(resumeData.experience)),
 				projects: JSON.parse(JSON.stringify(resumeData.projects)),
 				skills: JSON.parse(JSON.stringify(resumeData.skills || [])),
+				summary: JSON.parse(JSON.stringify(resumeData.summary || { summary: '' })),
 			})
 			setShowSaveBanner(false)
 		} catch (error) {
@@ -292,8 +307,6 @@ function ResumePreview() {
 				const responseData = response.data
 				const userData = responseData.user
 				setUser(userData)
-				
-				console.log('responseData: ', responseData)
 				// --- set initial header data.
 				const initialHeader = {
 					first_name: userData.first_name,
@@ -313,7 +326,6 @@ function ResumePreview() {
 					},
 				}
 
-				console.log('responseData.education: ', responseData.education)
 				const initialEducation = responseData.education.map(edu => ({
 					school: edu.school || '',
 					degree: edu.degree || '',
@@ -327,7 +339,6 @@ function ResumePreview() {
 					subsections: edu.subsections || {},
 				}))
 
-				console.log('responseData.experiences: ', responseData.experiences)
 				const initialExperience = responseData.experiences.map(exp => ({
 					title: exp.title || '',
 					company: exp.company || '',
@@ -339,7 +350,6 @@ function ResumePreview() {
 					skills: exp.skills || '',
 				}))
 
-				console.log('responseData.projects: ', responseData.projects)
 				const initialProjects = responseData.projects.map(proj => ({
 					title: proj.title || '',
 					description: proj.description || '',
@@ -351,6 +361,10 @@ function ResumePreview() {
 					name: skill.name || '',
 					category: skill.category || '',
 				}))
+
+				const initialSummary = responseData.summary 
+					? { summary: responseData.summary.summary || '' }
+					: { summary: '' }
 				
 				// ---set all data at once.
 				setHeaderData(initialHeader)
@@ -358,15 +372,15 @@ function ResumePreview() {
 				setExperienceData(initialExperience)
 				setProjectsData(initialProjects)
 				setSkillsData(initialSkills)
-				console.log('initialProjects: ', initialProjects)
+				setSummaryData(initialSummary)
 				setResumeData({
 					header: initialHeader,
 					education: initialEducation,
 					experience: initialExperience,
 					projects: initialProjects,
 					skills: initialSkills,
+					summary: initialSummary,
 				})
-				console.log('resumeData: ', resumeData)
 			}
 
 			fetchCurrentUser();
@@ -441,6 +455,7 @@ function ResumePreview() {
 			experience: JSON.parse(JSON.stringify(resumeData.experience || [])),
 			projects: JSON.parse(JSON.stringify(resumeData.projects || [])),
 			skills: JSON.parse(JSON.stringify(resumeData.skills || [])),
+			summary: JSON.parse(JSON.stringify(resumeData.summary || { summary: '' })),
 		})
 		setHasSetBaseline(true)
 	}, [resumeData, headerData, hasSetBaseline])
@@ -452,8 +467,6 @@ function ResumePreview() {
 		
 		const hasChanges = hasResumeDataChanged(resumeData, baselineData)
 		const descriptions = hasChanges ? getResumeChangeDescriptions(resumeData, baselineData) : []
-
-
 
 		setShowSaveBanner(hasChanges)
 		setChangeDescriptions(descriptions)
@@ -580,6 +593,13 @@ function ResumePreview() {
 						<Skills 
 							skillsData={skillsData}
 							onSkillsChange={handleSkillsChange}
+						/>
+					)}
+
+					{summaryData && (
+						<Summary 
+							summaryData={summaryData}
+							onSummaryChange={handleSummaryChange}
 						/>
 					)}
 					<div className="mt-6 flex gap-2">

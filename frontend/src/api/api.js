@@ -14,12 +14,16 @@ async function apiRequestCore(endpoint, options = {}) {
     // get token from localStorage if it exists.
     const token = localStorage.getItem('token')
     
+    // check if body is FormData (don't set Content-Type - browser sets it with boundary).
+    const isFormData = options.body instanceof FormData
+    
     // construct config object for request.
     const config = {
         method: options.method || 'GET',
         credentials: 'include',
         headers: {
-            'Content-Type': 'application/json',
+            // only set Content-Type for non-FormData requests.
+            ...(!isFormData && { 'Content-Type': 'application/json' }),
             ...(token && { 'Authorization': `Bearer ${token}` }),
             ...options.headers,
         },

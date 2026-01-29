@@ -81,7 +81,7 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate }) => {
 
 			// set parsed data state.
 			setParsedData(data)
-
+            
 			// merge parsed data into form data.
 			const mergedFormData = {
                 ...formData,
@@ -111,7 +111,8 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate }) => {
                     ...(data.projects || []).map(proj => normalizeParsedItem(proj, {
                         title: '', description: Array.isArray(proj?.description) ? [] : '', techStack: []
                     }))
-                ]
+                ],
+                summary: (data.summary && data.summary.trim()) ? data.summary : (formData.summary || '')
             }
 
             // return merged form data to parent.
@@ -199,6 +200,9 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate }) => {
                                     )}
                                     {parsedData.projects?.length > 0 && (
                                         <p>• Found {parsedData.projects.length} project(s)</p>
+                                    )}
+                                    {parsedData.summary && (
+                                        <p>• Found professional summary</p>
                                     )}
                                 </div>
                                 {parsedData.warnings?.length > 0 && (
