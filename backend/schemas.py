@@ -38,7 +38,7 @@ class TokenResponse(BaseModel):
 
 class SummaryCreate(BaseModel):
     summary: str
-
+    
 class SummaryResponse(BaseModel):
     id: int
     user_id: int

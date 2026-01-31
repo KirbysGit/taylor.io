@@ -15,6 +15,7 @@ export default {
         'brand-pink-light': 'rgb(238, 155, 155)',
         'brand-pink-lighter': 'rgb(250, 205, 205)',
         'cream': 'rgb(252, 250, 240)',
+        'cream-darker': 'rgb(245, 243, 235)',
         'white-bright': 'rgb(255, 255, 255)',
       },
       fontFamily: {

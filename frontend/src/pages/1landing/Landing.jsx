@@ -38,9 +38,6 @@ function Landing() {
 					>
 						Get Started
 					</button>
-					<button className="px-8 py-3 bg-white-bright text-brand-pink font-semibold rounded-lg border-2 border-brand-pink hover:bg-cream transition-all hover:-translate-y-0.5">
-						Learn More
-					</button>
 					</div>
 				</section>
 			</div>

@@ -12,6 +12,14 @@ import { useNavigate } from 'react-router-dom'
 // services imports.
 import { setupEducation, setupExperiences, setupProjects, setupSkills, createSummary } from '@/api/services/profile'
 
+// utils imports.
+import { 
+	normalizeEducationForBackend,
+	normalizeExperienceForBackend,
+	normalizeProjectForBackend,
+	normalizeSkillForBackend
+} from '@/pages/utils/DataFormatting'
+
 // steps imports.
 import WelcomeStep from './steps/WelcomeStep'
 import ContactStep from './steps/ContactStep'
@@ -50,7 +58,6 @@ function AccountSetup() {
 		coursework: [],
 	})
 
-
 	// ---- variables ----
 	
 	// step titles.
@@ -70,27 +77,18 @@ function AccountSetup() {
 
 	// ---- functions ----
 
-	// check authentication on mount.
+	// load user data on mount (authentication is handled by ProtectedRoute).
 	useEffect(() => {
-		// grab token and user data from localStorage.
-		const token = localStorage.getItem('token')
+		// parse user data from localStorage (ProtectedRoute ensures it exists).
 		const userData = localStorage.getItem('user')
-		
-		// if no token or user data, redirect to auth page.
-		if (!token || !userData) {
-			navigate('/auth')
-			return
+		if (userData) {
+			try {
+				setUser(JSON.parse(userData))
+			} catch (error) {
+				console.error('Error parsing user data:', error)
+			}
 		}
-
-		// try to parse user data from localStorage.
-		try {
-			setUser(JSON.parse(userData))
-		} catch (error) {
-			// if error, redirect to auth page.
-			console.error('Error parsing user data:', error)
-			navigate('/auth')
-		}
-	}, [navigate])
+	}, [])
 
 	// handles incrementing to the next step.
 	const handleNext = () => {
@@ -112,130 +110,30 @@ function AccountSetup() {
 			// save education, experiences, projects, and skills to backend.
 			const promises = []
 			
-			// helper function to convert month string to ISO date. (YYYY-MM -> YYYY-MM-DDT00:00:00).
-			const monthToDate = (monthStr) => {
-				if (!monthStr) return null
-				return `${monthStr}-01T00:00:00`
-			}
-			
 			// set up education data.
 			if (formData.education.length > 0) {
-				const educationData = formData.education.map(edu => {
-					// handle dates - could be in "YYYY-MM" format from parsing or "YYYY-MM-DD" format
-					let start_date = null
-					let end_date = null
-					
-					// if there's a start date, convert it to ISO format.
-					if (edu.startDate) {
-						if (edu.startDate.includes('T')) {
-							start_date = edu.startDate
-						} else {
-							start_date = monthToDate(edu.startDate)
-						}
-					}
-					
-					// if the education is current, set end date to null, else if there's an end date, convert it to ISO format.
-					if (edu.current) {
-						end_date = null
-					} else if (edu.endDate) {
-						if (edu.endDate.includes('T')) {
-							end_date = edu.endDate
-						} else {
-							end_date = monthToDate(edu.endDate)
-						}
-					}
-					
-					return {
-						school: edu.school,
-						degree: edu.degree,
-						discipline: edu.discipline,
-						minor: edu.minor || null,
-						start_date: start_date,
-						end_date: end_date,
-						current: edu.current || false,
-						gpa: edu.gpa || null,
-						location: edu.location || null,
-						subsections: edu.subsections || null,
-					}
-				})
-
-				// push the education data to the promises array.
+				const educationData = formData.education.map(normalizeEducationForBackend)
 				promises.push(setupEducation(educationData))
 			}
 			
 			// set up experiences data.
 			if (formData.experiences.length > 0) {
-				
-				const experiencesData = formData.experiences.map(exp => {
-					// handle dates - could be in "YYYY-MM" format from parsing or "YYYY-MM-DD" format
-					let start_date = null
-					let end_date = null
-					
-					// if there's a start date, convert it to ISO format.
-					if (exp.startDate) {
-						if (exp.startDate.includes('T')) {
-							start_date = exp.startDate
-						} else {
-							start_date = monthToDate(exp.startDate)
-						}
-					}
-					
-					// if the experience is current, set end date to null, else if there's an end date, convert it to ISO format.
-					if (exp.current) {
-						end_date = null
-					} else if (exp.endDate) {
-						if (exp.endDate.includes('T')) {
-							end_date = exp.endDate
-						} else {
-							end_date = monthToDate(exp.endDate)
-						}
-					}
-					
-					// return the experience data.
-					return {
-						title: exp.title,
-						company: exp.company || null,
-						description: Array.isArray(exp.description) 
-							? exp.description.map(item => `• ${item}`).join('\n')
-							: exp.description || null,
-						start_date: start_date,
-						end_date: end_date,
-						current: exp.current || false,
-						location: exp.location || null,
-						skills: exp.skills || null,
-					}
-				})
-				
-				
-				// push the experiences data to the promises array.
+				const experiencesData = formData.experiences.map(normalizeExperienceForBackend)
 				const experiencePromise = setupExperiences(experiencesData)
-					.then(response => {
-						return response
-					})
-					.catch(error => {
-						throw error
-					})
-				
+					.then(response => response)
+					.catch(error => { throw error })
 				promises.push(experiencePromise)
 			}
 			
 			// set up projects data.
 			if (formData.projects.length > 0) {
-				const projectsData = formData.projects.map(proj => ({
-					title: proj.title,
-					description: Array.isArray(proj.description)
-						? proj.description.map(item => `• ${item}`).join('\n')
-						: proj.description || null,
-					tech_stack: proj.techStack || null,
-				}))
+				const projectsData = formData.projects.map(normalizeProjectForBackend)
 				promises.push(setupProjects(projectsData))
 			}
 			
 			// set up skills data.
 			if (formData.skills.length > 0) {
-				const skillsData = formData.skills.map(skill => ({
-					name: skill.name,
-				}))
+				const skillsData = formData.skills.map(normalizeSkillForBackend)
 				promises.push(setupSkills(skillsData))
 			}
 
@@ -249,6 +147,12 @@ function AccountSetup() {
 			
 			// wait for all promises to complete.
 			await Promise.all(promises)
+			
+			// mark setup as completed in localStorage (user-specific flag).
+			const userId = user?.id
+			if (userId) {
+				localStorage.setItem(`setupCompleted_${userId}`, 'true')
+			}
 			
 			// redirect to home.
 			navigate('/home')
@@ -289,11 +193,11 @@ function AccountSetup() {
 			case 0: // Welcome Step.
 					return (
 						<WelcomeStep
-						user={user}
-						handleNext={handleNext}
-						formData={formData}
-						onFormDataUpdate={(mergedData) => setFormData(mergedData)}
-					/>
+							user={user}
+							handleNext={handleNext}
+							formData={formData}
+							onFormDataUpdate={(mergedData) => setFormData(mergedData)}
+						/>
 				)
 			case 1: // Contact
 				return (
@@ -403,7 +307,7 @@ function AccountSetup() {
 					{steps.map((step, index) => (
 						<div
 							key={index}
-							className={`flex flex-col items-center min-w-[80px] ${
+							className={`flex flex-col items-center mt-4 min-w-[80px] ${
 								index <= currentStep ? 'opacity-100' : 'opacity-40'
 							}`}
 						>

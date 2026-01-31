@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
+import { XIcon } from '@/components/icons'
 
 // services.
 import { loginUser } from '@/api/services/auth'
@@ -86,30 +87,26 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 
 	// return modal.
 	return (
-		<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-			<div className="bg-white-bright rounded-lg shadow-xl w-full max-w-md p-8 relative">
+		<div className="fixed inset-0 flex items-center justify-center z-50">
+			<div className="bg-white-bright/95 backdrop-blur-sm rounded-lg shadow-xl w-full max-w-[496px] p-8 relative">
 				{/* x button */}
 				<button
 					onClick={onClose}
 					className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
 				>
-					<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-					</svg>
+					<XIcon className="w-6 h-6" />
 				</button>
 
-				{/* header*/}
-				<div className="text-center mb-6">
-					<h2 className="text-3xl font-bold text-gray-900 mb-2">
+				{/* header & divider*/}
+				<div className="text-center mb-4">
+					<h2 className="text-3xl font-bold text-gray-900 mb-3">
 						Welcome Back
 					</h2>
-					<p className="text-gray-600">
-						Sign in to your account
-					</p>
+					<div className="smallDivider"></div>
 				</div>
 
 				{/* form */}
-				<form onSubmit={handleSubmit} className="space-y-4">
+				<form onSubmit={handleSubmit} className="space-y-4" noValidate>
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-1">
 							Email
@@ -119,7 +116,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 							name="email"
 							value={formData.email}
 							onChange={handleChange}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
+							className="input"
 							placeholder="you@example.com"
 							required
 						/>
@@ -135,7 +132,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 								name="password"
 								value={formData.password}
 								onChange={handleChange}
-								className="w-full px-4 py-2 pr-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
+								className="input pr-11"
 								placeholder="••••••••"
 								required
 							/>
@@ -144,7 +141,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 								onClick={() => setShowPassword(prev => !prev)}
 								aria-label={showPassword ? 'Hide password' : 'Show password'}
 								tabIndex={-1}
-								className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded"
+								className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
 							>
 								<FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
 							</button>
@@ -168,7 +165,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 					</div>
 
 					{error && (
-						<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+						<div className="errorMessage">
 							{error}
 						</div>
 					)}
@@ -184,12 +181,13 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 				</form>
 
 				{/* switch to sign up */}
-				<div className="mt-6 text-center">
-					<p className="text-sm text-gray-600">
+				<div className="mt-4 text-center">
+					<div className="smallDivider"></div>
+					<p className="text-sm text-gray-600 mt-4">
 						Don't have an account?{' '}
 						<button
 							onClick={onSwitchToSignUp}
-							className="text-brand-pink hover:opacity-80 font-semibold"
+							className="text-brand-pink hover:opacity-80 font-semibold underline"
 						>
 							Sign up
 						</button>

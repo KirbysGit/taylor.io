@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 /* global font */
 @layer base {
 	body {
@@ -18,7 +19,49 @@
 	}
 
 	.input {
-		@apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-brand-pink focus:border-brand-pink hover:border-gray-400 bg-white transition-all duration-300 ease-in-out;
+		@apply w-full px-3 py-2 rounded-lg bg-white;
+		border: 2px solid rgba(209, 213, 219, 0.75); /* border-gray-300 equivalent */
+		transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+	}
+	
+	.input:hover {
+		border-color: rgb(238, 155, 155); /* border-brand-pink-light */
+		outline: none;
+	}
+	
+	.input:focus {
+		border-color: rgb(214, 86, 86); /* border-brand-pink */
+		box-shadow: 0 0 0 3px rgba(214, 86, 86, 0.1);
+		outline: none;
+	}
+	
+	.input-success {
+		border-color: rgb(238, 155, 155) !important; /* brand-pink-light */
+	}
+	
+	.input-success:focus {
+		border-color: rgb(238, 155, 155) !important;
+		box-shadow: 0 0 0 3px rgba(238, 155, 155, 0.2) !important;
+	}
+	
+	.successCheckmark {
+		position: absolute;
+		right: 0.75rem;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 20px;
+		height: 20px;
+		background: rgb(238, 155, 155); /* brand-pink-light */
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		font-size: 0.75rem;
+		font-weight: bold;
+		animation: slideInCheckmark 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+		z-index: 10;
+		pointer-events: none;
 	}
 
 	.input:disabled {
@@ -46,6 +89,66 @@
 	/* visibility toggle button (eye icon button) */
 	.visibilityToggle {
 		@apply flex-shrink-0 text-gray-500 hover:text-gray-700 transition-colors ml-3;
+	}
+
+	.smallDivider {
+		@apply h-[3px] bg-brand-pink opacity-80 w-full rounded-full;
+	}
+
+	.errorMessage {
+		background: rgb(250, 205, 205); /* brand-pink-lighter for bg */
+		border: 1px solid rgb(238, 155, 155); /* brand-pink-light for border */
+		color: rgb(190, 70, 70); /* brand-pink-dark for text */
+		@apply px-4 py-3 rounded-lg text-[0.75rem];
+		animation: slide-down 0.3s ease-in-out;
+	}
+	
+	.passwordRequirements {
+		animation: slide-down 0.3s ease-in-out;
+	}
+}
+
+@keyframes slide-down {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slide-up {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slide-out {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+}
+
+@keyframes slideInCheckmark {
+	from {
+		opacity: 0;
+		transform: translateY(-50%) translateX(20px) scale(0.8);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(-50%) translateX(0) scale(1);
 	}
 }
 

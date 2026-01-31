@@ -56,7 +56,7 @@ async function apiRequestCore(endpoint, options = {}) {
             return await response.text()
         } else {
             const data = await response.json()
-            return { data }
+        return { data }
         }
 
     // if error, throw error.

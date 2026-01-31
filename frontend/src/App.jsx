@@ -31,7 +31,7 @@ function App() {
         <Route 
           path="/home" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireSetup={true}>
               <Home />
             </ProtectedRoute>
           } 
@@ -39,7 +39,7 @@ function App() {
         <Route 
           path="/info" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireSetup={true}>
               <Info />
             </ProtectedRoute>
           } 
@@ -47,7 +47,7 @@ function App() {
         <Route 
           path="/resume/preview" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireSetup={true}>
               <ResumePreview />
             </ProtectedRoute>
           } 

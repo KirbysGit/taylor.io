@@ -5,6 +5,9 @@
 // add background features that show on the side.
 // still need to brainstorm, maybe like user reviews, demo videos, etc.
 
+// google sign in
+// sign in with linkedin
+
 // imports.
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -57,31 +60,49 @@ function Auth() {
 
 	// handles if sign up is successful.
     const handleSignUpSuccess = (user) => {
-		navigate('/setup')
+		// switch to login modal after successful signup.
+		setShowSignUp(false)
+		setShowLogin(true)
+		navigate('/auth?mode=login')
     }
 
 	// handles if login is successful.
     const handleLoginSuccess = (user) => {
+		// navigate to home - ProtectedRoute will handle setup completion check and redirect if needed.
 		navigate('/home')
     }
 
     return (
-		<div className="min-h-screen flex items-center justify-center bg-cream">
-			{/* login modal */}
-			<LoginModal
-				isOpen={showLogin}
-				onClose={handleClose}
-				onSwitchToSignUp={switchToSignUp}
-				onLoginSuccess={handleLoginSuccess}
-			/>
+		<div 
+			className="min-h-screen flex items-center justify-center bg-cream relative"
+			style={{
+				backgroundImage: 'url(/auth-background.jpg)', // add your image to public folder
+				backgroundSize: 'cover',
+				backgroundPosition: 'center',
+				backgroundRepeat: 'no-repeat',
+			}}
+		>
+			{/* cream overlay for better contrast */}
+			<div className="absolute inset-0 bg-cream/80"></div>
+			
+			{/* modals container */}
+			<div className="relative z-10">
+				{/* login modal */}
+				<LoginModal
+					isOpen={showLogin}
+					onClose={handleClose}
+					onSwitchToSignUp={switchToSignUp}
+					onLoginSuccess={handleLoginSuccess}
+				/>
 
-			{/* sign up modal */}
-			<SignUpModal
-				isOpen={showSignUp}
-				onClose={handleClose}
-				onSwitchToLogin={switchToLogin}
-				onSignUpSuccess={handleSignUpSuccess}
-			/>
+				{/* sign up modal */}
+				<SignUpModal
+					isOpen={showSignUp}
+					onClose={handleClose}
+					onSwitchToLogin={switchToLogin}
+					onSignUpSuccess={handleSignUpSuccess}
+				/>
+			</div>
 		</div>
     )
 }

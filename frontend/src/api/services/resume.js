@@ -26,7 +26,7 @@ export async function generateResumePreview(template, resumeData) {
 
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
-
+	
 	// construct url for request.
 
 	const url = `/api/resume/generator/preview`
@@ -35,7 +35,7 @@ export async function generateResumePreview(template, resumeData) {
 	const payload = {
 		template: template,
 		resume_data: resumeData,
-	}
+		}
 
 	// make request to backend.
 	try {
@@ -53,10 +53,10 @@ export async function generateResumePDF(template, resumeData) {
 
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
-
+	
 	// construct url for request.
 	const url = `/api/resume/generator/pdf`
-
+	
 	// create payload for request.
 	const payload = {
 		template: template,

@@ -33,7 +33,13 @@ import Skills from './components/Skills'
 import Summary from './components/Summary'
 
 // util imports.
-import { formatDateForInput } from '@/pages/utils/DataFormatting'
+import { 
+	formatDateForInput,
+	normalizeEducationForBackend,
+	normalizeExperienceForBackend,
+	normalizeProjectForBackend,
+	normalizeSkillForBackend
+} from '@/pages/utils/DataFormatting'
 import { applyVisibilityFilters, hasResumeDataChanged, getResumeChangeDescriptions, downloadBlob } from './utils/resumeDataTransform'
 
 // ----------- main component -----------
@@ -213,45 +219,19 @@ function ResumePreview() {
 			})
 
 			// save education (bulk replace).
-			const educationToSave = resumeData.education.map(edu => ({
-				school: edu.school || null,
-				degree: edu.degree || null,
-				discipline: edu.discipline || null,
-				minor: edu.minor || null,
-				location: edu.location || null,
-				start_date: edu.start_date || null,
-				end_date: edu.end_date || null,
-				current: edu.current || false,
-				gpa: edu.gpa || null,
-				subsections: edu.subsections || {},
-			}))
+			const educationToSave = resumeData.education.map(normalizeEducationForBackend)
 			await setupEducation(educationToSave)
 
-			const experienceToSave = resumeData.experience.map(exp => ({
-				title: exp.title || null,
-				company: exp.company || null,
-				description: exp.description || null,
-				start_date: exp.start_date || null,
-				end_date: exp.end_date || null,
-				current: exp.current || false,
-				location: exp.location || null,
-				skills: exp.skills || null,
-			}))
+			// save experiences (bulk replace).
+			const experienceToSave = resumeData.experience.map(normalizeExperienceForBackend)
 			await setupExperiences(experienceToSave)
 
 			// save projects (bulk replace).
-			const projectsToSave = resumeData.projects.map(proj => ({
-				title: proj.title || null,
-				description: proj.description || null,
-				tech_stack: Array.isArray(proj.tech_stack) && proj.tech_stack.length > 0 ? proj.tech_stack : null,
-				url: proj.url || null,
-			}))
+			const projectsToSave = resumeData.projects.map(normalizeProjectForBackend)
 			await setupProjects(projectsToSave)
 
-			const skillsToSave = resumeData.skills.map(skill => ({
-				name: skill.name || null,
-				category: skill.category || null,
-			}))
+			// save skills (bulk replace).
+			const skillsToSave = resumeData.skills.map(normalizeSkillForBackend)
 			await setupSkills(skillsToSave)
 
 			// save summary (UPSERT).
