@@ -1,52 +1,39 @@
 === AFTER MINIMAL_CLEAN ===
 
 Colin Kirby
-Software Engineer | Full-Stack · UI / UX · Product Development
-407-876-8172 | kirbycolin26@gmail.com | github.com/KirbysGit | linkedin.com/in/colinwkirby/
-Summary
-Full-stack Software Engineer with experience delivering consumer-facing products from 0→1 to
-production scale. Strong background in React/TypeScript frontends and Python/SQL backends, with a focus
-on performance, accessibility, and secure system design. Skilled at collaborating with product and design
-teams to rapidly prototype, A/B test, and ship polished features that balance speed of iteration with long-term
-reliability.
-Skills
-Languages: JavaScript, TypeScript, Python, SQL (PostgreSQL, MySQL), Java
-Frameworks & Libraries: React.js, Django, FastAPI, Node.js, Tailwind CSS, MongoDB
-Developer Tools: Docker, AWS EC2, CI/CD (Github Actions), Git, Postman, Figma
-Focus Areas: API Design, Scalability & Reliability, Web Performance Optimization, Experimentation (A/B Testing),
-Application Security, Accessibility (WCAG/ARIA), Testing (PyTest, Jest)
-Experience
-Software Engineering Intern May 2024 – June 2025
-BitGo | Python, Django, React, PostgreSQL, Docker, Celery, AWS EC2, Gunicorn, Nginx, Git Remote
-• Built and maintained React components and responsive dashboards for internal and client-facing financial apps,
-meeting accessibility and performance standards.
-• Integrated React frontends with Django REST APIs and PostgreSQL backends, designing schemas and optimizing
-queries to handle complex data flows reliably at scale.
-• Deployed and monitored production services on Docker/AWS, improving reliability with logging, metrics, and
-automated high-availability workflows.
-• Partnered with cross-functional teams across product, design, and engineering to deliver secure, mission-critical
-financial features in a regulated environment.
-Projects
-Centi – Personal Finance Web App | React, FastAPI, PostgreSQL, Plaid API | centi.dev
-• Built a full-stack personal finance app with Plaid API integration, translating financial data into dashboards to track
-spending and cash flow.
-• Implemented secure JWT/OAuth authentication and deployed with Vercel + Railway, ensuring scalable performance
-and reliable production uptime.
-• Designed reusable, accessible UI components that improved performance and usability, ensuring a consistent UX across
-desktop and mobile devices.
-UCF Club & Event Manager – University of Central Florida | MERN Stack, Tailwind CSS, Heroku
-• Led a 6-person team to design and build a 0→1 platform for student club management and event registration,
-streamlining workflows and reducing manual tracking for student leaders.
-• Developed a React/Tailwind frontend with role-based dashboards and real-time event updates, integrating backend
-APIs to ensure accurate, reliable data handling.
-• Delivered a live demo to faculty, showcasing a production-ready platform that was tested by student organizations.
-SecureScape – Portable Smart Security System | Python, Flutter, Arduino C++, TensorFlow Lite
-• Created a React web dashboard and companion Flutter mobile app enabling real-time IoT video monitoring, alerts, and
-system management across devices.
-• Optimized low-latency communication protocols between IoT hardware and applications, achieving <10s response time.
-• Integrated lightweight ML pipelines (TensorFlow Lite) for on-device inference, enabling intelligent event detection while
-maintaining usability under hardware constraints.
+kirbycolin26@gmail.com | github.com/KirbysGit | linkedin.com/in/colinwkirby/ |  https://colinkirby.dev
 Education
-University of Central Florida
-Bachelor of Science in Computer Engineering, 3.7 GPA Orlando, FL
-Honors & Awards: Dean’s List 2021 , President’s Honor Roll 2023 - 2025
+University of Central Florida (GPA 3.78 / 4.0)	August 2021 – May 2025
+Bachelors of Science in Computer Engineering	Orlando, FL
+Honors & Awards: Dean’s List 2021 , President’s Honor Roll 2023 – 2025 , Pegasus Gold Scholarship
+Clubs & Extracurriculars: AI @ UCF , Knight Hacks , SHPE @ UCF
+Relevant Coursework: Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design
+Experience
+Software Engineering Intern	May 2024 – June 2025
+BitGo | Python, Django, React, PostgreSQL, AWS EC2	Remote
+Designed and maintained backend services and REST APIs in Python/Django supporting secure data flows across internal financial/compliance systems.
+Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.
+Built internal dashboards using React + Django APIs, improving visibility and operational decision-making across distributed teams. 
+Optimized Python data-processing pipelines and PostgreSQL queries, improving system scalability and reducing latency by ~40%.
+Projects
+SentimentTrader – Real-Time Stock Sentiment Pipeline | Python, SQL, FinBERT, XGBoost
+Designed and implemented a full ML-driven data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.
+Applied NLP models (FinBERT) and feature engineering to build 40+ predictive features per ticker; trained XGBoost models achieving 55–70% ROC-AUC. 
+Built modular components for data ingestion, transformation, model inference, and distributed-style batching, aligned with message-driven architectures.
+Automated end-to-end data collection, preprocessing, and model inference workflows, enabling scalable real-time analytics.
+Centi – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev
+Built FastAPI backend services integrating financial data via ETL pipelines and normalized SQL schemas to support real-time account analytics.
+Implemented scalable API endpoints, caching, and data modeling patterns for high-volume financial transactions. 
+Developed React dashboards for insights and authentication; deployed via containerized services and cloud-based CI/CD.
+ShelfVision – Dense Retail Shelf Object Detector | PyTorch, ResNet-50, FPN
+Implemented a custom deep learning object detection pipeline using PyTorch with dynamic IoU matching and modular training loops.
+Handled large-scale vision datasets (11K+ images) via optimized data loaders and GPU-accelerated training. 
+Applied ML engineering workflows including dataset preprocessing, hyperparameter tuning, checkpointing, and analysis.
+SecureScape – Portable Smart Security System | Python, Flutter, Arduino C++, TensorFlow Lite	
+Designed async communication layers for distributed IoT nodes, ensuring near real-time (<3.5 s) alert propagation and cross-node synchronization. 
+Built fault-tolerant Python backend supporting message handling and system reliability across constrained devices.
+Skills
+Languages : Python, Java, JavaScript, SQL
+Frameworks : Django, FastAPI, React, Node.js, PyTorch, TensorFlow Lite
+Data Tools : PostgreSQL, MySQL, MongoDB, Pandas, NumPy, AWS (EC2), ETL Pipelines
+Focus Areas : Full-Stack Development, ML/NLP Engineering, REST API Design, UI / UX Design

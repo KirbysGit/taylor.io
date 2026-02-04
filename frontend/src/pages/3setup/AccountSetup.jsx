@@ -236,6 +236,7 @@ function AccountSetup() {
 						skills={formData.skills}
 						onAdd={(item) => addItem('skills', item)}
 						onRemove={(index) => removeItem('skills', index)}
+						onUpdate={(index, item) => updateItem('skills', index, item)}
 					/>
 				)
 
@@ -282,76 +283,79 @@ function AccountSetup() {
 	}
 
 	return (
-		<div className="min-h-screen bg-cream py-8">
-			<div className="max-w-4xl mx-auto px-4">
-				{/* Progress Bar */}
-				<div className="mb-8">
-					<div className="flex justify-between items-center mb-2">
-						<span className="text-sm font-medium text-gray-700">
-							Step {currentStep + 1} of {steps.length}
-						</span>
-						<span className="text-sm font-medium text-gray-700">
-							{Math.round(progress)}%
-						</span>
-					</div>
-					<div className="w-full bg-gray-200 rounded-full h-2">
+		<div className="min-h-screen bg-cream flex items-center justify-center py-12 px-4">
+			<div className="w-full max-w-2xl">
+				{/* Subtle Progress Bar - Top */}
+				<div className="mb-6">
+					<div className="w-full bg-gray-200/50 rounded-full h-1.5 overflow-hidden">
 						<div
-							className="bg-brand-pink h-2 rounded-full transition-all duration-300"
+							className="bg-brand-pink h-full rounded-full transition-all duration-500 ease-out"
 							style={{ width: `${progress}%` }}
 						></div>
 					</div>
+					<div className="flex justify-between items-center mt-2">
+						<span className="text-xs text-gray-500 font-medium">
+							{steps[currentStep].title}
+						</span>
+						<span className="text-xs text-gray-500 font-medium">
+							{currentStep + 1} / {steps.length}
+						</span>
+					</div>
 				</div>
 
-				{/* Step Indicators */}
-				<div className="flex justify-between mb-8 overflow-x-auto pb-4">
-					{steps.map((step, index) => (
-						<div
-							key={index}
-							className={`flex flex-col items-center mt-4 min-w-[80px] ${
-								index <= currentStep ? 'opacity-100' : 'opacity-40'
-							}`}
-						>
-							<div
-								className={`w-12 h-12 rounded-full flex items-center justify-center text-xl mb-2 transition-all ${
-									index < currentStep
-										? 'bg-brand-pink text-white'
-										: index === currentStep
-										? 'bg-brand-pink text-white ring-4 ring-brand-pink/30'
-										: 'bg-gray-300 text-gray-600'
-								}`}
-							>
-								{index < currentStep ? '✓' : step.icon}
-							</div>
-							<span className="text-xs text-center font-medium text-gray-700">
-								{step.title}
-							</span>
-						</div>
-					))}
-				</div>
-
-				{/* Step Content */}
-				<div className="bg-white-bright rounded-xl shadow-sm p-8 mb-6">
+				{/* Main Content Card - Centered and Focused */}
+				<div 
+					key={currentStep}
+					className="bg-white-bright rounded-2xl shadow-xl p-6 md:p-8 animate-fadeIn"
+				>
 					{renderStepContent()}
 				</div>
 
-				{/* Navigation Buttons */}
+				{/* Navigation - Only show when not on first/last step */}
 				{currentStep !== 0 && currentStep !== steps.length - 1 && (
-					<div className="flex justify-between">
+					<div className="mt-6 flex items-center justify-between">
 						<button
 							onClick={handlePrevious}
-							className="px-6 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all"
+							className="px-5 py-2.5 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition-all flex items-center gap-2 group"
 						>
-							← Previous
+							<svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+							</svg>
+							Previous
 						</button>
+						
+						{/* Step Dots Indicator - Minimal */}
+						<div className="flex items-center gap-1.5">
+							{steps.slice(1, -1).map((_, index) => {
+								const stepIndex = index + 1
+								return (
+									<div
+										key={stepIndex}
+										className={`h-1.5 rounded-full transition-all duration-300 ${
+											stepIndex < currentStep
+												? 'w-6 bg-brand-pink'
+												: stepIndex === currentStep
+												? 'w-8 bg-brand-pink'
+												: 'w-1.5 bg-gray-300'
+										}`}
+									/>
+								)
+							})}
+						</div>
+
 						<button
 							onClick={handleNext}
-							className="px-6 py-2 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all"
+							className="px-6 py-2.5 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group"
 						>
-							Next →
+							Continue
+							<svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+							</svg>
 						</button>
 					</div>
 				)}
 			</div>
+
 		</div>
 	)
 }

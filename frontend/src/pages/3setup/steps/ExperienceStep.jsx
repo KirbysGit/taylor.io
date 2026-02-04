@@ -1,203 +1,272 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Experience Step Component.
 const ExperienceStep = ({ experiences, onAdd, onRemove, onUpdate }) => {
-	const [form, setForm] = useState({
-		title: '',
-		company: '',
-		description: '',
-		startDate: '',
-		endDate: '',
-		current: false,
-	})
+	// ensure at least one empty entry exists
+	const entries = experiences.length > 0 ? experiences : [{ 
+		id: Date.now(), 
+		title: '', 
+		company: '', 
+		description: '', 
+		startDate: '', 
+		endDate: '', 
+		current: false 
+	}]
 
-	// helper function to format date strings (YYYY-MM format)
-	const formatDate = (dateStr) => {
-		if (!dateStr) return 'Not specified'
-		try {
-			// handle YYYY-MM format
-			if (dateStr.match(/^\d{4}-\d{2}$/)) {
-				const [year, month] = dateStr.split('-')
-				const date = new Date(parseInt(year), parseInt(month) - 1, 1)
-				return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-			}
-			// handle other formats
-			const date = new Date(dateStr)
-			if (isNaN(date.getTime())) return dateStr
-			return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-		} catch {
-			return dateStr
+	const [expandedEntries, setExpandedEntries] = useState(new Set(entries.map((_, i) => i)))
+	const [localEntries, setLocalEntries] = useState(entries)
+	const prevLengthRef = React.useRef(experiences.length)
+	const prevIdsRef = React.useRef(experiences.map(e => e.id || e).join(','))
+
+	// sync with prop changes only when structure changes (add/remove), not field updates
+	useEffect(() => {
+		const currentLength = experiences.length
+		const currentIds = experiences.map(e => e.id || e).join(',')
+		
+		// only sync if the length changed or IDs changed (structure change, not field update)
+		if (currentLength !== prevLengthRef.current || currentIds !== prevIdsRef.current) {
+			const newEntries = experiences.length > 0 ? experiences : [{ 
+				id: Date.now(), 
+				title: '', 
+				company: '', 
+				description: '', 
+				startDate: '', 
+				endDate: '', 
+				current: false 
+			}]
+			setLocalEntries(newEntries)
+			setExpandedEntries(new Set(newEntries.map((_, i) => i)))
+			prevLengthRef.current = currentLength
+			prevIdsRef.current = currentIds
 		}
+	}, [experiences])
+
+	const toggleExpanded = (index) => {
+		setExpandedEntries(prev => {
+			const newSet = new Set(prev)
+			if (newSet.has(index)) {
+				newSet.delete(index)
+			} else {
+				newSet.add(index)
+			}
+			return newSet
+		})
 	}
 
-	const handleSubmit = (e) => {
-		e.preventDefault()
-		if (form.title && form.company) {
-			onAdd({ ...form, id: Date.now() })
-			setForm({ title: '', company: '', description: '', startDate: '', endDate: '', current: false })
+	const handleFieldChange = (index, field, value) => {
+		const updatedEntry = { ...localEntries[index], [field]: value }
+		if (field === 'current' && value) {
+			updatedEntry.endDate = ''
+			updatedEntry.end_date = ''
 		}
+		if (field === 'endDate' && value) {
+			updatedEntry.current = false
+		}
+		
+		// update local state immediately for responsive UI
+		const newEntries = [...localEntries]
+		newEntries[index] = updatedEntry
+		setLocalEntries(newEntries)
+		
+		// update parent
+		onUpdate(index, updatedEntry)
+	}
+
+	const handleAddNew = () => {
+		const newEntry = { 
+			id: Date.now(), 
+			title: '', 
+			company: '', 
+			description: '', 
+			startDate: '', 
+			endDate: '', 
+			current: false 
+		}
+		const newIndex = localEntries.length
+		onAdd(newEntry)
+		setExpandedEntries(prev => new Set([...prev, newIndex]))
 	}
 
 	return (
 		<div>
-			<h2 className="text-2xl font-bold text-gray-900 mb-6">Share your work experience</h2>
-			<p className="text-gray-600 mb-6">Add your professional experiences. You can add multiple entries.</p>
+			<h2 className="text-2xl font-bold text-gray-900 mb-2">Your Work Experience</h2>
+			<p className="text-gray-600 mb-3">Tell us about your professional experience.</p>
+			<div className="smallDivider mb-6"></div>
 
-			<form onSubmit={handleSubmit} className="space-y-4 mb-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
-						<input
-							type="text"
-							value={form.title}
-							onChange={(e) => setForm({ ...form, title: e.target.value })}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
-							required
-						/>
-					</div>
-					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">Company *</label>
-						<input
-							type="text"
-							value={form.company}
-							onChange={(e) => setForm({ ...form, company: e.target.value })}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
-							required
-						/>
-					</div>
-					<div className="md:col-span-2">
-						<label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-						<textarea
-							value={form.description}
-							onChange={(e) => setForm({ ...form, description: e.target.value })}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
-							rows="3"
-							placeholder="Describe your responsibilities and achievements..."
-						/>
-					</div>
-					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-						<input
-							type="month"
-							value={form.startDate}
-							onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
-						/>
-					</div>
-					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-						<input
-							type="month"
-							value={form.endDate}
-							onChange={(e) => setForm({ ...form, endDate: e.target.value, current: false })}
-							disabled={form.current}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent disabled:bg-gray-100"
-						/>
-					</div>
-					<div className="flex items-center pt-2">
-						<label className="flex items-center">
-							<input
-								type="checkbox"
-								checked={form.current}
-								onChange={(e) => setForm({ ...form, current: e.target.checked, endDate: '' })}
-								className="mr-2"
-							/>
-							<span className="text-sm text-gray-700">I currently work here</span>
-						</label>
-					</div>
-				</div>
-				<button
-					type="submit"
-					className="px-6 py-2 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all"
-				>
-					Add Experience
-				</button>
-			</form>
-
-			{experiences.length > 0 && (
-				<div className="space-y-3 mt-6">
-					<h3 className="font-semibold text-gray-900 mb-4">Added Experiences ({experiences.length}):</h3>
-					{experiences.map((exp, index) => (
-						<div key={exp.id || index} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
-							<div className="flex justify-between items-start">
-								<div className="flex-1">
-									{/* Job Title */}
-									<div className="flex items-center gap-2 mb-2">
-										<h4 className="text-lg font-semibold text-gray-900">{exp.title || 'Untitled Position'}</h4>
-										{exp.fromParsed && (
-											<span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
-												Parsed
-											</span>
+			{experiences.length > 0 ? (
+				<div className="space-y-3">
+					{localEntries.map((exp, index) => {
+					const isExpanded = expandedEntries.has(index)
+					const hasContent = exp.title || exp.company
+					const displayName = exp.title 
+						? (exp.company ? `${exp.title} @ ${exp.company}` : exp.title)
+						: (exp.company ? exp.company : (hasContent ? 'Incomplete' : 'New Experience'))
+					
+					return (
+						<div 
+							key={exp.id || index} 
+							className="collapsibleCard"
+						>
+							{/* Header - Always visible */}
+							<button
+								type="button"
+								onClick={() => toggleExpanded(index)}
+								className="collapsibleCardHeader"
+							>
+								<div className="flex items-center gap-3 flex-1 text-left">
+									<svg 
+										className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+										fill="none" 
+										stroke="currentColor" 
+										viewBox="0 0 24 24"
+									>
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+									</svg>
+									<div className="flex items-center gap-2">
+										<span className="text-base font-semibold text-gray-900">{displayName}</span>
+										{!hasContent && (
+											<span className="text-xs text-gray-400">(Click to add details)</span>
 										)}
 									</div>
-									
-									{/* Company */}
-									<div className="mb-2">
-										<p className="text-base text-gray-700 font-medium">
-											{exp.company || 'Company not specified'}
-										</p>
-									</div>
-									
-									{/* Description */}
-									{exp.description && (
-										<div className="mb-2">
-											<div className="text-sm text-gray-600 leading-relaxed">
-												{Array.isArray(exp.description) ? (
-													// description is an array of bullet points
-													exp.description.map((item, idx) => (
-														<div key={idx} className="ml-4 mb-1">
-															• {item}
+								</div>
+								{localEntries.length > 1 && (
+									<button
+										onClick={(e) => {
+											e.stopPropagation()
+											onRemove(index)
+										}}
+										className="removeButton"
+									>
+										Remove
+										<span className="removeButtonUnderline"></span>
+									</button>
+								)}
+							</button>
+
+							{/* Expandable Content */}
+							<div 
+								className={`expandableContent ${isExpanded ? 'expanded' : 'collapsed'}`}
+							>
+								<div className="expandableContentInner">
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<div>
+											<label className="label">Job Title</label>
+											<input
+												type="text"
+												value={localEntries[index]?.title || ''}
+												onChange={(e) => handleFieldChange(index, 'title', e.target.value)}
+												className="input"
+												placeholder="e.g., Software Engineer"
+											/>
+										</div>
+										<div>
+											<label className="label">Company</label>
+											<input
+												type="text"
+												value={localEntries[index]?.company || ''}
+												onChange={(e) => handleFieldChange(index, 'company', e.target.value)}
+												className="input"
+												placeholder="Company Name"
+											/>
+										</div>
+										<div className="md:col-span-2">
+											<label className="label">Description</label>
+											<textarea
+												value={Array.isArray(localEntries[index]?.description) 
+													? localEntries[index].description.join('\n') 
+													: (localEntries[index]?.description || '')}
+												onChange={(e) => handleFieldChange(index, 'description', e.target.value)}
+												className="input min-h-[100px] resize-y"
+												placeholder="Describe your responsibilities and achievements..."
+											/>
+										</div>
+										<div>
+											<label className="label">Start Date</label>
+											<input
+												type="month"
+												value={localEntries[index]?.startDate || localEntries[index]?.start_date || ''}
+												onChange={(e) => handleFieldChange(index, 'startDate', e.target.value)}
+												className="input"
+											/>
+										</div>
+										<div>
+											{/* Label Row with Switch */}
+											<div className="grid grid-cols-3 items-center mb-1">
+												<label className="label mb-0">End Date</label>
+												
+												{/* Switch - Centered */}
+												<div className="flex justify-center">
+													<label className="flex items-center cursor-pointer">
+														<input
+															type="checkbox"
+															checked={localEntries[index]?.current || false}
+															onChange={(e) => handleFieldChange(index, 'current', e.target.checked)}
+															className="sr-only"
+														/>
+														<div className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
+															localEntries[index]?.current ? 'bg-brand-pink' : 'bg-gray-300'
+														}`}>
+															<div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
+																localEntries[index]?.current ? 'translate-x-6' : 'translate-x-0'
+															}`}></div>
 														</div>
-													))
-												) : (
-													// description is a string
-													exp.description.split('\n').map((line, idx) => {
-														// format bullet points
-														if (line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*')) {
-															return (
-																<div key={idx} className="ml-4 mb-1">
-																	{line.trim()}
-																</div>
-															)
-														}
-														return (
-															<div key={idx} className="mb-1">
-																{line}
-															</div>
-														)
-													})
-												)}
+													</label>
+												</div>
+												
+												{/* Current Label - Right */}
+												<div className="flex justify-end">
+													<span className={`currentLabel ${
+														localEntries[index]?.current ? 'active' : 'inactive'
+													}`}>
+														Current
+													</span>
+												</div>
+											</div>
+											
+											{/* End Date Input */}
+											<div className={localEntries[index]?.current ? 'opacity-50' : ''}>
+												<input
+													type="month"
+													value={localEntries[index]?.endDate || localEntries[index]?.end_date || ''}
+													onChange={(e) => handleFieldChange(index, 'endDate', e.target.value)}
+													disabled={localEntries[index]?.current}
+													className="input disabled:bg-gray-100 disabled:cursor-not-allowed"
+												/>
 											</div>
 										</div>
-									)}
-									
-									{/* Dates */}
-									<div className="flex items-center gap-2 text-sm text-gray-500">
-										<span className="font-medium">Dates:</span>
-										<span>
-											{formatDate(exp.startDate)}
-											{' - '}
-											{exp.current ? (
-												<span className="text-brand-pink font-semibold">Present</span>
-											) : (
-												formatDate(exp.endDate)
-											)}
-										</span>
 									</div>
 								</div>
-								
-								{/* Remove Button */}
-								<button
-									onClick={() => onRemove(index)}
-									className="ml-4 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors font-medium"
-									title="Remove this experience entry"
-								>
-									Remove
-								</button>
 							</div>
 						</div>
-					))}
+					)
+				})}
+
+					<button
+						onClick={handleAddNew}
+						className="w-full px-6 py-3 border-2 border-brand-pink text-brand-pink font-semibold rounded-lg hover:bg-brand-pink hover:text-white transition-all"
+					>
+						+ Add Another Experience
+					</button>
+				</div>
+			) : (
+				<div className="text-center py-12">
+					<div className="mb-4">
+						<svg 
+							className="w-16 h-16 mx-auto text-gray-300" 
+							fill="none" 
+							stroke="currentColor" 
+							viewBox="0 0 24 24"
+						>
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+						</svg>
+					</div>
+					<p className="text-gray-400 mb-6">No work experience yet</p>
+					<button
+						onClick={handleAddNew}
+						className="w-full px-6 py-3 border-2 border-brand-pink text-brand-pink font-semibold rounded-lg hover:bg-brand-pink hover:text-white transition-all"
+					>
+						+ Add Your First Experience
+					</button>
 				</div>
 			)}
 		</div>

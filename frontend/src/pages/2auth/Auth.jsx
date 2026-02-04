@@ -76,7 +76,7 @@ function Auth() {
 		<div 
 			className="min-h-screen flex items-center justify-center bg-cream relative"
 			style={{
-				backgroundImage: 'url(/auth-background.jpg)', // add your image to public folder
+				backgroundImage: 'url(/auth-background.png)', // add your image to public folder
 				backgroundSize: 'cover',
 				backgroundPosition: 'center',
 				backgroundRepeat: 'no-repeat',
