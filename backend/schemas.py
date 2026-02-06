@@ -122,11 +122,13 @@ class ProjectResponse(BaseModel):
 
 class SkillCreate(BaseModel):
     name: str
+    category: Optional[str] = None
 
 class SkillResponse(BaseModel):
     id: int
     user_id: int
     name: str
+    category: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

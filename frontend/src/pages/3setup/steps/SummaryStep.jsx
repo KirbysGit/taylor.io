@@ -1,23 +1,10 @@
 // pages / 3setup / steps / SummaryStep.jsx
 
 // imports.
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import SummaryInput from '@/components/inputs/SummaryInput';
 
 const SummaryStep = ({ summary, onUpdate }) => {
-    const [summaryText, setSummaryText] = useState(summary || '');
-    
-    // sync with prop changes (e.g., when parsed from resume).
-    useEffect(() => {
-        setSummaryText(summary || '');
-    }, [summary]);
-    
-    // handle text change.
-    const handleChange = (e) => {
-        const value = e.target.value;
-        setSummaryText(value);
-        onUpdate(value);
-    };
-    
     return (
         <div className="w-full">
             {/* Header */}
@@ -42,22 +29,7 @@ const SummaryStep = ({ summary, onUpdate }) => {
                 </div>
             )}
             
-            <div>
-                <label htmlFor="summary" className="label">
-                    Professional Summary {!summary && <span className="text-gray-400 font-normal">(Optional)</span>}
-                </label>
-                <textarea
-                    id="summary"
-                    value={summaryText}
-                    onChange={handleChange}
-                    rows={8}
-                    className="input resize-y"
-                    placeholder="e.g., Experienced software engineer with 5+ years of expertise in full-stack development. Passionate about building scalable web applications and leading cross-functional teams..."
-                />
-                <p className="mt-2 text-xs text-gray-500">
-                    {summaryText.length} characters
-                </p>
-            </div>
+            <SummaryInput summary={summary} onUpdate={onUpdate} />
         </div>
     );
 };

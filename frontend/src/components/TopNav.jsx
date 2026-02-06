@@ -35,7 +35,7 @@ function TopNav({ user, onLogout }) {
 					</nav>
 				</div>
 				<div className="flex items-center gap-4">
-					{user && <span className="text-sm opacity-90">Welcome, {user.name}</span>}
+					{user && <span className="text-sm opacity-90">{user.email}</span>}
 					<button
 						onClick={onLogout}
 						className="px-4 py-2 bg-white-bright text-brand-pink font-semibold rounded-lg hover:opacity-90 transition-all"

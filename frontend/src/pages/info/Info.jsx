@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import {
 	getMyProfile,
 	upsertContact,
@@ -7,62 +8,36 @@ import {
 	setupExperiences,
 	setupProjects,
 	setupSkills,
-	updateSectionLabels,
+	createSummary,
 } from '@/api/services/profile'
 import TopNav from '@/components/TopNav'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPenToSquare, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
+import ContactSection from './components/ContactSection'
+import EducationSection from './components/EducationSection'
+import ExperienceSection from './components/ExperienceSection'
+import ProjectsSection from './components/ProjectsSection'
+import SkillsSection from './components/SkillsSection'
+import SummarySection from './components/SummarySection'
+import {
+	transformEducationForStep,
+	transformEducationForBackend,
+	transformExperienceForStep,
+	transformExperienceForBackend,
+	transformProjectForStep,
+	transformProjectForBackend,
+	transformSkillForStep,
+} from './utils/dataTransform'
+import { normalizeEducationForBackend, normalizeExperienceForBackend, normalizeProjectForBackend, normalizeSkillForBackend } from '@/pages/utils/DataFormatting'
 
 const newId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`
-
-const emptyEducation = () => ({
-	id: newId(),
-	school: '',
-	degree: '',
-	field: '',
-	minor: '',
-	location: '',
-	start_date: '',
-	end_date: '',
-	gpa: '',
-	subsections: {},
-})
-
-// Normalize date strings for <input type="date">
-const toDateInput = (value) => {
-	if (!value) return ''
-	return String(value).slice(0, 10)
-}
-
-const emptyExperience = () => ({
-	id: newId(),
-	title: '',
-	company: '',
-	description: '',
-	start_date: '',
-	end_date: '',
-})
-
-const emptyProject = () => ({
-	id: newId(),
-	title: '',
-	description: '',
-	tech_stack: '',
-})
-
-const emptySkill = () => ({
-	id: newId(),
-	name: '',
-})
 
 function Info() {
 	const navigate = useNavigate()
 	const [user, setUser] = useState(null)
 	const [isLoading, setIsLoading] = useState(true)
-	const [sectionLabels, setSectionLabels] = useState({})
-	const [isEditingSectionLabels, setIsEditingSectionLabels] = useState(false)
+	const [savingSection, setSavingSection] = useState(null)
 
-	const [contactForm, setContactForm] = useState({
+	// State - all in step component format
+	const [contact, setContact] = useState({
 		email: '',
 		phone: '',
 		github: '',
@@ -70,12 +45,13 @@ function Info() {
 		portfolio: '',
 		location: '',
 	})
+	const [education, setEducation] = useState([])
+	const [experiences, setExperiences] = useState([])
+	const [projects, setProjects] = useState([])
+	const [skills, setSkills] = useState([])
+	const [summary, setSummary] = useState('')
 
-	const [educationList, setEducationList] = useState([emptyEducation()])
-	const [experienceList, setExperienceList] = useState([emptyExperience()])
-	const [projectList, setProjectList] = useState([emptyProject()])
-	const [skillsList, setSkillsList] = useState([emptySkill()])
-
+	// Fetch profile data
 	useEffect(() => {
 		const fetchProfile = async () => {
 			const token = localStorage.getItem('token')
@@ -89,70 +65,49 @@ function Info() {
 				setUser(JSON.parse(userData))
 				const response = await getMyProfile()
 				const data = response.data || {}
-				const contact = data.contact || {}
-				const sectionLabelsData = (data.user && data.user.section_labels) || {}
 				
-				setSectionLabels(sectionLabelsData)
-				setContactForm({
-					email: contact.email || '',
-					phone: contact.phone || '',
-					github: contact.github || '',
-					linkedin: contact.linkedin || '',
-					portfolio: contact.portfolio || '',
-					location: contact.location || '',
+				// Contact
+				const contactData = data.contact || {}
+				setContact({
+					email: contactData.email || '',
+					phone: contactData.phone || '',
+					github: contactData.github || '',
+					linkedin: contactData.linkedin || '',
+					portfolio: contactData.portfolio || '',
+					location: contactData.location || '',
 				})
-				setEducationList(
-					data.education && data.education.length
-						? data.education.map((e) => ({
-								...emptyEducation(),
-								...e,
-								id: e.id || newId(),
-								// Ensure all string fields are never null
-								school: e.school ?? '',
-								degree: e.degree ?? '',
-								discipline: e.discipline ?? '',
-								minor: e.minor ?? '',
-								location: e.location ?? '',
-								start_date: e.start_date ?? '',
-								end_date: e.end_date ?? '',
-								gpa: e.gpa ?? '',
-								subsections: e.subsections || {},
-						  }))
-						: [emptyEducation()]
-				)
-				setExperienceList(
-					data.experiences && data.experiences.length
-						? data.experiences.map((e) => ({
-							...emptyExperience(),
-							...e,
-							id: e.id || newId(),
-							// Ensure all string fields are never null
-							title: e.title ?? '',
-							company: e.company ?? '',
-							description: e.description ?? '',
-							start_date: e.start_date ?? '',
-							end_date: e.end_date ?? '',
-						}))
-						: [emptyExperience()]
-				)
-				setProjectList(
-					data.projects && data.projects.length
-						? data.projects.map((p) => ({
-							...emptyProject(),
-							...p,
-							id: p.id || newId(),
-							// Ensure all string fields are never null
-							title: p.title ?? '',
-							description: p.description ?? '',
-							tech_stack: Array.isArray(p.tech_stack) ? p.tech_stack.join(', ') : (p.tech_stack ?? ''),
-						}))
-						: [emptyProject()]
-				)
-				setSkillsList(
-					data.skills && data.skills.length
-						? data.skills.map((s) => ({ ...emptySkill(), ...s, name: s.name || '', id: s.id || newId() }))
-						: [emptySkill()]
-				)
+
+				// Education - transform to step format
+				if (data.education && data.education.length) {
+					const edu = data.education.map(transformEducationForStep)
+					// Add default subsection for entries without one
+					edu.forEach(e => {
+						if (!e.subsections || Object.keys(e.subsections).length === 0) {
+							e.subsections = {}
+						}
+					})
+					setEducation(edu)
+				}
+
+				// Experiences - transform to step format
+				if (data.experiences && data.experiences.length) {
+					setExperiences(data.experiences.map(transformExperienceForStep))
+				}
+
+				// Projects - transform to step format
+				if (data.projects && data.projects.length) {
+					setProjects(data.projects.map(transformProjectForStep))
+				}
+
+				// Skills
+				if (data.skills && data.skills.length) {
+					setSkills(data.skills.map(transformSkillForStep))
+				}
+
+				// Summary
+				if (data.summary) {
+					setSummary(data.summary.summary || '')
+				}
 			} catch (error) {
 				console.error('Error fetching profile:', error)
 				try {
@@ -174,150 +129,223 @@ function Info() {
 		navigate('/')
 	}
 
-	// Local state updates only; backend updates occur on Save.
-	const onContactChange = (field, value) => setContactForm((prev) => ({ ...prev, [field]: value }))
-	const onEducationChange = (id, field, value) =>
-		setEducationList((prev) => prev.map((item) => (item.id === id ? { ...item, [field]: value } : item)))
-	const onEducationLabelChange = (id, key, value) =>
-		setEducationList((prev) =>
-			prev.map((item) =>
-				item.id === id
-					? { ...item, label_overrides: { ...(item.label_overrides || {}), [key]: value } }
-					: item
-			)
-		)
-	const onExperienceChange = (id, field, value) =>
-		setExperienceList((prev) => prev.map((item) => (item.id === id ? { ...item, [field]: value } : item)))
-	const onProjectChange = (id, field, value) =>
-		setProjectList((prev) => prev.map((item) => (item.id === id ? { ...item, [field]: value } : item)))
-	const onSkillChange = (id, value) =>
-		setSkillsList((prev) => prev.map((item) => (item.id === id ? { ...item, name: value } : item)))
+	// Contact handlers
+	const handleContactUpdate = (field, value) => {
+		setContact(prev => ({ ...prev, [field]: value }))
+	}
 
-	const addEducation = () => setEducationList((prev) => [...prev, emptyEducation()])
-	const addExperience = () => setExperienceList((prev) => [...prev, emptyExperience()])
-	const addProject = () => setProjectList((prev) => [...prev, emptyProject()])
-	const addSkill = () => setSkillsList((prev) => [...prev, emptySkill()])
-
-	// Saves
 	const handleContactSave = async () => {
+		setSavingSection('contact')
 		try {
-			await upsertContact(contactForm)
+			await upsertContact(contact)
+			toast.success('Contact information saved!')
 		} catch (error) {
 			console.error('Error saving contact:', error)
-			alert('Failed to save contact info.')
+			toast.error('Failed to save contact info.')
+		} finally {
+			setSavingSection(null)
 		}
 	}
 
-	const handleSaveEducation = async () => {
-		const payload = educationList
-			.filter((edu) => Object.values(edu).some((v) => (v || '').toString().trim() !== ''))
-			.map(({ id, start_date, end_date, ...rest }) => ({
-				...rest,
-				// Convert empty date strings to null for proper backend parsing
-				start_date: start_date && start_date.trim() ? start_date : null,
-				end_date: end_date && end_date.trim() ? end_date : null,
-			}))
-		try {
-			await setupEducation(payload)
-			// Refresh the profile data after successful save
-			const response = await getMyProfile()
-			const data = response.data || {}
-			
-			// Deduplicate education entries (same logic as initial load)
-			const educationMap = new Map()
-			if (data.education && data.education.length) {
-				data.education.forEach((e) => {
-					const key = `${e.school || ''}_${e.degree || ''}_${e.field || ''}_${e.start_date || ''}`
-					if (!educationMap.has(key) || (e.id && !educationMap.get(key).id)) {
-						educationMap.set(key, e)
-					}
-				})
+	// Education handlers
+	const handleEducationAdd = (newEdu) => {
+		const edu = {
+			...newEdu,
+			id: newEdu.id || newId(),
+			subsections: newEdu.subsections || { 'Relevant Coursework': '' },
+		}
+		setEducation(prev => [...prev, edu])
+	}
+
+	const handleEducationRemove = (index) => {
+		setEducation(prev => prev.filter((_, i) => i !== index))
+	}
+
+	const handleEducationUpdate = (index, updatedEdu) => {
+		setEducation(prev => {
+			const newEdu = [...prev]
+			newEdu[index] = { ...newEdu[index], ...updatedEdu }
+			return newEdu
+		})
+	}
+
+	const handleSubsectionUpdate = (action, eduIndex, oldTitle, newValue) => {
+		setEducation(prev => {
+			const newEdu = [...prev]
+			const edu = newEdu[eduIndex]
+			const subsections = { ...(edu.subsections || {}) }
+
+			if (action === 'add') {
+				const newTitle = `New Section ${Object.keys(subsections).length + 1}`
+				subsections[newTitle] = ''
+			} else if (action === 'remove') {
+				delete subsections[oldTitle]
+			} else if (action === 'rename') {
+				if (newValue.trim() && newValue !== oldTitle) {
+					const content = subsections[oldTitle] || ''
+					delete subsections[oldTitle]
+					subsections[newValue.trim()] = content
+				}
+			} else if (action === 'content') {
+				subsections[oldTitle] = newValue
 			}
-			const uniqueEducation = Array.from(educationMap.values())
-			
-			setEducationList(
-				uniqueEducation.length
-					? uniqueEducation.map((e) => ({
-						...emptyEducation(),
-						...e,
-						id: e.id || newId(),
-						// Ensure all string fields are never null
-						school: e.school ?? '',
-						degree: e.degree ?? '',
-						discipline: e.discipline ?? '',
-						minor: e.minor ?? '',
-						location: e.location ?? '',
-						start_date: e.start_date ?? '',
-						end_date: e.end_date ?? '',
-						gpa: e.gpa ?? '',
-						subsections: e.subsections || {},
-					}))
-					: [emptyEducation()]
-			)
-			alert('Education saved successfully!')
+
+			newEdu[eduIndex] = { ...edu, subsections }
+			return newEdu
+		})
+	}
+
+	const handleEducationSave = async () => {
+		setSavingSection('education')
+		try {
+			const payload = education
+				.filter((edu) => edu.school || edu.degree)
+				.map(edu => {
+					const transformed = transformEducationForBackend(edu)
+					return normalizeEducationForBackend(transformed)
+				})
+			await setupEducation(payload)
+			toast.success('Education saved successfully!')
 		} catch (error) {
 			console.error('Error saving education:', error)
-			alert('Failed to save education. Please check the console for details.')
+			toast.error('Failed to save education.')
+		} finally {
+			setSavingSection(null)
 		}
 	}
 
-	const handleSaveExperiences = async () => {
-		const payload = experienceList
-			.filter((exp) => Object.values(exp).some((v) => (v || '').toString().trim() !== ''))
-			.map(({ id, ...rest }) => rest)
+	// Experience handlers
+	const handleExperienceAdd = (newExp) => {
+		setExperiences(prev => [...prev, { ...newExp, id: newExp.id || newId() }])
+	}
+
+	const handleExperienceRemove = (index) => {
+		setExperiences(prev => prev.filter((_, i) => i !== index))
+	}
+
+	const handleExperienceUpdate = (index, updatedExp) => {
+		setExperiences(prev => {
+			const newExp = [...prev]
+			newExp[index] = { ...newExp[index], ...updatedExp }
+			return newExp
+		})
+	}
+
+	const handleExperienceSave = async () => {
+		setSavingSection('experiences')
 		try {
-			await createExperiencesBulk(payload)
+			const payload = experiences
+				.filter((exp) => exp.title || exp.company)
+				.map(exp => {
+					const transformed = transformExperienceForBackend(exp)
+					return normalizeExperienceForBackend(transformed)
+				})
+			await setupExperiences(payload)
+			toast.success('Experiences saved successfully!')
 		} catch (error) {
 			console.error('Error saving experiences:', error)
-			alert('Failed to save experiences.')
+			toast.error('Failed to save experiences.')
+		} finally {
+			setSavingSection(null)
 		}
 	}
 
-	const handleSaveProjects = async () => {
-		const payload = projectList
-			.filter((proj) => Object.values(proj).some((v) => (v || '').toString().trim() !== ''))
-			.map(({ id, tech_stack, ...rest }) => ({
-				...rest,
-				tech_stack: tech_stack
-					? tech_stack
-							.split(',')
-							.map((s) => s.trim())
-							.filter(Boolean)
-					: [],
-			}))
+	// Project handlers
+	const handleProjectAdd = (newProj) => {
+		setProjects(prev => [...prev, { ...newProj, id: newProj.id || newId() }])
+	}
+
+	const handleProjectRemove = (index) => {
+		setProjects(prev => prev.filter((_, i) => i !== index))
+	}
+
+	const handleProjectUpdate = (index, updatedProj) => {
+		setProjects(prev => {
+			const newProj = [...prev]
+			newProj[index] = { ...newProj[index], ...updatedProj }
+			return newProj
+		})
+	}
+
+	const handleProjectSave = async () => {
+		setSavingSection('projects')
 		try {
-			await createProjectsBulk(payload)
+			const payload = projects
+				.filter((proj) => proj.title)
+				.map(proj => {
+					const transformed = transformProjectForBackend(proj)
+					return normalizeProjectForBackend(transformed)
+				})
+			await setupProjects(payload)
+			toast.success('Projects saved successfully!')
 		} catch (error) {
 			console.error('Error saving projects:', error)
-			alert('Failed to save projects.')
+			toast.error('Failed to save projects.')
+		} finally {
+			setSavingSection(null)
 		}
 	}
 
-	const handleSaveSkills = async () => {
-		const payload = skillsList
-			.filter((s) => (s.name || '').trim() !== '')
-			.map(({ name }) => ({ name }))
+	// Skills handlers
+	const handleSkillAdd = (skill) => {
+		setSkills(prev => [...prev, { ...skill, id: skill.id || newId() }])
+	}
+
+	const handleSkillRemove = (index) => {
+		setSkills(prev => prev.filter((_, i) => i !== index))
+	}
+
+	const handleSkillUpdate = (index, updatedSkill) => {
+		setSkills(prev => {
+			const newSkills = [...prev]
+			newSkills[index] = { ...newSkills[index], ...updatedSkill }
+			return newSkills
+		})
+	}
+
+	const handleSkillSave = async () => {
+		setSavingSection('skills')
 		try {
-			await createSkillsBulk(payload)
+			const payload = skills
+				.filter((s) => s.name.trim())
+				.map(normalizeSkillForBackend)
+			await setupSkills(payload)
+			toast.success('Skills saved successfully!')
 		} catch (error) {
 			console.error('Error saving skills:', error)
-			alert('Failed to save skills.')
+			toast.error('Failed to save skills.')
+		} finally {
+			setSavingSection(null)
 		}
 	}
 
-	// Section label editing
-	const handleSectionLabelChange = (key, value) => {
-		setSectionLabels((prev) => ({ ...prev, [key]: value }))
+	// Summary handler
+	const handleSummaryUpdate = (value) => {
+		setSummary(value)
 	}
 
-	const handleSaveSectionLabels = async () => {
+	const handleSummarySave = async () => {
+		setSavingSection('summary')
 		try {
-			await updateSectionLabels(sectionLabels)
-			setIsEditingSectionLabels(false)
+			await createSummary({ summary })
+			toast.success('Summary saved successfully!')
 		} catch (error) {
-			console.error('Error saving section labels:', error)
-			alert('Failed to save section labels.')
+			console.error('Error saving summary:', error)
+			toast.error('Failed to save summary.')
+		} finally {
+			setSavingSection(null)
 		}
+	}
+
+	if (isLoading) {
+		return (
+			<div className="min-h-screen flex flex-col bg-cream">
+				<TopNav user={user} onLogout={handleLogout} />
+				<main className="flex-1 py-12 bg-cream flex items-center justify-center">
+					<p className="text-gray-600">Loading...</p>
+				</main>
+			</div>
+		)
 	}
 
 	return (
@@ -325,364 +353,69 @@ function Info() {
 			<TopNav user={user} onLogout={handleLogout} />
 
 			<main className="flex-1 py-8 bg-cream">
-				<div className="max-w-6xl mx-auto px-6 space-y-6">
-					<h2 className="text-2xl font-bold text-gray-900">Your Info</h2>
-					{isLoading ? (
-						<p className="text-gray-600">Loading...</p>
-					) : (
-						<div className="space-y-6">
-							<section className="bg-white-bright rounded-xl shadow-sm p-6">
-								<div className="flex items-center justify-between mb-4">
-									<h3 className="text-xl font-bold text-gray-900">Contact</h3>
-									<button
-										onClick={handleContactSave}
-										className="px-4 py-2 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition"
-									>
-										Save
-									</button>
-								</div>
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									{['email', 'phone', 'github', 'linkedin', 'portfolio', 'location'].map((field) => (
-										<div key={field} className="flex flex-col">
-											<label className="text-sm text-gray-700 mb-1 capitalize">{field}</label>
-											<input
-												type="text"
-												value={contactForm[field]}
-												onChange={(e) => onContactChange(field, e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-										</div>
-									))}
-								</div>
-							</section>
+				<div className="max-w-4xl mx-auto px-6 space-y-8">
+					{/* Header */}
+					<div>
+						<h1 className="text-3xl font-bold text-gray-900 mb-2">Your Information</h1>
+						<p className="text-gray-600">Review and update your profile details. Each section can be saved independently.</p>
+					</div>
 
-							<section className="bg-white-bright rounded-xl shadow-sm p-6">
-								<div className="flex items-center justify-between mb-4">
-							<h3 className="text-xl font-bold text-gray-900">
-								{sectionLabels.education || 'Education'}
-							</h3>
-							<div className="flex items-center gap-2">
-								{isEditingSectionLabels ? (
-									<>
-										<input
-											type="text"
-											value={sectionLabels.education || 'Education'}
-											onChange={(e) => handleSectionLabelChange('education', e.target.value)}
-											className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-										/>
-										<button
-											onClick={handleSaveSectionLabels}
-											className="p-2 bg-brand-pink text-white rounded-lg hover:opacity-90 transition"
-											title="Save label"
-										>
-											<FontAwesomeIcon icon={faCheck} className="h-4 w-4" />
-										</button>
-										<button
-											onClick={() => setIsEditingSectionLabels(false)}
-											className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
-											title="Cancel"
-										>
-											<FontAwesomeIcon icon={faXmark} className="h-4 w-4" />
-										</button>
-									</>
-								) : (
-									<button
-										onClick={() => setIsEditingSectionLabels(true)}
-										className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
-										title="Edit section label"
-									>
-										<FontAwesomeIcon icon={faPenToSquare} className="h-4 w-4" />
-									</button>
-								)}
-								<button
-									onClick={addEducation}
-									className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition"
-								>
-									Add another
-								</button>
-								<button
-									onClick={handleSaveEducation}
-									className="px-4 py-2 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition"
-								>
-									Save
-								</button>
-							</div>
-								</div>
-								<div className="space-y-4">
-									{educationList.map((edu) => (
-										<div
-											key={edu.id}
-											className="border border-gray-200 rounded-lg p-4 space-y-4 bg-white"
-										>
-											<div className="space-y-3">
-												<div className="text-xs font-semibold uppercase text-gray-500 tracking-wide">
-													Program
-												</div>
-												<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-													<div className="flex flex-col gap-1">
-														<label className="text-sm font-medium text-gray-700">School</label>
-														<input
-															type="text"
-															placeholder="University Name"
-															value={edu.school}
-															onChange={(e) => onEducationChange(edu.id, 'school', e.target.value)}
-															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-														/>
-													</div>
-													<div className="flex flex-col gap-1">
-														<label className="text-sm font-medium text-gray-700">Degree</label>
-														<input
-															type="text"
-															placeholder="Bachelor of Science"
-															value={edu.degree}
-															onChange={(e) => onEducationChange(edu.id, 'degree', e.target.value)}
-															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-														/>
-													</div>
-													<div className="flex flex-col gap-1">
-														<label className="text-sm font-medium text-gray-700">Discipline</label>
-														<input
-															type="text"
-															placeholder="Computer Engineering"
-															value={edu.discipline}
-															onChange={(e) => onEducationChange(edu.id, 'discipline', e.target.value)}
-															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-														/>
-													</div>
-													<div className="flex flex-col gap-1">
-														<label className="text-sm font-medium text-gray-700">Minor (optional)</label>
-														<input
-															type="text"
-															placeholder="Minor"
-															value={edu.minor}
-															onChange={(e) => onEducationChange(edu.id, 'minor', e.target.value)}
-															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-														/>
-													</div>
-												</div>
-											</div>
+					{/* Contact Section */}
+					<ContactSection
+						contact={contact}
+						onUpdate={handleContactUpdate}
+						onSave={handleContactSave}
+						isSaving={savingSection === 'contact'}
+					/>
 
-											<div className="space-y-3">
-												<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-													<div className="flex flex-col gap-1">
-														<label className="text-sm font-medium text-gray-700">Location</label>
-														<input
-															type="text"
-															placeholder="City, State"
-															value={edu.location}
-															onChange={(e) => onEducationChange(edu.id, 'location', e.target.value)}
-															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-														/>
-													</div>
-													<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-														<div className="flex flex-col gap-1">
-															<label className="text-sm font-medium text-gray-700">Start date</label>
-															<input
-																type="date"
-																value={toDateInput(edu.start_date)}
-																onChange={(e) => onEducationChange(edu.id, 'start_date', e.target.value)}
-																className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-															/>
-														</div>
-														<div className="flex flex-col gap-1">
-															<label className="text-sm font-medium text-gray-700">End date</label>
-															<input
-																type="date"
-																value={toDateInput(edu.end_date)}
-																onChange={(e) => onEducationChange(edu.id, 'end_date', e.target.value)}
-																className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-															/>
-														</div>
-													</div>
-												</div>
-											</div>
-											
-											<div className="flex flex-col gap-1">
-												<label className="text-sm font-medium text-gray-700">GPA</label>
-												<input
-													type="text"
-													placeholder="e.g., 3.8 / 4.0"
-													value={edu.gpa}
-													onChange={(e) => onEducationChange(edu.id, 'gpa', e.target.value)}
-													className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-												/>
-											</div>
+					{/* Education Section */}
+					<EducationSection
+						education={education}
+						onAdd={handleEducationAdd}
+						onRemove={handleEducationRemove}
+						onUpdate={handleEducationUpdate}
+						onSave={handleEducationSave}
+						isSaving={savingSection === 'education'}
+						onSubsectionUpdate={handleSubsectionUpdate}
+					/>
 
-											<div className="space-y-3">
-												<div className="text-xs font-semibold uppercase text-gray-500 tracking-wide">
-													Highlights
-												</div>
-												<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-													<div className="flex flex-col gap-1">
-														<label className="text-sm font-medium text-gray-700">{sectionLabels.subsections || 'Subsections'}</label>
-														<input
-															type="text"
-															placeholder="Subsections"
-															value={edu.subsections}
-															onChange={(e) => onEducationChange(edu.id, 'subsections', e.target.value)}
-															className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-														/>
-													 </div>
-												</div>
-											</div>
+					{/* Experience Section */}
+					<ExperienceSection
+						experiences={experiences}
+						onAdd={handleExperienceAdd}
+						onRemove={handleExperienceRemove}
+						onUpdate={handleExperienceUpdate}
+						onSave={handleExperienceSave}
+						isSaving={savingSection === 'experiences'}
+					/>
 
-											
-										</div>
-									))}
-								</div>
-							</section>
+					{/* Projects Section */}
+					<ProjectsSection
+						projects={projects}
+						onAdd={handleProjectAdd}
+						onRemove={handleProjectRemove}
+						onUpdate={handleProjectUpdate}
+						onSave={handleProjectSave}
+						isSaving={savingSection === 'projects'}
+					/>
 
-							{/* Experiences section - commented out */}
-							{/* <section className="bg-white-bright rounded-xl shadow-sm p-6">
-								<div className="flex items-center justify-between mb-4">
-									<h3 className="text-xl font-bold text-gray-900">Experiences</h3>
-									<div className="flex items-center gap-2">
-										<button
-											onClick={addExperience}
-											className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition"
-										>
-											Add another
-										</button>
-										<button
-											onClick={handleSaveExperiences}
-											className="px-4 py-2 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition"
-										>
-											Save
-										</button>
-									</div>
-								</div>
-								<div className="space-y-4">
-									{experienceList.map((exp) => (
-										<div
-											key={exp.id}
-											className="border border-gray-200 rounded-lg p-4 grid grid-cols-1 md:grid-cols-2 gap-3"
-										>
-											<input
-												type="text"
-												placeholder="Title"
-												value={exp.title}
-												onChange={(e) => onExperienceChange(exp.id, 'title', e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-											<input
-												type="text"
-												placeholder="Company"
-												value={exp.company}
-												onChange={(e) => onExperienceChange(exp.id, 'company', e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-											<input
-												type="text"
-												placeholder="Description"
-												value={exp.description}
-												onChange={(e) => onExperienceChange(exp.id, 'description', e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink md:col-span-2"
-											/>
-											<div className="grid grid-cols-2 gap-2">
-												<input
-													type="text"
-													placeholder="Start date"
-													value={exp.start_date}
-													onChange={(e) => onExperienceChange(exp.id, 'start_date', e.target.value)}
-													className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-												/>
-												<input
-													type="text"
-													placeholder="End date"
-													value={exp.end_date}
-													onChange={(e) => onExperienceChange(exp.id, 'end_date', e.target.value)}
-													className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-												/>
-											</div>
-										</div>
-									))}
-								</div>
-							</section> */}
+					{/* Skills Section */}
+					<SkillsSection
+						skills={skills}
+						onAdd={handleSkillAdd}
+						onRemove={handleSkillRemove}
+						onUpdate={handleSkillUpdate}
+						onSave={handleSkillSave}
+						isSaving={savingSection === 'skills'}
+					/>
 
-							{/* Projects section - commented out */}
-							{/* <section className="bg-white-bright rounded-xl shadow-sm p-6">
-								<div className="flex items-center justify-between mb-4">
-									<h3 className="text-xl font-bold text-gray-900">Projects</h3>
-									<div className="flex items-center gap-2">
-										<button
-											onClick={addProject}
-											className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition"
-										>
-											Add another
-										</button>
-										<button
-											onClick={handleSaveProjects}
-											className="px-4 py-2 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition"
-										>
-											Save
-										</button>
-									</div>
-								</div>
-								<div className="space-y-4">
-									{projectList.map((proj) => (
-										<div
-											key={proj.id}
-											className="border border-gray-200 rounded-lg p-4 grid grid-cols-1 md:grid-cols-2 gap-3"
-										>
-											<input
-												type="text"
-												placeholder="Title"
-												value={proj.title}
-												onChange={(e) => onProjectChange(proj.id, 'title', e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-											<input
-												type="text"
-												placeholder="Tech stack (comma separated)"
-												value={proj.tech_stack}
-												onChange={(e) => onProjectChange(proj.id, 'tech_stack', e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-											/>
-											<textarea
-												placeholder="Description"
-												value={proj.description}
-												onChange={(e) => onProjectChange(proj.id, 'description', e.target.value)}
-												className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink md:col-span-2 min-h-[80px]"
-											/>
-										</div>
-									))}
-								</div>
-							</section> */}
-
-							{/* Skills section - commented out */}
-							{/* <section className="bg-white-bright rounded-xl shadow-sm p-6">
-								<div className="flex items-center justify-between mb-4">
-									<h3 className="text-xl font-bold text-gray-900">Skills</h3>
-									<div className="flex items-center gap-2">
-										<button
-											onClick={addSkill}
-											className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition"
-										>
-											Add another
-										</button>
-										<button
-											onClick={handleSaveSkills}
-											className="px-4 py-2 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition"
-										>
-											Save
-										</button>
-									</div>
-								</div>
-								<div className="space-y-3">
-									{skillsList.map((skill) => (
-										<input
-											key={skill.id}
-											type="text"
-											placeholder="Skill"
-											value={skill.name}
-											onChange={(e) => onSkillChange(skill.id, e.target.value)}
-											className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-										/>
-									))}
-								</div>
-							</section> */}
-						</div>
-					)}
+					{/* Summary Section */}
+					<SummarySection
+						summary={summary}
+						onUpdate={handleSummaryUpdate}
+						onSave={handleSummarySave}
+						isSaving={savingSection === 'summary'}
+					/>
 				</div>
 			</main>
 		</div>
@@ -690,4 +423,3 @@ function Info() {
 }
 
 export default Info
-

@@ -12,9 +12,10 @@
 # - create_skills_bulk            -      creates multiple skills for the current user.
 
 # imports.
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 
 # local imports.
@@ -36,6 +37,21 @@ from models import User, Experience, Projects, Skills, Contact, Education, Summa
 
 # create router.
 router = APIRouter(prefix="/api/profile", tags=["profile"])
+
+# ------------------- helper functions -------------------
+
+# normalize skill name for case-insensitive matching
+def normalize_skill_name(name: str) -> str:
+    """Normalize skill name to lowercase for case-insensitive matching."""
+    return name.strip().lower() if name else ""
+
+# normalize category: empty string -> None, trim, limit to 50 chars
+def normalize_category(category: Optional[str]) -> Optional[str]:
+    """Normalize category: empty/None -> None, trim, max 50 chars."""
+    if not category or not category.strip():
+        return None
+    normalized = category.strip()[:50]
+    return normalized if normalized else None
 
 # ------------------- routes -------------------
 
@@ -137,21 +153,28 @@ async def create_skill(
     current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db)
 ):
-
-    # check if skill already exists for this user.
+    # normalize skill name and category
+    normalized_name = normalize_skill_name(skill_data.name)
+    normalized_category = normalize_category(skill_data.category)
+    
+    # check if skill already exists for this user (case-insensitive match by name only).
     existing_skill = db.query(Skills).filter(
         Skills.user_id == current_user.id,
-        Skills.name == skill_data.name
+        func.lower(Skills.name) == normalized_name
     ).first()
     
-    # if skill already exists, return it.
+    # if skill already exists, update its category and return it.
     if existing_skill:
+        existing_skill.category = normalized_category
+        db.commit()
+        db.refresh(existing_skill)
         return SkillResponse.model_validate(existing_skill)
     
     # create a new skill for the current user.
     new_skill = Skills(
         user_id=current_user.id,
-        name=skill_data.name,
+        name=skill_data.name.strip(),  # store original case
+        category=normalized_category,
     )
     
     # add, commit, and refresh db.
@@ -453,35 +476,53 @@ async def create_skills_bulk(
     current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db)
 ):
-    # create multiple skills for the current user.
-    new_skills = []
+    # get all existing skills for this user.
+    existing_skills = db.query(Skills).filter(
+        Skills.user_id == current_user.id
+    ).all()
+    
+    # build a map of existing skills by normalized name (case-insensitive).
+    existing_map = {}
+    for skill in existing_skills:
+        key = normalize_skill_name(skill.name)
+        existing_map[key] = skill
+    
+    # process incoming skills: update existing or create new.
+    result_skills = []
+    matched_keys = set()
+    
     for skill_data in skills_data:
-        # check if skill already exists.
-        existing_skill = db.query(Skills).filter(
-            Skills.user_id == current_user.id,
-            Skills.name == skill_data.name
-        ).first()
+        # normalize incoming skill name and category.
+        normalized_name = normalize_skill_name(skill_data.name)
+        normalized_category = normalize_category(skill_data.category)
         
-        # if skill already exists, append it to the list.
-        if existing_skill:
-            new_skills.append(existing_skill)
+        if normalized_name in existing_map:
+            # update existing skill (update category, preserve original name case if needed).
+            existing_skill = existing_map[normalized_name]
+            existing_skill.category = normalized_category
+            result_skills.append(existing_skill)
+            matched_keys.add(normalized_name)
         else:
-            # create a new skill for the current user.
+            # create new skill.
             new_skill = Skills(
                 user_id=current_user.id,
-                name=skill_data.name,
+                name=skill_data.name.strip(),  # store original case
+                category=normalized_category,
             )
-
-            # add, commit, and refresh db.
             db.add(new_skill)
-            new_skills.append(new_skill)
+            result_skills.append(new_skill)
     
-    # add, commit, and refresh db.
+    # delete existing skills that weren't matched (removed from frontend).
+    for key, skill in existing_map.items():
+        if key not in matched_keys:
+            db.delete(skill)
+    
+    # commit all changes.
     db.commit()
-    for skill in new_skills:
+    for skill in result_skills:
         db.refresh(skill)
     
-    return [SkillResponse.model_validate(skill) for skill in new_skills]
+    return [SkillResponse.model_validate(skill) for skill in result_skills]
 
 
 # parse resume file.

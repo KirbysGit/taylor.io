@@ -13,6 +13,7 @@ class Skills(Base):
     id = Column(Integer, primary_key=True, index=True)                      # id.
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)       # foreign key to user.
     name = Column(String(100), nullable=False)                              # skill name.
+    category = Column(String(50), nullable=True)                             # skill category (e.g., "Tools", "Languages").
 
     # relationship back to user.
     user = relationship("User", back_populates="skills")
