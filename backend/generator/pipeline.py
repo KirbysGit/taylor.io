@@ -13,65 +13,69 @@ from .builders import build_header, build_education_entry, build_experience_entr
 # get abs path to templates directory.
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
+def _build_section(title: str, entries_html: str) -> str:
+    """Helper to build a section with title and content."""
+    if not entries_html or not entries_html.strip():
+        return ""
+    return f'''<section class="section">
+            <h2 class="section-title">
+                <span>{title}</span>
+                <div class="divider"></div>
+            </h2>
+            {entries_html}
+        </section>'''
+
 def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
 
     # -- 1. fill header.
-
-    # get header data to fill in.
     header = resume_data.get("header", {})
-
     name = f"{header.get('first_name', '')} {header.get('last_name', '')}".strip()
-
-    # fill header line.
     html_content = html_content.replace("{name}", name)
     html_content = html_content.replace("{header_line}", build_header(header))
     
-    # -- 2. fill education.
-    education = resume_data.get("education", [])
-
-    education_entries = []
-
-    for edu in education:
-        education_entries.append(build_education_entry(edu))
+    # -- 2. build all sections (order will be applied later).
+    sections_map = {}
     
-    html_content = html_content.replace("{education_entries}", "\n".join(education_entries))
-
-    # -- 3. fill experience.
-    experience = resume_data.get("experience", [])
-
-    experience_entries = []
-
-    for exp in experience:
-        experience_entries.append(build_experience_entry(exp))
+    # Summary
+    summary = resume_data.get("summary")
+    if summary is not None:
+        summary_text = summary.get("summary", "") if isinstance(summary, dict) else ""
+        summary_content = ""
+        if summary_text and summary_text.strip():
+            summary_content = f'<div class="summary-section">&emsp; &ensp;{summary_text}</div>'
+        sections_map["summary"] = _build_section("Professional Summary", summary_content)
+    else:
+        sections_map["summary"] = ""
     
-    html_content = html_content.replace("{experience_entries}", "\n".join(experience_entries))
+    # Education
+    education = resume_data.get("education") or []
+    education_entries = [build_education_entry(edu) for edu in education]
+    sections_map["education"] = _build_section("Education", "\n".join(education_entries))
     
-    # -- 4. fill projects.
-    projects = resume_data.get("projects", [])
-
-    project_entries = []
-
-    for proj in projects:
-        project_entries.append(build_project_entry(proj))
+    # Experience
+    experience = resume_data.get("experience") or []
+    experience_entries = [build_experience_entry(exp) for exp in experience]
+    sections_map["experience"] = _build_section("Experience", "\n".join(experience_entries))
     
-    html_content = html_content.replace("{project_entries}", "\n".join(project_entries))
-
-    # -- 5. fill skills.
-    skills = resume_data.get("skills", [])
+    # Projects
+    projects = resume_data.get("projects") or []
+    project_entries = [build_project_entry(proj) for proj in projects]
+    sections_map["projects"] = _build_section("Projects", "\n".join(project_entries))
+    
+    # Skills
+    skills = resume_data.get("skills") or []
     skill_entries_html = build_skill_entry(skills)
+    sections_map["skills"] = _build_section("Skills", skill_entries_html)
     
-    html_content = html_content.replace("{skill_entries}", skill_entries_html)
-
-    # -- 6. fill summary.
-    summary = resume_data.get("summary", {})
-    summary_text = summary.get("summary", "") if isinstance(summary, dict) else ""
+    # -- 3. build sections in specified order.
+    section_order = resume_data.get("sectionOrder", ["summary", "education", "experience", "projects", "skills"])
+    sections_html = []
+    for section_key in section_order:
+        if section_key in sections_map and sections_map[section_key]:
+            sections_html.append(sections_map[section_key])
     
-    # add indent to first line only.
-    if summary_text:
-        print("in here!")
-        summary_text = f"&emsp; &ensp;{summary_text}"
-    
-    html_content = html_content.replace("{summary}", summary_text)
+    # -- 4. replace sections placeholder.
+    html_content = html_content.replace("{sections}", "\n".join(sections_html))
 
     return html_content
 

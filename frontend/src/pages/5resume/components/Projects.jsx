@@ -9,8 +9,9 @@ import { useState, useEffect } from 'react'
 
 // icon imports.
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus} from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons'
 import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
+import DescriptionInput from '@/components/inputs/DescriptionInput'
 
 // normalize project data from backend.
 const normalizeProject = (proj = null) => {
@@ -22,7 +23,7 @@ const normalizeProject = (proj = null) => {
     }
 }
 
-const Projects = ({ projectsData, onProjectsChange }) => {
+const Projects = ({ projectsData, onProjectsChange, isVisible = true, onVisibilityChange }) => {
     // ----- states -----
     const [isProjectsExpanded, setIsProjectsExpanded] = useState(true)	// whether the projects modal is expanded.
 
@@ -90,6 +91,22 @@ const Projects = ({ projectsData, onProjectsChange }) => {
 				onClick={() => setIsProjectsExpanded(!isProjectsExpanded)}
 				className="flex items-center gap-3 w-full transition-colors"
 			>
+				{/* Visibility Toggle Button - Left side in circle */}
+				{onVisibilityChange && (
+					<button
+						type="button"
+						onClick={(e) => {
+							e.stopPropagation();
+							onVisibilityChange(!isVisible);
+						}}
+						className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+						aria-label={isVisible ? 'Hide projects in preview' : 'Show projects in preview'}
+						title={isVisible ? 'Hide from preview' : 'Show in preview'}
+					>
+						<FontAwesomeIcon icon={isVisible ? faEye : faEyeSlash} className="w-4 h-4 text-gray-600" />
+					</button>
+				)}
+				
 				{/* title */}
 				<h1 className="text-[1.375rem] font-semibold text-gray-900">Projects</h1>
 				
@@ -142,16 +159,13 @@ const Projects = ({ projectsData, onProjectsChange }) => {
 								</div>
 							</div>
 							{/* description */}
-							<div className="flex mb-2">
-								<div className="labelInputPair">
-									<label className="label">Description <RequiredAsterisk /></label>
-									<textarea
-										value={project.description}
-										onChange={(e) => updateProject(index, 'description', e.target.value)}
-										className="input"
-										required
-									/>
-								</div>
+							<div className="mb-2">
+								<DescriptionInput
+									value={project.description}
+									onChange={(value) => updateProject(index, 'description', value)}
+									placeholder="Describe what the project does, key features, your role..."
+									required
+								/>
 							</div>
 							{/* tech stack */}
 							<div className="flex mb-2">

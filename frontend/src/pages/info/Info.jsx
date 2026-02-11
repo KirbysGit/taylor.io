@@ -337,6 +337,21 @@ function Info() {
 		}
 	}
 
+	// Scroll to section handler
+	const scrollToSection = (sectionId) => {
+		const element = document.getElementById(sectionId)
+		if (element) {
+			const offset = 100 // offset for fixed header/nav
+			const elementPosition = element.getBoundingClientRect().top
+			const offsetPosition = elementPosition + window.pageYOffset - offset
+
+			window.scrollTo({
+				top: offsetPosition,
+				behavior: 'smooth'
+			})
+		}
+	}
+
 	if (isLoading) {
 		return (
 			<div className="min-h-screen flex flex-col bg-cream">
@@ -353,69 +368,141 @@ function Info() {
 			<TopNav user={user} onLogout={handleLogout} />
 
 			<main className="flex-1 py-8 bg-cream">
-				<div className="max-w-4xl mx-auto px-6 space-y-8">
-					{/* Header */}
-					<div>
-						<h1 className="text-3xl font-bold text-gray-900 mb-2">Your Information</h1>
-						<p className="text-gray-600">Review and update your profile details. Each section can be saved independently.</p>
+				<div className="max-w-7xl mx-auto px-6 flex gap-8">
+					{/* Sidebar Navigation */}
+					<aside className="w-48 flex-shrink-0 sticky top-24 self-start">
+						<nav className="bg-white-bright rounded-xl p-4 border-2 border-gray-200 shadow-sm">
+							<h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Quick Navigation</h3>
+							<ul className="space-y-2">
+								<li>
+									<button
+										onClick={() => scrollToSection('contact-section')}
+										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
+									>
+										Contact
+									</button>
+								</li>
+								<li>
+									<button
+										onClick={() => scrollToSection('education-section')}
+										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
+									>
+										Education
+									</button>
+								</li>
+								<li>
+									<button
+										onClick={() => scrollToSection('experience-section')}
+										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
+									>
+										Experience
+									</button>
+								</li>
+								<li>
+									<button
+										onClick={() => scrollToSection('projects-section')}
+										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
+									>
+										Projects
+									</button>
+								</li>
+								<li>
+									<button
+										onClick={() => scrollToSection('skills-section')}
+										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
+									>
+										Skills
+									</button>
+								</li>
+								<li>
+									<button
+										onClick={() => scrollToSection('summary-section')}
+										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
+									>
+										Summary
+									</button>
+								</li>
+							</ul>
+						</nav>
+					</aside>
+
+					{/* Main Content */}
+					<div className="flex-1 max-w-4xl space-y-8">
+						{/* Header */}
+						<div>
+							<h1 className="text-3xl font-bold text-gray-900 mb-2">Your Information</h1>
+							<p className="text-gray-600">Review and update your profile details. Each section can be saved independently.</p>
+						</div>
+
+						{/* Contact Section */}
+						<div id="contact-section">
+							<ContactSection
+								contact={contact}
+								onUpdate={handleContactUpdate}
+								onSave={handleContactSave}
+								isSaving={savingSection === 'contact'}
+							/>
+						</div>
+
+						{/* Education Section */}
+						<div id="education-section">
+							<EducationSection
+								education={education}
+								onAdd={handleEducationAdd}
+								onRemove={handleEducationRemove}
+								onUpdate={handleEducationUpdate}
+								onSave={handleEducationSave}
+								isSaving={savingSection === 'education'}
+								onSubsectionUpdate={handleSubsectionUpdate}
+							/>
+						</div>
+
+						{/* Experience Section */}
+						<div id="experience-section">
+							<ExperienceSection
+								experiences={experiences}
+								onAdd={handleExperienceAdd}
+								onRemove={handleExperienceRemove}
+								onUpdate={handleExperienceUpdate}
+								onSave={handleExperienceSave}
+								isSaving={savingSection === 'experiences'}
+							/>
+						</div>
+
+						{/* Projects Section */}
+						<div id="projects-section">
+							<ProjectsSection
+								projects={projects}
+								onAdd={handleProjectAdd}
+								onRemove={handleProjectRemove}
+								onUpdate={handleProjectUpdate}
+								onSave={handleProjectSave}
+								isSaving={savingSection === 'projects'}
+							/>
+						</div>
+
+						{/* Skills Section */}
+						<div id="skills-section">
+							<SkillsSection
+								skills={skills}
+								onAdd={handleSkillAdd}
+								onRemove={handleSkillRemove}
+								onUpdate={handleSkillUpdate}
+								onSave={handleSkillSave}
+								isSaving={savingSection === 'skills'}
+							/>
+						</div>
+
+						{/* Summary Section */}
+						<div id="summary-section">
+							<SummarySection
+								summary={summary}
+								onUpdate={handleSummaryUpdate}
+								onSave={handleSummarySave}
+								isSaving={savingSection === 'summary'}
+							/>
+						</div>
 					</div>
-
-					{/* Contact Section */}
-					<ContactSection
-						contact={contact}
-						onUpdate={handleContactUpdate}
-						onSave={handleContactSave}
-						isSaving={savingSection === 'contact'}
-					/>
-
-					{/* Education Section */}
-					<EducationSection
-						education={education}
-						onAdd={handleEducationAdd}
-						onRemove={handleEducationRemove}
-						onUpdate={handleEducationUpdate}
-						onSave={handleEducationSave}
-						isSaving={savingSection === 'education'}
-						onSubsectionUpdate={handleSubsectionUpdate}
-					/>
-
-					{/* Experience Section */}
-					<ExperienceSection
-						experiences={experiences}
-						onAdd={handleExperienceAdd}
-						onRemove={handleExperienceRemove}
-						onUpdate={handleExperienceUpdate}
-						onSave={handleExperienceSave}
-						isSaving={savingSection === 'experiences'}
-					/>
-
-					{/* Projects Section */}
-					<ProjectsSection
-						projects={projects}
-						onAdd={handleProjectAdd}
-						onRemove={handleProjectRemove}
-						onUpdate={handleProjectUpdate}
-						onSave={handleProjectSave}
-						isSaving={savingSection === 'projects'}
-					/>
-
-					{/* Skills Section */}
-					<SkillsSection
-						skills={skills}
-						onAdd={handleSkillAdd}
-						onRemove={handleSkillRemove}
-						onUpdate={handleSkillUpdate}
-						onSave={handleSkillSave}
-						isSaving={savingSection === 'skills'}
-					/>
-
-					{/* Summary Section */}
-					<SummarySection
-						summary={summary}
-						onUpdate={handleSummaryUpdate}
-						onSave={handleSummarySave}
-						isSaving={savingSection === 'summary'}
-					/>
 				</div>
 			</main>
 		</div>

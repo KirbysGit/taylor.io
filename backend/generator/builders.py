@@ -234,8 +234,6 @@ def build_project_entry(proj: Dict[str, Any]) -> str:
 # ----- build skills entries.
 def build_skill_entry(skills: list) -> str:
     
-    print("skills: ", skills)
-
     if not skills:
         return ''
     

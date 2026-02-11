@@ -4,7 +4,7 @@
 import React from 'react';
 import { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faTimes, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import { ChevronDown, ChevronUp } from '@/components/icons'
 
 // parse bulk text (comma or newline separated)
@@ -90,7 +90,7 @@ const SkillPill = ({ skill, onRemove }) => (
     </div>
 )
 
-const Skills = ({ skillsData, onSkillsChange }) => {
+const Skills = ({ skillsData, onSkillsChange, isVisible = true, onVisibilityChange }) => {
     const [isSkillsExpanded, setIsSkillsExpanded] = useState(true)
     const [mode, setMode] = useState('categorical')
     const [categories, setCategories] = useState([{ category: '', skills: [] }])
@@ -237,6 +237,22 @@ const Skills = ({ skillsData, onSkillsChange }) => {
                     onClick={() => setIsSkillsExpanded(!isSkillsExpanded)}
                     className="flex items-center gap-3 w-full transition-colors"
                 >
+                    {/* Visibility Toggle Button - Left side in circle */}
+                    {onVisibilityChange && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onVisibilityChange(!isVisible);
+                            }}
+                            className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                            aria-label={isVisible ? 'Hide skills in preview' : 'Show skills in preview'}
+                            title={isVisible ? 'Hide from preview' : 'Show in preview'}
+                        >
+                            <FontAwesomeIcon icon={isVisible ? faEye : faEyeSlash} className="w-4 h-4 text-gray-600" />
+                        </button>
+                    )}
+                    
                     <h1 className="text-[1.375rem] font-semibold text-gray-900">Skills</h1>
                     <div className="flex-1 h-[3px] rounded bg-gray-300"></div>
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">

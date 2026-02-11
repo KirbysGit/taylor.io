@@ -21,6 +21,8 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 	const [localEntries, setLocalEntries] = useState(entries)
 	const prevLengthRef = useRef(education.length)
 	const prevIdsRef = useRef(education.map(e => e.id || e).join(','))
+	// store previous end dates when toggling "current" to preserve them
+	const savedEndDatesRef = useRef(new Map())
 
 	// sync with prop changes only when structure changes (add/remove), not field updates
 	useEffect(() => {
@@ -61,13 +63,31 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 	}
 
 	const handleFieldChange = (index, field, value) => {
+		const entryId = localEntries[index]?.id || index
 		const updatedEntry = { ...localEntries[index], [field]: value }
+		
 		if (field === 'current' && value) {
+			// saving current end date before clearing it
+			const currentEndDate = updatedEntry.endDate || updatedEntry.end_date || ''
+			if (currentEndDate) {
+				savedEndDatesRef.current.set(entryId, currentEndDate)
+			}
 			updatedEntry.endDate = ''
 			updatedEntry.end_date = ''
+		} else if (field === 'current' && !value) {
+			// restoring saved end date when toggling current off
+			const savedEndDate = savedEndDatesRef.current.get(entryId)
+			if (savedEndDate) {
+				updatedEntry.endDate = savedEndDate
+				updatedEntry.end_date = savedEndDate
+				savedEndDatesRef.current.delete(entryId) // clear after restoring
+			}
 		}
+		
 		if (field === 'endDate' && value) {
 			updatedEntry.current = false
+			// clear saved end date if user manually sets a new one
+			savedEndDatesRef.current.delete(entryId)
 		}
 		
 		// update local state immediately for responsive UI
@@ -301,8 +321,8 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 														<p className="text-sm">No highlights yet. Click "Add Section" to get started.</p>
 													</div>
 												) : (
-													Object.entries(localEntries[index]?.subsections || {}).map(([title, content]) => (
-														<div key={title} className="flex flex-col gap-2 p-3 border border-gray-200 rounded-md bg-gray-50">
+													Object.entries(localEntries[index]?.subsections || {}).map(([title, content], subIndex) => (
+														<div key={`subsection-${index}-${subIndex}`} className="flex flex-col gap-2 p-3 border border-gray-200 rounded-md bg-gray-50">
 															<div className="flex items-center gap-2">
 																<input
 																	type="text"

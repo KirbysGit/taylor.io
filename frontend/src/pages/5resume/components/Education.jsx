@@ -15,7 +15,7 @@
 import React, { useState, useEffect } from 'react';
 import Switch from 'react-switch';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus} from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
 
 // local imports.
@@ -52,7 +52,7 @@ const normalizeEducation = (edu = null) => {
     }
 }
 
-const Education = ({ educationData, onEducationChange }) => {
+const Education = ({ educationData, onEducationChange, isVisible = true, onVisibilityChange }) => {
 
 	// ----- states -----
 
@@ -168,6 +168,22 @@ const Education = ({ educationData, onEducationChange }) => {
 				onClick={() => setIsEducationExpanded(!isEducationExpanded)}
 				className="flex items-center gap-3 w-full transition-colors"
 			>
+				{/* Visibility Toggle Button - Left side in circle */}
+				{onVisibilityChange && (
+					<button
+						type="button"
+						onClick={(e) => {
+							e.stopPropagation();
+							onVisibilityChange(!isVisible);
+						}}
+						className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+						aria-label={isVisible ? 'Hide education in preview' : 'Show education in preview'}
+						title={isVisible ? 'Hide from preview' : 'Show in preview'}
+					>
+						<FontAwesomeIcon icon={isVisible ? faEye : faEyeSlash} className="w-4 h-4 text-gray-600" />
+					</button>
+				)}
+				
 				{/* title */}
 				<h1 className="text-[1.375rem] font-semibold text-gray-900">Education</h1>
 				

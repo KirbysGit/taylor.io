@@ -9,7 +9,7 @@
 // ----- functions -----
 
 // apply visibility filters to resume data for preview/pdf generation.
-// filters out hidden header fields based on visibility settings.
+// filters out hidden header fields and sections based on visibility settings.
 export function applyVisibilityFilters(resumeData) {
 	if (!resumeData || !resumeData.header) {
 		return resumeData
@@ -31,6 +31,41 @@ export function applyVisibilityFilters(resumeData) {
 	// remove visibility object (not needed for backend).
 	delete filteredData.header.visibility
 
+	// apply section visibility filters - remove sections that are hidden
+	const sectionVisibility = resumeData.sectionVisibility || {
+		summary: false,
+		education: true,
+		experience: true,
+		projects: true,
+		skills: true,
+	}
+
+	if (!sectionVisibility.summary) {
+		filteredData.summary = null
+	}
+	if (!sectionVisibility.education) {
+		filteredData.education = []
+	}
+	if (!sectionVisibility.experience) {
+		filteredData.experience = []
+	}
+	if (!sectionVisibility.projects) {
+		filteredData.projects = []
+	}
+	if (!sectionVisibility.skills) {
+		filteredData.skills = []
+	}
+
+	// preserve sectionOrder for backend (exclude 'header' as it's always first)
+	// sectionOrder is used to determine rendering order in template
+	if (resumeData.sectionOrder) {
+		// Filter out 'header' from sectionOrder (header is always rendered separately)
+		filteredData.sectionOrder = resumeData.sectionOrder.filter(key => key !== 'header')
+	}
+
+	// remove sectionVisibility object (not needed for backend)
+	delete filteredData.sectionVisibility
+
 	return filteredData
 }
 
@@ -50,19 +85,25 @@ function compareResumeData(currentData, baselineData) {
 	delete currentHeaderForCompare.visibility
 	delete baselineHeaderForCompare.visibility
 
+	// create copies without sectionVisibility for comparison (visibility changes don't count as data changes).
+	const currentDataForCompare = { ...currentData }
+	const baselineDataForCompare = { ...baselineData }
+	delete currentDataForCompare.sectionVisibility
+	delete baselineDataForCompare.sectionVisibility
+
 	// compare serialized versions.
 	const currentHeaderStr = JSON.stringify(currentHeaderForCompare)
 	const baselineHeaderStr = JSON.stringify(baselineHeaderForCompare)
-	const currentEduStr = JSON.stringify(currentData.education)
-	const baselineEduStr = JSON.stringify(baselineData.education)
-	const currentExpStr = JSON.stringify(currentData.experience)
-	const baselineExpStr = JSON.stringify(baselineData.experience)
-	const currentProjStr = JSON.stringify(currentData.projects)
-	const baselineProjStr = JSON.stringify(baselineData.projects)
-	const currentSkillsStr = JSON.stringify(currentData.skills || [])
-	const baselineSkillsStr = JSON.stringify(baselineData.skills || [])
-	const currentSummaryStr = JSON.stringify(currentData.summary || { summary: '' })
-	const baselineSummaryStr = JSON.stringify(baselineData.summary || { summary: '' })
+	const currentEduStr = JSON.stringify(currentDataForCompare.education)
+	const baselineEduStr = JSON.stringify(baselineDataForCompare.education)
+	const currentExpStr = JSON.stringify(currentDataForCompare.experience)
+	const baselineExpStr = JSON.stringify(baselineDataForCompare.experience)
+	const currentProjStr = JSON.stringify(currentDataForCompare.projects)
+	const baselineProjStr = JSON.stringify(baselineDataForCompare.projects)
+	const currentSkillsStr = JSON.stringify(currentDataForCompare.skills || [])
+	const baselineSkillsStr = JSON.stringify(baselineDataForCompare.skills || [])
+	const currentSummaryStr = JSON.stringify(currentDataForCompare.summary || { summary: '' })
+	const baselineSummaryStr = JSON.stringify(baselineDataForCompare.summary || { summary: '' })
 
 	return {
 		headerChanged: currentHeaderStr !== baselineHeaderStr,

@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react'
 import { formatDateForInput } from '@/pages/utils/DataFormatting'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus} from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons'
 import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
 import Switch from 'react-switch'
+import DescriptionInput from '@/components/inputs/DescriptionInput'
 
 
 const normalizeExperience = (exp = null) => {
@@ -21,7 +22,7 @@ const normalizeExperience = (exp = null) => {
     }
 }
 
-const Experience = ({ experienceData, onExperienceChange }) => {
+const Experience = ({ experienceData, onExperienceChange, isVisible = true, onVisibilityChange }) => {
     
     const [isExperienceExpanded, setIsExperienceExpanded] = useState(true)
 
@@ -83,6 +84,22 @@ const Experience = ({ experienceData, onExperienceChange }) => {
 				onClick={() => setIsExperienceExpanded(!isExperienceExpanded)}
 				className="flex items-center gap-3 w-full transition-colors"
 			>
+				{/* Visibility Toggle Button - Left side in circle */}
+				{onVisibilityChange && (
+					<button
+						type="button"
+						onClick={(e) => {
+							e.stopPropagation();
+							onVisibilityChange(!isVisible);
+						}}
+						className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+						aria-label={isVisible ? 'Hide experience in preview' : 'Show experience in preview'}
+						title={isVisible ? 'Hide from preview' : 'Show in preview'}
+					>
+						<FontAwesomeIcon icon={isVisible ? faEye : faEyeSlash} className="w-4 h-4 text-gray-600" />
+					</button>
+				)}
+				
 				{/* title */}
 				<h1 className="text-[1.375rem] font-semibold text-gray-900">Experience</h1>
 				
@@ -145,16 +162,13 @@ const Experience = ({ experienceData, onExperienceChange }) => {
 									/>
 								</div>
 							</div>
-							<div className="flex mb-2">
-								<div className="labelInputPair">
-									<label className="label">Description <RequiredAsterisk /></label>
-									<textarea
-										value={experience.description}
-										onChange={(e) => updateExperience(index, 'description', e.target.value)}
-										className="input"
-										required
-									/>
-								</div>
+							<div className="mb-2">
+								<DescriptionInput
+									value={experience.description}
+									onChange={(value) => updateExperience(index, 'description', value)}
+									placeholder="Describe your responsibilities and achievements..."
+									required
+								/>
 							</div>
                             {/* start date and current checkbox */}
 							<div className="flex gap-4 mb-2">
