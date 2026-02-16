@@ -104,11 +104,11 @@ function Home() {
 										Review and edit your contact, education, and experience details
 									</p>
 								</div>
-							</button>
+									</button>
 
 							{/* Generate Preview Card - Highlighted with Star */}
-							<button
-								onClick={handleGenerateResume}
+									<button
+										onClick={handleGenerateResume}
 								className="bg-white-bright rounded-xl shadow-xl p-8 hover:shadow-2xl transition-all border-brand-pink relative transform hover:scale-[1.02] group"
 								style={{ 
 									boxShadow: '0 20px 40px -10px rgba(214, 86, 86, 0.25), 0 10px 20px -5px rgba(0, 0, 0, 0.1)',
@@ -136,10 +136,10 @@ function Home() {
 										View and customize your resume before downloading
 									</p>
 								</div>
-							</button>
+										</button>
 
 							{/* Templates Card */}
-							<button
+										<button
 								onClick={() => navigate('/resume/preview')}
 								className="bg-white-bright rounded-xl shadow-lg p-8 hover:shadow-xl transition-all border-2 border-gray-200 hover:border-brand-pink/40 group"
 								style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)' }}
@@ -194,7 +194,7 @@ function Home() {
 											</div>
 										</div>
 									))}
-								</div>
+							</div>
 							)}
 						</div>
 					</section>

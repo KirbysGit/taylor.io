@@ -1,4 +1,4 @@
-// pages / 5resume / components / Summary.jsx
+// components / left / summary / Summary.jsx
 
 // imports.
 import React, { useState, useEffect } from 'react';

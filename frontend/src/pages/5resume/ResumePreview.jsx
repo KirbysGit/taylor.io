@@ -19,29 +19,23 @@ import { listTemplates } from '@/api/services/templates'
 import { generateResumePreview, generateResumePDF } from '@/api/services/resume'
 import { getMyProfile, upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary } from '@/api/services/profile'
 
-// icons imports.
-import { XIcon } from '@/components/icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRefresh, faDownload } from '@fortawesome/free-solid-svg-icons'
+// component imports.
+import SaveBanner from './components/left/SaveBanner'
+
 
 // component imports.
-import ResumeHeader from './components/ResumeHeader'
-import Education from './components/Education'
-import Experience from './components/Experience'
-import Projects from './components/Projects'
-import Skills from './components/Skills'
-import Summary from './components/Summary'
-import ResumeStyling from './components/ResumeStyling'
+import LeftPanel from './components/left/LeftPanel'
+import RightPanel from './components/right/RightPanel'
 
 // util imports.
 import { 
-	formatDateForInput,
 	normalizeEducationForBackend,
 	normalizeExperienceForBackend,
 	normalizeProjectForBackend,
 	normalizeSkillForBackend
 } from '@/pages/utils/DataFormatting'
 import { applyVisibilityFilters, hasResumeDataChanged, getResumeChangeDescriptions, downloadBlob } from './utils/resumeDataTransform'
+import { initializeResumeDataFromBackend } from './utils/resumeDataInitializer'
 
 // ----------- main component -----------
 function ResumePreview() {
@@ -66,13 +60,64 @@ function ResumePreview() {
 	const [isLoadingTemplates, setIsLoadingTemplates] = useState(true)          // loading state for templates.
 	
 	// panel states.
-	const [leftPanelWidth, setLeftPanelWidth] = useState(560);                  // width of left panel.
+	const DEFAULT_LEFT_PANEL_WIDTH = 700; // default width for left panel
+	const [leftPanelWidth, setLeftPanelWidth] = useState(DEFAULT_LEFT_PANEL_WIDTH);                  // width of left panel.
 	const [isResizing, setIsResizing] = useState(false);						// if user is currently resizing panel.
+
+	// Calculate min and max panel widths based on viewport size
+	// Using breakpoint-based approach for more precise control
+	const getMinLeftPanelWidth = () => {
+		const viewportWidth = window.innerWidth
+		
+		// Breakpoint-based minimum widths
+		// Adjust these pixel values as needed during debugging
+		if (viewportWidth < 768) {
+			// Mobile/Tablet (< 768px)
+			return 320 // Minimum for small screens
+		} else if (viewportWidth < 1024) {
+			// Tablet (768px - 1023px)
+			return 400
+		} else if (viewportWidth < 1440) {
+			// Desktop (1024px - 1439px)
+			return 500
+		} else if (viewportWidth < 1920) {
+			// Desktop (1440px - 1919px)
+			return 600
+		} else {
+			// Large Desktop (>= 1920px)
+			return 700 // Fixed max for large screens
+		}
+	}
+
+	const getMaxLeftPanelWidth = () => {
+		const viewportWidth = window.innerWidth
+		console.log('viewportWidth', viewportWidth)
+		// Breakpoint-based maximum widths
+		// Ensures right panel always has adequate space
+		// Adjust these pixel values as needed during debugging
+		if (viewportWidth < 768) {
+			// Mobile/Tablet (< 768px)
+			return Math.floor(viewportWidth * 0.60) // Max 60% on small screens
+		} else if (viewportWidth < 1024) {
+			// Tablet (768px - 1023px)
+			return Math.floor(viewportWidth * 0.55) // Max 55% on tablets
+		} else if (viewportWidth < 1440) {
+			// Desktop (1024px - 1439px)
+			return 800 // Fixed max for standard desktop
+		} else if (viewportWidth < 1920) {
+			// Large Desktop (>= 1440px)
+			return 1000 // Fixed max for large screens
+		} else {
+			// Large Desktop (>= 1920px)
+			return 1200 // Fixed max for large screens
+		}
+	}
 
 	// preview states.
 	const [previewHtml, setPreviewHtml] = useState(null)
 	const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
-	const [previewZoom, setPreviewZoom] = useState(75) // default 75% to see more content
+	const [previewZoom, setPreviewZoom] = useState(100) // default 75% to see more content
+	const [validationErrors, setValidationErrors] = useState([]) // validation errors for required fields
 
 	// zoom handlers
 	const handleZoomIn = () => {
@@ -158,14 +203,91 @@ function ResumePreview() {
 	const handleMouseMove = (e) => {
 		if (!isResizing) return;
 		const newWidth = e.clientX
-		setLeftPanelWidth(Math.min(Math.max(300, newWidth), 800))
+		const minWidth = getMinLeftPanelWidth()
+		const maxWidth = getMaxLeftPanelWidth()
+		setLeftPanelWidth(Math.min(Math.max(minWidth, newWidth), maxWidth))
 	}
 
 	const handleMouseUp = () => {
 		setIsResizing(false);
 	}
 
+	const handleDoubleClick = () => {
+		// Ensure default width is within bounds
+		const minWidth = getMinLeftPanelWidth()
+		const maxWidth = getMaxLeftPanelWidth()
+		const constrainedDefault = Math.min(Math.max(minWidth, DEFAULT_LEFT_PANEL_WIDTH), maxWidth)
+		setLeftPanelWidth(constrainedDefault)
+	}
+
+	// Validate required fields
+	const validateResumeData = (data) => {
+		const errors = []
+
+		// Check name (always required)
+		const fullName = `${data.header?.first_name || ''} ${data.header?.last_name || ''}`.trim()
+		if (!fullName) {
+			errors.push("Your name is required")
+		}
+
+		// Check education entries (if any exist)
+		if (data.education && data.education.length > 0) {
+			data.education.forEach((edu, index) => {
+				const entryNum = index + 1
+				if (!edu.school || !edu.school.trim()) {
+					errors.push(`Education ${entryNum}: School name is required`)
+				}
+				if (!edu.degree || !edu.degree.trim()) {
+					errors.push(`Education ${entryNum}: Degree is required`)
+				}
+				if (!edu.discipline || !edu.discipline.trim()) {
+					errors.push(`Education ${entryNum}: Discipline is required`)
+				}
+			})
+		}
+
+		// Check experience entries (if any exist)
+		if (data.experience && data.experience.length > 0) {
+			data.experience.forEach((exp, index) => {
+				const entryNum = index + 1
+				if (!exp.title || !exp.title.trim()) {
+					errors.push(`Experience ${entryNum}: Title is required`)
+				}
+				if (!exp.company || !exp.company.trim()) {
+					errors.push(`Experience ${entryNum}: Company is required`)
+				}
+				if (!exp.description || !exp.description.trim()) {
+					errors.push(`Experience ${entryNum}: Description is required`)
+				}
+			})
+		}
+
+		// Check project entries (if any exist)
+		if (data.projects && data.projects.length > 0) {
+			data.projects.forEach((proj, index) => {
+				const entryNum = index + 1
+				if (!proj.title || !proj.title.trim()) {
+					errors.push(`Project ${entryNum}: Title is required`)
+				}
+				if (!proj.description || !proj.description.trim()) {
+					errors.push(`Project ${entryNum}: Description is required`)
+				}
+			})
+		}
+
+		return errors
+	}
+
 	const handleRefreshPreview = async () => {
+		// Validate before generating preview
+		const errors = validateResumeData(resumeData)
+		if (errors.length > 0) {
+			setValidationErrors(errors)
+			setPreviewHtml(null)
+			return
+		}
+
+		setValidationErrors([])
 		setIsGeneratingPreview(true)
 		// apply visibility filters for preview.
 		const previewData = applyVisibilityFilters(resumeData)
@@ -193,27 +315,30 @@ function ResumePreview() {
 	const handleDiscardChanges = () => {
 		// reset to baseline data.
 		if (baselineData.header) {
-			setResumeData(prev => ({
-				...prev,
+			const resetData = {
 				header: JSON.parse(JSON.stringify(baselineData.header)),
 				education: JSON.parse(JSON.stringify(baselineData.education)),
+				experience: JSON.parse(JSON.stringify(baselineData.experience || [])),
 				projects: JSON.parse(JSON.stringify(baselineData.projects || [])),
 				skills: JSON.parse(JSON.stringify(baselineData.skills || [])),
 				summary: JSON.parse(JSON.stringify(baselineData.summary || { summary: '' })),
 				// preserve sectionVisibility when discarding (visibility is separate from data)
-				sectionVisibility: prev.sectionVisibility || {
+				sectionVisibility: resumeData.sectionVisibility || {
 					summary: false,
 					education: true,
 					experience: true,
 					projects: true,
 					skills: true,
 				},
-			}))
-			setHeaderData(JSON.parse(JSON.stringify(baselineData.header)))
-			setEducationData(JSON.parse(JSON.stringify(baselineData.education)))
-			setProjectsData(JSON.parse(JSON.stringify(baselineData.projects || [])))
-			setSkillsData(JSON.parse(JSON.stringify(baselineData.skills || [])))
-			setSummaryData(JSON.parse(JSON.stringify(baselineData.summary || { summary: '' })))
+				sectionOrder: resumeData.sectionOrder,
+			}
+			setResumeData(resetData)
+			setHeaderData(resetData.header)
+			setEducationData(resetData.education)
+			setExperienceData(resetData.experience)
+			setProjectsData(resetData.projects)
+			setSkillsData(resetData.skills)
+			setSummaryData(resetData.summary)
 		}
 		setShowSaveBanner(false)
 	}
@@ -264,10 +389,29 @@ function ResumePreview() {
 		setResumeData(prev => ({ ...prev, sectionOrder: newOrder }))
 	}
 
+	// Handle visibility change for sections
+	const handleVisibilityChange = (sectionKey, isVisible) => {
+		setResumeData(prev => ({
+			...prev,
+			sectionVisibility: {
+				...prev.sectionVisibility,
+				[sectionKey]: isVisible,
+			}
+		}))
+	}
+
+	// Handle welcome message dismissal
+	const handleDismissWelcome = () => {
+		localStorage.setItem('hasSeenResumeWelcome', 'true')
+		setWelcomeMessage(false)
+	}
+
 	const handleSaveChanges = async () => {
 		setIsSaving(true)
 		try {
 			// save contact/header info - use actual values, ignore visibility.
+			// Note: first_name, last_name, and email are NOT saved here - they are editable
+			// for the resume but remain separate from the user's profile data.
 			const header = resumeData.header
 			await upsertContact({
 				phone: header.phone || null,
@@ -340,94 +484,21 @@ function ResumePreview() {
 
 			// step 2 : fetch user data from backend.
 			const fetchCurrentUser = async () => {
-
 				// --- grab user data from backend.
 				const response = await getMyProfile()
 				const responseData = response.data
-				const userData = responseData.user
-				setUser(userData)
-				// --- set initial header data.
-				const initialHeader = {
-					first_name: userData.first_name,
-					last_name: userData.last_name,
-					email: userData.email,
-					phone: responseData.contact?.phone || '',
-					location: responseData.contact?.location || '',
-					linkedin: responseData.contact?.linkedin || '',
-					github: responseData.contact?.github || '',
-					portfolio: responseData.contact?.portfolio || '',
-					visibility: {
-						showPhone: true,
-						showLocation: true,
-						showLinkedin: true,
-						showGithub: true,
-						showPortfolio: true,
-					},
-				}
-
-				const initialEducation = responseData.education.map(edu => ({
-					school: edu.school || '',
-					degree: edu.degree || '',
-					discipline: edu.discipline || '',
-					location: edu.location || '',
-					start_date: formatDateForInput(edu.start_date),
-					end_date: formatDateForInput(edu.end_date),
-					current: edu.current || false,
-					gpa: edu.gpa || '',
-					minor: edu.minor || '',
-					subsections: edu.subsections || {},
-				}))
-
-				const initialExperience = responseData.experiences.map(exp => ({
-					title: exp.title || '',
-					company: exp.company || '',
-					description: exp.description || '',
-					start_date: formatDateForInput(exp.start_date),
-					end_date: formatDateForInput(exp.end_date),
-					current: exp.current || false,
-					location: exp.location || '',
-					skills: exp.skills || '',
-				}))
-
-				const initialProjects = responseData.projects.map(proj => ({
-					title: proj.title || '',
-					description: proj.description || '',
-					tech_stack: Array.isArray(proj.tech_stack) ? proj.tech_stack : (proj.tech_stack ? [proj.tech_stack] : []),
-					url: proj.url || '',
-				}))
-
-				const initialSkills = (responseData.skills || []).map(skill => ({
-					name: skill.name || '',
-					category: skill.category || '',
-				}))
-
-				const initialSummary = responseData.summary 
-					? { summary: responseData.summary.summary || '' }
-					: { summary: '' }
 				
-				// ---set all data at once.
-				setHeaderData(initialHeader)
-				setEducationData(initialEducation)
-				setExperienceData(initialExperience)
-				setProjectsData(initialProjects)
-				setSkillsData(initialSkills)
-				setSummaryData(initialSummary)
-				setResumeData({
-					header: initialHeader,
-					education: initialEducation,
-					experience: initialExperience,
-					projects: initialProjects,
-					skills: initialSkills,
-					summary: initialSummary,
-					sectionVisibility: {
-						summary: false, // hidden by default
-						education: true,
-						experience: true,
-						projects: true,
-						skills: true,
-					},
-					sectionOrder: sectionOrder, // Include section order for backend
-				})
+				// --- initialize all data using utility function.
+				const initialized = initializeResumeDataFromBackend(responseData, sectionOrder)
+				
+				setUser(initialized.user)
+				setHeaderData(initialized.headerData)
+				setEducationData(initialized.educationData)
+				setExperienceData(initialized.experienceData)
+				setProjectsData(initialized.projectsData)
+				setSkillsData(initialized.skillsData)
+				setSummaryData(initialized.summaryData)
+				setResumeData(initialized.resumeData)
 			}
 
 			fetchCurrentUser();
@@ -467,8 +538,30 @@ function ResumePreview() {
 		}
 	}, [isResizing])
 
+	// Constrain panel width when window is resized
+	useEffect(() => {
+		const handleResize = () => {
+			const minWidth = getMinLeftPanelWidth()
+			const maxWidth = getMaxLeftPanelWidth()
+			setLeftPanelWidth(prev => Math.min(Math.max(minWidth, prev), maxWidth))
+		}
+
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [])
+
 	// generate preview on data change.
 	useEffect(() => {
+		// Validate before generating preview
+		const errors = validateResumeData(resumeData)
+		if (errors.length > 0) {
+			setValidationErrors(errors)
+			setPreviewHtml(null)
+			setIsGeneratingPreview(false)
+			return
+		}
+
+		setValidationErrors([])
 		setIsGeneratingPreview(true)
 
 		const timer = setTimeout(async () => {
@@ -521,7 +614,8 @@ function ResumePreview() {
 
 	return (
 		<div className="h-screen flex flex-col bg-white overflow-hidden">
-			<header className="bg-brand-pink text-white py-2 shadow-md">
+			{/* Header/Navbar */}
+			<header className="flex-shrink-0 bg-brand-pink text-white py-2 shadow-md">
 				<div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
 					<h1 className="text-xl font-bold">Resume</h1>
 					<button
@@ -534,344 +628,68 @@ function ResumePreview() {
 				</div>
 			</header>
 
+			{/* Save Banner - Fixed Top Right */}
+			<SaveBanner
+				showSaveBanner={showSaveBanner}
+				changeDescriptions={changeDescriptions}
+				isSaving={isSaving}
+				onDiscard={handleDiscardChanges}
+				onSave={handleSaveChanges}
+			/>
+
 			<main className="flex-1 flex overflow-hidden min-h-0">
-				
-				{/* left panel : inputs / controls */}
-				<aside style = {{ width: `${leftPanelWidth}px` }} className="flex-shrink-0 bg-white border-r border-gray-200 p-8 overflow-y-auto">
-					{/* save changes banner */}
-					{showSaveBanner && (
-						<div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 mb-6">
-							<div className="flex items-center justify-between mb-2">
-								<span className="text-yellow-800 font-medium text-sm">You have unsaved changes</span>
-								<div className="flex items-center gap-2">
-									<button
-										type="button"
-										onClick={handleDiscardChanges}
-										disabled={isSaving}
-										className="px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-									>
-										Discard
-									</button>
-									<button
-										type="button"
-										onClick={handleSaveChanges}
-										disabled={isSaving}
-										className="px-3 py-1.5 text-sm bg-brand-pink text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-50"
-									>
-										{isSaving ? 'Saving...' : 'Save Changes'}
-									</button>
-								</div>
-							</div>
-							{changeDescriptions.length > 0 && (
-								<div className="text-xs text-yellow-700 space-y-1">
-									{changeDescriptions.map((desc, idx) => (
-										<div key={idx}>• {desc}</div>
-									))}
-								</div>
-							)}
-						</div>
-					)}
-
-					{ welcomeMessage && (
-						<div className="flex flex-col gap-0.5 p-3 border-[2px] rounded-md border-brand-pink-light mb-6 relative">
-							<h2 className="text-[1.25rem] font-semibold text-gray-900 mb-1">
-								{user?.first_name ? `Hey, ${user.first_name}! 👋` : 'Hey there! 👋'}
-							</h2>
-							<span className="text-[0.875rem] text-gray-500">Welcome to the <b>Builder</b>! This is where you will customize your resume.</span>
-							<span className="text-[0.875rem] text-gray-500">We've filled in what we know. Feel free to tweak or add anything. 😄</span>
-							<button
-								type="button"
-								onClick={() => {
-									// Save to localStorage so it doesn't show again
-									localStorage.setItem('hasSeenResumeWelcome', 'true')
-									setWelcomeMessage(false)
-								}}
-								className="absolute top-2 right-2 flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
-							>
-								<XIcon />
-							</button>
-						</div>
-					)}
-
-					{/* Styling & Template Section */}
-					<ResumeStyling 
-						sectionOrder={sectionOrder}
-						onSectionOrderChange={handleSectionOrderChange}
-						template={template}
-						onTemplateChange={setTemplate}
-						availableTemplates={availableTemplates}
-						isLoadingTemplates={isLoadingTemplates}
-						onScrollToSection={(sectionKey) => {
-							const element = document.getElementById(`section-${sectionKey}`)
-							if (element) {
-								element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-							}
-						}}
-					/>
-					
-					{/* Render sections in custom order */}
-					{sectionOrder.map((sectionKey) => {
-						switch (sectionKey) {
-							case 'header':
-								return headerData ? (
-									<div key="header" id="section-header" className="mb-6">
-										<ResumeHeader 
-											headerData={headerData}
-											onHeaderChange={handleHeaderChange}
-										/>
-									</div>
-								) : null
-							
-							case 'summary':
-								return summaryData ? (
-									<div key="summary" id="section-summary" className="mb-6">
-										<Summary 
-											summaryData={summaryData}
-											onSummaryChange={handleSummaryChange}
-											isVisible={resumeData.sectionVisibility?.summary ?? false}
-											onVisibilityChange={(isVisible) => {
-												setResumeData(prev => ({
-													...prev,
-													sectionVisibility: {
-														...prev.sectionVisibility,
-														summary: isVisible,
-													}
-												}))
-											}}
-										/>
-									</div>
-								) : null
-							
-							case 'education':
-								return educationData ? (
-									<div key="education" id="section-education" className="mb-6">
-										<Education 
-											educationData={educationData}
-											onEducationChange={handleEducationChange}
-											isVisible={resumeData.sectionVisibility?.education ?? true}
-											onVisibilityChange={(isVisible) => {
-												setResumeData(prev => ({
-													...prev,
-													sectionVisibility: {
-														...prev.sectionVisibility,
-														education: isVisible,
-													}
-												}))
-											}}
-										/>
-									</div>
-								) : null
-							
-							case 'experience':
-								return experienceData ? (
-									<div key="experience" id="section-experience" className="mb-6">
-										<Experience 
-											experienceData={experienceData}
-											onExperienceChange={handleExperienceChange}
-											isVisible={resumeData.sectionVisibility?.experience ?? true}
-											onVisibilityChange={(isVisible) => {
-												setResumeData(prev => ({
-													...prev,
-													sectionVisibility: {
-														...prev.sectionVisibility,
-														experience: isVisible,
-													}
-												}))
-											}}
-										/>
-									</div>
-								) : null
-							
-							case 'projects':
-								return projectsData ? (
-									<div key="projects" id="section-projects" className="mb-6">
-										<Projects 
-											projectsData={projectsData}
-											onProjectsChange={handleProjectsChange}
-											isVisible={resumeData.sectionVisibility?.projects ?? true}
-											onVisibilityChange={(isVisible) => {
-												setResumeData(prev => ({
-													...prev,
-													sectionVisibility: {
-														...prev.sectionVisibility,
-														projects: isVisible,
-													}
-												}))
-											}}
-										/>
-									</div>
-								) : null
-							
-							case 'skills':
-								return skillsData ? (
-									<div key="skills" id="section-skills" className="mb-6">
-										<Skills 
-											skillsData={skillsData}
-											onSkillsChange={handleSkillsChange}
-											isVisible={resumeData.sectionVisibility?.skills ?? true}
-											onVisibilityChange={(isVisible) => {
-												setResumeData(prev => ({
-													...prev,
-													sectionVisibility: {
-														...prev.sectionVisibility,
-														skills: isVisible,
-													}
-												}))
-											}}
-										/>
-									</div>
-								) : null
-							
-							default:
-								return null
+				<LeftPanel
+					width={leftPanelWidth}
+					welcomeMessage={welcomeMessage}
+					user={user}
+					onDismissWelcome={handleDismissWelcome}
+					sectionOrder={sectionOrder}
+					onSectionOrderChange={handleSectionOrderChange}
+					template={template}
+					onTemplateChange={setTemplate}
+					availableTemplates={availableTemplates}
+					isLoadingTemplates={isLoadingTemplates}
+					onScrollToSection={(sectionKey) => {
+						const element = document.getElementById(`section-${sectionKey}`)
+						if (element) {
+							element.scrollIntoView({ behavior: 'smooth', block: 'start' })
 						}
-					})}
-					<div className="mt-6 flex gap-2">
-						<button
-							type="button"
-							disabled
-							className="flex-1 px-4 py-2 bg-brand-pink text-white font-semibold rounded-lg opacity-50 cursor-not-allowed"
-							title="Coming next"
-						>
-							Preview
-						</button>
-						<button
-							type="button"
-							disabled
-							className="flex-1 px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg opacity-50 cursor-not-allowed"
-							title="Coming next"
-						>
-							Download
-						</button>
-					</div>
-				</aside>
+					}}
+					headerData={headerData}
+					educationData={educationData}
+					experienceData={experienceData}
+					projectsData={projectsData}
+					skillsData={skillsData}
+					summaryData={summaryData}
+					resumeData={resumeData}
+					onHeaderChange={handleHeaderChange}
+					onEducationChange={handleEducationChange}
+					onExperienceChange={handleExperienceChange}
+					onProjectsChange={handleProjectsChange}
+					onSkillsChange={handleSkillsChange}
+					onSummaryChange={handleSummaryChange}
+					onVisibilityChange={handleVisibilityChange}
+				/>
 
 				{/* resizable divider */}
 				<div
 					onMouseDown={handleMouseDown}
+					onDoubleClick={handleDoubleClick}
+					title="Drag to resize • Double-click to reset"
 					className={`w-1 bg-gray-300 hover:bg-brand-pink cursor-col-resize transition-colors ${isResizing ? 'bg-brand-pink' : ''}`}
 				/>
 				
-				{/* right panel : preview placeholder */}
-				<section className="flex-1 bg-white overflow-hidden p-4 flex flex-col">
-					{/* control buttons */}
-					<div className="flex items-center justify-between flex-shrink-0 mb-4">
-						{/* Spacer for centering */}
-						<div className="flex-1"></div>
-						
-						{/* Zoom Controls - Centered */}
-						<div className="flex items-center gap-3">
-							<button
-								type="button"
-								onClick={handleZoomOut}
-								disabled={previewZoom <= 25}
-								className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-								title="Zoom Out"
-							>
-								−
-							</button>
-							<span className="text-sm font-medium text-gray-700 min-w-[60px] text-center">
-								{previewZoom}%
-							</span>
-							<button
-								type="button"
-								onClick={handleZoomIn}
-								disabled={previewZoom >= 200}
-								className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-								title="Zoom In"
-							>
-								+
-							</button>
-						</div>
-
-						{/* Action Buttons */}
-						<div className="flex items-center gap-2 flex-1 justify-end">
-							<button
-								type="button"
-								className="px-3 py-1.5 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all flex items-center gap-2"
-								onClick={handleDownloadPDF}
-								disabled={isDownloadingPDF}
-							>
-								<FontAwesomeIcon icon={faDownload} />
-								<span className="text-sm">Download</span>
-							</button>
-							<button
-								type="button"
-								className="px-3 py-1.5 bg-gray-600 text-white font-semibold rounded-lg hover:opacity-90 transition-all flex items-center gap-2"
-								onClick={handleRefreshPreview}
-							>
-								<FontAwesomeIcon icon={faRefresh} />
-								<span className="text-sm">Refresh</span>
-							</button>
-						</div>
-					</div>
-					{/* Preview Container - A4 Ratio with Transform Scale */}
-					<div 
-						className="flex-1 rounded-lg border-2 border-gray-300 bg-white min-h-0 preview-scrollbar"
-						style={{
-							// Scroll container - constrained by flex-1, will overflow when content is larger
-							// A4: 8.5" × 11" = 816px × 1056px at 96 DPI
-							// Use scroll (not auto) to always show scrollbar for better UX
-							overflowY: 'scroll', // Always show vertical scrollbar
-							overflowX: 'auto', // Only show horizontal when needed
-							position: 'relative', // Ensure proper stacking context
-							zIndex: 1, // Ensure scrollbar is above content
-							padding: '16px', // Reduced padding for more space
-							// Ensure width doesn't exceed parent
-							width: '100%',
-							maxWidth: '100%',
-						}}
-					>
-						{/* Content wrapper - centers the scaled paper */}
-						<div
-							style={{
-								display: 'flex',
-								justifyContent: 'center',
-								alignItems: 'flex-start',
-								minHeight: '100%', // Ensure wrapper takes full height
-								paddingTop: '8px',
-							}}
-						>
-							{isGeneratingPreview ? (
-								<div className="flex items-center justify-center h-full">
-									<p className="text-gray-500">Generating preview...</p>
-								</div>
-							) : previewHtml ? (
-								<div 
-									className="bg-white shadow-xl rounded-lg overflow-hidden"
-									style={{
-										// Fixed A4 size (8.5" × 11" = 816px × 1056px at 96 DPI)
-										width: '816px',
-										height: '1056px',
-										// Apply zoom via CSS transform
-										transform: `scale(${previewZoom / 100})`,
-										transformOrigin: 'top center',
-										// Prevent layout shift during transform
-										willChange: 'transform',
-										// Ensure iframe doesn't cover scrollbar
-										position: 'relative',
-										zIndex: 0,
-									}}
-								>
-									<iframe 
-										srcDoc={previewHtml}
-										className="w-full h-full border-0"
-										title="Resume Preview"
-										style={{
-											width: '100%',
-											height: '100%',
-											display: 'block', // Remove any default iframe spacing
-										}}
-									/>
-								</div>
-							) : (
-								<div className="flex items-center justify-center h-full text-gray-500">
-									Resume preview will render here.
-								</div>
-							)}
-						</div>
-					</div>
-				</section>
+				<RightPanel
+					previewHtml={previewHtml}
+					isGeneratingPreview={isGeneratingPreview}
+					previewZoom={previewZoom}
+					onZoomIn={handleZoomIn}
+					onZoomOut={handleZoomOut}
+					isDownloadingPDF={isDownloadingPDF}
+					onDownloadPDF={handleDownloadPDF}
+					onRefreshPreview={handleRefreshPreview}
+					validationErrors={validationErrors}
+				/>
 			</main>
 		</div>
 	)

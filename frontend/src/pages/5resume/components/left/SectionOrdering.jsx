@@ -1,4 +1,4 @@
-// components / 5resume / components / SectionOrdering.jsx
+// components / left / SectionOrdering.jsx
 
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

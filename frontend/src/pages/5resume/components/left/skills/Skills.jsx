@@ -1,4 +1,4 @@
-// pages / 5resume / components / Skills.jsx
+// components / left / skills / Skills.jsx
 
 // imports.
 import React from 'react';

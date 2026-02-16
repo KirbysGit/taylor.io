@@ -92,15 +92,44 @@ def format_description(description: str) -> str:
 
 # ----- build headers.
 def build_header(header: Dict[str, Any]) -> str:
-    fields = [
-        header.get("email", ""),
-        header.get("phone", ""),
-        header.get("github", ""),
-        header.get("linkedin", ""),
-        header.get("location", ""),
-        header.get("portfolio", ""),
-    ]
-    return " | ".join([field for field in fields if field.strip()])
+    # Get contact order from header, default to standard order if not provided (includes email now)
+    contact_order = header.get("contactOrder", ["email", "phone", "location", "linkedin", "github", "portfolio"])
+    
+    # Map field keys to their values (including email)
+    field_map = {
+        "email": header.get("email", ""),
+        "phone": header.get("phone", ""),
+        "location": header.get("location", ""),
+        "linkedin": header.get("linkedin", ""),
+        "github": header.get("github", ""),
+        "portfolio": header.get("portfolio", ""),
+    }
+    
+    # Build fields list in specified order, filtering out empty values
+    fields = []
+    visibility = header.get("visibility", {})
+    
+    # Map field keys to their visibility keys
+    visibility_map = {
+        "email": "showEmail",
+        "phone": "showPhone",
+        "location": "showLocation",
+        "linkedin": "showLinkedin",
+        "github": "showGithub",
+        "portfolio": "showPortfolio",
+    }
+    
+    for field_key in contact_order:
+        if field_key in field_map:
+            field_value = field_map[field_key]
+            # Check visibility (default to True if not specified)
+            visibility_key = visibility_map.get(field_key, None)
+            is_visible = visibility.get(visibility_key, True) if visibility_key else True
+            
+            if field_value and field_value.strip() and is_visible:
+                fields.append(field_value)
+    
+    return " | ".join(fields)
 
 # ----- build education entries.
 def build_education_entry(edu: Dict[str, Any]) -> str:

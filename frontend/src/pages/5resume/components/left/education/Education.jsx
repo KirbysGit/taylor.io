@@ -1,4 +1,4 @@
-// components / 5resume / components / Education.jsx
+// components / left / education / Education.jsx
 
 // right now, just handling how we want to handle an array of education data,
 // like multiple schools.

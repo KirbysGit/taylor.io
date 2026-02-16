@@ -5,8 +5,20 @@
 @tailwind utilities;
 
 
-/* global font */
+/* global font and layout constraints */
 @layer base {
+	html, body {
+		height: 100%;
+		overflow: hidden;
+		margin: 0;
+		padding: 0;
+	}
+	
+	#root {
+		height: 100%;
+		overflow: hidden;
+	}
+	
 	body {
 		font-family: 'Inter', system-ui, sans-serif;
 	}
@@ -323,4 +335,40 @@ input[type="password"]::-ms-reveal {
 
 input[type="password"]::-webkit-credentials-auto-fill-button {
 	display: none !important;
+}
+
+/* Jumping dots animation for loading states */
+.jumping-dot {
+	display: inline-block;
+	font-size: 2rem;
+	color: rgb(214, 86, 86); /* brand-pink */
+	animation: jump 1.4s ease-in-out infinite;
+	transform-origin: center bottom;
+}
+
+@keyframes jump {
+	0%, 100% {
+		transform: translateY(0) scaleY(1);
+		opacity: 0.7;
+	}
+	50% {
+		transform: translateY(-20px) scaleY(1.2);
+		opacity: 1;
+	}
+}
+
+/* Slide in animation for save banner */
+@keyframes slide-in-right {
+	from {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+.animate-slide-in-right {
+	animation: slide-in-right 0.3s ease-out;
 }

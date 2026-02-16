@@ -1,4 +1,4 @@
-// pages / 5resume / components / Projects.jsx
+// components / left / projects / Projects.jsx
 
 // projects modal of resume preview section.
 
