@@ -25,6 +25,8 @@ function ResumeSections({
 	onSkillsChange,
 	onSummaryChange,
 	onVisibilityChange,
+	sectionLabels,
+	onSectionLabelChange,
 }) {
 	const renderSection = (sectionKey) => {
 		switch (sectionKey) {
@@ -48,6 +50,8 @@ function ResumeSections({
 							onVisibilityChange={(isVisible) => {
 								onVisibilityChange('summary', isVisible)
 							}}
+							sectionLabel={sectionLabels?.summary}
+							onSectionLabelChange={onSectionLabelChange}
 						/>
 					</div>
 				) : null
@@ -62,6 +66,8 @@ function ResumeSections({
 							onVisibilityChange={(isVisible) => {
 								onVisibilityChange('education', isVisible)
 							}}
+							sectionLabel={sectionLabels?.education}
+							onSectionLabelChange={onSectionLabelChange}
 						/>
 					</div>
 				) : null
@@ -76,6 +82,8 @@ function ResumeSections({
 							onVisibilityChange={(isVisible) => {
 								onVisibilityChange('experience', isVisible)
 							}}
+							sectionLabel={sectionLabels?.experience}
+							onSectionLabelChange={onSectionLabelChange}
 						/>
 					</div>
 				) : null
@@ -90,6 +98,8 @@ function ResumeSections({
 							onVisibilityChange={(isVisible) => {
 								onVisibilityChange('projects', isVisible)
 							}}
+							sectionLabel={sectionLabels?.projects}
+							onSectionLabelChange={onSectionLabelChange}
 						/>
 					</div>
 				) : null
@@ -104,6 +114,8 @@ function ResumeSections({
 							onVisibilityChange={(isVisible) => {
 								onVisibilityChange('skills', isVisible)
 							}}
+							sectionLabel={sectionLabels?.skills}
+							onSectionLabelChange={onSectionLabelChange}
 						/>
 					</div>
 				) : null

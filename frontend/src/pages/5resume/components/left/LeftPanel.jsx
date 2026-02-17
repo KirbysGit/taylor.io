@@ -32,6 +32,8 @@ function LeftPanel({
 	onSkillsChange,
 	onSummaryChange,
 	onVisibilityChange,
+	sectionLabels,
+	onSectionLabelChange,
 }) {
 	return (
 		<aside 
@@ -71,6 +73,8 @@ function LeftPanel({
 				onSkillsChange={onSkillsChange}
 				onSummaryChange={onSummaryChange}
 				onVisibilityChange={onVisibilityChange}
+				sectionLabels={sectionLabels}
+				onSectionLabelChange={onSectionLabelChange}
 			/>
 		</aside>
 	)

@@ -21,6 +21,7 @@ import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
 // local imports.
 import EduSubSection from './EduSubSection';
 import { formatDateForInput } from '@/pages/utils/DataFormatting';
+import SectionTitleEditor from '../SectionTitleEditor';
 
 // -- external helpers --
 
@@ -52,7 +53,7 @@ const normalizeEducation = (edu = null) => {
     }
 }
 
-const Education = ({ educationData, onEducationChange, isVisible = true, onVisibilityChange }) => {
+const Education = ({ educationData, onEducationChange, isVisible = true, onVisibilityChange, sectionLabel, onSectionLabelChange }) => {
 
 	// ----- states -----
 
@@ -184,8 +185,13 @@ const Education = ({ educationData, onEducationChange, isVisible = true, onVisib
 					</button>
 				)}
 				
-				{/* title */}
-				<h1 className="text-[1.375rem] font-semibold text-gray-900">Education</h1>
+				{/* title with edit capability */}
+				<SectionTitleEditor
+					sectionKey="education"
+					currentLabel={sectionLabel}
+					onLabelChange={onSectionLabelChange}
+					defaultLabel="Education"
+				/>
 				
 				{/* divider */}
 				<div className="flex-1 h-[3px] rounded bg-gray-300"></div>

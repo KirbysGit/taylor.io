@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons'
 import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
 import DescriptionInput from '@/components/inputs/DescriptionInput'
+import SectionTitleEditor from '../SectionTitleEditor'
 
 // normalize project data from backend.
 const normalizeProject = (proj = null) => {
@@ -23,7 +24,7 @@ const normalizeProject = (proj = null) => {
     }
 }
 
-const Projects = ({ projectsData, onProjectsChange, isVisible = true, onVisibilityChange }) => {
+const Projects = ({ projectsData, onProjectsChange, isVisible = true, onVisibilityChange, sectionLabel, onSectionLabelChange }) => {
     // ----- states -----
     const [isProjectsExpanded, setIsProjectsExpanded] = useState(true)	// whether the projects modal is expanded.
 
@@ -107,8 +108,13 @@ const Projects = ({ projectsData, onProjectsChange, isVisible = true, onVisibili
 					</button>
 				)}
 				
-				{/* title */}
-				<h1 className="text-[1.375rem] font-semibold text-gray-900">Projects</h1>
+				{/* title with edit capability */}
+				<SectionTitleEditor
+					sectionKey="projects"
+					currentLabel={sectionLabel}
+					onLabelChange={onSectionLabelChange}
+					defaultLabel="Projects"
+				/>
 				
 				{/* divider */}
 				<div className="flex-1 h-[3px] rounded bg-gray-300"></div>

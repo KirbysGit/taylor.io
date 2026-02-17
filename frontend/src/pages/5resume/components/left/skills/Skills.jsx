@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faTimes, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import { ChevronDown, ChevronUp } from '@/components/icons'
+import SectionTitleEditor from '../SectionTitleEditor'
 
 // parse bulk text (comma or newline separated)
 const parseBulkSkills = (text) => {
@@ -90,7 +91,7 @@ const SkillPill = ({ skill, onRemove }) => (
     </div>
 )
 
-const Skills = ({ skillsData, onSkillsChange, isVisible = true, onVisibilityChange }) => {
+const Skills = ({ skillsData, onSkillsChange, isVisible = true, onVisibilityChange, sectionLabel, onSectionLabelChange }) => {
     const [isSkillsExpanded, setIsSkillsExpanded] = useState(true)
     const [mode, setMode] = useState('categorical')
     const [categories, setCategories] = useState([{ category: '', skills: [] }])
@@ -253,7 +254,12 @@ const Skills = ({ skillsData, onSkillsChange, isVisible = true, onVisibilityChan
                         </button>
                     )}
                     
-                    <h1 className="text-[1.375rem] font-semibold text-gray-900">Skills</h1>
+                    <SectionTitleEditor
+						sectionKey="skills"
+						currentLabel={sectionLabel}
+						onLabelChange={onSectionLabelChange}
+						defaultLabel="Skills"
+					/>
                     <div className="flex-1 h-[3px] rounded bg-gray-300"></div>
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
                         {isSkillsExpanded ? (

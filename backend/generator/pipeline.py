@@ -34,6 +34,16 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
     html_content = html_content.replace("{header_line}", build_header(header))
     
     # -- 2. build all sections (order will be applied later).
+    # Get custom section labels or use defaults
+    section_labels = resume_data.get("sectionLabels", {})
+    default_labels = {
+        "summary": "Professional Summary",
+        "education": "Education",
+        "experience": "Experience",
+        "projects": "Projects",
+        "skills": "Skills"
+    }
+    
     sections_map = {}
     
     # Summary
@@ -43,29 +53,34 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
         summary_content = ""
         if summary_text and summary_text.strip():
             summary_content = f'<div class="summary-section">&emsp; &ensp;{summary_text}</div>'
-        sections_map["summary"] = _build_section("Professional Summary", summary_content)
+        summary_title = section_labels.get("summary", default_labels["summary"])
+        sections_map["summary"] = _build_section(summary_title, summary_content)
     else:
         sections_map["summary"] = ""
     
     # Education
     education = resume_data.get("education") or []
     education_entries = [build_education_entry(edu) for edu in education]
-    sections_map["education"] = _build_section("Education", "\n".join(education_entries))
+    education_title = section_labels.get("education", default_labels["education"])
+    sections_map["education"] = _build_section(education_title, "\n".join(education_entries))
     
     # Experience
     experience = resume_data.get("experience") or []
     experience_entries = [build_experience_entry(exp) for exp in experience]
-    sections_map["experience"] = _build_section("Experience", "\n".join(experience_entries))
+    experience_title = section_labels.get("experience", default_labels["experience"])
+    sections_map["experience"] = _build_section(experience_title, "\n".join(experience_entries))
     
     # Projects
     projects = resume_data.get("projects") or []
     project_entries = [build_project_entry(proj) for proj in projects]
-    sections_map["projects"] = _build_section("Projects", "\n".join(project_entries))
+    projects_title = section_labels.get("projects", default_labels["projects"])
+    sections_map["projects"] = _build_section(projects_title, "\n".join(project_entries))
     
     # Skills
     skills = resume_data.get("skills") or []
     skill_entries_html = build_skill_entry(skills)
-    sections_map["skills"] = _build_section("Skills", skill_entries_html)
+    skills_title = section_labels.get("skills", default_labels["skills"])
+    sections_map["skills"] = _build_section(skills_title, skill_entries_html)
     
     # -- 3. build sections in specified order.
     section_order = resume_data.get("sectionOrder", ["summary", "education", "experience", "projects", "skills"])

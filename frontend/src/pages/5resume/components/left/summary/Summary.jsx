@@ -5,8 +5,9 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from '@/components/icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
+import SectionTitleEditor from '../SectionTitleEditor'
 
-const Summary = ({ summaryData, onSummaryChange, isVisible = false, onVisibilityChange }) => {
+const Summary = ({ summaryData, onSummaryChange, isVisible = false, onVisibilityChange, sectionLabel, onSectionLabelChange }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [summary, setSummary] = useState(summaryData?.summary || '');
     
@@ -49,7 +50,12 @@ const Summary = ({ summaryData, onSummaryChange, isVisible = false, onVisibility
                     </button>
                     
                     {/* title */}
-                    <h1 className="text-[1.375rem] font-semibold text-gray-900">Professional Summary</h1>
+                    <SectionTitleEditor
+						sectionKey="summary"
+						currentLabel={sectionLabel}
+						onLabelChange={onSectionLabelChange}
+						defaultLabel="Professional Summary"
+					/>
                     
                     {/* divider */}
                     <div className="flex-1 h-[3px] rounded bg-gray-300"></div>

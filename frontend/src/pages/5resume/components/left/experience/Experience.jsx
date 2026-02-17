@@ -9,6 +9,7 @@ import { faPlus, faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons'
 import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
 import Switch from 'react-switch'
 import DescriptionInput from '@/components/inputs/DescriptionInput'
+import SectionTitleEditor from '../SectionTitleEditor'
 
 
 const normalizeExperience = (exp = null) => {
@@ -24,7 +25,7 @@ const normalizeExperience = (exp = null) => {
     }
 }
 
-const Experience = ({ experienceData, onExperienceChange, isVisible = true, onVisibilityChange }) => {
+const Experience = ({ experienceData, onExperienceChange, isVisible = true, onVisibilityChange, sectionLabel, onSectionLabelChange }) => {
     
     const [isExperienceExpanded, setIsExperienceExpanded] = useState(true)
 
@@ -102,8 +103,13 @@ const Experience = ({ experienceData, onExperienceChange, isVisible = true, onVi
 					</button>
 				)}
 				
-				{/* title */}
-				<h1 className="text-[1.375rem] font-semibold text-gray-900">Experience</h1>
+				{/* title with edit capability */}
+				<SectionTitleEditor
+					sectionKey="experience"
+					currentLabel={sectionLabel}
+					onLabelChange={onSectionLabelChange}
+					defaultLabel="Experience"
+				/>
 				
 				{/* divider */}
 				<div className="flex-1 h-[3px] rounded bg-gray-300"></div>

@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom'
 // api imports.
 import { listTemplates } from '@/api/services/templates'
 import { generateResumePreview, generateResumePDF } from '@/api/services/resume'
-import { getMyProfile, upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary } from '@/api/services/profile'
+import { getMyProfile, upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, updateSectionLabels } from '@/api/services/profile'
 
 // component imports.
 import SaveBanner from './components/left/SaveBanner'
@@ -164,6 +164,16 @@ function ResumePreview() {
 		return savedOrder ? JSON.parse(savedOrder) : ['header', 'summary', 'education', 'experience', 'projects', 'skills']
 	})
 
+	// section labels state - default labels
+	const DEFAULT_SECTION_LABELS = {
+		summary: 'Professional Summary',
+		education: 'Education',
+		experience: 'Experience',
+		projects: 'Projects',
+		skills: 'Skills'
+	}
+	const [sectionLabels, setSectionLabels] = useState(DEFAULT_SECTION_LABELS)
+
 	// resume data state.
 	const [resumeData, setResumeData] = useState({
 		header: {
@@ -290,7 +300,10 @@ function ResumePreview() {
 		setValidationErrors([])
 		setIsGeneratingPreview(true)
 		// apply visibility filters for preview.
-		const previewData = applyVisibilityFilters(resumeData)
+		const previewData = {
+			...applyVisibilityFilters(resumeData),
+			sectionLabels: sectionLabels
+		}
 		
 		const htmlContent = await generateResumePreview(template, previewData)
 		setPreviewHtml(htmlContent)
@@ -301,7 +314,10 @@ function ResumePreview() {
 		setIsDownloadingPDF(true)
 		try {
 			// apply visibility filters for PDF.
-			const pdfData = applyVisibilityFilters(resumeData)
+			const pdfData = {
+				...applyVisibilityFilters(resumeData),
+				sectionLabels: sectionLabels
+			}
 			
 			const pdfBlob = await generateResumePDF(template, pdfData)
 			setIsDownloadingPDF(false)
@@ -399,6 +415,49 @@ function ResumePreview() {
 			}
 		}))
 	}
+
+	// Handle section label change
+	const handleSectionLabelChange = useCallback(async (sectionKey, newLabel) => {
+		// Save current value for potential revert
+		const previousLabel = sectionLabels[sectionKey]
+
+		// Update local state immediately (optimistic update)
+		const updatedLabels = { ...sectionLabels, [sectionKey]: newLabel }
+		setSectionLabels(updatedLabels)
+
+		// Save to backend
+		try {
+			await updateSectionLabels(updatedLabels)
+			
+			// If preview exists, refresh it with new section labels
+			if (previewHtml) {
+				// Validate before generating preview
+				const errors = validateResumeData(resumeData)
+				if (errors.length === 0) {
+					setIsGeneratingPreview(true)
+					try {
+						const previewData = {
+							...applyVisibilityFilters(resumeData),
+							sectionLabels: updatedLabels
+						}
+						const htmlContent = await generateResumePreview(template, previewData)
+						setPreviewHtml(htmlContent)
+					} catch (error) {
+						console.error('Failed to refresh preview:', error)
+					} finally {
+						setIsGeneratingPreview(false)
+					}
+				}
+			}
+		} catch (error) {
+			console.error('Failed to update section label:', error)
+			// Revert on error
+			setSectionLabels(prev => ({
+				...prev,
+				[sectionKey]: previousLabel
+			}))
+		}
+	}, [sectionLabels, previewHtml, resumeData, template])
 
 	// Handle welcome message dismissal
 	const handleDismissWelcome = () => {
@@ -499,6 +558,11 @@ function ResumePreview() {
 				setSkillsData(initialized.skillsData)
 				setSummaryData(initialized.summaryData)
 				setResumeData(initialized.resumeData)
+
+				// Load section labels from user profile, merge with defaults
+				if (responseData.section_labels) {
+					setSectionLabels({ ...DEFAULT_SECTION_LABELS, ...responseData.section_labels })
+				}
 			}
 
 			fetchCurrentUser();
@@ -567,7 +631,10 @@ function ResumePreview() {
 		const timer = setTimeout(async () => {
 			try {
 				// --- apply visibility filters for preview, then generate preview, and set preview.
-				const previewData = applyVisibilityFilters(resumeData)
+				const previewData = {
+					...applyVisibilityFilters(resumeData),
+					sectionLabels: sectionLabels
+				}
 				const htmlContent = await generateResumePreview(template, previewData)
 				setPreviewHtml(htmlContent)
 			} catch (error) {
@@ -669,6 +736,8 @@ function ResumePreview() {
 					onSkillsChange={handleSkillsChange}
 					onSummaryChange={handleSummaryChange}
 					onVisibilityChange={handleVisibilityChange}
+					sectionLabels={sectionLabels}
+					onSectionLabelChange={handleSectionLabelChange}
 				/>
 
 				{/* resizable divider */}
