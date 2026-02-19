@@ -366,6 +366,49 @@ textarea:focus {
 	border-radius: 10px;
 }
 
+/* Custom scrollbar styling for Info page */
+.info-scrollbar {
+	/* Firefox scrollbar styling */
+	scrollbar-width: auto;
+	scrollbar-color: rgb(214, 86, 86) rgb(252, 250, 240);
+}
+
+.info-scrollbar::-webkit-scrollbar {
+	width: 12px;
+	height: 12px;
+	-webkit-appearance: none;
+	display: block !important;
+}
+
+.info-scrollbar::-webkit-scrollbar-track {
+	background: rgb(252, 250, 240); /* cream background */
+	border-radius: 10px;
+	margin: 2px;
+	border: 1px solid rgba(209, 213, 219, 0.3);
+}
+
+.info-scrollbar::-webkit-scrollbar-thumb {
+	background: rgb(214, 86, 86); /* brand-pink */
+	border-radius: 10px;
+	border: 2px solid rgb(252, 250, 240);
+	min-height: 50px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.info-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: rgb(190, 70, 70); /* brand-pink-dark */
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.info-scrollbar::-webkit-scrollbar-thumb:active {
+	background: rgb(170, 60, 60);
+}
+
+.info-scrollbar::-webkit-scrollbar-corner {
+	background: rgb(252, 250, 240);
+	border-radius: 10px;
+}
+
 /* hide browser's default password reveal button ( Edge / Chrome) */
 input[type="password"]::-ms-reveal {
 	display: none;

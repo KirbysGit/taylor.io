@@ -164,8 +164,7 @@ const Education = ({ educationData, onEducationChange, isVisible = true, onVisib
     return (
         <div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
 			{/* header with chevron */}
-			<button
-				type="button"
+			<div
 				onClick={() => setIsEducationExpanded(!isEducationExpanded)}
 				className="flex items-center gap-3 w-full transition-colors"
 			>
@@ -204,7 +203,7 @@ const Education = ({ educationData, onEducationChange, isVisible = true, onVisib
 						<ChevronDown className="w-4 h-4 text-gray-600" />
 					)}
 				</div>
-			</button>
+			</div>
 			
 			{isEducationExpanded && (
 				<div>

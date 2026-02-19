@@ -364,7 +364,7 @@ function Info() {
 	}
 
 	return (
-		<div className="min-h-screen flex flex-col bg-cream">
+		<div className="min-h-screen flex flex-col bg-cream info-scrollbar overflow-y-auto" style={{ height: '100vh' }}>
 			<TopNav user={user} onLogout={handleLogout} />
 
 			<main className="flex-1 py-8 bg-cream">

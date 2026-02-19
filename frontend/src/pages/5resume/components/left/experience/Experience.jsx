@@ -82,7 +82,7 @@ const Experience = ({ experienceData, onExperienceChange, isVisible = true, onVi
         <div>
             <div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
 			{/* header with chevron */}
-			<button
+			<div
 				type="button"
 				onClick={() => setIsExperienceExpanded(!isExperienceExpanded)}
 				className="flex items-center gap-3 w-full transition-colors"
@@ -122,7 +122,7 @@ const Experience = ({ experienceData, onExperienceChange, isVisible = true, onVi
 						<ChevronDown className="w-4 h-4 text-gray-600" />
 					)}
 				</div>
-			</button>
+			</div>
 			
 			{isExperienceExpanded && (
 				<div>

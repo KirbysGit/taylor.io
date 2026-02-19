@@ -1,6 +1,6 @@
 // components / inputs / DescriptionInput.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { XIcon, RequiredAsterisk } from '@/components/icons';
 import { isBulletFormat, paragraphToBullets, bulletsToParagraph } from '@/utils/descriptionHelpers';
 
@@ -8,49 +8,110 @@ import { isBulletFormat, paragraphToBullets, bulletsToParagraph } from '@/utils/
 const DescriptionInput = ({ value, onChange, placeholder = "Enter description...", required = false }) => {
 	const [mode, setMode] = useState('paragraph')
 	const [bullets, setBullets] = useState([''])
+	const isTogglingRef = useRef(false) // Prevent useEffect from interfering during toggle
 
 	// Initialize mode and bullets based on existing value
+	/*
 	useEffect(() => {
+		// Skip if we're in the middle of a toggle to prevent render loops
+		if (isTogglingRef.current) return
+		
 		if (value !== undefined) {
-			const isBullet = isBulletFormat(value || '')
-			setMode(isBullet ? 'bullets' : 'paragraph')
-			if (isBullet) {
-				setBullets(paragraphToBullets(value || ''))
-			} else {
-				setBullets([''])
+			try {
+				const safeValue = value || ''
+				const isBullet = isBulletFormat(safeValue)
+				const newMode = isBullet ? 'bullets' : 'paragraph'
+				
+				// Only update if mode actually changed to prevent unnecessary re-renders
+				setMode(prevMode => {
+					if (prevMode !== newMode) {
+						return newMode
+					}
+					return prevMode
+				})
+				
+				if (isBullet) {
+					const newBullets = paragraphToBullets(safeValue)
+					setBullets(Array.isArray(newBullets) && newBullets.length > 0 ? newBullets : [''])
+				} else {
+					// Only reset bullets if we're actually in paragraph mode
+					setBullets(prev => {
+						if (prev.length === 0 || (prev.length === 1 && !prev[0])) {
+							return ['']
+						}
+						return prev
+					})
+				}
+			} catch (error) {
+				console.error('Error in DescriptionInput useEffect:', error)
 			}
 		}
 	}, [value])
-
+	*/
+	
 	// Handle mode toggle
 	const handleModeToggle = () => {
-		const newMode = mode === 'paragraph' ? 'bullets' : 'paragraph'
-		const currentDescription = value || ''
-		
-		if (newMode === 'bullets') {
-			// Convert paragraph to bullets
-			const newBullets = paragraphToBullets(currentDescription)
-			setBullets(newBullets.length > 0 ? newBullets : [''])
-			const bulletString = bulletsToParagraph(newBullets)
-			onChange(bulletString)
-		} else {
-			// Convert bullets to paragraph
-			const paragraph = bullets.filter(b => b.trim()).join('\n')
-			onChange(paragraph)
+		try {
+			console.log('handleModeToggle called')
+			isTogglingRef.current = true // Flag that we're toggling
+			
+			const newMode = mode === 'paragraph' ? 'bullets' : 'paragraph'
+			const currentDescription = value || ''
+			console.log('currentDescription', currentDescription)
+			if (newMode === 'bullets') {
+				// Convert paragraph to bullets
+				const newBullets = paragraphToBullets(currentDescription)
+				const safeBullets = Array.isArray(newBullets) && newBullets.length > 0 ? newBullets : ['']
+				
+				setBullets(safeBullets)
+				console.log('HERE WE ARE')
+				const bulletString = bulletsToParagraph(safeBullets)
+				console.log('bulletString', bulletString)
+				// Only call onChange if we have a valid string
+				if (typeof bulletString === 'string') {
+					onChange(bulletString)
+				}
+			} else {
+				// Convert bullets to paragraph (without bullet prefix)
+				const paragraph = bullets
+					.filter(b => b && typeof b === 'string' && b.trim())
+					.join('\n')
+				
+				onChange(paragraph)
+			}
+			
+			console.log('newMode', newMode)
+			setMode(newMode)
+			
+			// Reset flag after a short delay to allow state updates to complete
+			setTimeout(() => {
+				isTogglingRef.current = false
+			}, 0)
+
+			console.log('mode', mode)
+		} catch (error) {
+			console.error('Error in handleModeToggle:', error)
+			isTogglingRef.current = false
 		}
-		
-		setMode(newMode)
 	}
 
 	// Handle bullet change
 	const handleBulletChange = (bulletIndex, bulletValue) => {
-		const newBullets = [...bullets]
-		newBullets[bulletIndex] = bulletValue
-		setBullets(newBullets)
-		
-		// Update description field with bullet format
-		const bulletString = bulletsToParagraph(newBullets)
-		onChange(bulletString)
+		try {
+			const newBullets = [...bullets]
+			if (bulletIndex >= 0 && bulletIndex < newBullets.length) {
+				newBullets[bulletIndex] = bulletValue || ''
+				setBullets(newBullets)
+				
+				// Update description field with bullet format
+				const bulletString = bulletsToParagraph(newBullets)
+				if (typeof bulletString === 'string') {
+					onChange(bulletString)
+				}
+			}
+		} catch (error) {
+			console.error('Error in handleBulletChange:', error)
+		}
 	}
 
 	// Handle add bullet
@@ -60,13 +121,19 @@ const DescriptionInput = ({ value, onChange, placeholder = "Enter description...
 
 	// Handle remove bullet
 	const handleRemoveBullet = (bulletIndex) => {
-		if (bullets.length <= 1) return // Keep at least one
-		const newBullets = bullets.filter((_, i) => i !== bulletIndex)
-		setBullets(newBullets)
-		
-		// Update description field
-		const bulletString = bulletsToParagraph(newBullets)
-		onChange(bulletString)
+		try {
+			if (bullets.length <= 1) return // Keep at least one
+			const newBullets = bullets.filter((_, i) => i !== bulletIndex)
+			setBullets(newBullets)
+			
+			// Update description field
+			const bulletString = bulletsToParagraph(newBullets)
+			if (typeof bulletString === 'string') {
+				onChange(bulletString)
+			}
+		} catch (error) {
+			console.error('Error in handleRemoveBullet:', error)
+		}
 	}
 
 	return (
@@ -86,7 +153,10 @@ const DescriptionInput = ({ value, onChange, placeholder = "Enter description...
 						<input
 							type="checkbox"
 							checked={mode === 'bullets'}
-							onChange={handleModeToggle}
+							onChange={(e) => {
+								e.preventDefault()
+								handleModeToggle()
+							}}
 							className="sr-only"
 						/>
 						<div className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${

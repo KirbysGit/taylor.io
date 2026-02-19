@@ -87,8 +87,7 @@ const Projects = ({ projectsData, onProjectsChange, isVisible = true, onVisibili
         <div>
             <div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
 			{/* header with chevron */}
-			<button
-				type="button"
+			<div
 				onClick={() => setIsProjectsExpanded(!isProjectsExpanded)}
 				className="flex items-center gap-3 w-full transition-colors"
 			>
@@ -127,7 +126,7 @@ const Projects = ({ projectsData, onProjectsChange, isVisible = true, onVisibili
 						<ChevronDown className="w-4 h-4 text-gray-600" />
 					)}
 				</div>
-			</button>
+			</div>
 			
 			{isProjectsExpanded && (
 				<div>

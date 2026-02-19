@@ -32,6 +32,9 @@ def format_description(description: str) -> str:
     if not description:
         return ''
     
+    print('On preview')
+    print('description', description)
+
     # split by newlines.
     lines = description.split('\n')
     bullet_items = []

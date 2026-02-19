@@ -156,8 +156,7 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 	return (
 		<div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
 			{/* header with chevron */}
-			<button
-				type="button"
+			<div
 				onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
 				className="flex items-center gap-3 w-full transition-colors"
 			>
@@ -175,7 +174,7 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 						<ChevronDown className="w-4 h-4 text-gray-600" />
 					)}
 				</div>
-			</button>
+			</div>
 			
 			{isHeaderExpanded && (
 				<div>

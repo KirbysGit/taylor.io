@@ -33,7 +33,7 @@ const Summary = ({ summaryData, onSummaryChange, isVisible = false, onVisibility
         <div>
             <div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
                 {/* header with chevron */}
-                <button
+                <div
                     type="button"
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="flex items-center gap-3 w-full transition-colors"
@@ -68,7 +68,7 @@ const Summary = ({ summaryData, onSummaryChange, isVisible = false, onVisibility
                             <ChevronDown className="w-4 h-4 text-gray-600" />
                         )}
                     </div>
-                </button>
+                </div>
                 
                 {isExpanded && (
                     <div>
