@@ -55,9 +55,9 @@ const normalizeEducationForBackend = (edu) => {
     const endDate = edu.endDate || edu.end_date
     const isCurrent = edu.current || false
     
-    // convert dates to ISO format if needed (only if in form format)
-    const start_date = startDate ? (edu.startDate ? convertToISODate(startDate) : startDate) : null
-    const end_date = isCurrent ? null : (endDate ? (edu.endDate ? convertToISODate(endDate) : endDate) : null)
+    // backend expects datetime (ISO with T); convert date-only strings (YYYY-MM-DD) to ISO
+    const start_date = startDate ? convertToISODate(startDate) : null
+    const end_date = isCurrent ? null : (endDate ? convertToISODate(endDate) : null)
     
     return {
         school: normalizeValue(edu.school),
@@ -81,9 +81,9 @@ const normalizeExperienceForBackend = (exp) => {
     const endDate = exp.endDate || exp.end_date
     const isCurrent = exp.current || false
     
-    // convert dates to ISO format if needed (only if in form format)
-    const start_date = startDate ? (exp.startDate ? convertToISODate(startDate) : startDate) : null
-    const end_date = isCurrent ? null : (endDate ? (exp.endDate ? convertToISODate(endDate) : endDate) : null)
+    // backend expects datetime (ISO with T); convert date-only strings (YYYY-MM-DD) to ISO
+    const start_date = startDate ? convertToISODate(startDate) : null
+    const end_date = isCurrent ? null : (endDate ? convertToISODate(endDate) : null)
     
     return {
         title: normalizeValue(exp.title),
@@ -128,6 +128,52 @@ const normalizeSkillForBackend = (skill) => {
         name: normalizeValue(skill.name),
         category: normalizeValue(skill.category),
     }
+}
+
+// filter out empty entries before sending to backend (avoids 422 on bulk endpoints)
+const hasContent = (v) => v != null && String(v).trim() !== ''
+const hasObjectContent = (obj) => obj && typeof obj === 'object' && Object.keys(obj).length > 0
+
+// description can be string or array of bullets
+const hasDescriptionContent = (d) => {
+    if (!d) return false
+    if (Array.isArray(d)) return d.some((x) => x != null && String(x).trim() !== '')
+    return hasContent(d)
+}
+
+// Minimum requirements per section - entry must meet these to be saved / shown on resume
+export const isValidEducation = (edu) =>
+    hasContent(edu.school) || hasContent(edu.degree) || hasContent(edu.discipline) ||
+    hasContent(edu.minor) || hasContent(edu.gpa) || hasContent(edu.location) ||
+    hasContent(edu.startDate) || hasContent(edu.start_date) ||
+    hasContent(edu.endDate) || hasContent(edu.end_date) || edu.current === true ||
+    hasObjectContent(edu.subsections)
+
+export const isValidExperience = (exp) =>
+    hasContent(exp.title) && hasContent(exp.company) && hasDescriptionContent(exp.description)
+
+export const isValidProject = (proj) => hasContent(proj.title)
+
+export const isValidSkill = (skill) => hasContent(skill.name)
+
+export const filterEmptyEducation = (arr) => {
+    if (!Array.isArray(arr)) return []
+    return arr.filter(isValidEducation)
+}
+
+export const filterEmptyExperiences = (arr) => {
+    if (!Array.isArray(arr)) return []
+    return arr.filter(isValidExperience)
+}
+
+export const filterEmptyProjects = (arr) => {
+    if (!Array.isArray(arr)) return []
+    return arr.filter(isValidProject)
+}
+
+export const filterEmptySkills = (arr) => {
+    if (!Array.isArray(arr)) return []
+    return arr.filter(isValidSkill)
 }
 
 export { 

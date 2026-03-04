@@ -22,6 +22,8 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 	const [descriptionBullets, setDescriptionBullets] = useState({})
 	const prevLengthRef = useRef(experiences.length)
 	const prevIdsRef = useRef(experiences.map(e => e.id || e).join(','))
+	// store previous end dates when toggling "current" to preserve them
+	const savedEndDatesRef = useRef(new Map())
 
 	// sync with prop changes only when structure changes (add/remove), not field updates
 	useEffect(() => {
@@ -92,13 +94,28 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 	}
 
 	const handleFieldChange = (index, field, value) => {
+		const entryId = localEntries[index]?.id || index
 		const updatedEntry = { ...localEntries[index], [field]: value }
 		if (field === 'current' && value) {
+			// save current end date before clearing it
+			const currentEndDate = updatedEntry.endDate || updatedEntry.end_date || ''
+			if (currentEndDate) {
+				savedEndDatesRef.current.set(entryId, currentEndDate)
+			}
 			updatedEntry.endDate = ''
 			updatedEntry.end_date = ''
+		} else if (field === 'current' && !value) {
+			// restore saved end date when toggling current off
+			const savedEndDate = savedEndDatesRef.current.get(entryId)
+			if (savedEndDate) {
+				updatedEntry.endDate = savedEndDate
+				updatedEntry.end_date = savedEndDate
+				savedEndDatesRef.current.delete(entryId)
+			}
 		}
 		if (field === 'endDate' && value) {
 			updatedEntry.current = false
+			savedEndDatesRef.current.delete(entryId)
 		}
 		
 		// update local state immediately for responsive UI

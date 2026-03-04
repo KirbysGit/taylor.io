@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import {
@@ -30,9 +30,23 @@ import {
 	transformProjectForBackend,
 	transformSkillForStep,
 } from './utils/dataTransform'
-import { normalizeEducationForBackend, normalizeExperienceForBackend, normalizeProjectForBackend, normalizeSkillForBackend } from '@/pages/utils/DataFormatting'
+import {
+	normalizeEducationForBackend,
+	normalizeExperienceForBackend,
+	normalizeProjectForBackend,
+	normalizeSkillForBackend,
+	filterEmptyEducation,
+	filterEmptyExperiences,
+	filterEmptyProjects,
+	filterEmptySkills,
+} from '@/pages/utils/DataFormatting'
 
 const newId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`
+const DEBOUNCE_MS = 2000
+
+// deep equality via JSON (simple; handles our data shapes)
+const snap = (x) => JSON.stringify(x)
+const isEqual = (a, b) => snap(a) === snap(b)
 
 function Info() {
 	const navigate = useNavigate()
@@ -41,6 +55,10 @@ function Info() {
 	const [savingSection, setSavingSection] = useState(null)
 	const [isParsingResume, setIsParsingResume] = useState(false)
 	const [parseResumeError, setParseResumeError] = useState('')
+
+	// last-saved snapshots for dirty check
+	const lastSavedRef = useRef(null)
+	const debounceRefs = useRef({})
 
 	// State - all in step component format
 	const [contact, setContact] = useState({
@@ -57,6 +75,10 @@ function Info() {
 	const [skills, setSkills] = useState([])
 	const [summary, setSummary] = useState('')
 
+	// ref with latest state so debounced save handlers avoid stale closures
+	const stateRef = useRef({ contact, education, experiences, projects, skills, summary })
+	stateRef.current = { contact, education, experiences, projects, skills, summary }
+
 	// Fetch profile data
 	useEffect(() => {
 		const fetchProfile = async () => {
@@ -72,16 +94,17 @@ function Info() {
 				const data = response.data || {}
 				setUser(data.user || JSON.parse(userData))
 
-				// Contact
+				// Contact - build once so state and lastSavedRef match
 				const contactData = data.contact || {}
-				setContact({
+				const contactState = {
 					email: contactData.email || '',
 					phone: contactData.phone || '',
 					github: contactData.github || '',
 					linkedin: contactData.linkedin || '',
 					portfolio: contactData.portfolio || '',
 					location: contactData.location || '',
-				})
+				}
+				setContact(contactState)
 
 				// Education - transform to step format
 				if (data.education && data.education.length) {
@@ -114,6 +137,21 @@ function Info() {
 				if (data.summary) {
 					setSummary(data.summary.summary || '')
 				}
+
+				// store last-saved snapshots for dirty check
+				const edu = (data.education || []).map(transformEducationForStep)
+				edu.forEach(e => {
+					if (!e.subsections || Object.keys(e.subsections || {}).length === 0) e.subsections = {}
+				})
+				// lastSavedRef must match state shape exactly (no extra API fields like id, user_id)
+				lastSavedRef.current = {
+					contact: contactState,
+					education: JSON.parse(JSON.stringify(edu)),
+					experiences: JSON.parse(JSON.stringify((data.experiences || []).map(transformExperienceForStep))),
+					projects: JSON.parse(JSON.stringify((data.projects || []).map(transformProjectForStep))),
+					skills: JSON.parse(JSON.stringify((data.skills || []).map(transformSkillForStep))),
+					summary: (data.summary?.summary || ''),
+				}
 			} catch (error) {
 				console.error('Error fetching profile:', error)
 				try {
@@ -135,16 +173,75 @@ function Info() {
 		navigate('/')
 	}
 
+	// debounced auto-save: schedule save for section after DEBOUNCE_MS
+	const scheduleDebouncedSave = (section) => {
+		const refs = debounceRefs.current
+		if (refs[section]) clearTimeout(refs[section])
+		refs[section] = setTimeout(() => {
+			refs[section] = null
+			if (section === 'contact') handleContactSave()
+			else if (section === 'education') handleEducationSave()
+			else if (section === 'experiences') handleExperienceSave()
+			else if (section === 'projects') handleProjectSave()
+			else if (section === 'skills') handleSkillSave()
+			else if (section === 'summary') handleSummarySave()
+		}, DEBOUNCE_MS)
+	}
+
+	// dirty check: any section differs from last saved
+	const isDirty = () => {
+		if (!lastSavedRef.current) return false
+		const s = lastSavedRef.current
+		return (
+			!isEqual(contact, s.contact) ||
+			!isEqual(education, s.education) ||
+			!isEqual(experiences, s.experiences) ||
+			!isEqual(projects, s.projects) ||
+			!isEqual(skills, s.skills) ||
+			!isEqual(summary, s.summary)
+		)
+	}
+
+	// save all dirty sections (for navigation/leave)
+	const saveAllDirty = async () => {
+		if (!lastSavedRef.current) return
+		const s = lastSavedRef.current
+		const promises = []
+		if (!isEqual(contact, s.contact)) promises.push(upsertContact(contact).then(() => { s.contact = JSON.parse(JSON.stringify(contact)) }))
+		if (!isEqual(education, s.education)) {
+			const payload = filterEmptyEducation(education).map(e => normalizeEducationForBackend(transformEducationForBackend(e)))
+			promises.push(setupEducation(payload).then(() => { s.education = JSON.parse(JSON.stringify(education)) }))
+		}
+		if (!isEqual(experiences, s.experiences)) {
+			const payload = filterEmptyExperiences(experiences).map(e => normalizeExperienceForBackend(transformExperienceForBackend(e)))
+			promises.push(setupExperiences(payload).then(() => { s.experiences = JSON.parse(JSON.stringify(experiences)) }))
+		}
+		if (!isEqual(projects, s.projects)) {
+			const payload = filterEmptyProjects(projects).map(p => normalizeProjectForBackend(transformProjectForBackend(p)))
+			promises.push(setupProjects(payload).then(() => { s.projects = JSON.parse(JSON.stringify(projects)) }))
+		}
+		if (!isEqual(skills, s.skills)) {
+			const payload = filterEmptySkills(skills).map(normalizeSkillForBackend)
+			promises.push(setupSkills(payload).then(() => { s.skills = JSON.parse(JSON.stringify(skills)) }))
+		}
+		if (!isEqual(summary, s.summary)) {
+			promises.push(createSummary({ summary }).then(() => { s.summary = summary }))
+		}
+		await Promise.all(promises)
+	}
+
 	// Contact handlers
 	const handleContactUpdate = (field, value) => {
 		setContact(prev => ({ ...prev, [field]: value }))
+		scheduleDebouncedSave('contact')
 	}
 
 	const handleContactSave = async () => {
 		setSavingSection('contact')
+		const c = stateRef.current.contact
 		try {
-			await upsertContact(contact)
-			toast.success('Contact information saved!')
+			await upsertContact(c)
+			if (lastSavedRef.current) lastSavedRef.current.contact = JSON.parse(JSON.stringify(c))
 		} catch (error) {
 			console.error('Error saving contact:', error)
 			toast.error('Failed to save contact info.')
@@ -161,10 +258,12 @@ function Info() {
 			subsections: newEdu.subsections || { 'Relevant Coursework': '' },
 		}
 		setEducation(prev => [...prev, edu])
+		scheduleDebouncedSave('education')
 	}
 
 	const handleEducationRemove = (index) => {
 		setEducation(prev => prev.filter((_, i) => i !== index))
+		scheduleDebouncedSave('education')
 	}
 
 	const handleEducationUpdate = (index, updatedEdu) => {
@@ -173,6 +272,7 @@ function Info() {
 			newEdu[index] = { ...newEdu[index], ...updatedEdu }
 			return newEdu
 		})
+		scheduleDebouncedSave('education')
 	}
 
 	const handleSubsectionUpdate = (action, eduIndex, oldTitle, newValue) => {
@@ -199,19 +299,19 @@ function Info() {
 			newEdu[eduIndex] = { ...edu, subsections }
 			return newEdu
 		})
+		scheduleDebouncedSave('education')
 	}
 
 	const handleEducationSave = async () => {
 		setSavingSection('education')
+		const edu = stateRef.current.education
 		try {
-			const payload = education
-				.filter((edu) => edu.school || edu.degree)
-				.map(edu => {
-					const transformed = transformEducationForBackend(edu)
-					return normalizeEducationForBackend(transformed)
-				})
+			const payload = filterEmptyEducation(edu).map(e => {
+				const transformed = transformEducationForBackend(e)
+				return normalizeEducationForBackend(transformed)
+			})
 			await setupEducation(payload)
-			toast.success('Education saved successfully!')
+			if (lastSavedRef.current) lastSavedRef.current.education = JSON.parse(JSON.stringify(edu))
 		} catch (error) {
 			console.error('Error saving education:', error)
 			toast.error('Failed to save education.')
@@ -223,10 +323,12 @@ function Info() {
 	// Experience handlers
 	const handleExperienceAdd = (newExp) => {
 		setExperiences(prev => [...prev, { ...newExp, id: newExp.id || newId() }])
+		scheduleDebouncedSave('experiences')
 	}
 
 	const handleExperienceRemove = (index) => {
 		setExperiences(prev => prev.filter((_, i) => i !== index))
+		scheduleDebouncedSave('experiences')
 	}
 
 	const handleExperienceUpdate = (index, updatedExp) => {
@@ -235,19 +337,19 @@ function Info() {
 			newExp[index] = { ...newExp[index], ...updatedExp }
 			return newExp
 		})
+		scheduleDebouncedSave('experiences')
 	}
 
 	const handleExperienceSave = async () => {
 		setSavingSection('experiences')
+		const exp = stateRef.current.experiences
 		try {
-			const payload = experiences
-				.filter((exp) => exp.title || exp.company)
-				.map(exp => {
-					const transformed = transformExperienceForBackend(exp)
-					return normalizeExperienceForBackend(transformed)
-				})
+			const payload = filterEmptyExperiences(exp).map(e => {
+				const transformed = transformExperienceForBackend(e)
+				return normalizeExperienceForBackend(transformed)
+			})
 			await setupExperiences(payload)
-			toast.success('Experiences saved successfully!')
+			if (lastSavedRef.current) lastSavedRef.current.experiences = JSON.parse(JSON.stringify(exp))
 		} catch (error) {
 			console.error('Error saving experiences:', error)
 			toast.error('Failed to save experiences.')
@@ -259,10 +361,12 @@ function Info() {
 	// Project handlers
 	const handleProjectAdd = (newProj) => {
 		setProjects(prev => [...prev, { ...newProj, id: newProj.id || newId() }])
+		scheduleDebouncedSave('projects')
 	}
 
 	const handleProjectRemove = (index) => {
 		setProjects(prev => prev.filter((_, i) => i !== index))
+		scheduleDebouncedSave('projects')
 	}
 
 	const handleProjectUpdate = (index, updatedProj) => {
@@ -271,19 +375,19 @@ function Info() {
 			newProj[index] = { ...newProj[index], ...updatedProj }
 			return newProj
 		})
+		scheduleDebouncedSave('projects')
 	}
 
 	const handleProjectSave = async () => {
 		setSavingSection('projects')
+		const proj = stateRef.current.projects
 		try {
-			const payload = projects
-				.filter((proj) => proj.title)
-				.map(proj => {
-					const transformed = transformProjectForBackend(proj)
-					return normalizeProjectForBackend(transformed)
-				})
+			const payload = filterEmptyProjects(proj).map(p => {
+				const transformed = transformProjectForBackend(p)
+				return normalizeProjectForBackend(transformed)
+			})
 			await setupProjects(payload)
-			toast.success('Projects saved successfully!')
+			if (lastSavedRef.current) lastSavedRef.current.projects = JSON.parse(JSON.stringify(proj))
 		} catch (error) {
 			console.error('Error saving projects:', error)
 			toast.error('Failed to save projects.')
@@ -295,10 +399,12 @@ function Info() {
 	// Skills handlers
 	const handleSkillAdd = (skill) => {
 		setSkills(prev => [...prev, { ...skill, id: skill.id || newId() }])
+		scheduleDebouncedSave('skills')
 	}
 
 	const handleSkillRemove = (index) => {
 		setSkills(prev => prev.filter((_, i) => i !== index))
+		scheduleDebouncedSave('skills')
 	}
 
 	const handleSkillUpdate = (index, updatedSkill) => {
@@ -307,16 +413,16 @@ function Info() {
 			newSkills[index] = { ...newSkills[index], ...updatedSkill }
 			return newSkills
 		})
+		scheduleDebouncedSave('skills')
 	}
 
 	const handleSkillSave = async () => {
 		setSavingSection('skills')
+		const sk = stateRef.current.skills
 		try {
-			const payload = skills
-				.filter((s) => s.name.trim())
-				.map(normalizeSkillForBackend)
+			const payload = filterEmptySkills(sk).map(normalizeSkillForBackend)
 			await setupSkills(payload)
-			toast.success('Skills saved successfully!')
+			if (lastSavedRef.current) lastSavedRef.current.skills = JSON.parse(JSON.stringify(sk))
 		} catch (error) {
 			console.error('Error saving skills:', error)
 			toast.error('Failed to save skills.')
@@ -328,13 +434,15 @@ function Info() {
 	// Summary handler
 	const handleSummaryUpdate = (value) => {
 		setSummary(value)
+		scheduleDebouncedSave('summary')
 	}
 
 	const handleSummarySave = async () => {
 		setSavingSection('summary')
+		const sum = stateRef.current.summary
 		try {
-			await createSummary({ summary })
-			toast.success('Summary saved successfully!')
+			await createSummary({ summary: sum })
+			if (lastSavedRef.current) lastSavedRef.current.summary = sum
 		} catch (error) {
 			console.error('Error saving summary:', error)
 			toast.error('Failed to save summary.')
@@ -369,6 +477,8 @@ function Info() {
 			setProjects(merged.projects)
 			setSkills(merged.skills)
 			setSummary(merged.summary)
+			// schedule auto-save for all merged sections (we're now dirty)
+			;['contact', 'education', 'experiences', 'projects', 'skills', 'summary'].forEach(scheduleDebouncedSave)
 			await attachResume(file.name)
 			setUser(prev => prev ? { ...prev, attached_resume_filename: file.name, attached_resume_uploaded_at: new Date().toISOString() } : null)
 			const total = counts.education + counts.experiences + counts.projects + counts.skills
@@ -399,6 +509,24 @@ function Info() {
 		e.target.value = ''
 	}
 
+	// beforeunload: prompt when dirty (tab close / refresh)
+	useEffect(() => {
+		const onBeforeUnload = (e) => {
+			if (isDirty()) {
+				e.preventDefault()
+			}
+		}
+		window.addEventListener('beforeunload', onBeforeUnload)
+		return () => window.removeEventListener('beforeunload', onBeforeUnload)
+	}, [contact, education, experiences, projects, skills, summary])
+
+	// clear debounce timers on unmount
+	useEffect(() => {
+		return () => {
+			Object.values(debounceRefs.current).forEach((id) => id && clearTimeout(id))
+		}
+	}, [])
+
 	// Scroll to section handler (scrolls the .info-scrollbar div, not the window)
 	const scrollToSection = (sectionId) => {
 		const scrollContainer = document.querySelector('.info-scrollbar')
@@ -424,12 +552,21 @@ function Info() {
 
 	return (
 		<div className="min-h-screen flex flex-col bg-cream info-scrollbar overflow-y-auto" style={{ height: '100vh' }}>
-			<TopNav user={user} onLogout={handleLogout} />
+			<TopNav
+				user={user}
+				onLogout={handleLogout}
+				onBeforeNavigate={async () => {
+					if (isDirty()) {
+						await saveAllDirty()
+						toast.success('Your changes have been saved.')
+					}
+				}}
+			/>
 
 			<main className="flex-1 py-8 bg-cream">
 				<div className="max-w-7xl mx-auto px-6 flex gap-8">
 					{/* Sidebar Navigation */}
-					<aside className="w-48 flex-shrink-0 sticky top-24 self-start">
+					<aside className="w-48 flex-shrink-0 sticky top-24 self-start space-y-3">
 						<nav className="bg-white-bright rounded-xl p-4 border-2 border-gray-200 shadow-sm">
 							<h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Quick Navigation</h3>
 							<ul className="space-y-2">
@@ -483,6 +620,32 @@ function Info() {
 								</li>
 							</ul>
 						</nav>
+						{/* Save status indicator */}
+						<div className="bg-white-bright rounded-xl p-3 border-2 border-gray-200 shadow-sm">
+							{savingSection ? (
+								<div className="flex items-center gap-2 text-sm text-brand-pink">
+									<svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+										<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+										<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+									</svg>
+									<span>Saving...</span>
+								</div>
+							) : isDirty() ? (
+								<div className="flex items-center gap-2 text-sm text-amber-600">
+									<svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+									<span>Unsaved changes</span>
+								</div>
+							) : (
+								<div className="flex items-center gap-2 text-sm text-green-600">
+									<svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+									<span>Up to date</span>
+								</div>
+							)}
+						</div>
 					</aside>
 
 					{/* Main Content */}
@@ -490,7 +653,7 @@ function Info() {
 						{/* Header */}
 						<div>
 							<h1 className="text-3xl font-bold text-gray-900 mb-2">Your Information</h1>
-							<p className="text-gray-600">Review and update your profile details. Each section can be saved independently.</p>
+							<p className="text-gray-600">Review and update your profile details. Changes auto-save after a short delay, or when you leave the page.</p>
 						</div>
 
 						{/* Attached Resume Banner or Upload Zone */}
@@ -572,12 +735,7 @@ function Info() {
 
 						{/* Contact Section */}
 						<div id="contact-section">
-							<ContactSection
-								contact={contact}
-								onUpdate={handleContactUpdate}
-								onSave={handleContactSave}
-								isSaving={savingSection === 'contact'}
-							/>
+							<ContactSection contact={contact} onUpdate={handleContactUpdate} />
 						</div>
 
 						{/* Education Section */}
@@ -587,8 +745,6 @@ function Info() {
 								onAdd={handleEducationAdd}
 								onRemove={handleEducationRemove}
 								onUpdate={handleEducationUpdate}
-								onSave={handleEducationSave}
-								isSaving={savingSection === 'education'}
 								onSubsectionUpdate={handleSubsectionUpdate}
 							/>
 						</div>
@@ -600,8 +756,6 @@ function Info() {
 								onAdd={handleExperienceAdd}
 								onRemove={handleExperienceRemove}
 								onUpdate={handleExperienceUpdate}
-								onSave={handleExperienceSave}
-								isSaving={savingSection === 'experiences'}
 							/>
 						</div>
 
@@ -612,8 +766,6 @@ function Info() {
 								onAdd={handleProjectAdd}
 								onRemove={handleProjectRemove}
 								onUpdate={handleProjectUpdate}
-								onSave={handleProjectSave}
-								isSaving={savingSection === 'projects'}
 							/>
 						</div>
 
@@ -624,19 +776,12 @@ function Info() {
 								onAdd={handleSkillAdd}
 								onRemove={handleSkillRemove}
 								onUpdate={handleSkillUpdate}
-								onSave={handleSkillSave}
-								isSaving={savingSection === 'skills'}
 							/>
 						</div>
 
 						{/* Summary Section */}
 						<div id="summary-section">
-							<SummarySection
-								summary={summary}
-								onUpdate={handleSummaryUpdate}
-								onSave={handleSummarySave}
-								isSaving={savingSection === 'summary'}
-							/>
+							<SummarySection summary={summary} onUpdate={handleSummaryUpdate} />
 						</div>
 					</div>
 				</div>

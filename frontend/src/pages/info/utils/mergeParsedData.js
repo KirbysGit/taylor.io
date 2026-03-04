@@ -7,8 +7,20 @@ const newId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`
 
 const normalize = (s) => (s || '').toString().trim().toLowerCase()
 
-// Keys for deduplication
-const eduKey = (e) => `${normalize(e.school)}|${normalize(e.degree)}|${normalize(e.discipline || e.field)}`
+// Education: match function - empty discipline treated as "matches any"
+// Parsed is duplicate of existing if: school matches AND degree matches AND (parsed.discipline empty OR matches)
+export function eduMatches(parsed, existing) {
+	const pSchool = normalize(parsed.school)
+	const pDegree = normalize(parsed.degree)
+	const pDisc = normalize(parsed.discipline || parsed.field)
+	const eSchool = normalize(existing.school)
+	const eDegree = normalize(existing.degree)
+	const eDisc = normalize(existing.discipline || existing.field)
+	if (pSchool !== eSchool || pDegree !== eDegree) return false
+	return !pDisc || pDisc === eDisc
+}
+
+// Keys for deduplication (experience, project, skill still use exact keys)
 const expKey = (e) => `${normalize(e.company)}|${normalize(e.title)}|${normalize(e.startDate)}`
 const projKey = (p) => normalize(p.title)
 const skillKey = (s) => `${normalize(s.name)}|${normalize(s.category || '')}`
@@ -46,13 +58,11 @@ export function mergeParsedData(parsed, existing) {
 		summary = parsed.summary.trim()
 	}
 
-	// Education: dedupe, add new
-	const existingEduKeys = new Set((existing.education || []).map(eduKey))
+	// Education: dedupe with eduMatches (empty discipline = matches any)
 	const education = [...(existing.education || [])]
 	for (const edu of parsed.education || []) {
-		const key = eduKey(edu)
-		if (!existingEduKeys.has(key)) {
-			existingEduKeys.add(key)
+		const isDup = education.some((ex) => eduMatches(edu, ex))
+		if (!isDup) {
 			education.push({
 				id: newId(),
 				school: edu.school || '',

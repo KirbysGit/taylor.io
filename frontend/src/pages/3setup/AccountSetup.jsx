@@ -10,14 +10,18 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // services imports.
-import { setupEducation, setupExperiences, setupProjects, setupSkills, createSummary } from '@/api/services/profile'
+import { setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, upsertContact, detachResume } from '@/api/services/profile'
 
 // utils imports.
 import { 
 	normalizeEducationForBackend,
 	normalizeExperienceForBackend,
 	normalizeProjectForBackend,
-	normalizeSkillForBackend
+	normalizeSkillForBackend,
+	filterEmptyEducation,
+	filterEmptyExperiences,
+	filterEmptyProjects,
+	filterEmptySkills,
 } from '@/pages/utils/DataFormatting'
 
 // steps imports.
@@ -49,6 +53,7 @@ function AccountSetup() {
 			github: '',
 			linkedin: '',
 			portfolio: '',
+			location: '',
 		},
 		education: [],
 		skills: [],
@@ -57,6 +62,7 @@ function AccountSetup() {
 		summary: '',
 		extracurriculars: [],
 		coursework: [],
+		uploadedResumeFilename: null, // persists when navigating back to WelcomeStep
 	})
 
 	// ---- variables ----
@@ -111,32 +117,39 @@ function AccountSetup() {
 			// save education, experiences, projects, and skills to backend.
 			const promises = []
 			
-			// set up education data.
-			if (formData.education.length > 0) {
-				const educationData = formData.education.map(normalizeEducationForBackend)
-				promises.push(setupEducation(educationData))
+			// set up education data (filter empty entries to avoid 422)
+			const educationFiltered = filterEmptyEducation(formData.education)
+			const educationData = educationFiltered.map(normalizeEducationForBackend)
+			promises.push(setupEducation(educationData))
+
+			// set up experiences data (filter empty entries to avoid 422)
+			const experiencesFiltered = filterEmptyExperiences(formData.experiences)
+			const experiencesData = experiencesFiltered.map(normalizeExperienceForBackend)
+			const experiencePromise = setupExperiences(experiencesData)
+				.then(response => response)
+				.catch(error => { throw error })
+			promises.push(experiencePromise)
+
+			// set up projects data (filter empty entries to avoid 422)
+			const projectsFiltered = filterEmptyProjects(formData.projects)
+			const projectsData = projectsFiltered.map(normalizeProjectForBackend)
+			promises.push(setupProjects(projectsData))
+
+			// set up skills data (filter empty entries to avoid 422)
+			const skillsFiltered = filterEmptySkills(formData.skills)
+			const skillsData = skillsFiltered.map(normalizeSkillForBackend)
+			promises.push(setupSkills(skillsData))
+
+			// set up contact data (phone, location, etc. - was never saved before).
+			const contactData = {
+				email: formData.contact?.email || null,
+				phone: formData.contact?.phone || null,
+				github: formData.contact?.github || null,
+				linkedin: formData.contact?.linkedin || null,
+				portfolio: formData.contact?.portfolio || null,
+				location: formData.contact?.location || null,
 			}
-			
-			// set up experiences data.
-			if (formData.experiences.length > 0) {
-				const experiencesData = formData.experiences.map(normalizeExperienceForBackend)
-				const experiencePromise = setupExperiences(experiencesData)
-					.then(response => response)
-					.catch(error => { throw error })
-				promises.push(experiencePromise)
-			}
-			
-			// set up projects data.
-			if (formData.projects.length > 0) {
-				const projectsData = formData.projects.map(normalizeProjectForBackend)
-				promises.push(setupProjects(projectsData))
-			}
-			
-			// set up skills data.
-			if (formData.skills.length > 0) {
-				const skillsData = formData.skills.map(normalizeSkillForBackend)
-				promises.push(setupSkills(skillsData))
-			}
+			promises.push(upsertContact(contactData))
 
 			// set up summary data.
 			if (formData.summary) {
@@ -145,7 +158,7 @@ function AccountSetup() {
 				}
 				promises.push(createSummary(summaryData))
 			}
-			
+
 			// wait for all promises to complete.
 			await Promise.all(promises)
 			
@@ -198,6 +211,10 @@ function AccountSetup() {
 							handleNext={handleNext}
 							formData={formData}
 							onFormDataUpdate={(mergedData) => setFormData(mergedData)}
+							onRemoveResume={async () => {
+								try { await detachResume() } catch (e) { console.warn('detachResume:', e) }
+								setFormData(prev => ({ ...prev, uploadedResumeFilename: null }))
+							}}
 						/>
 				)
 			case 1: // Contact
@@ -283,26 +300,12 @@ function AccountSetup() {
 		)
 	}
 
-	const showSideArrows = currentStep > 0 && currentStep < steps.length - 1
+	const showBottomNav = currentStep > 0 && currentStep < steps.length - 1
 
 	return (
-		<div className="min-h-screen bg-cream flex items-center justify-center py-12 px-4">
-			<div className="w-full max-w-5xl flex items-center justify-center gap-12">
-				{/* Left Arrow - Previous step */}
-				{showSideArrows ? (
-					<button
-						type="button"
-						onClick={handlePrevious}
-						aria-label="Previous step"
-						className="flex-shrink-0 w-16 h-16 rounded-full bg-brand-pink flex items-center justify-center transition-all text-white hover:bg-brand-pink-dark hover:opacity-90"
-					>
-						<ChevronLeft className="w-10 h-10" />
-					</button>
-				) : (
-					<div className="w-16 flex-shrink-0" />
-				)}
-
-				<div className="flex-1 max-w-2xl">
+		<div className="h-screen bg-cream overflow-y-auto info-scrollbar">
+			<div className="min-h-full flex items-center justify-center py-12 px-4">
+				<div className="w-full max-w-2xl">
 					{/* Subtle Progress Bar - Top */}
 					<div className="mb-6">
 						<div className="w-full bg-gray-200/50 rounded-full h-1.5 overflow-hidden">
@@ -330,7 +333,7 @@ function AccountSetup() {
 					</div>
 
 					{/* Bottom Navigation - Only show when not on first/last step */}
-					{showSideArrows && (
+					{showBottomNav && (
 						<div className="mt-6 flex items-center justify-center gap-4">
 							<button
 								onClick={handlePrevious}
@@ -369,20 +372,6 @@ function AccountSetup() {
 						</div>
 					)}
 				</div>
-
-				{/* Right Arrow - Next step */}
-				{showSideArrows ? (
-					<button
-						type="button"
-						onClick={handleNext}
-						aria-label="Next step"
-						className="flex-shrink-0 w-16 h-16 rounded-full bg-brand-pink flex items-center justify-center transition-all text-white hover:bg-brand-pink-dark hover:opacity-90"
-					>
-						<ChevronRight className="w-10 h-10" />
-					</button>
-				) : (
-					<div className="w-16 flex-shrink-0" />
-				)}
 			</div>
 		</div>
 	)
