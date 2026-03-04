@@ -29,6 +29,7 @@ from schemas import (
     ParsedResumeResponse,
     ContactCreate, ContactResponse,
     SectionLabelsUpdate,
+    AttachResumeRequest,
     SummaryCreate, SummaryResponse,
 )
 from resume_parser import parse_resume_file
@@ -525,7 +526,48 @@ async def create_skills_bulk(
     return [SkillResponse.model_validate(skill) for skill in result_skills]
 
 
-# parse resume file.
+# parse resume file (merge mode - no DB save, for Info page).
+@router.post("/parse-resume-merge", response_model=ParsedResumeResponse)
+async def parse_resume_merge(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user_from_token),
+):
+    """Parse resume and return structured data without saving to DB. Used by Info page."""
+    if not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No filename provided"
+        )
+    if not (file.filename.lower().endswith('.pdf') or file.filename.lower().endswith(('.docx', '.doc'))):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported file type. Only PDF and DOCX files are supported."
+        )
+    file_bytes = await file.read()
+    if len(file_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File too large. Maximum size is 10MB."
+        )
+    try:
+        parsed_data = parse_resume_file(file_bytes, file.filename)
+        return ParsedResumeResponse(
+            experiences=parsed_data.get("experiences", []),
+            education=parsed_data.get("education", []),
+            skills=parsed_data.get("skills", []),
+            projects=parsed_data.get("projects", []),
+            contact_info=parsed_data.get("contact_info", {}),
+            summary=parsed_data.get("summary", ""),
+            warnings=parsed_data.get("warnings", [])
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error parsing resume: {str(e)}"
+        )
+
+
+# parse resume file (saves contact/education/summary to DB - used by WelcomeStep).
 @router.post("/parse-resume", response_model=ParsedResumeResponse)
 async def parse_resume(
     file: UploadFile = File(...),
@@ -645,4 +687,35 @@ async def parse_resume(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error parsing resume: {str(e)}"
         )
+
+
+# attach resume metadata (after user uploads).
+@router.post("/attached-resume", response_model=UserResponse)
+async def attach_resume(
+    payload: AttachResumeRequest,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    """Record that user has an attached resume. Does not store file contents."""
+    current_user.attached_resume_filename = payload.filename
+    current_user.attached_resume_uploaded_at = datetime.utcnow()
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return UserResponse.model_validate(current_user)
+
+
+# detach resume (clear metadata only; parsed data stays).
+@router.delete("/attached-resume", response_model=UserResponse)
+async def detach_resume(
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    """Clear attached resume metadata. Does not touch education, experience, etc."""
+    current_user.attached_resume_filename = None
+    current_user.attached_resume_uploaded_at = None
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return UserResponse.model_validate(current_user)
 

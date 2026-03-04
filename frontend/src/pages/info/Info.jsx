@@ -9,7 +9,11 @@ import {
 	setupProjects,
 	setupSkills,
 	createSummary,
+	attachResume,
+	detachResume,
 } from '@/api/services/profile'
+import { parseResumeMerge } from '@/api/services/resume'
+import { mergeParsedData } from './utils/mergeParsedData'
 import TopNav from '@/components/TopNav'
 import ContactSection from './components/ContactSection'
 import EducationSection from './components/EducationSection'
@@ -35,6 +39,8 @@ function Info() {
 	const [user, setUser] = useState(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [savingSection, setSavingSection] = useState(null)
+	const [isParsingResume, setIsParsingResume] = useState(false)
+	const [parseResumeError, setParseResumeError] = useState('')
 
 	// State - all in step component format
 	const [contact, setContact] = useState({
@@ -62,10 +68,10 @@ function Info() {
 			}
 
 			try {
-				setUser(JSON.parse(userData))
 				const response = await getMyProfile()
 				const data = response.data || {}
-				
+				setUser(data.user || JSON.parse(userData))
+
 				// Contact
 				const contactData = data.contact || {}
 				setContact({
@@ -337,18 +343,71 @@ function Info() {
 		}
 	}
 
-	// Scroll to section handler
-	const scrollToSection = (sectionId) => {
-		const element = document.getElementById(sectionId)
-		if (element) {
-			const offset = 100 // offset for fixed header/nav
-			const elementPosition = element.getBoundingClientRect().top
-			const offsetPosition = elementPosition + window.pageYOffset - offset
+	// Resume upload / attach handlers
+	const handleResumeUpload = async (file) => {
+		const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword']
+		const validExtensions = ['.pdf', '.docx', '.doc']
+		const ext = '.' + (file.name || '').split('.').pop().toLowerCase()
+		if (!validTypes.includes(file.type) && !validExtensions.includes(ext)) {
+			setParseResumeError('Invalid file type. Please upload a PDF or DOCX file.')
+			return
+		}
+		if (file.size > 10 * 1024 * 1024) {
+			setParseResumeError('File too large. Please upload a file smaller than 10MB.')
+			return
+		}
+		setParseResumeError('')
+		setIsParsingResume(true)
+		try {
+			const res = await parseResumeMerge(file)
+			const parsed = res.data || res
+			const existing = { contact, education, experiences, projects, skills, summary }
+			const { merged, counts } = mergeParsedData(parsed, existing)
+			setContact(merged.contact)
+			setEducation(merged.education)
+			setExperiences(merged.experiences)
+			setProjects(merged.projects)
+			setSkills(merged.skills)
+			setSummary(merged.summary)
+			await attachResume(file.name)
+			setUser(prev => prev ? { ...prev, attached_resume_filename: file.name, attached_resume_uploaded_at: new Date().toISOString() } : null)
+			const total = counts.education + counts.experiences + counts.projects + counts.skills
+			toast.success(total > 0 ? `Resume parsed. ${total} new item(s) added.` : 'Resume parsed. No new items (duplicates skipped).')
+		} catch (err) {
+			console.error('Resume parse failed:', err)
+			setParseResumeError(err?.response?.data?.detail || 'Failed to parse resume. Please try again.')
+			toast.error('Failed to parse resume.')
+		} finally {
+			setIsParsingResume(false)
+		}
+	}
 
-			window.scrollTo({
-				top: offsetPosition,
-				behavior: 'smooth'
-			})
+	const handleDetachResume = async () => {
+		try {
+			await detachResume()
+			setUser(prev => prev ? { ...prev, attached_resume_filename: null, attached_resume_uploaded_at: null } : null)
+			toast.success('Resume detached. You can upload another.')
+		} catch (err) {
+			console.error('Detach failed:', err)
+			toast.error('Failed to detach resume.')
+		}
+	}
+
+	const handleResumeFileInput = (e) => {
+		const file = e.target.files?.[0]
+		if (file) handleResumeUpload(file)
+		e.target.value = ''
+	}
+
+	// Scroll to section handler (scrolls the .info-scrollbar div, not the window)
+	const scrollToSection = (sectionId) => {
+		const scrollContainer = document.querySelector('.info-scrollbar')
+		const element = document.getElementById(sectionId)
+		if (scrollContainer && element) {
+			const offset = 100 // offset for sticky header/nav
+			const elementPosition = element.getBoundingClientRect().top
+			const offsetPosition = elementPosition + scrollContainer.scrollTop - offset
+			scrollContainer.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' })
 		}
 	}
 
@@ -433,6 +492,83 @@ function Info() {
 							<h1 className="text-3xl font-bold text-gray-900 mb-2">Your Information</h1>
 							<p className="text-gray-600">Review and update your profile details. Each section can be saved independently.</p>
 						</div>
+
+						{/* Attached Resume Banner or Upload Zone */}
+						{user?.attached_resume_filename ? (
+							<div className="flex items-center justify-between p-4 bg-brand-pink/10 border-2 border-brand-pink/30 rounded-xl">
+								<div className="flex items-center gap-3">
+									<svg className="w-6 h-6 text-brand-pink flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+									</svg>
+									<div>
+										<p className="font-semibold text-gray-900">Attached Resume</p>
+										<p className="text-sm text-gray-600">{user.attached_resume_filename}</p>
+									</div>
+								</div>
+								<button
+									type="button"
+									onClick={handleDetachResume}
+									className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+								>
+									Remove
+								</button>
+							</div>
+						) : (
+							<div
+								className={`p-6 rounded-xl border-2 border-dashed transition-all ${
+									isParsingResume ? 'border-brand-pink bg-brand-pink/5' : 'border-gray-300 hover:border-brand-pink/50 bg-gray-50/50'
+								}`}
+								onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+								onDrop={(e) => {
+									e.preventDefault()
+									const file = e.dataTransfer?.files?.[0]
+									if (file && !isParsingResume) handleResumeUpload(file)
+								}}
+							>
+								<p className="text-sm text-gray-600 mb-4">
+									Upload a resume to quickly add education, experience, projects, and skills. Duplicates are skipped.
+								</p>
+								<input
+									type="file"
+									accept=".pdf,.docx,.doc"
+									onChange={handleResumeFileInput}
+									className="hidden"
+									id="info-resume-upload"
+									disabled={isParsingResume}
+								/>
+								<label
+									htmlFor="info-resume-upload"
+									className={`inline-flex items-center gap-2 px-6 py-3 border-2 font-semibold rounded-lg cursor-pointer transition-all ${
+										isParsingResume
+											? 'border-brand-pink bg-brand-pink/10 text-brand-pink'
+											: 'border-brand-pink text-brand-pink hover:bg-brand-pink hover:text-white'
+									}`}
+								>
+									{isParsingResume ? (
+										<>
+											<span className="flex gap-1">
+												<span className="w-2 h-2 bg-brand-pink rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+												<span className="w-2 h-2 bg-brand-pink rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+												<span className="w-2 h-2 bg-brand-pink rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+											</span>
+											Parsing...
+										</>
+									) : (
+										<>
+											<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+											</svg>
+											Upload Resume (PDF or DOCX)
+										</>
+									)}
+								</label>
+								{parseResumeError && (
+									<div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+										{parseResumeError}
+									</div>
+								)}
+							</div>
+						)}
 
 						{/* Contact Section */}
 						<div id="contact-section">

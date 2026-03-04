@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 // services imports.
 import { parseResume } from '@/api/services/resume'
+import { attachResume } from '@/api/services/profile'
 
 const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate }) => {
 
@@ -122,6 +123,13 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate }) => {
 
             // return merged form data to parent.
             onFormDataUpdate(mergedFormData)
+
+			// record attached resume for Info page banner
+			try {
+				await attachResume(fileToParse.name)
+			} catch (attachErr) {
+				console.warn('Could not attach resume metadata:', attachErr)
+			}
 		} catch (error) {
 			// if error, set error state and return.
 			console.error('Resume parsing failed:', error)

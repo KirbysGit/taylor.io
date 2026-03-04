@@ -21,6 +21,7 @@ import {
 } from '@/pages/utils/DataFormatting'
 
 // steps imports.
+import { ChevronLeft, ChevronRight } from '@/components/icons'
 import WelcomeStep from './steps/WelcomeStep'
 import ContactStep from './steps/ContactStep'
 import EducationStep from './steps/EducationStep'
@@ -282,80 +283,107 @@ function AccountSetup() {
 		)
 	}
 
+	const showSideArrows = currentStep > 0 && currentStep < steps.length - 1
+
 	return (
 		<div className="min-h-screen bg-cream flex items-center justify-center py-12 px-4">
-			<div className="w-full max-w-2xl">
-				{/* Subtle Progress Bar - Top */}
-				<div className="mb-6">
-					<div className="w-full bg-gray-200/50 rounded-full h-1.5 overflow-hidden">
-						<div
-							className="bg-brand-pink h-full rounded-full transition-all duration-500 ease-out"
-							style={{ width: `${progress}%` }}
-						></div>
-					</div>
-					<div className="flex justify-between items-center mt-2">
-						<span className="text-xs text-gray-500 font-medium">
-							{steps[currentStep].title}
-						</span>
-						<span className="text-xs text-gray-500 font-medium">
-							{currentStep + 1} / {steps.length}
-						</span>
-					</div>
-				</div>
+			<div className="w-full max-w-5xl flex items-center justify-center gap-12">
+				{/* Left Arrow - Previous step */}
+				{showSideArrows ? (
+					<button
+						type="button"
+						onClick={handlePrevious}
+						aria-label="Previous step"
+						className="flex-shrink-0 w-16 h-16 rounded-full bg-brand-pink flex items-center justify-center transition-all text-white hover:bg-brand-pink-dark hover:opacity-90"
+					>
+						<ChevronLeft className="w-10 h-10" />
+					</button>
+				) : (
+					<div className="w-16 flex-shrink-0" />
+				)}
 
-				{/* Main Content Card - Centered and Focused */}
-				<div 
-					key={currentStep}
-					className="bg-white-bright rounded-2xl shadow-xl p-6 md:p-8 animate-fadeIn"
-				>
-					{renderStepContent()}
-				</div>
-
-				{/* Navigation - Only show when not on first/last step */}
-				{currentStep !== 0 && currentStep !== steps.length - 1 && (
-					<div className="mt-6 flex items-center justify-between">
-						<button
-							onClick={handlePrevious}
-							className="px-5 py-2.5 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition-all flex items-center gap-2 group"
-						>
-							<svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-							</svg>
-							Previous
-						</button>
-						
-						{/* Step Dots Indicator - Minimal */}
-						<div className="flex items-center gap-1.5">
-							{steps.slice(1, -1).map((_, index) => {
-								const stepIndex = index + 1
-								return (
-									<div
-										key={stepIndex}
-										className={`h-1.5 rounded-full transition-all duration-300 ${
-											stepIndex < currentStep
-												? 'w-6 bg-brand-pink'
-												: stepIndex === currentStep
-												? 'w-8 bg-brand-pink'
-												: 'w-1.5 bg-gray-300'
-										}`}
-									/>
-								)
-							})}
+				<div className="flex-1 max-w-2xl">
+					{/* Subtle Progress Bar - Top */}
+					<div className="mb-6">
+						<div className="w-full bg-gray-200/50 rounded-full h-1.5 overflow-hidden">
+							<div
+								className="bg-brand-pink h-full rounded-full transition-all duration-500 ease-out"
+								style={{ width: `${progress}%` }}
+							></div>
 						</div>
-
-						<button
-							onClick={handleNext}
-							className="px-6 py-2.5 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group"
-						>
-							Continue
-							<svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-							</svg>
-						</button>
+						<div className="flex justify-between items-center mt-2">
+							<span className="text-xs text-gray-500 font-medium">
+								{steps[currentStep].title}
+							</span>
+							<span className="text-xs text-gray-500 font-medium">
+								{currentStep + 1} / {steps.length}
+							</span>
+						</div>
 					</div>
+
+					{/* Main Content Card - Centered and Focused */}
+					<div
+						key={currentStep}
+						className="bg-white-bright rounded-2xl shadow-xl p-6 md:p-8 animate-fadeIn"
+					>
+						{renderStepContent()}
+					</div>
+
+					{/* Bottom Navigation - Only show when not on first/last step */}
+					{showSideArrows && (
+						<div className="mt-6 flex items-center justify-center gap-4">
+							<button
+								onClick={handlePrevious}
+								className="px-5 py-2.5 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition-all flex items-center gap-2 group"
+							>
+								<ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+								Previous
+							</button>
+
+							{/* Step Dots Indicator */}
+							<div className="flex items-center gap-1.5">
+								{steps.slice(1, -1).map((_, index) => {
+									const stepIndex = index + 1
+									return (
+										<div
+											key={stepIndex}
+											className={`h-1.5 rounded-full transition-all duration-300 ${
+												stepIndex < currentStep
+													? 'w-6 bg-brand-pink'
+													: stepIndex === currentStep
+													? 'w-8 bg-brand-pink'
+													: 'w-1.5 bg-gray-300'
+											}`}
+										/>
+									)
+								})}
+							</div>
+
+							<button
+								onClick={handleNext}
+								className="px-6 py-2.5 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group"
+							>
+								Next
+								<ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+							</button>
+						</div>
+					)}
+				</div>
+
+				{/* Right Arrow - Next step */}
+				{showSideArrows ? (
+					<button
+						type="button"
+						onClick={handleNext}
+						aria-label="Next step"
+						className="flex-shrink-0 w-16 h-16 rounded-full bg-brand-pink flex items-center justify-center transition-all text-white hover:bg-brand-pink-dark hover:opacity-90"
+					>
+						<ChevronRight className="w-10 h-10" />
+					</button>
+				) : (
+					<div className="w-16 flex-shrink-0" />
 				)}
 			</div>
-
 		</div>
 	)
 }

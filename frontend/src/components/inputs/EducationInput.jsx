@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGripVertical } from '@fortawesome/free-solid-svg-icons';
 import { XIcon } from '@/components/icons';
 
 // Education Input Component - Just the form fields and logic, no headers
@@ -17,8 +19,11 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 		current: false 
 	}]
 
-	const [expandedEntries, setExpandedEntries] = useState(new Set(entries.map((_, i) => i)))
+	const getEntryId = (entry, index) => entry?.id ?? index
+	const [expandedIds, setExpandedIds] = useState(new Set(entries.map((e, i) => getEntryId(e, i))))
 	const [localEntries, setLocalEntries] = useState(entries)
+	const [draggedSubsection, setDraggedSubsection] = useState(null) // { eduIndex, subIndex }
+	const [dragOverSubsection, setDragOverSubsection] = useState(null) // { eduIndex, subIndex }
 	const prevLengthRef = useRef(education.length)
 	const prevIdsRef = useRef(education.map(e => e.id || e).join(','))
 	// store previous end dates when toggling "current" to preserve them
@@ -44,19 +49,37 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 				current: false 
 			}]
 			setLocalEntries(newEntries)
-			setExpandedEntries(new Set(newEntries.map((_, i) => i)))
+
+			// preserve expanded/collapsed state by ID (survives add/remove)
+			if (currentLength > prevLengthRef.current) {
+				setExpandedIds(prev => {
+					const newSet = new Set(prev)
+					const newEntry = newEntries[currentLength - 1]
+					newSet.add(getEntryId(newEntry, currentLength - 1)) // expand only the newly added
+					return newSet
+				})
+			} else {
+				// removing - keep only IDs that still exist
+				const currentIds = new Set(newEntries.map((e, i) => getEntryId(e, i)))
+				setExpandedIds(prev => {
+					const filtered = new Set([...prev].filter(id => currentIds.has(id)))
+					return filtered.size > 0 ? filtered : new Set(newEntries.map((e, i) => getEntryId(e, i)))
+				})
+			}
+
 			prevLengthRef.current = currentLength
 			prevIdsRef.current = currentIds
 		}
 	}, [education])
 
 	const toggleExpanded = (index) => {
-		setExpandedEntries(prev => {
+		const entryId = getEntryId(localEntries[index], index)
+		setExpandedIds(prev => {
 			const newSet = new Set(prev)
-			if (newSet.has(index)) {
-				newSet.delete(index)
+			if (newSet.has(entryId)) {
+				newSet.delete(entryId)
 			} else {
-				newSet.add(index)
+				newSet.add(entryId)
 			}
 			return newSet
 		})
@@ -112,9 +135,24 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 			endDate: '', 
 			current: false 
 		}
-		const newIndex = localEntries.length
 		onAdd(newEntry)
-		setExpandedEntries(prev => new Set([...prev, newIndex]))
+		setExpandedIds(prev => new Set([...prev, newEntry.id]))
+	}
+
+	const reorderSubsection = (eduIndex, fromIndex, toIndex) => {
+		if (fromIndex === toIndex) return
+		const updatedEdu = { ...localEntries[eduIndex] }
+		const subs = updatedEdu.subsections || {}
+		const entries = Object.entries(subs)
+		const [removed] = entries.splice(fromIndex, 1)
+		entries.splice(toIndex, 0, removed)
+		updatedEdu.subsections = Object.fromEntries(entries)
+		setLocalEntries(prev => {
+			const newEdu = [...prev]
+			newEdu[eduIndex] = updatedEdu
+			return newEdu
+		})
+		onUpdate(eduIndex, updatedEdu)
 	}
 
 	return (
@@ -122,7 +160,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 			{education.length > 0 ? (
 				<div className="space-y-3">
 					{localEntries.map((edu, index) => {
-					const isExpanded = expandedEntries.has(index)
+					const isExpanded = expandedIds.has(getEntryId(edu, index))
 					const hasContent = edu.school || edu.degree || edu.discipline
 					const displayName = edu.school || edu.degree || (hasContent ? 'Incomplete' : 'New Education')
 					
@@ -247,15 +285,23 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 											<div className="grid grid-cols-3 items-center mb-1">
 												<label className="label mb-0">End Date</label>
 												
-												{/* Switch - Centered */}
+												{/* Switch - div with role="switch" to avoid sr-only checkbox focus scroll bug */}
 												<div className="flex justify-center">
-													<label className="flex items-center cursor-pointer">
-														<input
-															type="checkbox"
-															checked={localEntries[index]?.current || false}
-															onChange={(e) => handleFieldChange(index, 'current', e.target.checked)}
-															className="sr-only"
-														/>
+													<div
+														role="switch"
+														aria-checked={localEntries[index]?.current || false}
+														aria-label="Currently enrolled"
+														tabIndex={0}
+														onClick={() => handleFieldChange(index, 'current', !(localEntries[index]?.current))}
+														onKeyDown={(e) => {
+															if (e.key === 'Enter' || e.key === ' ') {
+																e.preventDefault()
+																handleFieldChange(index, 'current', !(localEntries[index]?.current))
+															}
+														}}
+														onMouseDown={(e) => e.preventDefault()}
+														className="flex items-center cursor-pointer select-none"
+													>
 														<div className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
 															localEntries[index]?.current ? 'bg-brand-pink' : 'bg-gray-300'
 														}`}>
@@ -263,7 +309,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 																localEntries[index]?.current ? 'translate-x-6' : 'translate-x-0'
 															}`}></div>
 														</div>
-													</label>
+													</div>
 												</div>
 												
 												{/* Current Label - Right */}
@@ -321,88 +367,145 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 														<p className="text-sm">No highlights yet. Click "Add Section" to get started.</p>
 													</div>
 												) : (
-													Object.entries(localEntries[index]?.subsections || {}).map(([title, content], subIndex) => (
-														<div key={`subsection-${index}-${subIndex}`} className="flex flex-col gap-2 p-3 border border-gray-200 rounded-md bg-gray-50">
-															<div className="flex items-center gap-2">
-																<input
-																	type="text"
-																	value={title}
-																	onChange={(e) => {
-																		const newTitle = e.target.value
-																		setLocalEntries(prev => {
-																			const newEdu = [...prev]
-																			const subs = { ...newEdu[index].subsections }
-																			const cont = subs[title] || ''
-																			delete subs[title]
-																			subs[newTitle] = cont
-																			newEdu[index] = { ...newEdu[index], subsections: subs }
-																			return newEdu
-																		})
-																	}}
-																	onBlur={(e) => {
-																		const newTitle = e.target.value.trim()
-																		if (newTitle && newTitle !== title) {
-																			const updatedEdu = { ...localEntries[index] }
-																			const subs = { ...updatedEdu.subsections }
-																			const cont = subs[title] || ''
-																			delete subs[title]
-																			subs[newTitle] = cont
-																			updatedEdu.subsections = subs
-																			onUpdate(index, updatedEdu)
-																			onSubsectionUpdate?.('rename', index, title, newTitle)
-																		} else if (!newTitle) {
+													Object.entries(localEntries[index]?.subsections || {}).map(([title, content], subIndex) => {
+														const subsections = localEntries[index]?.subsections || {}
+														const isDraggable = Object.keys(subsections).length > 1
+														const isDragging = draggedSubsection?.eduIndex === index && draggedSubsection?.subIndex === subIndex
+														const isDragOver = dragOverSubsection?.eduIndex === index && dragOverSubsection?.subIndex === subIndex
+
+														const handleDragStart = (e) => {
+															setDraggedSubsection({ eduIndex: index, subIndex })
+															e.dataTransfer.effectAllowed = 'move'
+															e.dataTransfer.setData('text/plain', `subsection-${index}-${subIndex}`)
+														}
+
+														const handleDragOver = (e) => {
+															e.preventDefault()
+															e.dataTransfer.dropEffect = 'move'
+															setDragOverSubsection({ eduIndex: index, subIndex })
+														}
+
+														const handleDragLeave = () => {
+															setDragOverSubsection(null)
+														}
+
+														const handleDrop = (e) => {
+															e.preventDefault()
+															if (!draggedSubsection) return
+															if (draggedSubsection.eduIndex !== index || draggedSubsection.subIndex === subIndex) {
+																setDraggedSubsection(null)
+																setDragOverSubsection(null)
+																return
+															}
+															reorderSubsection(index, draggedSubsection.subIndex, subIndex)
+															setDraggedSubsection(null)
+															setDragOverSubsection(null)
+														}
+
+														const handleDragEnd = () => {
+															setDraggedSubsection(null)
+															setDragOverSubsection(null)
+														}
+
+														return (
+															<div
+																key={`subsection-${index}-${subIndex}`}
+																draggable={isDraggable}
+																onDragStart={isDraggable ? handleDragStart : undefined}
+																onDragOver={isDraggable ? handleDragOver : undefined}
+																onDragLeave={isDraggable ? handleDragLeave : undefined}
+																onDrop={isDraggable ? handleDrop : undefined}
+																onDragEnd={isDraggable ? handleDragEnd : undefined}
+																className={`flex items-start gap-2 ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'border-2 border-brand-pink border-dashed rounded' : ''}`}
+															>
+																{isDraggable && (
+																	<div className="flex-shrink-0 text-gray-400 cursor-move pt-3 px-1" aria-hidden="true">
+																		<FontAwesomeIcon icon={faGripVertical} className="w-4 h-4" />
+																	</div>
+																)}
+																<div className="flex-1 min-w-0 flex flex-col gap-2 p-3 border border-gray-200 rounded-md bg-gray-50">
+																	<div className="flex items-center gap-2">
+																		<input
+																			type="text"
+																			value={title}
+																			onChange={(e) => {
+																				const newTitle = e.target.value
+																				setLocalEntries(prev => {
+																					const newEdu = [...prev]
+																					const subs = { ...newEdu[index].subsections }
+																					const cont = subs[title] || ''
+																					delete subs[title]
+																					subs[newTitle] = cont
+																					newEdu[index] = { ...newEdu[index], subsections: subs }
+																					return newEdu
+																				})
+																			}}
+																			onBlur={(e) => {
+																				const newTitle = e.target.value.trim()
+																				if (newTitle && newTitle !== title) {
+																					const updatedEdu = { ...localEntries[index] }
+																					const subs = { ...updatedEdu.subsections }
+																					const cont = subs[title] || ''
+																					delete subs[title]
+																					subs[newTitle] = cont
+																					updatedEdu.subsections = subs
+																					onUpdate(index, updatedEdu)
+																					onSubsectionUpdate?.('rename', index, title, newTitle)
+																				} else if (!newTitle) {
+																					setLocalEntries(prev => {
+																						const newEdu = [...prev]
+																						const subs = { ...newEdu[index].subsections }
+																						if (!subs[title]) subs[title] = ''
+																						newEdu[index] = { ...newEdu[index], subsections: subs }
+																						return newEdu
+																					})
+																				}
+																			}}
+																			className="flex-1 input text-sm font-medium"
+																			placeholder="Subsection title"
+																		/>
+																		<button
+																			type="button"
+																			onClick={() => {
+																				const updatedEdu = { ...localEntries[index] }
+																				const subs = { ...updatedEdu.subsections }
+																				delete subs[title]
+																				updatedEdu.subsections = subs
+																				setLocalEntries(prev => {
+																					const newEdu = [...prev]
+																					newEdu[index] = updatedEdu
+																					return newEdu
+																				})
+																				onUpdate(index, updatedEdu)
+																				onSubsectionUpdate?.('remove', index, title)
+																			}}
+																			className="text-red-500 hover:text-red-700 transition-colors p-1"
+																		>
+																			<XIcon className="w-4 h-4" />
+																		</button>
+																	</div>
+																	<textarea
+																		value={content}
+																		onChange={(e) => {
+																			const updatedEdu = {
+																				...localEntries[index],
+																				subsections: { ...localEntries[index].subsections, [title]: e.target.value }
+																			}
 																			setLocalEntries(prev => {
 																				const newEdu = [...prev]
-																				const subs = { ...newEdu[index].subsections }
-																				if (!subs[title]) subs[title] = ''
-																				newEdu[index] = { ...newEdu[index], subsections: subs }
+																				newEdu[index] = updatedEdu
 																				return newEdu
 																			})
-																		}
-																	}}
-																	className="flex-1 input text-sm font-medium"
-																	placeholder="Subsection title"
-																/>
-																<button
-																	type="button"
-																	onClick={() => {
-																		const updatedEdu = { ...localEntries[index] }
-																		const subs = { ...updatedEdu.subsections }
-																		delete subs[title]
-																		updatedEdu.subsections = subs
-																		setLocalEntries(prev => {
-																			const newEdu = [...prev]
-																			newEdu[index] = updatedEdu
-																			return newEdu
-																		})
-																		onUpdate(index, updatedEdu)
-																		onSubsectionUpdate?.('remove', index, title)
-																	}}
-																	className="text-red-500 hover:text-red-700 transition-colors p-1"
-																>
-																	<XIcon className="w-4 h-4" />
-																</button>
+																			onUpdate(index, updatedEdu)
+																			onSubsectionUpdate?.('content', index, title, e.target.value)
+																		}}
+																		className="input min-h-[60px] resize-y"
+																		placeholder="Enter content for this subsection..."
+																	/>
+																</div>
 															</div>
-															<textarea
-																value={content}
-																onChange={(e) => {
-																	const updatedEdu = {
-																		...localEntries[index],
-																		subsections: { ...localEntries[index].subsections, [title]: e.target.value }
-																	}
-																	setLocalEntries(prev => {
-																		const newEdu = [...prev]
-																		newEdu[index] = updatedEdu
-																		return newEdu
-																	})
-																	onUpdate(index, updatedEdu)
-																	onSubsectionUpdate?.('content', index, title, e.target.value)
-																}}
-																className="input min-h-[60px] resize-y"
-																placeholder="Enter content for this subsection..."
-															/>
-														</div>
-													))
+														)
+													})
 												)}
 											</div>
 										</div>

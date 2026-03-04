@@ -4,7 +4,7 @@ Colin Kirby
 kirbycolin26@gmail.com | github.com/KirbysGit | linkedin.com/in/colinwkirby/ |  https://colinkirby.dev
 Education
 University of Central Florida (GPA 3.78 / 4.0)	August 2021 – May 2025
-Bachelors of Science in Computer Engineering	Orlando, FL
+Bachelor of Science in Computer Engineering	Orlando, FL
 Honors & Awards: Dean’s List 2021 , President’s Honor Roll 2023 – 2025 , Pegasus Gold Scholarship
 Clubs & Extracurriculars: AI @ UCF , Knight Hacks , SHPE @ UCF
 Relevant Coursework: Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design

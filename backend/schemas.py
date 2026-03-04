@@ -22,6 +22,8 @@ class UserResponse(BaseModel):
     last_name: str
     email: str
     section_labels: Optional[Dict[str, str]] = None
+    attached_resume_filename: Optional[str] = None
+    attached_resume_uploaded_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
@@ -157,6 +159,11 @@ class ContactResponse(BaseModel):
 # --------- section labels ---------
 class SectionLabelsUpdate(BaseModel):
     section_labels: Dict[str, str]
+
+
+class AttachResumeRequest(BaseModel):
+    filename: str
+
 
 # --------- user profile response ---------
 class UserProfileResponse(BaseModel):

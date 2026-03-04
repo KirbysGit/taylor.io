@@ -15,7 +15,8 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 		current: false 
 	}]
 
-	const [expandedEntries, setExpandedEntries] = useState(new Set(entries.map((_, i) => i)))
+	const getEntryId = (entry, index) => entry?.id ?? index
+	const [expandedIds, setExpandedIds] = useState(new Set(entries.map((e, i) => getEntryId(e, i))))
 	const [localEntries, setLocalEntries] = useState(entries)
 	const [descriptionModes, setDescriptionModes] = useState({})
 	const [descriptionBullets, setDescriptionBullets] = useState({})
@@ -39,7 +40,24 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 				current: false 
 			}]
 			setLocalEntries(newEntries)
-			setExpandedEntries(new Set(newEntries.map((_, i) => i)))
+
+			// preserve expanded/collapsed state by ID (survives add/remove)
+			if (currentLength > prevLengthRef.current) {
+				setExpandedIds(prev => {
+					const newSet = new Set(prev)
+					const newEntry = newEntries[currentLength - 1]
+					newSet.add(getEntryId(newEntry, currentLength - 1)) // expand only the newly added
+					return newSet
+				})
+			} else {
+				// removing - keep only IDs that still exist
+				const currentIds = new Set(newEntries.map((e, i) => getEntryId(e, i)))
+				setExpandedIds(prev => {
+					const filtered = new Set([...prev].filter(id => currentIds.has(id)))
+					return filtered.size > 0 ? filtered : new Set(newEntries.map((e, i) => getEntryId(e, i)))
+				})
+			}
+
 			prevLengthRef.current = currentLength
 			prevIdsRef.current = currentIds
 		}
@@ -61,12 +79,13 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 	}, [localEntries])
 
 	const toggleExpanded = (index) => {
-		setExpandedEntries(prev => {
+		const entryId = getEntryId(localEntries[index], index)
+		setExpandedIds(prev => {
 			const newSet = new Set(prev)
-			if (newSet.has(index)) {
-				newSet.delete(index)
+			if (newSet.has(entryId)) {
+				newSet.delete(entryId)
 			} else {
-				newSet.add(index)
+				newSet.add(entryId)
 			}
 			return newSet
 		})
@@ -149,9 +168,8 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 			endDate: '', 
 			current: false 
 		}
-		const newIndex = localEntries.length
 		onAdd(newEntry)
-		setExpandedEntries(prev => new Set([...prev, newIndex]))
+		setExpandedIds(prev => new Set([...prev, newEntry.id]))
 	}
 
 	return (
@@ -159,7 +177,7 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 			{experiences.length > 0 ? (
 				<div className="space-y-3">
 					{localEntries.map((exp, index) => {
-					const isExpanded = expandedEntries.has(index)
+					const isExpanded = expandedIds.has(getEntryId(exp, index))
 					const hasContent = exp.title || exp.company
 					const displayName = exp.title 
 						? (exp.company ? `${exp.title} @ ${exp.company}` : exp.title)
@@ -237,18 +255,26 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 											<div className="grid grid-cols-3 items-center mb-1">
 												<label className="label mb-0">Description</label>
 												
-												{/* Toggle Switch - Centered */}
+												{/* Toggle Switch - div with role="switch" to avoid checkbox focus scroll bug */}
 												<div className="flex justify-center items-center gap-2">
 													<span className={`text-xs font-medium ${(descriptionModes[index] || 'paragraph') === 'paragraph' ? 'text-brand-pink' : 'text-gray-400'}`}>
 														Paragraph
 													</span>
-													<label className="flex items-center cursor-pointer">
-														<input
-															type="checkbox"
-															checked={(descriptionModes[index] || 'paragraph') === 'bullets'}
-															onChange={() => handleDescriptionModeToggle(index)}
-															className="sr-only"
-														/>
+													<div
+														role="switch"
+														aria-checked={(descriptionModes[index] || 'paragraph') === 'bullets'}
+														aria-label="Toggle between paragraph and bullet list format"
+														tabIndex={0}
+														onClick={() => handleDescriptionModeToggle(index)}
+														onKeyDown={(e) => {
+															if (e.key === 'Enter' || e.key === ' ') {
+																e.preventDefault()
+																handleDescriptionModeToggle(index)
+															}
+														}}
+														onMouseDown={(e) => e.preventDefault()}
+														className="flex items-center cursor-pointer select-none"
+													>
 														<div className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
 															(descriptionModes[index] || 'paragraph') === 'bullets' ? 'bg-brand-pink' : 'bg-gray-300'
 														}`}>
@@ -256,7 +282,7 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 																(descriptionModes[index] || 'paragraph') === 'bullets' ? 'translate-x-6' : 'translate-x-0'
 															}`}></div>
 														</div>
-													</label>
+													</div>
 													<span className={`text-xs font-medium ${(descriptionModes[index] || 'paragraph') === 'bullets' ? 'text-brand-pink' : 'text-gray-400'}`}>
 														Bullets
 													</span>
@@ -327,15 +353,23 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 											<div className="grid grid-cols-3 items-center mb-1">
 												<label className="label mb-0">End Date</label>
 												
-												{/* Switch - Centered */}
+												{/* Switch - div with role="switch" to avoid sr-only checkbox focus scroll bug */}
 												<div className="flex justify-center">
-													<label className="flex items-center cursor-pointer">
-														<input
-															type="checkbox"
-															checked={localEntries[index]?.current || false}
-															onChange={(e) => handleFieldChange(index, 'current', e.target.checked)}
-															className="sr-only"
-														/>
+													<div
+														role="switch"
+														aria-checked={localEntries[index]?.current || false}
+														aria-label="Currently working here"
+														tabIndex={0}
+														onClick={() => handleFieldChange(index, 'current', !(localEntries[index]?.current))}
+														onKeyDown={(e) => {
+															if (e.key === 'Enter' || e.key === ' ') {
+																e.preventDefault()
+																handleFieldChange(index, 'current', !(localEntries[index]?.current))
+															}
+														}}
+														onMouseDown={(e) => e.preventDefault()}
+														className="flex items-center cursor-pointer select-none"
+													>
 														<div className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
 															localEntries[index]?.current ? 'bg-brand-pink' : 'bg-gray-300'
 														}`}>
@@ -343,7 +377,7 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 																localEntries[index]?.current ? 'translate-x-6' : 'translate-x-0'
 															}`}></div>
 														</div>
-													</label>
+													</div>
 												</div>
 												
 												{/* Current Label - Right */}

@@ -15,11 +15,18 @@ import DescriptionInput from '@/components/inputs/DescriptionInput'
 import SectionTitleEditor from '../SectionTitleEditor'
 
 // normalize project data from backend.
+// tech_stack: store as string for input (preserves spaces while typing); parse to array when exporting.
 const normalizeProject = (proj = null) => {
+    const techStack = proj?.tech_stack
+    const techStackStr = Array.isArray(techStack)
+        ? techStack.join(', ')
+        : typeof techStack === 'string'
+            ? techStack
+            : ''
     return {
         title: proj?.title || '',
         description: proj?.description || '',
-        tech_stack: Array.isArray(proj?.tech_stack) ? proj.tech_stack : (proj?.tech_stack ? [proj.tech_stack] : []),
+        tech_stack: techStackStr,
         url: proj?.url || '',
     }
 }
@@ -62,11 +69,9 @@ const Projects = ({ projectsData, onProjectsChange, isVisible = true, onVisibili
         })
     }
 
-    // update tech stack.
+    // update tech stack - store raw string while typing; parse to array only when exporting.
     const updateTechStack = (index, value) => {
-        // split by comma and clean up each item (split, trim, filter out empty strings).
-        const techArray = value.split(',').map(tech => tech.trim()).filter(tech => tech.length > 0)
-        updateProject(index, 'tech_stack', techArray)
+        updateProject(index, 'tech_stack', value)
     }
 
     // ----- effects -----
@@ -78,9 +83,15 @@ const Projects = ({ projectsData, onProjectsChange, isVisible = true, onVisibili
         }
     }, [projectsData])
 
-    // export projects array to parent component.
+    // export projects array to parent component (parse tech_stack string to array).
     useEffect(() => {
-        onProjectsChange(projects)
+        const projectsForExport = projects.map(proj => ({
+            ...proj,
+            tech_stack: typeof proj.tech_stack === 'string'
+                ? proj.tech_stack.split(',').map(tech => tech.trim()).filter(tech => tech.length > 0)
+                : Array.isArray(proj.tech_stack) ? proj.tech_stack : [],
+        }))
+        onProjectsChange(projectsForExport)
     }, [projects])
 
     return (
@@ -178,7 +189,7 @@ const Projects = ({ projectsData, onProjectsChange, isVisible = true, onVisibili
 									<label className="label">Tech Stack</label>
 									<input
 										type="text"
-										value={project.tech_stack.join(', ')}
+										value={typeof project.tech_stack === 'string' ? project.tech_stack : (Array.isArray(project.tech_stack) ? project.tech_stack.join(', ') : '')}
 										onChange={(e) => updateTechStack(index, e.target.value)}
 										className="input"
 										placeholder="Python, Django, React (comma-separated)"

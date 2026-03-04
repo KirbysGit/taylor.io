@@ -15,7 +15,7 @@
 import React, { useState, useEffect } from 'react';
 import Switch from 'react-switch';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faEye, faEyeSlash, faGripVertical } from '@fortawesome/free-solid-svg-icons'
 import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
 
 // local imports.
@@ -146,6 +146,27 @@ const Education = ({ educationData, onEducationChange, isVisible = true, onVisib
             return updated
         })
     }
+
+    // reorder subsections within an education entry.
+    const reorderSubsection = (eduIndex, fromIndex, toIndex) => {
+        if (fromIndex === toIndex) return
+        setEducations(prev => {
+            const updated = [...prev]
+            const entries = Object.entries(updated[eduIndex].subsections)
+            const [removed] = entries.splice(fromIndex, 1)
+            entries.splice(toIndex, 0, removed)
+            updated[eduIndex] = {
+                ...updated[eduIndex],
+                subsections: Object.fromEntries(entries)
+            }
+            return updated
+        })
+    }
+
+	// ----- DnD state for subsection reordering -----
+
+    const [draggedSubsection, setDraggedSubsection] = useState(null) // { eduIndex, subIndex }
+    const [dragOverSubsection, setDragOverSubsection] = useState(null) // { eduIndex, subIndex }
 
 	// ----- effects -----
 
@@ -390,16 +411,71 @@ const Education = ({ educationData, onEducationChange, isVisible = true, onVisib
 									) : (
 										Object.entries(education.subsections).map(([title, content], subsectionIndex) => {
 											const subsectionKey = `edu-${index}-sub-${subsectionIndex}`
+											const isDraggable = Object.keys(education.subsections).length > 1
+											const isDragging = draggedSubsection?.eduIndex === index && draggedSubsection?.subIndex === subsectionIndex
+											const isDragOver = dragOverSubsection?.eduIndex === index && dragOverSubsection?.subIndex === subsectionIndex
+
+											const handleDragStart = (e) => {
+												setDraggedSubsection({ eduIndex: index, subIndex: subsectionIndex })
+												e.dataTransfer.effectAllowed = 'move'
+												e.dataTransfer.setData('text/plain', subsectionKey)
+											}
+
+											const handleDragOver = (e) => {
+												e.preventDefault()
+												e.dataTransfer.dropEffect = 'move'
+												setDragOverSubsection({ eduIndex: index, subIndex: subsectionIndex })
+											}
+
+											const handleDragLeave = () => {
+												setDragOverSubsection(null)
+											}
+
+											const handleDrop = (e) => {
+												e.preventDefault()
+												if (!draggedSubsection) return
+												if (draggedSubsection.eduIndex !== index || draggedSubsection.subIndex === subsectionIndex) {
+													setDraggedSubsection(null)
+													setDragOverSubsection(null)
+													return
+												}
+												reorderSubsection(index, draggedSubsection.subIndex, subsectionIndex)
+												setDraggedSubsection(null)
+												setDragOverSubsection(null)
+											}
+
+											const handleDragEnd = () => {
+												setDraggedSubsection(null)
+												setDragOverSubsection(null)
+											}
+
 											return (
-												<EduSubSection
+												<div
 													key={subsectionKey}
-													eduIndex={index}
-													title={title}
-													content={content}
-													onTitleChange={(newTitle) => updateSubsectionTitle(index, title, newTitle)}
-													onContentChange={(newContent) => updateSubsectionContent(index, title, newContent)}
-													onDelete={() => removeSubsection(index, title)}
-												/>
+													draggable={isDraggable}
+													onDragStart={isDraggable ? handleDragStart : undefined}
+													onDragOver={isDraggable ? handleDragOver : undefined}
+													onDragLeave={isDraggable ? handleDragLeave : undefined}
+													onDrop={isDraggable ? handleDrop : undefined}
+													onDragEnd={isDraggable ? handleDragEnd : undefined}
+													className={`flex items-start gap-2 ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'border-2 border-brand-pink border-dashed rounded' : ''}`}
+												>
+													{isDraggable && (
+														<div className="flex-shrink-0 text-gray-400 cursor-move pt-3 px-1" aria-hidden="true">
+															<FontAwesomeIcon icon={faGripVertical} className="w-4 h-4" />
+														</div>
+													)}
+													<div className="flex-1 min-w-0">
+														<EduSubSection
+															eduIndex={index}
+															title={title}
+															content={content}
+															onTitleChange={(newTitle) => updateSubsectionTitle(index, title, newTitle)}
+															onContentChange={(newContent) => updateSubsectionContent(index, title, newContent)}
+															onDelete={() => removeSubsection(index, title)}
+														/>
+													</div>
+												</div>
 											)
 										})
 									)}

@@ -4,7 +4,8 @@ import { isBulletFormat, paragraphToBullets, bulletsToParagraph } from '@/utils/
 
 // Projects Input Component - Just the form fields and logic, no headers
 const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
-	const [expandedEntries, setExpandedEntries] = useState(new Set(projects.map((_, i) => i)))
+	const getEntryId = (entry, index) => entry?.id ?? index
+	const [expandedIds, setExpandedIds] = useState(new Set(projects.map((e, i) => getEntryId(e, i))))
 	const [localEntries, setLocalEntries] = useState(projects)
 	const [descriptionModes, setDescriptionModes] = useState({})
 	const [descriptionBullets, setDescriptionBullets] = useState({})
@@ -19,7 +20,24 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
 		// only sync if the length changed or IDs changed (structure change, not field update)
 		if (currentLength !== prevLengthRef.current || currentIds !== prevIdsRef.current) {
 			setLocalEntries(projects)
-			setExpandedEntries(new Set(projects.map((_, i) => i)))
+
+			// preserve expanded/collapsed state by ID (survives add/remove)
+			if (currentLength > prevLengthRef.current) {
+				setExpandedIds(prev => {
+					const newSet = new Set(prev)
+					const newEntry = projects[currentLength - 1]
+					newSet.add(getEntryId(newEntry, currentLength - 1)) // expand only the newly added
+					return newSet
+				})
+			} else {
+				// removing - keep only IDs that still exist
+				const currentIds = new Set(projects.map((e, i) => getEntryId(e, i)))
+				setExpandedIds(prev => {
+					const filtered = new Set([...prev].filter(id => currentIds.has(id)))
+					return filtered.size > 0 ? filtered : new Set(projects.map((e, i) => getEntryId(e, i)))
+				})
+			}
+
 			prevLengthRef.current = currentLength
 			prevIdsRef.current = currentIds
 		}
@@ -41,12 +59,13 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
 	}, [localEntries])
 
 	const toggleExpanded = (index) => {
-		setExpandedEntries(prev => {
+		const entryId = getEntryId(localEntries[index], index)
+		setExpandedIds(prev => {
 			const newSet = new Set(prev)
-			if (newSet.has(index)) {
-				newSet.delete(index)
+			if (newSet.has(entryId)) {
+				newSet.delete(entryId)
 			} else {
-				newSet.add(index)
+				newSet.add(entryId)
 			}
 			return newSet
 		})
@@ -55,15 +74,7 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
 	const handleFieldChange = (index, field, value) => {
 		const updatedEntry = { ...localEntries[index], [field]: value }
 		
-		// handle techStack - convert comma-separated string to array
-		if (field === 'techStack' && typeof value === 'string') {
-			updatedEntry.techStack = value
-				.split(',')
-				.map(tech => tech.trim())
-				.filter(tech => tech.length > 0)
-		}
-		
-		// update local state immediately for responsive UI
+		// update local state immediately for responsive UI (store raw string for techStack to preserve spaces)
 		const newEntries = [...localEntries]
 		newEntries[index] = updatedEntry
 		setLocalEntries(newEntries)
@@ -136,7 +147,7 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
 			url: ''
 		}
 		onAdd(newEntry)
-		// expandedEntries will be updated by useEffect when projects prop changes
+		setExpandedIds(prev => new Set([...prev, newEntry.id]))
 	}
 
 	const handleRemove = (index) => {
@@ -164,7 +175,7 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
 			{localEntries.length > 0 ? (
 				<div className="space-y-4">
 					{localEntries.map((proj, index) => {
-						const isExpanded = expandedEntries.has(index)
+						const isExpanded = expandedIds.has(getEntryId(proj, index))
 						const displayName = getDisplayName(proj)
 						
 						return (
@@ -222,18 +233,26 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
 											<div className="grid grid-cols-3 items-center mb-1">
 												<label className="label mb-0">Description</label>
 												
-												{/* Toggle Switch - Centered */}
+												{/* Toggle Switch - div with role="switch" to avoid checkbox focus scroll bug */}
 												<div className="flex justify-center items-center gap-2">
 													<span className={`text-xs font-medium ${(descriptionModes[index] || 'paragraph') === 'paragraph' ? 'text-brand-pink' : 'text-gray-400'}`}>
 														Paragraph
 													</span>
-													<label className="flex items-center cursor-pointer">
-														<input
-															type="checkbox"
-															checked={(descriptionModes[index] || 'paragraph') === 'bullets'}
-															onChange={() => handleDescriptionModeToggle(index)}
-															className="sr-only"
-														/>
+													<div
+														role="switch"
+														aria-checked={(descriptionModes[index] || 'paragraph') === 'bullets'}
+														aria-label="Toggle between paragraph and bullet list format"
+														tabIndex={0}
+														onClick={() => handleDescriptionModeToggle(index)}
+														onKeyDown={(e) => {
+															if (e.key === 'Enter' || e.key === ' ') {
+																e.preventDefault()
+																handleDescriptionModeToggle(index)
+															}
+														}}
+														onMouseDown={(e) => e.preventDefault()}
+														className="flex items-center cursor-pointer select-none"
+													>
 														<div className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
 															(descriptionModes[index] || 'paragraph') === 'bullets' ? 'bg-brand-pink' : 'bg-gray-300'
 														}`}>
@@ -241,7 +260,7 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
 																(descriptionModes[index] || 'paragraph') === 'bullets' ? 'translate-x-6' : 'translate-x-0'
 															}`}></div>
 														</div>
-													</label>
+													</div>
 													<span className={`text-xs font-medium ${(descriptionModes[index] || 'paragraph') === 'bullets' ? 'text-brand-pink' : 'text-gray-400'}`}>
 														Bullets
 													</span>

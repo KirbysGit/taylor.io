@@ -9,14 +9,21 @@
 // services.
 import { apiRequest, apiRequestText, apiRequestBlob } from '../api'
 
-// parse resume file (PDF or DOCX).
+// parse resume file (PDF or DOCX) - saves to DB (WelcomeStep).
 export async function parseResume(file) {
-	// create form data for file upload.
 	const formData = new FormData()
 	formData.append('file', file)
-	
-	// use apiRequest - FormData handling is automatic in apiRequestCore.
 	return await apiRequest('/api/profile/parse-resume', {
+		method: 'POST',
+		body: formData,
+	})
+}
+
+// parse resume file - returns only, no DB save (Info page merge).
+export async function parseResumeMerge(file) {
+	const formData = new FormData()
+	formData.append('file', file)
+	return await apiRequest('/api/profile/parse-resume-merge', {
 		method: 'POST',
 		body: formData,
 	})

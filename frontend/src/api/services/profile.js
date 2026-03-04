@@ -100,3 +100,18 @@ export async function updateSectionLabels(sectionLabels) {
 	})
 }
 
+// attach resume metadata (after upload)
+export async function attachResume(filename) {
+	return apiRequest('/api/profile/attached-resume', {
+		method: 'POST',
+		body: JSON.stringify({ filename }),
+	})
+}
+
+// detach resume (clear metadata only)
+export async function detachResume() {
+	return apiRequest('/api/profile/attached-resume', {
+		method: 'DELETE',
+	})
+}
+

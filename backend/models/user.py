@@ -1,7 +1,7 @@
 # models / user.py
 
 # imports.
-from sqlalchemy import Column, Integer, String, JSON
+from sqlalchemy import Column, Integer, String, JSON, DateTime
 from sqlalchemy.orm import relationship
 from .base import Base
 
@@ -15,6 +15,10 @@ class User(Base):
     last_name = Column(String(100), nullable=False)                         # last name.
     email = Column(String(255), unique=True, nullable=False, index=True)    # email.
     password_hash = Column(String(255), nullable=False)                     # password.
+
+    # attached resume metadata (Info page: "Attached Resume" banner)
+    attached_resume_filename = Column(String(255), nullable=True)
+    attached_resume_uploaded_at = Column(DateTime, nullable=True)
 
     # one user has many experiences, projects, skills, education, and contact entries.
     summary = relationship("Summary", back_populates="user", uselist=False, cascade="all, delete-orphan")

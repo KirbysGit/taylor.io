@@ -52,21 +52,18 @@ const DescriptionInput = ({ value, onChange, placeholder = "Enter description...
 	// Handle mode toggle
 	const handleModeToggle = () => {
 		try {
-			console.log('handleModeToggle called')
 			isTogglingRef.current = true // Flag that we're toggling
 			
 			const newMode = mode === 'paragraph' ? 'bullets' : 'paragraph'
 			const currentDescription = value || ''
-			console.log('currentDescription', currentDescription)
+			
 			if (newMode === 'bullets') {
 				// Convert paragraph to bullets
 				const newBullets = paragraphToBullets(currentDescription)
 				const safeBullets = Array.isArray(newBullets) && newBullets.length > 0 ? newBullets : ['']
 				
 				setBullets(safeBullets)
-				console.log('HERE WE ARE')
 				const bulletString = bulletsToParagraph(safeBullets)
-				console.log('bulletString', bulletString)
 				// Only call onChange if we have a valid string
 				if (typeof bulletString === 'string') {
 					onChange(bulletString)
@@ -80,15 +77,12 @@ const DescriptionInput = ({ value, onChange, placeholder = "Enter description...
 				onChange(paragraph)
 			}
 			
-			console.log('newMode', newMode)
 			setMode(newMode)
 			
 			// Reset flag after a short delay to allow state updates to complete
 			setTimeout(() => {
 				isTogglingRef.current = false
 			}, 0)
-
-			console.log('mode', mode)
 		} catch (error) {
 			console.error('Error in handleModeToggle:', error)
 			isTogglingRef.current = false
@@ -144,21 +138,26 @@ const DescriptionInput = ({ value, onChange, placeholder = "Enter description...
 					Description {required && <RequiredAsterisk />}
 				</label>
 				
-				{/* Toggle Switch - Centered */}
+				{/* Toggle Switch - Centered (div with role="switch" to avoid checkbox focus scroll bug) */}
 				<div className="flex justify-center items-center gap-2">
 					<span className={`text-xs font-medium ${mode === 'paragraph' ? 'text-brand-pink' : 'text-gray-400'}`}>
 						Paragraph
 					</span>
-					<label className="flex items-center cursor-pointer">
-						<input
-							type="checkbox"
-							checked={mode === 'bullets'}
-							onChange={(e) => {
+					<div
+						role="switch"
+						aria-checked={mode === 'bullets'}
+						aria-label="Toggle between paragraph and bullet list format"
+						tabIndex={0}
+						onClick={handleModeToggle}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
 								e.preventDefault()
 								handleModeToggle()
-							}}
-							className="sr-only"
-						/>
+							}
+						}}
+						onMouseDown={(e) => e.preventDefault()}
+						className="flex items-center cursor-pointer select-none"
+					>
 						<div className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
 							mode === 'bullets' ? 'bg-brand-pink' : 'bg-gray-300'
 						}`}>
@@ -166,7 +165,7 @@ const DescriptionInput = ({ value, onChange, placeholder = "Enter description...
 								mode === 'bullets' ? 'translate-x-6' : 'translate-x-0'
 							}`}></div>
 						</div>
-					</label>
+					</div>
 					<span className={`text-xs font-medium ${mode === 'bullets' ? 'text-brand-pink' : 'text-gray-400'}`}>
 						Bullets
 					</span>
