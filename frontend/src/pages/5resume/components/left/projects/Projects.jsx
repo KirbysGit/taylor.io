@@ -1,232 +1,78 @@
-// components / left / projects / Projects.jsx
+// Projects.jsx - Uses shared ProjectsInput with resume-specific wrapper (visibility, section label)
 
-// projects modal of resume preview section.
+import React, { useCallback, useMemo } from 'react'
+import ProjectsInput from '@/components/inputs/ProjectsInput'
+import ResumeSectionWrapper from '../ResumeSectionWrapper'
+import { transformProjectForStep } from '@/pages/info/utils/dataTransform'
 
+const newId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`
 
-// imports.
-import React from 'react';
-import { useState, useEffect } from 'react'
-
-// icon imports.
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons'
-import { RequiredAsterisk, ChevronDown, ChevronUp} from '@/components/icons'
-import DescriptionInput from '@/components/inputs/DescriptionInput'
-import SectionTitleEditor from '../SectionTitleEditor'
-
-// normalize project data from backend.
-// tech_stack: store as string for input (preserves spaces while typing); parse to array when exporting.
-const normalizeProject = (proj = null) => {
-    const techStack = proj?.tech_stack
-    const techStackStr = Array.isArray(techStack)
-        ? techStack.join(', ')
-        : typeof techStack === 'string'
-            ? techStack
-            : ''
-    return {
-        title: proj?.title || '',
-        description: proj?.description || '',
-        tech_stack: techStackStr,
-        url: proj?.url || '',
-    }
+// Resume format (tech_stack) -> Input format (techStack, id)
+const toInputFormat = (projectsData) => {
+	if (!projectsData || !Array.isArray(projectsData)) return []
+	return projectsData.map((proj) => transformProjectForStep(proj))
 }
 
-const Projects = ({ projectsData, onProjectsChange, isVisible = true, onVisibilityChange, sectionLabel, onSectionLabelChange }) => {
-    // ----- states -----
-    const [isProjectsExpanded, setIsProjectsExpanded] = useState(true)	// whether the projects modal is expanded.
-
-    // projects entries state.
-    const [projects, setProjects] = useState(() => {
-        if (projectsData && projectsData.length > 0) {
-            return projectsData.map(proj => normalizeProject(proj))
-        }
-		
-        // if no data, start with one empty entry (for adding new projects).
-        return [normalizeProject()]
-    })
-
-	// ----- helper functions -----
-
-    // update a specific project entry by index..
-    const updateProject = (index, field, value) => {
-        setProjects(prev => {
-            const updated = [...prev]
-            updated[index] = { ...updated[index], [field]: value }
-            return updated
-        })
-    }
-
-    // add a new empty project entry.
-    const addProject = () => {
-        setProjects(prev => [...prev, normalizeProject()])
-    }
-
-    // remove a project entry by index.
-    const removeProject = (index) => {
-        setProjects(prev => {
-            if (prev.length <= 1) return prev // keep at least one entry.
-            return prev.filter((_, i) => i !== index)
-        })
-    }
-
-    // update tech stack - store raw string while typing; parse to array only when exporting.
-    const updateTechStack = (index, value) => {
-        updateProject(index, 'tech_stack', value)
-    }
-
-    // ----- effects -----
-
-	// sync with prop changes.
-    useEffect(() => {
-        if (projectsData && projectsData.length > 0) {
-            setProjects(projectsData.map(proj => normalizeProject(proj)))
-        }
-    }, [projectsData])
-
-    // export projects array to parent component (parse tech_stack string to array).
-    useEffect(() => {
-        const projectsForExport = projects.map(proj => ({
-            ...proj,
-            tech_stack: typeof proj.tech_stack === 'string'
-                ? proj.tech_stack.split(',').map(tech => tech.trim()).filter(tech => tech.length > 0)
-                : Array.isArray(proj.tech_stack) ? proj.tech_stack : [],
-        }))
-        onProjectsChange(projectsForExport)
-    }, [projects])
-
-    return (
-        <div>
-            <div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
-			{/* header with chevron */}
-			<div
-				onClick={() => setIsProjectsExpanded(!isProjectsExpanded)}
-				className="flex items-center gap-3 w-full transition-colors"
-			>
-				{/* Visibility Toggle Button - Left side in circle */}
-				{onVisibilityChange && (
-					<button
-						type="button"
-						onClick={(e) => {
-							e.stopPropagation();
-							onVisibilityChange(!isVisible);
-						}}
-						className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-						aria-label={isVisible ? 'Hide projects in preview' : 'Show projects in preview'}
-						title={isVisible ? 'Hide from preview' : 'Show in preview'}
-					>
-						<FontAwesomeIcon icon={isVisible ? faEye : faEyeSlash} className="w-4 h-4 text-gray-600" />
-					</button>
-				)}
-				
-				{/* title with edit capability */}
-				<SectionTitleEditor
-					sectionKey="projects"
-					currentLabel={sectionLabel}
-					onLabelChange={onSectionLabelChange}
-					defaultLabel="Projects"
-				/>
-				
-				{/* divider */}
-				<div className="flex-1 h-[3px] rounded bg-gray-300"></div>
-				
-				{/* chevron in circle */}
-				<div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-					{isProjectsExpanded ? (
-						<ChevronUp className="w-4 h-4 text-gray-600" />
-					) : (
-						<ChevronDown className="w-4 h-4 text-gray-600" />
-					)}
-				</div>
-			</div>
-			
-			{isProjectsExpanded && (
-				<div>
-					<p className="text-[0.875rem] text-gray-500 mb-2">This is where you can showcase your projects.</p>
-					
-					{projects.map((project, index) => (
-						<div key={index} className="mb-2 p-4 border border-gray-300 rounded-md">
-							{/* entry header */}
-							<div className="flex items-center justify-between mb-2 border-b-2 border-brand-pink-light pb-1">
-								<h3 className="text-lg font-medium text-gray-700 m-0 p-0">
-									Project {index + 1}
-								</h3>
-								{/* remove button (only show if there are multiple entries) */}
-								{projects.length > 1 && (
-									<button
-										type="button"
-										onClick={() => removeProject(index)}
-										className="text-red-500 hover:text-red-700 text-sm"
-									>
-										Remove
-									</button>
-								)}
-							</div>
-							{/* title */}
-							<div className="flex mb-2">
-								<div className="labelInputPair">
-									<label className="label">Title <RequiredAsterisk /></label>
-									<input
-										type="text"
-										value={project.title}
-										onChange={(e) => updateProject(index, 'title', e.target.value)}
-										className="input"
-										required
-									/>
-								</div>
-							</div>
-							{/* description */}
-							<div className="mb-2">
-								<DescriptionInput
-									value={project.description}
-									onChange={(value) => updateProject(index, 'description', value)}
-									placeholder="Describe what the project does, key features, your role..."
-									required
-								/>
-							</div>
-							{/* tech stack */}
-							<div className="flex mb-2">
-								<div className="labelInputPair">
-									<label className="label">Tech Stack</label>
-									<input
-										type="text"
-										value={typeof project.tech_stack === 'string' ? project.tech_stack : (Array.isArray(project.tech_stack) ? project.tech_stack.join(', ') : '')}
-										onChange={(e) => updateTechStack(index, e.target.value)}
-										className="input"
-										placeholder="Python, Django, React (comma-separated)"
-									/>
-								</div>
-							</div>
-							{/* url */}
-							<div className="flex mb-2">
-								<div className="labelInputPair">
-									<label className="label">URL</label>
-									<input
-										type="url"
-										value={project.url}
-										onChange={(e) => updateProject(index, 'url', e.target.value)}
-										className="input"
-										placeholder="https://example.com"
-									/>
-								</div>
-							</div>
-						</div>
-					))}
-
-					{/* add another project button */}
-					<div className="flex justify-center mt-2">
-						<button
-							type="button"
-							onClick={addProject}
-							className="px-4 py-2 bg-brand-pink-light text-white rounded-full hover:bg-brand-pink transition-colors"
-						>
-							<FontAwesomeIcon icon={faPlus} className="w-4 h-4 color-white mr-2" /> Add Another Project
-						</button>
-					</div>
-				</div>
-			)}
-		</div>
-        </div>
-    )
+// Input format -> Resume format (step format; normalizeProjectForBackend uses techStack)
+const toResumeFormat = (projects) => {
+	if (!projects || !Array.isArray(projects)) return []
+	return projects
 }
 
-export default Projects;
+const Projects = ({
+	projectsData,
+	onProjectsChange,
+	isVisible = true,
+	onVisibilityChange,
+	sectionLabel,
+	onSectionLabelChange,
+}) => {
+	const projects = useMemo(() => toInputFormat(projectsData), [projectsData])
+
+	const handleAdd = useCallback(
+		(newProj) => {
+			const withId = { ...newProj, id: newProj.id || newId() }
+			const next = [...toInputFormat(projectsData), withId]
+			onProjectsChange(toResumeFormat(next))
+		},
+		[projectsData, onProjectsChange]
+	)
+
+	const handleRemove = useCallback(
+		(index) => {
+			const next = toInputFormat(projectsData).filter((_, i) => i !== index)
+			onProjectsChange(toResumeFormat(next))
+		},
+		[projectsData, onProjectsChange]
+	)
+
+	const handleUpdate = useCallback(
+		(index, updated) => {
+			const next = [...toInputFormat(projectsData)]
+			next[index] = { ...next[index], ...updated }
+			onProjectsChange(toResumeFormat(next))
+		},
+		[projectsData, onProjectsChange]
+	)
+
+	return (
+		<ResumeSectionWrapper
+			sectionKey="projects"
+			sectionLabel={sectionLabel}
+			onSectionLabelChange={onSectionLabelChange}
+			defaultLabel="Projects"
+			isVisible={isVisible}
+			onVisibilityChange={onVisibilityChange}
+			description="Highlight your projects"
+		>
+			<ProjectsInput
+				projects={projects}
+				onAdd={handleAdd}
+				onRemove={handleRemove}
+				onUpdate={handleUpdate}
+			/>
+		</ResumeSectionWrapper>
+	)
+}
+
+export default Projects

@@ -79,6 +79,10 @@ function Info() {
 	const stateRef = useRef({ contact, education, experiences, projects, skills, summary })
 	stateRef.current = { contact, education, experiences, projects, skills, summary }
 
+	// snapshot of data before resume merge (for "undo" when detaching)
+	const preResumeSnapshotRef = useRef(null)
+	const [showDetachModal, setShowDetachModal] = useState(false)
+
 	// Fetch profile data
 	useEffect(() => {
 		const fetchProfile = async () => {
@@ -255,7 +259,7 @@ function Info() {
 		const edu = {
 			...newEdu,
 			id: newEdu.id || newId(),
-			subsections: newEdu.subsections || { 'Relevant Coursework': '' },
+			subsections: newEdu.subsections || {},
 		}
 		setEducation(prev => [...prev, edu])
 		scheduleDebouncedSave('education')
@@ -416,6 +420,18 @@ function Info() {
 		scheduleDebouncedSave('skills')
 	}
 
+	const handleSkillReorder = (fromIndex, toIndex) => {
+		if (fromIndex === toIndex) return
+		setSkills(prev => {
+			const arr = [...prev]
+			const [removed] = arr.splice(fromIndex, 1)
+			const insertAt = fromIndex < toIndex ? toIndex - 1 : toIndex
+			arr.splice(insertAt, 0, removed)
+			return arr
+		})
+		scheduleDebouncedSave('skills')
+	}
+
 	const handleSkillSave = async () => {
 		setSavingSection('skills')
 		const sk = stateRef.current.skills
@@ -467,6 +483,16 @@ function Info() {
 		setParseResumeError('')
 		setIsParsingResume(true)
 		try {
+			// save snapshot before merge so user can undo if they detach
+			const s = stateRef.current
+			preResumeSnapshotRef.current = {
+				contact: JSON.parse(JSON.stringify(s.contact)),
+				education: JSON.parse(JSON.stringify(s.education)),
+				experiences: JSON.parse(JSON.stringify(s.experiences)),
+				projects: JSON.parse(JSON.stringify(s.projects)),
+				skills: JSON.parse(JSON.stringify(s.skills)),
+				summary: JSON.parse(JSON.stringify(s.summary)),
+			}
 			const res = await parseResumeMerge(file)
 			const parsed = res.data || res
 			const existing = { contact, education, experiences, projects, skills, summary }
@@ -492,11 +518,39 @@ function Info() {
 		}
 	}
 
-	const handleDetachResume = async () => {
+	const handleDetachResumeClick = () => {
+		setShowDetachModal(true)
+	}
+
+	const handleDetachWithUndo = async () => {
+		setShowDetachModal(false)
+		const snapshot = preResumeSnapshotRef.current
 		try {
 			await detachResume()
+			if (snapshot) {
+				setContact(snapshot.contact)
+				setEducation(snapshot.education)
+				setExperiences(snapshot.experiences)
+				setProjects(snapshot.projects)
+				setSkills(snapshot.skills)
+				setSummary(snapshot.summary)
+			}
+			preResumeSnapshotRef.current = null
 			setUser(prev => prev ? { ...prev, attached_resume_filename: null, attached_resume_uploaded_at: null } : null)
-			toast.success('Resume detached. You can upload another.')
+			toast.success('Resume removed. Your data has been restored to before the upload.')
+		} catch (err) {
+			console.error('Detach failed:', err)
+			toast.error('Failed to detach resume.')
+		}
+	}
+
+	const handleDetachKeepData = async () => {
+		setShowDetachModal(false)
+		try {
+			await detachResume()
+			preResumeSnapshotRef.current = null
+			setUser(prev => prev ? { ...prev, attached_resume_filename: null, attached_resume_uploaded_at: null } : null)
+			toast.success('Resume removed. Your data is unchanged. You can upload a new resume anytime.')
 		} catch (err) {
 			console.error('Detach failed:', err)
 			toast.error('Failed to detach resume.')
@@ -670,7 +724,7 @@ function Info() {
 								</div>
 								<button
 									type="button"
-									onClick={handleDetachResume}
+									onClick={handleDetachResumeClick}
 									className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
 								>
 									Remove
@@ -776,6 +830,7 @@ function Info() {
 								onAdd={handleSkillAdd}
 								onRemove={handleSkillRemove}
 								onUpdate={handleSkillUpdate}
+								onReorder={handleSkillReorder}
 							/>
 						</div>
 
@@ -786,6 +841,46 @@ function Info() {
 					</div>
 				</div>
 			</main>
+
+			{/* Detach Resume Modal */}
+			{showDetachModal && (
+				<div className="fixed inset-0 flex items-center justify-center z-50">
+					<div className="fixed inset-0 bg-black/50" onClick={() => setShowDetachModal(false)} aria-hidden />
+					<div className="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+						<h3 className="text-lg font-semibold text-gray-900 mb-2">Remove attached resume?</h3>
+						<p className="text-gray-600 text-sm mb-6">
+							{preResumeSnapshotRef.current
+								? 'Did you upload the wrong resume? You can undo the changes it made, or keep your current data and upload a new resume.'
+								: 'Your data will stay as-is. You can upload a new resume anytime.'}
+						</p>
+						<div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
+							<button
+								type="button"
+								onClick={() => setShowDetachModal(false)}
+								className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+							>
+								Cancel
+							</button>
+							{preResumeSnapshotRef.current && (
+								<button
+									type="button"
+									onClick={handleDetachWithUndo}
+									className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
+								>
+									Undo changes from this resume
+								</button>
+							)}
+							<button
+								type="button"
+								onClick={handleDetachKeepData}
+								className="px-4 py-2 text-sm font-medium bg-brand-pink text-white hover:opacity-90 rounded-lg transition-colors"
+							>
+								{preResumeSnapshotRef.current ? 'Keep current data & remove' : 'Remove attachment'}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }

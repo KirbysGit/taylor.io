@@ -42,6 +42,9 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 				current: false 
 			}]
 			setLocalEntries(newEntries)
+			// reset description modes so they re-initialize from the new entries (preserves bullet vs paragraph)
+			setDescriptionModes({})
+			setDescriptionBullets({})
 
 			// preserve expanded/collapsed state by ID (survives add/remove)
 			if (currentLength > prevLengthRef.current) {

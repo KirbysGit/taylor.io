@@ -1,9 +1,13 @@
+# if no start date, end date, don't have the dash.
+# better spacing.
+
 
 # imports.
 from io import BytesIO
 from pathlib import Path
 from typing import Dict, Any
 import asyncio
+import sys
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 
@@ -22,7 +26,9 @@ def _build_section(title: str, entries_html: str) -> str:
                 <span>{title}</span>
                 <div class="divider"></div>
             </h2>
-            {entries_html}
+            <div class="section-content">
+                {entries_html}
+            </div>
         </section>'''
 
 def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
@@ -120,7 +126,9 @@ def generate_resume(template_name: str, resume_data: Dict[str, Any]) -> str:
 
 def convert_html_to_pdf_sync(html_content: str) -> bytes:
     # convert html to pdf using playwright.
-    # has to run in a thread pool to avoid windows asyncio subprocess issues.
+    # On Windows, Playwright needs ProactorEventLoop for subprocess support (SelectorEventLoop raises NotImplementedError).
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch()
         page = browser.new_page()

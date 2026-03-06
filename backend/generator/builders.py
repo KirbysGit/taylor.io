@@ -134,6 +134,26 @@ def build_header(header: Dict[str, Any]) -> str:
     
     return " | ".join(fields)
 
+def _format_date_range(start_raw, end_raw, current: bool) -> str:
+    """Format date range with conditional dash. No dash when only one date or none."""
+    start_val = str(start_raw) if start_raw else ''
+    end_val = str(end_raw) if end_raw else ''
+    start_date = format_date_month_year(start_val) if start_val else ''
+    end_date = format_date_month_year(end_val) if end_val else ''
+
+    if current and start_date:
+        return f"{start_date} - Present"
+    if current and not start_date:
+        return "Present"
+    if start_date and end_date:
+        return f"{start_date} - {end_date}"
+    if start_date:
+        return start_date
+    if end_date:
+        return end_date
+    return ''
+
+
 # ----- build education entries.
 def build_education_entry(edu: Dict[str, Any]) -> str:
     
@@ -146,14 +166,11 @@ def build_education_entry(edu: Dict[str, Any]) -> str:
     if minor:
         degree_text += f", Minor in {minor}"
 
-    # build date range.
-    start_date = format_date_month_year(edu.get('start_date', ''))
-    end_date = format_date_month_year(edu.get('end_date', ''))
+    # build date range (support both snake_case and camelCase from API/frontend).
+    start_raw = edu.get('start_date') or edu.get('startDate') or ''
+    end_raw = edu.get('end_date') or edu.get('endDate') or ''
     current = edu.get('current', False)
-    if current:
-        date_range = f"{start_date} - Present"
-    else:
-        date_range = f"{start_date} - {end_date}"
+    date_range = _format_date_range(start_raw, end_raw, current)
 
     gpa = edu.get('gpa', '')
     gpa_text = f"(GPA: {gpa})" if gpa else ""
@@ -233,8 +250,8 @@ def build_project_entry(proj: Dict[str, Any]) -> str:
     
     title = proj.get('title', '')
     
-    # build tech stack string.
-    tech_stack = proj.get('tech_stack', [])
+    # build tech stack string - accept both tech_stack (backend) and techStack (frontend step format)
+    tech_stack = proj.get('tech_stack') or proj.get('techStack') or []
     tech_stack_str = ', '.join(tech_stack) if isinstance(tech_stack, list) else (tech_stack or '')
     
     # get url.

@@ -19,7 +19,21 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
 		
 		// only sync if the length changed or IDs changed (structure change, not field update)
 		if (currentLength !== prevLengthRef.current || currentIds !== prevIdsRef.current) {
-			setLocalEntries(projects)
+			// preserve local techStack when incoming has empty (avoids overwriting with stale data)
+			const merged = projects.map((proj, i) => {
+				const local = localEntries[i]
+				if (!local) return proj
+				const localArr = Array.isArray(local.techStack) ? local.techStack : (local.techStack ? String(local.techStack).split(',').map(t => t.trim()).filter(Boolean) : [])
+				const projArr = Array.isArray(proj.techStack) ? proj.techStack : (proj.techStack ? String(proj.techStack).split(',').map(t => t.trim()).filter(Boolean) : [])
+				if (localArr.length > 0 && projArr.length === 0) {
+					return { ...proj, techStack: localArr }
+				}
+				return proj
+			})
+			setLocalEntries(merged)
+			// reset description modes so they re-initialize from the new entries (preserves bullet vs paragraph)
+			setDescriptionModes({})
+			setDescriptionBullets({})
 
 			// preserve expanded/collapsed state by ID (survives add/remove)
 			if (currentLength > prevLengthRef.current) {
@@ -82,10 +96,21 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
 		// update parent - convert techStack string to array for backend
 		const backendEntry = { ...updatedEntry }
 		if (field === 'techStack' && typeof backendEntry.techStack === 'string') {
-			backendEntry.techStack = backendEntry.techStack
+			const parsed = backendEntry.techStack
 				.split(',')
 				.map(tech => tech.trim())
 				.filter(tech => tech.length > 0)
+			// If user typed whitespace-only (e.g. accidental space) that parses to [], preserve previous
+			// so we don't clear the preview. Only send [] when the field is actually empty (no chars).
+			if (parsed.length > 0) {
+				backendEntry.techStack = parsed
+			} else if (backendEntry.techStack.length === 0) {
+				backendEntry.techStack = []
+			} else {
+				// Non-empty string but parsed to [] (whitespace-only or ", , ") - keep previous
+				const prev = localEntries[index]?.techStack
+				backendEntry.techStack = Array.isArray(prev) ? prev : (prev ? prev.split(',').map(t => t.trim()).filter(Boolean) : [])
+			}
 		}
 		onUpdate(index, backendEntry)
 	}

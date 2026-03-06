@@ -105,10 +105,10 @@ function ResumeSections({
 				) : null
 			
 			case 'skills':
-				return skillsData ? (
+				return (Array.isArray(skillsData) || skillsData) ? (
 					<div key="skills" id="section-skills" className="mb-6">
 						<Skills 
-							skillsData={skillsData}
+							skillsData={Array.isArray(skillsData) ? skillsData : []}
 							onSkillsChange={onSkillsChange}
 							isVisible={resumeData.sectionVisibility?.skills ?? true}
 							onVisibilityChange={(isVisible) => {

@@ -68,15 +68,25 @@ export const transformExperienceForBackend = (exp) => {
 	}
 }
 
-// Transform project from backend format to step format
+// Transform project from backend format (tech_stack) or step format (techStack) to step format
 export const transformProjectForStep = (proj) => {
+	// Handle both tech_stack (backend) and techStack (step format) - step format is used when
+	// parent state is updated from ProjectsInput, so we must preserve techStack on re-render
+	let techStack = []
+	if (Array.isArray(proj.tech_stack)) {
+		techStack = proj.tech_stack
+	} else if (proj.tech_stack) {
+		techStack = proj.tech_stack.split(',').map(t => t.trim()).filter(Boolean)
+	} else if (Array.isArray(proj.techStack)) {
+		techStack = proj.techStack
+	} else if (proj.techStack && typeof proj.techStack === 'string') {
+		techStack = proj.techStack.split(',').map(t => t.trim()).filter(Boolean)
+	}
 	return {
 		id: proj.id || newId(),
 		title: proj.title || '',
 		description: proj.description || '',
-		techStack: Array.isArray(proj.tech_stack) 
-			? proj.tech_stack 
-			: (proj.tech_stack ? proj.tech_stack.split(',').map(t => t.trim()).filter(Boolean) : []),
+		techStack,
 		url: proj.url || '',
 	}
 }

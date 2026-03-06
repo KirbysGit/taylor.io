@@ -7,6 +7,8 @@ import SectionOrdering from './SectionOrdering'
 const ResumeStyling = ({ 
 	sectionOrder, 
 	onSectionOrderChange,
+	sectionVisibility,
+	onVisibilityChange,
 	template,
 	onTemplateChange,
 	availableTemplates,
@@ -54,6 +56,8 @@ const ResumeStyling = ({
 						<SectionOrdering 
 							sectionOrder={sectionOrder}
 							onOrderChange={onSectionOrderChange}
+							sectionVisibility={sectionVisibility}
+							onVisibilityChange={onVisibilityChange}
 							onScrollToSection={onScrollToSection}
 						/>
 					</div>

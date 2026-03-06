@@ -79,11 +79,9 @@ function compareResumeData(currentData, baselineData) {
 		return { headerChanged: false, educationChanged: false, experienceChanged: false, projectsChanged: false, skillsChanged: false, summaryChanged: false }
 	}
 
-	// create copies without visibility field for comparison.
+	// include visibility and contactOrder in comparison so save banner appears when user toggles them
 	const currentHeaderForCompare = { ...currentData.header }
 	const baselineHeaderForCompare = { ...baselineData.header }
-	delete currentHeaderForCompare.visibility
-	delete baselineHeaderForCompare.visibility
 
 	// create copies without sectionVisibility for comparison (visibility changes don't count as data changes).
 	const currentDataForCompare = { ...currentData }
@@ -127,7 +125,7 @@ export function getResumeChangeDescriptions(currentData, baselineData) {
 	const changes = []
 
 	if (headerChanged) {
-		changes.push('Contact information updated')
+		changes.push('Header or contact visibility updated')
 	}
 	if (educationChanged) {
 		changes.push('Education section updated')

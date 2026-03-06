@@ -13,6 +13,7 @@
 // imports.
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 // api imports.
 import { listTemplates } from '@/api/services/templates'
@@ -382,6 +383,8 @@ function ResumePreview() {
 	}, [])
 
 	const handleSummaryChange = useCallback((exportedSummary) => {
+		// Keep summaryData in sync so Summary component shows correct data when it remounts after reorder
+		setSummaryData(exportedSummary)
 		setResumeData(prev => ({ 
 			...prev, 
 			summary: exportedSummary,
@@ -501,6 +504,14 @@ function ResumePreview() {
 				await createSummary({ summary: resumeData.summary.summary })
 			}
 
+			// persist header visibility and contactOrder to localStorage so they survive page reload
+			if (resumeData.header?.visibility) {
+				localStorage.setItem('resumeHeaderVisibility', JSON.stringify(resumeData.header.visibility))
+			}
+			if (resumeData.header?.contactOrder) {
+				localStorage.setItem('resumeHeaderContactOrder', JSON.stringify(resumeData.header.contactOrder))
+			}
+
 			// update baseline to current data.
 			setBaselineData({
 				header: JSON.parse(JSON.stringify(resumeData.header)),
@@ -511,15 +522,38 @@ function ResumePreview() {
 				summary: JSON.parse(JSON.stringify(resumeData.summary || { summary: '' })),
 			})
 			setShowSaveBanner(false)
+			return true
 		} catch (error) {
 			console.error('Failed to save changes:', error)
 			alert('Failed to save changes. Please try again.')
+			return false
 		} finally {
 			setIsSaving(false)
 		}
 	}
 
+	// Save on Back/navigation - save first if dirty, then navigate
+	const handleBackClick = async () => {
+		if (showSaveBanner) {
+			const saved = await handleSaveChanges()
+			if (!saved) return
+			toast.success('Your changes have been saved.')
+		}
+		navigate('/home')
+	}
+
 	// ----- use effects -----
+
+	// beforeunload: prompt when dirty (tab close / refresh)
+	useEffect(() => {
+		const onBeforeUnload = (e) => {
+			if (showSaveBanner) {
+				e.preventDefault()
+			}
+		}
+		window.addEventListener('beforeunload', onBeforeUnload)
+		return () => window.removeEventListener('beforeunload', onBeforeUnload)
+	}, [showSaveBanner])
 
 	// auth guard on mount.
 	useEffect(() => {
@@ -687,7 +721,7 @@ function ResumePreview() {
 					<h1 className="text-xl font-bold">Resume</h1>
 					<button
 						type="button"
-						onClick={() => navigate('/home')}
+						onClick={handleBackClick}
 						className="px-3 py-1.5 bg-white-bright text-brand-pink font-semibold rounded-lg hover:opacity-90 transition-all text-sm"
 					>
 						← Back
@@ -723,11 +757,11 @@ function ResumePreview() {
 						}
 					}}
 					headerData={headerData}
-					educationData={educationData}
-					experienceData={experienceData}
-					projectsData={projectsData}
-					skillsData={skillsData}
-					summaryData={summaryData}
+					educationData={resumeData.education ?? educationData}
+					experienceData={resumeData.experience ?? experienceData}
+					projectsData={resumeData.projects ?? projectsData}
+					skillsData={resumeData.skills ?? skillsData}
+					summaryData={resumeData.summary ?? summaryData}
 					resumeData={resumeData}
 					onHeaderChange={handleHeaderChange}
 					onEducationChange={handleEducationChange}

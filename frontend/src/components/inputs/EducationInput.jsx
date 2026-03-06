@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGripVertical } from '@fortawesome/free-solid-svg-icons';
-import { XIcon } from '@/components/icons';
+import { XIcon, Pencil } from '@/components/icons';
 
 // Education Input Component - Just the form fields and logic, no headers
 const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections = false, onSubsectionUpdate }) => {
@@ -24,6 +24,8 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 	const [localEntries, setLocalEntries] = useState(entries)
 	const [draggedSubsection, setDraggedSubsection] = useState(null) // { eduIndex, subIndex }
 	const [dragOverSubsection, setDragOverSubsection] = useState(null) // { eduIndex, subIndex }
+	const [editingSubsection, setEditingSubsection] = useState(null) // { eduIndex, subIndex, oldTitle }
+	const [editingSubsectionValue, setEditingSubsectionValue] = useState('')
 	const prevLengthRef = useRef(education.length)
 	const prevIdsRef = useRef(education.map(e => e.id || e).join(','))
 	// store previous end dates when toggling "current" to preserve them
@@ -153,6 +155,38 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 			return newEdu
 		})
 		onUpdate(eduIndex, updatedEdu)
+	}
+
+	const handleStartEditSubsection = (eduIndex, subIndex, currentTitle) => {
+		setEditingSubsection({ eduIndex, subIndex, oldTitle: currentTitle })
+		setEditingSubsectionValue(currentTitle)
+	}
+
+	const handleSaveSubsectionEdit = () => {
+		if (!editingSubsection) return
+		const { eduIndex, subIndex, oldTitle } = editingSubsection
+		const newTitle = editingSubsectionValue.trim()
+		if (newTitle && newTitle !== oldTitle) {
+			const updatedEdu = { ...localEntries[eduIndex] }
+			const subs = { ...updatedEdu.subsections }
+			const cont = subs[oldTitle] ?? ''
+			delete subs[oldTitle]
+			subs[newTitle] = cont
+			updatedEdu.subsections = subs
+			setLocalEntries(prev => {
+				const newEdu = [...prev]
+				newEdu[eduIndex] = updatedEdu
+				return newEdu
+			})
+			onUpdate(eduIndex, updatedEdu)
+		}
+		setEditingSubsection(null)
+		setEditingSubsectionValue('')
+	}
+
+	const handleCancelSubsectionEdit = () => {
+		setEditingSubsection(null)
+		setEditingSubsectionValue('')
 	}
 
 	return (
@@ -354,7 +388,6 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 															return newEdu
 														})
 														onUpdate(index, updatedEdu)
-														onSubsectionUpdate?.('add', index)
 													}}
 													className="px-3 py-1.5 bg-brand-pink text-white text-sm font-medium rounded-lg hover:opacity-90 transition"
 												>
@@ -372,6 +405,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 														const isDraggable = Object.keys(subsections).length > 1
 														const isDragging = draggedSubsection?.eduIndex === index && draggedSubsection?.subIndex === subIndex
 														const isDragOver = dragOverSubsection?.eduIndex === index && dragOverSubsection?.subIndex === subIndex
+														const isEditing = editingSubsection?.eduIndex === index && editingSubsection?.subIndex === subIndex
 
 														const handleDragStart = (e) => {
 															setDraggedSubsection({ eduIndex: index, subIndex })
@@ -407,101 +441,103 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 															setDragOverSubsection(null)
 														}
 
+														const handleRemoveSubsection = () => {
+															const updatedEdu = { ...localEntries[index] }
+															const subs = { ...updatedEdu.subsections }
+															delete subs[title]
+															updatedEdu.subsections = subs
+															setLocalEntries(prev => {
+																const newEdu = [...prev]
+																newEdu[index] = updatedEdu
+																return newEdu
+															})
+															onUpdate(index, updatedEdu)
+															if (isEditing) {
+																setEditingSubsection(null)
+																setEditingSubsectionValue('')
+															}
+														}
+
 														return (
 															<div
-																key={`subsection-${index}-${subIndex}`}
-																draggable={isDraggable}
-																onDragStart={isDraggable ? handleDragStart : undefined}
+																key={`subsection-${index}-${subIndex}-${title}`}
 																onDragOver={isDraggable ? handleDragOver : undefined}
 																onDragLeave={isDraggable ? handleDragLeave : undefined}
 																onDrop={isDraggable ? handleDrop : undefined}
-																onDragEnd={isDraggable ? handleDragEnd : undefined}
-																className={`flex items-start gap-2 ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'border-2 border-brand-pink border-dashed rounded' : ''}`}
+																className={`collapsibleCard ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'border-2 border-brand-pink' : ''}`}
 															>
-																{isDraggable && (
-																	<div className="flex-shrink-0 text-gray-400 cursor-move pt-3 px-1" aria-hidden="true">
-																		<FontAwesomeIcon icon={faGripVertical} className="w-4 h-4" />
+																<div className="collapsibleCardHeader">
+																	<div className="flex items-center gap-3 flex-1 min-w-0">
+																		{isDraggable ? (
+																			<div
+																				draggable
+																				onDragStart={handleDragStart}
+																				onDragEnd={handleDragEnd}
+																				className="cursor-grab active:cursor-grabbing touch-none text-gray-400 hover:text-gray-600 shrink-0"
+																				title="Drag to reorder"
+																				aria-hidden="true"
+																			>
+																				<FontAwesomeIcon icon={faGripVertical} className="w-4 h-4" />
+																			</div>
+																		) : (
+																			<div className="w-4 shrink-0" aria-hidden="true" />
+																		)}
+																		{isEditing ? (
+																			<input
+																				type="text"
+																				value={editingSubsectionValue}
+																				onChange={(e) => setEditingSubsectionValue(e.target.value)}
+																				onKeyDown={(e) => {
+																					if (e.key === 'Enter') handleSaveSubsectionEdit()
+																					else if (e.key === 'Escape') handleCancelSubsectionEdit()
+																				}}
+																				onBlur={handleSaveSubsectionEdit}
+																				className="input text-sm font-semibold flex-1 max-w-xs"
+																				autoFocus
+																			/>
+																		) : (
+																			<>
+																				<span className="font-semibold text-gray-900 truncate">{title}</span>
+																				<button
+																					type="button"
+																					onClick={() => handleStartEditSubsection(index, subIndex, title)}
+																					className="p-1 hover:bg-gray-100 rounded transition-colors shrink-0"
+																					title="Edit section name"
+																				>
+																					<Pencil className="w-3.5 h-3.5 text-gray-500" />
+																				</button>
+																			</>
+																		)}
 																	</div>
-																)}
-																<div className="flex-1 min-w-0 flex flex-col gap-2 p-3 border border-gray-200 rounded-md bg-gray-50">
-																	<div className="flex items-center gap-2">
-																		<input
-																			type="text"
-																			value={title}
+																	<button
+																		type="button"
+																		onClick={handleRemoveSubsection}
+																		className="text-red-500 hover:text-red-700 transition-colors p-1 shrink-0"
+																		title="Remove section"
+																	>
+																		<XIcon className="w-4 h-4" />
+																	</button>
+																</div>
+																<div className="expandableContent expanded">
+																	<div className="expandableContentInner">
+																		<textarea
+																			value={content}
 																			onChange={(e) => {
-																				const newTitle = e.target.value
-																				setLocalEntries(prev => {
-																					const newEdu = [...prev]
-																					const subs = { ...newEdu[index].subsections }
-																					const cont = subs[title] || ''
-																					delete subs[title]
-																					subs[newTitle] = cont
-																					newEdu[index] = { ...newEdu[index], subsections: subs }
-																					return newEdu
-																				})
-																			}}
-																			onBlur={(e) => {
-																				const newTitle = e.target.value.trim()
-																				if (newTitle && newTitle !== title) {
-																					const updatedEdu = { ...localEntries[index] }
-																					const subs = { ...updatedEdu.subsections }
-																					const cont = subs[title] || ''
-																					delete subs[title]
-																					subs[newTitle] = cont
-																					updatedEdu.subsections = subs
-																					onUpdate(index, updatedEdu)
-																					onSubsectionUpdate?.('rename', index, title, newTitle)
-																				} else if (!newTitle) {
-																					setLocalEntries(prev => {
-																						const newEdu = [...prev]
-																						const subs = { ...newEdu[index].subsections }
-																						if (!subs[title]) subs[title] = ''
-																						newEdu[index] = { ...newEdu[index], subsections: subs }
-																						return newEdu
-																					})
+																				const updatedEdu = {
+																					...localEntries[index],
+																					subsections: { ...localEntries[index].subsections, [title]: e.target.value }
 																				}
-																			}}
-																			className="flex-1 input text-sm font-medium"
-																			placeholder="Subsection title"
-																		/>
-																		<button
-																			type="button"
-																			onClick={() => {
-																				const updatedEdu = { ...localEntries[index] }
-																				const subs = { ...updatedEdu.subsections }
-																				delete subs[title]
-																				updatedEdu.subsections = subs
 																				setLocalEntries(prev => {
 																					const newEdu = [...prev]
 																					newEdu[index] = updatedEdu
 																					return newEdu
 																				})
 																				onUpdate(index, updatedEdu)
-																				onSubsectionUpdate?.('remove', index, title)
 																			}}
-																			className="text-red-500 hover:text-red-700 transition-colors p-1"
-																		>
-																			<XIcon className="w-4 h-4" />
-																		</button>
+																			className="input min-h-[60px] resize-y w-full"
+																			placeholder="Enter content for this subsection..."
+																		/>
 																	</div>
-																	<textarea
-																		value={content}
-																		onChange={(e) => {
-																			const updatedEdu = {
-																				...localEntries[index],
-																				subsections: { ...localEntries[index].subsections, [title]: e.target.value }
-																			}
-																			setLocalEntries(prev => {
-																				const newEdu = [...prev]
-																				newEdu[index] = updatedEdu
-																				return newEdu
-																			})
-																			onUpdate(index, updatedEdu)
-																			onSubsectionUpdate?.('content', index, title, e.target.value)
-																		}}
-																		className="input min-h-[60px] resize-y"
-																		placeholder="Enter content for this subsection..."
-																	/>
 																</div>
 															</div>
 														)

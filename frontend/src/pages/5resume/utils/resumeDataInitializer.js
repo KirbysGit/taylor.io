@@ -15,7 +15,32 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 	const userData = responseData.user
 	const contact = responseData.contact || {}
 
-	// Initialize header data
+	// Initialize header data - merge visibility and contactOrder from localStorage if saved previously
+	const defaultVisibility = {
+		showEmail: contact.show_email ?? true,
+		showPhone: contact.show_phone ?? true,
+		showLocation: contact.show_location ?? true,
+		showLinkedin: contact.show_linkedin ?? true,
+		showGithub: contact.show_github ?? true,
+		showPortfolio: contact.show_portfolio ?? true,
+	}
+	const savedVisibility = (() => {
+		try {
+			const v = localStorage.getItem('resumeHeaderVisibility')
+			return v ? JSON.parse(v) : null
+		} catch {
+			return null
+		}
+	})()
+	const savedContactOrder = (() => {
+		try {
+			const o = localStorage.getItem('resumeHeaderContactOrder')
+			return o ? JSON.parse(o) : null
+		} catch {
+			return null
+		}
+	})()
+
 	const initialHeader = {
 		first_name: userData.first_name,
 		last_name: userData.last_name,
@@ -25,16 +50,8 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 		linkedin: contact.linkedin || '',
 		github: contact.github || '',
 		portfolio: contact.portfolio || '',
-		visibility: {
-			showEmail: contact.show_email ?? true,
-			showPhone: contact.show_phone ?? true,
-			showLocation: contact.show_location ?? true,
-			showLinkedin: contact.show_linkedin ?? true,
-			showGithub: contact.show_github ?? true,
-			showPortfolio: contact.show_portfolio ?? true,
-		},
-		// Default contact ordering (includes email)
-		contactOrder: ['email', 'phone', 'location', 'linkedin', 'github', 'portfolio'],
+		visibility: savedVisibility || defaultVisibility,
+		contactOrder: savedContactOrder || ['email', 'phone', 'location', 'linkedin', 'github', 'portfolio'],
 	}
 
 	// Initialize education data

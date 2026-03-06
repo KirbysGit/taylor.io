@@ -59,6 +59,18 @@ const normalizeEducationForBackend = (edu) => {
     const start_date = startDate ? convertToISODate(startDate) : null
     const end_date = isCurrent ? null : (endDate ? convertToISODate(endDate) : null)
     
+    // only persist subsections that have non-empty content (avoid stale empty fields after refresh)
+    let subsections = null
+    if (edu.subsections && typeof edu.subsections === 'object') {
+        const filtered = {}
+        for (const [title, content] of Object.entries(edu.subsections)) {
+            if (content != null && String(content).trim() !== '') {
+                filtered[title] = content
+            }
+        }
+        subsections = Object.keys(filtered).length > 0 ? filtered : null
+    }
+
     return {
         school: normalizeValue(edu.school),
         degree: normalizeValue(edu.degree),
@@ -69,7 +81,7 @@ const normalizeEducationForBackend = (edu) => {
         current: isCurrent,
         gpa: normalizeValue(edu.gpa),
         location: normalizeValue(edu.location),
-        subsections: edu.subsections || null,
+        subsections,
     }
 }
 

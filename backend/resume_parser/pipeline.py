@@ -2,6 +2,15 @@
 
 # resume parsing pipeline.
 
+# expansions :
+
+# - if separated by | probably a company or whatever the fuck. ex : Server | Bar Louie , title | company.
+# - if bullet char, make it a bullet then transfer over to frontend with like teh bullet tag or however we want to do it.
+# - if date keyword or like something like 2025 or present, its a date. (oh shit yea dates for projects too forgot about that)
+# - look for title keywords or something that could signal, also the spacing is a good sign, like the ai should be able to properly
+#   analyze that well. (who knows tho)
+# - better handling of skills and shi.
+
 # imports.
 import re
 import logging

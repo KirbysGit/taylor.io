@@ -1,29 +1,52 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGripVertical } from '@fortawesome/free-solid-svg-icons';
 import { XIcon, Pencil } from '@/components/icons';
 
 // Skills Input Component - Just the form fields and logic, no headers
-const SkillsInput = ({ skills, onAdd, onRemove, onUpdate }) => {
+const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder }) => {
 	const [skillInput, setSkillInput] = useState('');
 	const [categories, setCategories] = useState(['Tools']);
 	const [draggedSkill, setDraggedSkill] = useState(null);
 	const [dragOverCategory, setDragOverCategory] = useState(null);
 	const [dragOverAllSkills, setDragOverAllSkills] = useState(false);
+	const [dragOverPillId, setDragOverPillId] = useState(null);
 	const [editingCategory, setEditingCategory] = useState(null);
 	const [editingCategoryValue, setEditingCategoryValue] = useState('');
+	const [draggedCategory, setDraggedCategory] = useState(null);
+	const [dragOverCategoryForReorder, setDragOverCategoryForReorder] = useState(null);
 	const inputRef = useRef(null);
 
-	// initialize categories from existing skills
+	const SKILLS_REMOVED_DEFAULTS_KEY = 'tailor_skillsRemovedDefaults';
+
+	// initialize/sync categories from skills when skills prop changes (e.g. when data loads from backend)
+	// preserves user-defined category order; only appends new categories from skills
 	useEffect(() => {
-		const existingCategories = new Set(['Tools']);
+		const fromSkills = new Set();
 		skills.forEach(skill => {
 			if (skill.category && skill.category.trim()) {
-				existingCategories.add(skill.category.trim());
+				fromSkills.add(skill.category.trim());
 			}
 		});
-		if (existingCategories.size > 0) {
-			setCategories(Array.from(existingCategories));
+		// Add Tools as default only when there are no categories and user hasn't removed it
+		if (fromSkills.size === 0) {
+			try {
+				const removed = JSON.parse(localStorage.getItem(SKILLS_REMOVED_DEFAULTS_KEY) || '[]');
+				if (!removed.includes('Tools')) {
+					fromSkills.add('Tools');
+				}
+			} catch (_) {
+				fromSkills.add('Tools');
+			}
 		}
-	}, []);
+		if (fromSkills.size > 0) {
+			setCategories(prev => {
+				const kept = prev.filter(c => fromSkills.has(c));
+				const added = [...fromSkills].filter(c => !prev.includes(c));
+				return prev.length === 0 ? [...fromSkills] : [...kept, ...added];
+			});
+		}
+	}, [skills]);
 
 	// handle adding a new skill
 	const handleAddSkill = (e) => {
@@ -64,8 +87,9 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate }) => {
 		setDragOverCategory(categoryName);
 	};
 
-	// handle drag over all skills
+	// handle drag over all skills (only for skill drops, not category reorder)
 	const handleDragOverAllSkills = (e) => {
+		if (draggedCategory) return;
 		e.preventDefault();
 		e.dataTransfer.dropEffect = 'move';
 		setDragOverAllSkills(true);
@@ -75,6 +99,47 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate }) => {
 	const handleDragLeave = () => {
 		setDragOverCategory(null);
 		setDragOverAllSkills(false);
+		setDragOverPillId(null);
+		setDragOverCategoryForReorder(null);
+	};
+
+	// handle drop on pill (reorder within same category)
+	const handleDropOnPill = (e, dropTargetSkill, categoryKey) => {
+		e.preventDefault();
+		e.stopPropagation(); // prevent category card from also handling the drop
+		if (!draggedSkill || !onReorder) return;
+		if (draggedSkill.id === dropTargetSkill.id) {
+			setDraggedSkill(null);
+			setDragOverPillId(null);
+			return;
+		}
+		const draggedCategory = (draggedSkill.category || '').trim();
+		const targetCategory = categoryKey === '_uncategorized' ? '' : categoryKey;
+		if (draggedCategory !== targetCategory) {
+			setDraggedSkill(null);
+			setDragOverPillId(null);
+			return;
+		}
+		const fromIndex = skills.findIndex(s => s.id === draggedSkill.id);
+		const toIndex = skills.findIndex(s => s.id === dropTargetSkill.id);
+		if (fromIndex !== -1 && toIndex !== -1) {
+			onReorder(fromIndex, toIndex);
+		}
+		setDraggedSkill(null);
+		setDragOverPillId(null);
+	};
+
+	// handle drag over pill (for reorder)
+	const handleDragOverPill = (e, skill) => {
+		if (!draggedSkill) return;
+		const draggedCategory = (draggedSkill.category || '').trim();
+		const skillCategory = (skill.category || '').trim();
+		if (draggedCategory === skillCategory) {
+			e.preventDefault();
+			e.stopPropagation();
+			e.dataTransfer.dropEffect = 'move';
+			setDragOverPillId(skill.id);
+		}
 	};
 
 	// handle drop on category
@@ -154,6 +219,17 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate }) => {
 				onUpdate(index, { ...skill, category: '' });
 			}
 		});
+
+		// persist removed default (e.g. Tools) so it doesn't reappear on remount
+		if (categoryName === 'Tools') {
+			try {
+				const removed = JSON.parse(localStorage.getItem(SKILLS_REMOVED_DEFAULTS_KEY) || '[]');
+				if (!removed.includes('Tools')) {
+					removed.push('Tools');
+					localStorage.setItem(SKILLS_REMOVED_DEFAULTS_KEY, JSON.stringify(removed));
+				}
+			} catch (_) {}
+		}
 	};
 
 	// handle add new category
@@ -162,6 +238,46 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate }) => {
 		setCategories(prev => [...prev, newCategory]);
 		setEditingCategory(newCategory);
 		setEditingCategoryValue(newCategory);
+	};
+
+	// category reorder (only via grip handle)
+	const handleCategoryDragStart = (e, categoryName) => {
+		e.dataTransfer.effectAllowed = 'move';
+		e.dataTransfer.setData('text/plain', 'category:' + categoryName);
+		setDraggedCategory(categoryName);
+	};
+
+	const handleCategoryDragOver = (e, targetCategory) => {
+		if (!draggedCategory || draggedCategory === targetCategory) return;
+		e.preventDefault();
+		e.dataTransfer.dropEffect = 'move';
+		setDragOverCategoryForReorder(targetCategory);
+	};
+
+	const handleCategoryDrop = (e, targetCategory) => {
+		e.preventDefault();
+		if (!draggedCategory || draggedCategory === targetCategory) {
+			setDraggedCategory(null);
+			setDragOverCategoryForReorder(null);
+			return;
+		}
+		const fromIdx = categories.indexOf(draggedCategory);
+		const toIdx = categories.indexOf(targetCategory);
+		if (fromIdx !== -1 && toIdx !== -1) {
+			setCategories(prev => {
+				const next = [...prev];
+				const [removed] = next.splice(fromIdx, 1);
+				next.splice(toIdx, 0, removed);
+				return next;
+			});
+		}
+		setDraggedCategory(null);
+		setDragOverCategoryForReorder(null);
+	};
+
+	const handleCategoryDragEnd = () => {
+		setDraggedCategory(null);
+		setDragOverCategoryForReorder(null);
 	};
 
 	// group skills by category
@@ -200,7 +316,9 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate }) => {
 						}}
 					/>
 				</form>
-				<p className="text-xs text-gray-500 mt-1">Press Enter to add</p>
+				<p className="text-xs text-gray-500 mt-1">
+					Type to enter a skill here! It will appear in All Skills, then from there you can drag and drop to sort as you would like. Press Enter to add.
+				</p>
 			</div>
 
 			{/* Skills Display */}
@@ -231,12 +349,16 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate }) => {
 											key={skill.id}
 											draggable
 											onDragStart={(e) => handleDragStart(e, skill)}
+											onDragOver={(e) => handleDragOverPill(e, skill)}
+											onDragLeave={() => setDragOverPillId(null)}
+											onDrop={(e) => handleDropOnPill(e, skill, '_uncategorized')}
 											onDragEnd={() => {
 												setDraggedSkill(null);
 												setDragOverCategory(null);
 												setDragOverAllSkills(false);
+												setDragOverPillId(null);
 											}}
-											className={`skillPill ${skill.fromParsed ? 'skillPillParsed' : ''}`}
+											className={`skillPill cursor-grab active:cursor-grabbing ${skill.fromParsed ? 'skillPillParsed' : ''} ${dragOverPillId === skill.id ? 'ring-2 ring-brand-pink ring-offset-2' : ''}`}
 										>
 											<span>{skill.name}</span>
 											{skill.fromParsed && (
@@ -265,19 +387,36 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate }) => {
 				{categories.map(category => {
 					const categorySkills = groupedSkills[category] || [];
 					const isDragOver = dragOverCategory === category;
+					const isDragOverForReorder = dragOverCategoryForReorder === category;
 					const isEditing = editingCategory === category;
 					
 					return (
 						<div
 							key={category}
-							className={`collapsibleCard ${isDragOver ? 'border-brand-pink border-2 bg-brand-pink/5' : ''}`}
-							onDragOver={(e) => handleDragOverCategory(e, category)}
+							className={`collapsibleCard ${(isDragOver || isDragOverForReorder) ? 'border-brand-pink border-2 bg-brand-pink/5' : ''}`}
+							onDragOver={(e) => {
+								if (draggedCategory) handleCategoryDragOver(e, category);
+								else handleDragOverCategory(e, category);
+							}}
 							onDragLeave={handleDragLeave}
-							onDrop={(e) => handleDropOnCategory(e, category)}
+							onDrop={(e) => {
+								if (draggedCategory) handleCategoryDrop(e, category);
+								else handleDropOnCategory(e, category);
+							}}
 						>
 							<div className="collapsibleCardHeader">
 								<div className="flex items-center justify-between w-full">
 									<div className="flex items-center gap-3 flex-1">
+										{/* Grip handle - only this is draggable for category reorder */}
+										<div
+											draggable
+											onDragStart={(e) => handleCategoryDragStart(e, category)}
+											onDragEnd={handleCategoryDragEnd}
+											className="cursor-grab active:cursor-grabbing touch-none text-gray-400 hover:text-gray-600 p-1 -ml-1 shrink-0"
+											title="Drag to reorder category"
+										>
+											<FontAwesomeIcon icon={faGripVertical} className="w-4 h-4" />
+										</div>
 										{isEditing ? (
 											<input
 												type="text"
@@ -331,12 +470,16 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate }) => {
 													key={skill.id}
 													draggable
 													onDragStart={(e) => handleDragStart(e, skill)}
+													onDragOver={(e) => handleDragOverPill(e, skill)}
+													onDragLeave={() => setDragOverPillId(null)}
+													onDrop={(e) => handleDropOnPill(e, skill, category)}
 													onDragEnd={() => {
 														setDraggedSkill(null);
 														setDragOverCategory(null);
 														setDragOverAllSkills(false);
+														setDragOverPillId(null);
 													}}
-													className={`skillPill ${skill.fromParsed ? 'skillPillParsed' : ''}`}
+													className={`skillPill cursor-grab active:cursor-grabbing ${skill.fromParsed ? 'skillPillParsed' : ''} ${dragOverPillId === skill.id ? 'ring-2 ring-brand-pink ring-offset-2' : ''}`}
 												>
 													<span>{skill.name}</span>
 													{skill.fromParsed && (

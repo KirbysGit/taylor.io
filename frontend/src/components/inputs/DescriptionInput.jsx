@@ -10,44 +10,28 @@ const DescriptionInput = ({ value, onChange, placeholder = "Enter description...
 	const [bullets, setBullets] = useState([''])
 	const isTogglingRef = useRef(false) // Prevent useEffect from interfering during toggle
 
-	// Initialize mode and bullets based on existing value
-	/*
+	// Initialize mode and bullets based on existing value (e.g. when loading from backend/Info page)
 	useEffect(() => {
-		// Skip if we're in the middle of a toggle to prevent render loops
 		if (isTogglingRef.current) return
-		
-		if (value !== undefined) {
-			try {
-				const safeValue = value || ''
-				const isBullet = isBulletFormat(safeValue)
-				const newMode = isBullet ? 'bullets' : 'paragraph'
-				
-				// Only update if mode actually changed to prevent unnecessary re-renders
-				setMode(prevMode => {
-					if (prevMode !== newMode) {
-						return newMode
-					}
-					return prevMode
-				})
-				
-				if (isBullet) {
-					const newBullets = paragraphToBullets(safeValue)
-					setBullets(Array.isArray(newBullets) && newBullets.length > 0 ? newBullets : [''])
-				} else {
-					// Only reset bullets if we're actually in paragraph mode
-					setBullets(prev => {
-						if (prev.length === 0 || (prev.length === 1 && !prev[0])) {
-							return ['']
-						}
-						return prev
-					})
-				}
-			} catch (error) {
-				console.error('Error in DescriptionInput useEffect:', error)
+		if (value === undefined) return
+
+		try {
+			const safeValue = value || ''
+			const isBullet = isBulletFormat(safeValue)
+			const newMode = isBullet ? 'bullets' : 'paragraph'
+
+			setMode(prevMode => (prevMode !== newMode ? newMode : prevMode))
+
+			if (isBullet) {
+				const newBullets = paragraphToBullets(safeValue)
+				setBullets(Array.isArray(newBullets) && newBullets.length > 0 ? newBullets : [''])
+			} else {
+				setBullets(prev => (prev.length === 0 || (prev.length === 1 && !prev[0]) ? [''] : prev))
 			}
+		} catch (error) {
+			console.error('Error in DescriptionInput useEffect:', error)
 		}
 	}, [value])
-	*/
 	
 	// Handle mode toggle
 	const handleModeToggle = () => {

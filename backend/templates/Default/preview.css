@@ -63,8 +63,9 @@
 .section-title {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 14pt;
-    font-weight: bold;
-    padding: 0 1.25pt;
+    font-weight: normal;
+    padding: 3pt 1.25pt 0pt 1.25pt;
+    letter-spacing: 0.5pt;
 }
 
 .section-title span {
@@ -78,7 +79,12 @@
     background-color: #000;
     opacity: 0.75;
     margin-bottom: 5pt;
-    margin-top: 0;
+    margin-top: 1.5pt;
+}
+
+/* section content - indent entries from the left (not the header) */
+.section-content {
+    padding-left: 10pt;
 }
 
 /* ===== education section ===== */

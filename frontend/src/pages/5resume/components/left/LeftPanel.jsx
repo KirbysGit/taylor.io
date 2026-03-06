@@ -50,6 +50,8 @@ function LeftPanel({
 			<ResumeStyling 
 				sectionOrder={sectionOrder}
 				onSectionOrderChange={onSectionOrderChange}
+				sectionVisibility={resumeData?.sectionVisibility}
+				onVisibilityChange={onVisibilityChange}
 				template={template}
 				onTemplateChange={onTemplateChange}
 				availableTemplates={availableTemplates}
