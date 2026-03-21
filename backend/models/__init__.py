@@ -9,6 +9,7 @@ from .contact import Contact            # import 'contact' model.
 from .education import Education        # import 'education' model.
 from .summary import Summary            # import 'summary' model.
 from .base import Base                  # import 'base' model.
+from .saved_resume import SavedResume   # import 'saved_resume' model.
 
-__all__ = ["User", "Experience", "Projects", "Skills", "Contact", "Education", "Summary", "Base"]  # export our models.
+__all__ = ["User", "Experience", "Projects", "Skills", "Contact", "Education", "Summary", "SavedResume", "Base"]  # export our models.
 

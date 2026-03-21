@@ -98,8 +98,8 @@ function compareResumeData(currentData, baselineData) {
 	const baselineExpStr = JSON.stringify(baselineDataForCompare.experience)
 	const currentProjStr = JSON.stringify(currentDataForCompare.projects)
 	const baselineProjStr = JSON.stringify(baselineDataForCompare.projects)
-	const currentSkillsStr = JSON.stringify(currentDataForCompare.skills || [])
-	const baselineSkillsStr = JSON.stringify(baselineDataForCompare.skills || [])
+	const currentSkillsStr = JSON.stringify({ skills: currentDataForCompare.skills || [], hiddenSkills: currentDataForCompare.hiddenSkills || [] })
+	const baselineSkillsStr = JSON.stringify({ skills: baselineDataForCompare.skills || [], hiddenSkills: baselineDataForCompare.hiddenSkills || [] })
 	const currentSummaryStr = JSON.stringify(currentDataForCompare.summary || { summary: '' })
 	const baselineSummaryStr = JSON.stringify(baselineDataForCompare.summary || { summary: '' })
 

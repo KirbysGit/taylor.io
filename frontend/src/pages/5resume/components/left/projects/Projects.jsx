@@ -26,6 +26,7 @@ const Projects = ({
 	onVisibilityChange,
 	sectionLabel,
 	onSectionLabelChange,
+	bare = false,
 }) => {
 	const projects = useMemo(() => toInputFormat(projectsData), [projectsData])
 
@@ -55,6 +56,19 @@ const Projects = ({
 		[projectsData, onProjectsChange]
 	)
 
+	const input = (
+		<ProjectsInput
+			projects={projects}
+			onAdd={handleAdd}
+			onRemove={handleRemove}
+			onUpdate={handleUpdate}
+		/>
+	)
+
+	if (bare) {
+		return <div className="p-4">{input}</div>
+	}
+
 	return (
 		<ResumeSectionWrapper
 			sectionKey="projects"
@@ -65,12 +79,7 @@ const Projects = ({
 			onVisibilityChange={onVisibilityChange}
 			description="Highlight your projects"
 		>
-			<ProjectsInput
-				projects={projects}
-				onAdd={handleAdd}
-				onRemove={handleRemove}
-				onUpdate={handleUpdate}
-			/>
+			{input}
 		</ResumeSectionWrapper>
 	)
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import {
 	getMyProfile,
@@ -50,6 +50,7 @@ const isEqual = (a, b) => snap(a) === snap(b)
 
 function Info() {
 	const navigate = useNavigate()
+	const location = useLocation()
 	const [user, setUser] = useState(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [savingSection, setSavingSection] = useState(null)
@@ -580,6 +581,24 @@ function Info() {
 			Object.values(debounceRefs.current).forEach((id) => id && clearTimeout(id))
 		}
 	}, [])
+
+	// Deep link from Resume Preview: /info#experience-section etc.
+	useEffect(() => {
+		if (isLoading) return
+		const hash = (location.hash || '').replace('#', '').trim()
+		if (!hash) return
+		const t = setTimeout(() => {
+			const scrollContainer = document.querySelector('.info-scrollbar')
+			const element = document.getElementById(hash)
+			if (scrollContainer && element) {
+				const offset = 100
+				const elementPosition = element.getBoundingClientRect().top
+				const offsetPosition = elementPosition + scrollContainer.scrollTop - offset
+				scrollContainer.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' })
+			}
+		}, 200)
+		return () => clearTimeout(t)
+	}, [isLoading, location.hash])
 
 	// Scroll to section handler (scrolls the .info-scrollbar div, not the window)
 	const scrollToSection = (sectionId) => {

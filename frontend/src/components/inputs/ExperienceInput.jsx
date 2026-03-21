@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { XIcon } from '@/components/icons';
-import { isBulletFormat, paragraphToBullets, bulletsToParagraph } from '@/utils/descriptionHelpers';
+import { shouldDefaultToBullets, paragraphToBullets, bulletsToParagraph } from '@/utils/descriptionHelpers';
 
 // Experience Input Component - Just the form fields and logic, no headers
 const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
@@ -10,6 +10,8 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 		title: '', 
 		company: '', 
 		description: '', 
+		skills: '', 
+		location: '', 
 		startDate: '', 
 		endDate: '', 
 		current: false 
@@ -37,6 +39,8 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 				title: '', 
 				company: '', 
 				description: '', 
+				skills: '', 
+				location: '', 
 				startDate: '', 
 				endDate: '', 
 				current: false 
@@ -68,14 +72,15 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 		}
 	}, [experiences])
 
-	// initialize description modes based on existing descriptions
+	// initialize description modes based on existing descriptions (default to bullets when newline-separated)
 	useEffect(() => {
 		localEntries.forEach((entry, index) => {
 			if (descriptionModes[index] === undefined) {
-				const isBullet = isBulletFormat(entry.description || '')
-				setDescriptionModes(prev => ({ ...prev, [index]: isBullet ? 'bullets' : 'paragraph' }))
-				if (isBullet) {
-					setDescriptionBullets(prev => ({ ...prev, [index]: paragraphToBullets(entry.description || '') }))
+				const desc = entry.description || ''
+				const useBullets = shouldDefaultToBullets(desc)
+				setDescriptionModes(prev => ({ ...prev, [index]: useBullets ? 'bullets' : 'paragraph' }))
+				if (useBullets) {
+					setDescriptionBullets(prev => ({ ...prev, [index]: paragraphToBullets(desc) }))
 				} else {
 					setDescriptionBullets(prev => ({ ...prev, [index]: [''] }))
 				}
@@ -184,6 +189,8 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 			title: '', 
 			company: '', 
 			description: '', 
+			skills: '', 
+			location: '', 
 			startDate: '', 
 			endDate: '', 
 			current: false 
@@ -268,6 +275,16 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 												onChange={(e) => handleFieldChange(index, 'company', e.target.value)}
 												className="input"
 												placeholder="Company Name"
+											/>
+										</div>
+										<div className="md:col-span-2">
+											<label className="label">Tech Stack / Skills</label>
+											<input
+												type="text"
+												value={localEntries[index]?.skills || ''}
+												onChange={(e) => handleFieldChange(index, 'skills', e.target.value)}
+												className="input"
+												placeholder="e.g., Python, Django, React (comma-separated)"
 											/>
 										</div>
 										<div className="md:col-span-2">
@@ -420,6 +437,16 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 													className="input disabled:bg-gray-100 disabled:cursor-not-allowed"
 												/>
 											</div>
+										</div>
+										<div className="md:col-span-2">
+											<label className="label">Location</label>
+											<input
+												type="text"
+												value={localEntries[index]?.location || ''}
+												onChange={(e) => handleFieldChange(index, 'location', e.target.value)}
+												className="input"
+												placeholder="e.g., Remote, San Francisco, CA"
+											/>
 										</div>
 									</div>
 								</div>

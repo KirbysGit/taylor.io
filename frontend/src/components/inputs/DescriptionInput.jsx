@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { XIcon, RequiredAsterisk } from '@/components/icons';
-import { isBulletFormat, paragraphToBullets, bulletsToParagraph } from '@/utils/descriptionHelpers';
+import { shouldDefaultToBullets, paragraphToBullets, bulletsToParagraph } from '@/utils/descriptionHelpers';
 
 // Reusable Description Input Component - Handles paragraph and bullet modes
 const DescriptionInput = ({ value, onChange, placeholder = "Enter description...", required = false }) => {
@@ -17,12 +17,12 @@ const DescriptionInput = ({ value, onChange, placeholder = "Enter description...
 
 		try {
 			const safeValue = value || ''
-			const isBullet = isBulletFormat(safeValue)
-			const newMode = isBullet ? 'bullets' : 'paragraph'
+			const useBullets = shouldDefaultToBullets(safeValue)
+			const newMode = useBullets ? 'bullets' : 'paragraph'
 
 			setMode(prevMode => (prevMode !== newMode ? newMode : prevMode))
 
-			if (isBullet) {
+			if (useBullets) {
 				const newBullets = paragraphToBullets(safeValue)
 				setBullets(Array.isArray(newBullets) && newBullets.length > 0 ? newBullets : [''])
 			} else {

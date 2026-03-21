@@ -84,7 +84,8 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
     
     # Skills
     skills = resume_data.get("skills") or []
-    skill_entries_html = build_skill_entry(skills)
+    skills_category_order = resume_data.get("skillsCategoryOrder") or []
+    skill_entries_html = build_skill_entry(skills, skills_category_order)
     skills_title = section_labels.get("skills", default_labels["skills"])
     sections_map["skills"] = _build_section(skills_title, skill_entries_html)
     

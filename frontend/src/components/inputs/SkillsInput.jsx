@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGripVertical } from '@fortawesome/free-solid-svg-icons';
+import { faGripVertical, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { XIcon, Pencil } from '@/components/icons';
 
 // Skills Input Component - Just the form fields and logic, no headers
-const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder }) => {
+const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryOrderChange, onHide }) => {
 	const [skillInput, setSkillInput] = useState('');
 	const [categories, setCategories] = useState(['Tools']);
 	const [draggedSkill, setDraggedSkill] = useState(null);
@@ -43,7 +43,9 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder }) => {
 			setCategories(prev => {
 				const kept = prev.filter(c => fromSkills.has(c));
 				const added = [...fromSkills].filter(c => !prev.includes(c));
-				return prev.length === 0 ? [...fromSkills] : [...kept, ...added];
+				const next = prev.length === 0 ? [...fromSkills] : [...kept, ...added];
+				onCategoryOrderChange?.(next);
+				return next;
 			});
 		}
 	}, [skills]);
@@ -268,6 +270,7 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder }) => {
 				const next = [...prev];
 				const [removed] = next.splice(fromIdx, 1);
 				next.splice(toIdx, 0, removed);
+				onCategoryOrderChange?.(next);
 				return next;
 			});
 		}
@@ -366,13 +369,25 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder }) => {
 													Parsed
 												</span>
 											)}
-											<button
-												type="button"
-												onClick={() => handleRemoveSkill(skill.id)}
-												className="skillPillRemove"
-											>
-												<XIcon className="w-3 h-3" />
-											</button>
+											<div className="flex items-center gap-0.5">
+												{onHide && (
+													<button
+														type="button"
+														onClick={(e) => { e.stopPropagation(); onHide(skill.id); }}
+														className="skillPillRemove p-1 rounded hover:bg-gray-200"
+														title="Hide for this resume"
+													>
+														<FontAwesomeIcon icon={faEyeSlash} className="w-3 h-3 text-gray-500" />
+													</button>
+												)}
+												<button
+													type="button"
+													onClick={() => handleRemoveSkill(skill.id)}
+													className="skillPillRemove"
+												>
+													<XIcon className="w-3 h-3" />
+												</button>
+											</div>
 										</div>
 									))}
 								</div>
@@ -487,13 +502,25 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder }) => {
 															Parsed
 														</span>
 													)}
-													<button
-														type="button"
-														onClick={() => handleRemoveSkill(skill.id)}
-														className="skillPillRemove"
-													>
-														<XIcon className="w-3 h-3" />
-													</button>
+													<div className="flex items-center gap-0.5">
+														{onHide && (
+															<button
+																type="button"
+																onClick={(e) => { e.stopPropagation(); onHide(skill.id); }}
+																className="skillPillRemove p-1 rounded hover:bg-gray-200"
+																title="Hide for this resume"
+															>
+																<FontAwesomeIcon icon={faEyeSlash} className="w-3 h-3 text-gray-500" />
+															</button>
+														)}
+														<button
+															type="button"
+															onClick={() => handleRemoveSkill(skill.id)}
+															className="skillPillRemove"
+														>
+															<XIcon className="w-3 h-3" />
+														</button>
+													</div>
 												</div>
 											))}
 										</div>

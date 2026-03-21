@@ -208,14 +208,11 @@ def build_education_entry(edu: Dict[str, Any]) -> str:
 # ----- build experience entries.
 def build_experience_entry(exp: Dict[str, Any]) -> str:
     
-    # build date range.
-    start_date = format_date_month_year(exp.get('start_date', ''))
-    end_date = format_date_month_year(exp.get('end_date', ''))
+    # build date range (support both start_date/end_date and startDate/endDate from frontend)
+    start_raw = exp.get('start_date') or exp.get('startDate') or ''
+    end_raw = exp.get('end_date') or exp.get('endDate') or ''
     current = exp.get('current', False)
-    if current:
-        date_range = f"{start_date} - Present"
-    else:
-        date_range = f"{start_date} - {end_date}"
+    date_range = _format_date_range(start_raw, end_raw, current)
 
     company = exp.get('company', '')
     skills = exp.get('skills', '')
@@ -281,7 +278,7 @@ def build_project_entry(proj: Dict[str, Any]) -> str:
     '''
 
 # ----- build skills entries.
-def build_skill_entry(skills: list) -> str:
+def build_skill_entry(skills: list, category_order: list = None) -> str:
     
     if not skills:
         return ''
@@ -313,8 +310,18 @@ def build_skill_entry(skills: list) -> str:
     # build HTML for each category.
     skill_lines = []
     
-    # add categorized skills.
-    for category in sorted(skills_by_category.keys()):
+    # add categorized skills - use category_order when provided, else alphabetical
+    if category_order:
+        ordered = [c for c in category_order if c in skills_by_category]
+        # append any categories not in order (e.g. from backend)
+        for c in sorted(skills_by_category.keys()):
+            if c not in ordered:
+                ordered.append(c)
+        category_iter = ordered
+    else:
+        category_iter = sorted(skills_by_category.keys())
+    
+    for category in category_iter:
         skill_names = ', '.join(skills_by_category[category])
         skill_lines.append(
             f'<div class="skill-line">'

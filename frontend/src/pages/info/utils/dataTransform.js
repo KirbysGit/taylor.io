@@ -42,15 +42,18 @@ export const transformEducationForBackend = (edu) => {
 	}
 }
 
-// Transform experience from backend format to step format
+// Transform experience from backend format (start_date/end_date) or step format (startDate/endDate) to step format
 export const transformExperienceForStep = (exp) => {
+	// Handle both backend format (start_date/end_date ISO) and step format (startDate/endDate YYYY-MM)
+	const startDate = exp.startDate ?? (exp.start_date ? toMonthInput(exp.start_date) : '')
+	const endDate = exp.endDate ?? (exp.end_date ? toMonthInput(exp.end_date) : '')
 	return {
 		id: exp.id || newId(),
 		title: exp.title || '',
 		company: exp.company || '',
 		description: exp.description || '',
-		startDate: toMonthInput(exp.start_date),
-		endDate: toMonthInput(exp.end_date),
+		startDate,
+		endDate,
 		current: exp.current || false,
 		location: exp.location || '',
 		skills: exp.skills || '',

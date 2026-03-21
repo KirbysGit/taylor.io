@@ -225,3 +225,22 @@ class ParsedResumeResponse(BaseModel):
     summary: Optional[str] = None
     warnings: List[str] = []
 
+
+# --------- saved resume schemas ---------
+
+class SavedResumeCreate(BaseModel):
+    name: str
+    resume_data: Dict
+    template: Optional[str] = None
+
+
+class SavedResumeResponse(BaseModel):
+    id: int
+    user_id: int
+    name: str
+    resume_data: Dict
+    template: Optional[str] = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+

@@ -12,6 +12,7 @@
 # - create_skills_bulk            -      creates multiple skills for the current user.
 
 # imports.
+import os
 from typing import List, Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
@@ -31,10 +32,14 @@ from schemas import (
     SectionLabelsUpdate,
     AttachResumeRequest,
     SummaryCreate, SummaryResponse,
+    SavedResumeCreate, SavedResumeResponse,
 )
 from resume_parser import parse_resume_file
 from .auth import get_current_user_from_token
-from models import User, Experience, Projects, Skills, Contact, Education, Summary
+from models import User, Experience, Projects, Skills, Contact, Education, Summary, SavedResume
+
+# max saved resumes per user (env: MAX_SAVED_RESUMES, default 3)
+MAX_SAVED_RESUMES = int(os.getenv("MAX_SAVED_RESUMES", "3"))
 
 # create router.
 router = APIRouter(prefix="/api/profile", tags=["profile"])
@@ -718,4 +723,72 @@ async def detach_resume(
     db.commit()
     db.refresh(current_user)
     return UserResponse.model_validate(current_user)
+
+
+# ------------------- saved resumes (preview snapshots) -------------------
+
+@router.get("/saved-resumes")
+async def list_saved_resumes(
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    """List user's saved resume previews, newest first. Includes max limit."""
+    saved = db.query(SavedResume).filter(SavedResume.user_id == current_user.id).order_by(SavedResume.created_at.desc()).all()
+    return {
+        "items": [SavedResumeResponse.model_validate(s) for s in saved],
+        "max": MAX_SAVED_RESUMES,
+    }
+
+
+@router.post("/saved-resumes", response_model=SavedResumeResponse)
+async def create_saved_resume(
+    payload: SavedResumeCreate,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    """Save current resume state as a snapshot. Enforces MAX_SAVED_RESUMES limit."""
+    count = db.query(SavedResume).filter(SavedResume.user_id == current_user.id).count()
+    if count >= MAX_SAVED_RESUMES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"You can save up to {MAX_SAVED_RESUMES} resumes. Delete one to save a new one.",
+        )
+    new_saved = SavedResume(
+        user_id=current_user.id,
+        name=payload.name.strip() or "Untitled Resume",
+        resume_data=payload.resume_data,
+        template=payload.template,
+    )
+    db.add(new_saved)
+    db.commit()
+    db.refresh(new_saved)
+    return SavedResumeResponse.model_validate(new_saved)
+
+
+@router.get("/saved-resumes/{saved_id}", response_model=SavedResumeResponse)
+async def get_saved_resume(
+    saved_id: int,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    """Get a single saved resume by id."""
+    saved = db.query(SavedResume).filter(SavedResume.id == saved_id, SavedResume.user_id == current_user.id).first()
+    if not saved:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Saved resume not found")
+    return SavedResumeResponse.model_validate(saved)
+
+
+@router.delete("/saved-resumes/{saved_id}")
+async def delete_saved_resume(
+    saved_id: int,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    """Delete a saved resume."""
+    saved = db.query(SavedResume).filter(SavedResume.id == saved_id, SavedResume.user_id == current_user.id).first()
+    if not saved:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Saved resume not found")
+    db.delete(saved)
+    db.commit()
+    return {"ok": True}
 

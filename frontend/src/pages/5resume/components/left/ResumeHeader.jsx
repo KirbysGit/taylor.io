@@ -18,7 +18,7 @@ import { faEye, faEyeSlash, faGripVertical } from '@fortawesome/free-solid-svg-i
 import { RequiredAsterisk, ChevronDown, ChevronUp } from '@/components/icons'
 
 // ----------- component -----------
-const ResumeHeader = ({ headerData, onHeaderChange }) => {
+const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 	
 	// collapsible section state.
 	const [isHeaderExpanded, setIsHeaderExpanded] = useState(true)
@@ -153,30 +153,7 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 		onHeaderChange(exportedData)
 	}, [firstName, lastName, email, phoneValue, locationValue, linkedinValue, githubValue, portfolioValue, showEmail, showPhone, showLocation, showLinkedin, showGithub, showPortfolio, contactOrder])
 
-	return (
-		<div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
-			{/* header with chevron */}
-			<div
-				onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
-				className="flex items-center gap-3 w-full transition-colors"
-			>
-				{/* title */}
-				<h1 className="text-[1.375rem] font-semibold text-gray-900">Resume Header</h1>
-				
-				{/* divider */}
-				<div className="flex-1 h-[3px] rounded bg-gray-300"></div>
-				
-				{/* chevron in circle */}
-				<div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-					{isHeaderExpanded ? (
-						<ChevronUp className="w-4 h-4 text-gray-600" />
-					) : (
-						<ChevronDown className="w-4 h-4 text-gray-600" />
-					)}
-				</div>
-			</div>
-			
-			{isHeaderExpanded && (
+	const headerFields = (
 				<div>
 					<p className="text-[0.875rem] text-gray-500 mb-2">This is the top of your resume. It's your brand.</p>
 					
@@ -375,7 +352,36 @@ const ResumeHeader = ({ headerData, onHeaderChange }) => {
 						})}
 					</div>
 				</div>
-			)}
+	)
+
+	if (bare) {
+		return <div className="p-4">{headerFields}</div>
+	}
+
+	return (
+		<div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
+			{/* header with chevron */}
+			<div
+				onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
+				className="flex items-center gap-3 w-full transition-colors"
+			>
+				{/* title */}
+				<h1 className="text-[1.375rem] font-semibold text-gray-900">Resume Header</h1>
+				
+				{/* divider */}
+				<div className="flex-1 h-[3px] rounded bg-gray-300"></div>
+				
+				{/* chevron in circle */}
+				<div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+					{isHeaderExpanded ? (
+						<ChevronUp className="w-4 h-4 text-gray-600" />
+					) : (
+						<ChevronDown className="w-4 h-4 text-gray-600" />
+					)}
+				</div>
+			</div>
+			
+			{isHeaderExpanded && headerFields}
 		</div>
 	)
 }

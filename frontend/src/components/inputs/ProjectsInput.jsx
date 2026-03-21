@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { XIcon, ChevronDown } from '@/components/icons';
-import { isBulletFormat, paragraphToBullets, bulletsToParagraph } from '@/utils/descriptionHelpers';
+import { shouldDefaultToBullets, paragraphToBullets, bulletsToParagraph } from '@/utils/descriptionHelpers';
 
 // Projects Input Component - Just the form fields and logic, no headers
 const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
@@ -57,14 +57,15 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate }) => {
 		}
 	}, [projects])
 
-	// initialize description modes based on existing descriptions
+	// initialize description modes based on existing descriptions (default to bullets when newline-separated)
 	useEffect(() => {
 		localEntries.forEach((entry, index) => {
 			if (descriptionModes[index] === undefined) {
-				const isBullet = isBulletFormat(entry.description || '')
-				setDescriptionModes(prev => ({ ...prev, [index]: isBullet ? 'bullets' : 'paragraph' }))
-				if (isBullet) {
-					setDescriptionBullets(prev => ({ ...prev, [index]: paragraphToBullets(entry.description || '') }))
+				const desc = entry.description || ''
+				const useBullets = shouldDefaultToBullets(desc)
+				setDescriptionModes(prev => ({ ...prev, [index]: useBullets ? 'bullets' : 'paragraph' }))
+				if (useBullets) {
+					setDescriptionBullets(prev => ({ ...prev, [index]: paragraphToBullets(desc) }))
 				} else {
 					setDescriptionBullets(prev => ({ ...prev, [index]: [''] }))
 				}

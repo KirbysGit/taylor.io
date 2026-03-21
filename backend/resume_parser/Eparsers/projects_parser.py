@@ -75,11 +75,16 @@ def parse_projects(section_text: str) -> List[Dict[str, Optional[str]]]:
                         if item:
                             cleaned_items.append(item)
                     
-                    # return as list if we have bullets, otherwise as string
+                    # return as list if we have bullets, otherwise check for newline-separated lines
                     if cleaned_items:
                         current_project["description"] = cleaned_items
                     else:
-                        current_project["description"] = description.strip() if description.strip() else None
+                        # If no bullets but newline-separated lines, default to bullet list
+                        lines = [l.strip() for l in description.split('\n') if l.strip()]
+                        if len(lines) > 1:
+                            current_project["description"] = lines
+                        else:
+                            current_project["description"] = description.strip() if description.strip() else None
                 projects.append(current_project)
             
             # start new project - split on | to get title and tech stack
@@ -185,11 +190,16 @@ def parse_projects(section_text: str) -> List[Dict[str, Optional[str]]]:
                 if item:
                     cleaned_items.append(item)
             
-            # return as list if we have bullets, otherwise as string
+            # return as list if we have bullets, otherwise check for newline-separated lines
             if cleaned_items:
                 current_project["description"] = cleaned_items
             else:
-                current_project["description"] = description.strip() if description.strip() else None
+                # If no bullets but newline-separated lines, default to bullet list
+                lines = [l.strip() for l in description.split('\n') if l.strip()]
+                if len(lines) > 1:
+                    current_project["description"] = lines
+                else:
+                    current_project["description"] = description.strip() if description.strip() else None
         projects.append(current_project)
     
     return projects

@@ -115,3 +115,24 @@ export async function detachResume() {
 	})
 }
 
+// --------- saved resumes (preview snapshots) ---------
+
+export async function listSavedResumes() {
+	return apiRequest('/api/profile/saved-resumes', { method: 'GET' })
+}
+
+export async function createSavedResume(name, resumeData, template = null) {
+	return apiRequest('/api/profile/saved-resumes', {
+		method: 'POST',
+		body: JSON.stringify({ name, resume_data: resumeData, template }),
+	})
+}
+
+export async function getSavedResume(id) {
+	return apiRequest(`/api/profile/saved-resumes/${id}`, { method: 'GET' })
+}
+
+export async function deleteSavedResume(id) {
+	return apiRequest(`/api/profile/saved-resumes/${id}`, { method: 'DELETE' })
+}
+

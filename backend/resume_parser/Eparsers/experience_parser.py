@@ -289,11 +289,16 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
                 if item:
                     cleaned_items.append(item)
             
-            # return as list if we have bullets, otherwise as string
+            # return as list if we have bullets, otherwise check for newline-separated lines
             if cleaned_items:
                 exp_item["description"] = "• " + "\n• ".join(cleaned_items)
             else:
-                exp_item["description"] = description.strip()
+                # If no bullets but newline-separated lines, default to bullet format
+                lines = [l.strip() for l in description.split('\n') if l.strip()]
+                if len(lines) > 1:
+                    exp_item["description"] = "• " + "\n• ".join(lines)
+                else:
+                    exp_item["description"] = description.strip()
         
         if exp_item["title"]:
             experiences.append(exp_item)

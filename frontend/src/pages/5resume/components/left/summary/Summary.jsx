@@ -11,11 +11,18 @@ const Summary = ({
 	onVisibilityChange,
 	sectionLabel,
 	onSectionLabelChange,
+	bare = false,
 }) => {
 	const summary = summaryData?.summary ?? ''
 
 	const handleUpdate = (value) => {
 		onSummaryChange({ summary: value })
+	}
+
+	const input = <SummaryInput summary={summary} onUpdate={handleUpdate} />
+
+	if (bare) {
+		return <div className="p-4">{input}</div>
 	}
 
 	return (
@@ -28,7 +35,7 @@ const Summary = ({
 			onVisibilityChange={onVisibilityChange}
 			description="Write a brief professional summary highlighting your experience, skills, and career goals."
 		>
-			<SummaryInput summary={summary} onUpdate={handleUpdate} />
+			{input}
 		</ResumeSectionWrapper>
 	)
 }

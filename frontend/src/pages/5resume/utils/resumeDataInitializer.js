@@ -88,8 +88,9 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 		url: proj.url || '',
 	}))
 
-	// Initialize skills data
-	const initialSkills = (responseData.skills || []).map(skill => ({
+	// Initialize skills data (preserve id for hide/show stability)
+	const initialSkills = (responseData.skills || []).map((skill, i) => ({
+		id: skill.id ?? `skill-${Date.now()}-${i}`,
 		name: skill.name || '',
 		category: skill.category || '',
 	}))
@@ -99,13 +100,14 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 		? { summary: responseData.summary.summary || '' }
 		: { summary: '' }
 
-	// Create resume data object
+	// Create resume data object (hiddenSkills = [] by default, all skills visible)
 	const resumeData = {
 		header: initialHeader,
 		education: initialEducation,
 		experience: initialExperience,
 		projects: initialProjects,
 		skills: initialSkills,
+		hiddenSkills: [],
 		summary: initialSummary,
 		sectionVisibility: {
 			summary: false, // hidden by default
@@ -127,4 +129,37 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 		summaryData: initialSummary,
 		resumeData,
 	}
+}
+
+/**
+ * Initialize resume data with optional selection (for "Choose from profile" flow)
+ * or empty experience/projects (for "Start fresh" flow).
+ * @param {Object} responseData - The response data from getMyProfile API
+ * @param {Array} sectionOrder - The current section order
+ * @param {Object} options - { selectedEducationIds, selectedExperienceIds, selectedProjectIds } for choose; or { startFresh: true }
+ */
+export function initializeResumeDataWithOptions(responseData, sectionOrder, options = {}) {
+	const { selectedEducationIds, selectedExperienceIds, selectedProjectIds, startFresh } = options
+
+	let data = { ...responseData }
+	if (startFresh) {
+		data = { ...data, education: [], experiences: [], projects: [] }
+	} else if (selectedEducationIds || selectedExperienceIds || selectedProjectIds) {
+		if (selectedEducationIds && selectedEducationIds.length >= 0) {
+			data.education = (responseData.education || []).filter((e) =>
+				selectedEducationIds.includes(e.id)
+			)
+		}
+		if (selectedExperienceIds && selectedExperienceIds.length >= 0) {
+			data.experiences = (responseData.experiences || []).filter((e) =>
+				selectedExperienceIds.includes(e.id)
+			)
+		}
+		if (selectedProjectIds && selectedProjectIds.length >= 0) {
+			data.projects = (responseData.projects || []).filter((p) =>
+				selectedProjectIds.includes(p.id)
+			)
+		}
+	}
+	return initializeResumeDataFromBackend(data, sectionOrder)
 }

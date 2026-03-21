@@ -10,7 +10,9 @@ function SectionTitleEditor({
 	sectionKey, 
 	currentLabel, 
 	onLabelChange,
-	defaultLabel 
+	defaultLabel,
+	/** Smaller title for compact bars / nested panels */
+	size = 'default',
 }) {
 	const [isEditing, setIsEditing] = useState(false)
 	const [editValue, setEditValue] = useState(currentLabel || defaultLabel)
@@ -61,6 +63,12 @@ function SectionTitleEditor({
 		}
 	}
 
+	const isCompact = size === 'compact'
+	const inputClass = isCompact
+		? 'text-sm font-semibold text-gray-900 bg-white border-2 border-brand-pink rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-pink'
+		: 'text-[1.375rem] font-semibold text-gray-900 bg-white border-2 border-brand-pink rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-pink'
+	const titleClass = isCompact ? 'text-sm font-semibold text-gray-900' : 'text-[1.375rem] font-semibold text-gray-900'
+
 	if (isEditing) {
 		return (
 			<input
@@ -70,8 +78,8 @@ function SectionTitleEditor({
 				onChange={(e) => setEditValue(e.target.value)}
 				onBlur={handleSave}
 				onKeyDown={handleKeyDown}
-				className="text-[1.375rem] font-semibold text-gray-900 bg-white border-2 border-brand-pink rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-pink"
-				style={{ minWidth: '150px', maxWidth: '300px' }}
+				className={inputClass}
+				style={{ minWidth: isCompact ? '120px' : '150px', maxWidth: isCompact ? '240px' : '300px' }}
 				onClick={(e) => e.stopPropagation()}
 			/>
 		)
@@ -79,7 +87,7 @@ function SectionTitleEditor({
 
 	return (
 		<div className="flex items-center gap-2">
-			<h1 className="text-[1.375rem] font-semibold text-gray-900">
+			<h1 className={titleClass}>
 				{currentLabel || defaultLabel}
 			</h1>
 			<button

@@ -1,7 +1,7 @@
 import React from 'react'
 import SkillsInput from '@/components/inputs/SkillsInput'
 
-const SkillsSection = ({ skills, onAdd, onRemove, onUpdate, onReorder }) => {
+const SkillsSection = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryOrderChange }) => {
 	return (
 		<section 
 			className="bg-white-bright rounded-xl p-6 border-2 border-gray-200"
@@ -18,6 +18,7 @@ const SkillsSection = ({ skills, onAdd, onRemove, onUpdate, onReorder }) => {
 				onRemove={onRemove} 
 				onUpdate={onUpdate} 
 				onReorder={onReorder}
+				onCategoryOrderChange={onCategoryOrderChange}
 			/>
 		</section>
 	)

@@ -36,3 +36,6 @@ class User(Base):
     # optional per-user section header overrides, e.g., {"education": "Academics"}
     section_labels = Column(JSON, nullable=True)
 
+    # saved resume previews (snapshots for later)
+    saved_resumes = relationship("SavedResume", back_populates="user", cascade="all, delete-orphan")
+

@@ -26,6 +26,8 @@ const Education = ({
 	onVisibilityChange,
 	sectionLabel,
 	onSectionLabelChange,
+	/** When true, render only inputs (for compact bar + expand layout). */
+	bare = false,
 }) => {
 	const education = useMemo(() => toInputFormat(educationData), [educationData])
 
@@ -55,6 +57,20 @@ const Education = ({
 		[educationData, onEducationChange]
 	)
 
+	const input = (
+		<EducationInput
+			education={education}
+			onAdd={handleAdd}
+			onRemove={handleRemove}
+			onUpdate={handleUpdate}
+			showSubsections={true}
+		/>
+	)
+
+	if (bare) {
+		return <div className="p-4">{input}</div>
+	}
+
 	return (
 		<ResumeSectionWrapper
 			sectionKey="education"
@@ -65,13 +81,7 @@ const Education = ({
 			onVisibilityChange={onVisibilityChange}
 			description="Your academic background"
 		>
-			<EducationInput
-				education={education}
-				onAdd={handleAdd}
-				onRemove={handleRemove}
-				onUpdate={handleUpdate}
-				showSubsections={true}
-			/>
+			{input}
 		</ResumeSectionWrapper>
 	)
 }

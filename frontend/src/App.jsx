@@ -10,6 +10,8 @@ import Auth from './pages/2auth/Auth'
 import AccountSetup from './pages/3setup/AccountSetup'
 import Home from './pages/4home/Home'
 import ResumePreview from './pages/5resume/ResumePreview'
+import ResumeCreate from './pages/5resume/ResumeCreate'
+import ResumeChoose from './pages/5resume/ResumeChoose'
 import Info from './pages/info/Info'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -67,6 +69,22 @@ function App() {
           element={
             <ProtectedRoute requireSetup={true}>
               <Info />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/resume/create" 
+          element={
+            <ProtectedRoute requireSetup={true}>
+              <ResumeCreate />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/resume/create/choose" 
+          element={
+            <ProtectedRoute requireSetup={true}>
+              <ResumeChoose />
             </ProtectedRoute>
           } 
         />

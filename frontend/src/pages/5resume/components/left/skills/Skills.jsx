@@ -1,6 +1,8 @@
-// Skills.jsx - Uses shared SkillsInput with resume-specific wrapper (visibility, section label)
+// Skills.jsx - Uses shared SkillsInput with resume-specific wrapper (visibility, section label, hide/show)
 
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEye, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import SkillsInput from '@/components/inputs/SkillsInput'
 import ResumeSectionWrapper from '../ResumeSectionWrapper'
 
@@ -28,13 +30,20 @@ const toResumeFormat = (skills) => {
 
 const Skills = ({
 	skillsData,
+	hiddenSkills,
 	onSkillsChange,
+	onHideSkill,
+	onShowSkill,
+	onCategoryOrderChange,
 	isVisible = true,
 	onVisibilityChange,
 	sectionLabel,
 	onSectionLabelChange,
+	bare = false,
 }) => {
+	const [hiddenSectionOpen, setHiddenSectionOpen] = useState(false)
 	const skills = useMemo(() => toInputFormat(skillsData ?? []), [skillsData])
+	const hidden = useMemo(() => toInputFormat(hiddenSkills ?? []), [hiddenSkills])
 
 	const handleAdd = useCallback(
 		(skill) => {
@@ -72,6 +81,66 @@ const Skills = ({
 		[skillsData, onSkillsChange]
 	)
 
+	const hiddenBlock =
+		hidden.length > 0 ? (
+			<div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
+				<button
+					type="button"
+					onClick={() => setHiddenSectionOpen(!hiddenSectionOpen)}
+					className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left"
+				>
+					<span className="font-medium text-gray-700">
+						Hidden for this resume ({hidden.length})
+					</span>
+					<FontAwesomeIcon icon={hiddenSectionOpen ? faChevronUp : faChevronDown} className="w-4 h-4 text-gray-500" />
+				</button>
+				{hiddenSectionOpen && (
+					<div className="p-4 bg-white border-t border-gray-200">
+						<div className="flex flex-wrap gap-2">
+							{hidden.map((skill) => (
+								<div
+									key={skill.id}
+									className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-full text-sm"
+								>
+									<span className="text-gray-600">{skill.name}</span>
+									{skill.category && (
+										<span className="text-xs text-gray-400">({skill.category})</span>
+									)}
+									<button
+										type="button"
+										onClick={() => onShowSkill?.(skill.id)}
+										className="p-1 rounded hover:bg-brand-pink/20 text-brand-pink"
+										title="Show on resume"
+									>
+										<FontAwesomeIcon icon={faEye} className="w-3.5 h-3.5" />
+									</button>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+			</div>
+		) : null
+
+	const inputBlock = (
+		<>
+			<SkillsInput
+				skills={skills}
+				onAdd={handleAdd}
+				onRemove={handleRemove}
+				onUpdate={handleUpdate}
+				onReorder={handleReorder}
+				onCategoryOrderChange={onCategoryOrderChange}
+				onHide={onHideSkill || undefined}
+			/>
+			{hiddenBlock}
+		</>
+	)
+
+	if (bare) {
+		return <div className="p-4">{inputBlock}</div>
+	}
+
 	return (
 		<ResumeSectionWrapper
 			sectionKey="skills"
@@ -80,15 +149,9 @@ const Skills = ({
 			defaultLabel="Skills"
 			isVisible={isVisible}
 			onVisibilityChange={onVisibilityChange}
-			description="Organize your skills into categories. Drag pills to reorder."
+			description="Organize your skills into categories. Drag pills to reorder. Hide skills you don't want on this resume."
 		>
-			<SkillsInput
-				skills={skills}
-				onAdd={handleAdd}
-				onRemove={handleRemove}
-				onUpdate={handleUpdate}
-				onReorder={handleReorder}
-			/>
+			{inputBlock}
 		</ResumeSectionWrapper>
 	)
 }

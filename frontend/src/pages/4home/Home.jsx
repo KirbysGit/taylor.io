@@ -3,9 +3,11 @@
 // homepage component (shown after successful login/signup).
 
 // imports.
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import TopNav from '@/components/TopNav'
+import { listSavedResumes, deleteSavedResume } from '@/api/services/profile'
 
 // ----------- main component -----------
 
@@ -13,6 +15,17 @@ function Home() {
 	const navigate = useNavigate()
 	const [user, setUser] = useState(null)
 	const [isLoading, setIsLoading] = useState(true)
+	const [savedResumes, setSavedResumes] = useState({ items: [], max: 3 })
+
+	const fetchSavedResumes = useCallback(async () => {
+		try {
+			const res = await listSavedResumes()
+			const data = res.data || res
+			setSavedResumes({ items: data.items || [], max: data.max ?? 3 })
+		} catch {
+			setSavedResumes({ items: [], max: 3 })
+		}
+	}, [])
 
 	// get user profile from backend on mount.
 	useEffect(() => {
@@ -46,9 +59,14 @@ function Home() {
 		fetchProfile()
 	}, [navigate])
 
-	// function to handle resume generation - navigate to preview page.
+	// fetch saved resumes when user is loaded
+	useEffect(() => {
+		if (user) fetchSavedResumes()
+	}, [user, fetchSavedResumes])
+
+	// function to handle resume generation - navigate to create options page.
 	const handleGenerateResume = () => {
-		navigate('/resume/preview')
+		navigate('/resume/create')
 	}
 
 	// function to handle logout.
@@ -58,13 +76,33 @@ function Home() {
 		navigate('/')
 	}
 
-	// placeholder past resumes data
-	const pastResumes = [
-		// This will be populated from backend later
-	]
+	const handleLoadSaved = (id) => {
+		navigate('/resume/preview', { state: { loadSavedId: id } })
+	}
+
+	const handleDeleteSaved = async (id, e) => {
+		e?.stopPropagation()
+		try {
+			await deleteSavedResume(id)
+			fetchSavedResumes()
+			toast.success('Saved resume deleted')
+		} catch {
+			toast.error('Failed to delete')
+		}
+	}
+
+	const formatDate = (dateStr) => {
+		if (!dateStr) return ''
+		try {
+			const d = new Date(dateStr)
+			return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+		} catch {
+			return dateStr
+		}
+	}
 
 	return (
-		<div className="min-h-screen flex flex-col bg-cream">
+		<div className="min-h-screen flex flex-col bg-cream info-scrollbar overflow-y-auto" style={{ height: '100vh' }}>
 			<TopNav user={user} onLogout={handleLogout} />
 
 			{/* Main Content */}
@@ -161,40 +199,49 @@ function Home() {
 						</div>
 					</section>
 
-					{/* Past Resumes Section */}
+					{/* Saved Resumes Section */}
 					<section>
 						<div 
 							className="bg-white-bright rounded-xl p-8 border-2 border-gray-200"
 							style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)' }}
 						>
 							<h2 className="text-2xl font-bold mb-4 text-gray-900">
-								Past Resumes
+								Saved Resumes ({savedResumes.items.length}/{savedResumes.max})
 							</h2>
-							{pastResumes.length === 0 ? (
+							{savedResumes.items.length === 0 ? (
 								<div className="text-center py-12">
 									<svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 									</svg>
 									<p className="text-gray-500 text-sm">
-										Your generated resumes will appear here
+										Save resume previews from the editor to access them here
 									</p>
 								</div>
 							) : (
 								<div className="space-y-3">
-									{pastResumes.map((resume, index) => (
-										<div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-											<div className="flex items-center justify-between">
-												<div>
-													<h3 className="font-semibold text-gray-900">{resume.name}</h3>
-													<p className="text-sm text-gray-500">{resume.date}</p>
-												</div>
-												<button className="text-brand-pink hover:text-brand-pink/80 text-sm font-medium">
-													View
+									{savedResumes.items.map((resume) => (
+										<div key={resume.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
+											<div>
+												<h3 className="font-semibold text-gray-900">{resume.name}</h3>
+												<p className="text-sm text-gray-500">{formatDate(resume.created_at)}</p>
+											</div>
+											<div className="flex items-center gap-2">
+												<button
+													onClick={() => handleLoadSaved(resume.id)}
+													className="px-4 py-2 bg-brand-pink text-white rounded-lg hover:opacity-90 text-sm font-medium"
+												>
+													Load
+												</button>
+												<button
+													onClick={(e) => handleDeleteSaved(resume.id, e)}
+													className="text-red-500 hover:text-red-700 text-sm font-medium"
+												>
+													Delete
 												</button>
 											</div>
 										</div>
 									))}
-							</div>
+								</div>
 							)}
 						</div>
 					</section>

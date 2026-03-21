@@ -24,6 +24,7 @@ const Experience = ({
 	onVisibilityChange,
 	sectionLabel,
 	onSectionLabelChange,
+	bare = false,
 }) => {
 	const experiences = useMemo(() => toInputFormat(experienceData), [experienceData])
 
@@ -52,6 +53,19 @@ const Experience = ({
 		[experienceData, onExperienceChange]
 	)
 
+	const input = (
+		<ExperienceInput
+			experiences={experiences}
+			onAdd={handleAdd}
+			onRemove={handleRemove}
+			onUpdate={handleUpdate}
+		/>
+	)
+
+	if (bare) {
+		return <div className="p-4">{input}</div>
+	}
+
 	return (
 		<ResumeSectionWrapper
 			sectionKey="experience"
@@ -62,12 +76,7 @@ const Experience = ({
 			onVisibilityChange={onVisibilityChange}
 			description="Your work history"
 		>
-			<ExperienceInput
-				experiences={experiences}
-				onAdd={handleAdd}
-				onRemove={handleRemove}
-				onUpdate={handleUpdate}
-			/>
+			{input}
 		</ResumeSectionWrapper>
 	)
 }

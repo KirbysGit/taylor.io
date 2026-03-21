@@ -12,13 +12,13 @@
 
 // imports.
 import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
 // api imports.
 import { listTemplates } from '@/api/services/templates'
 import { generateResumePreview, generateResumePDF } from '@/api/services/resume'
-import { getMyProfile, upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, updateSectionLabels } from '@/api/services/profile'
+import { getMyProfile, upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, updateSectionLabels, listSavedResumes, createSavedResume, getSavedResume, deleteSavedResume } from '@/api/services/profile'
 
 // component imports.
 import SaveBanner from './components/left/SaveBanner'
@@ -36,13 +36,14 @@ import {
 	normalizeSkillForBackend
 } from '@/pages/utils/DataFormatting'
 import { applyVisibilityFilters, hasResumeDataChanged, getResumeChangeDescriptions, downloadBlob } from './utils/resumeDataTransform'
-import { initializeResumeDataFromBackend } from './utils/resumeDataInitializer'
+import { initializeResumeDataFromBackend, initializeResumeDataWithOptions } from './utils/resumeDataInitializer'
 
 // ----------- main component -----------
 function ResumePreview() {
 
     // allows us to navigate to other pages.
 	const navigate = useNavigate()
+	const location = useLocation()
 
     // ----- states -----
 
@@ -152,6 +153,7 @@ function ResumePreview() {
 		experience: null,
 		projects: null,
 		skills: null,
+		hiddenSkills: null,
 		summary: null,
 	})
 
@@ -164,6 +166,24 @@ function ResumePreview() {
 		const savedOrder = localStorage.getItem('resumeSectionOrder')
 		return savedOrder ? JSON.parse(savedOrder) : ['header', 'summary', 'education', 'experience', 'projects', 'skills']
 	})
+
+	// Left panel: Organize (compact) vs Full editor — persisted
+	const [leftPanelMode, setLeftPanelMode] = useState(() => {
+		try {
+			const v = localStorage.getItem('resumePreviewLeftPanelMode')
+			return v === 'full' ? 'full' : 'simple'
+		} catch {
+			return 'simple'
+		}
+	})
+	const handleLeftPanelModeChange = useCallback((mode) => {
+		setLeftPanelMode(mode)
+		try {
+			localStorage.setItem('resumePreviewLeftPanelMode', mode)
+		} catch {
+			/* ignore */
+		}
+	}, [])
 
 	// section labels state - default labels
 	const DEFAULT_SECTION_LABELS = {
@@ -191,6 +211,7 @@ function ResumePreview() {
 		experience: [],
 		projects: [],
 		skills: [],
+		hiddenSkills: [],
 		summary: { summary: '' },
 		// section visibility - controls which sections show in preview/PDF
 		sectionVisibility: {
@@ -338,6 +359,7 @@ function ResumePreview() {
 				experience: JSON.parse(JSON.stringify(baselineData.experience || [])),
 				projects: JSON.parse(JSON.stringify(baselineData.projects || [])),
 				skills: JSON.parse(JSON.stringify(baselineData.skills || [])),
+				hiddenSkills: JSON.parse(JSON.stringify(baselineData.hiddenSkills || [])),
 				summary: JSON.parse(JSON.stringify(baselineData.summary || { summary: '' })),
 				// preserve sectionVisibility when discarding (visibility is separate from data)
 				sectionVisibility: resumeData.sectionVisibility || {
@@ -382,6 +404,32 @@ function ResumePreview() {
 		setResumeData(prev => ({ ...prev, skills: exportedSkills }))
 	}, [])
 
+	const handleHideSkill = useCallback((skillId) => {
+		setResumeData((prev) => {
+			const skills = prev.skills || []
+			const skill = skills.find((s) => String(s.id ?? s) === String(skillId))
+			if (!skill) return prev
+			const newSkills = skills.filter((s) => String(s.id ?? s) !== String(skillId))
+			const newHidden = [...(prev.hiddenSkills || []), { ...skill, id: skill.id ?? skillId }]
+			return { ...prev, skills: newSkills, hiddenSkills: newHidden }
+		})
+	}, [])
+
+	const handleShowSkill = useCallback((skillId) => {
+		setResumeData((prev) => {
+			const hidden = prev.hiddenSkills || []
+			const skill = hidden.find((s) => String(s.id ?? s) === String(skillId))
+			if (!skill) return prev
+			const newHidden = hidden.filter((s) => String(s.id ?? s) !== String(skillId))
+			const newSkills = [...(prev.skills || []), { ...skill, id: skill.id ?? skillId }]
+			return { ...prev, skills: newSkills, hiddenSkills: newHidden }
+		})
+	}, [])
+
+	const handleSkillsCategoryOrderChange = useCallback((categoryOrder) => {
+		setResumeData(prev => ({ ...prev, skillsCategoryOrder: categoryOrder }))
+	}, [])
+
 	const handleSummaryChange = useCallback((exportedSummary) => {
 		// Keep summaryData in sync so Summary component shows correct data when it remounts after reorder
 		setSummaryData(exportedSummary)
@@ -398,6 +446,105 @@ function ResumePreview() {
 			}
 		}))
 	}, [])
+
+	// ----- saved resumes (preview snapshots) -----
+	const [savedResumes, setSavedResumes] = useState({ items: [], max: 3 })
+	const [savedResumesOpen, setSavedResumesOpen] = useState(false)
+	const [isSavingResume, setIsSavingResume] = useState(false)
+	const [saveResumeName, setSaveResumeName] = useState('')
+
+	const fetchSavedResumes = useCallback(async () => {
+		try {
+			const res = await listSavedResumes()
+			const data = res.data || res
+			setSavedResumes({ items: data.items || [], max: data.max ?? 3 })
+		} catch {
+			setSavedResumes({ items: [], max: 3 })
+		}
+	}, [])
+
+	const handleSaveForLater = useCallback(async () => {
+		const name = (saveResumeName || 'Untitled Resume').trim()
+		if (!name) return
+		setIsSavingResume(true)
+		try {
+			const payload = {
+				...resumeData,
+				header: resumeData.header,
+				education: resumeData.education || [],
+				experience: resumeData.experience || [],
+				projects: resumeData.projects || [],
+				skills: resumeData.skills || [],
+				hiddenSkills: resumeData.hiddenSkills || [],
+				summary: resumeData.summary || { summary: '' },
+				sectionVisibility: resumeData.sectionVisibility,
+				sectionOrder: resumeData.sectionOrder || sectionOrder,
+				skillsCategoryOrder: resumeData.skillsCategoryOrder,
+			}
+			await createSavedResume(name, payload, template)
+			toast.success('Resume saved for later')
+			setSaveResumeName('')
+			fetchSavedResumes()
+		} catch (err) {
+			const msg = err?.response?.data?.detail || err?.message || 'Failed to save'
+			toast.error(typeof msg === 'string' ? msg : msg[0]?.msg || 'Failed to save')
+		} finally {
+			setIsSavingResume(false)
+		}
+	}, [resumeData, template, sectionOrder, saveResumeName, fetchSavedResumes])
+
+	const handleLoadSaved = useCallback(async (id) => {
+		try {
+			const res = await getSavedResume(id)
+			const data = res.data || res
+			const rd = data.resume_data || {}
+			const merged = {
+				header: rd.header,
+				education: rd.education ?? [],
+				experience: rd.experience ?? [],
+				projects: rd.projects ?? [],
+				skills: rd.skills ?? [],
+				hiddenSkills: rd.hiddenSkills ?? [],
+				summary: rd.summary ?? { summary: '' },
+				sectionVisibility: rd.sectionVisibility,
+				sectionOrder: rd.sectionOrder,
+				skillsCategoryOrder: rd.skillsCategoryOrder,
+			}
+			setResumeData(prev => ({ ...prev, ...merged }))
+			setHeaderData(merged.header)
+			setEducationData(merged.education)
+			setExperienceData(merged.experience)
+			setProjectsData(merged.projects)
+			setSkillsData(merged.skills)
+			setSummaryData(merged.summary)
+			setBaselineData({
+				header: merged.header,
+				education: merged.education,
+				experience: merged.experience,
+				projects: merged.projects,
+				skills: merged.skills,
+				hiddenSkills: merged.hiddenSkills,
+				summary: merged.summary,
+			})
+			if (merged.sectionOrder) setSectionOrder(merged.sectionOrder)
+			if (data.template) setTemplate(data.template)
+			setSavedResumesOpen(false)
+			toast.success('Resume loaded')
+		} catch {
+			toast.error('Failed to load')
+		}
+	}, [])
+
+	const handleDeleteSaved = useCallback(async (id, e) => {
+		e?.stopPropagation()
+		try {
+			await deleteSavedResume(id)
+			fetchSavedResumes()
+			toast.success('Saved resume deleted')
+		} catch {
+			toast.error('Failed to delete')
+		}
+	}, [fetchSavedResumes])
 
 	// Handle section order change
 	const handleSectionOrderChange = (newOrder) => {
@@ -495,8 +642,9 @@ function ResumePreview() {
 			const projectsToSave = resumeData.projects.map(normalizeProjectForBackend)
 			await setupProjects(projectsToSave)
 
-			// save skills (bulk replace).
-			const skillsToSave = resumeData.skills.map(normalizeSkillForBackend)
+			// save skills (bulk replace) - include both visible and hidden (full pool to profile)
+			const allSkills = [...(resumeData.skills || []), ...(resumeData.hiddenSkills || [])]
+			const skillsToSave = allSkills.map(normalizeSkillForBackend)
 			await setupSkills(skillsToSave)
 
 			// save summary (UPSERT).
@@ -519,6 +667,7 @@ function ResumePreview() {
 				experience: JSON.parse(JSON.stringify(resumeData.experience)),
 				projects: JSON.parse(JSON.stringify(resumeData.projects)),
 				skills: JSON.parse(JSON.stringify(resumeData.skills || [])),
+				hiddenSkills: JSON.parse(JSON.stringify(resumeData.hiddenSkills || [])),
 				summary: JSON.parse(JSON.stringify(resumeData.summary || { summary: '' })),
 			})
 			setShowSaveBanner(false)
@@ -580,10 +729,22 @@ function ResumePreview() {
 				// --- grab user data from backend.
 				const response = await getMyProfile()
 				const responseData = response.data
-				
-				// --- initialize all data using utility function.
-				const initialized = initializeResumeDataFromBackend(responseData, sectionOrder)
-				
+				const state = location.state || {}
+
+				// --- initialize using utility (with options for choose/startFresh flows)
+				let initialized
+				if (state.createMode === 'choose' && (state.selectedEducationIds || state.selectedExperienceIds || state.selectedProjectIds)) {
+					initialized = initializeResumeDataWithOptions(responseData, sectionOrder, {
+						selectedEducationIds: state.selectedEducationIds,
+						selectedExperienceIds: state.selectedExperienceIds,
+						selectedProjectIds: state.selectedProjectIds,
+					})
+				} else if (state.createMode === 'startFresh') {
+					initialized = initializeResumeDataWithOptions(responseData, sectionOrder, { startFresh: true })
+				} else {
+					initialized = initializeResumeDataFromBackend(responseData, sectionOrder)
+				}
+
 				setUser(initialized.user)
 				setHeaderData(initialized.headerData)
 				setEducationData(initialized.educationData)
@@ -618,6 +779,63 @@ function ResumePreview() {
 
 		fetchTemplates()
 	}, [])
+
+	// fetch saved resumes when user is loaded
+	useEffect(() => {
+		if (user) fetchSavedResumes()
+	}, [user, fetchSavedResumes])
+
+	// load saved resume when navigated from Home with loadSavedId
+	useEffect(() => {
+		const loadSavedId = location.state?.loadSavedId
+		if (!user || !loadSavedId) return
+
+		const loadFromHome = async () => {
+			try {
+				const res = await getSavedResume(loadSavedId)
+				const data = res.data || res
+				const rd = data.resume_data || {}
+				const merged = {
+					header: rd.header,
+					education: rd.education ?? [],
+					experience: rd.experience ?? [],
+					projects: rd.projects ?? [],
+					skills: rd.skills ?? [],
+					hiddenSkills: rd.hiddenSkills ?? [],
+					summary: rd.summary ?? { summary: '' },
+					sectionVisibility: rd.sectionVisibility,
+					sectionOrder: rd.sectionOrder,
+					skillsCategoryOrder: rd.skillsCategoryOrder,
+				}
+				setResumeData(prev => ({ ...prev, ...merged }))
+				setHeaderData(merged.header)
+				setEducationData(merged.education)
+				setExperienceData(merged.experience)
+				setProjectsData(merged.projects)
+				setSkillsData(merged.skills)
+				setSummaryData(merged.summary)
+				setBaselineData({
+					header: merged.header,
+					education: merged.education,
+					experience: merged.experience,
+					projects: merged.projects,
+					skills: merged.skills,
+					hiddenSkills: merged.hiddenSkills,
+					summary: merged.summary,
+				})
+				if (merged.sectionOrder) setSectionOrder(merged.sectionOrder)
+				if (data.template) setTemplate(data.template)
+				toast.success('Resume loaded')
+				// clear navigation state so we don't reload on re-render
+				navigate('/resume/preview', { replace: true })
+			} catch {
+				toast.error('Failed to load saved resume')
+				navigate('/resume/preview', { replace: true })
+			}
+		}
+
+		loadFromHome()
+	}, [user, location.state?.loadSavedId, navigate])
 
 	// resizing global listener.
 	useEffect(() => {
@@ -696,6 +914,7 @@ function ResumePreview() {
 			experience: JSON.parse(JSON.stringify(resumeData.experience || [])),
 			projects: JSON.parse(JSON.stringify(resumeData.projects || [])),
 			skills: JSON.parse(JSON.stringify(resumeData.skills || [])),
+			hiddenSkills: JSON.parse(JSON.stringify(resumeData.hiddenSkills || [])),
 			summary: JSON.parse(JSON.stringify(resumeData.summary || { summary: '' })),
 		})
 		setHasSetBaseline(true)
@@ -719,13 +938,79 @@ function ResumePreview() {
 			<header className="flex-shrink-0 bg-brand-pink text-white py-2 shadow-md">
 				<div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
 					<h1 className="text-xl font-bold">Resume</h1>
-					<button
-						type="button"
-						onClick={handleBackClick}
-						className="px-3 py-1.5 bg-white-bright text-brand-pink font-semibold rounded-lg hover:opacity-90 transition-all text-sm"
-					>
-						← Back
-					</button>
+					<div className="flex items-center gap-2">
+						{/* Save for later */}
+						<div className="relative">
+							<button
+								type="button"
+								onClick={() => setSavedResumesOpen(!savedResumesOpen)}
+								className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-all"
+							>
+								Saved ({savedResumes.items.length}/{savedResumes.max})
+							</button>
+							{savedResumesOpen && (
+								<>
+									<div className="fixed inset-0 z-10" onClick={() => setSavedResumesOpen(false)} aria-hidden="true" />
+									<div className="absolute right-0 top-full mt-1 w-72 bg-white text-gray-900 rounded-lg shadow-lg border border-gray-200 py-2 z-20">
+										<div className="px-3 py-2 border-b border-gray-100">
+											<input
+												type="text"
+												value={saveResumeName}
+												onChange={(e) => setSaveResumeName(e.target.value)}
+												placeholder="Name for this resume"
+												className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded"
+											/>
+											<button
+												type="button"
+												onClick={handleSaveForLater}
+												disabled={isSavingResume || savedResumes.items.length >= savedResumes.max}
+												className="mt-2 w-full px-3 py-1.5 bg-brand-pink text-white text-sm font-medium rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+											>
+												{isSavingResume ? 'Saving...' : 'Save for later'}
+											</button>
+											{savedResumes.items.length >= savedResumes.max && (
+												<p className="mt-1 text-xs text-gray-500">Limit reached. Delete one to save more.</p>
+											)}
+										</div>
+										{savedResumes.items.length > 0 ? (
+											<div className="max-h-48 overflow-y-auto">
+												{savedResumes.items.map((s) => (
+													<div
+														key={s.id}
+														className="px-3 py-2 hover:bg-gray-50 flex justify-between items-center group"
+													>
+														<button
+															type="button"
+															onClick={() => handleLoadSaved(s.id)}
+															className="text-left flex-1 min-w-0 truncate text-sm"
+														>
+															{s.name}
+														</button>
+														<button
+															type="button"
+															onClick={(e) => handleDeleteSaved(s.id, e)}
+															className="text-red-500 hover:text-red-700 text-xs opacity-0 group-hover:opacity-100 transition-opacity ml-2"
+														>
+															Delete
+														</button>
+													</div>
+												))}
+											</div>
+										) : (
+											<p className="px-3 py-4 text-sm text-gray-500">No saved resumes yet</p>
+										)}
+									</div>
+								</>
+							)}
+						</div>
+						<button
+							type="button"
+							onClick={handleBackClick}
+							className="px-3 py-1.5 bg-white-bright text-brand-pink font-semibold rounded-lg hover:opacity-90 transition-all text-sm"
+						>
+							← Back
+						</button>
+					</div>
 				</div>
 			</header>
 
@@ -741,6 +1026,8 @@ function ResumePreview() {
 			<main className="flex-1 flex overflow-hidden min-h-0">
 				<LeftPanel
 					width={leftPanelWidth}
+					leftPanelMode={leftPanelMode}
+					onLeftPanelModeChange={handleLeftPanelModeChange}
 					welcomeMessage={welcomeMessage}
 					user={user}
 					onDismissWelcome={handleDismissWelcome}
@@ -768,6 +1055,9 @@ function ResumePreview() {
 					onExperienceChange={handleExperienceChange}
 					onProjectsChange={handleProjectsChange}
 					onSkillsChange={handleSkillsChange}
+					onHideSkill={handleHideSkill}
+					onShowSkill={handleShowSkill}
+					onSkillsCategoryOrderChange={handleSkillsCategoryOrderChange}
 					onSummaryChange={handleSummaryChange}
 					onVisibilityChange={handleVisibilityChange}
 					sectionLabels={sectionLabels}

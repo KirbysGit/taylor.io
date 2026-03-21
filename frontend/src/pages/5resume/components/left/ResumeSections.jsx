@@ -23,6 +23,9 @@ function ResumeSections({
 	onExperienceChange,
 	onProjectsChange,
 	onSkillsChange,
+	onHideSkill,
+	onShowSkill,
+	onSkillsCategoryOrderChange,
 	onSummaryChange,
 	onVisibilityChange,
 	sectionLabels,
@@ -109,7 +112,11 @@ function ResumeSections({
 					<div key="skills" id="section-skills" className="mb-6">
 						<Skills 
 							skillsData={Array.isArray(skillsData) ? skillsData : []}
+							hiddenSkills={resumeData?.hiddenSkills ?? []}
 							onSkillsChange={onSkillsChange}
+							onHideSkill={onHideSkill}
+							onShowSkill={onShowSkill}
+							onCategoryOrderChange={onSkillsCategoryOrderChange}
 							isVisible={resumeData.sectionVisibility?.skills ?? true}
 							onVisibilityChange={(isVisible) => {
 								onVisibilityChange('skills', isVisible)
