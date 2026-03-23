@@ -43,12 +43,17 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 			setCategories(prev => {
 				const kept = prev.filter(c => fromSkills.has(c));
 				const added = [...fromSkills].filter(c => !prev.includes(c));
-				const next = prev.length === 0 ? [...fromSkills] : [...kept, ...added];
-				onCategoryOrderChange?.(next);
-				return next;
+				return prev.length === 0 ? [...fromSkills] : [...kept, ...added];
 			});
 		}
 	}, [skills]);
+
+	// Sync category order to parent (separate effect to avoid setState-during-render)
+	useEffect(() => {
+		if (categories.length > 0 && onCategoryOrderChange) {
+			onCategoryOrderChange(categories);
+		}
+	}, [categories, onCategoryOrderChange]);
 
 	// handle adding a new skill
 	const handleAddSkill = (e) => {
@@ -301,6 +306,21 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 
 	return (
 		<>
+			{/* Header with Add Category */}
+			<div className="flex items-start justify-between gap-4 mb-4">
+				<div>
+					<h3 className="text-sm font-semibold text-gray-900">Your Skills</h3>
+					<p className="text-xs text-gray-500 mt-0.5">Add skills and organize them by category. Drag to reorder.</p>
+				</div>
+				<button
+					type="button"
+					onClick={handleAddCategory}
+					className="px-3 py-1.5 text-sm font-medium border border-brand-pink text-brand-pink rounded-lg hover:bg-brand-pink hover:text-white transition-all flex-shrink-0"
+				>
+					+ Add Category
+				</button>
+			</div>
+
 			{/* Add Skill Input */}
 			<div className="mb-3">
 				<label className="label">Add a skill</label>
@@ -532,15 +552,6 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 						</div>
 					);
 				})}
-
-				{/* Add Category Button */}
-				<button
-					type="button"
-					onClick={handleAddCategory}
-					className="text-sm text-brand-pink hover:text-brand-pink-dark font-medium transition-colors"
-				>
-					+ Add Category
-				</button>
 			</div>
 		</>
 	);

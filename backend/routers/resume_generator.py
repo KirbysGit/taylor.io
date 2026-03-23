@@ -15,7 +15,7 @@ from fastapi import APIRouter, Response
 # create router.
 router = APIRouter(prefix="/api/resume/generator", tags=["generator"])
 
-from generator.pipeline import generate_resume, generate_pdf
+from generator.pipeline import generate_resume, generate_pdf, generate_docx
 
 # ------------------- routes -------------------
 
@@ -46,4 +46,21 @@ async def generate_resume_pdf(payload: dict):
 
     # return response with pdf content.
     return Response(content=pdf_content, media_type="application/pdf")
+
+
+# generate resume Word document.
+@router.post("/docx")
+async def generate_resume_docx(payload: dict):
+
+    # grab template and resume data from payload (template reserved for future styling).
+    template = payload.get("template")
+    resume_data = payload.get("resume_data")
+
+    docx_content = generate_docx(template or "default", resume_data)
+
+    # return response with docx content.
+    return Response(
+        content=docx_content,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
 

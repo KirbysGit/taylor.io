@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
-// Summary Input Component - Just the textarea, no headers
-const SummaryInput = ({ summary, onUpdate }) => {
+// Summary Input Component - Just the textarea, optional label
+const SummaryInput = ({ summary, onUpdate, hideLabel = false }) => {
 	const [summaryText, setSummaryText] = useState(summary || '')
 	
 	// Sync with prop changes
@@ -17,9 +17,11 @@ const SummaryInput = ({ summary, onUpdate }) => {
 	
 	return (
 		<div>
-			<label htmlFor="summary" className="label">
-				Professional Summary
-			</label>
+			{!hideLabel && (
+				<label htmlFor="summary" className="label">
+					Professional Summary
+				</label>
+			)}
 			<textarea
 				id="summary"
 				value={summaryText}

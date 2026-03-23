@@ -57,18 +57,27 @@ const Education = ({
 		[educationData, onEducationChange]
 	)
 
+	const handleReorder = useCallback(
+		(reordered) => {
+			onEducationChange(toResumeFormat(reordered))
+		},
+		[onEducationChange]
+	)
+
 	const input = (
 		<EducationInput
 			education={education}
 			onAdd={handleAdd}
 			onRemove={handleRemove}
 			onUpdate={handleUpdate}
+			onReorder={handleReorder}
 			showSubsections={true}
+			compact={bare}
 		/>
 	)
 
 	if (bare) {
-		return <div className="p-4">{input}</div>
+		return input
 	}
 
 	return (

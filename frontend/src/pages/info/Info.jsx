@@ -761,7 +761,7 @@ function Info() {
 									if (file && !isParsingResume) handleResumeUpload(file)
 								}}
 							>
-								<p className="text-sm text-gray-600 mb-4">
+								<p className="text-base text-gray-600 mb-4">
 									Upload a resume to quickly add education, experience, projects, and skills. Duplicates are skipped.
 								</p>
 								<input

@@ -26,6 +26,13 @@ function ResumeSectionWrapper({
 				onClick={() => setIsExpanded(!isExpanded)}
 				className="flex items-center gap-3 w-full transition-colors cursor-pointer"
 			>
+				<SectionTitleEditor
+					sectionKey={sectionKey}
+					currentLabel={sectionLabel}
+					onLabelChange={onSectionLabelChange}
+					defaultLabel={defaultLabel}
+				/>
+				<div className="flex-1 h-[3px] rounded bg-gray-300" />
 				{onVisibilityChange && (
 					<button
 						type="button"
@@ -40,13 +47,6 @@ function ResumeSectionWrapper({
 						<FontAwesomeIcon icon={isVisible ? faEye : faEyeSlash} className="w-4 h-4 text-gray-600" />
 					</button>
 				)}
-				<SectionTitleEditor
-					sectionKey={sectionKey}
-					currentLabel={sectionLabel}
-					onLabelChange={onSectionLabelChange}
-					defaultLabel={defaultLabel}
-				/>
-				<div className="flex-1 h-[3px] rounded bg-gray-300" />
 				<div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
 					{isExpanded ? (
 						<ChevronUp className="w-4 h-4 text-gray-600" />

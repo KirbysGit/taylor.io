@@ -1,10 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGripVertical } from '@fortawesome/free-solid-svg-icons';
-import { XIcon, Pencil } from '@/components/icons';
+import { faGripVertical, faPencil, faChevronUp, faTrash } from '@fortawesome/free-solid-svg-icons';
+import MonthYearPicker from './MonthYearPicker';
+
+function AnimatedExpand({ expanded, children }) {
+	return (
+		<div
+			className="grid transition-[grid-template-rows] duration-150 ease-out"
+			style={{ gridTemplateRows: expanded ? '1fr' : '0fr' }}
+		>
+			<div className="min-h-0 overflow-hidden">{children}</div>
+		</div>
+	)
+}
 
 // Education Input Component - Just the form fields and logic, no headers
-const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections = false, onSubsectionUpdate }) => {
+const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showSubsections = false, onSubsectionUpdate, compact = false }) => {
 	// ensure at least one empty entry exists
 	const entries = education.length > 0 ? education : [{ 
 		id: Date.now(), 
@@ -20,8 +31,10 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 	}]
 
 	const getEntryId = (entry, index) => entry?.id ?? index
-	const [expandedIds, setExpandedIds] = useState(new Set(entries.map((e, i) => getEntryId(e, i))))
+	const [expandedIds, setExpandedIds] = useState(() => new Set()) // closed by default
 	const [localEntries, setLocalEntries] = useState(entries)
+	const [draggedEntryIndex, setDraggedEntryIndex] = useState(null)
+	const [dragOverEntryIndex, setDragOverEntryIndex] = useState(null)
 	const [draggedSubsection, setDraggedSubsection] = useState(null) // { eduIndex, subIndex }
 	const [dragOverSubsection, setDragOverSubsection] = useState(null) // { eduIndex, subIndex }
 	const [editingSubsection, setEditingSubsection] = useState(null) // { eduIndex, subIndex, oldTitle }
@@ -30,6 +43,8 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 	const prevIdsRef = useRef(education.map(e => e.id || e).join(','))
 	// store previous end dates when toggling "current" to preserve them
 	const savedEndDatesRef = useRef(new Map())
+	// ignore pencil click that fires right after drag-end (browser can synthesize click on drop)
+	const lastDragEndRef = useRef(0)
 
 	// sync with prop changes only when structure changes (add/remove), not field updates
 	useEffect(() => {
@@ -53,19 +68,23 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 			setLocalEntries(newEntries)
 
 			// preserve expanded/collapsed state by ID (survives add/remove)
-			if (currentLength > prevLengthRef.current) {
+			// only expand newly added when user added one (not when data loads from empty)
+			if (currentLength > prevLengthRef.current && prevLengthRef.current > 0 && currentLength === prevLengthRef.current + 1) {
 				setExpandedIds(prev => {
 					const newSet = new Set(prev)
 					const newEntry = newEntries[currentLength - 1]
 					newSet.add(getEntryId(newEntry, currentLength - 1)) // expand only the newly added
 					return newSet
 				})
+			} else if (currentLength > prevLengthRef.current) {
+				// data loaded - keep all collapsed
+				setExpandedIds(new Set())
 			} else {
-				// removing - keep only IDs that still exist
+				// removing - keep only IDs that still exist; default to collapsed
 				const currentIds = new Set(newEntries.map((e, i) => getEntryId(e, i)))
 				setExpandedIds(prev => {
 					const filtered = new Set([...prev].filter(id => currentIds.has(id)))
-					return filtered.size > 0 ? filtered : new Set(newEntries.map((e, i) => getEntryId(e, i)))
+					return filtered
 				})
 			}
 
@@ -141,6 +160,14 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 		setExpandedIds(prev => new Set([...prev, newEntry.id]))
 	}
 
+	const handleReorder = (fromIndex, toIndex) => {
+		if (fromIndex === toIndex || !onReorder) return
+		const reordered = [...localEntries]
+		const [removed] = reordered.splice(fromIndex, 1)
+		reordered.splice(toIndex, 0, removed)
+		onReorder(reordered)
+	}
+
 	const reorderSubsection = (eduIndex, fromIndex, toIndex) => {
 		if (fromIndex === toIndex) return
 		const updatedEdu = { ...localEntries[eduIndex] }
@@ -189,64 +216,107 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 		setEditingSubsectionValue('')
 	}
 
+	const headerSection = (
+		<div className="flex items-start justify-between gap-4 mb-4">
+			<div>
+				<h3 className="text-sm font-semibold text-gray-900">Your Education Entries</h3>
+				<p className="text-xs text-gray-500 mt-0.5">Add, edit, or reorder your academic history. Click a row to expand.</p>
+			</div>
+			<button
+				onClick={handleAddNew}
+				className="px-3 py-1.5 text-sm font-medium border border-brand-pink text-brand-pink rounded-lg hover:bg-brand-pink hover:text-white transition-all flex-shrink-0"
+			>
+				+ Add Education
+			</button>
+		</div>
+	)
+
 	return (
 		<>
 			{education.length > 0 ? (
-				<div className="space-y-3">
+				<div>
+					{headerSection}
+					<div className={compact ? 'space-y-3' : 'space-y-3'}>
 					{localEntries.map((edu, index) => {
 					const isExpanded = expandedIds.has(getEntryId(edu, index))
+					const major = edu.discipline || edu.degree
+					const university = edu.school
 					const hasContent = edu.school || edu.degree || edu.discipline
-					const displayName = edu.school || edu.degree || (hasContent ? 'Incomplete' : 'New Education')
-					
+					const displayName = major
+						? (university ? `${major} @ ${university}` : major)
+						: (university ? university : (hasContent ? 'Incomplete' : 'New Education'))
+					const isDraggable = !!onReorder
+					const isDragging = draggedEntryIndex === index
+					const isDragOver = dragOverEntryIndex === index
+
 					return (
-						<div 
-							key={edu.id || index} 
-							className="collapsibleCard"
+							<div
+								key={edu.id || index}
+								onDragOver={isDraggable ? (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverEntryIndex(index) } : undefined}
+								onDragLeave={isDraggable ? () => setDragOverEntryIndex(null) : undefined}
+								onDrop={isDraggable ? (e) => { e.preventDefault(); if (draggedEntryIndex != null) { handleReorder(draggedEntryIndex, index); setDraggedEntryIndex(null); setDragOverEntryIndex(null) } } : undefined}
+							className={`min-w-0 rounded-xl border-l-4 border-brand-pink bg-white shadow transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${isExpanded ? 'rounded-t-xl' : ''} ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'ring-2 ring-brand-pink ring-dashed ring-offset-1 bg-brand-pink/5' : ''}`}
 						>
-							{/* Header - Always visible */}
-							<button
-								type="button"
-								onClick={() => toggleExpanded(index)}
-								className="collapsibleCardHeader"
-							>
-								<div className="flex items-center gap-3 flex-1 text-left">
-									<svg 
-										className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
-										fill="none" 
-										stroke="currentColor" 
-										viewBox="0 0 24 24"
-									>
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-									</svg>
-									<div className="flex items-center gap-2">
-										<span className="text-base font-semibold text-gray-900">{displayName}</span>
-										{!hasContent && (
-											<span className="text-xs text-gray-400">(Click to add details)</span>
-										)}
-									</div>
-								</div>
-								{localEntries.length > 1 && (
-									<button
-										onClick={(e) => {
-											e.stopPropagation()
-											onRemove(index)
+							{/* Card bar - grip, label, pencil, trash */}
+							<div className={`flex items-center gap-2 py-2.5 rounded-xl transition-colors ${isDraggable ? 'pl-3 pr-2' : 'pl-5 pr-2'} hover:bg-gray-50/50`}>
+								{isDraggable ? (
+									<div
+										draggable
+										onDragStart={(e) => {
+											setDraggedEntryIndex(index)
+											e.dataTransfer.effectAllowed = 'move'
+											e.dataTransfer.setData('text/plain', String(index))
 										}}
-										className="removeButton"
+										onDragEnd={() => {
+											setDraggedEntryIndex(null)
+											setDragOverEntryIndex(null)
+										}}
+										className="flex-shrink-0 w-6 flex items-center justify-center text-gray-400 cursor-grab active:cursor-grabbing p-1 -m-1 touch-none"
+										title="Drag to reorder"
 									>
-										Remove
-										<span className="removeButtonUnderline"></span>
-									</button>
-								)}
-							</button>
+										<FontAwesomeIcon icon={faGripVertical} className="w-3.5 h-3.5" />
+									</div>
+								) : null}
+								<span className="flex-1 min-w-0 text-sm font-semibold text-gray-900 truncate">
+									{displayName}
+									{!hasContent && <span className="text-gray-500 font-normal ml-1">(click pencil to edit)</span>}
+								</span>
+								<button
+									type="button"
+									onClick={(e) => {
+										e.stopPropagation()
+										// ignore spurious click that can fire after drag-drop
+										if (Date.now() - lastDragEndRef.current < 150) return
+										toggleExpanded(index)
+									}}
+									className={`flex-shrink-0 p-2 rounded-md transition-colors ${
+										isExpanded ? 'bg-brand-pink/10 text-brand-pink hover:bg-brand-pink/20' : 'text-gray-500 hover:text-brand-pink hover:bg-gray-100'
+									}`}
+									aria-expanded={isExpanded}
+									title={isExpanded ? 'Collapse' : 'Expand to edit'}
+								>
+									<FontAwesomeIcon icon={isExpanded ? faChevronUp : faPencil} className="w-3.5 h-3.5" />
+								</button>
+								<button
+									type="button"
+									onClick={(e) => {
+										e.stopPropagation()
+										onRemove(index)
+									}}
+									className="flex-shrink-0 p-2 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+									aria-label="Remove"
+									title="Remove"
+								>
+									<FontAwesomeIcon icon={faTrash} className="w-3.5 h-3.5" />
+								</button>
+							</div>
 
 							{/* Expandable Content */}
-							<div 
-								className={`expandableContent ${isExpanded ? 'expanded' : 'collapsed'}`}
-							>
-								<div className="expandableContentInner">
-									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<AnimatedExpand expanded={isExpanded}>
+								<div className="pt-4 pb-4 px-4 border-t border-gray-200 space-y-4">
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
 										<div>
-											<label className="label">School/University</label>
+											<label className={compact ? 'block text-sm font-medium text-gray-500 mb-1' : 'label'}>School/University</label>
 											<input
 												type="text"
 												value={localEntries[index]?.school || ''}
@@ -256,7 +326,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 											/>
 										</div>
 										<div>
-											<label className="label">Degree</label>
+											<label className={compact ? 'block text-sm font-medium text-gray-500 mb-1' : 'label'}>Degree</label>
 											<input
 												type="text"
 												value={localEntries[index]?.degree || ''}
@@ -266,7 +336,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 											/>
 										</div>
 										<div>
-											<label className="label">Field of Study</label>
+											<label className={compact ? 'block text-sm font-medium text-gray-500 mb-1' : 'label'}>Field of Study</label>
 											<input
 												type="text"
 												value={localEntries[index]?.discipline || localEntries[index]?.field || ''}
@@ -276,7 +346,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 											/>
 										</div>
 										<div>
-											<label className="label">Minor</label>
+											<label className={compact ? 'block text-sm font-medium text-gray-500 mb-1' : 'label'}>Minor</label>
 											<input
 												type="text"
 												value={localEntries[index]?.minor || ''}
@@ -286,7 +356,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 											/>
 										</div>
 										<div>
-											<label className="label">Location</label>
+											<label className={compact ? 'block text-sm font-medium text-gray-500 mb-1' : 'label'}>Location</label>
 											<input
 												type="text"
 												value={localEntries[index]?.location || ''}
@@ -296,7 +366,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 											/>
 										</div>
 										<div>
-											<label className="label">GPA</label>
+											<label className={compact ? 'block text-sm font-medium text-gray-500 mb-1' : 'label'}>GPA</label>
 											<input
 												type="text"
 												value={localEntries[index]?.gpa || ''}
@@ -306,18 +376,18 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 											/>
 										</div>
 										<div>
-											<label className="label">Start Date</label>
-											<input
-												type="month"
+											<div className="flex items-center min-h-8 mb-1">
+												<label className={compact ? 'text-sm font-medium text-gray-500' : 'label mb-0'}>Start Date</label>
+											</div>
+											<MonthYearPicker
 												value={localEntries[index]?.startDate || localEntries[index]?.start_date || ''}
-												onChange={(e) => handleFieldChange(index, 'startDate', e.target.value)}
-												className="input"
+												onChange={(v) => handleFieldChange(index, 'startDate', v)}
 											/>
 										</div>
 										<div>
 											{/* Label Row with Switch */}
-											<div className="grid grid-cols-3 items-center mb-1">
-												<label className="label mb-0">End Date</label>
+											<div className="grid grid-cols-3 items-center min-h-8 mb-1">
+												<label className={compact ? 'block text-sm font-medium text-gray-500 mb-0' : 'label mb-0'}>End Date</label>
 												
 												{/* Switch - div with role="switch" to avoid sr-only checkbox focus scroll bug */}
 												<div className="flex justify-center">
@@ -358,12 +428,10 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 											
 											{/* End Date Input */}
 											<div className={localEntries[index]?.current ? 'opacity-50' : ''}>
-												<input
-													type="month"
+												<MonthYearPicker
 													value={localEntries[index]?.endDate || localEntries[index]?.end_date || ''}
-													onChange={(e) => handleFieldChange(index, 'endDate', e.target.value)}
+													onChange={(v) => handleFieldChange(index, 'endDate', v)}
 													disabled={localEntries[index]?.current}
-													className="input disabled:bg-gray-100 disabled:cursor-not-allowed"
 												/>
 											</div>
 										</div>
@@ -371,9 +439,9 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 
 									{/* Subsections - Only show if enabled */}
 									{showSubsections && (
-										<div className="mt-6 pt-6 border-t border-gray-200">
-											<div className="flex items-center justify-between mb-3">
-												<h4 className="text-base font-semibold text-gray-800">Highlights</h4>
+										<div className="mt-4 pt-4 border-t border-gray-200">
+											<div className="flex items-center justify-between mb-2">
+												<h4 className="text-base font-semibold text-gray-900">Highlights</h4>
 												<button
 													type="button"
 													onClick={() => {
@@ -389,16 +457,14 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 														})
 														onUpdate(index, updatedEdu)
 													}}
-													className="px-3 py-1.5 bg-brand-pink text-white text-sm font-medium rounded-lg hover:opacity-90 transition"
+													className="px-3 py-1.5 text-sm font-medium border border-brand-pink text-brand-pink rounded hover:bg-brand-pink hover:text-white transition-all"
 												>
 													+ Add Section
 												</button>
 											</div>
 											<div className="space-y-3">
 												{Object.keys(localEntries[index]?.subsections || {}).length === 0 ? (
-													<div className="text-center py-6 text-gray-400">
-														<p className="text-sm">No highlights yet. Click "Add Section" to get started.</p>
-													</div>
+													<p className="text-sm text-gray-500 py-2">No highlights yet. Click &quot;Add Section&quot; to get started.</p>
 												) : (
 													Object.entries(localEntries[index]?.subsections || {}).map(([title, content], subIndex) => {
 														const subsections = localEntries[index]?.subsections || {}
@@ -419,9 +485,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 															setDragOverSubsection({ eduIndex: index, subIndex })
 														}
 
-														const handleDragLeave = () => {
-															setDragOverSubsection(null)
-														}
+														const handleDragLeave = () => setDragOverSubsection(null)
 
 														const handleDrop = (e) => {
 															e.preventDefault()
@@ -464,81 +528,82 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 																onDragOver={isDraggable ? handleDragOver : undefined}
 																onDragLeave={isDraggable ? handleDragLeave : undefined}
 																onDrop={isDraggable ? handleDrop : undefined}
-																className={`collapsibleCard ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'border-2 border-brand-pink' : ''}`}
+																className={`rounded-lg px-2.5 py-1.5 transition-all duration-200 ease-out ${
+																	isDragging
+																		? 'opacity-60 scale-[0.98] bg-gray-50'
+																		: isDragOver
+																		? 'ring-2 ring-brand-pink/60 ring-offset-2 ring-offset-white bg-brand-pink/5'
+																		: ''
+																}`}
 															>
-																<div className="collapsibleCardHeader">
-																	<div className="flex items-center gap-3 flex-1 min-w-0">
-																		{isDraggable ? (
-																			<div
-																				draggable
-																				onDragStart={handleDragStart}
-																				onDragEnd={handleDragEnd}
-																				className="cursor-grab active:cursor-grabbing touch-none text-gray-400 hover:text-gray-600 shrink-0"
-																				title="Drag to reorder"
-																				aria-hidden="true"
-																			>
-																				<FontAwesomeIcon icon={faGripVertical} className="w-4 h-4" />
-																			</div>
-																		) : (
-																			<div className="w-4 shrink-0" aria-hidden="true" />
-																		)}
-																		{isEditing ? (
-																			<input
-																				type="text"
-																				value={editingSubsectionValue}
-																				onChange={(e) => setEditingSubsectionValue(e.target.value)}
-																				onKeyDown={(e) => {
-																					if (e.key === 'Enter') handleSaveSubsectionEdit()
-																					else if (e.key === 'Escape') handleCancelSubsectionEdit()
-																				}}
-																				onBlur={handleSaveSubsectionEdit}
-																				className="input text-sm font-semibold flex-1 max-w-xs"
-																				autoFocus
-																			/>
-																		) : (
-																			<>
-																				<span className="font-semibold text-gray-900 truncate">{title}</span>
+																<div className="flex items-center gap-2 mb-1">
+																	{isEditing ? (
+																		<input
+																			type="text"
+																			value={editingSubsectionValue}
+																			onChange={(e) => setEditingSubsectionValue(e.target.value)}
+																			onKeyDown={(e) => {
+																				if (e.key === 'Enter') handleSaveSubsectionEdit()
+																				else if (e.key === 'Escape') handleCancelSubsectionEdit()
+																			}}
+																			onBlur={handleSaveSubsectionEdit}
+																			className="input text-sm font-medium flex-1 min-w-0 py-1 px-2"
+																			autoFocus
+																		/>
+																	) : (
+																		<>
+																			{isDraggable && (
+																				<div
+																					draggable
+																					onDragStart={handleDragStart}
+																					onDragEnd={handleDragEnd}
+																					className="shrink-0 cursor-grab active:cursor-grabbing p-1 -m-1 touch-none"
+																					title="Drag to reorder"
+																				>
+																					<FontAwesomeIcon icon={faGripVertical} className="w-3.5 h-3.5 text-gray-400" />
+																				</div>
+																			)}
+																			<span className="text-sm font-medium text-gray-900 truncate min-w-0 flex-1">{title}</span>
+																			<div className="flex items-center gap-0.5 shrink-0">
 																				<button
 																					type="button"
 																					onClick={() => handleStartEditSubsection(index, subIndex, title)}
-																					className="p-1 hover:bg-gray-100 rounded transition-colors shrink-0"
-																					title="Edit section name"
+																					className="p-1.5 rounded text-gray-500 hover:text-brand-pink hover:bg-gray-100"
+																					title="Edit name"
 																				>
-																					<Pencil className="w-3.5 h-3.5 text-gray-500" />
+																					<FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
 																				</button>
-																			</>
-																		)}
-																	</div>
-																	<button
-																		type="button"
-																		onClick={handleRemoveSubsection}
-																		className="text-red-500 hover:text-red-700 transition-colors p-1 shrink-0"
-																		title="Remove section"
-																	>
-																		<XIcon className="w-4 h-4" />
-																	</button>
+																				<button
+																					type="button"
+																					onClick={handleRemoveSubsection}
+																					className="p-1.5 rounded text-gray-500 hover:text-red-500 hover:bg-red-50"
+																					aria-label="Remove"
+																					title="Remove"
+																				>
+																					<FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
+																				</button>
+																			</div>
+																		</>
+																	)}
 																</div>
-																<div className="expandableContent expanded">
-																	<div className="expandableContentInner">
-																		<textarea
-																			value={content}
-																			onChange={(e) => {
-																				const updatedEdu = {
-																					...localEntries[index],
-																					subsections: { ...localEntries[index].subsections, [title]: e.target.value }
-																				}
-																				setLocalEntries(prev => {
-																					const newEdu = [...prev]
-																					newEdu[index] = updatedEdu
-																					return newEdu
-																				})
-																				onUpdate(index, updatedEdu)
-																			}}
-																			className="input min-h-[60px] resize-y w-full"
-																			placeholder="Enter content for this subsection..."
-																		/>
-																	</div>
-																</div>
+																<input
+																	type="text"
+																	value={content}
+																	onChange={(e) => {
+																		const updatedEdu = {
+																			...localEntries[index],
+																			subsections: { ...localEntries[index].subsections, [title]: e.target.value }
+																		}
+																		setLocalEntries(prev => {
+																			const newEdu = [...prev]
+																			newEdu[index] = updatedEdu
+																			return newEdu
+																		})
+																		onUpdate(index, updatedEdu)
+																	}}
+																	className="input text-sm py-1.5 px-3"
+																	placeholder="One sentence or short phrase..."
+																/>
 															</div>
 														)
 													})
@@ -547,39 +612,18 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, showSubsections 
 										</div>
 									)}
 								</div>
-							</div>
+							</AnimatedExpand>
 						</div>
 					)
 				})}
-
-					<button
-						onClick={handleAddNew}
-						className="w-full px-6 py-3 border-2 border-brand-pink text-brand-pink font-semibold rounded-lg hover:bg-brand-pink hover:text-white transition-all"
-					>
-						+ Add Another Education
-					</button>
+					</div>
 				</div>
 			) : (
-				<div className="text-center py-12">
-					<div className="mb-4">
-						<svg 
-							className="w-16 h-16 mx-auto text-gray-300" 
-							fill="none" 
-							stroke="currentColor" 
-							viewBox="0 0 24 24"
-						>
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l9-5-9-5-9 5 9 5z" />
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14v7m0 0l-3-3m3 3l3-3" />
-						</svg>
+				<div>
+					{headerSection}
+					<div className="text-center py-10 border border-dashed border-gray-200 rounded-lg">
+						<p className="text-gray-500 text-base">No entries yet. Click &quot;+ Add Education&quot; above to get started.</p>
 					</div>
-					<p className="text-gray-400 mb-6">No education entries yet</p>
-					<button
-						onClick={handleAddNew}
-						className="w-full px-6 py-3 border-2 border-brand-pink text-brand-pink font-semibold rounded-lg hover:bg-brand-pink hover:text-white transition-all"
-					>
-						+ Add Your First Education
-					</button>
 				</div>
 			)}
 		</>

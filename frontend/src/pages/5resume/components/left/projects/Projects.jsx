@@ -56,12 +56,20 @@ const Projects = ({
 		[projectsData, onProjectsChange]
 	)
 
+	const handleReorder = useCallback(
+		(reordered) => {
+			onProjectsChange(toResumeFormat(reordered))
+		},
+		[onProjectsChange]
+	)
+
 	const input = (
 		<ProjectsInput
 			projects={projects}
 			onAdd={handleAdd}
 			onRemove={handleRemove}
 			onUpdate={handleUpdate}
+			onReorder={handleReorder}
 		/>
 	)
 

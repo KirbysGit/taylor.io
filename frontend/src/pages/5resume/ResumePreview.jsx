@@ -11,13 +11,13 @@
 // always have padding on left side for scroll bar (like the left panel).
 
 // imports.
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
 // api imports.
 import { listTemplates } from '@/api/services/templates'
-import { generateResumePreview, generateResumePDF } from '@/api/services/resume'
+import { generateResumePreview, generateResumePDF, generateResumeWord } from '@/api/services/resume'
 import { getMyProfile, upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, updateSectionLabels, listSavedResumes, createSavedResume, getSavedResume, deleteSavedResume } from '@/api/services/profile'
 
 // component imports.
@@ -118,6 +118,7 @@ function ResumePreview() {
 	// preview states.
 	const [previewHtml, setPreviewHtml] = useState(null)
 	const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
+	const lastPreviewInputRef = useRef(null) // skip fetch when visible data unchanged
 	const [previewZoom, setPreviewZoom] = useState(100) // default 75% to see more content
 	const [validationErrors, setValidationErrors] = useState([]) // validation errors for required fields
 
@@ -132,6 +133,7 @@ function ResumePreview() {
 
 	// download states.
 	const [isDownloadingPDF, setIsDownloadingPDF] = useState(false)
+	const [isDownloadingWord, setIsDownloadingWord] = useState(false)
 
 	// header data state.
 	const [headerData, setHeaderData] = useState(null)
@@ -166,24 +168,6 @@ function ResumePreview() {
 		const savedOrder = localStorage.getItem('resumeSectionOrder')
 		return savedOrder ? JSON.parse(savedOrder) : ['header', 'summary', 'education', 'experience', 'projects', 'skills']
 	})
-
-	// Left panel: Organize (compact) vs Full editor — persisted
-	const [leftPanelMode, setLeftPanelMode] = useState(() => {
-		try {
-			const v = localStorage.getItem('resumePreviewLeftPanelMode')
-			return v === 'full' ? 'full' : 'simple'
-		} catch {
-			return 'simple'
-		}
-	})
-	const handleLeftPanelModeChange = useCallback((mode) => {
-		setLeftPanelMode(mode)
-		try {
-			localStorage.setItem('resumePreviewLeftPanelMode', mode)
-		} catch {
-			/* ignore */
-		}
-	}, [])
 
 	// section labels state - default labels
 	const DEFAULT_SECTION_LABELS = {
@@ -252,18 +236,25 @@ function ResumePreview() {
 		setLeftPanelWidth(constrainedDefault)
 	}
 
-	// Validate required fields
+	// Validate required fields (only for sections that are visible in the preview)
 	const validateResumeData = (data) => {
 		const errors = []
+		const sectionVisibility = data.sectionVisibility || {
+			summary: false,
+			education: true,
+			experience: true,
+			projects: true,
+			skills: true,
+		}
 
-		// Check name (always required)
+		// Check name (always required - header is always shown)
 		const fullName = `${data.header?.first_name || ''} ${data.header?.last_name || ''}`.trim()
 		if (!fullName) {
 			errors.push("Your name is required")
 		}
 
-		// Check education entries (if any exist)
-		if (data.education && data.education.length > 0) {
+		// Check education entries only if education section is visible
+		if (sectionVisibility.education && data.education && data.education.length > 0) {
 			data.education.forEach((edu, index) => {
 				const entryNum = index + 1
 				if (!edu.school || !edu.school.trim()) {
@@ -278,8 +269,8 @@ function ResumePreview() {
 			})
 		}
 
-		// Check experience entries (if any exist)
-		if (data.experience && data.experience.length > 0) {
+		// Check experience entries only if experience section is visible
+		if (sectionVisibility.experience && data.experience && data.experience.length > 0) {
 			data.experience.forEach((exp, index) => {
 				const entryNum = index + 1
 				if (!exp.title || !exp.title.trim()) {
@@ -294,8 +285,8 @@ function ResumePreview() {
 			})
 		}
 
-		// Check project entries (if any exist)
-		if (data.projects && data.projects.length > 0) {
+		// Check project entries only if projects section is visible
+		if (sectionVisibility.projects && data.projects && data.projects.length > 0) {
 			data.projects.forEach((proj, index) => {
 				const entryNum = index + 1
 				if (!proj.title || !proj.title.trim()) {
@@ -321,32 +312,47 @@ function ResumePreview() {
 
 		setValidationErrors([])
 		setIsGeneratingPreview(true)
-		// apply visibility filters for preview.
-		const previewData = {
-			...applyVisibilityFilters(resumeData),
-			sectionLabels: sectionLabels
+		try {
+			const previewData = {
+				...applyVisibilityFilters(resumeData),
+				sectionLabels: sectionLabels
+			}
+			const htmlContent = await generateResumePreview(template, previewData)
+			setPreviewHtml(htmlContent)
+		} finally {
+			setIsGeneratingPreview(false)
 		}
-		
-		const htmlContent = await generateResumePreview(template, previewData)
-		setPreviewHtml(htmlContent)
-		setIsGeneratingPreview(false)
 	}
 
 	const handleDownloadPDF = async () => {
 		setIsDownloadingPDF(true)
 		try {
-			// apply visibility filters for PDF.
 			const pdfData = {
 				...applyVisibilityFilters(resumeData),
 				sectionLabels: sectionLabels
 			}
-			
 			const pdfBlob = await generateResumePDF(template, pdfData)
-			setIsDownloadingPDF(false)
 			downloadBlob(pdfBlob, 'resume.pdf')
 		} catch (error) {
 			console.error('Failed to generate PDF:', error)
+		} finally {
 			setIsDownloadingPDF(false)
+		}
+	}
+
+	const handleDownloadWord = async () => {
+		setIsDownloadingWord(true)
+		try {
+			const docData = {
+				...applyVisibilityFilters(resumeData),
+				sectionLabels: sectionLabels
+			}
+			const docBlob = await generateResumeWord(template, docData)
+			downloadBlob(docBlob, 'resume.docx')
+		} catch (error) {
+			console.error('Failed to generate Word:', error)
+		} finally {
+			setIsDownloadingWord(false)
 		}
 	}
 
@@ -866,7 +872,7 @@ function ResumePreview() {
 		return () => window.removeEventListener('resize', handleResize)
 	}, [])
 
-	// generate preview on data change.
+	// generate preview on data change (only when visible data changes).
 	useEffect(() => {
 		// Validate before generating preview
 		const errors = validateResumeData(resumeData)
@@ -878,17 +884,28 @@ function ResumePreview() {
 		}
 
 		setValidationErrors([])
+
+		// compute the data that would actually be sent to the preview (visibility-filtered)
+		const previewData = {
+			...applyVisibilityFilters(resumeData),
+			sectionLabels: sectionLabels
+		}
+		const previewInput = JSON.stringify({ template, previewData })
+
+		// skip fetch if nothing visible changed (e.g. editing a hidden section)
+		if (lastPreviewInputRef.current === previewInput) {
+			// ensure loading is cleared (previous run may have been cancelled before its callback ran)
+			setIsGeneratingPreview(false)
+			return
+		}
+
 		setIsGeneratingPreview(true)
 
 		const timer = setTimeout(async () => {
 			try {
-				// --- apply visibility filters for preview, then generate preview, and set preview.
-				const previewData = {
-					...applyVisibilityFilters(resumeData),
-					sectionLabels: sectionLabels
-				}
 				const htmlContent = await generateResumePreview(template, previewData)
 				setPreviewHtml(htmlContent)
+				lastPreviewInputRef.current = previewInput
 			} catch (error) {
 				console.error('Failed to generate preview: ', error)
 			} finally {
@@ -897,7 +914,7 @@ function ResumePreview() {
 		}, 1000)
 
 		return () => clearTimeout(timer)
-	}, [template, resumeData])
+	}, [template, resumeData, sectionLabels])
 
 	// set baseline data after components mount and data is loaded.
 	useEffect(() => {
@@ -1026,8 +1043,6 @@ function ResumePreview() {
 			<main className="flex-1 flex overflow-hidden min-h-0">
 				<LeftPanel
 					width={leftPanelWidth}
-					leftPanelMode={leftPanelMode}
-					onLeftPanelModeChange={handleLeftPanelModeChange}
 					welcomeMessage={welcomeMessage}
 					user={user}
 					onDismissWelcome={handleDismissWelcome}
@@ -1080,6 +1095,8 @@ function ResumePreview() {
 					onZoomOut={handleZoomOut}
 					isDownloadingPDF={isDownloadingPDF}
 					onDownloadPDF={handleDownloadPDF}
+					isDownloadingWord={isDownloadingWord}
+					onDownloadWord={handleDownloadWord}
 					onRefreshPreview={handleRefreshPreview}
 					validationErrors={validationErrors}
 				/>

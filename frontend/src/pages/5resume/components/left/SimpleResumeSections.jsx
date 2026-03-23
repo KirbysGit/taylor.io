@@ -1,9 +1,8 @@
 // SimpleResumeSections.jsx — Organize view: section bars + pencil expands full editors below (same inputs as Full editor).
 
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faEyeSlash, faPenToSquare } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faEyeSlash, faPencil, faChevronUp, faGripVertical, faLock } from '@fortawesome/free-solid-svg-icons'
 
 import ResumeHeader from './ResumeHeader'
 import Education from './education/Education'
@@ -11,31 +10,63 @@ import Experience from './experience/Experience'
 import Projects from './projects/Projects'
 import Skills from './skills/Skills'
 import Summary from './summary/Summary'
-import SectionTitleEditor from './SectionTitleEditor'
-
-function truncatePreview(s, len = 72) {
-	if (s == null || s === '') return ''
-	const t = String(s).replace(/\s+/g, ' ').trim()
-	if (!t) return ''
-	return t.length <= len ? t : `${t.slice(0, len)}…`
-}
 
 function OrganizeSectionBar({
 	defaultLabel,
 	sectionLabel,
-	preview,
 	showVisibility,
 	isVisible,
 	onVisibilityChange,
 	expanded,
 	onToggleExpand,
+	isLocked,
+	isDraggable,
+	isDragging,
+	isDragOver,
+	onDragStart,
+	onDragOver,
+	onDragLeave,
+	onDrop,
+	onDragEnd,
 }) {
 	return (
 		<div
-			className={`flex items-center gap-2 border border-gray-200 bg-gray-50/90 px-3 py-2.5 ${
-				expanded ? 'rounded-t-lg border-b-0' : 'rounded-lg'
-			}`}
+			draggable={isDraggable}
+			onDragStart={isDraggable ? onDragStart : undefined}
+			onDragOver={onDragOver}
+			onDragLeave={onDragLeave}
+			onDrop={onDrop}
+			onDragEnd={isDraggable ? onDragEnd : undefined}
+			className={`
+				flex items-center gap-2 pl-3 pr-2 py-2.5
+				border-l-4 ${isLocked ? 'border-gray-400 bg-gray-50/60' : 'border-brand-pink'} bg-white
+				shadow
+				transition-all duration-200 ease-out
+				hover:shadow-lg hover:-translate-y-0.5
+				${expanded ? 'rounded-t-xl' : 'rounded-xl'}
+				${isDragging ? 'opacity-50' : ''}
+				${isDragOver ? 'ring-2 ring-brand-pink ring-dashed ring-offset-1 bg-brand-pink/5' : ''}
+				${isDraggable ? 'cursor-move' : ''}
+			`}
 		>
+			{/* Grip or lock — left side */}
+			<div className="flex-shrink-0 w-6 flex items-center justify-center text-gray-400">
+				{isLocked ? (
+					<FontAwesomeIcon icon={faLock} className="w-3.5 h-3.5" />
+				) : isDraggable ? (
+					<FontAwesomeIcon icon={faGripVertical} className="w-3.5 h-3.5" />
+				) : (
+					<span className="w-3.5" aria-hidden />
+				)}
+			</div>
+			{/* Label */}
+			<span
+				className="text-sm font-semibold text-gray-900 truncate flex-1 min-w-0"
+				title={sectionLabel || defaultLabel}
+			>
+				{sectionLabel || defaultLabel}
+			</span>
+			{/* Eye + Pencil — right side, icon-only with light hover */}
 			{showVisibility && onVisibilityChange && (
 				<button
 					type="button"
@@ -43,58 +74,55 @@ function OrganizeSectionBar({
 						e.stopPropagation()
 						onVisibilityChange(!isVisible)
 					}}
-					className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+					className="flex-shrink-0 p-2 rounded-md text-gray-500 hover:text-brand-pink hover:bg-gray-100 transition-colors"
 					aria-label={isVisible ? 'Hide from preview' : 'Show in preview'}
 					title={isVisible ? 'Hide from preview' : 'Show in preview'}
 				>
-					<FontAwesomeIcon icon={isVisible ? faEye : faEyeSlash} className="w-4 h-4 text-gray-600" />
+					<FontAwesomeIcon icon={isVisible ? faEye : faEyeSlash} className="w-4 h-4" />
 				</button>
 			)}
-			<span
-				className="text-sm font-semibold text-gray-900 shrink-0 max-w-[42%] truncate"
-				title={sectionLabel || defaultLabel}
-			>
-				{sectionLabel || defaultLabel}
-			</span>
-			<span className="text-xs text-gray-500 truncate min-w-0 flex-1" title={preview}>
-				{preview || '—'}
-			</span>
 			<button
 				type="button"
 				onClick={(e) => {
 					e.stopPropagation()
 					onToggleExpand()
 				}}
-				className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-700"
+				className={`flex-shrink-0 p-2 rounded-md transition-colors ${
+					expanded
+						? 'bg-brand-pink/10 text-brand-pink hover:bg-brand-pink/20'
+						: 'text-gray-500 hover:text-brand-pink hover:bg-gray-100'
+				}`}
 				aria-expanded={expanded}
-				title={expanded ? 'Collapse editor' : 'Expand editor'}
+				title={expanded ? 'Click to collapse editor' : 'Click to expand editor'}
 			>
-				<FontAwesomeIcon icon={faPenToSquare} className="w-3.5 h-3.5" />
+				<FontAwesomeIcon icon={expanded ? faChevronUp : faPencil} className="w-3.5 h-3.5" />
 			</button>
 		</div>
 	)
 }
 
-function ExpandedChrome({ children, sectionKey, defaultLabel, sectionLabel, onSectionLabelChange, description }) {
+function AnimatedExpand({ expanded, children }) {
 	return (
-		<div className="rounded-b-lg border border-gray-200 border-t-0 bg-white overflow-hidden shadow-sm">
-			<div className="px-4 pt-3 pb-2 border-b border-gray-100 bg-white">
-				<SectionTitleEditor
-					sectionKey={sectionKey}
-					currentLabel={sectionLabel}
-					onLabelChange={onSectionLabelChange}
-					defaultLabel={defaultLabel}
-					size="compact"
-				/>
-				{description ? <p className="text-xs text-gray-500 mt-1.5">{description}</p> : null}
-			</div>
-			{children}
+		<div
+			className="grid transition-[grid-template-rows] duration-150 ease-out"
+			style={{ gridTemplateRows: expanded ? '1fr' : '0fr' }}
+		>
+			<div className="min-h-0 overflow-hidden">{children}</div>
+		</div>
+	)
+}
+
+function ExpandedChromeSimple({ children }) {
+	return (
+		<div className="rounded-b-xl border-l-4 border-brand-pink border border-gray-100 border-t-0 bg-white overflow-hidden shadow">
+			<div className="px-4 pt-4 pb-4">{children}</div>
 		</div>
 	)
 }
 
 function SimpleResumeSections({
 	sectionOrder,
+	onSectionOrderChange,
 	headerData,
 	educationData,
 	experienceData,
@@ -117,70 +145,99 @@ function SimpleResumeSections({
 }) {
 	const vis = resumeData?.sectionVisibility || {}
 	const [expandedSections, setExpandedSections] = useState({})
+	const [draggedSection, setDraggedSection] = useState(null)
+	const [dragOverIndex, setDragOverIndex] = useState(null)
+
+	const draggableOrder = sectionOrder.filter((k) => k !== 'header')
+
+	const handleDragStart = (e, sectionKey) => {
+		setDraggedSection(sectionKey)
+		e.dataTransfer.effectAllowed = 'move'
+		e.dataTransfer.setData('text/plain', sectionKey)
+	}
+	const handleDragOver = (e, index) => {
+		e.preventDefault()
+		e.dataTransfer.dropEffect = 'move'
+		setDragOverIndex(index)
+	}
+	const handleDragLeave = () => setDragOverIndex(null)
+	const handleDrop = (e, dropIndex) => {
+		e.preventDefault()
+		if (!draggedSection) return
+		const draggedIndex = draggableOrder.indexOf(draggedSection)
+		if (draggedIndex === -1 || draggedIndex === dropIndex) {
+			setDraggedSection(null)
+			setDragOverIndex(null)
+			return
+		}
+		const newDraggable = [...draggableOrder]
+		const [removed] = newDraggable.splice(draggedIndex, 1)
+		newDraggable.splice(dropIndex, 0, removed)
+		onSectionOrderChange?.(['header', ...newDraggable])
+		setDraggedSection(null)
+		setDragOverIndex(null)
+	}
+	const handleDragEnd = () => {
+		setDraggedSection(null)
+		setDragOverIndex(null)
+	}
 
 	const toggle = (key) => {
 		setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }))
 	}
 
-	const educationList = Array.isArray(educationData) ? educationData : []
-	const experienceList = Array.isArray(experienceData) ? experienceData : []
-	const projectsList = Array.isArray(projectsData) ? projectsData : []
 	const skillsList = Array.isArray(skillsData) ? skillsData : []
 
 	const renderSection = (sectionKey) => {
 		switch (sectionKey) {
 			case 'header': {
 				if (!headerData) return null
-				const name = [headerData.first_name, headerData.last_name].filter(Boolean).join(' ') || 'Your name'
-				const preview = `${name} · ${headerData.email || '—'}`
 				const ex = !!expandedSections.header
 				return (
 					<div key="header" id="section-header" className="mb-4">
 						<OrganizeSectionBar
 							defaultLabel="Header"
 							sectionLabel={sectionLabels?.header || 'Header'}
-							preview={preview}
 							showVisibility={false}
 							expanded={ex}
 							onToggleExpand={() => toggle('header')}
+							isLocked
+							isDraggable={false}
 						/>
-						{ex && (
-							<div className="rounded-b-lg border border-gray-200 border-t-0 bg-white overflow-hidden shadow-sm">
-								<div className="px-4 pt-3 pb-2 border-b border-gray-100">
-									<p className="text-xs text-gray-500">Name, email, and optional contacts for the top of your resume.</p>
-								</div>
+						<AnimatedExpand expanded={ex}>
+							<ExpandedChromeSimple>
 								<ResumeHeader headerData={headerData} onHeaderChange={onHeaderChange} bare />
-							</div>
-						)}
+							</ExpandedChromeSimple>
+						</AnimatedExpand>
 					</div>
 				)
 			}
 
 			case 'summary': {
 				if (!summaryData) return null
-				const text = (summaryData.summary || '').trim()
-				const preview = text ? truncatePreview(text) : 'No summary yet'
 				const ex = !!expandedSections.summary
 				return (
 					<div key="summary" id="section-summary" className="mb-4">
 						<OrganizeSectionBar
 							defaultLabel="Professional Summary"
 							sectionLabel={sectionLabels?.summary}
-							preview={preview}
 							showVisibility
 							isVisible={vis.summary ?? false}
 							onVisibilityChange={(v) => onVisibilityChange('summary', v)}
 							expanded={ex}
 							onToggleExpand={() => toggle('summary')}
+							isLocked={false}
+							isDraggable
+							isDragging={draggedSection === 'summary'}
+							isDragOver={dragOverIndex === 0}
+							onDragStart={(e) => handleDragStart(e, 'summary')}
+							onDragOver={(e) => handleDragOver(e, 0)}
+							onDragLeave={handleDragLeave}
+							onDrop={(e) => handleDrop(e, 0)}
+							onDragEnd={handleDragEnd}
 						/>
-						{ex && (
-							<ExpandedChrome
-								sectionKey="summary"
-								defaultLabel="Professional Summary"
-								sectionLabel={sectionLabels?.summary}
-								onSectionLabelChange={onSectionLabelChange}
-								description="Write a brief professional summary highlighting your experience, skills, and career goals."
-							>
+						<AnimatedExpand expanded={ex}>
+							<ExpandedChromeSimple>
 								<Summary
 									bare
 									summaryData={summaryData}
@@ -190,41 +247,39 @@ function SimpleResumeSections({
 									sectionLabel={sectionLabels?.summary}
 									onSectionLabelChange={onSectionLabelChange}
 								/>
-							</ExpandedChrome>
-						)}
+							</ExpandedChromeSimple>
+						</AnimatedExpand>
 					</div>
 				)
 			}
 
 			case 'education': {
 				if (!educationData) return null
-				const first = educationList[0]
-				const preview =
-					educationList.length === 0
-						? 'No entries yet'
-						: `${educationList.length} · ${first?.school || 'School'}${first?.degree ? ` · ${first.degree}` : ''}`
 				const ex = !!expandedSections.education
 				return (
 					<div key="education" id="section-education" className="mb-4">
 						<OrganizeSectionBar
 							defaultLabel="Education"
 							sectionLabel={sectionLabels?.education}
-							preview={preview}
 							showVisibility
 							isVisible={vis.education ?? true}
 							onVisibilityChange={(v) => onVisibilityChange('education', v)}
 							expanded={ex}
 							onToggleExpand={() => toggle('education')}
+							isLocked={false}
+							isDraggable
+							isDragging={draggedSection === 'education'}
+							isDragOver={dragOverIndex === draggableOrder.indexOf('education')}
+							onDragStart={(e) => handleDragStart(e, 'education')}
+							onDragOver={(e) => handleDragOver(e, draggableOrder.indexOf('education'))}
+							onDragLeave={handleDragLeave}
+							onDrop={(e) => handleDrop(e, draggableOrder.indexOf('education'))}
+							onDragEnd={handleDragEnd}
 						/>
-						{ex && (
-							<ExpandedChrome
-								sectionKey="education"
-								defaultLabel="Education"
-								sectionLabel={sectionLabels?.education}
-								onSectionLabelChange={onSectionLabelChange}
-								description="Your academic background"
-							>
+						<AnimatedExpand expanded={ex}>
+							<ExpandedChromeSimple>
 								<Education
+									key={`education-${(educationData?.length ?? 0)}-${(educationData?.map(e => String(e.id ?? '')).join('-') ?? '')}`}
 									bare
 									educationData={educationData}
 									onEducationChange={onEducationChange}
@@ -233,40 +288,37 @@ function SimpleResumeSections({
 									sectionLabel={sectionLabels?.education}
 									onSectionLabelChange={onSectionLabelChange}
 								/>
-							</ExpandedChrome>
-						)}
+							</ExpandedChromeSimple>
+						</AnimatedExpand>
 					</div>
 				)
 			}
 
 			case 'experience': {
 				if (!experienceData) return null
-				const first = experienceList[0]
-				const preview =
-					experienceList.length === 0
-						? 'No entries yet'
-						: `${experienceList.length} · ${first?.title || 'Role'}${first?.company ? ` @ ${first.company}` : ''}`
 				const ex = !!expandedSections.experience
 				return (
 					<div key="experience" id="section-experience" className="mb-4">
 						<OrganizeSectionBar
 							defaultLabel="Experience"
 							sectionLabel={sectionLabels?.experience}
-							preview={preview}
 							showVisibility
 							isVisible={vis.experience ?? true}
 							onVisibilityChange={(v) => onVisibilityChange('experience', v)}
 							expanded={ex}
 							onToggleExpand={() => toggle('experience')}
+							isLocked={false}
+							isDraggable
+							isDragging={draggedSection === 'experience'}
+							isDragOver={dragOverIndex === draggableOrder.indexOf('experience')}
+							onDragStart={(e) => handleDragStart(e, 'experience')}
+							onDragOver={(e) => handleDragOver(e, draggableOrder.indexOf('experience'))}
+							onDragLeave={handleDragLeave}
+							onDrop={(e) => handleDrop(e, draggableOrder.indexOf('experience'))}
+							onDragEnd={handleDragEnd}
 						/>
-						{ex && (
-							<ExpandedChrome
-								sectionKey="experience"
-								defaultLabel="Experience"
-								sectionLabel={sectionLabels?.experience}
-								onSectionLabelChange={onSectionLabelChange}
-								description="Your work history"
-							>
+						<AnimatedExpand expanded={ex}>
+							<ExpandedChromeSimple>
 								<Experience
 									bare
 									experienceData={experienceData}
@@ -276,40 +328,37 @@ function SimpleResumeSections({
 									sectionLabel={sectionLabels?.experience}
 									onSectionLabelChange={onSectionLabelChange}
 								/>
-							</ExpandedChrome>
-						)}
+							</ExpandedChromeSimple>
+						</AnimatedExpand>
 					</div>
 				)
 			}
 
 			case 'projects': {
 				if (!projectsData) return null
-				const first = projectsList[0]
-				const preview =
-					projectsList.length === 0
-						? 'No entries yet'
-						: `${projectsList.length} · ${first?.title || 'Project'}`
 				const ex = !!expandedSections.projects
 				return (
 					<div key="projects" id="section-projects" className="mb-4">
 						<OrganizeSectionBar
 							defaultLabel="Projects"
 							sectionLabel={sectionLabels?.projects}
-							preview={preview}
 							showVisibility
 							isVisible={vis.projects ?? true}
 							onVisibilityChange={(v) => onVisibilityChange('projects', v)}
 							expanded={ex}
 							onToggleExpand={() => toggle('projects')}
+							isLocked={false}
+							isDraggable={vis.projects ?? true}
+							isDragging={draggedSection === 'projects'}
+							isDragOver={dragOverIndex === draggableOrder.indexOf('projects')}
+							onDragStart={(e) => handleDragStart(e, 'projects')}
+							onDragOver={(e) => handleDragOver(e, draggableOrder.indexOf('projects'))}
+							onDragLeave={handleDragLeave}
+							onDrop={(e) => handleDrop(e, draggableOrder.indexOf('projects'))}
+							onDragEnd={handleDragEnd}
 						/>
-						{ex && (
-							<ExpandedChrome
-								sectionKey="projects"
-								defaultLabel="Projects"
-								sectionLabel={sectionLabels?.projects}
-								onSectionLabelChange={onSectionLabelChange}
-								description="Highlight your projects"
-							>
+						<AnimatedExpand expanded={ex}>
+							<ExpandedChromeSimple>
 								<Projects
 									bare
 									projectsData={projectsData}
@@ -319,38 +368,37 @@ function SimpleResumeSections({
 									sectionLabel={sectionLabels?.projects}
 									onSectionLabelChange={onSectionLabelChange}
 								/>
-							</ExpandedChrome>
-						)}
+							</ExpandedChromeSimple>
+						</AnimatedExpand>
 					</div>
 				)
 			}
 
 			case 'skills': {
 				if (!Array.isArray(skillsData) && !skillsData) return null
-				const n = skillsList.length
-				const names = skillsList.slice(0, 3).map((s) => s.name).filter(Boolean)
-				const preview = n === 0 ? 'No skills yet' : `${n} skill${n === 1 ? '' : 's'} · ${names.join(', ') || '—'}`
 				const ex = !!expandedSections.skills
 				return (
 					<div key="skills" id="section-skills" className="mb-4">
 						<OrganizeSectionBar
 							defaultLabel="Skills"
 							sectionLabel={sectionLabels?.skills}
-							preview={preview}
 							showVisibility
 							isVisible={vis.skills ?? true}
 							onVisibilityChange={(v) => onVisibilityChange('skills', v)}
 							expanded={ex}
 							onToggleExpand={() => toggle('skills')}
+							isLocked={false}
+							isDraggable
+							isDragging={draggedSection === 'skills'}
+							isDragOver={dragOverIndex === draggableOrder.indexOf('skills')}
+							onDragStart={(e) => handleDragStart(e, 'skills')}
+							onDragOver={(e) => handleDragOver(e, draggableOrder.indexOf('skills'))}
+							onDragLeave={handleDragLeave}
+							onDrop={(e) => handleDrop(e, draggableOrder.indexOf('skills'))}
+							onDragEnd={handleDragEnd}
 						/>
-						{ex && (
-							<ExpandedChrome
-								sectionKey="skills"
-								defaultLabel="Skills"
-								sectionLabel={sectionLabels?.skills}
-								onSectionLabelChange={onSectionLabelChange}
-								description="Organize your skills into categories. Drag pills to reorder. Hide skills you don't want on this resume."
-							>
+						<AnimatedExpand expanded={ex}>
+							<ExpandedChromeSimple>
 								<Skills
 									bare
 									skillsData={skillsList}
@@ -364,8 +412,8 @@ function SimpleResumeSections({
 									sectionLabel={sectionLabels?.skills}
 									onSectionLabelChange={onSectionLabelChange}
 								/>
-							</ExpandedChrome>
-						)}
+							</ExpandedChromeSimple>
+						</AnimatedExpand>
 					</div>
 				)
 			}
@@ -376,21 +424,7 @@ function SimpleResumeSections({
 	}
 
 	return (
-		<div className="space-y-1">
-			<div className="mb-4 p-3 rounded-lg bg-brand-pink/5 border border-brand-pink/20">
-				<p className="text-sm text-gray-800 font-medium">Organize your resume</p>
-				<p className="text-xs text-gray-600 mt-1">
-					Each row is a section—use the pencil to expand and edit here, or switch to{' '}
-					<strong>Full editor</strong> to open every section at once.
-				</p>
-				<p className="text-xs text-gray-500 mt-2">
-					Profile and account details:{' '}
-					<Link to="/info" className="text-brand-pink font-medium hover:underline">
-						Info
-					</Link>
-					.
-				</p>
-			</div>
+		<div className="space-y-4">
 			{sectionOrder.map(renderSection)}
 		</div>
 	)

@@ -3,7 +3,7 @@
 // Right panel containing the resume preview and controls.
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRefresh, faDownload } from '@fortawesome/free-solid-svg-icons'
+import { faRefresh, faDownload, faFileWord } from '@fortawesome/free-solid-svg-icons'
 
 function RightPanel({
 	previewHtml,
@@ -13,6 +13,8 @@ function RightPanel({
 	onZoomOut,
 	isDownloadingPDF,
 	onDownloadPDF,
+	isDownloadingWord,
+	onDownloadWord,
 	onRefreshPreview,
 	validationErrors = [],
 }) {
@@ -54,12 +56,21 @@ function RightPanel({
 				<div className="flex items-center gap-2 flex-1 justify-end">
 					<button
 						type="button"
-						className="px-3 py-1.5 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all flex items-center gap-2"
+						className="px-3 py-1.5 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all flex items-center gap-2 disabled:opacity-70"
 						onClick={onDownloadPDF}
 						disabled={isDownloadingPDF}
 					>
 						<FontAwesomeIcon icon={faDownload} />
-						<span className="text-sm">Download</span>
+						<span className="text-sm">PDF</span>
+					</button>
+					<button
+						type="button"
+						className="px-3 py-1.5 bg-[#2b579a] text-white font-semibold rounded-lg hover:opacity-90 transition-all flex items-center gap-2 disabled:opacity-70"
+						onClick={onDownloadWord}
+						disabled={isDownloadingWord}
+					>
+						<FontAwesomeIcon icon={faFileWord} />
+						<span className="text-sm">Word</span>
 					</button>
 					<button
 						type="button"

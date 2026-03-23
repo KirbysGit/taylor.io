@@ -19,7 +19,7 @@ const Summary = ({
 		onSummaryChange({ summary: value })
 	}
 
-	const input = <SummaryInput summary={summary} onUpdate={handleUpdate} />
+	const input = <SummaryInput summary={summary} onUpdate={handleUpdate} hideLabel={bare} />
 
 	if (bare) {
 		return <div className="p-4">{input}</div>

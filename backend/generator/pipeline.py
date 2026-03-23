@@ -148,3 +148,13 @@ async def generate_pdf(template_name: str, resume_data: Dict[str, Any]) -> bytes
 
     # return pdf bytes.
     return pdf_bytes
+
+
+def generate_docx(template_name: str, resume_data: Dict[str, Any]) -> bytes:
+    """
+    Generate a Word document from resume_data.
+    Uses template-specific styling from docx_styles.
+    Returns .docx file as bytes.
+    """
+    from .docx_builder import build_docx
+    return build_docx(resume_data, template_name)

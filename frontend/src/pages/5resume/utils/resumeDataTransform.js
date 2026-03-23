@@ -57,10 +57,18 @@ export function applyVisibilityFilters(resumeData) {
 	}
 
 	// preserve sectionOrder for backend (exclude 'header' as it's always first)
-	// sectionOrder is used to determine rendering order in template
+	// only include visible sections - reordering hidden sections should not affect preview
 	if (resumeData.sectionOrder) {
-		// Filter out 'header' from sectionOrder (header is always rendered separately)
-		filteredData.sectionOrder = resumeData.sectionOrder.filter(key => key !== 'header')
+		filteredData.sectionOrder = resumeData.sectionOrder.filter((key) => {
+			if (key === 'header') return false
+			// exclude hidden sections so reordering them won't trigger a preview refresh
+			if (key === 'summary' && !sectionVisibility.summary) return false
+			if (key === 'education' && !sectionVisibility.education) return false
+			if (key === 'experience' && !sectionVisibility.experience) return false
+			if (key === 'projects' && !sectionVisibility.projects) return false
+			if (key === 'skills' && !sectionVisibility.skills) return false
+			return true
+		})
 	}
 
 	// remove sectionVisibility object (not needed for backend)

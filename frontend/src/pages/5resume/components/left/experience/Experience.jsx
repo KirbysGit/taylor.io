@@ -53,12 +53,20 @@ const Experience = ({
 		[experienceData, onExperienceChange]
 	)
 
+	const handleReorder = useCallback(
+		(reordered) => {
+			onExperienceChange(toResumeFormat(reordered))
+		},
+		[onExperienceChange]
+	)
+
 	const input = (
 		<ExperienceInput
 			experiences={experiences}
 			onAdd={handleAdd}
 			onRemove={handleRemove}
 			onUpdate={handleUpdate}
+			onReorder={handleReorder}
 		/>
 	)
 

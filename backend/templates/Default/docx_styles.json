@@ -1,0 +1,4 @@
+{
+  "_comment": "Override docx styling for Default template. Values match preview.css. Edit to adjust Word output.",
+  "_doc": "See backend/generator/docx_styles.py DocxStyleConfig for all keys. Omit keys to use defaults."
+}

@@ -82,3 +82,20 @@ export async function generateResumePDF(template, resumeData) {
 	}
 }
 
+export async function generateResumeWord(template, resumeData) {
+	const url = `/api/resume/generator/docx`
+	const payload = {
+		template: template,
+		resume_data: resumeData,
+	}
+	try {
+		return await apiRequestBlob(url, {
+			method: 'POST',
+			body: JSON.stringify(payload),
+		})
+	} catch (error) {
+		console.error('Error generating resume Word:', error)
+		throw error
+	}
+}
+

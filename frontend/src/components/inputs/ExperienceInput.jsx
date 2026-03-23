@@ -1,9 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGripVertical, faPencil, faChevronUp, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { XIcon } from '@/components/icons';
 import { shouldDefaultToBullets, paragraphToBullets, bulletsToParagraph } from '@/utils/descriptionHelpers';
+import MonthYearPicker from './MonthYearPicker';
+
+function AnimatedExpand({ expanded, children }) {
+	return (
+		<div
+			className="grid transition-[grid-template-rows] duration-150 ease-out"
+			style={{ gridTemplateRows: expanded ? '1fr' : '0fr' }}
+		>
+			<div className="min-h-0 overflow-hidden">{children}</div>
+		</div>
+	)
+}
 
 // Experience Input Component - Just the form fields and logic, no headers
-const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
+const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) => {
 	// ensure at least one empty entry exists
 	const entries = experiences.length > 0 ? experiences : [{ 
 		id: Date.now(), 
@@ -18,12 +32,15 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 	}]
 
 	const getEntryId = (entry, index) => entry?.id ?? index
-	const [expandedIds, setExpandedIds] = useState(new Set(entries.map((e, i) => getEntryId(e, i))))
+	const [expandedIds, setExpandedIds] = useState(() => new Set()) // collapsed by default
 	const [localEntries, setLocalEntries] = useState(entries)
 	const [descriptionModes, setDescriptionModes] = useState({})
 	const [descriptionBullets, setDescriptionBullets] = useState({})
+	const [draggedEntryIndex, setDraggedEntryIndex] = useState(null)
+	const [dragOverEntryIndex, setDragOverEntryIndex] = useState(null)
 	const prevLengthRef = useRef(experiences.length)
 	const prevIdsRef = useRef(experiences.map(e => e.id || e).join(','))
+	const lastDragEndRef = useRef(0)
 	// store previous end dates when toggling "current" to preserve them
 	const savedEndDatesRef = useRef(new Map())
 
@@ -51,19 +68,23 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 			setDescriptionBullets({})
 
 			// preserve expanded/collapsed state by ID (survives add/remove)
-			if (currentLength > prevLengthRef.current) {
+			// only expand newly added when user added one (not when data loads from empty)
+			if (currentLength > prevLengthRef.current && prevLengthRef.current > 0 && currentLength === prevLengthRef.current + 1) {
 				setExpandedIds(prev => {
 					const newSet = new Set(prev)
 					const newEntry = newEntries[currentLength - 1]
 					newSet.add(getEntryId(newEntry, currentLength - 1)) // expand only the newly added
 					return newSet
 				})
+			} else if (currentLength > prevLengthRef.current) {
+				// data loaded (e.g. from [] to multiple) - keep all collapsed
+				setExpandedIds(new Set())
 			} else {
-				// removing - keep only IDs that still exist
+				// removing - keep only IDs that still exist; default to collapsed
 				const currentIds = new Set(newEntries.map((e, i) => getEntryId(e, i)))
 				setExpandedIds(prev => {
 					const filtered = new Set([...prev].filter(id => currentIds.has(id)))
-					return filtered.size > 0 ? filtered : new Set(newEntries.map((e, i) => getEntryId(e, i)))
+					return filtered
 				})
 			}
 
@@ -199,64 +220,112 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 		setExpandedIds(prev => new Set([...prev, newEntry.id]))
 	}
 
+	const handleReorder = (fromIndex, toIndex) => {
+		if (fromIndex === toIndex || !onReorder) return
+		const reordered = [...localEntries]
+		const [removed] = reordered.splice(fromIndex, 1)
+		reordered.splice(toIndex, 0, removed)
+		setLocalEntries(reordered)
+		onReorder(reordered)
+	}
+
+	const headerSection = (
+		<div className="flex items-start justify-between gap-4 mb-4">
+			<div>
+				<h3 className="text-sm font-semibold text-gray-900">Your Experience Entries</h3>
+				<p className="text-xs text-gray-500 mt-0.5">Add, edit, or reorder your work history. Click the pencil to expand.</p>
+			</div>
+			<button
+				onClick={handleAddNew}
+				className="px-3 py-1.5 text-sm font-medium border border-brand-pink text-brand-pink rounded-lg hover:bg-brand-pink hover:text-white transition-all flex-shrink-0"
+			>
+				+ Add Experience
+			</button>
+		</div>
+	)
+
 	return (
 		<>
 			{experiences.length > 0 ? (
-				<div className="space-y-3">
-					{localEntries.map((exp, index) => {
-					const isExpanded = expandedIds.has(getEntryId(exp, index))
-					const hasContent = exp.title || exp.company
-					const displayName = exp.title 
-						? (exp.company ? `${exp.title} @ ${exp.company}` : exp.title)
-						: (exp.company ? exp.company : (hasContent ? 'Incomplete' : 'New Experience'))
-					
-					return (
-						<div 
-							key={exp.id || index} 
-							className="collapsibleCard"
-						>
-							{/* Header - Always visible */}
-							<button
-								type="button"
-								onClick={() => toggleExpanded(index)}
-								className="collapsibleCardHeader"
-							>
-								<div className="flex items-center gap-3 flex-1 text-left">
-									<svg 
-										className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
-										fill="none" 
-										stroke="currentColor" 
-										viewBox="0 0 24 24"
-									>
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-									</svg>
-									<div className="flex items-center gap-2">
-										<span className="text-base font-semibold text-gray-900">{displayName}</span>
-										{!hasContent && (
-											<span className="text-xs text-gray-400">(Click to add details)</span>
-										)}
-									</div>
-								</div>
-								{localEntries.length > 1 && (
-									<button
-										onClick={(e) => {
-											e.stopPropagation()
-											onRemove(index)
-										}}
-										className="removeButton"
-									>
-										Remove
-										<span className="removeButtonUnderline"></span>
-									</button>
-								)}
-							</button>
+				<div>
+					{headerSection}
+					<div className="space-y-3">
+						{localEntries.map((exp, index) => {
+							const isExpanded = expandedIds.has(getEntryId(exp, index))
+							const hasContent = exp.title || exp.company
+							const displayName = exp.title 
+								? (exp.company ? `${exp.title} @ ${exp.company}` : exp.title)
+								: (exp.company ? exp.company : (hasContent ? 'Incomplete' : 'New Experience'))
+							const isDraggable = !!onReorder
+							const isDragging = draggedEntryIndex === index
+							const isDragOver = dragOverEntryIndex === index
 
-							{/* Expandable Content */}
-							<div 
-								className={`expandableContent ${isExpanded ? 'expanded' : 'collapsed'}`}
-							>
-								<div className="expandableContentInner">
-									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							return (
+								<div 
+									key={exp.id || index} 
+									onDragOver={isDraggable ? (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverEntryIndex(index) } : undefined}
+									onDragLeave={isDraggable ? () => setDragOverEntryIndex(null) : undefined}
+									onDrop={isDraggable ? (e) => { e.preventDefault(); if (draggedEntryIndex != null) { handleReorder(draggedEntryIndex, index); setDraggedEntryIndex(null); setDragOverEntryIndex(null) } } : undefined}
+									className={`min-w-0 rounded-xl border-l-4 border-brand-pink bg-white shadow transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${isExpanded ? 'rounded-t-xl' : ''} ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'ring-2 ring-brand-pink ring-dashed ring-offset-1 bg-brand-pink/5' : ''}`}
+								>
+									{/* Card bar - grip, label, pencil, trash */}
+									<div className={`flex items-center gap-2 py-2.5 rounded-xl transition-colors ${isDraggable ? 'pl-3 pr-2' : 'pl-5 pr-2'} hover:bg-gray-50/50`}>
+										{isDraggable ? (
+											<div
+												draggable
+												onDragStart={(e) => {
+													setDraggedEntryIndex(index)
+													e.dataTransfer.effectAllowed = 'move'
+													e.dataTransfer.setData('text/plain', String(index))
+												}}
+												onDragEnd={() => {
+													lastDragEndRef.current = Date.now()
+													setDraggedEntryIndex(null)
+													setDragOverEntryIndex(null)
+												}}
+												className="flex-shrink-0 w-6 flex items-center justify-center text-gray-400 cursor-grab active:cursor-grabbing p-1 -m-1 touch-none"
+												title="Drag to reorder"
+											>
+												<FontAwesomeIcon icon={faGripVertical} className="w-3.5 h-3.5" />
+											</div>
+										) : null}
+										<span className="flex-1 min-w-0 text-sm font-semibold text-gray-900 truncate">
+											{displayName}
+											{!hasContent && <span className="text-gray-500 font-normal ml-1">(click pencil to edit)</span>}
+										</span>
+										<button
+											type="button"
+											onClick={(e) => {
+												e.stopPropagation()
+												if (Date.now() - lastDragEndRef.current < 150) return
+												toggleExpanded(index)
+											}}
+											className={`flex-shrink-0 p-2 rounded-md transition-colors ${
+												isExpanded ? 'bg-brand-pink/10 text-brand-pink hover:bg-brand-pink/20' : 'text-gray-500 hover:text-brand-pink hover:bg-gray-100'
+											}`}
+											aria-expanded={isExpanded}
+											title={isExpanded ? 'Collapse' : 'Expand to edit'}
+										>
+											<FontAwesomeIcon icon={isExpanded ? faChevronUp : faPencil} className="w-3.5 h-3.5" />
+										</button>
+										<button
+											type="button"
+											onClick={(e) => {
+												e.stopPropagation()
+												onRemove(index)
+											}}
+											className="flex-shrink-0 p-2 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+											aria-label="Remove"
+											title="Remove"
+										>
+											<FontAwesomeIcon icon={faTrash} className="w-3.5 h-3.5" />
+										</button>
+									</div>
+
+									{/* Expandable Content */}
+									<AnimatedExpand expanded={isExpanded}>
+										<div className="pt-4 pb-4 px-4 border-t border-gray-200 space-y-4">
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
 										<div>
 											<label className="label">Job Title</label>
 											<input
@@ -377,17 +446,17 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 											)}
 										</div>
 										<div>
-											<label className="label">Start Date</label>
-											<input
-												type="month"
+											<div className="flex items-center min-h-8 mb-1">
+												<label className="label mb-0">Start Date</label>
+											</div>
+											<MonthYearPicker
 												value={localEntries[index]?.startDate || localEntries[index]?.start_date || ''}
-												onChange={(e) => handleFieldChange(index, 'startDate', e.target.value)}
-												className="input"
+												onChange={(v) => handleFieldChange(index, 'startDate', v)}
 											/>
 										</div>
 										<div>
 											{/* Label Row with Switch */}
-											<div className="grid grid-cols-3 items-center mb-1">
+											<div className="grid grid-cols-3 items-center min-h-8 mb-1">
 												<label className="label mb-0">End Date</label>
 												
 												{/* Switch - div with role="switch" to avoid sr-only checkbox focus scroll bug */}
@@ -429,12 +498,10 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 											
 											{/* End Date Input */}
 											<div className={localEntries[index]?.current ? 'opacity-50' : ''}>
-												<input
-													type="month"
+												<MonthYearPicker
 													value={localEntries[index]?.endDate || localEntries[index]?.end_date || ''}
-													onChange={(e) => handleFieldChange(index, 'endDate', e.target.value)}
+													onChange={(v) => handleFieldChange(index, 'endDate', v)}
 													disabled={localEntries[index]?.current}
-													className="input disabled:bg-gray-100 disabled:cursor-not-allowed"
 												/>
 											</div>
 										</div>
@@ -450,37 +517,18 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate }) => {
 										</div>
 									</div>
 								</div>
+								</AnimatedExpand>
 							</div>
-						</div>
-					)
-				})}
-
-					<button
-						onClick={handleAddNew}
-						className="w-full px-6 py-3 border-2 border-brand-pink text-brand-pink font-semibold rounded-lg hover:bg-brand-pink hover:text-white transition-all"
-					>
-						+ Add Another Experience
-					</button>
+						)
+					})}
+					</div>
 				</div>
 			) : (
-				<div className="text-center py-12">
-					<div className="mb-4">
-						<svg 
-							className="w-16 h-16 mx-auto text-gray-300" 
-							fill="none" 
-							stroke="currentColor" 
-							viewBox="0 0 24 24"
-						>
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-						</svg>
+				<div>
+					{headerSection}
+					<div className="text-center py-10 border border-dashed border-gray-200 rounded-lg">
+						<p className="text-gray-500 text-base">No experience yet. Click &quot;+ Add Experience&quot; above to get started.</p>
 					</div>
-					<p className="text-gray-400 mb-6">No work experience yet</p>
-					<button
-						onClick={handleAddNew}
-						className="w-full px-6 py-3 border-2 border-brand-pink text-brand-pink font-semibold rounded-lg hover:bg-brand-pink hover:text-white transition-all"
-					>
-						+ Add Your First Experience
-					</button>
 				</div>
 			)}
 		</>

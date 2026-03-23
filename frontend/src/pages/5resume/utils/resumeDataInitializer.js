@@ -54,8 +54,9 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 		contactOrder: savedContactOrder || ['email', 'phone', 'location', 'linkedin', 'github', 'portfolio'],
 	}
 
-	// Initialize education data
+	// Initialize education data (preserve id for React keys and sync logic)
 	const initialEducation = (responseData.education || []).map(edu => ({
+		id: edu.id,
 		school: edu.school || '',
 		degree: edu.degree || '',
 		discipline: edu.discipline || '',
@@ -68,8 +69,9 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 		subsections: edu.subsections || {},
 	}))
 
-	// Initialize experience data
+	// Initialize experience data (preserve id for React keys and sync logic)
 	const initialExperience = (responseData.experiences || []).map(exp => ({
+		id: exp.id,
 		title: exp.title || '',
 		company: exp.company || '',
 		description: exp.description || '',
@@ -80,8 +82,9 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 		skills: exp.skills || '',
 	}))
 
-	// Initialize projects data
+	// Initialize projects data (preserve id for React keys and sync logic)
 	const initialProjects = (responseData.projects || []).map(proj => ({
+		id: proj.id,
 		title: proj.title || '',
 		description: proj.description || '',
 		tech_stack: Array.isArray(proj.tech_stack) ? proj.tech_stack : (proj.tech_stack ? [proj.tech_stack] : []),

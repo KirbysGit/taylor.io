@@ -14,14 +14,14 @@ import { useState, useEffect } from 'react'
 
 // icons imports.
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faEyeSlash, faGripVertical } from '@fortawesome/free-solid-svg-icons'
-import { RequiredAsterisk, ChevronDown, ChevronUp } from '@/components/icons'
+import { faEye, faEyeSlash, faGripVertical, faPencil, faCheck } from '@fortawesome/free-solid-svg-icons'
+import { RequiredAsterisk } from '@/components/icons'
 
 // ----------- component -----------
 const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 	
-	// collapsible section state.
-	const [isHeaderExpanded, setIsHeaderExpanded] = useState(true)
+	// which field is being edited: 'name' | 'email' | 'phone' | ... or null
+	const [editingField, setEditingField] = useState(null)
 
 	// visibility states for contacts (including email).
 	const [showEmail, setShowEmail] = useState(headerData?.visibility?.showEmail ?? true)
@@ -153,235 +153,197 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 		onHeaderChange(exportedData)
 	}, [firstName, lastName, email, phoneValue, locationValue, linkedinValue, githubValue, portfolioValue, showEmail, showPhone, showLocation, showLinkedin, showGithub, showPortfolio, contactOrder])
 
-	const headerFields = (
-				<div>
-					<p className="text-[0.875rem] text-gray-500 mb-2">This is the top of your resume. It's your brand.</p>
-					
-					{/* name */}
-					<div className="mb-4">
-						<div className="labelInputPair">
-							<label className="label">Your Name <RequiredAsterisk /></label>
-							<input
-								type="text"
-								value={firstName + (lastName ? ' ' + lastName : '')}
-								onChange={(e) => {
-									const fullName = e.target.value
-									// Split on the last space to handle multiple middle names correctly
-									const lastSpaceIndex = fullName.lastIndexOf(' ')
-									if (lastSpaceIndex === -1) {
-										// No space found, treat entire string as first name
-										setFirstName(fullName)
-										setLastName('')
-									} else {
-										// Check if there's content after the last space
-										const afterSpace = fullName.substring(lastSpaceIndex + 1)
-										if (afterSpace.length > 0) {
-											// There's content after the space, split normally
-											setFirstName(fullName.substring(0, lastSpaceIndex))
-											setLastName(afterSpace)
-										} else {
-											// Trailing space - keep it in firstName so user can continue typing
-											setFirstName(fullName)
-											setLastName('')
-										}
-									}
-								}}
-								className="input"
-								required
-							/>
-						</div>
-					</div>
-					
-					{/* contact fields with drag and drop */}
-					<div className="flex flex-col mt-4 gap-2">
-						<h2 className="sectionHeading">Nice To Haves (Optional Contacts)</h2>
-						
-						{/* Contact Fields - Rendered in specified order with drag handles */}
-						{contactOrder.map((fieldKey, index) => {
-							// Map field keys to their values and visibility states
-							const fieldMap = {
-								email: {
-									label: 'Email',
-									value: email,
-									setValue: setEmail,
-									show: showEmail,
-									setShow: setShowEmail,
-									required: false,
-								},
-								phone: {
-									label: 'Phone Number',
-									value: phoneValue,
-									setValue: setPhoneValue,
-									show: showPhone,
-									setShow: setShowPhone,
-									required: false,
-								},
-								location: {
-									label: 'Location',
-									value: locationValue,
-									setValue: setLocationValue,
-									show: showLocation,
-									setShow: setShowLocation,
-									required: false,
-								},
-								linkedin: {
-									label: 'LinkedIn',
-									value: linkedinValue,
-									setValue: setLinkedinValue,
-									show: showLinkedin,
-									setShow: setShowLinkedin,
-									required: false,
-								},
-								github: {
-									label: 'GitHub',
-									value: githubValue,
-									setValue: setGithubValue,
-									show: showGithub,
-									setShow: setShowGithub,
-									required: false,
-								},
-								portfolio: {
-									label: 'Portfolio',
-									value: portfolioValue,
-									setValue: setPortfolioValue,
-									show: showPortfolio,
-									setShow: setShowPortfolio,
-									required: false,
-								},
-							}
-
-							const field = fieldMap[fieldKey]
-							if (!field) return null
-
-							const isDragging = draggedField === fieldKey
-							const isDragOver = dragOverIndex === index
-
-							// Drag handlers
-							const handleDragStart = (e) => {
-								setDraggedField(fieldKey)
-								e.dataTransfer.effectAllowed = 'move'
-								e.dataTransfer.setData('text/plain', fieldKey)
-							}
-
-							const handleDragOver = (e) => {
-								e.preventDefault()
-								e.dataTransfer.dropEffect = 'move'
-								setDragOverIndex(index)
-							}
-
-							const handleDragLeave = () => {
-								setDragOverIndex(null)
-							}
-
-							const handleDrop = (e) => {
-								e.preventDefault()
-								
-								if (!draggedField) return
-
-								const draggedIndex = contactOrder.indexOf(draggedField)
-								if (draggedIndex === -1 || draggedIndex === index) {
-									setDraggedField(null)
-									setDragOverIndex(null)
-									return
-								}
-
-								// Reorder contact fields
-								const newOrder = [...contactOrder]
-								const [removed] = newOrder.splice(draggedIndex, 1)
-								newOrder.splice(index, 0, removed)
-
-								setContactOrder(newOrder)
-								setDraggedField(null)
-								setDragOverIndex(null)
-							}
-
-							const handleDragEnd = () => {
-								setDraggedField(null)
-								setDragOverIndex(null)
-							}
-
-							return (
-								<div
-									key={fieldKey}
-									draggable={true}
-									onDragStart={handleDragStart}
-									onDragOver={handleDragOver}
-									onDragLeave={handleDragLeave}
-									onDrop={handleDrop}
-									onDragEnd={handleDragEnd}
-									className={`
-										labelInputPairHoriz
-										${isDragging ? 'opacity-50' : ''}
-										${isDragOver ? 'border-2 border-brand-pink border-dashed rounded' : ''}
-									`}
-								>
-									{/* Drag Handle - 6 dots */}
-									<div className="flex-shrink-0 text-gray-400 cursor-move px-2">
-										<FontAwesomeIcon icon={faGripVertical} className="w-4 h-4" />
-									</div>
-									
-									{/* Label */}
-									<label className="labelHoriz">
-										{field.label}&nbsp;{field.required && <RequiredAsterisk />}
-									</label>
-									
-									{/* Input */}
-									<input
-										type="text"
-										value={field.value}
-										onChange={(e) => field.setValue(e.target.value)}
-										className="input flex-1"
-										disabled={!field.show}
-										required={field.required}
-									/>
-									
-									{/* Visibility Toggle */}
-									{field.setShow && (
-										<button
-											type="button"
-											onClick={() => field.setShow(prev => !prev)}
-											className="visibilityToggle"
-											aria-label={field.show ? `Hide ${field.label.toLowerCase()}` : `Show ${field.label.toLowerCase()}`}
-											tabIndex={-1}
-										>
-											<FontAwesomeIcon icon={field.show ? faEye : faEyeSlash} className="w-5 h-5" />
-										</button>
-									)}
-								</div>
-							)
-						})}
-					</div>
-				</div>
-	)
-
-	if (bare) {
-		return <div className="p-4">{headerFields}</div>
+	const fieldMap = {
+		email: { label: 'Email', value: email, setValue: setEmail, show: showEmail, setShow: setShowEmail },
+		phone: { label: 'Phone Number', value: phoneValue, setValue: setPhoneValue, show: showPhone, setShow: setShowPhone },
+		location: { label: 'Location', value: locationValue, setValue: setLocationValue, show: showLocation, setShow: setShowLocation },
+		linkedin: { label: 'LinkedIn', value: linkedinValue, setValue: setLinkedinValue, show: showLinkedin, setShow: setShowLinkedin },
+		github: { label: 'GitHub', value: githubValue, setValue: setGithubValue, show: showGithub, setShow: setShowGithub },
+		portfolio: { label: 'Portfolio', value: portfolioValue, setValue: setPortfolioValue, show: showPortfolio, setShow: setShowPortfolio },
 	}
 
-	return (
-		<div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
-			{/* header with chevron */}
+	const fullName = [firstName, lastName].filter(Boolean).join(' ').trim() || ''
+
+	const doneBtn = () => (
+		<button
+			type="button"
+			data-done-btn
+			onClick={() => {
+				setTimeout(() => setEditingField(null), 0)
+			}}
+			className="p-2 rounded-md text-brand-pink bg-brand-pink/10 hover:bg-brand-pink/15 transition-colors"
+			aria-label="Done"
+			title="Done"
+		>
+			<FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5" />
+		</button>
+	)
+
+	const handleInputBlur = (e) => {
+		// Don't exit if focus moved to our done button (avoid re-opening edit)
+		if (e.relatedTarget?.closest?.('[data-done-btn]')) return
+		setEditingField(null)
+	}
+
+	const pencilBtn = (fieldKey, label) => (
+		<button
+			type="button"
+			onClick={() => setEditingField(fieldKey)}
+			className="p-2 rounded-md text-gray-400 hover:text-brand-pink hover:bg-gray-50 transition-colors"
+			aria-label={label}
+			title={label}
+		>
+			<FontAwesomeIcon icon={faPencil} className="w-3.5 h-3.5" />
+		</button>
+	)
+
+	const nameRow = (
+		<div className="flex items-center gap-4 py-4">
+			<label className="w-28 flex-shrink-0 text-sm font-medium text-gray-500">
+				Your name <RequiredAsterisk />
+			</label>
+			<div className="flex-1 min-w-0 flex items-center gap-3">
+				{editingField === 'name' ? (
+					<>
+						<input
+							type="text"
+							value={firstName + (lastName ? ' ' + lastName : '')}
+							onBlur={handleInputBlur}
+							onChange={(e) => {
+								const val = e.target.value
+								const lastSpaceIndex = val.lastIndexOf(' ')
+								if (lastSpaceIndex === -1) {
+									setFirstName(val)
+									setLastName('')
+								} else {
+									const afterSpace = val.substring(lastSpaceIndex + 1)
+									if (afterSpace.length > 0) {
+										setFirstName(val.substring(0, lastSpaceIndex))
+										setLastName(afterSpace)
+									} else {
+										setFirstName(val)
+										setLastName('')
+									}
+								}
+							}}
+							onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
+							className="input py-1.5 text-sm flex-1"
+							placeholder="First and last name"
+							autoFocus
+						/>
+						{doneBtn()}
+					</>
+				) : (
+					<>
+						<span className={`text-sm flex-1 ${fullName ? 'text-gray-900' : 'text-gray-400'}`}>
+							{fullName || 'Add your name'}
+						</span>
+						{pencilBtn('name', 'Edit name')}
+					</>
+				)}
+			</div>
+		</div>
+	)
+
+	const contactRow = (fieldKey, field, index) => {
+		const isEditing = editingField === fieldKey
+		const isDragging = draggedField === fieldKey
+		const isDragOver = dragOverIndex === index
+		return (
 			<div
-				onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
-				className="flex items-center gap-3 w-full transition-colors"
+				key={fieldKey}
+				draggable={!isEditing}
+				onDragStart={(e) => {
+					setDraggedField(fieldKey)
+					e.dataTransfer.effectAllowed = 'move'
+					e.dataTransfer.setData('text/plain', fieldKey)
+				}}
+				onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverIndex(index) }}
+				onDragLeave={() => setDragOverIndex(null)}
+				onDrop={(e) => {
+					e.preventDefault()
+					if (!draggedField || draggedField === fieldKey) return
+					const di = contactOrder.indexOf(draggedField)
+					if (di === -1 || di === index) return
+					const next = [...contactOrder]
+					const [removed] = next.splice(di, 1)
+					next.splice(index, 0, removed)
+					setContactOrder(next)
+					setDraggedField(null)
+					setDragOverIndex(null)
+				}}
+				onDragEnd={() => { setDraggedField(null); setDragOverIndex(null) }}
+				className={`flex items-center gap-4 py-3.5 transition-colors
+					${isDragOver ? 'bg-gray-50/80 rounded-lg -mx-1 px-2' : ''}
+					${isDragging ? 'opacity-50' : ''}`}
 			>
-				{/* title */}
-				<h1 className="text-[1.375rem] font-semibold text-gray-900">Resume Header</h1>
-				
-				{/* divider */}
-				<div className="flex-1 h-[3px] rounded bg-gray-300"></div>
-				
-				{/* chevron in circle */}
-				<div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-					{isHeaderExpanded ? (
-						<ChevronUp className="w-4 h-4 text-gray-600" />
+				<div className="w-28 flex-shrink-0 flex items-center gap-4">
+					<FontAwesomeIcon icon={faGripVertical} className="w-3.5 h-3.5 text-gray-300 cursor-move flex-shrink-0" />
+					<label className="text-sm font-medium text-gray-500">{field.label}</label>
+				</div>
+				<div className="flex-1 min-w-0 flex items-center gap-3">
+					{isEditing ? (
+						<>
+							<input
+								type="text"
+								value={field.value}
+								onBlur={handleInputBlur}
+								onChange={(e) => field.setValue(e.target.value)}
+								onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
+								className="input py-1.5 text-sm flex-1 disabled:opacity-60"
+								disabled={!field.show}
+								placeholder={field.label}
+								autoFocus
+							/>
+							<button
+								type="button"
+								onClick={() => field.setShow(prev => !prev)}
+								className="p-2 rounded-md text-gray-400 hover:text-brand-pink hover:bg-gray-50 transition-colors"
+								title={field.show ? 'Hide on resume' : 'Show on resume'}
+							>
+								<FontAwesomeIcon icon={field.show ? faEye : faEyeSlash} className="w-3.5 h-3.5" />
+							</button>
+							{doneBtn()}
+						</>
 					) : (
-						<ChevronDown className="w-4 h-4 text-gray-600" />
+						<>
+							<span className={`text-sm flex-1 ${field.value ? 'text-gray-900' : 'text-gray-400'}`}>
+								{field.value || `Add ${field.label.toLowerCase()}`}
+							</span>
+							<button
+								type="button"
+								onClick={() => field.setShow(prev => !prev)}
+								className="p-2 rounded-md text-gray-400 hover:text-brand-pink hover:bg-gray-50 transition-colors"
+								title={field.show ? 'Hide on resume' : 'Show on resume'}
+							>
+								<FontAwesomeIcon icon={field.show ? faEye : faEyeSlash} className="w-3.5 h-3.5" />
+							</button>
+							{pencilBtn(fieldKey, `Edit ${field.label}`)}
+						</>
 					)}
 				</div>
 			</div>
-			
-			{isHeaderExpanded && headerFields}
+		)
+	}
+
+	const content = (
+		<div className="divide-y divide-gray-100">
+			{nameRow}
+			{contactOrder.map((key, i) => {
+				const f = fieldMap[key]
+				return f ? contactRow(key, f, i) : null
+			})}
+		</div>
+	)
+
+	if (bare) {
+		return <div className="px-4 py-5">{content}</div>
+	}
+
+	return (
+		<div className="mb-4">
+			<h2 className="text-lg font-semibold text-gray-900 mb-3">Resume Header</h2>
+			{content}
 		</div>
 	)
 }

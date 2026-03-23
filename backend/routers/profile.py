@@ -15,7 +15,7 @@
 import os
 from typing import List, Optional
 from datetime import datetime
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import func
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 
@@ -67,6 +67,19 @@ async def get_my_profile(
     current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db)
 ):
+    # re-query with eager loading to ensure we get fresh data (avoids lazy-load / stale cache issues after bulk saves)
+    user = db.query(User).options(
+        selectinload(User.education),
+        selectinload(User.experiences),
+        selectinload(User.projects),
+        selectinload(User.skills),
+        selectinload(User.contact),
+        selectinload(User.summary),
+    ).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    current_user = user
+
     # return the user's profile with all experiences, projects, skills, education, contact info, and summary.
     contact_response = None
     if current_user.contact:

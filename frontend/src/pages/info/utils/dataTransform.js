@@ -14,8 +14,10 @@ export const monthToISO = (monthValue) => {
 	return `${monthValue}-01T00:00:00`
 }
 
-// Transform education from backend format to step format
+// Transform education from backend format (start_date/end_date) or step format (startDate/endDate) to step format
 export const transformEducationForStep = (edu) => {
+	const startDate = edu.startDate ?? (edu.start_date ? toMonthInput(edu.start_date) : '')
+	const endDate = edu.endDate ?? (edu.end_date ? toMonthInput(edu.end_date) : '')
 	return {
 		id: edu.id || newId(),
 		school: edu.school || '',
@@ -23,8 +25,8 @@ export const transformEducationForStep = (edu) => {
 		discipline: edu.discipline || edu.field || '',
 		minor: edu.minor || '',
 		location: edu.location || '',
-		startDate: toMonthInput(edu.start_date),
-		endDate: toMonthInput(edu.end_date),
+		startDate,
+		endDate,
 		current: edu.current || false,
 		gpa: edu.gpa || '',
 		subsections: edu.subsections || {},

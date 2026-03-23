@@ -5,6 +5,7 @@
 // imports.
 import { useState } from 'react'
 import { createExperience } from '@/api/services/profile'
+import MonthYearPicker from '@/components/inputs/MonthYearPicker'
 
 // ----------- main component -----------
 
@@ -155,25 +156,21 @@ function AddExperienceModal({ isOpen, onClose, onSuccess }) {
 							<label className="block text-sm font-medium text-gray-700 mb-1">
 								Start Date
 							</label>
-							<input
-								type="month"
-								name="startDate"
+							<MonthYearPicker
 								value={form.startDate}
-								onChange={handleChange}
-								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent"
+								onChange={(v) => setForm(prev => ({ ...prev, startDate: v }))}
+								className="w-full"
 							/>
 						</div>
 						<div>
 							<label className="block text-sm font-medium text-gray-700 mb-1">
 								End Date
 							</label>
-							<input
-								type="month"
-								name="endDate"
+							<MonthYearPicker
 								value={form.endDate}
-								onChange={handleChange}
+								onChange={(v) => setForm(prev => ({ ...prev, endDate: v }))}
 								disabled={form.current}
-								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-transparent disabled:bg-gray-100"
+								className="w-full"
 							/>
 						</div>
 					</div>
