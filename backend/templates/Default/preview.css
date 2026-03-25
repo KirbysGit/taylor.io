@@ -40,6 +40,30 @@
     letter-spacing: 0.5pt;
     font-weight: bold;
 }
+
+.tagline {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 11pt;
+    line-height: 1.2;
+    margin-top: 2pt;
+    margin-bottom: 4pt;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.tagline strong {
+    font-weight: bold;
+}
+
+.tagline em {
+    font-style: italic;
+}
+
+.tagline u {
+    text-decoration: underline;
+    text-underline-offset: 1.5pt;
+}
   
 .contact {
     font-family: Georgia, "Times New Roman", serif;
@@ -124,10 +148,10 @@
     font-weight: bold;
 }
 
-/* school gpa */
+/* school gpa (Georgia to match Word / school name) */
 .school-gpa {
-    font-family: "Times New Roman", serif;
-    font-size: 11pt;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 9pt;
     font-weight: normal;
     font-style: italic;
 }
@@ -356,7 +380,7 @@
 }
 
 .skill-names {
-    font-family: "Times New Roman", serif;
+    font-family: Georgia, "Times New Roman", serif;
     font-size: 11pt;
     font-weight: normal;
 }
@@ -369,4 +393,54 @@
     font-weight: normal;
     margin-bottom: 2.5pt;
     text-align: justify;
+}
+
+/* ----- screen: draft preview only (honest single column; no fake page breaks / gutters) -----
+   Exact pagination = “Exact preview” in app (rendered PDF pages). Margins here = .resume padding. */
+
+@media screen {
+    html.body-wrapper {
+        background-color: #e8ecf1;
+        min-height: 100%;
+    }
+
+    body {
+        padding: 16px 12px 28px;
+    }
+
+    .resume {
+        margin: 0 auto;
+        border-radius: 3px;
+        background-color: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.09);
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.07);
+    }
+}
+
+/* ----- print / PDF: margins come from Chromium/Playwright; content fills page box ----- */
+
+@media print {
+    html.body-wrapper,
+    body {
+        background: #fff !important;
+        padding: 0 !important;
+    }
+
+    .body-wrapper {
+        display: block;
+        align-items: stretch;
+        justify-content: flex-start;
+    }
+
+    .resume {
+        width: 100%;
+        max-width: 100%;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: #fff !important;
+        background-image: none !important;
+    }
 }

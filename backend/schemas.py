@@ -143,6 +143,7 @@ class ContactCreate(BaseModel):
     linkedin: Optional[str] = None
     portfolio: Optional[str] = None
     location: Optional[str] = None
+    tagline: Optional[str] = None
 
 class ContactResponse(BaseModel):
     id: int
@@ -153,6 +154,7 @@ class ContactResponse(BaseModel):
     linkedin: Optional[str] = None
     portfolio: Optional[str] = None
     location: Optional[str] = None
+    tagline: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

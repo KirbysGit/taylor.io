@@ -5,25 +5,36 @@ import re
 from io import BytesIO
 
 from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT, WD_LINE_SPACING, WD_UNDERLINE
 from docx.shared import Pt, Inches
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from typing import Dict, Any, Optional, List, Tuple
 
-from .builders import format_date_month_year
+from .builders import format_date_month_year, parse_tagline_runs
 from .docx_styles import get_styles, DocxStyleConfig
+
+
+def _set_run_character_spacing(run, spacing_pt: float) -> None:
+    """Word w:spacing on the run (expanded spacing, val in 1/20 pt)."""
+    if spacing_pt is None or spacing_pt <= 0:
+        return
+    r_pr = run._element.get_or_add_rPr()
+    spacing = OxmlElement("w:spacing")
+    spacing.set(qn("w:val"), str(int(round(float(spacing_pt) * 20))))
+    r_pr.append(spacing)
 
 
 def _add_two_column_line(
     doc: Document,
     style: DocxStyleConfig,
-    left_runs: List[Tuple[str, float, bool, bool]],  # (text, font_size_pt, bold, italic)
+    left_runs: List[Tuple],  # (text, font_size_pt, bold, italic) or + force_primary_font bool
     right_run: Optional[Tuple[str, float, bool, bool]],
     *,
     indent_pt: float = 0,
     space_after_pt: float = 0,
     space_before_pt: float = 0,
+    line_spacing_single: bool = False,
 ) -> None:
     """
     Add a line with left content (multiple styled runs) and right-aligned content.
@@ -37,10 +48,11 @@ def _add_two_column_line(
         return
     p = doc.add_paragraph()
     p.paragraph_format.left_indent = Pt(indent_pt)
-    if space_before_pt:
-        p.paragraph_format.space_before = Pt(space_before_pt)
-    if space_after_pt:
-        p.paragraph_format.space_after = Pt(space_after_pt)
+    # Always set (including 0); `if space_after_pt` skipped 0 and Word kept default spacing
+    p.paragraph_format.space_before = Pt(space_before_pt)
+    p.paragraph_format.space_after = Pt(space_after_pt)
+    if line_spacing_single:
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
 
     if has_right:
         p.paragraph_format.tab_stops.add_tab_stop(
@@ -48,12 +60,20 @@ def _add_two_column_line(
             WD_TAB_ALIGNMENT.RIGHT,
         )
 
-    for text, sz, bold, italic in left_runs:
+    for run_spec in left_runs:
+        if len(run_spec) == 5:
+            text, sz, bold, italic, force_primary = run_spec
+        else:
+            text, sz, bold, italic = run_spec
+            force_primary = False
         if not text:
             continue
         run = p.add_run(str(text))
         run.font.size = Pt(sz)
-        run.font.name = style.font_primary if bold else style.font_secondary
+        if force_primary:
+            run.font.name = style.font_primary
+        else:
+            run.font.name = style.font_primary if bold else style.font_secondary
         run.bold = bold
         run.italic = italic
 
@@ -88,12 +108,11 @@ def _format_date_range(start_raw, end_raw: str, current: bool) -> str:
     return ""
 
 
-def _add_border_paragraph(doc: Document, style: DocxStyleConfig) -> None:
-    """Add a thin horizontal line (divider) under section titles."""
-    p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(1.5)
-    p.paragraph_format.space_after = Pt(style.section_title_space_after_pt)
-    p.paragraph_format.line_spacing = Pt(1)
+def _apply_section_title_bottom_border(p) -> None:
+    """
+    Draw the divider on the title paragraph itself (no empty paragraph below).
+    Avoids an extra 'blank line' in Word that deletes with the rule and feels disconnected.
+    """
     p_border = OxmlElement("w:pBdr")
     bottom = OxmlElement("w:bottom")
     bottom.set(qn("w:val"), "single")
@@ -114,8 +133,28 @@ def _add_header(document: Document, resume_data: Dict[str, Any], style: DocxStyl
         run.bold = True
         run.font.size = Pt(style.name_font_size_pt)
         run.font.name = style.font_primary
+        _set_run_character_spacing(run, style.name_character_spacing_pt or 0)
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.paragraph_format.space_after = Pt(style.name_space_after_pt)
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+
+    has_tagline = False
+    vis = header.get("visibility", {})
+    if vis.get("showTagline", True):
+        tagline = (header.get("tagline") or "").strip()
+        if tagline:
+            has_tagline = True
+            p = document.add_paragraph()
+            for text, t_bold, t_italic, t_underline in parse_tagline_runs(tagline):
+                run = p.add_run(text)
+                run.font.size = Pt(style.tagline_font_size_pt)
+                run.font.name = style.font_primary
+                run.bold = t_bold
+                run.italic = t_italic
+                run.font.underline = WD_UNDERLINE.SINGLE if t_underline else WD_UNDERLINE.NONE
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.paragraph_format.space_after = Pt(style.tagline_space_after_pt)
+            p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
 
     # Contact line
     contact_order = header.get("contactOrder", ["email", "phone", "location", "linkedin", "github", "portfolio"])
@@ -144,21 +183,28 @@ def _add_header(document: Document, resume_data: Dict[str, Any], style: DocxStyl
         p = document.add_paragraph()
         run = p.add_run(" | ".join(fields))
         run.font.size = Pt(style.contact_font_size_pt)
-        run.font.name = style.font_secondary
+        run.font.name = style.font_primary  # Georgia (contact line), not Times New Roman
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.paragraph_format.line_spacing = style.contact_line_height
-        p.paragraph_format.space_after = Pt(6)  # before first section
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        space_before = (
+            style.contact_space_before_after_tagline_pt
+            if has_tagline
+            else style.contact_space_before_pt
+        )
+        p.paragraph_format.space_before = Pt(space_before)
+        p.paragraph_format.space_after = Pt(style.contact_space_after_pt)
 
 
 def _add_section_title(document: Document, title: str, style: DocxStyleConfig) -> None:
-    """Add a section heading with divider."""
+    """Add a section heading with bottom border on the same paragraph; space_after clears content below."""
     p = document.add_paragraph()
     run = p.add_run(title)
     run.font.size = Pt(style.section_title_font_size_pt)
     run.font.name = style.font_primary
     p.paragraph_format.space_before = Pt(style.section_title_space_before_pt)
-    p.paragraph_format.space_after = Pt(0)
-    _add_border_paragraph(document, style)
+    p.paragraph_format.space_after = Pt(style.section_title_space_after_pt)
+    p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+    _apply_section_title_bottom_border(p)
 
 
 def _add_para(
@@ -253,13 +299,267 @@ def _add_description_block(
             p.paragraph_format.space_after = Pt(style.description_paragraph_space_pt)
             run = p.add_run(str(content).strip())
         run.font.size = Pt(style.description_font_size_pt)
-        run.font.name = style.font_secondary
+        run.font.name = style.font_primary  # Georgia for bullets & description (Word)
+
+
+# Matches pipeline.py / PDF: header is fixed; body sections follow resume_data.sectionOrder
+DEFAULT_DOCX_SECTION_ORDER = ["summary", "education", "experience", "projects", "skills"]
+_DOCX_SECTION_KEYS = frozenset(DEFAULT_DOCX_SECTION_ORDER)
+
+
+def _normalize_docx_section_order(order: Any) -> List[str]:
+    """Skip 'header'; dedupe; fall back to default if empty or invalid."""
+    if not order or not isinstance(order, list):
+        return list(DEFAULT_DOCX_SECTION_ORDER)
+    seen = set()
+    out: List[str] = []
+    for key in order:
+        if key == "header":
+            continue
+        if key in _DOCX_SECTION_KEYS and key not in seen:
+            out.append(key)
+            seen.add(key)
+    return out if out else list(DEFAULT_DOCX_SECTION_ORDER)
+
+
+def _render_docx_summary_section(
+    doc: Document,
+    resume_data: Dict[str, Any],
+    style: DocxStyleConfig,
+    indent: float,
+    section_labels: Dict[str, Any],
+    defaults: Dict[str, str],
+) -> None:
+    summary = resume_data.get("summary")
+    if not summary or not isinstance(summary, dict):
+        return
+    text = summary.get("summary", "").strip()
+    if not text:
+        return
+    _add_section_title(doc, section_labels.get("summary", defaults["summary"]), style)
+    _add_para(
+        doc, text, style,
+        font_size_pt=style.summary_font_size_pt,
+        indent_pt=indent,
+        space_after_pt=style.summary_space_after_pt,
+    )
+
+
+def _render_docx_education_section(
+    doc: Document,
+    resume_data: Dict[str, Any],
+    style: DocxStyleConfig,
+    indent: float,
+    section_labels: Dict[str, Any],
+    defaults: Dict[str, str],
+) -> None:
+    education = resume_data.get("education") or []
+    if not education:
+        return
+    _add_section_title(doc, section_labels.get("education", defaults["education"]), style)
+    for edu in education:
+        degree = edu.get("degree", "")
+        discipline = edu.get("discipline", "")
+        minor = edu.get("minor", "")
+        degree_text = f"{degree} in {discipline}" if discipline else degree
+        if minor:
+            degree_text += f", Minor in {minor}"
+
+        start_raw = edu.get("start_date") or edu.get("startDate") or ""
+        end_raw = edu.get("end_date") or edu.get("endDate") or ""
+        date_range = _format_date_range(start_raw, end_raw, edu.get("current", False))
+        gpa = edu.get("gpa", "")
+        gpa_text = f" (GPA: {gpa})" if gpa else ""
+
+        left_runs = [
+            (edu.get("school", ""), style.school_name_font_size_pt, True, False),
+        ]
+        if gpa_text:
+            left_runs.append(
+                (gpa_text, style.school_gpa_font_size_pt, False, True, True)
+            )
+        _add_two_column_line(
+            doc, style,
+            left_runs,
+            (date_range, style.school_meta_font_size_pt, False, True) if date_range else None,
+            indent_pt=indent,
+            space_after_pt=style.school_name_line_space_after_pt,
+        )
+
+        loc = edu.get("location", "")
+        deg_sz = style.education_degree_line_font_size_pt
+        _add_two_column_line(
+            doc, style,
+            [(degree_text, deg_sz, False, True)],
+            (loc, style.school_meta_font_size_pt, False, True) if loc else None,
+            indent_pt=indent,
+            space_after_pt=style.school_line_space_after_pt,
+        )
+        for sub_title, sub_content in (edu.get("subsections") or {}).items():
+            if sub_content and str(sub_content).strip():
+                p = doc.add_paragraph()
+                p.paragraph_format.left_indent = Pt(indent)
+                p.paragraph_format.space_after = Pt(3)
+                if sub_title:
+                    r1 = p.add_run(f"{sub_title}: ")
+                    r1.bold = True
+                    r1.font.size = Pt(style.highlight_font_size_pt)
+                    r1.font.name = style.font_primary
+                r2 = p.add_run(str(sub_content).strip())
+                r2.font.size = Pt(style.highlight_font_size_pt)
+                r2.font.name = style.font_primary
+
+
+def _render_docx_experience_section(
+    doc: Document,
+    resume_data: Dict[str, Any],
+    style: DocxStyleConfig,
+    indent: float,
+    section_labels: Dict[str, Any],
+    defaults: Dict[str, str],
+) -> None:
+    experience = resume_data.get("experience") or []
+    if not experience:
+        return
+    _add_section_title(doc, section_labels.get("experience", defaults["experience"]), style)
+    for exp in experience:
+        start_raw = exp.get("start_date") or exp.get("startDate") or ""
+        end_raw = exp.get("end_date") or exp.get("endDate") or ""
+        date_range = _format_date_range(start_raw, end_raw, exp.get("current", False))
+
+        _add_two_column_line(
+            doc, style,
+            [(exp.get("title", ""), style.experience_title_font_size_pt, True, False)],
+            (date_range, style.experience_meta_font_size_pt, False, True) if date_range else None,
+            indent_pt=indent,
+            space_before_pt=style.experience_line_space_before_pt,
+            space_after_pt=style.experience_line_space_pt,
+            line_spacing_single=True,
+        )
+
+        company = exp.get("company", "")
+        skills = exp.get("skills", "")
+        loc = exp.get("location", "")
+        left_runs = [(company, style.experience_meta_font_size_pt, True, False)]
+        if skills:
+            left_runs.append((f" | {skills}", style.experience_meta_font_size_pt, False, True))
+        _add_two_column_line(
+            doc, style,
+            left_runs,
+            (loc, style.experience_meta_font_size_pt, False, True) if loc else None,
+            indent_pt=indent,
+            space_after_pt=style.experience_line_space_pt,
+            line_spacing_single=True,
+        )
+        desc = exp.get("description", "")
+        if desc and str(desc).strip():
+            _add_description_block(doc, style, str(desc), indent)
+
+
+def _render_docx_projects_section(
+    doc: Document,
+    resume_data: Dict[str, Any],
+    style: DocxStyleConfig,
+    indent: float,
+    section_labels: Dict[str, Any],
+    defaults: Dict[str, str],
+) -> None:
+    projects = resume_data.get("projects") or []
+    if not projects:
+        return
+    _add_section_title(doc, section_labels.get("projects", defaults["projects"]), style)
+    for proj in projects:
+        title = proj.get("title", "")
+        tech = proj.get("tech_stack") or proj.get("techStack") or []
+        tech_str = ", ".join(tech) if isinstance(tech, list) else str(tech or "")
+        url = proj.get("url", "")
+
+        p = doc.add_paragraph()
+        p.paragraph_format.left_indent = Pt(indent)
+        p.paragraph_format.space_before = Pt(style.project_title_space_before_pt)
+        p.paragraph_format.space_after = Pt(style.project_line_space_pt)
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        r1 = p.add_run(title)
+        r1.bold = True
+        r1.font.size = Pt(style.project_title_font_size_pt)
+        r1.font.name = style.font_primary
+        if tech_str or url:
+            extras = []
+            if tech_str:
+                extras.append(tech_str)
+            if url:
+                extras.append(url)
+            p.add_run(" | ")
+            r2 = p.add_run(" | ".join(extras))
+            r2.italic = True
+            r2.font.size = Pt(style.project_title_font_size_pt)
+            r2.font.name = style.font_secondary
+        desc = proj.get("description", "")
+        if desc and str(desc).strip():
+            _add_description_block(doc, style, str(desc), indent)
+
+
+def _render_docx_skills_section(
+    doc: Document,
+    resume_data: Dict[str, Any],
+    style: DocxStyleConfig,
+    indent: float,
+    section_labels: Dict[str, Any],
+    defaults: Dict[str, str],
+) -> None:
+    skills = resume_data.get("skills") or []
+    skills_category_order = resume_data.get("skillsCategoryOrder") or []
+    if not skills:
+        return
+
+    skills_by_cat: Dict[str, List[str]] = {}
+    uncategorized: List[str] = []
+    for s in skills:
+        if isinstance(s, dict):
+            cat = s.get("category") or s.get("Category")
+            name = s.get("name") or s.get("Name", "")
+        else:
+            cat = None
+            name = str(s)
+        if not name:
+            continue
+        if cat:
+            skills_by_cat.setdefault(cat, []).append(name)
+        else:
+            uncategorized.append(name)
+
+    _add_section_title(doc, section_labels.get("skills", defaults["skills"]), style)
+    order = [c for c in skills_category_order if c in skills_by_cat]
+    for c in sorted(skills_by_cat.keys()):
+        if c not in order:
+            order.append(c)
+    for cat in order:
+        p = doc.add_paragraph()
+        p.paragraph_format.left_indent = Pt(indent)
+        p.paragraph_format.space_after = Pt(style.skill_line_space_pt)
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        r1 = p.add_run(f"{cat}: ")
+        r1.bold = True
+        r1.font.size = Pt(style.skill_category_font_size_pt)
+        r1.font.name = style.font_primary
+        r2 = p.add_run(", ".join(skills_by_cat[cat]))
+        r2.font.size = Pt(style.skill_names_font_size_pt)
+        r2.font.name = style.font_primary
+    if uncategorized:
+        p = doc.add_paragraph()
+        p.paragraph_format.left_indent = Pt(indent)
+        p.paragraph_format.space_after = Pt(style.skill_line_space_pt)
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        r = p.add_run(", ".join(uncategorized))
+        r.font.size = Pt(style.skill_names_font_size_pt)
+        r.font.name = style.font_primary
 
 
 def build_docx(resume_data: Dict[str, Any], template_name: str = "default") -> bytes:
     """
     Build a styled Word document from resume_data.
     Uses docx_styles for template-consistent formatting (margins, fonts, spacing).
+    Body sections follow resume_data.sectionOrder (same as PDF/HTML), after the header.
     """
     style = get_styles(template_name)
     doc = Document()
@@ -271,7 +571,7 @@ def build_docx(resume_data: Dict[str, Any], template_name: str = "default") -> b
     sect.left_margin = Inches(style.margin_left_in)
     sect.right_margin = Inches(style.margin_right_in)
 
-    # Header
+    # Header (always first)
     _add_header(doc, resume_data, style)
 
     section_labels = resume_data.get("sectionLabels", {})
@@ -285,187 +585,18 @@ def build_docx(resume_data: Dict[str, Any], template_name: str = "default") -> b
 
     indent = style.section_content_indent_pt
 
-    # Summary
-    summary = resume_data.get("summary")
-    if summary and isinstance(summary, dict):
-        text = summary.get("summary", "").strip()
-        if text:
-            _add_section_title(doc, section_labels.get("summary", defaults["summary"]), style)
-            _add_para(
-                doc, text, style,
-                font_size_pt=style.summary_font_size_pt,
-                indent_pt=indent,
-                space_after_pt=style.summary_space_after_pt,
-            )
-
-    # Education
-    education = resume_data.get("education") or []
-    if education:
-        _add_section_title(doc, section_labels.get("education", defaults["education"]), style)
-        for edu in education:
-            degree = edu.get("degree", "")
-            discipline = edu.get("discipline", "")
-            minor = edu.get("minor", "")
-            degree_text = f"{degree} in {discipline}" if discipline else degree
-            if minor:
-                degree_text += f", Minor in {minor}"
-
-            start_raw = edu.get("start_date") or edu.get("startDate") or ""
-            end_raw = edu.get("end_date") or edu.get("endDate") or ""
-            date_range = _format_date_range(start_raw, end_raw, edu.get("current", False))
-            gpa = edu.get("gpa", "")
-            gpa_text = f" (GPA: {gpa})" if gpa else ""
-
-            # School line: [school bold 12pt] [GPA italic 11pt] <tab> [dates italic 12pt] - matches PDF
-            left_runs = [
-                (edu.get("school", ""), style.school_name_font_size_pt, True, False),
-            ]
-            if gpa_text:
-                left_runs.append((gpa_text, style.school_gpa_font_size_pt, False, True))
-            _add_two_column_line(
-                doc, style,
-                left_runs,
-                (date_range, style.school_meta_font_size_pt, False, True) if date_range else None,
-                indent_pt=indent,
-                space_after_pt=style.school_line_space_after_pt,
-            )
-
-            # Degree line: [degree italic 12pt] <tab> [location italic 12pt]
-            loc = edu.get("location", "")
-            _add_two_column_line(
-                doc, style,
-                [(degree_text, style.school_meta_font_size_pt, False, True)],
-                (loc, style.school_meta_font_size_pt, False, True) if loc else None,
-                indent_pt=indent,
-                space_after_pt=style.school_line_space_after_pt,
-            )
-            for sub_title, sub_content in (edu.get("subsections") or {}).items():
-                if sub_content and str(sub_content).strip():
-                    p = doc.add_paragraph()
-                    p.paragraph_format.left_indent = Pt(indent)
-                    p.paragraph_format.space_after = Pt(3)
-                    if sub_title:
-                        r1 = p.add_run(f"{sub_title}: ")
-                        r1.bold = True
-                        r1.font.size = Pt(style.highlight_font_size_pt)
-                        r1.font.name = style.font_primary
-                    r2 = p.add_run(str(sub_content).strip())
-                    r2.font.size = Pt(style.highlight_font_size_pt)
-                    r2.font.name = style.font_secondary
-
-    # Experience
-    experience = resume_data.get("experience") or []
-    if experience:
-        _add_section_title(doc, section_labels.get("experience", defaults["experience"]), style)
-        for exp in experience:
-            start_raw = exp.get("start_date") or exp.get("startDate") or ""
-            end_raw = exp.get("end_date") or exp.get("endDate") or ""
-            date_range = _format_date_range(start_raw, end_raw, exp.get("current", False))
-
-            # Experience line: [title bold 11pt] <tab> [dates italic 11pt]
-            _add_two_column_line(
-                doc, style,
-                [(exp.get("title", ""), style.experience_title_font_size_pt, True, False)],
-                (date_range, style.experience_meta_font_size_pt, False, True) if date_range else None,
-                indent_pt=indent,
-                space_before_pt=style.experience_line_space_before_pt,
-                space_after_pt=style.experience_line_space_pt,
-            )
-
-            # Company line: [company bold] [| skills italic] <tab> [location italic]
-            company = exp.get("company", "")
-            skills = exp.get("skills", "")
-            loc = exp.get("location", "")
-            left_runs = [(company, style.experience_meta_font_size_pt, True, False)]
-            if skills:
-                left_runs.append((f" | {skills}", style.experience_meta_font_size_pt, False, True))
-            _add_two_column_line(
-                doc, style,
-                left_runs,
-                (loc, style.experience_meta_font_size_pt, False, True) if loc else None,
-                indent_pt=indent,
-                space_after_pt=style.experience_line_space_pt,
-            )
-            desc = exp.get("description", "")
-            if desc and str(desc).strip():
-                _add_description_block(doc, style, str(desc), indent)
-
-    # Projects
-    projects = resume_data.get("projects") or []
-    if projects:
-        _add_section_title(doc, section_labels.get("projects", defaults["projects"]), style)
-        for proj in projects:
-            title = proj.get("title", "")
-            tech = proj.get("tech_stack") or proj.get("techStack") or []
-            tech_str = ", ".join(tech) if isinstance(tech, list) else str(tech or "")
-            url = proj.get("url", "")
-
-            p = doc.add_paragraph()
-            p.paragraph_format.left_indent = Pt(indent)
-            p.paragraph_format.space_before = Pt(1)
-            p.paragraph_format.space_after = Pt(style.project_line_space_pt)
-            r1 = p.add_run(title)
-            r1.bold = True
-            r1.font.size = Pt(style.project_title_font_size_pt)
-            r1.font.name = style.font_primary
-            if tech_str or url:
-                extras = []
-                if tech_str:
-                    extras.append(tech_str)
-                if url:
-                    extras.append(url)
-                p.add_run(" | ")
-                r2 = p.add_run(" | ".join(extras))
-                r2.italic = True
-                r2.font.size = Pt(style.project_title_font_size_pt)
-                r2.font.name = style.font_secondary
-            desc = proj.get("description", "")
-            if desc and str(desc).strip():
-                _add_description_block(doc, style, str(desc), indent)
-
-    # Skills
-    skills = resume_data.get("skills") or []
-    skills_category_order = resume_data.get("skillsCategoryOrder") or []
-    if skills:
-        skills_by_cat = {}
-        uncategorized = []
-        for s in skills:
-            if isinstance(s, dict):
-                cat = s.get("category") or s.get("Category")
-                name = s.get("name") or s.get("Name", "")
-            else:
-                cat = None
-                name = str(s)
-            if not name:
-                continue
-            if cat:
-                skills_by_cat.setdefault(cat, []).append(name)
-            else:
-                uncategorized.append(name)
-
-        _add_section_title(doc, section_labels.get("skills", defaults["skills"]), style)
-        order = [c for c in skills_category_order if c in skills_by_cat]
-        for c in sorted(skills_by_cat.keys()):
-            if c not in order:
-                order.append(c)
-        for cat in order:
-            p = doc.add_paragraph()
-            p.paragraph_format.left_indent = Pt(indent)
-            p.paragraph_format.space_after = Pt(style.skill_line_space_pt)
-            r1 = p.add_run(f"{cat}: ")
-            r1.bold = True
-            r1.font.size = Pt(style.skill_category_font_size_pt)
-            r1.font.name = style.font_primary
-            r2 = p.add_run(", ".join(skills_by_cat[cat]))
-            r2.font.size = Pt(style.skill_names_font_size_pt)
-            r2.font.name = style.font_secondary
-        if uncategorized:
-            p = doc.add_paragraph()
-            p.paragraph_format.left_indent = Pt(indent)
-            p.paragraph_format.space_after = Pt(style.skill_line_space_pt)
-            r = p.add_run(", ".join(uncategorized))
-            r.font.size = Pt(style.skill_names_font_size_pt)
-            r.font.name = style.font_secondary
+    section_order = _normalize_docx_section_order(resume_data.get("sectionOrder"))
+    renderers = {
+        "summary": _render_docx_summary_section,
+        "education": _render_docx_education_section,
+        "experience": _render_docx_experience_section,
+        "projects": _render_docx_projects_section,
+        "skills": _render_docx_skills_section,
+    }
+    for section_key in section_order:
+        fn = renderers.get(section_key)
+        if fn:
+            fn(doc, resume_data, style, indent, section_labels, defaults)
 
     buffer = BytesIO()
     doc.save(buffer)

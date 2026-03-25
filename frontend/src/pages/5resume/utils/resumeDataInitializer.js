@@ -23,6 +23,7 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 		showLinkedin: contact.show_linkedin ?? true,
 		showGithub: contact.show_github ?? true,
 		showPortfolio: contact.show_portfolio ?? true,
+		showTagline: true,
 	}
 	const savedVisibility = (() => {
 		try {
@@ -50,7 +51,8 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 		linkedin: contact.linkedin || '',
 		github: contact.github || '',
 		portfolio: contact.portfolio || '',
-		visibility: savedVisibility || defaultVisibility,
+		tagline: contact.tagline || '',
+		visibility: { ...defaultVisibility, ...(savedVisibility || {}) },
 		contactOrder: savedContactOrder || ['email', 'phone', 'location', 'linkedin', 'github', 'portfolio'],
 	}
 
@@ -91,26 +93,31 @@ export function initializeResumeDataFromBackend(responseData, sectionOrder = ['h
 		url: proj.url || '',
 	}))
 
-	// Initialize skills data (preserve id for hide/show stability)
-	const initialSkills = (responseData.skills || []).map((skill, i) => ({
-		id: skill.id ?? `skill-${Date.now()}-${i}`,
+	const mapSkillRow = (skill, i, prefix = 'skill') => ({
+		id: skill.id ?? `${prefix}-${Date.now()}-${i}`,
 		name: skill.name || '',
 		category: skill.category || '',
-	}))
+	})
+
+	// Initialize skills data (preserve id for hide/show stability)
+	const initialSkills = (responseData.skills || []).map((skill, i) => mapSkillRow(skill, i, 'skill'))
+
+	// Hidden-for-this-resume skills (e.g. "Start fresh" puts all profile skills here)
+	const initialHiddenSkills = (responseData.hiddenSkills || []).map((skill, i) => mapSkillRow(skill, i, 'skill'))
 
 	// Initialize summary data
 	const initialSummary = responseData.summary 
 		? { summary: responseData.summary.summary || '' }
 		: { summary: '' }
 
-	// Create resume data object (hiddenSkills = [] by default, all skills visible)
+	// Create resume data object (hiddenSkills from API when provided, else [])
 	const resumeData = {
 		header: initialHeader,
 		education: initialEducation,
 		experience: initialExperience,
 		projects: initialProjects,
 		skills: initialSkills,
-		hiddenSkills: [],
+		hiddenSkills: initialHiddenSkills,
 		summary: initialSummary,
 		sectionVisibility: {
 			summary: false, // hidden by default
@@ -146,7 +153,16 @@ export function initializeResumeDataWithOptions(responseData, sectionOrder, opti
 
 	let data = { ...responseData }
 	if (startFresh) {
-		data = { ...data, education: [], experiences: [], projects: [] }
+		// Empty sections; keep profile skills only under hiddenSkills so the resume starts with nothing visible to add
+		const profileSkills = responseData.skills || []
+		data = {
+			...data,
+			education: [],
+			experiences: [],
+			projects: [],
+			skills: [],
+			hiddenSkills: profileSkills,
+		}
 	} else if (selectedEducationIds || selectedExperienceIds || selectedProjectIds) {
 		if (selectedEducationIds && selectedEducationIds.length >= 0) {
 			data.education = (responseData.education || []).filter((e) =>

@@ -3,9 +3,24 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGripVertical, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { XIcon, Pencil } from '@/components/icons';
 
+function NewSkillTargetRadio({ selected, className = '' }) {
+	return (
+		<span
+			className={`shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors bg-white ${className} ${
+				selected ? 'border-brand-pink' : 'border-gray-300'
+			}`}
+			aria-hidden
+		>
+			{selected ? <span className="w-2 h-2 rounded-full bg-brand-pink" /> : null}
+		</span>
+	);
+}
+
 // Skills Input Component - Just the form fields and logic, no headers
 const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryOrderChange, onHide }) => {
 	const [skillInput, setSkillInput] = useState('');
+	// Where new skills go from the input: 'all' (uncategorized) or a category name
+	const [newSkillTarget, setNewSkillTarget] = useState('all');
 	const [categories, setCategories] = useState(['Tools']);
 	const [draggedSkill, setDraggedSkill] = useState(null);
 	const [dragOverCategory, setDragOverCategory] = useState(null);
@@ -55,6 +70,12 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 		}
 	}, [categories, onCategoryOrderChange]);
 
+	useEffect(() => {
+		if (newSkillTarget !== 'all' && !categories.includes(newSkillTarget)) {
+			setNewSkillTarget('all');
+		}
+	}, [categories, newSkillTarget]);
+
 	// handle adding a new skill
 	const handleAddSkill = (e) => {
 		e.preventDefault();
@@ -62,10 +83,11 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 			const skillName = skillInput.trim();
 			// check if skill already exists
 			if (!skills.some(s => s.name.toLowerCase() === skillName.toLowerCase())) {
-				onAdd({ 
-					name: skillName, 
-					category: '',
-					id: Date.now() 
+				const category = newSkillTarget === 'all' ? '' : newSkillTarget;
+				onAdd({
+					name: skillName,
+					category,
+					id: Date.now(),
 				});
 				setSkillInput('');
 			}
@@ -204,6 +226,9 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 					onUpdate(index, { ...skill, category: newCategory });
 				}
 			});
+			if (newSkillTarget === oldCategory) {
+				setNewSkillTarget(newCategory);
+			}
 		}
 		setEditingCategory(null);
 		setEditingCategoryValue('');
@@ -310,7 +335,9 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 			<div className="flex items-start justify-between gap-4 mb-4">
 				<div>
 					<h3 className="text-sm font-semibold text-gray-900">Your Skills</h3>
-					<p className="text-xs text-gray-500 mt-0.5">Add skills and organize them by category. Drag to reorder.</p>
+					<p className="text-xs text-gray-500 mt-0.5">
+					Add skills and organize by category. Use the circle on each section to choose where new entries go; drag pills to reorder or move.
+				</p>
 				</div>
 				<button
 					type="button"
@@ -337,30 +364,46 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 								handleAddSkill(e);
 							}
 						}}
+						aria-describedby="skills-add-hint"
 					/>
 				</form>
-				<p className="text-xs text-gray-500 mt-1">
-					Type to enter a skill here! It will appear in All Skills, then from there you can drag and drop to sort as you would like. Press Enter to add.
+				<p id="skills-add-hint" className="text-xs text-gray-500 mt-1">
+					Select a section below (circle){' '}
+					<span className="text-gray-700 font-medium">All Skills</span> or a category — new skills are added there. Default is{' '}
+					<span className="text-gray-700 font-medium">All Skills</span>. Press Enter to add; drag pills to reorder or move between sections.
 				</p>
 			</div>
 
 			{/* Skills Display */}
-			<div className="space-y-6">
+			<div className="space-y-6" role="radiogroup" aria-label="Where to add new skills">
 				{/* All Skills Section (Uncategorized) */}
 				<div
-					className={`collapsibleCard ${dragOverAllSkills ? 'border-brand-pink border-2 bg-brand-pink/5' : ''}`}
+					className={`collapsibleCard transition-shadow ${
+						dragOverAllSkills
+							? 'border-brand-pink border-2 bg-brand-pink/5'
+							: newSkillTarget === 'all'
+								? 'ring-2 ring-brand-pink ring-offset-2 border-gray-200 shadow-sm'
+								: ''
+					}`}
 					onDragOver={handleDragOverAllSkills}
 					onDragLeave={handleDragLeave}
 					onDrop={handleDropOnAllSkills}
 				>
 					<div className="collapsibleCardHeader">
 						<div className="flex items-center justify-between w-full">
-							<div className="flex items-center gap-3">
+							<button
+								type="button"
+								role="radio"
+								aria-checked={newSkillTarget === 'all'}
+								onClick={() => setNewSkillTarget('all')}
+								className="flex items-center gap-3 text-left min-w-0 rounded-lg -m-1 p-1 pr-2 hover:bg-gray-50/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+							>
+								<NewSkillTargetRadio selected={newSkillTarget === 'all'} />
 								<span className="font-semibold text-gray-900">All Skills</span>
-								<span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+								<span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0">
 									{uncategorizedSkills.length}
 								</span>
-							</div>
+							</button>
 						</div>
 					</div>
 					<div className="expandableContent expanded">
@@ -425,10 +468,18 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 					const isDragOverForReorder = dragOverCategoryForReorder === category;
 					const isEditing = editingCategory === category;
 					
+					const isNewSkillTargetHere = newSkillTarget === category;
+
 					return (
 						<div
 							key={category}
-							className={`collapsibleCard ${(isDragOver || isDragOverForReorder) ? 'border-brand-pink border-2 bg-brand-pink/5' : ''}`}
+							className={`collapsibleCard transition-shadow ${
+								isDragOver || isDragOverForReorder
+									? 'border-brand-pink border-2 bg-brand-pink/5'
+									: isNewSkillTargetHere
+										? 'ring-2 ring-brand-pink ring-offset-2 border-gray-200 shadow-sm'
+										: ''
+							}`}
 							onDragOver={(e) => {
 								if (draggedCategory) handleCategoryDragOver(e, category);
 								else handleDragOverCategory(e, category);
@@ -440,8 +491,8 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 							}}
 						>
 							<div className="collapsibleCardHeader">
-								<div className="flex items-center justify-between w-full">
-									<div className="flex items-center gap-3 flex-1">
+								<div className="flex items-center justify-between w-full gap-2">
+									<div className="flex items-center gap-2 flex-1 min-w-0">
 										{/* Grip handle - only this is draggable for category reorder */}
 										<div
 											draggable
@@ -469,21 +520,30 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 												autoFocus
 											/>
 										) : (
-											<>
-												<span className="font-semibold text-gray-900">{category}</span>
-												<span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+											<button
+												type="button"
+												role="radio"
+												aria-checked={isNewSkillTargetHere}
+												onClick={() => setNewSkillTarget(category)}
+												className="flex items-center gap-3 text-left min-w-0 flex-1 rounded-lg -my-1 py-1 px-1 pr-2 hover:bg-gray-50/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+											>
+												<NewSkillTargetRadio selected={isNewSkillTargetHere} />
+												<span className="font-semibold text-gray-900 truncate">{category}</span>
+												<span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0">
 													{categorySkills.length}
 												</span>
-												<button
-													type="button"
-													onClick={() => handleStartEditCategory(category)}
-													className="p-1 hover:bg-gray-100 rounded transition-colors"
-													title="Edit category name"
-												>
-													<Pencil className="w-3.5 h-3.5 text-gray-500" />
-												</button>
-											</>
+											</button>
 										)}
+										{!isEditing ? (
+											<button
+												type="button"
+												onClick={() => handleStartEditCategory(category)}
+												className="p-1 hover:bg-gray-100 rounded transition-colors shrink-0"
+												title="Edit category name"
+											>
+												<Pencil className="w-3.5 h-3.5 text-gray-500" />
+											</button>
+										) : null}
 									</div>
 									<button
 										type="button"

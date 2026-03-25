@@ -11,8 +11,17 @@ import sys
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 
+from .docx_styles import DocxStyleConfig
+
 # import builders.
-from .builders import build_header, build_education_entry, build_experience_entry, build_project_entry, build_skill_entry
+from .builders import (
+    build_header,
+    build_tagline_block,
+    build_education_entry,
+    build_experience_entry,
+    build_project_entry,
+    build_skill_entry,
+)
 
 # get abs path to templates directory.
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
@@ -37,6 +46,7 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
     header = resume_data.get("header", {})
     name = f"{header.get('first_name', '')} {header.get('last_name', '')}".strip()
     html_content = html_content.replace("{name}", name)
+    html_content = html_content.replace("{tagline_block}", build_tagline_block(header))
     html_content = html_content.replace("{header_line}", build_header(header))
     
     # -- 2. build all sections (order will be applied later).
@@ -134,7 +144,18 @@ def convert_html_to_pdf_sync(html_content: str) -> bytes:
         browser = playwright.chromium.launch()
         page = browser.new_page()
         page.set_content(html_content, wait_until='networkidle')
-        pdf_bytes = page.pdf(format='Letter', print_background=True)
+        cfg = DocxStyleConfig()
+        margin = {
+            "top": f"{cfg.margin_top_in}in",
+            "right": f"{cfg.margin_right_in}in",
+            "bottom": f"{cfg.margin_bottom_in}in",
+            "left": f"{cfg.margin_left_in}in",
+        }
+        pdf_bytes = page.pdf(
+            format="Letter",
+            print_background=True,
+            margin=margin,
+        )
         browser.close()
         return pdf_bytes
 

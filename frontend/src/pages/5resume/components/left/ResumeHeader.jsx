@@ -30,6 +30,7 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 	const [showLinkedin, setShowLinkedin] = useState(headerData?.visibility?.showLinkedin ?? true)
 	const [showGithub, setShowGithub] = useState(headerData?.visibility?.showGithub ?? true)
 	const [showPortfolio, setShowPortfolio] = useState(headerData?.visibility?.showPortfolio ?? true)
+	const [showTagline, setShowTagline] = useState(headerData?.visibility?.showTagline ?? true)
 
 	// contact ordering (includes email now)
 	const [contactOrder, setContactOrder] = useState(
@@ -101,6 +102,7 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 	const [linkedinValue, setLinkedinValue] = useState(headerData?.linkedin || '')
 	const [githubValue, setGithubValue] = useState(headerData?.github || '')
 	const [portfolioValue, setPortfolioValue] = useState(headerData?.portfolio || '')
+	const [taglineValue, setTaglineValue] = useState(headerData?.tagline || '')
 
 	// Update local state when headerData changes (e.g., from discard changes)
 	useEffect(() => {
@@ -113,12 +115,14 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 			setLinkedinValue(headerData.linkedin || '')
 			setGithubValue(headerData.github || '')
 			setPortfolioValue(headerData.portfolio || '')
+			setTaglineValue(headerData.tagline || '')
 			setShowEmail(headerData.visibility?.showEmail ?? true)
 			setShowPhone(headerData.visibility?.showPhone ?? true)
 			setShowLocation(headerData.visibility?.showLocation ?? true)
 			setShowLinkedin(headerData.visibility?.showLinkedin ?? true)
 			setShowGithub(headerData.visibility?.showGithub ?? true)
 			setShowPortfolio(headerData.visibility?.showPortfolio ?? true)
+			setShowTagline(headerData.visibility?.showTagline ?? true)
 			if (headerData.contactOrder) {
 				setContactOrder(headerData.contactOrder)
 			}
@@ -138,6 +142,7 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 			linkedin: linkedinValue,
 			github: githubValue,
 			portfolio: portfolioValue,
+			tagline: taglineValue,
 			// visibility states.
 			visibility: {
 				showEmail,
@@ -146,12 +151,13 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 				showLinkedin,
 				showGithub,
 				showPortfolio,
+				showTagline,
 			},
 			// contact ordering (includes email).
 			contactOrder: contactOrder,
 		}
 		onHeaderChange(exportedData)
-	}, [firstName, lastName, email, phoneValue, locationValue, linkedinValue, githubValue, portfolioValue, showEmail, showPhone, showLocation, showLinkedin, showGithub, showPortfolio, contactOrder])
+	}, [firstName, lastName, email, phoneValue, locationValue, linkedinValue, githubValue, portfolioValue, taglineValue, showEmail, showPhone, showLocation, showLinkedin, showGithub, showPortfolio, showTagline, contactOrder])
 
 	const fieldMap = {
 		email: { label: 'Email', value: email, setValue: setEmail, show: showEmail, setShow: setShowEmail },
@@ -195,6 +201,53 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 		>
 			<FontAwesomeIcon icon={faPencil} className="w-3.5 h-3.5" />
 		</button>
+	)
+
+	const taglineRow = (
+		<div className="flex items-center gap-4 py-3.5">
+			<label className="w-28 flex-shrink-0 text-sm font-medium text-gray-500">Tagline</label>
+			<div className="flex-1 min-w-0 flex items-center gap-3">
+				{editingField === 'tagline' ? (
+					<>
+						<input
+							type="text"
+							value={taglineValue}
+							onBlur={handleInputBlur}
+							onChange={(e) => setTaglineValue(e.target.value)}
+							onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
+							className="input py-1.5 text-sm flex-1 disabled:opacity-60"
+							disabled={!showTagline}
+							placeholder="**Bold** · _italic_ · type * for middle dots (·)"
+							autoFocus
+						/>
+						<button
+							type="button"
+							onClick={() => setShowTagline((prev) => !prev)}
+							className="p-2 rounded-md text-gray-400 hover:text-brand-pink hover:bg-gray-50 transition-colors"
+							title={showTagline ? 'Hide on resume' : 'Show on resume'}
+						>
+							<FontAwesomeIcon icon={showTagline ? faEye : faEyeSlash} className="w-3.5 h-3.5" />
+						</button>
+						{doneBtn()}
+					</>
+				) : (
+					<>
+						<span className={`text-sm flex-1 ${taglineValue ? 'text-gray-900' : 'text-gray-400'}`}>
+							{taglineValue || 'Optional line below your name'}
+						</span>
+						<button
+							type="button"
+							onClick={() => setShowTagline((prev) => !prev)}
+							className="p-2 rounded-md text-gray-400 hover:text-brand-pink hover:bg-gray-50 transition-colors"
+							title={showTagline ? 'Hide on resume' : 'Show on resume'}
+						>
+							<FontAwesomeIcon icon={showTagline ? faEye : faEyeSlash} className="w-3.5 h-3.5" />
+						</button>
+						{pencilBtn('tagline', 'Edit tagline')}
+					</>
+				)}
+			</div>
+		</div>
 	)
 
 	const nameRow = (
@@ -329,6 +382,7 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 	const content = (
 		<div className="divide-y divide-gray-100">
 			{nameRow}
+			{taglineRow}
 			{contactOrder.map((key, i) => {
 				const f = fieldMap[key]
 				return f ? contactRow(key, f, i) : null

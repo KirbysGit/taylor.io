@@ -397,6 +397,8 @@ async def create_or_update_contact(
             existing_contact.portfolio = contact_data.portfolio
         if getattr(contact_data, "location", None) is not None:
             existing_contact.location = contact_data.location
+        if getattr(contact_data, "tagline", None) is not None:
+            existing_contact.tagline = contact_data.tagline
         
         # add, commit, and refresh db.
         db.commit()
@@ -412,6 +414,7 @@ async def create_or_update_contact(
             linkedin=contact_data.linkedin,
             portfolio=contact_data.portfolio,
             location=getattr(contact_data, "location", None),
+            tagline=getattr(contact_data, "tagline", None),
         )
 
         # add, commit, and refresh db.
@@ -670,7 +673,7 @@ async def parse_resume(
         
         # save summary to database if present.
         summary = parsed_data.get("summary", "")
-        print(parsed_data)
+        # print(parsed_data)
         if summary:
             existing_summary = db.query(Summary).filter(Summary.user_id == current_user.id).first()
             if existing_summary:

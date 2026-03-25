@@ -69,6 +69,7 @@ function Info() {
 		linkedin: '',
 		portfolio: '',
 		location: '',
+		tagline: '',
 	})
 	const [education, setEducation] = useState([])
 	const [experiences, setExperiences] = useState([])
@@ -108,6 +109,7 @@ function Info() {
 					linkedin: contactData.linkedin || '',
 					portfolio: contactData.portfolio || '',
 					location: contactData.location || '',
+					tagline: contactData.tagline || '',
 				}
 				setContact(contactState)
 

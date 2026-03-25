@@ -50,6 +50,7 @@ export function mergeParsedData(parsed, existing) {
 		linkedin: parsed.contact_info?.linkedin ?? existing.contact?.linkedin ?? '',
 		portfolio: parsed.contact_info?.portfolio ?? existing.contact?.portfolio ?? '',
 		location: parsed.contact_info?.location ?? existing.contact?.location ?? '',
+		tagline: parsed.contact_info?.tagline ?? existing.contact?.tagline ?? '',
 	}
 
 	// Summary: append only if current is empty

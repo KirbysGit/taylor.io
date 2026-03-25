@@ -25,6 +25,10 @@ export function applyVisibilityFilters(resumeData) {
 			linkedin: resumeData.header.visibility?.showLinkedin ? resumeData.header.linkedin : '',
 			github: resumeData.header.visibility?.showGithub ? resumeData.header.github : '',
 			portfolio: resumeData.header.visibility?.showPortfolio ? resumeData.header.portfolio : '',
+			tagline:
+				resumeData.header.visibility?.showTagline !== false
+					? resumeData.header.tagline || ''
+					: '',
 		},
 	}
 
@@ -78,7 +82,8 @@ export function applyVisibilityFilters(resumeData) {
 }
 
 // compare resume data and return which sections changed (helper function).
-// ignores visibility field in comparison (visibility doesn't count as a change).
+// Excludes preview-only layout: header.visibility, header.contactOrder, sectionVisibility,
+// sectionOrder, skillsCategoryOrder (use "Save for later" / saved resumes for those).
 function compareResumeData(currentData, baselineData) {
 	if (!baselineData.header || !baselineData.education || !baselineData.experience || !baselineData.projects) {
 		return { headerChanged: false, educationChanged: false, experienceChanged: false, projectsChanged: false, skillsChanged: false, summaryChanged: false }
@@ -87,15 +92,22 @@ function compareResumeData(currentData, baselineData) {
 		return { headerChanged: false, educationChanged: false, experienceChanged: false, projectsChanged: false, skillsChanged: false, summaryChanged: false }
 	}
 
-	// include visibility and contactOrder in comparison so save banner appears when user toggles them
-	const currentHeaderForCompare = { ...currentData.header }
-	const baselineHeaderForCompare = { ...baselineData.header }
+	const stripPreviewOnlyHeader = (h) => {
+		if (!h) return h
+		const { visibility: _v, contactOrder: _c, ...rest } = h
+		return rest
+	}
+	const currentHeaderForCompare = stripPreviewOnlyHeader(currentData.header)
+	const baselineHeaderForCompare = stripPreviewOnlyHeader(baselineData.header)
 
-	// create copies without sectionVisibility for comparison (visibility changes don't count as data changes).
 	const currentDataForCompare = { ...currentData }
 	const baselineDataForCompare = { ...baselineData }
 	delete currentDataForCompare.sectionVisibility
 	delete baselineDataForCompare.sectionVisibility
+	delete currentDataForCompare.sectionOrder
+	delete baselineDataForCompare.sectionOrder
+	delete currentDataForCompare.skillsCategoryOrder
+	delete baselineDataForCompare.skillsCategoryOrder
 
 	// compare serialized versions.
 	const currentHeaderStr = JSON.stringify(currentHeaderForCompare)
@@ -133,7 +145,7 @@ export function getResumeChangeDescriptions(currentData, baselineData) {
 	const changes = []
 
 	if (headerChanged) {
-		changes.push('Header or contact visibility updated')
+		changes.push('Header or contact info updated')
 	}
 	if (educationChanged) {
 		changes.push('Education section updated')

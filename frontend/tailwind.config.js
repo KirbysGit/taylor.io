@@ -21,6 +21,26 @@ export default {
       fontFamily: {
         'sans': ['Inter', 'system-ui', 'sans-serif'],
       },
+      keyframes: {
+        'download-bar': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(400%)' },
+        },
+        'download-success-pop': {
+          '0%': { transform: 'scale(0.6)', opacity: '0' },
+          '70%': { transform: 'scale(1.08)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'slide-tagline': {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+      },
+      animation: {
+        'download-bar': 'download-bar 1.4s ease-in-out infinite',
+        'download-success-pop': 'download-success-pop 0.45s ease-out forwards',
+        'slide-tagline': 'slide-tagline 0.4s ease-out both',
+      },
     },
   },
   plugins: [],

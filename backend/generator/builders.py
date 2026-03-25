@@ -1,6 +1,10 @@
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 from datetime import datetime
+import html
 import re
+
+# Middle dot for tagline separators; single * in user input becomes this after **bold** parsing.
+_TAGLINE_INTERPUNCT = "\u00b7"
 
 # ----- helpers.
 def format_date_month_year(date: str) -> str:
@@ -32,8 +36,8 @@ def format_description(description: str) -> str:
     if not description:
         return ''
     
-    print('On preview')
-    print('description', description)
+    #print('On preview')
+    #print('description', description)
 
     # split by newlines.
     lines = description.split('\n')
@@ -133,6 +137,130 @@ def build_header(header: Dict[str, Any]) -> str:
                 fields.append(field_value)
     
     return " | ".join(fields)
+
+
+def _tagline_outer_italic_segments(raw: str) -> List[Tuple[bool, str]]:
+    """
+    Split into (is_italic, text) chunks: _..._ pairs are italic (non-empty inner); lone _ stays plain.
+    Parsed first so **bold** can sit inside _italic_ and vice versa.
+    """
+    out: List[Tuple[bool, str]] = []
+    i = 0
+    n = len(raw)
+    while i < n:
+        if raw[i] == "_":
+            j = raw.find("_", i + 1)
+            if j != -1 and j > i + 1:
+                out.append((True, raw[i + 1 : j]))
+                i = j + 1
+            else:
+                start = i
+                i += 1
+                while i < n and raw[i] != "_":
+                    i += 1
+                out.append((False, raw[start:i]))
+        else:
+            start = i
+            while i < n and raw[i] != "_":
+                i += 1
+            out.append((False, raw[start:i]))
+    return out
+
+
+def _tagline_apply_bold_and_dots(text: str, italic: bool) -> List[Tuple[str, bool, bool]]:
+    """
+    Within one outer segment: **bold** pairs; unclosed ** leaves * -> · only.
+    """
+    parts = text.split("**")
+    if len(parts) % 2 == 0:
+        t = text.replace("*", _TAGLINE_INTERPUNCT)
+        return [(t, False, italic)] if t else []
+    runs: List[Tuple[str, bool, bool]] = []
+    for idx, p in enumerate(parts):
+        bold = idx % 2 == 1
+        t = p.replace("*", _TAGLINE_INTERPUNCT)
+        if t:
+            runs.append((t, bold, italic))
+    return runs
+
+
+def _merge_bold_italic_runs(runs: List[Tuple[str, bool, bool]]) -> List[Tuple[str, bool, bool]]:
+    merged: List[Tuple[str, bool, bool]] = []
+    for text_p, b, it in runs:
+        if not text_p:
+            continue
+        if merged and merged[-1][1] == b and merged[-1][2] == it:
+            merged[-1] = (merged[-1][0] + text_p, b, it)
+        else:
+            merged.append((text_p, b, it))
+    return merged
+
+
+def _parse_tagline_runs_bold_italic_only(text: str) -> List[Tuple[str, bool, bool]]:
+    """Italic regions, then bold/* -> ·. No == underline (caller strips == segments)."""
+    all_runs: List[Tuple[str, bool, bool]] = []
+    for is_italic, seg in _tagline_outer_italic_segments(text):
+        all_runs.extend(_tagline_apply_bold_and_dots(seg, is_italic))
+    return _merge_bold_italic_runs(all_runs)
+
+
+def parse_tagline_runs(raw: str) -> List[Tuple[str, bool, bool, bool]]:
+    """
+    Tagline mini-markup (HTML preview/PDF and Word):
+    - ==text== — underline (parsed outermost)
+    - **text** — bold
+    - _text_ — italic
+    - Every * outside of ** pairs becomes a middle dot (·)
+    """
+    raw = (raw or "").strip()
+    if not raw:
+        return []
+    parts = raw.split("==")
+    if len(parts) % 2 == 0:
+        merged_three = _parse_tagline_runs_bold_italic_only(raw)
+        return [(t, b, it, False) for t, b, it in merged_three]
+    merged_four: List[Tuple[str, bool, bool, bool]] = []
+    for idx, p in enumerate(parts):
+        underline = idx % 2 == 1
+        for t, b, it in _parse_tagline_runs_bold_italic_only(p):
+            merged_four.append((t, b, it, underline))
+    out: List[Tuple[str, bool, bool, bool]] = []
+    for text_p, b, it, u in merged_four:
+        if not text_p:
+            continue
+        if out and out[-1][1] == b and out[-1][2] == it and out[-1][3] == u:
+            out[-1] = (out[-1][0] + text_p, b, it, u)
+        else:
+            out.append((text_p, b, it, u))
+    return out
+
+
+def _tagline_runs_to_html(runs: List[Tuple[str, bool, bool, bool]]) -> str:
+    out: List[str] = []
+    for text_p, bold, italic, underline in runs:
+        esc = html.escape(text_p, quote=True)
+        chunk = esc
+        if italic:
+            chunk = f"<em>{chunk}</em>"
+        if bold:
+            chunk = f"<strong>{chunk}</strong>"
+        if underline:
+            chunk = f"<u>{chunk}</u>"
+        out.append(chunk)
+    return "".join(out)
+
+
+def build_tagline_block(header: Dict[str, Any]) -> str:
+    """HTML fragment for optional tagline: ==underline==, **bold**, _italic_, * -> ·."""
+    visibility = header.get("visibility", {})
+    if visibility.get("showTagline") is False:
+        return ""
+    raw = (header.get("tagline") or "").strip()
+    if not raw:
+        return ""
+    inner = _tagline_runs_to_html(parse_tagline_runs(raw))
+    return f'<p class="tagline">{inner}</p>'
+
 
 def _format_date_range(start_raw, end_raw, current: bool) -> str:
     """Format date range with conditional dash. No dash when only one date or none."""

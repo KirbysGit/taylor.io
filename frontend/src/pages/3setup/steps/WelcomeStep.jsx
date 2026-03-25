@@ -38,6 +38,7 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 		linkedin: parsed?.linkedin || existing?.linkedin,
 		portfolio: parsed?.portfolio || existing?.portfolio,
 		location: parsed?.location || existing?.location,
+		tagline: parsed?.tagline || existing?.tagline || '',
 	})
 
     // ---- functions ----

@@ -38,6 +38,13 @@ import {
 import { applyVisibilityFilters, hasResumeDataChanged, getResumeChangeDescriptions, downloadBlob } from './utils/resumeDataTransform'
 import { initializeResumeDataFromBackend, initializeResumeDataWithOptions } from './utils/resumeDataInitializer'
 
+/** Preview iframe scale: 50%–150%, step 25% (no % label in UI) */
+const PREVIEW_ZOOM = { min: 50, max: 150, step: 25, default: 100 }
+
+/** Draft HTML: quick feedback. Exact PDF: debounced; matches export. */
+const DRAFT_PREVIEW_DEBOUNCE_MS = 450
+const EXACT_PDF_DEBOUNCE_MS = 1000
+
 // ----------- main component -----------
 function ResumePreview() {
 
@@ -119,21 +126,26 @@ function ResumePreview() {
 	const [previewHtml, setPreviewHtml] = useState(null)
 	const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
 	const lastPreviewInputRef = useRef(null) // skip fetch when visible data unchanged
-	const [previewZoom, setPreviewZoom] = useState(100) // default 75% to see more content
+	const [exactPdfBlobUrl, setExactPdfBlobUrl] = useState(null)
+	const [exactPdfRefreshing, setExactPdfRefreshing] = useState(false)
+	const lastExactInputRef = useRef(null)
+	const exactPdfRequestIdRef = useRef(0)
+	const exactPdfBlobUrlRef = useRef(null)
+	const [previewZoom, setPreviewZoom] = useState(PREVIEW_ZOOM.default)
 	const [validationErrors, setValidationErrors] = useState([]) // validation errors for required fields
 
-	// zoom handlers
 	const handleZoomIn = () => {
-		setPreviewZoom(prev => Math.min(prev + 25, 200)) // Max 200%
+		setPreviewZoom((prev) => Math.min(prev + PREVIEW_ZOOM.step, PREVIEW_ZOOM.max))
 	}
 
 	const handleZoomOut = () => {
-		setPreviewZoom(prev => Math.max(prev - 25, 25)) // Min 25%
+		setPreviewZoom((prev) => Math.max(prev - PREVIEW_ZOOM.step, PREVIEW_ZOOM.min))
 	}
 
-	// download states.
-	const [isDownloadingPDF, setIsDownloadingPDF] = useState(false)
-	const [isDownloadingWord, setIsDownloadingWord] = useState(false)
+	const handleZoomReset = () => setPreviewZoom(PREVIEW_ZOOM.default)
+
+	/** Right-panel download overlay: loading bar + success animation (PDF / Word) */
+	const [downloadStatus, setDownloadStatus] = useState(null)
 
 	// header data state.
 	const [headerData, setHeaderData] = useState(null)
@@ -190,6 +202,7 @@ function ResumePreview() {
 			github: '',
 			linkedin: '',
 			portfolio: '',
+			tagline: '',
 		},
 		education: [],
 		experience: [],
@@ -311,21 +324,37 @@ function ResumePreview() {
 		}
 
 		setValidationErrors([])
+		exactPdfRequestIdRef.current += 1
 		setIsGeneratingPreview(true)
+		setExactPdfRefreshing(true)
 		try {
 			const previewData = {
 				...applyVisibilityFilters(resumeData),
-				sectionLabels: sectionLabels
+				sectionLabels: sectionLabels,
 			}
-			const htmlContent = await generateResumePreview(template, previewData)
+			const inputKey = JSON.stringify({ template, previewData })
+			const [htmlContent, pdfBlob] = await Promise.all([
+				generateResumePreview(template, previewData),
+				generateResumePDF(template, previewData),
+			])
 			setPreviewHtml(htmlContent)
+			lastPreviewInputRef.current = inputKey
+			setExactPdfBlobUrl((prev) => {
+				if (prev) URL.revokeObjectURL(prev)
+				return URL.createObjectURL(pdfBlob)
+			})
+			lastExactInputRef.current = inputKey
+		} catch (error) {
+			console.error('Refresh preview failed:', error)
+			toast.error('Could not refresh preview.')
 		} finally {
 			setIsGeneratingPreview(false)
+			setExactPdfRefreshing(false)
 		}
 	}
 
 	const handleDownloadPDF = async () => {
-		setIsDownloadingPDF(true)
+		setDownloadStatus({ type: 'pdf', phase: 'loading' })
 		try {
 			const pdfData = {
 				...applyVisibilityFilters(resumeData),
@@ -333,15 +362,18 @@ function ResumePreview() {
 			}
 			const pdfBlob = await generateResumePDF(template, pdfData)
 			downloadBlob(pdfBlob, 'resume.pdf')
+			setDownloadStatus({ type: 'pdf', phase: 'success' })
+			window.setTimeout(() => setDownloadStatus(null), 2200)
 		} catch (error) {
 			console.error('Failed to generate PDF:', error)
-		} finally {
-			setIsDownloadingPDF(false)
+			toast.error('Could not generate PDF. Try again.')
+			setDownloadStatus({ type: 'pdf', phase: 'error' })
+			window.setTimeout(() => setDownloadStatus(null), 2400)
 		}
 	}
 
 	const handleDownloadWord = async () => {
-		setIsDownloadingWord(true)
+		setDownloadStatus({ type: 'word', phase: 'loading' })
 		try {
 			const docData = {
 				...applyVisibilityFilters(resumeData),
@@ -349,10 +381,13 @@ function ResumePreview() {
 			}
 			const docBlob = await generateResumeWord(template, docData)
 			downloadBlob(docBlob, 'resume.docx')
+			setDownloadStatus({ type: 'word', phase: 'success' })
+			window.setTimeout(() => setDownloadStatus(null), 2200)
 		} catch (error) {
 			console.error('Failed to generate Word:', error)
-		} finally {
-			setIsDownloadingWord(false)
+			toast.error('Could not generate Word document. Try again.')
+			setDownloadStatus({ type: 'word', phase: 'error' })
+			window.setTimeout(() => setDownloadStatus(null), 2400)
 		}
 	}
 
@@ -634,6 +669,7 @@ function ResumePreview() {
 				github: header.github || null,
 				linkedin: header.linkedin || null,
 				portfolio: header.portfolio || null,
+				tagline: (header.tagline ?? '').trim(),
 			})
 
 			// save education (bulk replace).
@@ -843,6 +879,68 @@ function ResumePreview() {
 		loadFromHome()
 	}, [user, location.state?.loadSavedId, navigate])
 
+	useEffect(() => {
+		exactPdfBlobUrlRef.current = exactPdfBlobUrl
+	}, [exactPdfBlobUrl])
+
+	useEffect(() => {
+		return () => {
+			const u = exactPdfBlobUrlRef.current
+			if (u) URL.revokeObjectURL(u)
+		}
+	}, [])
+
+	// Debounced exact PDF preview (hybrid: draft HTML + true PDF pages).
+	useEffect(() => {
+		const errors = validateResumeData(resumeData)
+		if (errors.length > 0) {
+			setExactPdfBlobUrl((prev) => {
+				if (prev) URL.revokeObjectURL(prev)
+				return null
+			})
+			lastExactInputRef.current = null
+			setExactPdfRefreshing(false)
+			return
+		}
+
+		const previewData = {
+			...applyVisibilityFilters(resumeData),
+			sectionLabels: sectionLabels,
+		}
+		const exactInput = JSON.stringify({ template, previewData })
+
+		if (lastExactInputRef.current === exactInput) {
+			setExactPdfRefreshing(false)
+			return
+		}
+
+		setExactPdfRefreshing(true)
+		const reqId = ++exactPdfRequestIdRef.current
+
+		const timer = setTimeout(async () => {
+			try {
+				const blob = await generateResumePDF(template, previewData)
+				if (reqId !== exactPdfRequestIdRef.current) return
+				setExactPdfBlobUrl((prev) => {
+					if (prev) URL.revokeObjectURL(prev)
+					return URL.createObjectURL(blob)
+				})
+				lastExactInputRef.current = exactInput
+			} catch (error) {
+				console.error('Exact PDF preview failed:', error)
+				if (reqId === exactPdfRequestIdRef.current) {
+					toast.error('Could not update exact preview.')
+				}
+			} finally {
+				if (reqId === exactPdfRequestIdRef.current) {
+					setExactPdfRefreshing(false)
+				}
+			}
+		}, EXACT_PDF_DEBOUNCE_MS)
+
+		return () => clearTimeout(timer)
+	}, [template, resumeData, sectionLabels])
+
 	// resizing global listener.
 	useEffect(() => {
 		if (isResizing) {
@@ -880,6 +978,12 @@ function ResumePreview() {
 			setValidationErrors(errors)
 			setPreviewHtml(null)
 			setIsGeneratingPreview(false)
+			setExactPdfBlobUrl((prev) => {
+				if (prev) URL.revokeObjectURL(prev)
+				return null
+			})
+			lastExactInputRef.current = null
+			setExactPdfRefreshing(false)
 			return
 		}
 
@@ -911,7 +1015,7 @@ function ResumePreview() {
 			} finally {
 				setIsGeneratingPreview(false)
 			}
-		}, 1000)
+		}, DRAFT_PREVIEW_DEBOUNCE_MS)
 
 		return () => clearTimeout(timer)
 	}, [template, resumeData, sectionLabels])
@@ -1091,14 +1195,18 @@ function ResumePreview() {
 					previewHtml={previewHtml}
 					isGeneratingPreview={isGeneratingPreview}
 					previewZoom={previewZoom}
+					zoomMin={PREVIEW_ZOOM.min}
+					zoomMax={PREVIEW_ZOOM.max}
 					onZoomIn={handleZoomIn}
 					onZoomOut={handleZoomOut}
-					isDownloadingPDF={isDownloadingPDF}
+					onZoomReset={handleZoomReset}
+					downloadStatus={downloadStatus}
 					onDownloadPDF={handleDownloadPDF}
-					isDownloadingWord={isDownloadingWord}
 					onDownloadWord={handleDownloadWord}
 					onRefreshPreview={handleRefreshPreview}
 					validationErrors={validationErrors}
+					exactPdfUrl={exactPdfBlobUrl}
+					exactPdfRefreshing={exactPdfRefreshing}
 				/>
 			</main>
 		</div>

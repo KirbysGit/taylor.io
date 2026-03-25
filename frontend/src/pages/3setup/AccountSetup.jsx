@@ -54,6 +54,7 @@ function AccountSetup() {
 			linkedin: '',
 			portfolio: '',
 			location: '',
+			tagline: '',
 		},
 		education: [],
 		skills: [],
@@ -148,6 +149,9 @@ function AccountSetup() {
 				linkedin: formData.contact?.linkedin || null,
 				portfolio: formData.contact?.portfolio || null,
 				location: formData.contact?.location || null,
+				tagline: (formData.contact?.tagline && formData.contact.tagline.trim())
+					? formData.contact.tagline.trim()
+					: null,
 			}
 			promises.push(upsertContact(contactData))
 

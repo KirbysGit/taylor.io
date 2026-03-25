@@ -28,17 +28,27 @@ class DocxStyleConfig:
     # ---- Header ----
     # .name: 32pt, bold
     name_font_size_pt: int = 32
-    name_space_after_pt: float = 3.0  # margin-bottom on resume-header
+    name_space_after_pt: float = 0.0  # space after name (before contact line)
+    # Expanded letter-spacing on name (Word w:spacing, in points; 0 = off)
+    name_character_spacing_pt: float = 0.6
 
-    # .contact: 10.5pt
-    contact_font_size_pt: float = 10.5
-    contact_line_height: float = 1.15
+    # Optional tagline (between name and contact)
+    tagline_font_size_pt: float = 11.0
+    tagline_space_after_pt: float = 2.5
+    # When a tagline is shown, contact line sits right under it (small gap via tagline_space_after)
+    contact_space_before_after_tagline_pt: float = 0.0
+
+    # Contact line (centered under name)
+    contact_font_size_pt: float = 10.0
+    contact_line_height: float = 1.0  # single-ish
+    contact_space_before_pt: float = 3.0  # space between name and contact line (no tagline)
+    contact_space_after_pt: float = 2.0  # space after contact line (before first section)
 
     # ---- Section title ----
-    # .section-title: 14pt
-    section_title_font_size_pt: int = 14
-    section_title_space_before_pt: float = 3.0
-    section_title_space_after_pt: float = 5.0  # divider margin-bottom
+    section_title_font_size_pt: int = 12
+    section_title_space_before_pt: float = 2.0
+    # Space below the title paragraph (divider is on the same paragraph); breathing room before body
+    section_title_space_after_pt: float = 5.0
 
     # .section-content padding-left: 10pt
     section_content_indent_pt: float = 10.0
@@ -49,11 +59,15 @@ class DocxStyleConfig:
     # ---- Education ----
     # .school-name: 12pt, bold
     school_name_font_size_pt: int = 12
-    # .school-gpa: 11pt, italic (distinct from school-dates)
-    school_gpa_font_size_pt: int = 11
-    # .school-dates, .degree-type, .school-location: 12pt, italic
+    # GPA on school line (Georgia in Word)
+    school_gpa_font_size_pt: int = 9
+    # .school-dates (right column): 12pt, italic
     school_meta_font_size_pt: int = 12
-    school_line_space_after_pt: float = 2.5
+    # "Bachelor of … in …" degree line (left column)
+    education_degree_line_font_size_pt: int = 11
+    # Space after university/school line (before degree line); keep tighter than degree→next
+    school_name_line_space_after_pt: float = 0.0
+    school_line_space_after_pt: float = 1.5
 
     # Right-aligned tab position for two-column lines (in). Content width ~7.5in.
     two_column_tab_in: float = 7.5
@@ -66,8 +80,8 @@ class DocxStyleConfig:
     # .experience-dates, .company-name, .company-skills, .company-location: 11pt
     experience_title_font_size_pt: int = 11
     experience_meta_font_size_pt: int = 11
-    experience_line_space_pt: float = 2.5
-    experience_line_space_before_pt: float = 1.0
+    experience_line_space_pt: float = 1.5
+    experience_line_space_before_pt: float = 0.5
 
     # .description-content: 10pt
     description_font_size_pt: int = 10
@@ -78,18 +92,18 @@ class DocxStyleConfig:
     description_bullet_hang_pt: float = 12.0  # hang width; tab stop here for bullet-to-text alignment
     description_bullet_item_space_pt: float = 0.5
     description_paragraph_space_pt: float = 2.0
-    description_block_space_before_pt: float = 1.5  # margin between company and bullets
+    description_block_space_before_pt: float = 1.0  # margin between company and bullets
 
     # ---- Projects ----
     # .project-title: 10.5pt, bold
     project_title_font_size_pt: float = 10.5
-    project_line_space_pt: float = 2.5
+    project_title_space_before_pt: float = 0.0
+    project_line_space_pt: float = 0.75
 
     # ---- Skills ----
-    # .skill-category: 11pt, bold; .skill-names: 11pt
-    skill_category_font_size_pt: int = 11
-    skill_names_font_size_pt: int = 11
-    skill_line_space_pt: float = 3.0
+    skill_category_font_size_pt: int = 10
+    skill_names_font_size_pt: int = 10
+    skill_line_space_pt: float = 1.5
 
     # ---- Summary ----
     # .summary-section: 10pt

@@ -1,4 +1,35 @@
 {
-  "_comment": "Override docx styling for Default template. Values match preview.css. Edit to adjust Word output.",
-  "_doc": "See backend/generator/docx_styles.py DocxStyleConfig for all keys. Omit keys to use defaults."
+  "_comment": "Default template Word (.docx) overrides. Keys match DocxStyleConfig in backend/generator/docx_styles.py — only listed keys are required; omit to use Python defaults.",
+  "_doc": "HTML preview uses preview.css; this file affects Word export only.",
+
+  "name_space_after_pt": 0,
+  "name_character_spacing_pt": 0.6,
+
+  "tagline_font_size_pt": 11,
+  "tagline_space_after_pt": 2.5,
+  "contact_space_before_after_tagline_pt": 0,
+
+  "contact_font_size_pt": 10,
+  "contact_space_before_pt": 3,
+  "contact_space_after_pt": 2,
+
+  "section_title_font_size_pt": 12,
+  "section_title_space_before_pt": 2,
+  "section_title_space_after_pt": 5,
+
+  "school_gpa_font_size_pt": 9,
+  "school_name_line_space_after_pt": 0,
+  "education_degree_line_font_size_pt": 11,
+
+  "experience_line_space_pt": 1.5,
+  "experience_line_space_before_pt": 0.5,
+
+  "project_title_space_before_pt": 0,
+  "project_line_space_pt": 0.75,
+
+  "skill_category_font_size_pt": 10,
+  "skill_names_font_size_pt": 10,
+  "skill_line_space_pt": 1.5,
+  "school_line_space_after_pt": 1.5
 }
+

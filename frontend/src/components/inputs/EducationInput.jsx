@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGripVertical, faPencil, faChevronUp, faTrash } from '@fortawesome/free-solid-svg-icons';
 import MonthYearPicker from './MonthYearPicker';
@@ -45,6 +45,15 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 	const savedEndDatesRef = useRef(new Map())
 	// ignore pencil click that fires right after drag-end (browser can synthesize click on drop)
 	const lastDragEndRef = useRef(0)
+	const newSubsectionTitleInputRef = useRef(null)
+
+	useLayoutEffect(() => {
+		if (editingSubsection?.isNew && newSubsectionTitleInputRef.current) {
+			const el = newSubsectionTitleInputRef.current
+			el.focus()
+			el.select()
+		}
+	}, [editingSubsection])
 
 	// sync with prop changes only when structure changes (add/remove), not field updates
 	useEffect(() => {
@@ -185,14 +194,32 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 	}
 
 	const handleStartEditSubsection = (eduIndex, subIndex, currentTitle) => {
-		setEditingSubsection({ eduIndex, subIndex, oldTitle: currentTitle })
+		setEditingSubsection({ eduIndex, subIndex, oldTitle: currentTitle, isNew: false })
 		setEditingSubsectionValue(currentTitle)
 	}
 
-	const handleSaveSubsectionEdit = () => {
+	const handleSaveSubsectionEdit = (opts = {}) => {
 		if (!editingSubsection) return
-		const { eduIndex, subIndex, oldTitle } = editingSubsection
+		const { eduIndex, oldTitle, isNew } = editingSubsection
 		const newTitle = editingSubsectionValue.trim()
+		const focusContent = opts.focusContent
+
+		if (isNew && !newTitle) {
+			const updatedEdu = { ...localEntries[eduIndex] }
+			const subs = { ...(updatedEdu.subsections || {}) }
+			delete subs[oldTitle]
+			updatedEdu.subsections = subs
+			setLocalEntries((prev) => {
+				const newEdu = [...prev]
+				newEdu[eduIndex] = updatedEdu
+				return newEdu
+			})
+			onUpdate(eduIndex, updatedEdu)
+			setEditingSubsection(null)
+			setEditingSubsectionValue('')
+			return
+		}
+
 		if (newTitle && newTitle !== oldTitle) {
 			const updatedEdu = { ...localEntries[eduIndex] }
 			const subs = { ...updatedEdu.subsections }
@@ -200,7 +227,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 			delete subs[oldTitle]
 			subs[newTitle] = cont
 			updatedEdu.subsections = subs
-			setLocalEntries(prev => {
+			setLocalEntries((prev) => {
 				const newEdu = [...prev]
 				newEdu[eduIndex] = updatedEdu
 				return newEdu
@@ -209,9 +236,29 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 		}
 		setEditingSubsection(null)
 		setEditingSubsectionValue('')
+
+		if (focusContent) {
+			const { eduIndex: eIdx, subIndex: sIdx } = focusContent
+			window.setTimeout(() => {
+				document.getElementById(`education-highlight-${eIdx}-${sIdx}`)?.focus()
+			}, 0)
+		}
 	}
 
 	const handleCancelSubsectionEdit = () => {
+		if (editingSubsection?.isNew) {
+			const { eduIndex, oldTitle } = editingSubsection
+			const updatedEdu = { ...localEntries[eduIndex] }
+			const subs = { ...(updatedEdu.subsections || {}) }
+			delete subs[oldTitle]
+			updatedEdu.subsections = subs
+			setLocalEntries((prev) => {
+				const newEdu = [...prev]
+				newEdu[eduIndex] = updatedEdu
+				return newEdu
+			})
+			onUpdate(eduIndex, updatedEdu)
+		}
 		setEditingSubsection(null)
 		setEditingSubsectionValue('')
 	}
@@ -447,15 +494,23 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 													onClick={() => {
 														const updatedEdu = { ...localEntries[index] }
 														const subs = { ...(updatedEdu.subsections || {}) }
-														const newTitle = `New Section ${Object.keys(subs).length + 1}`
-														subs[newTitle] = ''
+														const provisional = `__new__${Date.now()}`
+														subs[provisional] = ''
 														updatedEdu.subsections = subs
-														setLocalEntries(prev => {
+														const subIndex = Object.keys(subs).length - 1
+														setLocalEntries((prev) => {
 															const newEdu = [...prev]
 															newEdu[index] = updatedEdu
 															return newEdu
 														})
 														onUpdate(index, updatedEdu)
+														setEditingSubsection({
+															eduIndex: index,
+															subIndex,
+															oldTitle: provisional,
+															isNew: true,
+														})
+														setEditingSubsectionValue('')
 													}}
 													className="px-3 py-1.5 text-sm font-medium border border-brand-pink text-brand-pink rounded hover:bg-brand-pink hover:text-white transition-all"
 												>
@@ -539,16 +594,28 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 																<div className="flex items-center gap-2 mb-1">
 																	{isEditing ? (
 																		<input
+																			ref={editingSubsection?.isNew ? newSubsectionTitleInputRef : undefined}
 																			type="text"
 																			value={editingSubsectionValue}
 																			onChange={(e) => setEditingSubsectionValue(e.target.value)}
 																			onKeyDown={(e) => {
-																				if (e.key === 'Enter') handleSaveSubsectionEdit()
-																				else if (e.key === 'Escape') handleCancelSubsectionEdit()
+																				if (e.key === 'Enter') {
+																					e.preventDefault()
+																					handleSaveSubsectionEdit({
+																						focusContent: { eduIndex: index, subIndex },
+																					})
+																				} else if (e.key === 'Escape') {
+																					handleCancelSubsectionEdit()
+																				}
 																			}}
-																			onBlur={handleSaveSubsectionEdit}
+																			onBlur={() => handleSaveSubsectionEdit()}
 																			className="input text-sm font-medium flex-1 min-w-0 py-1 px-2"
-																			autoFocus
+																			placeholder={
+																				editingSubsection?.isNew
+																					? 'Section title (e.g. Honors, Coursework)'
+																					: undefined
+																			}
+																			autoFocus={!editingSubsection?.isNew}
 																		/>
 																	) : (
 																		<>
@@ -587,6 +654,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 																	)}
 																</div>
 																<input
+																	id={`education-highlight-${index}-${subIndex}`}
 																	type="text"
 																	value={content}
 																	onChange={(e) => {
@@ -600,6 +668,12 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 																			return newEdu
 																		})
 																		onUpdate(index, updatedEdu)
+																	}}
+																	onKeyDown={(e) => {
+																		if (e.key === 'Enter') {
+																			e.preventDefault()
+																			e.currentTarget.blur()
+																		}
 																	}}
 																	className="input text-sm py-1.5 px-3"
 																	placeholder="One sentence or short phrase..."

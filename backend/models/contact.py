@@ -18,6 +18,7 @@ class Contact(Base):
     linkedin = Column(String(500), nullable=True)                               # linkedin url.
     portfolio = Column(String(500), nullable=True)                              # portfolio/website url.
     location = Column(String(255), nullable=True)                               # location / city, state.
+    tagline = Column(String(500), nullable=True)                                # e.g. "Software Engineer | Full-Stack · Product"
 
     # relationship back to user.
     user = relationship("User", back_populates="contact")

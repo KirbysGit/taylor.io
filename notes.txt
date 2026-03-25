@@ -1,0 +1,2 @@
+what users can style :
+- order of the sections in the resume
