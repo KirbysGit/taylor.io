@@ -6,6 +6,78 @@
 // getResumeChangeDescriptions -> get simple descriptions of what changed.
 // downloadBlob -> download a blob as a file.
 
+import {
+	transformEducationForStep,
+	transformExperienceForStep,
+	transformProjectForStep,
+	transformSkillForStep,
+} from '@/pages/info/utils/dataTransform'
+import {
+	normalizeEducationForBackend,
+	normalizeExperienceForBackend,
+	normalizeProjectForBackend,
+	normalizeSkillForBackend,
+} from '@/pages/utils/DataFormatting'
+
+/** Map list entries through step transform + backend normalizer so shape matches what Save sends (ignores harmless UI-only / key-alias drift). */
+function canonicalEducationList(arr) {
+	if (!Array.isArray(arr)) return []
+	return arr.map((edu) => normalizeEducationForBackend(transformEducationForStep(edu)))
+}
+
+function canonicalExperienceList(arr) {
+	if (!Array.isArray(arr)) return []
+	return arr.map((exp) => normalizeExperienceForBackend(transformExperienceForStep(exp)))
+}
+
+function canonicalProjectList(arr) {
+	if (!Array.isArray(arr)) return []
+	return arr.map((proj) => normalizeProjectForBackend(transformProjectForStep(proj)))
+}
+
+function canonicalSkillList(arr) {
+	if (!Array.isArray(arr)) return []
+	return arr.map((skill) => normalizeSkillForBackend(transformSkillForStep(skill)))
+}
+
+/** Full section order including locked `header` (first) and `summary` (second). */
+const DEFAULT_FULL_SECTION_ORDER = [
+	'header',
+	'summary',
+	'education',
+	'experience',
+	'projects',
+	'skills',
+]
+
+/**
+ * Lock Professional Summary directly under header; user may only reorder other sections.
+ * @param {string[]|null|undefined} order
+ * @returns {string[]}
+ */
+export function normalizeSectionOrder(order) {
+	if (!Array.isArray(order) || order.length === 0) {
+		return [...DEFAULT_FULL_SECTION_ORDER]
+	}
+	const allowed = new Set(DEFAULT_FULL_SECTION_ORDER)
+	const seen = new Set()
+	const tail = []
+	for (const k of order) {
+		if (k === 'header' || k === 'summary') continue
+		if (allowed.has(k) && !seen.has(k)) {
+			seen.add(k)
+			tail.push(k)
+		}
+	}
+	for (const k of DEFAULT_FULL_SECTION_ORDER) {
+		if (k !== 'header' && k !== 'summary' && !seen.has(k)) {
+			seen.add(k)
+			tail.push(k)
+		}
+	}
+	return ['header', 'summary', ...tail]
+}
+
 // ----- functions -----
 
 // apply visibility filters to resume data for preview/pdf generation.
@@ -73,6 +145,16 @@ export function applyVisibilityFilters(resumeData) {
 			if (key === 'skills' && !sectionVisibility.skills) return false
 			return true
 		})
+		// summary always first in document body (under fixed header), matching editor lock
+		if (filteredData.sectionOrder.length) {
+			const si = filteredData.sectionOrder.indexOf('summary')
+			if (si > 0) {
+				filteredData.sectionOrder = [
+					'summary',
+					...filteredData.sectionOrder.filter((k) => k !== 'summary'),
+				]
+			}
+		}
 	}
 
 	// remove sectionVisibility object (not needed for backend)
@@ -112,16 +194,26 @@ function compareResumeData(currentData, baselineData) {
 	// compare serialized versions.
 	const currentHeaderStr = JSON.stringify(currentHeaderForCompare)
 	const baselineHeaderStr = JSON.stringify(baselineHeaderForCompare)
-	const currentEduStr = JSON.stringify(currentDataForCompare.education)
-	const baselineEduStr = JSON.stringify(baselineDataForCompare.education)
-	const currentExpStr = JSON.stringify(currentDataForCompare.experience)
-	const baselineExpStr = JSON.stringify(baselineDataForCompare.experience)
-	const currentProjStr = JSON.stringify(currentDataForCompare.projects)
-	const baselineProjStr = JSON.stringify(baselineDataForCompare.projects)
-	const currentSkillsStr = JSON.stringify({ skills: currentDataForCompare.skills || [], hiddenSkills: currentDataForCompare.hiddenSkills || [] })
-	const baselineSkillsStr = JSON.stringify({ skills: baselineDataForCompare.skills || [], hiddenSkills: baselineDataForCompare.hiddenSkills || [] })
-	const currentSummaryStr = JSON.stringify(currentDataForCompare.summary || { summary: '' })
-	const baselineSummaryStr = JSON.stringify(baselineDataForCompare.summary || { summary: '' })
+	const currentEduStr = JSON.stringify(canonicalEducationList(currentDataForCompare.education))
+	const baselineEduStr = JSON.stringify(canonicalEducationList(baselineDataForCompare.education))
+	const currentExpStr = JSON.stringify(canonicalExperienceList(currentDataForCompare.experience))
+	const baselineExpStr = JSON.stringify(canonicalExperienceList(baselineDataForCompare.experience))
+	const currentProjStr = JSON.stringify(canonicalProjectList(currentDataForCompare.projects))
+	const baselineProjStr = JSON.stringify(canonicalProjectList(baselineDataForCompare.projects))
+	const currentSkillsStr = JSON.stringify({
+		skills: canonicalSkillList(currentDataForCompare.skills || []),
+		hiddenSkills: canonicalSkillList(currentDataForCompare.hiddenSkills || []),
+	})
+	const baselineSkillsStr = JSON.stringify({
+		skills: canonicalSkillList(baselineDataForCompare.skills || []),
+		hiddenSkills: canonicalSkillList(baselineDataForCompare.hiddenSkills || []),
+	})
+	const currentSummaryStr = JSON.stringify({
+		summary: (currentDataForCompare.summary?.summary ?? '').trim(),
+	})
+	const baselineSummaryStr = JSON.stringify({
+		summary: (baselineDataForCompare.summary?.summary ?? '').trim(),
+	})
 
 	return {
 		headerChanged: currentHeaderStr !== baselineHeaderStr,
@@ -144,24 +236,12 @@ export function getResumeChangeDescriptions(currentData, baselineData) {
 	const { headerChanged, educationChanged, experienceChanged, projectsChanged, skillsChanged, summaryChanged } = compareResumeData(currentData, baselineData)
 	const changes = []
 
-	if (headerChanged) {
-		changes.push('Header or contact info updated')
-	}
-	if (educationChanged) {
-		changes.push('Education section updated')
-	}
-	if (experienceChanged) {
-		changes.push('Experience section updated')
-	}
-	if (projectsChanged) {
-		changes.push('Projects section updated')
-	}
-	if (skillsChanged) {
-		changes.push('Skills section updated')
-	}
-	if (summaryChanged) {
-		changes.push('Summary updated')
-	}
+	if (headerChanged) changes.push('Header')
+	if (educationChanged) changes.push('Education')
+	if (experienceChanged) changes.push('Experience')
+	if (projectsChanged) changes.push('Projects')
+	if (skillsChanged) changes.push('Skills')
+	if (summaryChanged) changes.push('Summary')
 
 	return changes
 }

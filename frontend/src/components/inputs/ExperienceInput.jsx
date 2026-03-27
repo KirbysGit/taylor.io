@@ -31,7 +31,7 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 		current: false 
 	}]
 
-	const getEntryId = (entry, index) => entry?.id ?? index
+	const getEntryId = (entry, index) => String(entry?.id ?? index)
 	const [expandedIds, setExpandedIds] = useState(() => new Set()) // collapsed by default
 	const [localEntries, setLocalEntries] = useState(entries)
 	const [descriptionModes, setDescriptionModes] = useState({})
@@ -43,6 +43,43 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 	const lastDragEndRef = useRef(0)
 	// store previous end dates when toggling "current" to preserve them
 	const savedEndDatesRef = useRef(new Map())
+	const pendingTitleFocusEntryIdRef = useRef(null)
+	/** True only when user clicked "+ Add" — avoids auto-expanding on async 0→1 data load */
+	const addFromButtonRef = useRef(false)
+
+	// After "+ Add Experience": scroll card + focus job title when expanded (AnimatedExpand ~150ms)
+	useEffect(() => {
+		const targetId = pendingTitleFocusEntryIdRef.current
+		if (targetId == null) return
+		const isOpen = [...expandedIds].some((id) => String(id) === targetId)
+		if (!isOpen) return
+
+		let cancelled = false
+		const t = window.setTimeout(() => {
+			if (cancelled) return
+			let card = document.getElementById(`experience-card-${targetId}`)
+			let input = document.getElementById(`experience-title-${targetId}`)
+			if ((!card || !input) && localEntries.length > 0) {
+				const lastIdx = localEntries.length - 1
+				const fallbackId = getEntryId(localEntries[lastIdx], lastIdx)
+				card = card || document.getElementById(`experience-card-${fallbackId}`)
+				input = input || document.getElementById(`experience-title-${fallbackId}`)
+			}
+			if (card) {
+				card.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+			}
+			if (input) {
+				input.focus()
+				input.select()
+			}
+			pendingTitleFocusEntryIdRef.current = null
+		}, 200)
+
+		return () => {
+			cancelled = true
+			window.clearTimeout(t)
+		}
+	}, [localEntries, expandedIds])
 
 	// sync with prop changes only when structure changes (add/remove), not field updates
 	useEffect(() => {
@@ -77,8 +114,17 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 					return newSet
 				})
 			} else if (currentLength > prevLengthRef.current) {
-				// data loaded (e.g. from [] to multiple) - keep all collapsed
-				setExpandedIds(new Set())
+				const delta = currentLength - prevLengthRef.current
+				if (delta > 1) {
+					addFromButtonRef.current = false
+					setExpandedIds(new Set())
+				} else if (delta === 1 && prevLengthRef.current === 0 && addFromButtonRef.current) {
+					addFromButtonRef.current = false
+					const newEntry = newEntries[currentLength - 1]
+					setExpandedIds(new Set([getEntryId(newEntry, currentLength - 1)]))
+				} else if (delta === 1 && prevLengthRef.current === 0) {
+					setExpandedIds(new Set())
+				}
 			} else {
 				// removing - keep only IDs that still exist; default to collapsed
 				const currentIds = new Set(newEntries.map((e, i) => getEntryId(e, i)))
@@ -123,7 +169,7 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 	}
 
 	const handleFieldChange = (index, field, value) => {
-		const entryId = localEntries[index]?.id || index
+		const entryId = localEntries[index]?.id ?? index
 		const updatedEntry = { ...localEntries[index], [field]: value }
 		if (field === 'current' && value) {
 			// save current end date before clearing it
@@ -216,8 +262,15 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 			endDate: '', 
 			current: false 
 		}
+		const idKey = getEntryId(newEntry, 0)
+		addFromButtonRef.current = true
+		pendingTitleFocusEntryIdRef.current = idKey
+		setLocalEntries((prev) => {
+			if (experiences.length === 0) return [newEntry]
+			return [...prev, newEntry]
+		})
+		setExpandedIds((prev) => new Set([...prev, idKey]))
 		onAdd(newEntry)
-		setExpandedIds(prev => new Set([...prev, newEntry.id]))
 	}
 
 	const handleReorder = (fromIndex, toIndex) => {
@@ -262,7 +315,8 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 
 							return (
 								<div 
-									key={exp.id || index} 
+									key={exp.id || index}
+									id={`experience-card-${getEntryId(exp, index)}`}
 									onDragOver={isDraggable ? (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverEntryIndex(index) } : undefined}
 									onDragLeave={isDraggable ? () => setDragOverEntryIndex(null) : undefined}
 									onDrop={isDraggable ? (e) => { e.preventDefault(); if (draggedEntryIndex != null) { handleReorder(draggedEntryIndex, index); setDraggedEntryIndex(null); setDragOverEntryIndex(null) } } : undefined}
@@ -330,6 +384,7 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 											<label className="label">Job Title</label>
 											<input
 												type="text"
+												id={`experience-title-${getEntryId(exp, index)}`}
 												value={localEntries[index]?.title || ''}
 												onChange={(e) => handleFieldChange(index, 'title', e.target.value)}
 												className="input"

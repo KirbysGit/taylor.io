@@ -29,11 +29,12 @@ class DocxStyleConfig:
     # .name: 32pt, bold
     name_font_size_pt: int = 32
     name_space_after_pt: float = 0.0  # space after name (before contact line)
-    # Expanded letter-spacing on name (Word w:spacing, in points; 0 = off)
-    name_character_spacing_pt: float = 0.6
+    # Letter-spacing on name: CSS letter-spacing + Word expanded spacing (same token)
+    name_letter_spacing_pt: float = 0.5
 
     # Optional tagline (between name and contact)
     tagline_font_size_pt: float = 11.0
+    tagline_line_height: float = 1.2
     tagline_space_after_pt: float = 2.5
     # When a tagline is shown, contact line sits right under it (small gap via tagline_space_after)
     contact_space_before_after_tagline_pt: float = 0.0
@@ -82,6 +83,8 @@ class DocxStyleConfig:
     experience_meta_font_size_pt: int = 11
     experience_line_space_pt: float = 1.5
     experience_line_space_before_pt: float = 0.5
+    # .company-line margin-bottom (PDF); title line uses experience_line_space_pt
+    company_line_space_after_pt: float = 2.5
 
     # .description-content: 10pt
     description_font_size_pt: int = 10
@@ -104,22 +107,33 @@ class DocxStyleConfig:
     skill_category_font_size_pt: int = 10
     skill_names_font_size_pt: int = 10
     skill_line_space_pt: float = 1.5
+    skill_line_height: float = 1.2
 
-    # ---- Summary ----
-    # .summary-section: 10pt
+    # ---- Summary / body prose ----
+    # Line height for summary + experience/project bullets (matches preview.css line-height)
+    prose_line_height: float = 1.15
+
+    # .section-content padding-left 10pt + .summary-section padding-left 1.25pt (see preview.css)
     summary_font_size_pt: int = 10
     summary_space_after_pt: float = 2.5
+    summary_text_padding_left_pt: float = 1.25
+    # First-line “tab” (body lines align to section indent + padding only)
+    summary_first_line_indent_pt: float = 30.0
 
 
 def get_styles(template_name: str) -> DocxStyleConfig:
     """
     Return style config for the given template.
-    Uses DocxStyleConfig as base; loads optional docx_styles.json from
-    templates/<TemplateName>/ to override values (keeps PDF and Word aligned).
+    Loads resume_tokens.json first (shared with PDF preview), then optional docx_styles.json overrides.
     """
     import json
+
+    from .resume_tokens import apply_resume_tokens_to_docx_config, load_resume_token_dict
+
     name = (template_name or "default").strip()
     base = DocxStyleConfig()
+    tokens = load_resume_token_dict(name)
+    apply_resume_tokens_to_docx_config(base, tokens)
     # Try per-template override: templates/Default/docx_styles.json
     override_path = TEMPLATES_DIR / name / "docx_styles.json"
     if not override_path.exists():

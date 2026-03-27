@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGripVertical, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faGripVertical, faEyeSlash, faEye, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { XIcon, Pencil } from '@/components/icons';
 
 function NewSkillTargetRadio({ selected, className = '' }) {
@@ -17,7 +17,17 @@ function NewSkillTargetRadio({ selected, className = '' }) {
 }
 
 // Skills Input Component - Just the form fields and logic, no headers
-const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryOrderChange, onHide }) => {
+const SkillsInput = ({
+	skills,
+	hiddenSkills = [],
+	onAdd,
+	onRemove,
+	onUpdate,
+	onReorder,
+	onCategoryOrderChange,
+	onHide,
+	onShowSkill,
+}) => {
 	const [skillInput, setSkillInput] = useState('');
 	// Where new skills go from the input: 'all' (uncategorized) or a category name
 	const [newSkillTarget, setNewSkillTarget] = useState('all');
@@ -30,7 +40,23 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 	const [editingCategoryValue, setEditingCategoryValue] = useState('');
 	const [draggedCategory, setDraggedCategory] = useState(null);
 	const [dragOverCategoryForReorder, setDragOverCategoryForReorder] = useState(null);
+	const [hiddenSectionOpen, setHiddenSectionOpen] = useState(true);
 	const inputRef = useRef(null);
+	// HTML5 drop can fire before React state from onDragStart flushes; keep ref in sync.
+	const draggedSkillRef = useRef(null);
+
+	const skillIsHidden = (skill) =>
+		skill && hiddenSkills.some((h) => String(h.id) === String(skill.id));
+
+	const activeDraggedSkill = () => draggedSkillRef.current ?? draggedSkill;
+
+	const endSkillDrag = () => {
+		draggedSkillRef.current = null;
+		setDraggedSkill(null);
+		setDragOverCategory(null);
+		setDragOverAllSkills(false);
+		setDragOverPillId(null);
+	};
 
 	const SKILLS_REMOVED_DEFAULTS_KEY = 'tailor_skillsRemovedDefaults';
 
@@ -104,9 +130,18 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 
 	// handle drag start
 	const handleDragStart = (e, skill) => {
+		draggedSkillRef.current = skill;
 		setDraggedSkill(skill);
 		e.dataTransfer.effectAllowed = 'move';
-		e.dataTransfer.setData('text/html', e.target.outerHTML);
+		try {
+			e.dataTransfer.setData('text/plain', `skill:${skill.id}`);
+		} catch (_) {
+			/* ignore */
+		}
+		const el = e.currentTarget;
+		if (el?.outerHTML) {
+			e.dataTransfer.setData('text/html', el.outerHTML);
+		}
 	};
 
 	// handle drag over category
@@ -136,32 +171,37 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 	const handleDropOnPill = (e, dropTargetSkill, categoryKey) => {
 		e.preventDefault();
 		e.stopPropagation(); // prevent category card from also handling the drop
-		if (!draggedSkill || !onReorder) return;
-		if (draggedSkill.id === dropTargetSkill.id) {
-			setDraggedSkill(null);
-			setDragOverPillId(null);
+		const d = activeDraggedSkill();
+		if (!d) return;
+		if (skillIsHidden(d)) {
+			endSkillDrag();
 			return;
 		}
-		const draggedCategory = (draggedSkill.category || '').trim();
+		if (!onReorder) return;
+		if (d.id === dropTargetSkill.id) {
+			endSkillDrag();
+			return;
+		}
+		const draggedCategory = (d.category || '').trim();
 		const targetCategory = categoryKey === '_uncategorized' ? '' : categoryKey;
 		if (draggedCategory !== targetCategory) {
-			setDraggedSkill(null);
-			setDragOverPillId(null);
+			endSkillDrag();
 			return;
 		}
-		const fromIndex = skills.findIndex(s => s.id === draggedSkill.id);
-		const toIndex = skills.findIndex(s => s.id === dropTargetSkill.id);
+		const fromIndex = skills.findIndex((s) => String(s.id) === String(d.id));
+		const toIndex = skills.findIndex((s) => s.id === dropTargetSkill.id);
 		if (fromIndex !== -1 && toIndex !== -1) {
 			onReorder(fromIndex, toIndex);
 		}
-		setDraggedSkill(null);
-		setDragOverPillId(null);
+		endSkillDrag();
 	};
 
 	// handle drag over pill (for reorder)
 	const handleDragOverPill = (e, skill) => {
-		if (!draggedSkill) return;
-		const draggedCategory = (draggedSkill.category || '').trim();
+		const d = activeDraggedSkill();
+		if (!d) return;
+		if (skillIsHidden(d)) return;
+		const draggedCategory = (d.category || '').trim();
 		const skillCategory = (skill.category || '').trim();
 		if (draggedCategory === skillCategory) {
 			e.preventDefault();
@@ -174,35 +214,41 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 	// handle drop on category
 	const handleDropOnCategory = (e, categoryName) => {
 		e.preventDefault();
-		if (draggedSkill) {
-			const skillIndex = skills.findIndex(s => s.id === draggedSkill.id);
-			if (skillIndex !== -1 && onUpdate) {
-				const updatedSkill = {
-					...draggedSkill,
-					category: categoryName
-				};
-				onUpdate(skillIndex, updatedSkill);
+		const d = activeDraggedSkill();
+		if (d) {
+			if (skillIsHidden(d)) {
+				onShowSkill?.(d.id, { category: categoryName });
+			} else {
+				const skillIndex = skills.findIndex((s) => String(s.id) === String(d.id));
+				if (skillIndex !== -1 && onUpdate) {
+					onUpdate(skillIndex, {
+						...d,
+						category: categoryName,
+					});
+				}
 			}
 		}
-		setDraggedSkill(null);
-		setDragOverCategory(null);
+		endSkillDrag();
 	};
 
 	// handle drop on all skills
 	const handleDropOnAllSkills = (e) => {
 		e.preventDefault();
-		if (draggedSkill) {
-			const skillIndex = skills.findIndex(s => s.id === draggedSkill.id);
-			if (skillIndex !== -1 && onUpdate) {
-				const updatedSkill = {
-					...draggedSkill,
-					category: ''
-				};
-				onUpdate(skillIndex, updatedSkill);
+		const d = activeDraggedSkill();
+		if (d) {
+			if (skillIsHidden(d)) {
+				onShowSkill?.(d.id, { category: '' });
+			} else {
+				const skillIndex = skills.findIndex((s) => String(s.id) === String(d.id));
+				if (skillIndex !== -1 && onUpdate) {
+					onUpdate(skillIndex, {
+						...d,
+						category: '',
+					});
+				}
 			}
 		}
-		setDraggedSkill(null);
-		setDragOverAllSkills(false);
+		endSkillDrag();
 	};
 
 	// handle start editing category
@@ -418,12 +464,7 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 											onDragOver={(e) => handleDragOverPill(e, skill)}
 											onDragLeave={() => setDragOverPillId(null)}
 											onDrop={(e) => handleDropOnPill(e, skill, '_uncategorized')}
-											onDragEnd={() => {
-												setDraggedSkill(null);
-												setDragOverCategory(null);
-												setDragOverAllSkills(false);
-												setDragOverPillId(null);
-											}}
+											onDragEnd={endSkillDrag}
 											className={`skillPill cursor-grab active:cursor-grabbing ${skill.fromParsed ? 'skillPillParsed' : ''} ${dragOverPillId === skill.id ? 'ring-2 ring-brand-pink ring-offset-2' : ''}`}
 										>
 											<span>{skill.name}</span>
@@ -460,6 +501,92 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 						</div>
 					</div>
 				</div>
+
+				{/* Hidden skills — directly under All Skills so “Fresh start” / pool is obvious; drag out to show */}
+				{hiddenSkills.length > 0 ? (
+					<div className="collapsibleCard border-dashed border-gray-300 bg-gray-50/50">
+						<div className="collapsibleCardHeader py-2">
+							<button
+								type="button"
+								onClick={() => setHiddenSectionOpen(!hiddenSectionOpen)}
+								className="w-full flex items-center justify-between gap-2 text-left rounded-lg -m-1 p-1 pr-2 hover:bg-gray-100/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+							>
+								<div className="flex items-center gap-2 min-w-0">
+									<FontAwesomeIcon icon={faEyeSlash} className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+									<span className="font-semibold text-gray-800 truncate">
+										Hidden for this resume
+									</span>
+									<span className="text-xs bg-gray-200/80 text-gray-700 px-2 py-0.5 rounded-full shrink-0">
+										{hiddenSkills.length}
+									</span>
+								</div>
+								<FontAwesomeIcon
+									icon={hiddenSectionOpen ? faChevronUp : faChevronDown}
+									className="w-4 h-4 text-gray-500 shrink-0"
+								/>
+							</button>
+						</div>
+						{hiddenSectionOpen ? (
+							<div className="expandableContent expanded border-t border-gray-200/80">
+								<div className="expandableContentInner">
+									{onShowSkill ? (
+										<p className="text-xs text-gray-500 mb-3">
+											Drag a pill to <span className="font-medium text-gray-700">All Skills</span> or a
+											category above to show it there, or use the eye to restore with the same category.
+										</p>
+									) : (
+										<p className="text-xs text-gray-500 mb-3">
+											These skills are not on the resume. Open the resume editor to move them into a
+											section.
+										</p>
+									)}
+									<div className="flex flex-wrap gap-2">
+										{hiddenSkills.map((skill) => (
+											<div
+												key={skill.id}
+												draggable={Boolean(onShowSkill)}
+												onDragStart={(e) => {
+													if (onShowSkill) handleDragStart(e, skill);
+												}}
+												onDragEnd={endSkillDrag}
+												className={`skillPill cursor-grab active:cursor-grabbing ${
+													skill.fromParsed ? 'skillPillParsed' : ''
+												}`}
+											>
+												<span>{skill.name}</span>
+												{skill.category ? (
+													<span className="text-xs font-normal text-gray-600">
+														({skill.category})
+													</span>
+												) : null}
+												{skill.fromParsed ? (
+													<span className="text-xs bg-blue-200 text-blue-800 px-1.5 py-0.5 rounded-full">
+														Parsed
+													</span>
+												) : null}
+												{onShowSkill ? (
+													<button
+														type="button"
+														draggable={false}
+														onDragStart={(ev) => ev.stopPropagation()}
+														onClick={(e) => {
+															e.stopPropagation();
+															onShowSkill(skill.id);
+														}}
+														className="skillPillRemove p-1 rounded hover:bg-brand-pink/20 text-brand-pink"
+														title="Show on resume"
+													>
+														<FontAwesomeIcon icon={faEye} className="w-3 h-3" />
+													</button>
+												) : null}
+											</div>
+										))}
+									</div>
+								</div>
+							</div>
+						) : null}
+					</div>
+				) : null}
 
 				{/* Categorized Skills */}
 				{categories.map(category => {
@@ -568,12 +695,7 @@ const SkillsInput = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategoryO
 													onDragOver={(e) => handleDragOverPill(e, skill)}
 													onDragLeave={() => setDragOverPillId(null)}
 													onDrop={(e) => handleDropOnPill(e, skill, category)}
-													onDragEnd={() => {
-														setDraggedSkill(null);
-														setDragOverCategory(null);
-														setDragOverAllSkills(false);
-														setDragOverPillId(null);
-													}}
+													onDragEnd={endSkillDrag}
 													className={`skillPill cursor-grab active:cursor-grabbing ${skill.fromParsed ? 'skillPillParsed' : ''} ${dragOverPillId === skill.id ? 'ring-2 ring-brand-pink ring-offset-2' : ''}`}
 												>
 													<span>{skill.name}</span>

@@ -1,0 +1,106 @@
+"""
+Resume design tokens: one JSON file drives PDF preview CSS variables and Word (DocxStyleConfig).
+
+- templates/<Template>/resume_tokens.json (fallback: templates/Default/)
+- PDF: pipeline prepends :root { --rt-* } built from this file before preview.css
+- Word: docx_styles.get_styles merges applicable keys onto DocxStyleConfig
+"""
+
+from __future__ import annotations
+
+import json
+from dataclasses import fields
+from pathlib import Path
+from typing import Any, Dict
+
+from .docx_styles import DocxStyleConfig, TEMPLATES_DIR
+
+TOKEN_FILENAME = "resume_tokens.json"
+
+
+def _template_dir(template_name: str) -> Path:
+    name = (template_name or "default").strip()
+    d = TEMPLATES_DIR / name
+    if d.is_dir():
+        return d
+    return TEMPLATES_DIR / "Default"
+
+
+def load_resume_token_dict(template_name: str) -> Dict[str, Any]:
+    """Load flat token dict; ignores keys starting with underscore."""
+    path = _template_dir(template_name) / TOKEN_FILENAME
+    if not path.exists():
+        path = TEMPLATES_DIR / "Default" / TOKEN_FILENAME
+    if not path.exists():
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+    except Exception:
+        return {}
+    if not isinstance(raw, dict):
+        return {}
+    return {k: v for k, v in raw.items() if isinstance(k, str) and not k.startswith("_")}
+
+
+def apply_resume_tokens_to_docx_config(cfg: DocxStyleConfig, tokens: Dict[str, Any]) -> None:
+    """Apply JSON values to DocxStyleConfig (unknown keys skipped)."""
+    field_names = {f.name for f in fields(DocxStyleConfig)}
+    for key, val in tokens.items():
+        if key not in field_names or val is None:
+            continue
+        current = getattr(cfg, key)
+        if isinstance(current, bool):
+            setattr(cfg, key, bool(val))
+        elif isinstance(current, int) and not isinstance(val, bool):
+            setattr(cfg, key, int(val))
+        elif isinstance(current, float):
+            setattr(cfg, key, float(val))
+        else:
+            setattr(cfg, key, val)
+
+
+def _css_var_name(key: str) -> str:
+    return "--rt-" + key.replace("_", "-")
+
+
+def token_value_to_css(key: str, val: Any) -> str:
+    if val is None:
+        return ""
+    if isinstance(val, str):
+        if key.endswith("_in") or key.endswith("_pt"):
+            return val
+        return val
+    if isinstance(val, bool):
+        return "1" if val else "0"
+    if key.endswith("_in"):
+        return f"{float(val)}in"
+    if key.endswith("_pt"):
+        f = float(val)
+        if f == int(f):
+            return f"{int(f)}pt"
+        return f"{f}pt"
+    if isinstance(val, float):
+        s = f"{val:.4f}".rstrip("0").rstrip(".")
+        return s if s else "0"
+    if isinstance(val, int):
+        return str(val)
+    return str(val)
+
+
+def build_resume_tokens_css(tokens: Dict[str, Any]) -> str:
+    """Emit :root block for preview / PDF HTML. Keys become --rt-kebab-case."""
+    lines = [
+        "/* Injected from resume_tokens.json — single source with Word styles (DocxStyleConfig). */",
+        ":root {",
+    ]
+    for key in sorted(tokens.keys()):
+        if key.startswith("_"):
+            continue
+        val = tokens[key]
+        css_val = token_value_to_css(key, val)
+        if css_val == "":
+            continue
+        lines.append(f"  {_css_var_name(key)}: {css_val};")
+    lines.append("}")
+    return "\n".join(lines) + "\n"

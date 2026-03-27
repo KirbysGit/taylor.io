@@ -1,2 +1,58 @@
 what users can style :
 - order of the sections in the resume
+
+
+
+idea stack :
+- parsing updated 
+    - banks for schools
+    - banks for types of major
+    - types of degree
+    - gpa stles
+    - minor types
+    - location api 
+    - bank of domains (.com, .dev, .org, parsing as sites associated with whatever section)
+
+- date selection (allowing before 1980)
+- making site more relevant to non-engineers
+    - no more tech stack revolving
+    - allowing addition of links like github not defaulting
+    - non-black and white papers (more styling options)
+
+- project parser based on spacing and styling rather than as much of key words.
+
+- idek if we have a parser for professional summary. 
+
+- hard stuck button view when going backwards based on height (maybe buttons on side in same spot and set up rotates around that)
+
+- logo creation.
+
+- dark mode.
+
+- ai clean up of parsed data potentially (example with the Skills & extracurriculars messy for one of my resumes)
+
+- option to clear professional resume entry (just like a clear and are you sure button)
+
+- skills, select a category, adn when  you add skills it adds to that space.
+
+- better more active You're all set! screen.
+
+- the ⓘ icon to specific parts of the site to help users understand their capabilities and what they might want to do.
+
+- word doc / pdf preview :
+    - more spacing between education entries. right now i have highlights basically resting on top of the next education entry. give it some proper spacing. 
+    - 
+
+- move the unsaved changes into gap between text entry and the zoom buttons. so its not in way of word or pdf icons.
+
+- option to remove https:// from links.
+
+- auto filled in fields like for linkedin, and github. (like https://github.com/ ... )
+
+- drag and drop slides under too. (extra ui addition).
+
+- google sso login. linkedin login. 
+
+- solidified word - pdf and pdf - word comparisons for styling so as we create new templates we can maintain that.
+
+- hovering over sections in the pdf and going to it in the field.

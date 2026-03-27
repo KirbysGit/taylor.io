@@ -30,7 +30,8 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 		current: false 
 	}]
 
-	const getEntryId = (entry, index) => entry?.id ?? index
+	// String ids: parent/transform may use number or string; Set + DOM must match
+	const getEntryId = (entry, index) => String(entry?.id ?? index)
 	const [expandedIds, setExpandedIds] = useState(() => new Set()) // closed by default
 	const [localEntries, setLocalEntries] = useState(entries)
 	const [draggedEntryIndex, setDraggedEntryIndex] = useState(null)
@@ -46,6 +47,8 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 	// ignore pencil click that fires right after drag-end (browser can synthesize click on drop)
 	const lastDragEndRef = useRef(0)
 	const newSubsectionTitleInputRef = useRef(null)
+	/** After "+ Add Education", focus School/University when the new row is expanded */
+	const pendingSchoolFocusEntryIdRef = useRef(null)
 
 	useLayoutEffect(() => {
 		if (editingSubsection?.isNew && newSubsectionTitleInputRef.current) {
@@ -54,6 +57,40 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 			el.select()
 		}
 	}, [editingSubsection])
+
+	// After "+ Add Education": wait for row mount + AnimatedExpand (150ms), then scroll card and focus school
+	useEffect(() => {
+		const targetId = pendingSchoolFocusEntryIdRef.current
+		if (targetId == null) return
+		const isOpen = [...expandedIds].some((id) => String(id) === targetId)
+		if (!isOpen) return
+
+		let cancelled = false
+		const t = window.setTimeout(() => {
+			if (cancelled) return
+			let card = document.getElementById(`education-card-${targetId}`)
+			let input = document.getElementById(`education-school-${targetId}`)
+			if ((!card || !input) && localEntries.length > 0) {
+				const lastIdx = localEntries.length - 1
+				const fallbackId = getEntryId(localEntries[lastIdx], lastIdx)
+				card = card || document.getElementById(`education-card-${fallbackId}`)
+				input = input || document.getElementById(`education-school-${fallbackId}`)
+			}
+			if (card) {
+				card.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+			}
+			if (input) {
+				input.focus()
+				input.select()
+			}
+			pendingSchoolFocusEntryIdRef.current = null
+		}, 200)
+
+		return () => {
+			cancelled = true
+			window.clearTimeout(t)
+		}
+	}, [localEntries, expandedIds])
 
 	// sync with prop changes only when structure changes (add/remove), not field updates
 	useEffect(() => {
@@ -86,8 +123,15 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 					return newSet
 				})
 			} else if (currentLength > prevLengthRef.current) {
-				// data loaded - keep all collapsed
-				setExpandedIds(new Set())
+				const delta = currentLength - prevLengthRef.current
+				// Single new row from empty: expand it (first add was collapsing before)
+				if (delta === 1 && prevLengthRef.current === 0) {
+					const newEntry = newEntries[currentLength - 1]
+					setExpandedIds(new Set([getEntryId(newEntry, currentLength - 1)]))
+				} else if (delta > 1) {
+					// Bulk load (e.g. profile with many schools) — start collapsed
+					setExpandedIds(new Set())
+				}
 			} else {
 				// removing - keep only IDs that still exist; default to collapsed
 				const currentIds = new Set(newEntries.map((e, i) => getEntryId(e, i)))
@@ -116,7 +160,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 	}
 
 	const handleFieldChange = (index, field, value) => {
-		const entryId = localEntries[index]?.id || index
+		const entryId = localEntries[index]?.id ?? index
 		const updatedEntry = { ...localEntries[index], [field]: value }
 		
 		if (field === 'current' && value) {
@@ -153,20 +197,28 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 	}
 
 	const handleAddNew = () => {
-		const newEntry = { 
-			id: Date.now(), 
-			school: '', 
-			degree: '', 
-			discipline: '', 
+		const newEntry = {
+			id: Date.now(),
+			school: '',
+			degree: '',
+			discipline: '',
 			location: '',
 			minor: '',
 			gpa: '',
-			startDate: '', 
-			endDate: '', 
-			current: false 
+			startDate: '',
+			endDate: '',
+			current: false,
+			subsections: {},
 		}
+		const idKey = getEntryId(newEntry, 0)
+		pendingSchoolFocusEntryIdRef.current = idKey
+		// Parent sync runs in useEffect next tick — render row immediately so the input exists + can expand
+		setLocalEntries((prev) => {
+			if (education.length === 0) return [newEntry]
+			return [...prev, newEntry]
+		})
+		setExpandedIds((prev) => new Set([...prev, idKey]))
 		onAdd(newEntry)
-		setExpandedIds(prev => new Set([...prev, newEntry.id]))
 	}
 
 	const handleReorder = (fromIndex, toIndex) => {
@@ -298,6 +350,7 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 
 					return (
 							<div
+								id={`education-card-${getEntryId(edu, index)}`}
 								key={edu.id || index}
 								onDragOver={isDraggable ? (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverEntryIndex(index) } : undefined}
 								onDragLeave={isDraggable ? () => setDragOverEntryIndex(null) : undefined}
@@ -365,11 +418,13 @@ const EducationInput = ({ education, onAdd, onRemove, onUpdate, onReorder, showS
 										<div>
 											<label className={compact ? 'block text-sm font-medium text-gray-500 mb-1' : 'label'}>School/University</label>
 											<input
+												id={`education-school-${getEntryId(edu, index)}`}
 												type="text"
 												value={localEntries[index]?.school || ''}
 												onChange={(e) => handleFieldChange(index, 'school', e.target.value)}
 												className="input"
 												placeholder="University Name"
+												autoComplete="organization"
 											/>
 										</div>
 										<div>

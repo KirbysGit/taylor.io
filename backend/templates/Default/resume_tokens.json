@@ -1,0 +1,110 @@
+{
+  "_comment": "Single source of truth for PDF preview (preview.css via injected :root) and Word (DocxStyleConfig). Edit here first; optional docx_styles.json still overrides Word-only tweaks. Keys ending _in/_pt are converted for CSS; other strings (e.g. font stacks) pass through.",
+
+  "margin_top_in": 0.43,
+  "margin_bottom_in": 0.19,
+  "margin_left_in": 0.5,
+  "margin_right_in": 0.5,
+
+  "font_primary": "Georgia",
+  "font_secondary": "Times New Roman",
+  "font_name_display_stack": "\"Palatino Linotype\", Georgia, \"Times New Roman\", serif",
+
+  "name_font_size_pt": 32,
+  "name_space_after_pt": 0.0,
+  "name_letter_spacing_pt": 0.5,
+
+  "prose_line_height": 1.15,
+
+  "tagline_font_size_pt": 11.0,
+  "tagline_space_after_pt": 4.0,
+  "tagline_margin_top_pt": 2.0,
+  "tagline_line_height": 1.2,
+  "contact_space_before_after_tagline_pt": 0.0,
+
+  "contact_font_size_pt": 10.5,
+  "contact_line_height": 1.15,
+  "contact_space_before_pt": 3.0,
+  "contact_space_after_pt": 2.0,
+  "contact_span_letter_spacing_pt": -0.4,
+
+  "resume_header_margin_bottom_pt": 3.0,
+
+  "section_title_font_size_pt": 14,
+  "section_title_space_before_pt": 2.0,
+  "section_title_space_after_pt": 5.0,
+  "section_title_padding_top_pt": 3.0,
+  "section_title_padding_x_pt": 1.25,
+  "section_title_padding_bottom_pt": 0.0,
+  "section_title_letter_spacing_pt": 0.5,
+  "section_title_span_margin_bottom_pt": 0.75,
+  "divider_height_pt": 0.25,
+  "divider_margin_top_pt": 1.5,
+  "divider_margin_bottom_pt": 5.0,
+
+  "section_content_indent_pt": 10.0,
+  "entry_padding_pt": 2.5,
+  "entry_row_padding_left_pt": 1.25,
+  "entry_row_padding_right_pt": 2.5,
+
+  "school_name_font_size_pt": 12,
+  "school_gpa_font_size_pt": 9,
+  "school_meta_font_size_pt": 12,
+  "education_degree_line_font_size_pt": 11,
+  "school_name_line_space_after_pt": 0.0,
+  "school_line_space_after_pt": 1.5,
+  "school_line_margin_bottom_pt": 2.5,
+  "school_gpa_gap_pt": 4.0,
+  "degree_type_margin_bottom_pt": 2.5,
+  "school_location_margin_bottom_pt": 2.5,
+  "two_column_tab_in": 7.5,
+
+  "education_entry_margin_bottom_pt": 4.0,
+  "education_entry_last_margin_bottom_pt": 0.0,
+
+  "highlight_font_size_pt": 10,
+  "highlights_gap_pt": 3.0,
+  "highlight_title_margin_right_pt": 4.0,
+
+  "experience_title_font_size_pt": 11,
+  "experience_meta_font_size_pt": 11,
+  "experience_line_space_pt": 1.5,
+  "experience_line_space_before_pt": 0.5,
+  "experience_line_margin_bottom_pt": 2.5,
+  "experience_line_margin_top_pt": 1.0,
+  "company_line_space_after_pt": 2.5,
+  "company_line_margin_top_pt": 1.0,
+  "company_line_margin_bottom_pt": 2.5,
+  "company_separator_margin_x_pt": 4.0,
+
+  "description_font_size_pt": 10,
+  "description_space_after_pt": 1.5,
+  "description_bullet_indent_pt": 12.5,
+  "description_bullet_hang_pt": 12.0,
+  "description_bullet_item_space_pt": 0.5,
+  "description_paragraph_space_pt": 2.0,
+  "description_block_space_before_pt": 1.0,
+  "description_line_margin_bottom_pt": 1.5,
+  "description_bullet_li_padding_left_pt": 2.0,
+
+  "project_title_font_size_pt": 10.5,
+  "project_title_space_before_pt": 1.0,
+  "project_line_space_pt": 2.5,
+  "project_entry_margin_top_pt": 1.0,
+  "project_line_margin_bottom_pt": 2.5,
+  "project_separator_margin_x_pt": 2.0,
+
+  "skill_category_font_size_pt": 11,
+  "skill_names_font_size_pt": 11,
+  "skill_line_space_pt": 3.0,
+  "skill_line_padding_x_pt": 2.5,
+  "skill_line_height": 1.2,
+
+  "summary_font_size_pt": 10,
+  "summary_space_after_pt": 2.5,
+  "summary_text_padding_left_pt": 1.25,
+  "summary_first_line_indent_pt": 30,
+  "summary_section_margin_bottom_pt": 2.5,
+
+  "tagline_underline_offset_pt": 1.5
+}

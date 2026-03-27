@@ -21,9 +21,6 @@ import { generateResumePreview, generateResumePDF, generateResumeWord } from '@/
 import { getMyProfile, upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, updateSectionLabels, listSavedResumes, createSavedResume, getSavedResume, deleteSavedResume } from '@/api/services/profile'
 
 // component imports.
-import SaveBanner from './components/left/SaveBanner'
-
-
 // component imports.
 import LeftPanel from './components/left/LeftPanel'
 import RightPanel from './components/right/RightPanel'
@@ -35,8 +32,9 @@ import {
 	normalizeProjectForBackend,
 	normalizeSkillForBackend
 } from '@/pages/utils/DataFormatting'
-import { applyVisibilityFilters, hasResumeDataChanged, getResumeChangeDescriptions, downloadBlob } from './utils/resumeDataTransform'
+import { applyVisibilityFilters, hasResumeDataChanged, getResumeChangeDescriptions, downloadBlob, normalizeSectionOrder } from './utils/resumeDataTransform'
 import { initializeResumeDataFromBackend, initializeResumeDataWithOptions } from './utils/resumeDataInitializer'
+import { validateResumeData } from './utils/resumeValidation'
 
 /** Preview iframe scale: 50%–150%, step 25% (no % label in UI) */
 const PREVIEW_ZOOM = { min: 50, max: 150, step: 25, default: 100 }
@@ -132,7 +130,7 @@ function ResumePreview() {
 	const exactPdfRequestIdRef = useRef(0)
 	const exactPdfBlobUrlRef = useRef(null)
 	const [previewZoom, setPreviewZoom] = useState(PREVIEW_ZOOM.default)
-	const [validationErrors, setValidationErrors] = useState([]) // validation errors for required fields
+	const [validationIssues, setValidationIssues] = useState([])
 
 	const handleZoomIn = () => {
 		setPreviewZoom((prev) => Math.min(prev + PREVIEW_ZOOM.step, PREVIEW_ZOOM.max))
@@ -176,9 +174,8 @@ function ResumePreview() {
 
 	// section ordering state
 	const [sectionOrder, setSectionOrder] = useState(() => {
-		// Load from localStorage or use default
 		const savedOrder = localStorage.getItem('resumeSectionOrder')
-		return savedOrder ? JSON.parse(savedOrder) : ['header', 'summary', 'education', 'experience', 'projects', 'skills']
+		return normalizeSectionOrder(savedOrder ? JSON.parse(savedOrder) : null)
 	})
 
 	// section labels state - default labels
@@ -218,7 +215,7 @@ function ResumePreview() {
 			projects: true,
 			skills: true,
 		},
-		sectionOrder: sectionOrder, // Include section order for backend
+		sectionOrder: normalizeSectionOrder(sectionOrder), // summary locked under header
 	})
 
 
@@ -249,81 +246,16 @@ function ResumePreview() {
 		setLeftPanelWidth(constrainedDefault)
 	}
 
-	// Validate required fields (only for sections that are visible in the preview)
-	const validateResumeData = (data) => {
-		const errors = []
-		const sectionVisibility = data.sectionVisibility || {
-			summary: false,
-			education: true,
-			experience: true,
-			projects: true,
-			skills: true,
-		}
-
-		// Check name (always required - header is always shown)
-		const fullName = `${data.header?.first_name || ''} ${data.header?.last_name || ''}`.trim()
-		if (!fullName) {
-			errors.push("Your name is required")
-		}
-
-		// Check education entries only if education section is visible
-		if (sectionVisibility.education && data.education && data.education.length > 0) {
-			data.education.forEach((edu, index) => {
-				const entryNum = index + 1
-				if (!edu.school || !edu.school.trim()) {
-					errors.push(`Education ${entryNum}: School name is required`)
-				}
-				if (!edu.degree || !edu.degree.trim()) {
-					errors.push(`Education ${entryNum}: Degree is required`)
-				}
-				if (!edu.discipline || !edu.discipline.trim()) {
-					errors.push(`Education ${entryNum}: Discipline is required`)
-				}
-			})
-		}
-
-		// Check experience entries only if experience section is visible
-		if (sectionVisibility.experience && data.experience && data.experience.length > 0) {
-			data.experience.forEach((exp, index) => {
-				const entryNum = index + 1
-				if (!exp.title || !exp.title.trim()) {
-					errors.push(`Experience ${entryNum}: Title is required`)
-				}
-				if (!exp.company || !exp.company.trim()) {
-					errors.push(`Experience ${entryNum}: Company is required`)
-				}
-				if (!exp.description || !exp.description.trim()) {
-					errors.push(`Experience ${entryNum}: Description is required`)
-				}
-			})
-		}
-
-		// Check project entries only if projects section is visible
-		if (sectionVisibility.projects && data.projects && data.projects.length > 0) {
-			data.projects.forEach((proj, index) => {
-				const entryNum = index + 1
-				if (!proj.title || !proj.title.trim()) {
-					errors.push(`Project ${entryNum}: Title is required`)
-				}
-				if (!proj.description || !proj.description.trim()) {
-					errors.push(`Project ${entryNum}: Description is required`)
-				}
-			})
-		}
-
-		return errors
-	}
-
 	const handleRefreshPreview = async () => {
 		// Validate before generating preview
-		const errors = validateResumeData(resumeData)
-		if (errors.length > 0) {
-			setValidationErrors(errors)
+		const issues = validateResumeData(resumeData)
+		if (issues.length > 0) {
+			setValidationIssues(issues)
 			setPreviewHtml(null)
 			return
 		}
 
-		setValidationErrors([])
+		setValidationIssues([])
 		exactPdfRequestIdRef.current += 1
 		setIsGeneratingPreview(true)
 		setExactPdfRefreshing(true)
@@ -410,9 +342,11 @@ function ResumePreview() {
 					projects: true,
 					skills: true,
 				},
-				sectionOrder: resumeData.sectionOrder,
+				sectionOrder: normalizeSectionOrder(resumeData.sectionOrder),
 			}
 			setResumeData(resetData)
+			setSectionOrder(resetData.sectionOrder)
+			localStorage.setItem('resumeSectionOrder', JSON.stringify(resetData.sectionOrder))
 			setHeaderData(resetData.header)
 			setEducationData(resetData.education)
 			setExperienceData(resetData.experience)
@@ -456,13 +390,17 @@ function ResumePreview() {
 		})
 	}, [])
 
-	const handleShowSkill = useCallback((skillId) => {
+	const handleShowSkill = useCallback((skillId, opts) => {
 		setResumeData((prev) => {
 			const hidden = prev.hiddenSkills || []
 			const skill = hidden.find((s) => String(s.id ?? s) === String(skillId))
 			if (!skill) return prev
 			const newHidden = hidden.filter((s) => String(s.id ?? s) !== String(skillId))
-			const newSkills = [...(prev.skills || []), { ...skill, id: skill.id ?? skillId }]
+			const shown = { ...skill, id: skill.id ?? skillId }
+			if (opts && 'category' in opts) {
+				shown.category = opts.category ?? ''
+			}
+			const newSkills = [...(prev.skills || []), shown]
 			return { ...prev, skills: newSkills, hiddenSkills: newHidden }
 		})
 	}, [])
@@ -539,6 +477,7 @@ function ResumePreview() {
 			const res = await getSavedResume(id)
 			const data = res.data || res
 			const rd = data.resume_data || {}
+			const ord = normalizeSectionOrder(rd.sectionOrder)
 			const merged = {
 				header: rd.header,
 				education: rd.education ?? [],
@@ -548,7 +487,7 @@ function ResumePreview() {
 				hiddenSkills: rd.hiddenSkills ?? [],
 				summary: rd.summary ?? { summary: '' },
 				sectionVisibility: rd.sectionVisibility,
-				sectionOrder: rd.sectionOrder,
+				sectionOrder: ord,
 				skillsCategoryOrder: rd.skillsCategoryOrder,
 			}
 			setResumeData(prev => ({ ...prev, ...merged }))
@@ -567,7 +506,8 @@ function ResumePreview() {
 				hiddenSkills: merged.hiddenSkills,
 				summary: merged.summary,
 			})
-			if (merged.sectionOrder) setSectionOrder(merged.sectionOrder)
+			setSectionOrder(ord)
+			localStorage.setItem('resumeSectionOrder', JSON.stringify(ord))
 			if (data.template) setTemplate(data.template)
 			setSavedResumesOpen(false)
 			toast.success('Resume loaded')
@@ -589,11 +529,10 @@ function ResumePreview() {
 
 	// Handle section order change
 	const handleSectionOrderChange = (newOrder) => {
-		setSectionOrder(newOrder)
-		// Save to localStorage
-		localStorage.setItem('resumeSectionOrder', JSON.stringify(newOrder))
-		// Update resumeData with new order
-		setResumeData(prev => ({ ...prev, sectionOrder: newOrder }))
+		const normalized = normalizeSectionOrder(newOrder)
+		setSectionOrder(normalized)
+		localStorage.setItem('resumeSectionOrder', JSON.stringify(normalized))
+		setResumeData(prev => ({ ...prev, sectionOrder: normalized }))
 	}
 
 	// Handle visibility change for sections
@@ -623,8 +562,8 @@ function ResumePreview() {
 			// If preview exists, refresh it with new section labels
 			if (previewHtml) {
 				// Validate before generating preview
-				const errors = validateResumeData(resumeData)
-				if (errors.length === 0) {
+				const issues = validateResumeData(resumeData)
+				if (issues.length === 0) {
 					setIsGeneratingPreview(true)
 					try {
 						const previewData = {
@@ -794,7 +733,10 @@ function ResumePreview() {
 				setProjectsData(initialized.projectsData)
 				setSkillsData(initialized.skillsData)
 				setSummaryData(initialized.summaryData)
-				setResumeData(initialized.resumeData)
+				const ord = normalizeSectionOrder(initialized.resumeData.sectionOrder)
+				setResumeData({ ...initialized.resumeData, sectionOrder: ord })
+				setSectionOrder(ord)
+				localStorage.setItem('resumeSectionOrder', JSON.stringify(ord))
 
 				// Load section labels from user profile, merge with defaults
 				if (responseData.section_labels) {
@@ -837,6 +779,7 @@ function ResumePreview() {
 				const res = await getSavedResume(loadSavedId)
 				const data = res.data || res
 				const rd = data.resume_data || {}
+				const ord = normalizeSectionOrder(rd.sectionOrder)
 				const merged = {
 					header: rd.header,
 					education: rd.education ?? [],
@@ -846,7 +789,7 @@ function ResumePreview() {
 					hiddenSkills: rd.hiddenSkills ?? [],
 					summary: rd.summary ?? { summary: '' },
 					sectionVisibility: rd.sectionVisibility,
-					sectionOrder: rd.sectionOrder,
+					sectionOrder: ord,
 					skillsCategoryOrder: rd.skillsCategoryOrder,
 				}
 				setResumeData(prev => ({ ...prev, ...merged }))
@@ -865,7 +808,8 @@ function ResumePreview() {
 					hiddenSkills: merged.hiddenSkills,
 					summary: merged.summary,
 				})
-				if (merged.sectionOrder) setSectionOrder(merged.sectionOrder)
+				setSectionOrder(ord)
+				localStorage.setItem('resumeSectionOrder', JSON.stringify(ord))
 				if (data.template) setTemplate(data.template)
 				toast.success('Resume loaded')
 				// clear navigation state so we don't reload on re-render
@@ -892,8 +836,8 @@ function ResumePreview() {
 
 	// Debounced exact PDF preview (hybrid: draft HTML + true PDF pages).
 	useEffect(() => {
-		const errors = validateResumeData(resumeData)
-		if (errors.length > 0) {
+		const issues = validateResumeData(resumeData)
+		if (issues.length > 0) {
 			setExactPdfBlobUrl((prev) => {
 				if (prev) URL.revokeObjectURL(prev)
 				return null
@@ -973,9 +917,9 @@ function ResumePreview() {
 	// generate preview on data change (only when visible data changes).
 	useEffect(() => {
 		// Validate before generating preview
-		const errors = validateResumeData(resumeData)
-		if (errors.length > 0) {
-			setValidationErrors(errors)
+		const issues = validateResumeData(resumeData)
+		if (issues.length > 0) {
+			setValidationIssues(issues)
 			setPreviewHtml(null)
 			setIsGeneratingPreview(false)
 			setExactPdfBlobUrl((prev) => {
@@ -987,7 +931,7 @@ function ResumePreview() {
 			return
 		}
 
-		setValidationErrors([])
+		setValidationIssues([])
 
 		// compute the data that would actually be sent to the preview (visibility-filtered)
 		const previewData = {
@@ -1135,15 +1079,6 @@ function ResumePreview() {
 				</div>
 			</header>
 
-			{/* Save Banner - Fixed Top Right */}
-			<SaveBanner
-				showSaveBanner={showSaveBanner}
-				changeDescriptions={changeDescriptions}
-				isSaving={isSaving}
-				onDiscard={handleDiscardChanges}
-				onSave={handleSaveChanges}
-			/>
-
 			<main className="flex-1 flex overflow-hidden min-h-0">
 				<LeftPanel
 					width={leftPanelWidth}
@@ -1204,9 +1139,14 @@ function ResumePreview() {
 					onDownloadPDF={handleDownloadPDF}
 					onDownloadWord={handleDownloadWord}
 					onRefreshPreview={handleRefreshPreview}
-					validationErrors={validationErrors}
+					validationIssues={validationIssues}
 					exactPdfUrl={exactPdfBlobUrl}
 					exactPdfRefreshing={exactPdfRefreshing}
+					showSaveBanner={showSaveBanner}
+					saveChangedSections={changeDescriptions}
+					isSavingResume={isSaving}
+					onDiscardChanges={handleDiscardChanges}
+					onSaveChanges={handleSaveChanges}
 				/>
 			</main>
 		</div>

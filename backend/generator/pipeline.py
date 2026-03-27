@@ -12,6 +12,7 @@ from datetime import datetime
 from playwright.sync_api import sync_playwright
 
 from .docx_styles import DocxStyleConfig
+from .resume_tokens import build_resume_tokens_css, load_resume_token_dict
 
 # import builders.
 from .builders import (
@@ -68,7 +69,7 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
         summary_text = summary.get("summary", "") if isinstance(summary, dict) else ""
         summary_content = ""
         if summary_text and summary_text.strip():
-            summary_content = f'<div class="summary-section">&emsp; &ensp;{summary_text}</div>'
+            summary_content = f'<div class="summary-section">{summary_text}</div>'
         summary_title = section_labels.get("summary", default_labels["summary"])
         sections_map["summary"] = _build_section(summary_title, summary_content)
     else:
@@ -99,10 +100,16 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
     skills_title = section_labels.get("skills", default_labels["skills"])
     sections_map["skills"] = _build_section(skills_title, skill_entries_html)
     
-    # -- 3. build sections in specified order.
-    section_order = resume_data.get("sectionOrder", ["summary", "education", "experience", "projects", "skills"])
+    # -- 3. build sections in specified order (summary always first under fixed HTML header).
+    section_order = resume_data.get(
+        "sectionOrder",
+        ["header", "summary", "education", "experience", "projects", "skills"],
+    )
+    body_order = [k for k in section_order if k != "header"]
+    if "summary" in body_order:
+        body_order = ["summary"] + [k for k in body_order if k != "summary"]
     sections_html = []
-    for section_key in section_order:
+    for section_key in body_order:
         if section_key in sections_map and sections_map[section_key]:
             sections_html.append(sections_map[section_key])
     
@@ -121,13 +128,15 @@ def generate_resume(template_name: str, resume_data: Dict[str, Any]) -> str:
     with open(template_path, 'r', encoding='utf-8') as file:
         html_template = file.read()
 
-    # load preview.css.
+    # load preview.css and prepend :root tokens (resume_tokens.json — shared with Word).
     styles_path = TEMPLATES_DIR / template_name / "preview.css"
     with open(styles_path, 'r', encoding='utf-8') as file:
         styles = file.read()
+    token_dict = load_resume_token_dict(template_name)
+    token_css = build_resume_tokens_css(token_dict)
 
     # replace {{template_css}} placeholder with styles.
-    html_template = html_template.replace("{{template_css}}", styles)
+    html_template = html_template.replace("{{template_css}}", token_css + styles)
 
     # fill template based on placeholders.
     filled_html = fill_template(html_template, resume_data)

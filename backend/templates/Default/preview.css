@@ -1,3 +1,6 @@
+/* Spacing and type sizes: :root variables are injected before this file from resume_tokens.json
+   (backend/generator/resume_tokens.py + docx_styles.DocxStyleConfig). Edit the JSON to change both PDF and Word. */
+
 /* reset default spacing */
 * {
     margin: 0;
@@ -19,7 +22,7 @@
     min-height: 11in;
     background: white;
     transform-origin: top center;
-    padding: 0.43in 0.5in 0.19in 0.5in;
+    padding: var(--rt-margin-top-in) var(--rt-margin-right-in) var(--rt-margin-bottom-in) var(--rt-margin-left-in);
 }
 
 /* ===== header section ===== */
@@ -29,24 +32,24 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    margin-bottom: 3pt;
+    margin-bottom: var(--rt-resume-header-margin-bottom-pt);
     box-sizing: border-box;
 }
 
   
 .name {
-    font-family: "Palatino Linotype", Georgia, "Times New Roman", serif;
-    font-size: 32pt;
-    letter-spacing: 0.5pt;
+    font-family: var(--rt-font-name-display-stack);
+    font-size: var(--rt-name-font-size-pt);
+    letter-spacing: var(--rt-name-letter-spacing-pt);
     font-weight: bold;
 }
 
 .tagline {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 11pt;
-    line-height: 1.2;
-    margin-top: 2pt;
-    margin-bottom: 4pt;
+    font-size: var(--rt-tagline-font-size-pt);
+    line-height: var(--rt-tagline-line-height);
+    margin-top: var(--rt-tagline-margin-top-pt);
+    margin-bottom: var(--rt-tagline-space-after-pt);
     max-width: 100%;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -62,20 +65,20 @@
 
 .tagline u {
     text-decoration: underline;
-    text-underline-offset: 1.5pt;
+    text-underline-offset: var(--rt-tagline-underline-offset-pt);
 }
   
 .contact {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 10.5pt;
-    line-height: 1.15;
+    font-size: var(--rt-contact-font-size-pt);
+    line-height: var(--rt-contact-line-height);
     word-wrap: break-word;
     overflow-wrap: break-word;
     max-width: 100%;
 }
 
 .contact span {
-    letter-spacing: -0.4pt;
+    letter-spacing: var(--rt-contact-span-letter-spacing-pt);
     white-space: normal;
     word-break: break-word;
 }
@@ -86,86 +89,90 @@
 
 .section-title {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 14pt;
+    font-size: var(--rt-section-title-font-size-pt);
     font-weight: normal;
-    padding: 3pt 1.25pt 0pt 1.25pt;
-    letter-spacing: 0.5pt;
+    padding: var(--rt-section-title-padding-top-pt) var(--rt-section-title-padding-x-pt) var(--rt-section-title-padding-bottom-pt) var(--rt-section-title-padding-x-pt);
+    letter-spacing: var(--rt-section-title-letter-spacing-pt);
 }
 
 .section-title span {
-    margin-bottom: 0.75pt;
+    margin-bottom: var(--rt-section-title-span-margin-bottom-pt);
     display: block;
 }
 
 .divider {
     width: 100%;
-    height: 0.25pt;
+    height: var(--rt-divider-height-pt);
     background-color: #000;
     opacity: 0.75;
-    margin-bottom: 5pt;
-    margin-top: 1.5pt;
+    margin-bottom: var(--rt-divider-margin-bottom-pt);
+    margin-top: var(--rt-divider-margin-top-pt);
 }
 
 /* section content - indent entries from the left (not the header) */
 .section-content {
-    padding-left: 10pt;
+    padding-left: var(--rt-section-content-indent-pt);
 }
 
 /* ===== education section ===== */
 
-.education-entry, .experience-entry, .project-entry, .summary-section {
+.experience-entry, .project-entry, .summary-section {
     display: flex;
     flex-direction: column;
-    padding: 0 2.5pt;
+    padding: 0 var(--rt-entry-row-padding-right-pt) 0 var(--rt-entry-row-padding-left-pt);
+}
+
+.education-entry {
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--rt-entry-padding-pt);
+    margin-bottom: var(--rt-education-entry-margin-bottom-pt);
+}
+
+.education-entry:last-child {
+    margin-bottom: var(--rt-education-entry-last-margin-bottom-pt);
 }
 
 /* ----- school GPA dates pairing ----- */
 
-/* school, gpa, dates line */
 .school-line {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2.5pt;
+    margin-bottom: var(--rt-school-line-margin-bottom-pt);
     line-height: 1;
 }
 
-/* school, gpa pairing */
 .school-gpa-line {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: baseline;
-    gap: 4pt;
+    gap: var(--rt-school-gpa-gap-pt);
 }
 
-/* school name */
 .school-name {
     justify-self: flex-start;
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 12pt;
+    font-size: var(--rt-school-name-font-size-pt);
     font-weight: bold;
 }
 
-/* school gpa (Georgia to match Word / school name) */
 .school-gpa {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 9pt;
+    font-size: var(--rt-school-gpa-font-size-pt);
     font-weight: normal;
     font-style: italic;
 }
 
 .school-dates {
     font-family: "Times New Roman", serif;
-    font-size: 12pt;
+    font-size: var(--rt-school-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
 }
 
-/* ----- degree, discipline, minor, location pairing ----- */
-
-/* degree, location pairing */
 .degree-line {
     display: flex;
     flex-direction: row;
@@ -173,31 +180,27 @@
     align-items: center;
 }
 
-/* degree type */
 .degree-type {
     font-family: "Times New Roman", serif;
-    font-size: 12pt;
+    font-size: var(--rt-school-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
-    margin-bottom: 2.5pt;
+    margin-bottom: var(--rt-degree-type-margin-bottom-pt);
 }
 
-/* school location */
 .school-location {
     justify-self: flex-end;
     font-family: "Times New Roman", serif;
-    font-size: 12pt;
+    font-size: var(--rt-school-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
-    margin-bottom: 2.5pt;
+    margin-bottom: var(--rt-school-location-margin-bottom-pt);
 }
-
-/* ----- highlights for education section ----- */
 
 .highlights-lines {
     display: flex;
     flex-direction: column;
-    gap: 3pt;
+    gap: var(--rt-highlights-gap-pt);
 }
 
 .highlight-line {
@@ -208,54 +211,50 @@
 .highlight-title {
     display: flex;
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 10pt;
+    font-size: var(--rt-highlight-font-size-pt);
     font-weight: bold;
-    margin-right: 4pt;
+    margin-right: var(--rt-highlight-title-margin-right-pt);
 }
 
 .highlight-content {
     display: flex;
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 10pt;
+    font-size: var(--rt-highlight-font-size-pt);
     font-weight: normal;
 }
 
 /* ===== experience section ===== */
-
-/* ----- title & dates pairing ----- */
 
 .experience-line {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2.5pt;
+    margin-bottom: var(--rt-experience-line-margin-bottom-pt);
     line-height: 1;
-    margin-top: 1pt;
+    margin-top: var(--rt-experience-line-margin-top-pt);
 }
 
 .experience-title {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 11pt;
+    font-size: var(--rt-experience-title-font-size-pt);
     font-weight: bold;
 }
 
 .experience-dates {
     font-family: "Times New Roman", serif;
-    font-size: 11pt;
+    font-size: var(--rt-experience-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
 }
-
-/* ----- company, skills, location pairing ----- */
 
 .company-line {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-top: 1pt;
-    margin-bottom: 2.5pt;
+    margin-top: var(--rt-company-line-margin-top-pt);
+    margin-bottom: var(--rt-company-line-margin-bottom-pt);
     line-height: 1;
 }
 
@@ -268,79 +267,76 @@
 
 .company-name {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 11pt;
+    font-size: var(--rt-experience-meta-font-size-pt);
     font-weight: bold;
 }
 
 .company-separator {
-    margin: 0 4pt;
+    margin: 0 var(--rt-company-separator-margin-x-pt);
     font-family: "Times New Roman", serif;
-    font-size: 11pt;
+    font-size: var(--rt-experience-meta-font-size-pt);
     font-weight: normal;
 }
 
 .company-skills {
     font-family: "Times New Roman", serif;
-    font-size: 11pt;
+    font-size: var(--rt-experience-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
 }
 
 .company-location {
     font-family: "Times New Roman", serif;
-    font-size: 11pt;
+    font-size: var(--rt-experience-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
 }
 
-/* ----- description ----- */
-
 .description-line {
     display: flex;
     flex-direction: column;
-    margin-bottom: 1.5pt;
+    margin-bottom: var(--rt-description-line-margin-bottom-pt);
     text-align: justify;
 }
 
 .description-content {
     font-family: "Georgia", "Times New Roman", serif;
-    font-size: 10pt;
+    font-size: var(--rt-description-font-size-pt);
+    line-height: var(--rt-prose-line-height);
     font-weight: normal;
 }
 
 .description-bullets {
     margin: 0;
-    padding-left: 12.5pt;
+    padding-left: var(--rt-description-bullet-indent-pt);
     list-style-type: disc;
 }
 
 .description-bullets li {
     gap: 4pt;
-    margin-bottom: 0.5pt;
-    padding-left: 2pt;
+    margin-bottom: var(--rt-description-bullet-item-space-pt);
+    padding-left: var(--rt-description-bullet-li-padding-left-pt);
 }
 
 .description-paragraph {
     margin: 0;
-    margin-bottom: 2pt;
+    margin-bottom: var(--rt-description-paragraph-space-pt);
 }
 
-/* ----- projects ----- */
-
 .project-entry {
-    margin-top: 1pt;
+    margin-top: var(--rt-project-entry-margin-top-pt);
 }
 
 .project-line {
     display: flex;
     flex-direction: row;
-    margin-bottom: 2.5pt;
+    margin-bottom: var(--rt-project-line-margin-bottom-pt);
     line-height: 1;
 }
 
 .project-title {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 10.5pt;
+    font-size: var(--rt-project-title-font-size-pt);
     font-weight: bold;
 }
 
@@ -349,7 +345,7 @@
 }
 
 .project-separator {
-    margin: 0 2pt;
+    margin: 0 var(--rt-project-separator-margin-x-pt);
     font-weight: normal;
 }
 
@@ -365,38 +361,36 @@
     font-style: italic;
 }
 
-/* ----- skills ----- */
-
 .skill-line {
-    margin-bottom: 3pt;
-    line-height: 1.2;
-    margin: 0 2.5pt;
+    margin-top: 0;
+    margin-bottom: var(--rt-skill-line-space-pt);
+    margin-left: var(--rt-skill-line-padding-x-pt);
+    margin-right: var(--rt-skill-line-padding-x-pt);
+    line-height: var(--rt-skill-line-height);
 }
 
 .skill-category {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 11pt;
+    font-size: var(--rt-skill-category-font-size-pt);
     font-weight: bold;
 }
 
 .skill-names {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 11pt;
+    font-size: var(--rt-skill-names-font-size-pt);
     font-weight: normal;
 }
-
-/* ===== summary section ===== */
 
 .summary-section {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 10pt;
+    font-size: var(--rt-summary-font-size-pt);
+    line-height: var(--rt-prose-line-height);
     font-weight: normal;
-    margin-bottom: 2.5pt;
+    padding-left: var(--rt-summary-text-padding-left-pt);
+    text-indent: var(--rt-summary-first-line-indent-pt);
+    margin-bottom: var(--rt-summary-section-margin-bottom-pt);
     text-align: justify;
 }
-
-/* ----- screen: draft preview only (honest single column; no fake page breaks / gutters) -----
-   Exact pagination = “Exact preview” in app (rendered PDF pages). Margins here = .resume padding. */
 
 @media screen {
     html.body-wrapper {
@@ -416,8 +410,6 @@
         box-shadow: 0 1px 4px rgba(15, 23, 42, 0.07);
     }
 }
-
-/* ----- print / PDF: margins come from Chromium/Playwright; content fills page box ----- */
 
 @media print {
     html.body-wrapper,

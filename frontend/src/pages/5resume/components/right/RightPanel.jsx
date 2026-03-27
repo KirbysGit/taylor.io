@@ -5,14 +5,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-	faRefresh,
-	faDownload,
+	faRotate,
+	faFilePdf,
 	faFileWord,
 	faSpinner,
 	faCircleCheck,
 	faExclamationTriangle,
 } from '@fortawesome/free-solid-svg-icons'
+
+const iconSm = 'h-4 w-4 shrink-0'
 import ExactPdfPages from './ExactPdfPages'
+import PreviewUnsavedBar from './PreviewUnsavedBar'
+import ResumeValidationNotice from '../ResumeValidationNotice'
 
 function RightPanel({
 	previewHtml,
@@ -27,18 +31,23 @@ function RightPanel({
 	onDownloadPDF,
 	onDownloadWord,
 	onRefreshPreview,
-	validationErrors = [],
+	validationIssues = [],
 	exactPdfUrl = null,
 	exactPdfRefreshing = false,
+	showSaveBanner = false,
+	saveChangedSections = [],
+	isSavingResume = false,
+	onDiscardChanges = () => {},
+	onSaveChanges = () => {},
 }) {
-	const hasValidationErrors = validationErrors.length > 0
+	const hasValidationIssues = validationIssues.length > 0
 	const isDownloadBusy = downloadStatus?.phase === 'loading'
 	const downloadLabel =
 		downloadStatus?.type === 'word' ? 'Word document' : 'PDF'
 	const isDefaultZoom = previewZoom === 100
 	const showExact = Boolean(exactPdfUrl)
 	const showPreviewRefreshOverlay =
-		!hasValidationErrors &&
+		!hasValidationIssues &&
 		Boolean(previewHtml) &&
 		(exactPdfRefreshing || isGeneratingPreview)
 
@@ -68,14 +77,84 @@ function RightPanel({
 
 	return (
 		<section className="flex-1 bg-white overflow-hidden p-4 flex flex-col relative min-h-0">
-			{/* Control buttons */}
-			<div className={`flex items-center justify-between flex-shrink-0 mb-4 ${hasValidationErrors ? 'blur-sm' : ''}`}>
-				{/* Spacer for centering */}
-				<div className="flex-1"></div>
-				
-				{/* Zoom: − / default or reset / + (no % — range 50–150) */}
+			{/* Row 1: unsaved (~half width max) · export only */}
+			<div
+				className={`mb-2 flex flex-shrink-0 flex-wrap items-start justify-between gap-x-3 gap-y-2 ${hasValidationIssues ? 'blur-sm' : ''}`}
+			>
+				<div className="min-w-0 max-w-[50%] shrink">
+					<PreviewUnsavedBar
+						show={showSaveBanner}
+						changedSections={saveChangedSections}
+						isSaving={isSavingResume}
+						onDiscard={onDiscardChanges}
+						onSave={onSaveChanges}
+					/>
+				</div>
 				<div
-					className="flex items-center gap-2"
+					className="ml-auto flex shrink-0 items-center"
+					role="toolbar"
+					aria-label="Download and refresh preview"
+				>
+					<div className="inline-flex h-10 overflow-hidden rounded-xl border border-gray-200/95 bg-gradient-to-b from-white to-gray-50/95 shadow-sm ring-1 ring-gray-900/[0.04]">
+						<button
+							type="button"
+							onClick={onDownloadPDF}
+							disabled={isDownloadBusy}
+							className="inline-flex items-center gap-2 px-3.5 text-sm font-semibold text-brand-pink transition-colors duration-150 hover:bg-brand-pink/[0.08] active:bg-brand-pink/15 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-pink/40"
+							aria-label="Download PDF"
+						>
+							<FontAwesomeIcon icon={faFilePdf} className={iconSm} />
+							<span className="pr-0.5">PDF</span>
+						</button>
+						<span className="w-px shrink-0 self-stretch bg-gray-200" aria-hidden="true" />
+						<button
+							type="button"
+							onClick={onDownloadWord}
+							disabled={isDownloadBusy}
+							className="inline-flex items-center gap-2 px-3.5 text-sm font-semibold text-sky-900 transition-colors duration-150 hover:bg-sky-50 active:bg-sky-100/80 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-sky-400/50"
+							aria-label="Download Word document"
+						>
+							<FontAwesomeIcon icon={faFileWord} className={iconSm} />
+							<span className="pr-0.5">Word</span>
+						</button>
+						<span className="w-px shrink-0 self-stretch bg-gray-200" aria-hidden="true" />
+						<button
+							type="button"
+							onClick={onRefreshPreview}
+							className="inline-flex items-center gap-2 px-3 text-sm font-medium text-gray-600 transition-colors duration-150 hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200/70 focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gray-400/60"
+							aria-label="Refresh preview"
+							title="Refresh preview"
+						>
+							<FontAwesomeIcon
+								icon={faRotate}
+								className={`${iconSm} transition-transform duration-500 ease-out motion-safe:hover:rotate-90 motion-reduce:hover:rotate-0`}
+							/>
+							<span className="hidden pr-0.5 sm:inline">Refresh</span>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			{/* Row 2: draft/exact label (left) · zoom centered in full width */}
+			<div
+				className={`mb-3 grid flex-shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-x-2 px-1 ${hasValidationIssues ? 'blur-sm' : ''}`}
+				aria-live="polite"
+			>
+				<div className="min-w-0 justify-self-start">
+					{showExact ? (
+						<p className="text-xs font-medium text-gray-700">
+							<span className="text-green-700">Exact preview</span>
+							<span className="font-normal text-gray-500"> — matches PDF export.</span>
+						</p>
+					) : (
+						<p className="text-xs text-gray-600">
+							<span className="font-medium text-gray-800">Draft preview</span>
+							<span> — fast while you edit. Exact preview loads after you pause.</span>
+						</p>
+					)}
+				</div>
+				<div
+					className="flex items-center gap-2 justify-self-center"
 					role="group"
 					aria-label="Preview zoom"
 				>
@@ -83,7 +162,7 @@ function RightPanel({
 						type="button"
 						onClick={onZoomOut}
 						disabled={previewZoom <= zoomMin}
-						className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+						className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 bg-white font-semibold text-gray-700 transition-all hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
 						title="Zoom out"
 						aria-label="Zoom preview out"
 					>
@@ -110,61 +189,14 @@ function RightPanel({
 						type="button"
 						onClick={onZoomIn}
 						disabled={previewZoom >= zoomMax}
-						className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+						className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 bg-white font-semibold text-gray-700 transition-all hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
 						title="Zoom in"
 						aria-label="Zoom preview in"
 					>
 						+
 					</button>
 				</div>
-
-				{/* Action Buttons */}
-				<div className="flex items-center gap-2 flex-1 justify-end">
-					<button
-						type="button"
-						className="px-3 py-1.5 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-						onClick={onDownloadPDF}
-						disabled={isDownloadBusy}
-					>
-						<FontAwesomeIcon icon={faDownload} />
-						<span className="text-sm">PDF</span>
-					</button>
-					<button
-						type="button"
-						className="px-3 py-1.5 bg-[#2b579a] text-white font-semibold rounded-lg hover:opacity-90 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-						onClick={onDownloadWord}
-						disabled={isDownloadBusy}
-					>
-						<FontAwesomeIcon icon={faFileWord} />
-						<span className="text-sm">Word</span>
-					</button>
-					<button
-						type="button"
-						className="px-3 py-1.5 bg-gray-600 text-white font-semibold rounded-lg hover:opacity-90 transition-all flex items-center gap-2"
-						onClick={onRefreshPreview}
-					>
-						<FontAwesomeIcon icon={faRefresh} />
-						<span className="text-sm">Refresh</span>
-					</button>
-				</div>
-			</div>
-
-			{/* Draft vs exact preview label */}
-			<div
-				className={`flex-shrink-0 mb-2 px-1 ${hasValidationErrors ? 'blur-sm' : ''}`}
-				aria-live="polite"
-			>
-				{showExact ? (
-					<p className="text-xs font-medium text-gray-700">
-						<span className="text-green-700">Exact preview</span>
-						<span className="text-gray-500 font-normal"> — matches PDF export.</span>
-					</p>
-				) : (
-					<p className="text-xs text-gray-600">
-						<span className="font-medium text-gray-800">Draft preview</span>
-						<span> — fast while you edit. Exact preview loads after you pause.</span>
-					</p>
-				)}
+				<div className="min-w-0" aria-hidden="true" />
 			</div>
 
 			{/* Download progress / success (over preview) */}
@@ -226,7 +258,7 @@ function RightPanel({
 
 			{/* Preview Container - A4 Ratio with Transform Scale */}
 			<div 
-				className={`flex-1 rounded-lg border-2 border-gray-300 bg-white min-h-0 preview-scrollbar ${hasValidationErrors ? 'blur-sm' : ''}`}
+				className={`flex-1 rounded-lg border-2 border-gray-300 bg-white min-h-0 preview-scrollbar ${hasValidationIssues ? 'blur-sm' : ''}`}
 				style={{
 					// Scroll container - constrained by flex-1, will overflow when content is larger
 					// A4: 8.5" × 11" = 816px × 1056px at 96 DPI
@@ -346,25 +378,17 @@ function RightPanel({
 				</div>
 			</div>
 
-			{/* Validation Error Overlay */}
-			{hasValidationErrors && (
-				<div className="absolute inset-0 flex items-center justify-center z-20 bg-white/60 backdrop-blur-md">
-					<div className="bg-white rounded-lg shadow-2xl border-2 border-brand-pink-light p-6 max-w-md mx-4">
-						<div className="text-center mb-4">
-							<h2 className="text-xl font-semibold text-gray-900 mb-2">
-								Almost there! 🎯
-							</h2>
-							<p className="text-sm text-gray-600 mb-4">
-								Please fill in the following required fields to see your resume preview:
-							</p>
-						</div>
-						<div className="space-y-2 max-h-64 overflow-y-auto">
-							{validationErrors.map((error, index) => (
-								<div key={index} className="flex items-start gap-2 text-sm text-gray-700">
-									<span className="text-brand-pink mt-0.5">•</span>
-									<span>{error}</span>
-								</div>
-							))}
+			{/* Validation overlay — friendly copy via ResumeValidationNotice */}
+			{hasValidationIssues && (
+				<div className="absolute inset-0 z-20 flex items-center justify-center bg-white/65 backdrop-blur-md px-4">
+					<div
+						className="w-full max-w-lg rounded-2xl border border-gray-200/90 bg-white p-6 shadow-2xl ring-1 ring-gray-900/[0.06]"
+						role="alertdialog"
+						aria-labelledby="resume-validation-title"
+						aria-describedby="resume-validation-desc"
+					>
+						<div id="resume-validation-desc">
+							<ResumeValidationNotice issues={validationIssues} />
 						</div>
 					</div>
 				</div>

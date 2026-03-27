@@ -17,7 +17,7 @@ function AnimatedExpand({ expanded, children }) {
 
 // Projects Input Component - Just the form fields and logic, no headers
 const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate, onReorder }) => {
-	const getEntryId = (entry, index) => entry?.id ?? index
+	const getEntryId = (entry, index) => String(entry?.id ?? index)
 	const [expandedIds, setExpandedIds] = useState(() => new Set()) // collapsed by default
 	const [localEntries, setLocalEntries] = useState(projects)
 	const [descriptionModes, setDescriptionModes] = useState({})
@@ -27,6 +27,42 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate, onReorder }) => {
 	const prevLengthRef = useRef(projects.length)
 	const prevIdsRef = useRef(projects.map(p => p.id || p).join(','))
 	const lastDragEndRef = useRef(0)
+	const pendingTitleFocusEntryIdRef = useRef(null)
+	const addFromButtonRef = useRef(false)
+
+	// After "+ Add Project": scroll card + focus project title when expanded
+	useEffect(() => {
+		const targetId = pendingTitleFocusEntryIdRef.current
+		if (targetId == null) return
+		const isOpen = [...expandedIds].some((id) => String(id) === targetId)
+		if (!isOpen) return
+
+		let cancelled = false
+		const t = window.setTimeout(() => {
+			if (cancelled) return
+			let card = document.getElementById(`project-card-${targetId}`)
+			let input = document.getElementById(`project-title-${targetId}`)
+			if ((!card || !input) && localEntries.length > 0) {
+				const lastIdx = localEntries.length - 1
+				const fallbackId = getEntryId(localEntries[lastIdx], lastIdx)
+				card = card || document.getElementById(`project-card-${fallbackId}`)
+				input = input || document.getElementById(`project-title-${fallbackId}`)
+			}
+			if (card) {
+				card.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+			}
+			if (input) {
+				input.focus()
+				input.select()
+			}
+			pendingTitleFocusEntryIdRef.current = null
+		}, 200)
+
+		return () => {
+			cancelled = true
+			window.clearTimeout(t)
+		}
+	}, [localEntries, expandedIds])
 
 	// sync with prop changes only when structure changes (add/remove), not field updates
 	useEffect(() => {
@@ -53,8 +89,17 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate, onReorder }) => {
 					return newSet
 				})
 			} else if (currentLength > prevLengthRef.current) {
-				// data loaded - keep all collapsed
-				setExpandedIds(new Set())
+				const delta = currentLength - prevLengthRef.current
+				if (delta > 1) {
+					addFromButtonRef.current = false
+					setExpandedIds(new Set())
+				} else if (delta === 1 && prevLengthRef.current === 0 && addFromButtonRef.current) {
+					addFromButtonRef.current = false
+					const newEntry = projects[currentLength - 1]
+					setExpandedIds(new Set([getEntryId(newEntry, currentLength - 1)]))
+				} else if (delta === 1 && prevLengthRef.current === 0) {
+					setExpandedIds(new Set())
+				}
 			} else {
 				const currentIdsSet = new Set(projects.map((e, i) => getEntryId(e, i)))
 				setExpandedIds(prev => new Set([...prev].filter(id => currentIdsSet.has(id))))
@@ -145,8 +190,15 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate, onReorder }) => {
 
 	const handleAddNew = () => {
 		const newEntry = { id: Date.now(), title: '', description: '', techStack: [], url: '' }
+		const idKey = getEntryId(newEntry, 0)
+		addFromButtonRef.current = true
+		pendingTitleFocusEntryIdRef.current = idKey
+		setLocalEntries((prev) => {
+			if (projects.length === 0) return [newEntry]
+			return [...prev, newEntry]
+		})
+		setExpandedIds((prev) => new Set([...prev, idKey]))
 		onAdd(newEntry)
-		setExpandedIds(prev => new Set([...prev, newEntry.id]))
 	}
 
 	const handleReorder = (fromIndex, toIndex) => {
@@ -200,6 +252,7 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate, onReorder }) => {
 							return (
 								<div
 									key={proj.id || index}
+									id={`project-card-${getEntryId(proj, index)}`}
 									onDragOver={isDraggable ? (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverEntryIndex(index) } : undefined}
 									onDragLeave={isDraggable ? () => setDragOverEntryIndex(null) : undefined}
 									onDrop={isDraggable ? (e) => { e.preventDefault(); if (draggedEntryIndex != null) { handleReorder(draggedEntryIndex, index); setDraggedEntryIndex(null); setDragOverEntryIndex(null) } } : undefined}
@@ -265,6 +318,7 @@ const ProjectsInput = ({ projects, onAdd, onRemove, onUpdate, onReorder }) => {
 												<label className="label">Project Title</label>
 												<input
 													type="text"
+													id={`project-title-${getEntryId(proj, index)}`}
 													value={proj.title || ''}
 													onChange={(e) => handleFieldChange(index, 'title', e.target.value)}
 													className="input"

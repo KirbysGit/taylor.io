@@ -148,7 +148,13 @@ function SimpleResumeSections({
 	const [draggedSection, setDraggedSection] = useState(null)
 	const [dragOverIndex, setDragOverIndex] = useState(null)
 
-	const draggableOrder = sectionOrder.filter((k) => k !== 'header')
+	// Header + Professional Summary are fixed at top; only reorder the rest
+	const draggableOrder = sectionOrder.filter((k) => k !== 'header' && k !== 'summary')
+	const displayOrder = [
+		'header',
+		...(summaryData != null ? ['summary'] : []),
+		...draggableOrder,
+	]
 
 	const handleDragStart = (e, sectionKey) => {
 		setDraggedSection(sectionKey)
@@ -173,7 +179,7 @@ function SimpleResumeSections({
 		const newDraggable = [...draggableOrder]
 		const [removed] = newDraggable.splice(draggedIndex, 1)
 		newDraggable.splice(dropIndex, 0, removed)
-		onSectionOrderChange?.(['header', ...newDraggable])
+		onSectionOrderChange?.(['header', 'summary', ...newDraggable])
 		setDraggedSection(null)
 		setDragOverIndex(null)
 	}
@@ -226,15 +232,8 @@ function SimpleResumeSections({
 							onVisibilityChange={(v) => onVisibilityChange('summary', v)}
 							expanded={ex}
 							onToggleExpand={() => toggle('summary')}
-							isLocked={false}
-							isDraggable
-							isDragging={draggedSection === 'summary'}
-							isDragOver={dragOverIndex === 0}
-							onDragStart={(e) => handleDragStart(e, 'summary')}
-							onDragOver={(e) => handleDragOver(e, 0)}
-							onDragLeave={handleDragLeave}
-							onDrop={(e) => handleDrop(e, 0)}
-							onDragEnd={handleDragEnd}
+							isLocked
+							isDraggable={false}
 						/>
 						<AnimatedExpand expanded={ex}>
 							<ExpandedChromeSimple>
@@ -279,7 +278,6 @@ function SimpleResumeSections({
 						<AnimatedExpand expanded={ex}>
 							<ExpandedChromeSimple>
 								<Education
-									key={`education-${(educationData?.length ?? 0)}-${(educationData?.map(e => String(e.id ?? '')).join('-') ?? '')}`}
 									bare
 									educationData={educationData}
 									onEducationChange={onEducationChange}
@@ -348,7 +346,7 @@ function SimpleResumeSections({
 							expanded={ex}
 							onToggleExpand={() => toggle('projects')}
 							isLocked={false}
-							isDraggable={vis.projects ?? true}
+							isDraggable
 							isDragging={draggedSection === 'projects'}
 							isDragOver={dragOverIndex === draggableOrder.indexOf('projects')}
 							onDragStart={(e) => handleDragStart(e, 'projects')}
@@ -425,7 +423,7 @@ function SimpleResumeSections({
 
 	return (
 		<div className="space-y-4">
-			{sectionOrder.map(renderSection)}
+			{displayOrder.map(renderSection)}
 		</div>
 	)
 }

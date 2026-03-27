@@ -25,6 +25,16 @@ def _set_run_character_spacing(run, spacing_pt: float) -> None:
     r_pr.append(spacing)
 
 
+def _set_line_spacing_multiple(p, mult: float) -> None:
+    """Align Word line leading with CSS line-height. Avoids Normal/defaults (often looser)."""
+    m = float(mult)
+    if m <= 0:
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        return
+    p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.MULTIPLE
+    p.paragraph_format.line_spacing = m
+
+
 def _add_two_column_line(
     doc: Document,
     style: DocxStyleConfig,
@@ -133,7 +143,7 @@ def _add_header(document: Document, resume_data: Dict[str, Any], style: DocxStyl
         run.bold = True
         run.font.size = Pt(style.name_font_size_pt)
         run.font.name = style.font_primary
-        _set_run_character_spacing(run, style.name_character_spacing_pt or 0)
+        _set_run_character_spacing(run, style.name_letter_spacing_pt or 0)
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.paragraph_format.space_after = Pt(style.name_space_after_pt)
         p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
@@ -154,7 +164,7 @@ def _add_header(document: Document, resume_data: Dict[str, Any], style: DocxStyl
                 run.font.underline = WD_UNDERLINE.SINGLE if t_underline else WD_UNDERLINE.NONE
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             p.paragraph_format.space_after = Pt(style.tagline_space_after_pt)
-            p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+            _set_line_spacing_multiple(p, style.tagline_line_height)
 
     # Contact line
     contact_order = header.get("contactOrder", ["email", "phone", "location", "linkedin", "github", "portfolio"])
@@ -185,7 +195,6 @@ def _add_header(document: Document, resume_data: Dict[str, Any], style: DocxStyl
         run.font.size = Pt(style.contact_font_size_pt)
         run.font.name = style.font_primary  # Georgia (contact line), not Times New Roman
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
         space_before = (
             style.contact_space_before_after_tagline_pt
             if has_tagline
@@ -193,6 +202,7 @@ def _add_header(document: Document, resume_data: Dict[str, Any], style: DocxStyl
         )
         p.paragraph_format.space_before = Pt(space_before)
         p.paragraph_format.space_after = Pt(style.contact_space_after_pt)
+        _set_line_spacing_multiple(p, style.contact_line_height)
 
 
 def _add_section_title(document: Document, title: str, style: DocxStyleConfig) -> None:
@@ -213,11 +223,14 @@ def _add_para(
     style: DocxStyleConfig,
     *,
     font_size_pt: Optional[float] = None,
+    font_name: Optional[str] = None,
     bold: bool = False,
     italic: bool = False,
     indent_pt: float = 0,
+    first_line_indent_pt: float = 0,
     space_before_pt: float = 0,
     space_after_pt: float = 0,
+    alignment: Optional[WD_ALIGN_PARAGRAPH] = None,
 ) -> None:
     """Add a styled paragraph."""
     if not text or not str(text).strip():
@@ -225,15 +238,21 @@ def _add_para(
     p = document.add_paragraph()
     run = p.add_run(str(text).strip())
     run.font.size = Pt(font_size_pt or style.description_font_size_pt)
-    run.font.name = style.font_primary if bold else style.font_secondary
+    if font_name:
+        run.font.name = font_name
+    else:
+        run.font.name = style.font_primary if bold else style.font_secondary
     run.bold = bold
     run.italic = italic
     if indent_pt:
         p.paragraph_format.left_indent = Pt(indent_pt)
-    if space_before_pt:
-        p.paragraph_format.space_before = Pt(space_before_pt)
-    if space_after_pt:
-        p.paragraph_format.space_after = Pt(space_after_pt)
+    if first_line_indent_pt:
+        p.paragraph_format.first_line_indent = Pt(first_line_indent_pt)
+    p.paragraph_format.space_before = Pt(space_before_pt)
+    p.paragraph_format.space_after = Pt(space_after_pt)
+    _set_line_spacing_multiple(p, style.prose_line_height)
+    if alignment is not None:
+        p.alignment = alignment
 
 
 def _parse_description_items(description: str) -> List[Tuple[str, str]]:
@@ -284,6 +303,8 @@ def _add_description_block(
         if first:
             p.paragraph_format.space_before = Pt(style.description_block_space_before_pt)
             first = False
+        else:
+            p.paragraph_format.space_before = Pt(0)
         if item_type == "bullet":
             # Tab stop at hang_pt (from first-line edge) aligns text; wrapped lines align with left_indent
             p.paragraph_format.left_indent = Pt(bullet_indent)
@@ -298,6 +319,7 @@ def _add_description_block(
             p.paragraph_format.left_indent = Pt(indent_pt)
             p.paragraph_format.space_after = Pt(style.description_paragraph_space_pt)
             run = p.add_run(str(content).strip())
+        _set_line_spacing_multiple(p, style.prose_line_height)
         run.font.size = Pt(style.description_font_size_pt)
         run.font.name = style.font_primary  # Georgia for bullets & description (Word)
 
@@ -319,6 +341,8 @@ def _normalize_docx_section_order(order: Any) -> List[str]:
         if key in _DOCX_SECTION_KEYS and key not in seen:
             out.append(key)
             seen.add(key)
+    if "summary" in out:
+        out = ["summary"] + [k for k in out if k != "summary"]
     return out if out else list(DEFAULT_DOCX_SECTION_ORDER)
 
 
@@ -337,11 +361,15 @@ def _render_docx_summary_section(
     if not text:
         return
     _add_section_title(doc, section_labels.get("summary", defaults["summary"]), style)
+    summary_indent = indent + style.summary_text_padding_left_pt
     _add_para(
         doc, text, style,
         font_size_pt=style.summary_font_size_pt,
-        indent_pt=indent,
+        font_name=style.font_primary,
+        indent_pt=summary_indent,
+        first_line_indent_pt=style.summary_first_line_indent_pt,
         space_after_pt=style.summary_space_after_pt,
+        alignment=WD_ALIGN_PARAGRAPH.JUSTIFY,
     )
 
 
@@ -399,7 +427,9 @@ def _render_docx_education_section(
             if sub_content and str(sub_content).strip():
                 p = doc.add_paragraph()
                 p.paragraph_format.left_indent = Pt(indent)
+                p.paragraph_format.space_before = Pt(0)
                 p.paragraph_format.space_after = Pt(3)
+                _set_line_spacing_multiple(p, style.prose_line_height)
                 if sub_title:
                     r1 = p.add_run(f"{sub_title}: ")
                     r1.bold = True
@@ -448,7 +478,7 @@ def _render_docx_experience_section(
             left_runs,
             (loc, style.experience_meta_font_size_pt, False, True) if loc else None,
             indent_pt=indent,
-            space_after_pt=style.experience_line_space_pt,
+            space_after_pt=style.company_line_space_after_pt,
             line_spacing_single=True,
         )
         desc = exp.get("description", "")
@@ -478,7 +508,7 @@ def _render_docx_projects_section(
         p.paragraph_format.left_indent = Pt(indent)
         p.paragraph_format.space_before = Pt(style.project_title_space_before_pt)
         p.paragraph_format.space_after = Pt(style.project_line_space_pt)
-        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        _set_line_spacing_multiple(p, 1.0)
         r1 = p.add_run(title)
         r1.bold = True
         r1.font.size = Pt(style.project_title_font_size_pt)
@@ -537,7 +567,7 @@ def _render_docx_skills_section(
         p = doc.add_paragraph()
         p.paragraph_format.left_indent = Pt(indent)
         p.paragraph_format.space_after = Pt(style.skill_line_space_pt)
-        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        _set_line_spacing_multiple(p, style.skill_line_height)
         r1 = p.add_run(f"{cat}: ")
         r1.bold = True
         r1.font.size = Pt(style.skill_category_font_size_pt)
@@ -549,7 +579,7 @@ def _render_docx_skills_section(
         p = doc.add_paragraph()
         p.paragraph_format.left_indent = Pt(indent)
         p.paragraph_format.space_after = Pt(style.skill_line_space_pt)
-        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        _set_line_spacing_multiple(p, style.skill_line_height)
         r = p.add_run(", ".join(uncategorized))
         r.font.size = Pt(style.skill_names_font_size_pt)
         r.font.name = style.font_primary
