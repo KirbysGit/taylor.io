@@ -45,7 +45,7 @@
 }
 
 .tagline {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-tagline-font-size-pt);
     line-height: var(--rt-tagline-line-height);
     margin-top: var(--rt-tagline-margin-top-pt);
@@ -69,7 +69,7 @@
 }
   
 .contact {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-contact-font-size-pt);
     line-height: var(--rt-contact-line-height);
     word-wrap: break-word;
@@ -88,7 +88,7 @@
 /* ----- section header ----- */
 
 .section-title {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-section-title-font-size-pt);
     font-weight: normal;
     padding: var(--rt-section-title-padding-top-pt) var(--rt-section-title-padding-x-pt) var(--rt-section-title-padding-bottom-pt) var(--rt-section-title-padding-x-pt);
@@ -154,20 +154,20 @@
 
 .school-name {
     justify-self: flex-start;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-school-name-font-size-pt);
     font-weight: bold;
 }
 
 .school-gpa {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-school-gpa-font-size-pt);
     font-weight: normal;
     font-style: italic;
 }
 
 .school-dates {
-    font-family: "Times New Roman", serif;
+    font-family: var(--rt-font-stack-secondary);
     font-size: var(--rt-school-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
@@ -181,7 +181,7 @@
 }
 
 .degree-type {
-    font-family: "Times New Roman", serif;
+    font-family: var(--rt-font-stack-secondary);
     font-size: var(--rt-school-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
@@ -190,7 +190,7 @@
 
 .school-location {
     justify-self: flex-end;
-    font-family: "Times New Roman", serif;
+    font-family: var(--rt-font-stack-secondary);
     font-size: var(--rt-school-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
@@ -210,7 +210,7 @@
 
 .highlight-title {
     display: flex;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-highlight-font-size-pt);
     font-weight: bold;
     margin-right: var(--rt-highlight-title-margin-right-pt);
@@ -218,7 +218,7 @@
 
 .highlight-content {
     display: flex;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-highlight-font-size-pt);
     font-weight: normal;
 }
@@ -236,13 +236,13 @@
 }
 
 .experience-title {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-experience-title-font-size-pt);
     font-weight: bold;
 }
 
 .experience-dates {
-    font-family: "Times New Roman", serif;
+    font-family: var(--rt-font-stack-secondary);
     font-size: var(--rt-experience-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
@@ -266,27 +266,27 @@
 }
 
 .company-name {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-experience-meta-font-size-pt);
     font-weight: bold;
 }
 
 .company-separator {
     margin: 0 var(--rt-company-separator-margin-x-pt);
-    font-family: "Times New Roman", serif;
+    font-family: var(--rt-font-stack-secondary);
     font-size: var(--rt-experience-meta-font-size-pt);
     font-weight: normal;
 }
 
 .company-skills {
-    font-family: "Times New Roman", serif;
+    font-family: var(--rt-font-stack-secondary);
     font-size: var(--rt-experience-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
 }
 
 .company-location {
-    font-family: "Times New Roman", serif;
+    font-family: var(--rt-font-stack-secondary);
     font-size: var(--rt-experience-meta-font-size-pt);
     font-weight: normal;
     font-style: italic;
@@ -300,7 +300,7 @@
 }
 
 .description-content {
-    font-family: "Georgia", "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-description-font-size-pt);
     line-height: var(--rt-prose-line-height);
     font-weight: normal;
@@ -335,7 +335,7 @@
 }
 
 .project-title {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-project-title-font-size-pt);
     font-weight: bold;
 }
@@ -350,13 +350,13 @@
 }
 
 .project-tech {
-    font-family: "Times New Roman", serif;
+    font-family: var(--rt-font-stack-secondary);
     font-weight: normal;
     font-style: italic;
 }
 
 .project-url {
-    font-family: "Times New Roman", serif;
+    font-family: var(--rt-font-stack-secondary);
     font-weight: normal;
     font-style: italic;
 }
@@ -370,19 +370,19 @@
 }
 
 .skill-category {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-skill-category-font-size-pt);
     font-weight: bold;
 }
 
 .skill-names {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-skill-names-font-size-pt);
     font-weight: normal;
 }
 
 .summary-section {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-summary-font-size-pt);
     line-height: var(--rt-prose-line-height);
     font-weight: normal;

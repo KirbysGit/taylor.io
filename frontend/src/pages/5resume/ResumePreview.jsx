@@ -43,6 +43,22 @@ const PREVIEW_ZOOM = { min: 50, max: 150, step: 25, default: 100 }
 const DRAFT_PREVIEW_DEBOUNCE_MS = 450
 const EXACT_PDF_DEBOUNCE_MS = 1000
 
+/** Aligns with backend `template_slug.normalize_template_slug` (legacy `default` → `classic`). */
+function normalizeTemplateSlug(name) {
+	if (name == null || name === '') return 'classic'
+	const s = String(name).trim()
+	if (s.toLowerCase() === 'default') return 'classic'
+	return s
+}
+
+/** Defaults for `style` sent with preview/PDF/Word; backend applies presets for `classic` only. */
+const DEFAULT_STYLE_PREFERENCES = {
+	marginPreset: 'balanced',
+	lineSpacingPreset: 'standard',
+	typeScalePreset: 'standard',
+	fontPairing: 'serif_classic',
+}
+
 // ----------- main component -----------
 function ResumePreview() {
 
@@ -62,9 +78,11 @@ function ResumePreview() {
 	})
 
 	// template states.
-	const [template, setTemplate] = useState('default')                            // template being used for resume.
-	const [availableTemplates, setAvailableTemplates] = useState(['default'])      // available templates to choose from.
+	const [template, setTemplate] = useState('classic')
+	const [availableTemplates, setAvailableTemplates] = useState(['classic'])
+	const [templateStyling, setTemplateStyling] = useState({})
 	const [isLoadingTemplates, setIsLoadingTemplates] = useState(true)          // loading state for templates.
+	const [stylePreferences, setStylePreferences] = useState(() => ({ ...DEFAULT_STYLE_PREFERENCES }))
 	
 	// panel states.
 	const DEFAULT_LEFT_PANEL_WIDTH = 700; // default width for left panel
@@ -264,10 +282,10 @@ function ResumePreview() {
 				...applyVisibilityFilters(resumeData),
 				sectionLabels: sectionLabels,
 			}
-			const inputKey = JSON.stringify({ template, previewData })
+			const inputKey = JSON.stringify({ template, previewData, stylePreferences })
 			const [htmlContent, pdfBlob] = await Promise.all([
-				generateResumePreview(template, previewData),
-				generateResumePDF(template, previewData),
+				generateResumePreview(template, previewData, stylePreferences),
+				generateResumePDF(template, previewData, stylePreferences),
 			])
 			setPreviewHtml(htmlContent)
 			lastPreviewInputRef.current = inputKey
@@ -292,7 +310,7 @@ function ResumePreview() {
 				...applyVisibilityFilters(resumeData),
 				sectionLabels: sectionLabels
 			}
-			const pdfBlob = await generateResumePDF(template, pdfData)
+			const pdfBlob = await generateResumePDF(template, pdfData, stylePreferences)
 			downloadBlob(pdfBlob, 'resume.pdf')
 			setDownloadStatus({ type: 'pdf', phase: 'success' })
 			window.setTimeout(() => setDownloadStatus(null), 2200)
@@ -311,7 +329,7 @@ function ResumePreview() {
 				...applyVisibilityFilters(resumeData),
 				sectionLabels: sectionLabels
 			}
-			const docBlob = await generateResumeWord(template, docData)
+			const docBlob = await generateResumeWord(template, docData, stylePreferences)
 			downloadBlob(docBlob, 'resume.docx')
 			setDownloadStatus({ type: 'word', phase: 'success' })
 			window.setTimeout(() => setDownloadStatus(null), 2200)
@@ -508,7 +526,7 @@ function ResumePreview() {
 			})
 			setSectionOrder(ord)
 			localStorage.setItem('resumeSectionOrder', JSON.stringify(ord))
-			if (data.template) setTemplate(data.template)
+			if (data.template) setTemplate(normalizeTemplateSlug(data.template))
 			setSavedResumesOpen(false)
 			toast.success('Resume loaded')
 		} catch {
@@ -570,7 +588,7 @@ function ResumePreview() {
 							...applyVisibilityFilters(resumeData),
 							sectionLabels: updatedLabels
 						}
-						const htmlContent = await generateResumePreview(template, previewData)
+						const htmlContent = await generateResumePreview(template, previewData, stylePreferences)
 						setPreviewHtml(htmlContent)
 					} catch (error) {
 						console.error('Failed to refresh preview:', error)
@@ -587,7 +605,7 @@ function ResumePreview() {
 				[sectionKey]: previousLabel
 			}))
 		}
-	}, [sectionLabels, previewHtml, resumeData, template])
+	}, [sectionLabels, previewHtml, resumeData, template, stylePreferences])
 
 	// Handle welcome message dismissal
 	const handleDismissWelcome = () => {
@@ -758,11 +776,31 @@ function ResumePreview() {
 			const response = await listTemplates()
 			const responseData = response.data
 			setAvailableTemplates(responseData.templates)
+			setTemplateStyling(responseData.templateStyling || {})
 			setIsLoadingTemplates(false)
 		}
 
 		fetchTemplates()
 	}, [])
+
+	// Apply template chosen from /templates gallery (consume state once).
+	useEffect(() => {
+		const pick = location.state?.selectTemplate
+		if (pick == null || pick === '' || isLoadingTemplates || availableTemplates.length === 0) return
+		const slug = normalizeTemplateSlug(pick)
+		if (availableTemplates.includes(slug)) {
+			setTemplate(slug)
+		}
+		const next = { ...(location.state || {}) }
+		delete next.selectTemplate
+		const hasState = Object.keys(next).length > 0
+		navigate('/resume/preview', { replace: true, state: hasState ? next : undefined })
+	}, [
+		location.state?.selectTemplate,
+		isLoadingTemplates,
+		availableTemplates,
+		navigate,
+	])
 
 	// fetch saved resumes when user is loaded
 	useEffect(() => {
@@ -810,7 +848,7 @@ function ResumePreview() {
 				})
 				setSectionOrder(ord)
 				localStorage.setItem('resumeSectionOrder', JSON.stringify(ord))
-				if (data.template) setTemplate(data.template)
+				if (data.template) setTemplate(normalizeTemplateSlug(data.template))
 				toast.success('Resume loaded')
 				// clear navigation state so we don't reload on re-render
 				navigate('/resume/preview', { replace: true })
@@ -851,7 +889,7 @@ function ResumePreview() {
 			...applyVisibilityFilters(resumeData),
 			sectionLabels: sectionLabels,
 		}
-		const exactInput = JSON.stringify({ template, previewData })
+		const exactInput = JSON.stringify({ template, previewData, stylePreferences })
 
 		if (lastExactInputRef.current === exactInput) {
 			setExactPdfRefreshing(false)
@@ -863,7 +901,7 @@ function ResumePreview() {
 
 		const timer = setTimeout(async () => {
 			try {
-				const blob = await generateResumePDF(template, previewData)
+				const blob = await generateResumePDF(template, previewData, stylePreferences)
 				if (reqId !== exactPdfRequestIdRef.current) return
 				setExactPdfBlobUrl((prev) => {
 					if (prev) URL.revokeObjectURL(prev)
@@ -883,7 +921,7 @@ function ResumePreview() {
 		}, EXACT_PDF_DEBOUNCE_MS)
 
 		return () => clearTimeout(timer)
-	}, [template, resumeData, sectionLabels])
+	}, [template, resumeData, sectionLabels, stylePreferences])
 
 	// resizing global listener.
 	useEffect(() => {
@@ -938,7 +976,7 @@ function ResumePreview() {
 			...applyVisibilityFilters(resumeData),
 			sectionLabels: sectionLabels
 		}
-		const previewInput = JSON.stringify({ template, previewData })
+		const previewInput = JSON.stringify({ template, previewData, stylePreferences })
 
 		// skip fetch if nothing visible changed (e.g. editing a hidden section)
 		if (lastPreviewInputRef.current === previewInput) {
@@ -951,7 +989,7 @@ function ResumePreview() {
 
 		const timer = setTimeout(async () => {
 			try {
-				const htmlContent = await generateResumePreview(template, previewData)
+				const htmlContent = await generateResumePreview(template, previewData, stylePreferences)
 				setPreviewHtml(htmlContent)
 				lastPreviewInputRef.current = previewInput
 			} catch (error) {
@@ -962,7 +1000,7 @@ function ResumePreview() {
 		}, DRAFT_PREVIEW_DEBOUNCE_MS)
 
 		return () => clearTimeout(timer)
-	}, [template, resumeData, sectionLabels])
+	}, [template, resumeData, sectionLabels, stylePreferences])
 
 	// set baseline data after components mount and data is loaded.
 	useEffect(() => {
@@ -1088,9 +1126,14 @@ function ResumePreview() {
 					sectionOrder={sectionOrder}
 					onSectionOrderChange={handleSectionOrderChange}
 					template={template}
-					onTemplateChange={setTemplate}
+					onTemplateChange={(t) => setTemplate(normalizeTemplateSlug(t))}
 					availableTemplates={availableTemplates}
+					templateStyling={templateStyling}
 					isLoadingTemplates={isLoadingTemplates}
+					stylePreferences={stylePreferences}
+					onStylePreferenceChange={(key, value) => {
+						setStylePreferences((prev) => ({ ...prev, [key]: value }))
+					}}
 					onScrollToSection={(sectionKey) => {
 						const element = document.getElementById(`section-${sectionKey}`)
 						if (element) {

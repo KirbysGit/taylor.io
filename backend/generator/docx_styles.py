@@ -1,13 +1,16 @@
 # docx_styles.py
 # Style configuration for Word document generation.
-# Values mirror backend/templates/Default/preview.css for consistency.
+# Values mirror backend/templates/classic/preview.css (primary token-driven template).
 # Edit these to adjust docx styling; add per-template configs as you expand.
 
 from dataclasses import dataclass
-from pathlib import Path
 
-# Template dir for resolving paths (e.g. to load per-template overrides later).
-TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
+from .template_slug import (
+    PRIMARY_TEMPLATE_SLUG,
+    TEMPLATES_DIR,
+    normalize_template_slug,
+    resolve_template_folder,
+)
 
 
 @dataclass
@@ -39,7 +42,8 @@ class DocxStyleConfig:
     # When a tagline is shown, contact line sits right under it (small gap via tagline_space_after)
     contact_space_before_after_tagline_pt: float = 0.0
 
-    # Contact line (centered under name)
+    # Contact line (centered under name); negative = tighter, same token as `.contact span` letter-spacing in preview.css
+    contact_span_letter_spacing_pt: float = 0.0
     contact_font_size_pt: float = 10.0
     contact_line_height: float = 1.0  # single-ish
     contact_space_before_pt: float = 3.0  # space between name and contact line (no tagline)
@@ -75,6 +79,11 @@ class DocxStyleConfig:
 
     # .highlight-title, .highlight-content: 10pt (title bold)
     highlight_font_size_pt: int = 10
+    # Word-only: education subsection (honors / highlights) lines — see PDF_WORD_SPACING.md
+    word_highlight_space_after_pt: float = 2.0
+    # Word-only: experience & project bullet paragraphs (shared _add_description_block)
+    word_bullet_space_before_pt: float = 1.0
+    word_bullet_space_after_pt: float = 1.5
 
     # ---- Experience ----
     # .experience-title: 11pt, bold
@@ -121,23 +130,24 @@ class DocxStyleConfig:
     summary_first_line_indent_pt: float = 30.0
 
 
-def get_styles(template_name: str) -> DocxStyleConfig:
+def get_styles(template_name: str, style_preferences: dict | None = None) -> DocxStyleConfig:
     """
     Return style config for the given template.
-    Loads resume_tokens.json first (shared with PDF preview), then optional docx_styles.json overrides.
+    Loads resume_tokens.json, merges optional user presets (see style_presets), then docx_styles.json overrides.
     """
     import json
 
     from .resume_tokens import apply_resume_tokens_to_docx_config, load_resume_token_dict
+    from .style_presets import merge_resume_token_overrides
 
-    name = (template_name or "default").strip()
+    name = normalize_template_slug(template_name)
     base = DocxStyleConfig()
-    tokens = load_resume_token_dict(name)
+    raw_tokens = load_resume_token_dict(name)
+    tokens = merge_resume_token_overrides(name, raw_tokens, style_preferences)
     apply_resume_tokens_to_docx_config(base, tokens)
-    # Try per-template override: templates/Default/docx_styles.json
-    override_path = TEMPLATES_DIR / name / "docx_styles.json"
+    override_path = resolve_template_folder(name) / "docx_styles.json"
     if not override_path.exists():
-        override_path = TEMPLATES_DIR / "Default" / "docx_styles.json"
+        override_path = resolve_template_folder(PRIMARY_TEMPLATE_SLUG) / "docx_styles.json"
     if override_path.exists():
         try:
             with open(override_path, "r", encoding="utf-8") as f:

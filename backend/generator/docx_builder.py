@@ -16,8 +16,8 @@ from .docx_styles import get_styles, DocxStyleConfig
 
 
 def _set_run_character_spacing(run, spacing_pt: float) -> None:
-    """Word w:spacing on the run (expanded spacing, val in 1/20 pt)."""
-    if spacing_pt is None or spacing_pt <= 0:
+    """Word w:spacing on the run; val in 1/20 pt (positive = expand, negative = condense). Matches CSS letter-spacing."""
+    if spacing_pt is None or spacing_pt == 0:
         return
     r_pr = run._element.get_or_add_rPr()
     spacing = OxmlElement("w:spacing")
@@ -194,6 +194,7 @@ def _add_header(document: Document, resume_data: Dict[str, Any], style: DocxStyl
         run = p.add_run(" | ".join(fields))
         run.font.size = Pt(style.contact_font_size_pt)
         run.font.name = style.font_primary  # Georgia (contact line), not Times New Roman
+        _set_run_character_spacing(run, style.contact_span_letter_spacing_pt)
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         space_before = (
             style.contact_space_before_after_tagline_pt
@@ -288,7 +289,8 @@ def _add_description_block(
 ) -> None:
     """
     Add description with bullets set off to the side (matches PDF).
-    Bullets get extra indent (12.5pt), bullet item spacing (0.5pt), paragraph spacing (2pt).
+    Word bullets: single line spacing; space before/after from word_bullet_* tokens (see PDF_WORD_SPACING.md).
+    Non-bullet lines keep prose_line_height and description_paragraph_space_pt.
     """
     items = _parse_description_items(description)
     if not items:
@@ -301,10 +303,18 @@ def _add_description_block(
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         if first:
-            p.paragraph_format.space_before = Pt(style.description_block_space_before_pt)
+            if item_type == "bullet":
+                p.paragraph_format.space_before = Pt(
+                    style.description_block_space_before_pt + style.word_bullet_space_before_pt
+                )
+            else:
+                p.paragraph_format.space_before = Pt(style.description_block_space_before_pt)
             first = False
         else:
-            p.paragraph_format.space_before = Pt(0)
+            if item_type == "bullet":
+                p.paragraph_format.space_before = Pt(style.word_bullet_space_before_pt)
+            else:
+                p.paragraph_format.space_before = Pt(0)
         if item_type == "bullet":
             # Tab stop at hang_pt (from first-line edge) aligns text; wrapped lines align with left_indent
             p.paragraph_format.left_indent = Pt(bullet_indent)
@@ -313,13 +323,14 @@ def _add_description_block(
                 Pt(style.description_bullet_hang_pt),
                 WD_TAB_ALIGNMENT.LEFT,
             )
-            p.paragraph_format.space_after = Pt(style.description_bullet_item_space_pt)
+            p.paragraph_format.space_after = Pt(style.word_bullet_space_after_pt)
+            p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
             run = p.add_run("•\t" + str(content).strip())
         else:
             p.paragraph_format.left_indent = Pt(indent_pt)
             p.paragraph_format.space_after = Pt(style.description_paragraph_space_pt)
             run = p.add_run(str(content).strip())
-        _set_line_spacing_multiple(p, style.prose_line_height)
+            _set_line_spacing_multiple(p, style.prose_line_height)
         run.font.size = Pt(style.description_font_size_pt)
         run.font.name = style.font_primary  # Georgia for bullets & description (Word)
 
@@ -428,8 +439,8 @@ def _render_docx_education_section(
                 p = doc.add_paragraph()
                 p.paragraph_format.left_indent = Pt(indent)
                 p.paragraph_format.space_before = Pt(0)
-                p.paragraph_format.space_after = Pt(3)
-                _set_line_spacing_multiple(p, style.prose_line_height)
+                p.paragraph_format.space_after = Pt(style.word_highlight_space_after_pt)
+                p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
                 if sub_title:
                     r1 = p.add_run(f"{sub_title}: ")
                     r1.bold = True
@@ -567,7 +578,7 @@ def _render_docx_skills_section(
         p = doc.add_paragraph()
         p.paragraph_format.left_indent = Pt(indent)
         p.paragraph_format.space_after = Pt(style.skill_line_space_pt)
-        _set_line_spacing_multiple(p, style.skill_line_height)
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
         r1 = p.add_run(f"{cat}: ")
         r1.bold = True
         r1.font.size = Pt(style.skill_category_font_size_pt)
@@ -579,19 +590,23 @@ def _render_docx_skills_section(
         p = doc.add_paragraph()
         p.paragraph_format.left_indent = Pt(indent)
         p.paragraph_format.space_after = Pt(style.skill_line_space_pt)
-        _set_line_spacing_multiple(p, style.skill_line_height)
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
         r = p.add_run(", ".join(uncategorized))
         r.font.size = Pt(style.skill_names_font_size_pt)
         r.font.name = style.font_primary
 
 
-def build_docx(resume_data: Dict[str, Any], template_name: str = "default") -> bytes:
+def build_docx(
+    resume_data: Dict[str, Any],
+    template_name: str = "classic",
+    style_preferences: dict | None = None,
+) -> bytes:
     """
     Build a styled Word document from resume_data.
     Uses docx_styles for template-consistent formatting (margins, fonts, spacing).
     Body sections follow resume_data.sectionOrder (same as PDF/HTML), after the header.
     """
-    style = get_styles(template_name)
+    style = get_styles(template_name, style_preferences)
     doc = Document()
 
     # Page margins (match .resume padding)

@@ -4,15 +4,16 @@
 
 # imports.
 from io import BytesIO
-from pathlib import Path
 from typing import Dict, Any
 import asyncio
 import sys
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 
-from .docx_styles import DocxStyleConfig
+from .docx_styles import get_styles
 from .resume_tokens import build_resume_tokens_css, load_resume_token_dict
+from .style_presets import merge_resume_token_overrides
+from .template_slug import normalize_template_slug, resolve_template_folder
 
 # import builders.
 from .builders import (
@@ -23,9 +24,6 @@ from .builders import (
     build_project_entry,
     build_skill_entry,
 )
-
-# get abs path to templates directory.
-TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
 def _build_section(title: str, entries_html: str) -> str:
     """Helper to build a section with title and content."""
@@ -118,21 +116,26 @@ def fill_template(html_content: str, resume_data: Dict[str, Any]) -> str:
 
     return html_content
 
-def generate_resume(template_name: str, resume_data: Dict[str, Any]) -> str:
+def generate_resume(
+    template_name: str,
+    resume_data: Dict[str, Any],
+    style_preferences: Dict[str, Any] | None = None,
+) -> str:
 
-    # grab template from template folder.
-    # Look for {template_name}/{template_name}.docx inside templates directory.
-    template_path = TEMPLATES_DIR / template_name / f"template.html"
+    folder = resolve_template_folder(template_name)
+    template_path = folder / "template.html"
 
     # load template.
     with open(template_path, 'r', encoding='utf-8') as file:
         html_template = file.read()
 
     # load preview.css and prepend :root tokens (resume_tokens.json — shared with Word).
-    styles_path = TEMPLATES_DIR / template_name / "preview.css"
+    styles_path = folder / "preview.css"
     with open(styles_path, 'r', encoding='utf-8') as file:
         styles = file.read()
-    token_dict = load_resume_token_dict(template_name)
+    slug = normalize_template_slug(template_name)
+    raw_tokens = load_resume_token_dict(template_name)
+    token_dict = merge_resume_token_overrides(slug, raw_tokens, style_preferences)
     token_css = build_resume_tokens_css(token_dict)
 
     # replace {{template_css}} placeholder with styles.
@@ -144,21 +147,25 @@ def generate_resume(template_name: str, resume_data: Dict[str, Any]) -> str:
     # return filled document.
     return filled_html
 
-def convert_html_to_pdf_sync(html_content: str) -> bytes:
+def convert_html_to_pdf_sync(
+    html_content: str,
+    template_name: str | None = None,
+    style_preferences: Dict[str, Any] | None = None,
+) -> bytes:
     # convert html to pdf using playwright.
     # On Windows, Playwright needs ProactorEventLoop for subprocess support (SelectorEventLoop raises NotImplementedError).
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    style = get_styles(normalize_template_slug(template_name), style_preferences)
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch()
         page = browser.new_page()
         page.set_content(html_content, wait_until='networkidle')
-        cfg = DocxStyleConfig()
         margin = {
-            "top": f"{cfg.margin_top_in}in",
-            "right": f"{cfg.margin_right_in}in",
-            "bottom": f"{cfg.margin_bottom_in}in",
-            "left": f"{cfg.margin_left_in}in",
+            "top": f"{style.margin_top_in}in",
+            "right": f"{style.margin_right_in}in",
+            "bottom": f"{style.margin_bottom_in}in",
+            "left": f"{style.margin_left_in}in",
         }
         pdf_bytes = page.pdf(
             format="Letter",
@@ -168,23 +175,36 @@ def convert_html_to_pdf_sync(html_content: str) -> bytes:
         browser.close()
         return pdf_bytes
 
-async def generate_pdf(template_name: str, resume_data: Dict[str, Any]) -> bytes:
+async def generate_pdf(
+    template_name: str,
+    resume_data: Dict[str, Any],
+    style_preferences: Dict[str, Any] | None = None,
+) -> bytes:
 
     # generate html resume.
-    html_content = generate_resume(template_name, resume_data)
+    html_content = generate_resume(template_name, resume_data, style_preferences)
 
     # generate pdf from html content using thread pool (fixes Windows asyncio issue).
-    pdf_bytes = await asyncio.to_thread(convert_html_to_pdf_sync, html_content)
+    pdf_bytes = await asyncio.to_thread(
+        convert_html_to_pdf_sync,
+        html_content,
+        template_name,
+        style_preferences,
+    )
 
     # return pdf bytes.
     return pdf_bytes
 
 
-def generate_docx(template_name: str, resume_data: Dict[str, Any]) -> bytes:
+def generate_docx(
+    template_name: str,
+    resume_data: Dict[str, Any],
+    style_preferences: Dict[str, Any] | None = None,
+) -> bytes:
     """
     Generate a Word document from resume_data.
     Uses template-specific styling from docx_styles.
     Returns .docx file as bytes.
     """
     from .docx_builder import build_docx
-    return build_docx(resume_data, template_name)
+    return build_docx(resume_data, template_name, style_preferences)

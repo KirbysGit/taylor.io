@@ -3,6 +3,21 @@ what users can style :
 
 
 
+themeable resume — ideas to expand (general options only; avoid turning every token into a user knob):
+- type scale / font pairing (in progress — presets, not per-field sizes)
+- margin & line-spacing presets (in progress)
+- one accent treatment — e.g. section rules/divider weight or subtle heading emphasis (single preset bundle, PDF + Word parity)
+- header density — e.g. “compact header” vs “airy” (name/tagline/contact spacing as a preset bundle)
+- date presentation — preset: month+year vs season+year vs full date where applicable (data + template contract)
+- contact line separator — preset: pipe · bullet · em dash (same string rules in HTML and Word)
+- optional single accent color — if we can map cleanly to one token family both engines support (else skip)
+- section title style — preset: small caps / sentence case / underline variant (layout-stable; template declares support)
+- bullet / list glyph style — preset: disc vs dash vs square (CSS + Word list parity where possible)
+- alignment where theme allows — e.g. header block center vs left while keeping section structure (only if layoutLocked allows)
+- paper / export — Letter vs A4 as a first-class preset when we add non-US defaults
+- hyphenation / rag control — on/off or “balanced rag” for narrow columns (preview + PDF; Word may differ slightly)
+- “quiet” vs “expressive” bundles — named profiles that only remap approved token groups (guardrails for designers)
+
 idea stack :
 - parsing updated 
     - banks for schools
@@ -54,5 +69,6 @@ idea stack :
 - google sso login. linkedin login. 
 
 - solidified word - pdf and pdf - word comparisons for styling so as we create new templates we can maintain that.
+    - not exact right now, need to be cleaned up a bit.
 
 - hovering over sections in the pdf and going to it in the field.

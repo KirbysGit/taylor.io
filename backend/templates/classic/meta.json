@@ -1,0 +1,15 @@
+{
+  "displayName": "Classic Serif",
+  "shortDescription": "Single-column serif layout—margins, type scale, and font presets stay in sync for preview, PDF, and Word.",
+  "previewImage": "classic.png",
+  "description": "Single-column, Georgia-forward layout. Fully token-driven for PDF and Word—intended as the most themeable resume: margins, type scale, fonts, and spacing presets map to resume_tokens.json (and word_* tweaks for DOCX parity).",
+  "stylingMode": "themeable",
+  "allowedControls": [
+    "marginPreset",
+    "typeScale",
+    "fontPairing",
+    "lineSpacingPreset"
+  ],
+  "layoutLocked": false,
+  "capabilitiesVersion": 1
+}

@@ -13,6 +13,7 @@ import ResumePreview from './pages/5resume/ResumePreview'
 import ResumeCreate from './pages/5resume/ResumeCreate'
 import ResumeChoose from './pages/5resume/ResumeChoose'
 import Info from './pages/info/Info'
+import TemplatesPage from './pages/templates/TemplatesPage'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // ----------- main component -----------
@@ -69,6 +70,14 @@ function App() {
           element={
             <ProtectedRoute requireSetup={true}>
               <Info />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/templates" 
+          element={
+            <ProtectedRoute requireSetup={true}>
+              <TemplatesPage />
             </ProtectedRoute>
           } 
         />

@@ -7,6 +7,7 @@ function TopNav({ user, onLogout, onBeforeNavigate }) {
 
 	const links = [
 		{ label: 'Home', to: '/home' },
+		{ label: 'Templates', to: '/templates' },
 		{ label: 'Info', to: '/info' },
 		{ label: 'Preview', to: '/resume/preview' },
 	]

@@ -16,7 +16,10 @@ function LeftPanel({
 	template,
 	onTemplateChange,
 	availableTemplates,
+	templateStyling,
 	isLoadingTemplates,
+	stylePreferences,
+	onStylePreferenceChange,
 	onScrollToSection,
 	headerData,
 	educationData,
@@ -54,7 +57,10 @@ function LeftPanel({
 				template={template}
 				onTemplateChange={onTemplateChange}
 				availableTemplates={availableTemplates}
+				templateStyling={templateStyling}
 				isLoadingTemplates={isLoadingTemplates}
+				stylePreferences={stylePreferences}
+				onStylePreferenceChange={onStylePreferenceChange}
 			/>
 
 			<SimpleResumeSections

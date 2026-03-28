@@ -178,7 +178,7 @@ function Home() {
 
 							{/* Templates Card */}
 										<button
-								onClick={() => navigate('/resume/preview')}
+								onClick={() => navigate('/templates')}
 								className="bg-white-bright rounded-xl shadow-lg p-8 hover:shadow-xl transition-all border-2 border-gray-200 hover:border-brand-pink/40 group"
 								style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)' }}
 							>

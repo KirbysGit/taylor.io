@@ -1,7 +1,7 @@
 """
 Resume design tokens: one JSON file drives PDF preview CSS variables and Word (DocxStyleConfig).
 
-- templates/<Template>/resume_tokens.json (fallback: templates/Default/)
+- templates/<slug>/resume_tokens.json (primary slug: ``classic``; legacy ``default`` aliases there)
 - PDF: pipeline prepends :root { --rt-* } built from this file before preview.css
 - Word: docx_styles.get_styles merges applicable keys onto DocxStyleConfig
 """
@@ -10,27 +10,23 @@ from __future__ import annotations
 
 import json
 from dataclasses import fields
-from pathlib import Path
 from typing import Any, Dict
 
-from .docx_styles import DocxStyleConfig, TEMPLATES_DIR
+from .docx_styles import DocxStyleConfig
+from .template_slug import PRIMARY_TEMPLATE_SLUG, TEMPLATES_DIR, resolve_template_folder
 
 TOKEN_FILENAME = "resume_tokens.json"
 
 
-def _template_dir(template_name: str) -> Path:
-    name = (template_name or "default").strip()
-    d = TEMPLATES_DIR / name
-    if d.is_dir():
-        return d
-    return TEMPLATES_DIR / "Default"
+def _template_dir(template_name: str):
+    return resolve_template_folder(template_name)
 
 
 def load_resume_token_dict(template_name: str) -> Dict[str, Any]:
     """Load flat token dict; ignores keys starting with underscore."""
     path = _template_dir(template_name) / TOKEN_FILENAME
     if not path.exists():
-        path = TEMPLATES_DIR / "Default" / TOKEN_FILENAME
+        path = TEMPLATES_DIR / PRIMARY_TEMPLATE_SLUG / TOKEN_FILENAME
     if not path.exists():
         return {}
     try:
@@ -95,7 +91,7 @@ def build_resume_tokens_css(tokens: Dict[str, Any]) -> str:
         ":root {",
     ]
     for key in sorted(tokens.keys()):
-        if key.startswith("_"):
+        if key.startswith("_") or key.startswith("word_"):
             continue
         val = tokens[key]
         css_val = token_value_to_css(key, val)

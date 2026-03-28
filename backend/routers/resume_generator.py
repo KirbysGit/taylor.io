@@ -19,6 +19,12 @@ from generator.pipeline import generate_resume, generate_pdf, generate_docx
 
 # ------------------- routes -------------------
 
+def _style_from_payload(payload: dict) -> dict:
+    """User style preferences: marginPreset, lineSpacingPreset, etc."""
+    raw = payload.get("style")
+    return raw if isinstance(raw, dict) else {}
+
+
 # generate resume preview.
 @router.post("/preview")
 async def generate_resume_preview(payload: dict):
@@ -26,9 +32,10 @@ async def generate_resume_preview(payload: dict):
     # grab template and resume data from payload.
     template = payload.get("template")
     resume_data = payload.get("resume_data")
+    style = _style_from_payload(payload)
 
     # generate resume.
-    html_content = generate_resume(template, resume_data)
+    html_content = generate_resume(template, resume_data, style)
 
     # return response with html content.
     return Response(content=html_content, media_type="text/html")
@@ -40,9 +47,10 @@ async def generate_resume_pdf(payload: dict):
     # grab template and resume data from payload.
     template = payload.get("template")
     resume_data = payload.get("resume_data")
+    style = _style_from_payload(payload)
 
     # generate resume.
-    pdf_content = await generate_pdf(template, resume_data)
+    pdf_content = await generate_pdf(template, resume_data, style)
 
     # return response with pdf content.
     return Response(content=pdf_content, media_type="application/pdf")
@@ -55,8 +63,9 @@ async def generate_resume_docx(payload: dict):
     # grab template and resume data from payload (template reserved for future styling).
     template = payload.get("template")
     resume_data = payload.get("resume_data")
+    style = _style_from_payload(payload)
 
-    docx_content = generate_docx(template or "default", resume_data)
+    docx_content = generate_docx(template or "classic", resume_data, style)
 
     # return response with docx content.
     return Response(

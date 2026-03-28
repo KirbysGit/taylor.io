@@ -29,7 +29,7 @@ export async function parseResumeMerge(file) {
 	})
 }
 
-export async function generateResumePreview(template, resumeData) {
+export async function generateResumePreview(template, resumeData, style = undefined) {
 
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
@@ -42,7 +42,10 @@ export async function generateResumePreview(template, resumeData) {
 	const payload = {
 		template: template,
 		resume_data: resumeData,
-		}
+	}
+	if (style != null) {
+		payload.style = style
+	}
 
 	// make request to backend.
 	try {
@@ -56,7 +59,7 @@ export async function generateResumePreview(template, resumeData) {
 	}
 }
 
-export async function generateResumePDF(template, resumeData) {
+export async function generateResumePDF(template, resumeData, style = undefined) {
 
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
@@ -68,6 +71,9 @@ export async function generateResumePDF(template, resumeData) {
 	const payload = {
 		template: template,
 		resume_data: resumeData,
+	}
+	if (style != null) {
+		payload.style = style
 	}
 
 	// make request to backend.
@@ -82,11 +88,14 @@ export async function generateResumePDF(template, resumeData) {
 	}
 }
 
-export async function generateResumeWord(template, resumeData) {
+export async function generateResumeWord(template, resumeData, style = undefined) {
 	const url = `/api/resume/generator/docx`
 	const payload = {
 		template: template,
 		resume_data: resumeData,
+	}
+	if (style != null) {
+		payload.style = style
 	}
 	try {
 		return await apiRequestBlob(url, {
