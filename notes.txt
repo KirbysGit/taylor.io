@@ -72,3 +72,11 @@ idea stack :
     - not exact right now, need to be cleaned up a bit.
 
 - hovering over sections in the pdf and going to it in the field.
+
+
+- ai features
+    - general resume clean up -
+        - we pass all the information to the AI, all of the data available.
+        - list how the data is set up based on the current template (like how things are sectioned)
+        - list the goal (this will be different based on the ai function called)
+        - set up so that the output of the AI is a shorter resume, or less bs words, or more organized sections.

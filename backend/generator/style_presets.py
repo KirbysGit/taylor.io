@@ -1,14 +1,18 @@
 """
 Map user style preferences (margin / line-spacing presets) into resume_tokens overrides.
 
-Classic template only for now; other slugs return {} until presets are defined.
+Preset maps apply to any template whose meta.json layoutProfile is classic_single_column (shared engine; per-slug tokens).
 """
 
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from .template_slug import PRIMARY_TEMPLATE_SLUG, normalize_template_slug
+from .template_layout import DEFAULT_LAYOUT_PROFILE, load_layout_profile
+
+
+def _classic_single_column_engine(template_name: Optional[str]) -> bool:
+    return load_layout_profile(template_name) == DEFAULT_LAYOUT_PROFILE
 
 # --- Classic (classic / legacy default) ---------------------------------
 
@@ -72,8 +76,7 @@ def user_style_to_token_overrides(template_name: Optional[str], preferences: Dic
     """
     if not preferences:
         return {}
-    slug = normalize_template_slug(template_name)
-    if slug != PRIMARY_TEMPLATE_SLUG:
+    if not _classic_single_column_engine(template_name):
         return {}
 
     out: Dict[str, Any] = {}
@@ -108,13 +111,12 @@ def _apply_type_scale_to_tokens(
 ) -> Dict[str, Any]:
     if not preferences:
         return tokens
-    slug = normalize_template_slug(template_name)
     ts_key = _pick(preferences, "typeScalePreset", "type_scale_preset")
     if not isinstance(ts_key, str):
         return tokens
     ts_key = ts_key.strip().lower()
     factor = _CLASSIC_TYPE_SCALE_FACTORS.get(ts_key)
-    if slug != PRIMARY_TEMPLATE_SLUG or factor is None or factor == 1.0:
+    if not _classic_single_column_engine(template_name) or factor is None or factor == 1.0:
         return tokens
     out = dict(tokens)
     for k in list(out.keys()):
@@ -133,7 +135,7 @@ def merge_resume_token_overrides(
     base_tokens: Dict[str, Any],
     preferences: Optional[Dict[str, Any]],
 ) -> Dict[str, Any]:
-    """Shallow merge: file tokens, then preset layer; then type-scale multiplier (classic only)."""
+    """Shallow merge: file tokens, then preset layer; then type-scale (classic_single_column profile)."""
     merged = dict(base_tokens)
     merged.update(user_style_to_token_overrides(template_name, preferences or {}))
     merged = _apply_type_scale_to_tokens(merged, template_name, preferences)

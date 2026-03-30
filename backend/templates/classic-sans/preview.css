@@ -1,0 +1,438 @@
+/* Spacing and type sizes: :root variables are injected before this file from resume_tokens.json
+   (backend/generator/resume_tokens.py + docx_styles.DocxStyleConfig). Edit the JSON to change both PDF and Word. */
+
+/* reset default spacing */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.body-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-origin: top center;
+}
+
+/* ===== resume container ===== */
+
+.resume {
+    width: 8.5in;
+    min-height: 11in;
+    background: white;
+    transform-origin: top center;
+    padding: var(--rt-margin-top-in) var(--rt-margin-right-in) var(--rt-margin-bottom-in) var(--rt-margin-left-in);
+}
+
+/* ===== header section ===== */
+
+.resume-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: var(--rt-resume-header-margin-bottom-pt);
+    box-sizing: border-box;
+}
+
+  
+.name {
+    font-family: var(--rt-font-name-display-stack);
+    font-size: var(--rt-name-font-size-pt);
+    letter-spacing: var(--rt-name-letter-spacing-pt);
+    font-weight: bold;
+}
+
+.tagline {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-tagline-font-size-pt);
+    line-height: var(--rt-tagline-line-height);
+    margin-top: var(--rt-tagline-margin-top-pt);
+    margin-bottom: var(--rt-tagline-space-after-pt);
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.tagline strong {
+    font-weight: bold;
+}
+
+.tagline em {
+    font-style: italic;
+}
+
+.tagline u {
+    text-decoration: underline;
+    text-underline-offset: var(--rt-tagline-underline-offset-pt);
+}
+  
+.contact {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-contact-font-size-pt);
+    line-height: var(--rt-contact-line-height);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.contact span {
+    letter-spacing: var(--rt-contact-span-letter-spacing-pt);
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* ===== section styling ===== */
+
+/* ----- section header ----- */
+
+.section-title {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-section-title-font-size-pt);
+    font-weight: normal;
+    padding: var(--rt-section-title-padding-top-pt) var(--rt-section-title-padding-x-pt) var(--rt-section-title-padding-bottom-pt) var(--rt-section-title-padding-x-pt);
+    letter-spacing: var(--rt-section-title-letter-spacing-pt);
+}
+
+.section-title span {
+    margin-bottom: var(--rt-section-title-span-margin-bottom-pt);
+    display: block;
+}
+
+.divider {
+    width: 100%;
+    height: var(--rt-divider-height-pt);
+    background-color: #000;
+    opacity: 0.75;
+    margin-bottom: var(--rt-divider-margin-bottom-pt);
+    margin-top: var(--rt-divider-margin-top-pt);
+}
+
+/* section content - indent entries from the left (not the header) */
+.section-content {
+    padding-left: var(--rt-section-content-indent-pt);
+}
+
+/* ===== education section ===== */
+
+.experience-entry, .project-entry, .summary-section {
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--rt-entry-row-padding-right-pt) 0 var(--rt-entry-row-padding-left-pt);
+}
+
+.education-entry {
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--rt-entry-padding-pt);
+    margin-bottom: var(--rt-education-entry-margin-bottom-pt);
+}
+
+.education-entry:last-child {
+    margin-bottom: var(--rt-education-entry-last-margin-bottom-pt);
+}
+
+/* ----- school GPA dates pairing ----- */
+
+.school-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--rt-school-line-margin-bottom-pt);
+    line-height: 1;
+}
+
+.school-gpa-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--rt-school-gpa-gap-pt);
+}
+
+.school-name {
+    justify-self: flex-start;
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-school-name-font-size-pt);
+    font-weight: bold;
+}
+
+.school-gpa {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-school-gpa-font-size-pt);
+    font-weight: normal;
+    font-style: italic;
+}
+
+.school-dates {
+    font-family: var(--rt-font-stack-secondary);
+    font-size: var(--rt-school-meta-font-size-pt);
+    font-weight: normal;
+    font-style: italic;
+}
+
+.degree-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.degree-type {
+    font-family: var(--rt-font-stack-secondary);
+    font-size: var(--rt-school-meta-font-size-pt);
+    font-weight: normal;
+    font-style: italic;
+    margin-bottom: var(--rt-degree-type-margin-bottom-pt);
+}
+
+.school-location {
+    justify-self: flex-end;
+    font-family: var(--rt-font-stack-secondary);
+    font-size: var(--rt-school-meta-font-size-pt);
+    font-weight: normal;
+    font-style: italic;
+    margin-bottom: var(--rt-school-location-margin-bottom-pt);
+}
+
+.highlights-lines {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rt-highlights-gap-pt);
+}
+
+.highlight-line {
+    display: flex;
+    flex-direction: row;
+}
+
+.highlight-title {
+    display: flex;
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-highlight-font-size-pt);
+    font-weight: bold;
+    margin-right: var(--rt-highlight-title-margin-right-pt);
+}
+
+.highlight-content {
+    display: flex;
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-highlight-font-size-pt);
+    font-weight: normal;
+}
+
+/* ===== experience section ===== */
+
+.experience-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--rt-experience-line-margin-bottom-pt);
+    line-height: 1;
+    margin-top: var(--rt-experience-line-margin-top-pt);
+}
+
+.experience-title {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-experience-title-font-size-pt);
+    font-weight: bold;
+}
+
+.experience-dates {
+    font-family: var(--rt-font-stack-secondary);
+    font-size: var(--rt-experience-meta-font-size-pt);
+    font-weight: normal;
+    font-style: italic;
+}
+
+.company-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--rt-company-line-margin-top-pt);
+    margin-bottom: var(--rt-company-line-margin-bottom-pt);
+    line-height: 1;
+}
+
+.company-skills-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+}
+
+.company-name {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-experience-meta-font-size-pt);
+    font-weight: bold;
+}
+
+.company-separator {
+    margin: 0 var(--rt-company-separator-margin-x-pt);
+    font-family: var(--rt-font-stack-secondary);
+    font-size: var(--rt-experience-meta-font-size-pt);
+    font-weight: normal;
+}
+
+.company-skills {
+    font-family: var(--rt-font-stack-secondary);
+    font-size: var(--rt-experience-meta-font-size-pt);
+    font-weight: normal;
+    font-style: italic;
+}
+
+.company-location {
+    font-family: var(--rt-font-stack-secondary);
+    font-size: var(--rt-experience-meta-font-size-pt);
+    font-weight: normal;
+    font-style: italic;
+}
+
+.description-line {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--rt-description-line-margin-bottom-pt);
+    text-align: justify;
+}
+
+.description-content {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-description-font-size-pt);
+    line-height: var(--rt-prose-line-height);
+    font-weight: normal;
+}
+
+.description-bullets {
+    margin: 0;
+    padding-left: var(--rt-description-bullet-indent-pt);
+    list-style-type: disc;
+}
+
+.description-bullets li {
+    gap: 4pt;
+    margin-bottom: var(--rt-description-bullet-item-space-pt);
+    padding-left: var(--rt-description-bullet-li-padding-left-pt);
+}
+
+.description-paragraph {
+    margin: 0;
+    margin-bottom: var(--rt-description-paragraph-space-pt);
+}
+
+.project-entry {
+    margin-top: var(--rt-project-entry-margin-top-pt);
+}
+
+.project-line {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: var(--rt-project-line-margin-bottom-pt);
+    line-height: 1;
+}
+
+.project-title {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-project-title-font-size-pt);
+    font-weight: bold;
+}
+
+.project-title-text {
+    font-weight: bold;
+}
+
+.project-separator {
+    margin: 0 var(--rt-project-separator-margin-x-pt);
+    font-weight: normal;
+}
+
+.project-tech {
+    font-family: var(--rt-font-stack-secondary);
+    font-weight: normal;
+    font-style: italic;
+}
+
+.project-url {
+    font-family: var(--rt-font-stack-secondary);
+    font-weight: normal;
+    font-style: italic;
+}
+
+.skill-line {
+    margin-top: 0;
+    margin-bottom: var(--rt-skill-line-space-pt);
+    margin-left: var(--rt-skill-line-padding-x-pt);
+    margin-right: var(--rt-skill-line-padding-x-pt);
+    line-height: var(--rt-skill-line-height);
+}
+
+.skill-category {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-skill-category-font-size-pt);
+    font-weight: bold;
+}
+
+.skill-names {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-skill-names-font-size-pt);
+    font-weight: normal;
+}
+
+.summary-section {
+    font-family: var(--rt-font-stack-primary);
+    font-size: var(--rt-summary-font-size-pt);
+    line-height: var(--rt-prose-line-height);
+    font-weight: normal;
+    padding-left: var(--rt-summary-text-padding-left-pt);
+    text-indent: var(--rt-summary-first-line-indent-pt);
+    margin-bottom: var(--rt-summary-section-margin-bottom-pt);
+    text-align: justify;
+}
+
+@media screen {
+    html.body-wrapper {
+        background-color: #e8ecf1;
+        min-height: 100%;
+    }
+
+    body {
+        padding: 16px 12px 28px;
+    }
+
+    .resume {
+        margin: 0 auto;
+        border-radius: 3px;
+        background-color: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.09);
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.07);
+    }
+}
+
+@media print {
+    html.body-wrapper,
+    body {
+        background: #fff !important;
+        padding: 0 !important;
+    }
+
+    .body-wrapper {
+        display: block;
+        align-items: stretch;
+        justify-content: flex-start;
+    }
+
+    .resume {
+        width: 100%;
+        max-width: 100%;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: #fff !important;
+        background-image: none !important;
+    }
+}

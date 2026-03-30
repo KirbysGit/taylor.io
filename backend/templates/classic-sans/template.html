@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html class="body-wrapper" lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{name} - Resume</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>{{template_css}}</style>
+    </head>
+
+    <body>
+        <main class="resume">
+
+            <!-- Header -->
+            <header class="resume-header">
+            <h1 class="name">{name}</h1>
+            {tagline_block}
+            <p class="contact">
+                <span>{header_line}</span>
+            </p>
+            </header>
+
+            <!-- Sections (ordered dynamically) -->
+            {sections}
+
+        </main>
+    </body>
+</html>

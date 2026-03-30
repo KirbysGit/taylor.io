@@ -27,6 +27,10 @@ def _default_styling_meta(folder_name: str) -> Dict[str, Any]:
         "allowedControls": [],
         "layoutLocked": False,
         "capabilitiesVersion": 1,
+        # layoutProfile: shared DOCX/HTML engine id (see generator.template_layout).
+        "layoutProfile": "classic_single_column",
+        "family": "",
+        "variantLabel": "",
     }
 
 
@@ -60,7 +64,17 @@ def load_template_styling_meta(folder_name: str) -> Dict[str, Any]:
         "allowedControls": controls,
         "layoutLocked": bool(raw.get("layoutLocked", base["layoutLocked"])),
         "capabilitiesVersion": int(raw.get("capabilitiesVersion", base["capabilitiesVersion"])),
+        "layoutProfile": str(raw.get("layoutProfile") or base["layoutProfile"]).strip()
+        or base["layoutProfile"],
     }
+
+    fam = raw.get("family")
+    if isinstance(fam, str) and fam.strip():
+        out["family"] = fam.strip()[:120]
+
+    vl = raw.get("variantLabel")
+    if isinstance(vl, str) and vl.strip():
+        out["variantLabel"] = vl.strip()[:120]
 
     sd = raw.get("shortDescription")
     if isinstance(sd, str) and sd.strip():
@@ -80,6 +94,9 @@ def load_template_styling_meta(folder_name: str) -> Dict[str, Any]:
                 if cand.is_file():
                     out["previewImage"] = fn
                     out["previewUrl"] = f"/api/templates/{folder_name}/asset/{fn}"
+
+    out.setdefault("family", base["family"])
+    out.setdefault("variantLabel", base["variantLabel"])
 
     return out
 

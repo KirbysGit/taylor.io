@@ -14,6 +14,35 @@ const MODE_LABELS = {
 	locked: 'Fixed look',
 }
 
+/** Group slugs by meta.family for section headings; templates without family land in one "Other" bucket when needed. */
+function groupTemplateSections(sortedSlugs, templateStyling) {
+	const byFamily = new Map()
+	const ungrouped = []
+	for (const slug of sortedSlugs) {
+		const fam = ((templateStyling[slug]?.family) || '').trim()
+		if (fam) {
+			if (!byFamily.has(fam)) byFamily.set(fam, [])
+			byFamily.get(fam).push(slug)
+		} else {
+			ungrouped.push(slug)
+		}
+	}
+	const familyNames = [...byFamily.keys()].sort((a, b) => a.localeCompare(b))
+	const sections = familyNames.map((name) => ({
+		key: `family:${name}`,
+		heading: name,
+		slugs: byFamily.get(name),
+	}))
+	if (ungrouped.length) {
+		sections.push({
+			key: 'ungrouped',
+			heading: familyNames.length > 0 ? 'Other' : null,
+			slugs: ungrouped,
+		})
+	}
+	return sections
+}
+
 /** Generic “page with lines” when no image or load error. */
 function FallbackMiniPreview() {
 	return (
@@ -83,7 +112,12 @@ function TemplateCard({ folder, meta, onUse }) {
 				) : null}
 				<span className="ml-auto font-mono text-[10px] text-slate-400">{folder}</span>
 			</div>
-			<h2 className="text-xl font-bold text-gray-900">{displayName}</h2>
+			<div>
+				<h2 className="text-xl font-bold text-gray-900">{displayName}</h2>
+				{(meta?.variantLabel || '').trim() ? (
+					<p className="mt-0.5 text-xs font-medium text-slate-500">{(meta.variantLabel || '').trim()}</p>
+				) : null}
+			</div>
 			{blurb ? (
 				<p
 					className={`mt-2 flex-1 text-slate-600 leading-relaxed ${short ? 'text-xs line-clamp-3' : 'text-xs line-clamp-2'}`}
@@ -160,6 +194,8 @@ function TemplatesPage() {
 		return na.localeCompare(nb)
 	})
 
+	const sections = groupTemplateSections(sorted, templateStyling)
+
 	const handleUse = (folder) => {
 		navigate('/resume/preview', { state: { selectTemplate: folder } })
 	}
@@ -173,7 +209,8 @@ function TemplatesPage() {
 					<div className="mb-8">
 						<h1 className="text-3xl font-bold text-gray-900">Resume templates</h1>
 						<p className="mt-2 max-w-xl text-sm text-gray-600">
-							Each template can ship its own look—cards show a small preview and a short blurb when the template provides them.
+							Each card is a distinct design. Templates with the same{' '}
+							<span className="font-medium text-slate-700">family</span> are grouped—often the same layout with a different skin.
 						</p>
 					</div>
 
@@ -192,15 +229,23 @@ function TemplatesPage() {
 						<p className="text-gray-600">No templates found.</p>
 					)}
 
-					{!loading && !error && sorted.length > 0 && (
-						<ul className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-							{sorted.map((folder) => (
-								<li key={folder}>
-									<TemplateCard folder={folder} meta={templateStyling[folder]} onUse={handleUse} />
-								</li>
-							))}
-						</ul>
-					)}
+					{!loading && !error && sorted.length > 0 &&
+						sections.map((section) => (
+							<section key={section.key} className={section.heading ? 'mb-12 last:mb-0' : ''}>
+								{section.heading ? (
+									<h2 className="mb-5 border-b border-slate-200 pb-2 text-lg font-semibold tracking-tight text-slate-800">
+										{section.heading}
+									</h2>
+								) : null}
+								<ul className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+									{section.slugs.map((folder) => (
+										<li key={folder}>
+											<TemplateCard folder={folder} meta={templateStyling[folder]} onUse={handleUse} />
+										</li>
+									))}
+								</ul>
+							</section>
+						))}
 				</div>
 			</main>
 		</div>

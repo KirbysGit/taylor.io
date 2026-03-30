@@ -1,0 +1,18 @@
+{
+  "displayName": "Classic Sans",
+  "family": "Classic single-column",
+  "variantLabel": "Sans · Calibri",
+  "layoutProfile": "classic_single_column",
+  "shortDescription": "Same single-column structure as Classic Serif; sans-first typography and slightly tighter tracking on the name line.",
+  "previewImage": "classic-sans.png",
+  "description": "Sibling skin of Classic Serif: identical HTML section flow and Word layout path, with Calibri-forward tokens and preview/CSS parity. Use this as the template for adding more skins before introducing a second layoutProfile.",
+  "stylingMode": "themeable",
+  "allowedControls": [
+    "marginPreset",
+    "typeScale",
+    "fontPairing",
+    "lineSpacingPreset"
+  ],
+  "layoutLocked": false,
+  "capabilitiesVersion": 1
+}

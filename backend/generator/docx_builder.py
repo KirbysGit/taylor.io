@@ -11,7 +11,12 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from typing import Dict, Any, Optional, List, Tuple
 
-from .builders import format_date_month_year, parse_tagline_runs
+from .builders import (
+    format_contact_field_display,
+    format_date_month_year,
+    parse_tagline_runs,
+    resolve_contact_url_display,
+)
 from .docx_styles import get_styles, DocxStyleConfig
 
 
@@ -133,7 +138,12 @@ def _apply_section_title_bottom_border(p) -> None:
     p._p.get_or_add_pPr().append(p_border)
 
 
-def _add_header(document: Document, resume_data: Dict[str, Any], style: DocxStyleConfig) -> None:
+def _add_header(
+    document: Document,
+    resume_data: Dict[str, Any],
+    style: DocxStyleConfig,
+    style_preferences: dict | None = None,
+) -> None:
     """Add name and contact line with proper styling."""
     header = resume_data.get("header", {})
     name = f"{header.get('first_name', '')} {header.get('last_name', '')}".strip()
@@ -181,6 +191,7 @@ def _add_header(document: Document, resume_data: Dict[str, Any], style: DocxStyl
         "email": "showEmail", "phone": "showPhone", "location": "showLocation",
         "linkedin": "showLinkedin", "github": "showGithub", "portfolio": "showPortfolio",
     }
+    url_disp = resolve_contact_url_display(style_preferences)
     fields = []
     for field_key in contact_order:
         if field_key in field_map:
@@ -188,7 +199,13 @@ def _add_header(document: Document, resume_data: Dict[str, Any], style: DocxStyl
             vis_key = visibility_map.get(field_key)
             is_visible = visibility.get(vis_key, True) if vis_key else True
             if val and str(val).strip() and is_visible:
-                fields.append(str(val).strip())
+                fields.append(
+                    format_contact_field_display(
+                        field_key,
+                        str(val).strip(),
+                        contact_url_display=url_disp,
+                    )
+                )
     if fields:
         p = document.add_paragraph()
         run = p.add_run(" | ".join(fields))
@@ -617,7 +634,7 @@ def build_docx(
     sect.right_margin = Inches(style.margin_right_in)
 
     # Header (always first)
-    _add_header(doc, resume_data, style)
+    _add_header(doc, resume_data, style, style_preferences)
 
     section_labels = resume_data.get("sectionLabels", {})
     defaults = {

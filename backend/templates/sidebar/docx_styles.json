@@ -1,0 +1,4 @@
+{
+  "_comment": "Optional Word-only overrides applied after resume_tokens.json. For spacing/sizes shared with the PDF preview, edit resume_tokens.json instead.",
+  "_doc": "Keys match DocxStyleConfig fields. An empty object (besides _*) means all values come from resume_tokens.json."
+}

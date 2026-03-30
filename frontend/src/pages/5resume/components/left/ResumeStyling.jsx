@@ -1,8 +1,13 @@
 // components / left / ResumeStyling.jsx
 
-// Templates first (room for favorites / recents / popular later). Selected template → mode tag row → expandable customizations.
+// Tab strip: Template (picker + template-specific tokens) vs Format (global output rules for all layouts).
 
 import { useEffect, useState } from 'react'
+
+const STYLING_SECTION_TABS = [
+	{ id: 'template', label: 'Template' },
+	{ id: 'format', label: 'Format' },
+]
 
 const STYLING_MODES = {
 	themeable: {
@@ -70,6 +75,37 @@ function ModeTag({ mode, size = 'sm' }) {
 	)
 }
 
+function StylingTabStrip({ value, onChange }) {
+	return (
+		<div
+			className="flex gap-1 border-b border-slate-200/80 bg-slate-50/90 px-3 py-2.5"
+			role="tablist"
+			aria-label="Resume styling sections"
+		>
+			{STYLING_SECTION_TABS.map((tab) => {
+				const active = value === tab.id
+				return (
+					<button
+						key={tab.id}
+						type="button"
+						role="tab"
+						aria-selected={active}
+						id={`resume-styling-tab-${tab.id}`}
+						onClick={() => onChange(tab.id)}
+						className={`min-w-0 flex-1 rounded-lg px-2 py-2 text-center text-xs font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/40 focus-visible:ring-offset-2 ${
+							active
+								? 'bg-white text-brand-pink-dark shadow-sm shadow-slate-200/40 ring-1 ring-slate-200/80'
+								: 'text-slate-500 hover:bg-white/60 hover:text-slate-800'
+						}`}
+					>
+						{tab.label}
+					</button>
+				)
+			})}
+		</div>
+	)
+}
+
 /** Single-track segmented control — reads as one control, not loose chips. */
 function SegmentedRow({ label, value, options, onChange }) {
 	return (
@@ -116,6 +152,15 @@ function LookSpacingIcon({ className = 'w-3.5 h-3.5' }) {
 	)
 }
 
+function LinkFormatIcon({ className = 'w-3.5 h-3.5' }) {
+	return (
+		<svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+			<path d="M6.879 7.121a3 3 0 0 1 4.243 0l.707.707a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 0 0-1.414 0L7.586 9.586a1 1 0 1 1-1.414-1.414l.707-.707zm2.242 1.758a1 1 0 0 1 1.414 0l.707.707a3 3 0 0 1-4.243 4.243l-1.415 1.414a1 1 0 1 1-1.414-1.414l1.414-1.415a1 1 0 0 0 0-1.414 1 1 0 0 1 1.414-1.414z" />
+			<path d="M9.121 6.879a3 3 0 0 0-4.243 0L3.465 8.293a1 1 0 1 0 1.414 1.414l1.415-1.415a1 1 0 0 1 1.414 0l.707.707a1 1 0 1 1-1.414 1.414l-.707-.707a3 3 0 1 1 4.242-4.243z" opacity=".45" />
+		</svg>
+	)
+}
+
 const MARGIN_OPTIONS = [
 	{ id: 'balanced', label: 'Balanced' },
 	{ id: 'tight', label: 'Tight' },
@@ -139,6 +184,12 @@ const FONT_PAIRING_OPTIONS = [
 	{ id: 'calibri_modern', label: 'Calibri modern' },
 ]
 
+/** Global: LinkedIn / GitHub / portfolio labels (backend still emits full href). */
+const CONTACT_URL_DISPLAY_OPTIONS = [
+	{ id: 'full', label: 'Full URL' },
+	{ id: 'strip_protocol', label: 'Hide https://' },
+]
+
 /** Control IDs listed in meta but not implemented yet — show under “Coming”. */
 const PLANNED_CONTROL_IDS = []
 
@@ -151,6 +202,8 @@ const ResumeStyling = ({
 	stylePreferences = {},
 	onStylePreferenceChange,
 }) => {
+	const [sectionTab, setSectionTab] = useState('template')
+
 	const meta = templateStyling[template] || {}
 	const allowed = meta.allowedControls ?? []
 	const modeKey = modeForMeta(meta.stylingMode)
@@ -191,193 +244,233 @@ const ResumeStyling = ({
 				aria-hidden
 			/>
 
-			{/* —— Templates —— */}
-			<div className="border-b border-slate-100/90 bg-white/40 px-4 py-4 backdrop-blur-[2px]">
-				<div className="flex items-baseline justify-between gap-2">
-					<h2 className="text-sm font-semibold tracking-tight text-slate-800">Templates</h2>
-					<span className="text-[10px] font-medium uppercase tracking-wider text-slate-400">Choose</span>
-				</div>
-				<p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-					Favorites &amp; recents will live here later—for now, select a layout.
-				</p>
-				{isLoadingTemplates ? (
-					<div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
-						<span className="h-3.5 w-3.5 animate-pulse rounded-full bg-slate-200" aria-hidden />
-						Loading…
-					</div>
-				) : (
-					<div
-						className={
-							templateScroll
-								? 'mt-3 grid max-h-44 grid-cols-1 gap-2.5 overflow-y-auto pr-1 [scrollbar-gutter:stable]'
-								: 'mt-3 grid grid-cols-1 gap-2.5'
-						}
-					>
-						{availableTemplates.map((t) => {
-							const rowMeta = templateStyling[t] || {}
-							const rowMode = modeForMeta(rowMeta.stylingMode)
-							const label = rowMeta.displayName || t
-							const selected = template === t
-							return (
-								<button
-									key={t}
-									type="button"
-									onClick={() => onTemplateChange(t)}
-									className={`flex items-center justify-between gap-2 rounded-xl px-3 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/40 focus-visible:ring-offset-2 ${
-										selected
-											? 'border-2 border-brand-pink/90 bg-gradient-to-r from-brand-pink/[0.12] to-brand-pink/[0.06] shadow-md shadow-brand-pink/10'
-											: 'border border-slate-200/80 bg-white/90 shadow-sm hover:border-slate-300 hover:shadow-md'
-									}`}
-								>
-									<span
-										className={`min-w-0 truncate text-sm font-semibold ${
-											selected ? 'text-brand-pink-dark' : 'text-slate-800'
-										}`}
-									>
-										{label}
-									</span>
-									<ModeTag mode={rowMode} size="sm" />
-								</button>
-							)
-						})}
-					</div>
-				)}
-			</div>
+			<StylingTabStrip value={sectionTab} onChange={setSectionTab} />
 
-			{/* —— Style options —— */}
-			{!isLoadingTemplates && showCustomizeRow && (
-				<div className="p-4">
-					<button
-						type="button"
-						onClick={() => setCustomizeOpen((o) => !o)}
-						className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/35 focus-visible:ring-offset-2 ${
-							customizeOpen
-								? 'border-brand-pink/25 bg-gradient-to-r from-white to-brand-pink/[0.06] shadow-md'
-								: 'border-slate-200/80 bg-gradient-to-r from-white to-slate-50/90 hover:border-slate-300 hover:shadow-md'
-						}`}
-						aria-expanded={customizeOpen}
-					>
-						<span
-							className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors ${
-								customizeOpen
-									? 'border-brand-pink/30 bg-brand-pink/10 text-brand-pink-dark'
-									: 'border-slate-200/90 bg-white text-slate-600 group-hover:border-slate-300'
-							}`}
-						>
-							<ModeGlyph mode={modeKey} className="h-4 w-4" />
-						</span>
-						<div className="flex min-w-0 flex-wrap items-center gap-2">
-							<ModeTag mode={modeKey} size="md" />
-						</div>
-						<span className="min-w-0 flex-1 text-xs font-medium text-slate-500">Style options</span>
-						<svg
-							className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-hover:text-slate-600 ${
-								customizeOpen ? 'rotate-180' : ''
-							}`}
-							viewBox="0 0 16 16"
-							fill="currentColor"
-							aria-hidden
-						>
-							<path d="M4.47 6.97a.75.75 0 0 1 1.06 0L8 9.44l2.47-2.47a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 0 1 0-1.06z" />
-						</svg>
-					</button>
-
-					{customizeOpen && (
-						<div className="mt-4 space-y-4">
-							<p className="rounded-xl border border-brand-pink/15 bg-gradient-to-br from-brand-pink/[0.06] to-transparent px-3 py-2.5 text-[11px] leading-relaxed text-slate-600">
-								{mode.hint}
-							</p>
-							{meta.layoutLocked ? (
-								<p className="rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-50/30 px-3 py-2.5 text-[11px] font-medium text-amber-950/80">
-									Layout is fixed; only the controls here affect PDF and Word output.
+			{sectionTab === 'format' && onStylePreferenceChange && (
+				<div
+					className="border-b border-slate-100/90 bg-white/50 px-4 py-4"
+					role="tabpanel"
+					aria-labelledby="resume-styling-tab-format"
+				>
+					<div className="mb-3">
+						<h2 className="text-sm font-semibold tracking-tight text-slate-800">Format</h2>
+						<p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+							How text appears in preview, PDF, and Word—same choices for every template.
+						</p>
+					</div>
+					<div className="rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-50/80 via-white to-sky-50/40 p-3 shadow-inner shadow-slate-200/30">
+						<div className="mb-3 flex items-center gap-2 px-0.5">
+							<span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-800">
+								<LinkFormatIcon className="h-4 w-4" />
+							</span>
+							<div>
+								<p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+									Contact links
 								</p>
-							) : null}
-
-							{showStyleTuners && onStylePreferenceChange && (
-								<div className="rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-50/80 via-white to-brand-pink/[0.04] p-3 shadow-inner shadow-slate-200/30">
-									<div className="mb-3 flex items-center gap-2 px-0.5">
-										<span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-pink/10 text-brand-pink-dark">
-											<LookSpacingIcon className="h-4 w-4" />
-										</span>
-										<div>
-											<p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-												Look &amp; spacing
-											</p>
-											<p className="text-[10px] text-slate-400">Applies to preview &amp; exports</p>
-										</div>
-									</div>
-									<div className="grid grid-cols-1 gap-3 @md/resume-style:grid-cols-2 @md/resume-style:gap-x-3 @md/resume-style:gap-y-4">
-										{showTypeScale && (
-											<div className="min-w-0">
-												<SegmentedRow
-													label="Type scale"
-													value={stylePreferences.typeScalePreset ?? 'standard'}
-													options={TYPE_SCALE_OPTIONS}
-													onChange={(id) => onStylePreferenceChange('typeScalePreset', id)}
-												/>
-											</div>
-										)}
-										{showFontPairing && (
-											<div className="min-w-0">
-												<SegmentedRow
-													label="Fonts"
-													value={stylePreferences.fontPairing ?? 'serif_classic'}
-													options={FONT_PAIRING_OPTIONS}
-													onChange={(id) => onStylePreferenceChange('fontPairing', id)}
-												/>
-											</div>
-										)}
-										{showMargins && (
-											<div className="min-w-0">
-												<SegmentedRow
-													label="Page margins"
-													value={stylePreferences.marginPreset ?? 'balanced'}
-													options={MARGIN_OPTIONS}
-													onChange={(id) => onStylePreferenceChange('marginPreset', id)}
-												/>
-											</div>
-										)}
-										{showLineSpacing && (
-											<div className="min-w-0">
-												<SegmentedRow
-													label="Line spacing"
-													value={stylePreferences.lineSpacingPreset ?? 'standard'}
-													options={LINE_SPACING_OPTIONS}
-													onChange={(id) => onStylePreferenceChange('lineSpacingPreset', id)}
-												/>
-											</div>
-										)}
-									</div>
-								</div>
-							)}
-
-							{upcomingLabels.length > 0 ? (
-								<div className="rounded-xl border border-dashed border-slate-300/80 bg-white/60 px-3 py-2.5">
-									<p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-										Coming for this template
-									</p>
-									<ul className="list-inside list-disc space-y-0.5 text-xs text-slate-500 marker:text-slate-300">
-										{upcomingLabels.map((text) => (
-											<li key={text}>{text}</li>
-										))}
-									</ul>
-								</div>
-							) : null}
-
-							{!hasStyleControls && !meta.layoutLocked && modeKey === 'locked' ? (
-								<p className="text-xs text-slate-500">No adjustable style options for this template.</p>
-							) : null}
+								<p className="text-[10px] text-slate-400">LinkedIn, GitHub, portfolio line — links still work</p>
+							</div>
 						</div>
-					)}
+						<SegmentedRow
+							label="URL text"
+							value={stylePreferences.contactUrlDisplay ?? 'full'}
+							options={CONTACT_URL_DISPLAY_OPTIONS}
+							onChange={(id) => onStylePreferenceChange('contactUrlDisplay', id)}
+						/>
+					</div>
 				</div>
 			)}
 
-			{!isLoadingTemplates && !showCustomizeRow && (
-				<div className="px-4 pb-4 pt-0">
-					<p className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-600">
-						This template does not expose style tweaks in Tailor yet.
-					</p>
-				</div>
+			{sectionTab === 'template' && (
+				<>
+					<div className="border-b border-slate-100/90 bg-white/40 px-4 py-4 backdrop-blur-[2px]">
+						<div className="flex items-baseline justify-between gap-2">
+							<h2 className="text-sm font-semibold tracking-tight text-slate-800">Templates</h2>
+							<span className="text-[10px] font-medium uppercase tracking-wider text-slate-400">Choose</span>
+						</div>
+						<p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+							Favorites &amp; recents will live here later—for now, select a layout.
+						</p>
+						{isLoadingTemplates ? (
+							<div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
+								<span className="h-3.5 w-3.5 animate-pulse rounded-full bg-slate-200" aria-hidden />
+								Loading…
+							</div>
+						) : (
+							<div
+								className={
+									templateScroll
+										? 'mt-3 grid max-h-44 grid-cols-1 gap-2.5 overflow-y-auto pr-1 [scrollbar-gutter:stable]'
+										: 'mt-3 grid grid-cols-1 gap-2.5'
+								}
+							>
+								{availableTemplates.map((t) => {
+									const rowMeta = templateStyling[t] || {}
+									const rowMode = modeForMeta(rowMeta.stylingMode)
+									const label = rowMeta.displayName || t
+									const selected = template === t
+									return (
+										<button
+											key={t}
+											type="button"
+											onClick={() => onTemplateChange(t)}
+											className={`flex items-center justify-between gap-2 rounded-xl px-3 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/40 focus-visible:ring-offset-2 ${
+												selected
+													? 'border-2 border-brand-pink/90 bg-gradient-to-r from-brand-pink/[0.12] to-brand-pink/[0.06] shadow-md shadow-brand-pink/10'
+													: 'border border-slate-200/80 bg-white/90 shadow-sm hover:border-slate-300 hover:shadow-md'
+											}`}
+										>
+											<span
+												className={`min-w-0 truncate text-sm font-semibold ${
+													selected ? 'text-brand-pink-dark' : 'text-slate-800'
+												}`}
+											>
+												{label}
+											</span>
+											<ModeTag mode={rowMode} size="sm" />
+										</button>
+									)
+								})}
+							</div>
+						)}
+					</div>
+
+					{!isLoadingTemplates && showCustomizeRow && (
+						<div className="p-4" role="tabpanel" aria-labelledby="resume-styling-tab-template">
+							<button
+								type="button"
+								onClick={() => setCustomizeOpen((o) => !o)}
+								className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/35 focus-visible:ring-offset-2 ${
+									customizeOpen
+										? 'border-brand-pink/25 bg-gradient-to-r from-white to-brand-pink/[0.06] shadow-md'
+										: 'border-slate-200/80 bg-gradient-to-r from-white to-slate-50/90 hover:border-slate-300 hover:shadow-md'
+								}`}
+								aria-expanded={customizeOpen}
+							>
+								<span
+									className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors ${
+										customizeOpen
+											? 'border-brand-pink/30 bg-brand-pink/10 text-brand-pink-dark'
+											: 'border-slate-200/90 bg-white text-slate-600 group-hover:border-slate-300'
+									}`}
+								>
+									<ModeGlyph mode={modeKey} className="h-4 w-4" />
+								</span>
+								<div className="flex min-w-0 flex-wrap items-center gap-2">
+									<ModeTag mode={modeKey} size="md" />
+								</div>
+								<span className="min-w-0 flex-1 text-xs font-medium text-slate-500">Template style</span>
+								<svg
+									className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-hover:text-slate-600 ${
+										customizeOpen ? 'rotate-180' : ''
+									}`}
+									viewBox="0 0 16 16"
+									fill="currentColor"
+									aria-hidden
+								>
+									<path d="M4.47 6.97a.75.75 0 0 1 1.06 0L8 9.44l2.47-2.47a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 0 1 0-1.06z" />
+								</svg>
+							</button>
+
+							{customizeOpen && (
+								<div className="mt-4 space-y-4">
+									<p className="rounded-xl border border-brand-pink/15 bg-gradient-to-br from-brand-pink/[0.06] to-transparent px-3 py-2.5 text-[11px] leading-relaxed text-slate-600">
+										{mode.hint}
+									</p>
+									{meta.layoutLocked ? (
+										<p className="rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-50/30 px-3 py-2.5 text-[11px] font-medium text-amber-950/80">
+											Layout is fixed; only the controls here affect PDF and Word output.
+										</p>
+									) : null}
+
+									{showStyleTuners && onStylePreferenceChange && (
+										<div className="rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-50/80 via-white to-brand-pink/[0.04] p-3 shadow-inner shadow-slate-200/30">
+											<div className="mb-3 flex items-center gap-2 px-0.5">
+												<span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-pink/10 text-brand-pink-dark">
+													<LookSpacingIcon className="h-4 w-4" />
+												</span>
+												<div>
+													<p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+														Look &amp; spacing
+													</p>
+													<p className="text-[10px] text-slate-400">This template only</p>
+												</div>
+											</div>
+											<div className="grid grid-cols-1 gap-3 @md/resume-style:grid-cols-2 @md/resume-style:gap-x-3 @md/resume-style:gap-y-4">
+												{showTypeScale && (
+													<div className="min-w-0">
+														<SegmentedRow
+															label="Type scale"
+															value={stylePreferences.typeScalePreset ?? 'standard'}
+															options={TYPE_SCALE_OPTIONS}
+															onChange={(id) => onStylePreferenceChange('typeScalePreset', id)}
+														/>
+													</div>
+												)}
+												{showFontPairing && (
+													<div className="min-w-0">
+														<SegmentedRow
+															label="Fonts"
+															value={stylePreferences.fontPairing ?? 'serif_classic'}
+															options={FONT_PAIRING_OPTIONS}
+															onChange={(id) => onStylePreferenceChange('fontPairing', id)}
+														/>
+													</div>
+												)}
+												{showMargins && (
+													<div className="min-w-0">
+														<SegmentedRow
+															label="Page margins"
+															value={stylePreferences.marginPreset ?? 'balanced'}
+															options={MARGIN_OPTIONS}
+															onChange={(id) => onStylePreferenceChange('marginPreset', id)}
+														/>
+													</div>
+												)}
+												{showLineSpacing && (
+													<div className="min-w-0">
+														<SegmentedRow
+															label="Line spacing"
+															value={stylePreferences.lineSpacingPreset ?? 'standard'}
+															options={LINE_SPACING_OPTIONS}
+															onChange={(id) => onStylePreferenceChange('lineSpacingPreset', id)}
+														/>
+													</div>
+												)}
+											</div>
+										</div>
+									)}
+
+									{upcomingLabels.length > 0 ? (
+										<div className="rounded-xl border border-dashed border-slate-300/80 bg-white/60 px-3 py-2.5">
+											<p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+												Coming for this template
+											</p>
+											<ul className="list-inside list-disc space-y-0.5 text-xs text-slate-500 marker:text-slate-300">
+												{upcomingLabels.map((text) => (
+													<li key={text}>{text}</li>
+												))}
+											</ul>
+										</div>
+									) : null}
+
+									{!hasStyleControls && !meta.layoutLocked && modeKey === 'locked' ? (
+										<p className="text-xs text-slate-500">No adjustable style options for this template.</p>
+									) : null}
+								</div>
+							)}
+						</div>
+					)}
+
+					{!isLoadingTemplates && !showCustomizeRow && (
+						<div className="px-4 pb-4 pt-0">
+							<p className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-600">
+								This template does not expose template-specific style tweaks in Tailor yet. Use the{' '}
+								<strong className="font-semibold text-slate-700">Format</strong> tab for options that apply to
+								all layouts.
+							</p>
+						</div>
+					)}
+				</>
 			)}
 		</div>
 	)

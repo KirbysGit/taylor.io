@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html class="body-wrapper layout-sidebar" lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{name} - Resume</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>{{template_css}}</style>
+    </head>
+
+    <body>
+        <main class="resume resume-sidebar-layout">
+            <aside class="resume-aside">
+                <header class="resume-header resume-header--sidebar">
+                    <h1 class="name">{name}</h1>
+                    {tagline_block}
+                    <div class="contact-rail-wrap">
+                        {contact_rail}
+                    </div>
+                </header>
+                {sidebar_sections}
+            </aside>
+            <div class="resume-body">
+                {sections}
+            </div>
+        </main>
+    </body>
+</html>

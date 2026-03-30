@@ -51,12 +51,14 @@ function normalizeTemplateSlug(name) {
 	return s
 }
 
-/** Defaults for `style` sent with preview/PDF/Word; backend applies presets for `classic` only. */
+/** Defaults for `style` sent with preview/PDF/Word; presets apply when layoutProfile is classic_single_column. */
 const DEFAULT_STYLE_PREFERENCES = {
 	marginPreset: 'balanced',
 	lineSpacingPreset: 'standard',
 	typeScalePreset: 'standard',
 	fontPairing: 'serif_classic',
+	/** 'full' | 'strip_protocol' — contact / rail link labels only; hrefs stay correct (backend). */
+	contactUrlDisplay: 'full',
 }
 
 // ----------- main component -----------

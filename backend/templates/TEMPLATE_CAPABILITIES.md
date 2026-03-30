@@ -43,6 +43,14 @@ This template is **`themeable` by design**: full token pipeline + `word_*` Word-
 3. If the design cannot be expressed without breaking Word parity, use **`locked`** or **`hybrid`** with a small allowlist until parity is solved.
 4. Update this file if you introduce a **new** `allowedControls` ID.
 
+## Gallery & layout profile (`meta.json`)
+
+| Key | Purpose |
+|-----|---------|
+| **`layoutProfile`** | Shared engine id for HTML/DOCX (default `classic_single_column`). Multiple slugs may use the same profile; add new profiles only when you implement a new builder path. See `generator/template_layout.py`. |
+| **`family`** | Optional; groups templates in the **Templates** page (e.g. `Classic serif`) without merging them into one card. |
+| **`variantLabel`** | Optional; short subtitle on the card (e.g. `Default`, `Warm`). |
+
 ## API
 
 `GET /api/templates/list` returns `templates` (folder names, backward compatible) and **`templateStyling`**: a map of folder name → metadata loaded from `meta.json` (with defaults if missing).
