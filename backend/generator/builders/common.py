@@ -1,20 +1,19 @@
 """
-Shared HTML helpers: dates, descriptions, taglines, skill grouping.
+Shared HTML helpers: dates, descriptions, skill grouping.
 
-Layout-specific markup lives in header.py, single_column.py, sidebar_rail.py.
+Tagline parsing/HTML: ``tagline`` module. Layout-specific markup: header.py, single_column.py, sidebar_rail.py.
 """
 
 from __future__ import annotations
 
-import html
 import re
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
-# Middle dot for tagline separators; single * in user input becomes this after **bold** parsing.
-TAGLINE_INTERPUNCT = "\u00b7"
-
-
+# --- date formatter.
+# if its just a year, format it as YYYY.
+# if its a month, format it as Month YYYY.
+# if its a date, format it as Month Day, Year.
 def format_date_month_year(date: str) -> str:
     if not date:
         return ""
@@ -33,7 +32,9 @@ def format_date_month_year(date: str) -> str:
     except Exception:
         return date
 
-
+# --- description formatter.
+# converts bullet points to HTML list items.
+# converts paragraphs to HTML paragraphs.
 def format_description(description: str) -> str:
     """Format description text, converting bullet points to HTML list."""
     if not description:
@@ -82,9 +83,9 @@ def format_description(description: str) -> str:
         return "".join(html_parts)
     return f'<p class="description-paragraph">{description}</p>'
 
-
+# --- date range formatter.
+# formats a date range with a conditional dash.
 def format_date_range(start_raw, end_raw, current: bool) -> str:
-    """Format date range with conditional dash. No dash when only one date or none."""
     start_val = str(start_raw) if start_raw else ""
     end_val = str(end_raw) if end_raw else ""
     start_date = format_date_month_year(start_val) if start_val else ""
@@ -101,121 +102,6 @@ def format_date_range(start_raw, end_raw, current: bool) -> str:
     if end_date:
         return end_date
     return ""
-
-
-def _tagline_outer_italic_segments(raw: str) -> List[Tuple[bool, str]]:
-    out: List[Tuple[bool, str]] = []
-    i = 0
-    n = len(raw)
-    while i < n:
-        if raw[i] == "_":
-            j = raw.find("_", i + 1)
-            if j != -1 and j > i + 1:
-                out.append((True, raw[i + 1 : j]))
-                i = j + 1
-            else:
-                start = i
-                i += 1
-                while i < n and raw[i] != "_":
-                    i += 1
-                out.append((False, raw[start:i]))
-        else:
-            start = i
-            while i < n and raw[i] != "_":
-                i += 1
-            out.append((False, raw[start:i]))
-    return out
-
-
-def _tagline_apply_bold_and_dots(text: str, italic: bool) -> List[Tuple[str, bool, bool]]:
-    parts = text.split("**")
-    if len(parts) % 2 == 0:
-        t = text.replace("*", TAGLINE_INTERPUNCT)
-        return [(t, False, italic)] if t else []
-    runs: List[Tuple[str, bool, bool]] = []
-    for idx, p in enumerate(parts):
-        bold = idx % 2 == 1
-        t = p.replace("*", TAGLINE_INTERPUNCT)
-        if t:
-            runs.append((t, bold, italic))
-    return runs
-
-
-def _merge_bold_italic_runs(runs: List[Tuple[str, bool, bool]]) -> List[Tuple[str, bool, bool]]:
-    merged: List[Tuple[str, bool, bool]] = []
-    for text_p, b, it in runs:
-        if not text_p:
-            continue
-        if merged and merged[-1][1] == b and merged[-1][2] == it:
-            merged[-1] = (merged[-1][0] + text_p, b, it)
-        else:
-            merged.append((text_p, b, it))
-    return merged
-
-
-def _parse_tagline_runs_bold_italic_only(text: str) -> List[Tuple[str, bool, bool]]:
-    all_runs: List[Tuple[str, bool, bool]] = []
-    for is_italic, seg in _tagline_outer_italic_segments(text):
-        all_runs.extend(_tagline_apply_bold_and_dots(seg, is_italic))
-    return _merge_bold_italic_runs(all_runs)
-
-
-def parse_tagline_runs(raw: str) -> List[Tuple[str, bool, bool, bool]]:
-    """
-    Tagline mini-markup (HTML preview/PDF and Word):
-    - ==text== — underline (parsed outermost)
-    - **text** — bold
-    - _text_ — italic
-    - Every * outside of ** pairs becomes a middle dot (·)
-    """
-    raw = (raw or "").strip()
-    if not raw:
-        return []
-    parts = raw.split("==")
-    if len(parts) % 2 == 0:
-        merged_three = _parse_tagline_runs_bold_italic_only(raw)
-        return [(t, b, it, False) for t, b, it in merged_three]
-    merged_four: List[Tuple[str, bool, bool, bool]] = []
-    for idx, p in enumerate(parts):
-        underline = idx % 2 == 1
-        for t, b, it in _parse_tagline_runs_bold_italic_only(p):
-            merged_four.append((t, b, it, underline))
-    out: List[Tuple[str, bool, bool, bool]] = []
-    for text_p, b, it, u in merged_four:
-        if not text_p:
-            continue
-        if out and out[-1][1] == b and out[-1][2] == it and out[-1][3] == u:
-            out[-1] = (out[-1][0] + text_p, b, it, u)
-        else:
-            out.append((text_p, b, it, u))
-    return out
-
-
-def _tagline_runs_to_html(runs: List[Tuple[str, bool, bool, bool]]) -> str:
-    out: List[str] = []
-    for text_p, bold, italic, underline in runs:
-        esc = html.escape(text_p, quote=True)
-        chunk = esc
-        if italic:
-            chunk = f"<em>{chunk}</em>"
-        if bold:
-            chunk = f"<strong>{chunk}</strong>"
-        if underline:
-            chunk = f"<u>{chunk}</u>"
-        out.append(chunk)
-    return "".join(out)
-
-
-def build_tagline_block(header: Dict[str, Any]) -> str:
-    """HTML fragment for optional tagline: ==underline==, **bold**, _italic_, * -> ·."""
-    visibility = header.get("visibility", {})
-    if visibility.get("showTagline") is False:
-        return ""
-    raw = (header.get("tagline") or "").strip()
-    if not raw:
-        return ""
-    inner = _tagline_runs_to_html(parse_tagline_runs(raw))
-    return f'<p class="tagline">{inner}</p>'
 
 
 def skills_group_ordered(

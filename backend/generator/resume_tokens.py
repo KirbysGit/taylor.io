@@ -41,16 +41,18 @@ def load_resume_token_dict(template_name: str) -> Dict[str, Any]:
 
 def apply_resume_tokens_to_docx_config(cfg: DocxStyleConfig, tokens: Dict[str, Any]) -> None:
     """Apply JSON values to DocxStyleConfig (unknown keys skipped)."""
-    field_names = {f.name for f in fields(DocxStyleConfig)}
+    fmap = {f.name: f for f in fields(DocxStyleConfig)}
     for key, val in tokens.items():
-        if key not in field_names or val is None:
+        if key not in fmap or val is None:
             continue
-        current = getattr(cfg, key)
-        if isinstance(current, bool):
+        f = fmap[key]
+        if isinstance(val, bool) and f.type is not bool:
+            continue
+        if f.type is bool:
             setattr(cfg, key, bool(val))
-        elif isinstance(current, int) and not isinstance(val, bool):
+        elif f.type is int:
             setattr(cfg, key, int(val))
-        elif isinstance(current, float):
+        elif f.type is float:
             setattr(cfg, key, float(val))
         else:
             setattr(cfg, key, val)

@@ -6,6 +6,9 @@
   "sidebar_bg": "#e9edf2",
   "sidebar_border_width_pt": 0.75,
   "sidebar_border_color": "#b8c2ce",
+  "sidebar_docx_fill_row_height_in": 10.795,
+  "sidebar_docx_contact_icon_size_pt": 9.5,
+  "sidebar_docx_contact_icon_text_gap_pt": 4.5,
   "sidebar_header_margin_bottom_pt": 12,
   "sidebar_body_pad_left_in": 0.3,
   "sidebar_section_content_indent_pt": 6.5,
@@ -16,6 +19,12 @@
   "margin_bottom_in": 0.19,
   "margin_left_in": 0.45,
   "margin_right_in": 0.45,
+
+  "resume_text_color_primary": "rgba(15, 23, 42, 0.92)",
+  "resume_text_color_secondary": "rgba(15, 23, 42, 0.78)",
+  "resume_text_color_tertiary": "rgba(15, 23, 42, 0.55)",
+  "resume_text_color_emphasis": "rgba(15, 23, 42, 0.96)",
+  "resume_text_color_highlight_title": "rgba(15, 23, 42, 0.88)",
 
   "font_primary": "Georgia",
   "font_secondary": "Times New Roman",
@@ -44,8 +53,8 @@
   "resume_header_margin_bottom_pt": 10.0,
 
   "section_title_font_size_pt": 14,
-  "section_title_space_before_pt": 2.0,
-  "section_title_space_after_pt": 5.0,
+  "section_title_space_before_pt": 5.0,
+  "section_title_space_after_pt": 7.0,
   "section_title_padding_top_pt": 3.0,
   "section_title_padding_x_pt": 1.25,
   "section_title_padding_bottom_pt": 0.0,
@@ -75,8 +84,8 @@
   "education_entry_margin_bottom_pt": 4.0,
   "education_entry_last_margin_bottom_pt": 0.0,
 
-  "highlight_font_size_pt": 10,
-  "highlights_gap_pt": 3.0,
+  "highlight_font_size_pt": 9,
+  "highlights_gap_pt": 4.5,
   "highlight_title_margin_right_pt": 4.0,
 
   "word_highlight_space_after_pt": 2.0,
@@ -104,6 +113,11 @@
   "description_line_margin_bottom_pt": 1.5,
   "description_bullet_li_padding_left_pt": 2.0,
 
+  "education_rail_minor_font_size_pt": 9,
+  "education_rail_gpa_space_after_pt": 0,
+  "education_rail_highlights_space_before_pt": 6,
+  "sidebar_rail_section_stack_margin_top_pt": 6,
+
   "project_title_font_size_pt": 10.5,
   "project_title_space_before_pt": 1.0,
   "project_line_space_pt": 2.5,
@@ -112,7 +126,7 @@
   "project_separator_margin_x_pt": 2.0,
 
   "skill_category_font_size_pt": 10,
-  "skill_names_font_size_pt": 10,
+  "skill_names_font_size_pt": 9.5,
   "skill_line_space_pt": 3.25,
   "skill_line_padding_x_pt": 2.0,
   "skill_line_height": 1.28,

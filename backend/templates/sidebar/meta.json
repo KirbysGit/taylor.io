@@ -1,13 +1,14 @@
 {
   "displayName": "Sidebar",
   "family": "Split column",
-  "variantLabel": "Scan rail · PDF",
+  "variantLabel": "Scan rail · PDF & Word",
   "layoutProfile": "sidebar_split",
-  "shortDescription": "Left rail: contact, then skills and education in the same order as Organize (sectionOrder). Main: summary, experience, projects. Word still exports classic single-column.",
+  "shortDescription": "Left rail (shaded): contact, skills & education by sectionOrder. Main column: summary, experience, projects. Word export uses the same split, tokens, and rail styling as PDF preview.",
   "previewImage": "sidebar.png",
-  "description": "Rail order for skills vs education follows sectionOrder from the editor (Organize). Main column uses sectionOrder among summary, experience, projects. Education uses build_education_entry_rail in the rail only.",
+  "description": "Rail order for skills vs education follows sectionOrder from the editor (Organize). Main column uses sectionOrder among summary, experience, projects. Education uses build_education_entry_rail in the rail only; Word mirrors layout with a two-column table.",
   "stylingMode": "locked",
   "allowedControls": [],
   "layoutLocked": true,
-  "capabilitiesVersion": 1
+  "capabilitiesVersion": 1,
+  "docxMaxPages": 1
 }

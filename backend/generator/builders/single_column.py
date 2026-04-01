@@ -91,13 +91,41 @@ def build_experience_entry(exp: Dict[str, Any]) -> str:
     '''
 
 
-def build_project_entry(proj: Dict[str, Any]) -> str:
+def build_project_entry(proj: Dict[str, Any], *, variant: str = "default") -> str:
     title = proj.get("title", "")
 
     tech_stack = proj.get("tech_stack") or proj.get("techStack") or []
     tech_stack_str = ", ".join(tech_stack) if isinstance(tech_stack, list) else (tech_stack or "")
 
     url = proj.get("url", "")
+
+    description = format_description(proj.get("description", ""))
+
+    # Sidebar main column: title row, then tech (left) and URL (right), no pipe dividers.
+    if variant == "sidebar_main":
+        meta_parts: List[str] = []
+        if tech_stack_str:
+            meta_parts.append(f'<span class="project-tech">{tech_stack_str}</span>')
+        if url:
+            meta_parts.append(f'<span class="project-url">{url}</span>')
+        meta_row = (
+            f'<div class="project-meta-row">{"".join(meta_parts)}</div>'
+            if meta_parts
+            else ""
+        )
+        return f'''
+    <div class="project-entry project-entry--sidebar-main">
+        <div class="project-line">
+            <div class="project-title project-title--sidebar-main">
+                <span class="project-title-text">{title}</span>
+                {meta_row}
+            </div>
+        </div>
+        <div class="description-line">
+            <div class="description-content">{description}</div>
+        </div>
+    </div>
+    '''
 
     title_html = f'<span class="project-title-text">{title}</span>'
 
@@ -106,8 +134,6 @@ def build_project_entry(proj: Dict[str, Any]) -> str:
 
     if url:
         title_html += f'<span class="project-separator">|</span><span class="project-url">{url}</span>'
-
-    description = format_description(proj.get("description", ""))
 
     return f'''
     <div class="project-entry">

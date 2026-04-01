@@ -9,18 +9,17 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from .template_slug import PRIMARY_TEMPLATE_SLUG, normalize_template_slug, resolve_template_folder
 
 DEFAULT_LAYOUT_PROFILE = "classic_single_column"
 
-# Second HTML/PDF structure: narrow aside (identity + skills) + main column (summary, jobs, etc.).
-# Word export does not implement this yet; see docx_export_template_slug().
+# Second HTML/PDF structure: narrow aside + main column; same profile drives Word when supported.
 LAYOUT_SIDEBAR_SPLIT = "sidebar_split"
 
-# DOCX (and future HTML branches) only implement these for now.
-SUPPORTED_DOCX_PROFILES = frozenset({DEFAULT_LAYOUT_PROFILE})
+# DOCX: classic single-column + sidebar two-column (table layout; tokens from templates/<slug>/).
+SUPPORTED_DOCX_PROFILES = frozenset({DEFAULT_LAYOUT_PROFILE, LAYOUT_SIDEBAR_SPLIT})
 
 
 def load_layout_profile(template_name: Optional[str]) -> str:
@@ -50,12 +49,49 @@ def resolve_docx_layout_profile(template_name: Optional[str]) -> str:
     return prof
 
 
+def load_docx_max_pages(template_name: Optional[str]) -> Optional[int]:
+    """
+    Optional templates/<slug>/meta.json ``docxMaxPages`` (int >= 1).
+    When ``1``, sidebar Word export always stretches the layout table row toward the
+    bottom of the page (see docx_builder); overflow may still span pages in Word.
+    """
+    folder = resolve_template_folder(template_name)
+    path: Path = folder / "meta.json"
+    if not path.is_file():
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+    except (OSError, json.JSONDecodeError, TypeError):
+        return None
+    if not isinstance(raw, dict):
+        return None
+    v = raw.get("docxMaxPages")
+    if isinstance(v, int) and v >= 1:
+        return v
+    if isinstance(v, str) and v.strip().isdigit():
+        i = int(v.strip())
+        if i >= 1:
+            return i
+    return None
+
+
+def resolve_docx_max_pages(
+    template_name: Optional[str],
+    resume_data: Optional[Dict[str, Any]] = None,
+) -> Optional[int]:
+    """Per-resume ``docxMaxPages`` in payload overrides template meta when set."""
+    if resume_data and isinstance(resume_data.get("docxMaxPages"), int):
+        v = resume_data["docxMaxPages"]
+        if v >= 1:
+            return v
+    return load_docx_max_pages(template_name)
+
+
 def docx_export_template_slug(template_name: Optional[str]) -> str:
     """
-    Folder slug used for Word generation.
-
-    PDF/HTML may use a template whose layoutProfile is not implemented in docx_builder yet.
-    In that case export uses the primary single-column template so users still get a usable .docx.
+    Folder slug for Word: matches the selected template when layoutProfile is implemented
+    (e.g. ``sidebar`` for ``sidebar_split``). Unsupported profiles fall back to ``classic``.
     """
     slug = normalize_template_slug(template_name)
     if load_layout_profile(slug) not in SUPPORTED_DOCX_PROFILES:

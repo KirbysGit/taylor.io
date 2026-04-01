@@ -51,20 +51,19 @@ def build_education_entry_rail(edu: Dict[str, Any]) -> str:
         di = html.escape(discipline, quote=True)
         major_html = (
             f'<div class="education-entry--rail__major">'
-            f'<span class="education-entry--rail__major-preamble">{de} in </span>'
-            f'<span class="education-entry--rail__major-em">{di}</span>'
+            f'<span class="education-entry--rail__major-preamble">{de} in {di}</span>'
             f"</div>"
         )
     elif degree:
         major_html = (
             f'<div class="education-entry--rail__major">'
-            f'<span class="education-entry--rail__major-em">{html.escape(degree, quote=True)}</span>'
+            f'<span class="education-entry--rail__major-preamble">{html.escape(degree, quote=True)}</span>'
             f"</div>"
         )
     elif discipline:
         major_html = (
             f'<div class="education-entry--rail__major">'
-            f'<span class="education-entry--rail__major-em">{html.escape(discipline, quote=True)}</span>'
+            f'<span class="education-entry--rail__major-preamble">{html.escape(discipline, quote=True)}</span>'
             f"</div>"
         )
 

@@ -15,6 +15,11 @@ from .resume_tokens import build_resume_tokens_css, load_resume_token_dict
 from .style_presets import merge_resume_token_overrides
 from .template_layout import LAYOUT_SIDEBAR_SPLIT, docx_export_template_slug, load_layout_profile
 from .template_slug import normalize_template_slug, resolve_template_folder
+from .layout_sidebar_split import (
+    raw_body_order as _raw_body_order,
+    sidebar_main_column_order as _sidebar_main_column_order,
+    sidebar_rail_section_order as _sidebar_rail_section_order,
+)
 
 # import builders.
 from .builders import (
@@ -63,10 +68,16 @@ def _section_titles(resume_data: Dict[str, Any]) -> Dict[str, str]:
     return titles
 
 
-def build_sections_map(resume_data: Dict[str, Any]) -> Dict[str, str]:
+def build_sections_map(
+    resume_data: Dict[str, Any],
+    layout_profile: str | None = None,
+) -> Dict[str, str]:
     """Section key → HTML block (possibly empty string)."""
     titles = _section_titles(resume_data)
     sections_map: Dict[str, str] = {}
+    project_variant = (
+        "sidebar_main" if layout_profile == LAYOUT_SIDEBAR_SPLIT else "default"
+    )
 
     summary = resume_data.get("summary")
     if summary is not None:
@@ -87,7 +98,9 @@ def build_sections_map(resume_data: Dict[str, Any]) -> Dict[str, str]:
     sections_map["experience"] = _build_section(titles["experience"], "\n".join(experience_entries))
 
     projects = resume_data.get("projects") or []
-    project_entries = [build_project_entry(proj) for proj in projects]
+    project_entries = [
+        build_project_entry(proj, variant=project_variant) for proj in projects
+    ]
     sections_map["projects"] = _build_section(titles["projects"], "\n".join(project_entries))
 
     skills = resume_data.get("skills") or []
@@ -98,45 +111,12 @@ def build_sections_map(resume_data: Dict[str, Any]) -> Dict[str, str]:
     return sections_map
 
 
-def _raw_body_order(resume_data: Dict[str, Any]) -> list:
-    """Section keys from payload order, excluding header only (no summary-first normalization)."""
-    section_order = resume_data.get(
-        "sectionOrder",
-        ["header", "summary", "education", "experience", "projects", "skills"],
-    )
-    return [k for k in section_order if k != "header"]
-
-
 def _body_section_order(resume_data: Dict[str, Any]) -> list:
     """Single-column flow: summary always first when present, then rest in order."""
     body_order = list(_raw_body_order(resume_data))
     if "summary" in body_order:
         body_order = ["summary"] + [k for k in body_order if k != "summary"]
     return body_order
-
-
-# sidebar_split: rail = skills + education (order from sectionOrder); main = narrative only.
-_SIDEBAR_RAIL_KEY_SET = frozenset({"skills", "education"})
-_SIDEBAR_MAIN_KEYS = frozenset({"summary", "experience", "projects"})
-
-
-def _sidebar_rail_section_order(resume_data: Dict[str, Any]) -> list:
-    """
-    Skills vs education order follows resume_data.sectionOrder (same source as the Organize UI).
-    Keys omitted from sectionOrder default to skills, then education.
-    """
-    raw = _raw_body_order(resume_data)
-    ordered: list = []
-    seen: set = set()
-    for k in raw:
-        if k in _SIDEBAR_RAIL_KEY_SET and k not in seen:
-            ordered.append(k)
-            seen.add(k)
-    for k in ("skills", "education"):
-        if k not in seen:
-            ordered.append(k)
-            seen.add(k)
-    return ordered
 
 
 def _sidebar_rail_skills_section(resume_data: Dict[str, Any]) -> str:
@@ -161,14 +141,6 @@ def _sidebar_rail_education_section(resume_data: Dict[str, Any]) -> str:
         return ""
     titles = _section_titles(resume_data)
     return _build_section(titles["education"], "\n".join(entries))
-
-
-def _sidebar_main_column_order(resume_data: Dict[str, Any]) -> list:
-    """
-    Respect sectionOrder only among summary / experience / projects.
-    Education is rail-only (compact variant); skills are rail-only.
-    """
-    return [k for k in _raw_body_order(resume_data) if k in _SIDEBAR_MAIN_KEYS]
 
 
 def _fill_header_placeholders(
@@ -204,7 +176,7 @@ def fill_template(
     html_content = _fill_header_placeholders(
         html_content, resume_data, layout_profile, style_preferences
     )
-    sections_map = build_sections_map(resume_data)
+    sections_map = build_sections_map(resume_data, layout_profile)
 
     if layout_profile == LAYOUT_SIDEBAR_SPLIT:
         rail_blocks = []

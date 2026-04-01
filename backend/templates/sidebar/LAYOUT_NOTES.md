@@ -7,15 +7,14 @@
 - Education uses the **rail variant** only here; classic template still uses `build_education_entry`.
 - `generator/pipeline.fill_template` branches on `layoutProfile` from `meta.json`.
 - PDF and `/preview` use the `sidebar` folder as normal.
-- Word: `docx_export_template_slug()` routes exports to `classic` until `sidebar_split` is added to `SUPPORTED_DOCX_PROFILES` and `docx_builder` gains a matching structure (likely table with two cells or section columns).
+- Word: `sidebar_split` is in `SUPPORTED_DOCX_PROFILES`; `docx_export_template_slug('sidebar')` stays `sidebar` so DOCX loads `templates/sidebar/` tokens. Builder uses a **two-column table**; **page margins and header/footer offset are 0** (Playwright PDF margin 0 parity); insets use `margin_top_in` / `margin_bottom_in` / `sidebar_pad_x_in` / `margin_right_in` as **cell padding** + rail **paragraph** indent. Rail cell gets shading + right border from tokens. Main-column **projects** use a right tab (tech left, URL right).
+- **Contact rail**: PDF uses inline SVG in `build_contact_rail_html`. Word optionally embeds **PNG** from `templates/sidebar/docx_icons/<field>.png` (`email`, `phone`, `location`, `linkedin`, `github`, `portfolio`). Transparent PNGs are fine. Size / text gap: `sidebar_docx_contact_icon_size_pt`, `sidebar_docx_contact_icon_text_gap_pt` in `resume_tokens.json`. Hyperlinks on contact text are not yet mirrored in Word.
 
-## DOCX checklist (later)
+## DOCX checklist
 
-- Map aside width to Word (table column inches vs section columns).
-- Repeat header/contact in Word or accept different first-page treatment.
-- Skills block: same HTML builders; ensure list styles and spacing match narrow column.
-- Section order parity: main includes education; skills rail-only.
-- Regression: export still includes all sections when user picks Sidebar (currently classic layout substitutes).
+- Done: table column width vs aside ratio, rail cell appearance from tokens, main vs rail section order, projects tech/URL line.
+- Rail **height**: `docxMaxPages`: 1 + row-fill set `w:trHeight` / `w:hRule=exact` from **`sidebar_docx_fill_row_height_in`** in `resume_tokens.json` (default **10.795in**). If set to `0`, falls back to body height minus slack twips. Stub paragraph before `w:sectPr` when row-fill runs.
+- Optional polish: first-page header repeat, pixel-perfect list spacing in narrow column.
 
 ## PDF / Playwright
 

@@ -28,6 +28,13 @@ class DocxStyleConfig:
     font_primary: str = "Georgia"  # .name, .section-title, .company-name, etc.
     font_secondary: str = "Times New Roman"  # .school-dates, .experience-dates, etc.
 
+    # Body text colors (CSS rgba / #hex); Word uses alpha blended onto white. Sidebar + classic.
+    resume_text_color_primary: str = "rgba(15, 23, 42, 0.92)"
+    resume_text_color_secondary: str = "rgba(15, 23, 42, 0.78)"
+    resume_text_color_tertiary: str = "rgba(15, 23, 42, 0.55)"
+    resume_text_color_emphasis: str = "rgba(15, 23, 42, 0.96)"
+    resume_text_color_highlight_title: str = "rgba(15, 23, 42, 0.88)"
+
     # ---- Header ----
     # .name: 32pt, bold
     name_font_size_pt: int = 32
@@ -77,13 +84,46 @@ class DocxStyleConfig:
     # Right-aligned tab position for two-column lines (in). Content width ~7.5in.
     two_column_tab_in: float = 7.5
 
+    # sidebar_split Word: rail column width (in). Classic templates ignore; sidebar resume_tokens sets this.
+    sidebar_width_in: float = 2.68
+    # Rail / main cell insets and main-column summary indents (sidebar resume_tokens)
+    sidebar_pad_x_in: float = 0.34
+    sidebar_body_pad_left_in: float = 0.3
+    sidebar_section_content_indent_pt: float = 6.5
+    sidebar_summary_text_padding_left_pt: float = 0.0
+    sidebar_summary_first_line_indent_pt: float = 20.0
+    sidebar_header_margin_bottom_pt: float = 12.0
+    # Rail cell fill + divider (sidebar resume_tokens); classic export ignores.
+    sidebar_bg: str = "#e9edf2"
+    sidebar_border_width_pt: float = 0.75
+    sidebar_border_color: str = "#b8c2ce"
+    # Word-only: when row-fill runs, w:trHeight@exact height in inches (~full Letter body).
+    # Classic ignores.
+    sidebar_docx_fill_row_height_in: float = 10.795
+    # Word rail: templates/<slug>/docx_icons/<field>.png (optional); square PNG recommended
+    sidebar_docx_contact_icon_size_pt: float = 9.5
+    sidebar_docx_contact_icon_text_gap_pt: float = 4.5
+
     # .highlight-title, .highlight-content: 10pt (title bold)
     highlight_font_size_pt: int = 10
+    # .highlights-lines gap (PDF); Word: space before each highlight after the first in an entry
+    highlights_gap_pt: float = 4.5
     # Word-only: education subsection (honors / highlights) lines — see PDF_WORD_SPACING.md
-    word_highlight_space_after_pt: float = 2.0
+    word_highlight_space_after_pt: float = 3.0
     # Word-only: experience & project bullet paragraphs (shared _add_description_block)
     word_bullet_space_before_pt: float = 1.0
     word_bullet_space_after_pt: float = 1.5
+
+    # sidebar rail education: minor line size (pt), GPA→highlights gap, highlights block top air
+    education_rail_minor_font_size_pt: float = 9.0
+    education_rail_gpa_space_after_pt: float = 6.0
+    education_rail_highlights_space_before_pt: float = 8.0
+
+    # Extra margin between stacked aside sections (PDF rail)
+    sidebar_rail_section_stack_margin_top_pt: float = 8.0
+
+    # PDF: margin below each education entry card (rail uses for last paragraph in entry)
+    education_entry_margin_bottom_pt: float = 4.0
 
     # ---- Experience ----
     # .experience-title: 11pt, bold
@@ -102,6 +142,7 @@ class DocxStyleConfig:
     # .description-bullets padding-left, li margin/padding (matches preview.css)
     description_bullet_indent_pt: float = 12.5
     description_bullet_hang_pt: float = 12.0  # hang width; tab stop here for bullet-to-text alignment
+    description_bullet_li_padding_left_pt: float = 2.0  # gap between bullet glyph and text (PDF li padding-left)
     description_bullet_item_space_pt: float = 0.5
     description_paragraph_space_pt: float = 2.0
     description_block_space_before_pt: float = 1.0  # margin between company and bullets
@@ -113,8 +154,8 @@ class DocxStyleConfig:
     project_line_space_pt: float = 0.75
 
     # ---- Skills ----
-    skill_category_font_size_pt: int = 10
-    skill_names_font_size_pt: int = 10
+    skill_category_font_size_pt: float = 10
+    skill_names_font_size_pt: float = 10
     skill_line_space_pt: float = 1.5
     skill_line_height: float = 1.2
 

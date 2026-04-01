@@ -1,7 +1,8 @@
 """
 Resume HTML fragment builders.
 
-- ``common`` — dates, descriptions, taglines, skill grouping (shared).
+- ``common`` — dates, descriptions, skill grouping (shared).
+- ``tagline`` — mini-markup for header tagline (HTML + Word run lists).
 - ``header`` — contact line and sidebar contact rail.
 - ``single_column`` — classic template body entries.
 - ``sidebar_rail`` — narrow-column variants for ``layoutProfile=sidebar_split``.
@@ -12,13 +13,13 @@ Import from ``generator.builders`` (this package) as before; e.g. ``build_educat
 from __future__ import annotations
 
 from .common import (
-    build_tagline_block,
     format_date_month_year,
     format_description,
     format_date_range,
-    parse_tagline_runs,
     skills_group_ordered,
 )
+from .tagline import build_tagline_block, parse_tagline_runs
+
 from .header import (
     build_contact_rail_html,
     build_header,
@@ -26,6 +27,7 @@ from .header import (
     resolve_contact_url_display,
 )
 from .sidebar_rail import build_education_entry_rail, build_skill_entry_rail
+
 from .single_column import (
     build_education_entry,
     build_experience_entry,

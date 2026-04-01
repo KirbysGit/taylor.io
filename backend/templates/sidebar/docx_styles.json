@@ -1,4 +1,21 @@
 {
-  "_comment": "Optional Word-only overrides applied after resume_tokens.json. For spacing/sizes shared with the PDF preview, edit resume_tokens.json instead.",
-  "_doc": "Keys match DocxStyleConfig fields. An empty object (besides _*) means all values come from resume_tokens.json."
+  "_comment": "Word-only overrides (applied after resume_tokens via get_styles). Main-column rhythm and rail width; section title spacing defers to resume_tokens unless overridden here.",
+  "sidebar_width_in": 2.84,
+  "sidebar_border_width_pt": 0.65,
+  "prose_line_height": 1.12,
+  "word_bullet_space_before_pt": 0.35,
+  "word_bullet_space_after_pt": 0.85,
+  "description_space_after_pt": 1.0,
+  "description_bullet_item_space_pt": 0.32,
+  "description_paragraph_space_pt": 1.3,
+  "description_block_space_before_pt": 0.6,
+  "company_line_space_after_pt": 1.85,
+  "experience_line_space_before_pt": 0.35,
+  "experience_line_space_pt": 1.15,
+  "project_title_space_before_pt": 0.45,
+  "project_line_space_pt": 1.6,
+  "summary_space_after_pt": 1.85,
+  "skill_line_space_pt": 2.45,
+  "skill_line_height": 1.18,
+  "word_highlight_space_after_pt": 1.3
 }
