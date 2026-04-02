@@ -3,7 +3,7 @@ Resume design tokens: one JSON file drives PDF preview CSS variables and Word (D
 
 - templates/<slug>/resume_tokens.json (primary slug: ``classic``; legacy ``default`` aliases there)
 - PDF: pipeline prepends :root { --rt-* } built from this file before preview.css
-- Word: docx_styles.get_styles merges applicable keys onto DocxStyleConfig
+- Word / PDF margins: shared.styles.get_styles merges applicable keys onto DocxStyleConfig
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import json
 from dataclasses import fields
 from typing import Any, Dict
 
-from .docx_styles import DocxStyleConfig
+from .word.docx_styles import DocxStyleConfig
 from .template_slug import PRIMARY_TEMPLATE_SLUG, TEMPLATES_DIR, resolve_template_folder
 
 TOKEN_FILENAME = "resume_tokens.json"

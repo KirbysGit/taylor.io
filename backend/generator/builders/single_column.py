@@ -1,5 +1,11 @@
 """
 Classic single-column HTML: education, experience, projects, skills (inline row).
+
+Sections (in order):
+  - Education — school / dates / degree line / GPA / subsection highlights
+  - Experience — title + dates, company + skills + location, description (may contain HTML)
+  - Projects — default: title | tech | URL on one row, or if sidebar, title block organized differently.
+  - Skills — one "skill-line" per category (comma-separated names)
 """
 
 from __future__ import annotations
@@ -9,7 +15,10 @@ from typing import Dict, Any, List
 from .common import format_date_range, format_description, skills_group_ordered
 
 
+# --- Education ---
+
 def build_education_entry(edu: Dict[str, Any]) -> str:
+    """Builds Classic Single-Column Education HTML."""
     degree = edu.get("degree", "")
     discipline = edu.get("discipline", "")
     minor = edu.get("minor", "")
@@ -36,6 +45,7 @@ def build_education_entry(edu: Dict[str, Any]) -> str:
         )
     highlights_lines = "\n".join(highlights_lines)
 
+    # Indented multiline string: leading spaces become part of the HTML.
     return f'''
     <div class="education-entry">
         <div class="school-line">
@@ -56,6 +66,8 @@ def build_education_entry(edu: Dict[str, Any]) -> str:
     '''
 
 
+# --- Experience ---
+
 def build_experience_entry(exp: Dict[str, Any]) -> str:
     start_raw = exp.get("start_date") or exp.get("startDate") or ""
     end_raw = exp.get("end_date") or exp.get("endDate") or ""
@@ -66,6 +78,7 @@ def build_experience_entry(exp: Dict[str, Any]) -> str:
     skills = exp.get("skills", "")
     location = exp.get("location", "")
 
+    # Optional! : skills associated with experience entry.
     company_skills_html = f'<div class="company-name">{company}</div>'
     if skills:
         company_skills_html += (
@@ -91,6 +104,8 @@ def build_experience_entry(exp: Dict[str, Any]) -> str:
     '''
 
 
+# --- Projects ---
+
 def build_project_entry(proj: Dict[str, Any], *, variant: str = "default") -> str:
     title = proj.get("title", "")
 
@@ -101,7 +116,7 @@ def build_project_entry(proj: Dict[str, Any], *, variant: str = "default") -> st
 
     description = format_description(proj.get("description", ""))
 
-    # Sidebar main column: title row, then tech (left) and URL (right), no pipe dividers.
+    # If 'Sidebar' layout, no '|' separators. Info moved below title block.
     if variant == "sidebar_main":
         meta_parts: List[str] = []
         if tech_stack_str:
@@ -127,6 +142,7 @@ def build_project_entry(proj: Dict[str, Any], *, variant: str = "default") -> st
     </div>
     '''
 
+    # Classic: title, tech, URL inline with pipe separators.
     title_html = f'<span class="project-title-text">{title}</span>'
 
     if tech_stack_str:
@@ -146,6 +162,8 @@ def build_project_entry(proj: Dict[str, Any], *, variant: str = "default") -> st
     </div>
     '''
 
+
+# --- Skills ---
 
 def build_skill_entry(skills: list, category_order: list = None) -> str:
     groups = skills_group_ordered(skills, category_order)

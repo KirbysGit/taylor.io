@@ -1,7 +1,11 @@
 """
-Shared HTML helpers: dates, descriptions, skill grouping.
+Shared HTML helpers for resume body fragments.
 
-Tagline parsing/HTML: ``tagline`` module. Layout-specific markup: header.py, single_column.py, sidebar_rail.py.
+Sections (in order):
+  - Dates — month/year parsing; entry date ranges (e.g. Present)
+  - Descriptions — bullets vs paragraphs HTML
+  - Skill grouping — category order + uncategorized
+
 """
 
 from __future__ import annotations
@@ -10,10 +14,9 @@ import re
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
-# --- date formatter.
-# if its just a year, format it as YYYY.
-# if its a month, format it as Month YYYY.
-# if its a date, format it as Month Day, Year.
+# --- Dates ---
+
+# One date string (usually YYYY-MM or YYYY-MM-DD) → readable "Month YYYY". If parsing fails, returns the input unchanged.
 def format_date_month_year(date: str) -> str:
     if not date:
         return ""
@@ -32,11 +35,32 @@ def format_date_month_year(date: str) -> str:
     except Exception:
         return date
 
-# --- description formatter.
-# converts bullet points to HTML list items.
-# converts paragraphs to HTML paragraphs.
+
+# Formats the date range for an entry: if both start and end exist, "Start - End". If only one exists, that single label.
+# If current is True, shows Present instead of an end date (or just "Present" when there is no start).
+def format_date_range(start_raw, end_raw, current: bool) -> str:
+    start_val = str(start_raw) if start_raw else ""
+    end_val = str(end_raw) if end_raw else ""
+    start_date = format_date_month_year(start_val) if start_val else ""
+    end_date = format_date_month_year(end_val) if end_val else ""
+
+    if current and start_date:
+        return f"{start_date} - Present"
+    if current and not start_date:
+        return "Present"
+    if start_date and end_date:
+        return f"{start_date} - {end_date}"
+    if start_date:
+        return start_date
+    if end_date:
+        return end_date
+    return ""
+
+
+# --- Descriptions ---
+
+# Multiline text → HTML: lines starting with • become a bullet list; other lines become paragraphs (see description-* classes).
 def format_description(description: str) -> str:
-    """Format description text, converting bullet points to HTML list."""
     if not description:
         return ""
 
@@ -83,35 +107,14 @@ def format_description(description: str) -> str:
         return "".join(html_parts)
     return f'<p class="description-paragraph">{description}</p>'
 
-# --- date range formatter.
-# formats a date range with a conditional dash.
-def format_date_range(start_raw, end_raw, current: bool) -> str:
-    start_val = str(start_raw) if start_raw else ""
-    end_val = str(end_raw) if end_raw else ""
-    start_date = format_date_month_year(start_val) if start_val else ""
-    end_date = format_date_month_year(end_val) if end_val else ""
 
-    if current and start_date:
-        return f"{start_date} - Present"
-    if current and not start_date:
-        return "Present"
-    if start_date and end_date:
-        return f"{start_date} - {end_date}"
-    if start_date:
-        return start_date
-    if end_date:
-        return end_date
-    return ""
+# --- Skill grouping ---
 
-
+# Skills → list of (category name or None, names in that bucket). Optional category_order list runs first; rest alpha; uncategorized last.
 def skills_group_ordered(
     skills: list,
     category_order: Optional[list] = None,
 ) -> List[Tuple[Optional[str], List[str]]]:
-    """
-    Ordered list  of (category_name | None for uncategorized, [skill names]).
-    Used by single-column and sidebar rail skill renderers.
-    """
     skills_by_category: Dict[str, List[str]] = {}
     uncategorized: List[str] = []
 

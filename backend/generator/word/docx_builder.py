@@ -1,5 +1,5 @@
 # docx_builder.py
-# Word document generator for resumes. Uses docx_styles for template-consistent formatting.
+# Word document generator for resumes. Style loading: ``shared.styles.get_styles``; tokens: ``word.docx_styles``.
 
 import re
 from io import BytesIO
@@ -12,23 +12,25 @@ from docx.oxml import OxmlElement
 from dataclasses import replace
 from typing import Dict, Any, Optional, List, Tuple
 
-from .layout_sidebar_split import sidebar_main_column_order, sidebar_rail_section_order
-from .template_layout import (
+from ..layout_sidebar_split import sidebar_main_column_order, sidebar_rail_section_order
+from ..shared.styles import get_styles
+from ..template_layout import (
     LAYOUT_SIDEBAR_SPLIT,
     load_layout_profile,
     resolve_docx_max_pages,
 )
-from .template_slug import normalize_template_slug
+from ..template_slug import normalize_template_slug
 
-from .builders import (
+from ..builders import (
     format_contact_field_display,
     format_date_month_year,
     parse_tagline_runs,
     resolve_contact_url_display,
 )
-from .builders.common import skills_group_ordered
-from .docx_styles import get_styles, DocxStyleConfig
-from .docx_contact_icons import contact_rail_icon_png_bytes
+from ..builders.common import skills_group_ordered
+from ..icons.docx_rail_png import contact_rail_icon_png_bytes
+
+from .docx_styles import DocxStyleConfig
 
 
 def _set_run_character_spacing(run, spacing_pt: float) -> None:
@@ -1700,7 +1702,7 @@ def build_docx(
 ) -> bytes:
     """
     Build a styled Word document from resume_data.
-    Uses docx_styles for template-consistent formatting (margins, fonts, spacing).
+    Uses ``shared.styles.get_styles`` for template-consistent formatting (margins, fonts, spacing).
     Body sections follow resume_data.sectionOrder (same as PDF/HTML), after the header.
     """
     name = normalize_template_slug(template_name)

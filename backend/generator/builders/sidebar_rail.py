@@ -1,5 +1,11 @@
 """
-Sidebar rail–specific HTML: compact education, stacked skill categories.
+Sidebar rail–specific HTML.
+
+A more compact education rail, stacked skill categories.
+
+Sections (in order):
+  - Education rail — vertical stack (school → dates → location → major/minor → GPA → highlights)
+  - Skills rail — grouped categories, title row + comma-separated names (or solo names if no category label)
 """
 
 from __future__ import annotations
@@ -10,11 +16,10 @@ from typing import Any, Dict, List, Optional
 from .common import format_date_range, skills_group_ordered
 
 
+# --- Education Rail ---
+
 def build_education_entry_rail(edu: Dict[str, Any]) -> str:
-    """
-    Sidebar rail education: top-to-bottom stack — school, dates, location, major,
-    minor line ("Minor in …"), GPA, then highlights (title block above body text).
-    """
+    """Builds Sidebar Rail Education HTML."""
     school_raw = (edu.get("school") or "").strip()
     degree = (edu.get("degree") or "").strip()
     discipline = (edu.get("discipline") or "").strip()
@@ -30,9 +35,7 @@ def build_education_entry_rail(edu: Dict[str, Any]) -> str:
     minor_line = f"Minor in {minor}" if minor else ""
 
     has_major = bool(degree or discipline)
-    has_body = bool(
-        school_raw or date_range or location or has_major or minor_line or gpa
-    )
+    has_body = bool(school_raw or date_range or location or has_major or minor_line or gpa)
     subs = edu.get("subsections") or {}
     if isinstance(subs, dict) and subs:
         has_body = True
@@ -40,6 +43,7 @@ def build_education_entry_rail(edu: Dict[str, Any]) -> str:
     if not has_body:
         return ""
 
+    # User text → safe HTML.
     school_e = html.escape(school_raw, quote=True)
     dates_e = html.escape(date_range, quote=True)
     loc_e = html.escape(location, quote=True)
@@ -83,6 +87,7 @@ def build_education_entry_rail(edu: Dict[str, Any]) -> str:
             f'<div class="education-entry--rail__gpa">{html.escape(f"GPA: {gpa}", quote=True)}</div>'
         )
 
+    # Arbitrary title + body pairs (e.g. coursework, honors).
     hl_parts: List[str] = []
     if isinstance(subs, dict):
         for title, content in subs.items():
@@ -118,6 +123,8 @@ def build_education_entry_rail(edu: Dict[str, Any]) -> str:
 </div>'''
 
 
+# --- Skills Rail ---
+
 def build_skill_entry_rail(skills: list, category_order: Optional[list] = None) -> str:
     """
     Sidebar rail: category title block, then skill names below.
@@ -140,6 +147,7 @@ def build_skill_entry_rail(skills: list, category_order: Optional[list] = None) 
                 f"</div>"
             )
         else:
+            # No category label (e.g. uncategorized bucket).
             blocks.append(
                 f'<div class="skill-rail-group skill-rail-group--solo">'
                 f'<div class="skill-rail__names">{names_e}</div>'

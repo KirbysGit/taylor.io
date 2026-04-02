@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 
-from .docx_styles import get_styles
+from .shared.styles import get_styles
 from .resume_tokens import build_resume_tokens_css, load_resume_token_dict
 from .style_presets import merge_resume_token_overrides
 from .template_layout import LAYOUT_SIDEBAR_SPLIT, docx_export_template_slug, load_layout_profile
@@ -304,10 +304,10 @@ def generate_docx(
 ) -> bytes:
     """
     Generate a Word document from resume_data.
-    Uses template-specific styling from docx_styles.
+    Uses template-specific styling from shared.styles (DocxStyleConfig).
     Returns .docx file as bytes.
     """
-    from .docx_builder import build_docx
+    from .word.docx_builder import build_docx
 
     export_slug = docx_export_template_slug(template_name)
     return build_docx(resume_data, export_slug, style_preferences)

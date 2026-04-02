@@ -1,16 +1,8 @@
 # docx_styles.py
-# Style configuration for Word document generation.
-# Values mirror backend/templates/classic/preview.css (primary token-driven template).
-# Edit these to adjust docx styling; add per-template configs as you expand.
+# Word-facing style token dataclass. Values mirror backend/templates/classic/preview.css.
+# Merged token loading lives in ``generator.shared.styles`` (``get_styles``).
 
 from dataclasses import dataclass
-
-from .template_slug import (
-    PRIMARY_TEMPLATE_SLUG,
-    TEMPLATES_DIR,
-    normalize_template_slug,
-    resolve_template_folder,
-)
 
 
 @dataclass
@@ -169,33 +161,3 @@ class DocxStyleConfig:
     summary_text_padding_left_pt: float = 1.25
     # First-line “tab” (body lines align to section indent + padding only)
     summary_first_line_indent_pt: float = 30.0
-
-
-def get_styles(template_name: str, style_preferences: dict | None = None) -> DocxStyleConfig:
-    """
-    Return style config for the given template.
-    Loads resume_tokens.json, merges optional user presets (see style_presets), then docx_styles.json overrides.
-    """
-    import json
-
-    from .resume_tokens import apply_resume_tokens_to_docx_config, load_resume_token_dict
-    from .style_presets import merge_resume_token_overrides
-
-    name = normalize_template_slug(template_name)
-    base = DocxStyleConfig()
-    raw_tokens = load_resume_token_dict(name)
-    tokens = merge_resume_token_overrides(name, raw_tokens, style_preferences)
-    apply_resume_tokens_to_docx_config(base, tokens)
-    override_path = resolve_template_folder(name) / "docx_styles.json"
-    if not override_path.exists():
-        override_path = resolve_template_folder(PRIMARY_TEMPLATE_SLUG) / "docx_styles.json"
-    if override_path.exists():
-        try:
-            with open(override_path, "r", encoding="utf-8") as f:
-                overrides = json.load(f)
-            for key, val in overrides.items():
-                if not key.startswith("_") and hasattr(base, key):
-                    setattr(base, key, val)
-        except Exception:
-            pass
-    return base

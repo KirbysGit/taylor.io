@@ -1,14 +1,20 @@
 """
 Resume tagline mini-markup: same AST drives HTML (preview/PDF) and Word runs.
 
-Markup (intentionally small surface area):
-  ==text==     → underline (split on ``==`` first so underline wraps bold/italic regions)
-  **text**     → bold
-  _text_       → italic (underscore pairs; unmatched ``_`` stays literal in a plain segment)
-  *            → middle dot (·) when not part of a ``**`` pair
-
-``parse_tagline_runs`` returns runs as ``(text, bold, italic, underline)`` for ``docx_builder``
-and internal HTML emission. ``build_tagline_block`` wraps the parsed HTML in ``<p class="tagline">``.
+Sections:
+    - Constants - 
+        - TAGLINE_INTERPUNCT - Just middle dot character.
+    - Parsing - 
+        - tagline_outer_italic_segments - Scan for Italic segments.
+        - tagline_apply_bold_and_dots - Apply Bold and Bullet dots to the segment.
+        - merge_bold_italic_runs - Merge adjacent Bold and Italic runs.
+        - parse_tagline_runs_bold_italic_only - Parse slices that do not contain == underline markers.
+    - Public parse - 
+        - parse_tagline_runs - Parse the tagline string for underline to be applied to the bold and italic runs.
+    - HTML - 
+        - tagline_runs_to_html - Convert the parsed runs to HTML.
+    - Block builder - 
+        - build_tagline_block - Build the tagline block HTML.
 """
 
 from __future__ import annotations
@@ -16,18 +22,15 @@ from __future__ import annotations
 import html
 from typing import Any, Dict, List, Tuple
 
+# --- Constants ---
+
 # Characters that become a literal middle dot (·), to avoid clashing with ``**`` bold markers.
 TAGLINE_INTERPUNCT = "\u00b7"
 
 
-def _tagline_outer_italic_segments(raw: str) -> List[Tuple[bool, str]]:
-    """
-    Scan ``raw`` left-to-right and emit (is_italic, segment) pieces using ``_..._`` pairs.
+# --- Parsing  ---
 
-    - Balanced ``_inner_`` → ``inner`` is one segment with ``is_italic=True``.
-    - Lone/trailing ``_`` → consume until next ``_`` or EOS as a non-italic segment (literal underscores preserved in the slice).
-    - Segments between italic spans are non-italic; bold/interpunct rules apply later per segment.
-    """
+def _tagline_outer_italic_segments(raw: str) -> List[Tuple[bool, str]]:
     out: List[Tuple[bool, str]] = []
     i = 0
     n = len(raw)
@@ -52,12 +55,6 @@ def _tagline_outer_italic_segments(raw: str) -> List[Tuple[bool, str]]:
 
 
 def _tagline_apply_bold_and_dots(text: str, italic: bool) -> List[Tuple[str, bool, bool]]:
-    """
-    Within one italic/non-italic segment: split on ``**`` to mark bold runs; remap stray ``*`` to ``TAGLINE_INTERPUNCT``.
-
-    - Odd number of ``**``-delimited parts → even **index segments are normal, odd are **bold**.
-    - Even number of splits (unclosed ``**``) → treat whole string as plain: no bold toggles, still swap ``*`` for interpunct.
-    """
     parts = text.split("**")
     if len(parts) % 2 == 0:
         t = text.replace("*", TAGLINE_INTERPUNCT)
@@ -72,7 +69,6 @@ def _tagline_apply_bold_and_dots(text: str, italic: bool) -> List[Tuple[str, boo
 
 
 def _merge_bold_italic_runs(runs: List[Tuple[str, bool, bool]]) -> List[Tuple[str, bool, bool]]:
-    """Join adjacent (text, bold, italic) runs when style flags match so Word/HTML get fewer fragments."""
     merged: List[Tuple[str, bool, bool]] = []
     for text_p, b, it in runs:
         if not text_p:
@@ -85,28 +81,22 @@ def _merge_bold_italic_runs(runs: List[Tuple[str, bool, bool]]) -> List[Tuple[st
 
 
 def _parse_tagline_runs_bold_italic_only(text: str) -> List[Tuple[str, bool, bool]]:
-    """Parse a slice that does not contain ``==`` underline markers (underline is applied one level up)."""
     all_runs: List[Tuple[str, bool, bool]] = []
     for is_italic, seg in _tagline_outer_italic_segments(text):
         all_runs.extend(_tagline_apply_bold_and_dots(seg, is_italic))
     return _merge_bold_italic_runs(all_runs)
 
 
+# --- Public Parse ---
+
 def parse_tagline_runs(raw: str) -> List[Tuple[str, bool, bool, bool]]:
-    """
-    Tagline mini-markup (HTML preview/PDF and Word):
-    - ==text== — underline (parsed outermost)
-    - **text** — bold
-    - _text_ — italic
-    - Every * outside of ** pairs becomes a middle dot (·)
-    """
     raw = (raw or "").strip()
     if not raw:
         return []
-    # Underline: split on == so segments at odd indices are wrapped with underline in the final pass below.
+    # Odd-length parts → alternating plain / underlined slices after split on ==.
     parts = raw.split("==")
     if len(parts) % 2 == 0:
-        # Unbalanced ==: do not treat as underline; parse bold/italic only on full string.
+        # Unbalanced ==: do not treat as underline, parse bold/italic only on full string.
         merged_three = _parse_tagline_runs_bold_italic_only(raw)
         return [(t, b, it, False) for t, b, it in merged_three]
     merged_four: List[Tuple[str, bool, bool, bool]] = []
@@ -114,7 +104,7 @@ def parse_tagline_runs(raw: str) -> List[Tuple[str, bool, bool, bool]]:
         underline = idx % 2 == 1
         for t, b, it in _parse_tagline_runs_bold_italic_only(p):
             merged_four.append((t, b, it, underline))
-    # Merge adjacent runs if all four style bits match (same as bold/italic merge, plus underline).
+    # Merge adjacent runs if all four style bits match (same as bold/italic merge, plus underline) to avoid duplicate runs.
     out: List[Tuple[str, bool, bool, bool]] = []
     for text_p, b, it, u in merged_four:
         if not text_p:
@@ -125,6 +115,8 @@ def parse_tagline_runs(raw: str) -> List[Tuple[str, bool, bool, bool]]:
             out.append((text_p, b, it, u))
     return out
 
+
+# --- HTML ---
 
 def _tagline_runs_to_html(runs: List[Tuple[str, bool, bool, bool]]) -> str:
     """Nest em/strong/u in a fixed order so browser styling is predictable (inner = em, then strong, then u)."""
@@ -141,6 +133,8 @@ def _tagline_runs_to_html(runs: List[Tuple[str, bool, bool, bool]]) -> str:
         out.append(chunk)
     return "".join(out)
 
+
+# --- Block builder ---
 
 def build_tagline_block(header: Dict[str, Any]) -> str:
     """HTML fragment for optional tagline: ==underline==, **bold**, _italic_, * -> ·."""

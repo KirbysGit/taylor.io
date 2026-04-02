@@ -3,7 +3,7 @@ Resume HTML fragment builders.
 
 - ``common`` — dates, descriptions, skill grouping (shared).
 - ``tagline`` — mini-markup for header tagline (HTML + Word run lists).
-- ``header`` — contact line and sidebar contact rail.
+- ``header`` — contact line, rail HTML, URL/display helpers (SVG via ``generator.icons``).
 - ``single_column`` — classic template body entries.
 - ``sidebar_rail`` — narrow-column variants for ``layoutProfile=sidebar_split``.
 

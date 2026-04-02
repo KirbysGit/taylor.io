@@ -80,3 +80,7 @@ idea stack :
         - list how the data is set up based on the current template (like how things are sectioned)
         - list the goal (this will be different based on the ai function called)
         - set up so that the output of the AI is a shorter resume, or less bs words, or more organized sections.
+
+- keep pipeline.py under ~400 lines.
+
+- one page resume only templates. 

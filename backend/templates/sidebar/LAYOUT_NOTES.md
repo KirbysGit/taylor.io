@@ -8,7 +8,7 @@
 - `generator/pipeline.fill_template` branches on `layoutProfile` from `meta.json`.
 - PDF and `/preview` use the `sidebar` folder as normal.
 - Word: `sidebar_split` is in `SUPPORTED_DOCX_PROFILES`; `docx_export_template_slug('sidebar')` stays `sidebar` so DOCX loads `templates/sidebar/` tokens. Builder uses a **two-column table**; **page margins and header/footer offset are 0** (Playwright PDF margin 0 parity); insets use `margin_top_in` / `margin_bottom_in` / `sidebar_pad_x_in` / `margin_right_in` as **cell padding** + rail **paragraph** indent. Rail cell gets shading + right border from tokens. Main-column **projects** use a right tab (tech left, URL right).
-- **Contact rail**: PDF uses inline SVG in `build_contact_rail_html`. Word optionally embeds **PNG** from `templates/sidebar/docx_icons/<field>.png` (`email`, `phone`, `location`, `linkedin`, `github`, `portfolio`). Transparent PNGs are fine. Size / text gap: `sidebar_docx_contact_icon_size_pt`, `sidebar_docx_contact_icon_text_gap_pt` in `resume_tokens.json`. Hyperlinks on contact text are not yet mirrored in Word.
+- **Contact rail**: PDF uses inline SVG from `generator/icons/contact_rail_svg.py` (via `build_contact_rail_html`). Word optionally embeds **PNG** via `generator/icons/docx_rail_png.py` from `templates/sidebar/docx_icons/<field>.png` (`email`, `phone`, `location`, `linkedin`, `github`, `portfolio`). Transparent PNGs are fine. Size / text gap: `sidebar_docx_contact_icon_size_pt`, `sidebar_docx_contact_icon_text_gap_pt` in `resume_tokens.json`. Hyperlinks on contact text are not yet mirrored in Word.
 
 ## DOCX checklist
 
