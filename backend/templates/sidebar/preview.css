@@ -1,5 +1,5 @@
 /* Spacing and type sizes: :root variables are injected before this file from resume_tokens.json
-   (backend/generator/resume_tokens.py + docx_styles.DocxStyleConfig). Edit the JSON to change both PDF and Word. */
+   (backend/generator/shared/resume_tokens.py + word/docx_styles.DocxStyleConfig). Edit the JSON to change both PDF and Word. */
 
 /* reset default spacing */
 * {
@@ -658,7 +658,7 @@
     margin-bottom: 2pt;
 }
 
-/* Degree + major / discipline: one weight (see builders sidebar_rail). */
+/* Degree + major / discipline: one weight (see html/sidebar_rail). */
 .resume-aside .education-entry--rail__major {
     font-size: calc(var(--rt-education-degree-line-font-size-pt) * 1.05);
     line-height: 1.3;

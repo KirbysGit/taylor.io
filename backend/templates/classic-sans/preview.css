@@ -1,5 +1,5 @@
 /* Spacing and type sizes: :root variables are injected before this file from resume_tokens.json
-   (backend/generator/resume_tokens.py + docx_styles.DocxStyleConfig). Edit the JSON to change both PDF and Word. */
+   (backend/generator/shared/resume_tokens.py + word/docx_styles.DocxStyleConfig). Edit the JSON to change both PDF and Word. */
 
 /* reset default spacing */
 * {

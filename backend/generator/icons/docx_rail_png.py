@@ -1,12 +1,4 @@
-"""
-PNG files for the sidebar contact rail in Word found in respective template's docx_icons folder.
-
-Sections:
-    - Constants: field keys, template slug, template folder
-    - Path lookup: field key → PNG file (case-insensitive)
-    - Bytes cache: PNG → bytes (lru_cache)
-    - Cache clear: for updates
-"""
+# PNG files for the sidebar contact rail in Word found in respective template's docx_icons folder.
 
 from __future__ import annotations
 
@@ -14,11 +6,12 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
-from ..template_slug import normalize_template_slug, resolve_template_folder
+from ..shared.template_slug import normalize_template_slug, resolve_template_folder
 
+# Constants for the contact rail icon fields.
 CONTACT_RAIL_ICON_FIELDS = frozenset(("email", "phone", "location", "linkedin", "github", "portfolio"))
 
-# Find the PNG file for a contact field key.
+# Takes in Template Name & Field Key and returns the PNG file path.
 def contact_rail_icon_png_path(template_name: Optional[str], field_key: str) -> Optional[Path]:
     if field_key not in CONTACT_RAIL_ICON_FIELDS:
         return None
@@ -30,7 +23,7 @@ def contact_rail_icon_png_path(template_name: Optional[str], field_key: str) -> 
             return p
     return None
 
-
+# Uses LRU to cache PNG bytes.
 @lru_cache(maxsize=64)
 def contact_rail_icon_png_bytes(template_name: Optional[str], field_key: str) -> Optional[bytes]:
     path = contact_rail_icon_png_path(template_name, field_key)
@@ -42,5 +35,6 @@ def contact_rail_icon_png_bytes(template_name: Optional[str], field_key: str) ->
         return None
 
 
+# Clears the cache.
 def clear_contact_icon_cache() -> None:
     contact_rail_icon_png_bytes.cache_clear()

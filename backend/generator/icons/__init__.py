@@ -1,9 +1,4 @@
-"""
-Contact rail icons: SVG markup for HTML/PDF, PNG loading for Word.
-
-- ``contact_rail_svg`` — inline ``<svg>`` strings and ``contact_rail_svg_for_field``.
-- ``docx_rail_png`` — paths/bytes under ``templates/<slug>/docx_icons/*.png``.
-"""
+# Contact rail icons: SVG markup for HTML/PDF, PNG loading for Word.
 
 from __future__ import annotations
 

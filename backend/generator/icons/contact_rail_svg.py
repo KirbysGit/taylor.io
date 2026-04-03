@@ -1,16 +1,10 @@
-"""
-Inline SVG strings for the sidebar contact rail (HTML / PDF preview).
-
-Field keys map to an internal kind, then to one SVG. currentColor follows CSS.
-
-Word uses PNGs from the respective template's docx_icons folder.
-"""
+# Builds Inline SVG strings for the sidebar contact rail (HTML / PDF preview).
 
 from __future__ import annotations
 
 
 def contact_rail_icon_kind(field_key: str) -> str:
-    """Map ``contactOrder`` keys to keys in ``_SVG_BY_KIND``."""
+    """Map contactOrder keys to keys in _SVG_BY_KIND."""
     if field_key == "email":
         return "mail"
     if field_key == "phone":
@@ -80,6 +74,6 @@ _SVG_BY_KIND = {
 
 
 def contact_rail_svg_for_field(field_key: str) -> str:
-    """Full ``<svg>…</svg>`` for one contact field; ``globe`` fallback."""
+    """Full <svg>…</svg> for one contact field; <globe> fallback."""
     kind = contact_rail_icon_kind(field_key)
     return _SVG_BY_KIND.get(kind, _SVG_GLOBE)

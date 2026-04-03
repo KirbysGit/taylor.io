@@ -1,28 +1,22 @@
-"""
-Classic single-column HTML: education, experience, projects, skills (inline row).
-
-Sections (in order):
-  - Education — school / dates / degree line / GPA / subsection highlights
-  - Experience — title + dates, company + skills + location, description (may contain HTML)
-  - Projects — default: title | tech | URL on one row, or if sidebar, title block organized differently.
-  - Skills — one "skill-line" per category (comma-separated names)
-"""
+# Builds classic single-column HTML: education, experience, projects, skills (inline row).
 
 from __future__ import annotations
 
 from typing import Dict, Any, List
 
-from .common import format_date_range, format_description, skills_group_ordered
+from ..shared.dates import format_date_range
+from ..shared.skills import skills_group_ordered
+from .description import format_description
 
 
 # --- Education ---
 
 def build_education_entry(edu: Dict[str, Any]) -> str:
-    """Builds Classic Single-Column Education HTML."""
+
+    # Get All Relevant Edu Data.
     degree = edu.get("degree", "")
     discipline = edu.get("discipline", "")
     minor = edu.get("minor", "")
-
     degree_text = f"{degree} in {discipline}"
     if minor:
         degree_text += f", Minor in {minor}"
@@ -35,7 +29,10 @@ def build_education_entry(edu: Dict[str, Any]) -> str:
     gpa = edu.get("gpa", "")
     gpa_text = f"(GPA: {gpa})" if gpa else ""
 
-    highlights_lines = []
+    # Initialize the highlights lines list.
+    highlights_lines: List[str] = []
+
+    # Iterate over each subsection and build the highlights lines.
     for title, content in edu.get("subsections", {}).items():
         highlights_lines.append(
             f'''<div class='highlight-line'>
@@ -45,7 +42,7 @@ def build_education_entry(edu: Dict[str, Any]) -> str:
         )
     highlights_lines = "\n".join(highlights_lines)
 
-    # Indented multiline string: leading spaces become part of the HTML.
+    # Build the Education Entry HTML based on available data.
     return f'''
     <div class="education-entry">
         <div class="school-line">
@@ -69,6 +66,8 @@ def build_education_entry(edu: Dict[str, Any]) -> str:
 # --- Experience ---
 
 def build_experience_entry(exp: Dict[str, Any]) -> str:
+
+    # Get All Relevant Exp Data.
     start_raw = exp.get("start_date") or exp.get("startDate") or ""
     end_raw = exp.get("end_date") or exp.get("endDate") or ""
     current = exp.get("current", False)
@@ -78,13 +77,14 @@ def build_experience_entry(exp: Dict[str, Any]) -> str:
     skills = exp.get("skills", "")
     location = exp.get("location", "")
 
-    # Optional! : skills associated with experience entry.
+    # Handles optional skills per experience entry.
     company_skills_html = f'<div class="company-name">{company}</div>'
     if skills:
         company_skills_html += (
             f'<span class="company-separator"> | </span><div class="company-skills">{skills}</div>'
         )
 
+    # Format description per entry.
     description = format_description(exp.get("description", ""))
 
     return f'''
@@ -107,6 +107,8 @@ def build_experience_entry(exp: Dict[str, Any]) -> str:
 # --- Projects ---
 
 def build_project_entry(proj: Dict[str, Any], *, variant: str = "default") -> str:
+
+    # Get All Relevant Proj Data.
     title = proj.get("title", "")
 
     tech_stack = proj.get("tech_stack") or proj.get("techStack") or []
@@ -116,7 +118,7 @@ def build_project_entry(proj: Dict[str, Any], *, variant: str = "default") -> st
 
     description = format_description(proj.get("description", ""))
 
-    # If 'Sidebar' layout, no '|' separators. Info moved below title block.
+    # If 'Sidebar' layout, no '|' separators. Info moved below title block. (Keeping it here while file is small... :) )
     if variant == "sidebar_main":
         meta_parts: List[str] = []
         if tech_stack_str:
@@ -166,13 +168,18 @@ def build_project_entry(proj: Dict[str, Any], *, variant: str = "default") -> st
 # --- Skills ---
 
 def build_skill_entry(skills: list, category_order: list = None) -> str:
+
+    # Group skills by category and order them.
     groups = skills_group_ordered(skills, category_order)
     if not groups:
         return ""
 
+    # Initialize the skill lines list.
     skill_lines: List[str] = []
     for category, names in groups:
+        # Join skill names by comma.
         skill_names = ", ".join(names)
+        # If there is a category, build the skill line with the category.
         if category:
             skill_lines.append(
                 f'<div class="skill-line">'

@@ -32,7 +32,7 @@ Add new IDs only when documented here and wired for **both** exports you promise
 
 ## Primary template: `classic` (display **Classic Serif**)
 
-Folder slug: **`classic`**. The old name `default` is a **legacy API alias** only—it resolves to `classic` in the generator (`template_slug.normalize_template_slug`).
+Folder slug: **`classic`**. The old name `default` is a **legacy API alias** only—it resolves to `classic` in the generator (`shared.template_slug.normalize_template_slug`).
 
 This template is **`themeable` by design**: full token pipeline + `word_*` Word-only spacing. It is not a generic “fallback” layout; the name reflects a **specific** single-column serif design you can extend with user presets.
 
@@ -47,7 +47,7 @@ This template is **`themeable` by design**: full token pipeline + `word_*` Word-
 
 | Key | Purpose |
 |-----|---------|
-| **`layoutProfile`** | Shared engine id for HTML/DOCX (default `classic_single_column`). Multiple slugs may use the same profile; add new profiles only when you implement a new builder path. See `generator/template_layout.py`. |
+| **`layoutProfile`** | Shared engine id for HTML/DOCX (default `classic_single_column`). Multiple slugs may use the same profile; add new profiles only when you implement a new builder path. See `generator/layouts/registry.py`. |
 | **`family`** | Optional; groups templates in the **Templates** page (e.g. `Classic serif`) without merging them into one card. |
 | **`variantLabel`** | Optional; short subtitle on the card (e.g. `Default`, `Warm`). |
 

@@ -1,10 +1,6 @@
-"""
-Resume design tokens: one JSON file drives PDF preview CSS variables and Word (DocxStyleConfig).
+# Resume Design Tokens. 
 
-- templates/<slug>/resume_tokens.json (primary slug: ``classic``; legacy ``default`` aliases there)
-- PDF: pipeline prepends :root { --rt-* } built from this file before preview.css
-- Word / PDF margins: shared.styles.get_styles merges applicable keys onto DocxStyleConfig
-"""
+# Goal is that we have shared styling that can be used across all templates.
 
 from __future__ import annotations
 
@@ -12,18 +8,20 @@ import json
 from dataclasses import fields
 from typing import Any, Dict
 
-from .word.docx_styles import DocxStyleConfig
 from .template_slug import PRIMARY_TEMPLATE_SLUG, TEMPLATES_DIR, resolve_template_folder
+from ..word.docx_styles import DocxStyleConfig
 
+# The filename of the resume tokens JSON file.
 TOKEN_FILENAME = "resume_tokens.json"
 
-
+# Simple helper function to get the template directory.
 def _template_dir(template_name: str):
     return resolve_template_folder(template_name)
 
-
+# Load the resume tokens JSON file for a given template.
+# In : Template Name
+# Out : Dictionary of Resume Tokens.
 def load_resume_token_dict(template_name: str) -> Dict[str, Any]:
-    """Load flat token dict; ignores keys starting with underscore."""
     path = _template_dir(template_name) / TOKEN_FILENAME
     if not path.exists():
         path = TEMPLATES_DIR / PRIMARY_TEMPLATE_SLUG / TOKEN_FILENAME
@@ -38,9 +36,10 @@ def load_resume_token_dict(template_name: str) -> Dict[str, Any]:
         return {}
     return {k: v for k, v in raw.items() if isinstance(k, str) and not k.startswith("_")}
 
-
+# Apply the resume tokens to the DocxStyleConfig.
+# In : DocxStyleConfig, Dictionary of Resume Tokens
+# Out : None
 def apply_resume_tokens_to_docx_config(cfg: DocxStyleConfig, tokens: Dict[str, Any]) -> None:
-    """Apply JSON values to DocxStyleConfig (unknown keys skipped)."""
     fmap = {f.name: f for f in fields(DocxStyleConfig)}
     for key, val in tokens.items():
         if key not in fmap or val is None:
@@ -57,11 +56,11 @@ def apply_resume_tokens_to_docx_config(cfg: DocxStyleConfig, tokens: Dict[str, A
         else:
             setattr(cfg, key, val)
 
-
+# Converts the resume token key to a CSS variable name.
 def _css_var_name(key: str) -> str:
     return "--rt-" + key.replace("_", "-")
 
-
+# Converts the resume token value to a CSS value.
 def token_value_to_css(key: str, val: Any) -> str:
     if val is None:
         return ""
@@ -85,9 +84,11 @@ def token_value_to_css(key: str, val: Any) -> str:
         return str(val)
     return str(val)
 
-
+# Build the CSS for the resume tokens.
+# In : Dictionary of Resume Tokens
+# Out : CSS String
 def build_resume_tokens_css(tokens: Dict[str, Any]) -> str:
-    """Emit :root block for preview / PDF HTML. Keys become --rt-kebab-case."""
+    # Create a list of lines to build the CSS.
     lines = [
         "/* Injected from resume_tokens.json — single source with Word styles (DocxStyleConfig). */",
         ":root {",

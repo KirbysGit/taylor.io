@@ -27,7 +27,7 @@ def _default_styling_meta(folder_name: str) -> Dict[str, Any]:
         "allowedControls": [],
         "layoutLocked": False,
         "capabilitiesVersion": 1,
-        # layoutProfile: shared DOCX/HTML engine id (see generator.template_layout).
+        # layoutProfile: shared DOCX/HTML engine id (see generator.layouts.registry).
         "layoutProfile": "classic_single_column",
         "family": "",
         "variantLabel": "",

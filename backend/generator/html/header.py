@@ -1,16 +1,4 @@
-"""
-Header and contact HTML: classic one-line contact, sidebar stacked contact rail.
-
-Sections (in order):
-  - Constants — visibility keys, field order, URL-like contact keys
-  - URL display preference — how link fields show text (full vs strip protocol)
-  - Contact display text — strip protocol for display only (href unchanged)
-  - Visible fields — ordered (key, value) list respecting visibility
-  - Classic header — single line, pipe-separated
-  - Contact rail — href builder per field; stacked ``<ul class="contact-rail">`` HTML
-
-Icons handled in our /icons folder.
-"""
+# Builds header and contact HTML dependent on the layout profile.
 
 from __future__ import annotations
 
@@ -41,11 +29,14 @@ _URLISH_CONTACT_KEYS = frozenset({"linkedin", "github", "portfolio"})
 
 # Determines if link shows "https://" or not, returns preference to parent function.
 def resolve_contact_url_display(preferences: Optional[Dict[str, Any]]) -> str:
+    # If there are no preferences, return full.
     if not preferences:
         return "full"
 
+    # Get the contact URL display preference from the preferences.
     raw = preferences.get("contactUrlDisplay") or preferences.get("contact_url_display")
     
+    # If the contact URL display preference is strip_protocol, return strip_protocol.
     if isinstance(raw, str) and raw.strip().lower() in ("strip_protocol", "strip"):
         return "strip_protocol"
 
