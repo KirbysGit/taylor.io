@@ -12,6 +12,7 @@ import Home from './pages/4home/Home'
 import ResumePreview from './pages/5resume/ResumePreview'
 import ResumeCreate from './pages/5resume/ResumeCreate'
 import ResumeChoose from './pages/5resume/ResumeChoose'
+import ResumeTailorSetup from './pages/5resume/ResumeTailorSetup'
 import Info from './pages/info/Info'
 import TemplatesPage from './pages/templates/TemplatesPage'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -94,6 +95,14 @@ function App() {
           element={
             <ProtectedRoute requireSetup={true}>
               <ResumeChoose />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/resume/create/tailor" 
+          element={
+            <ProtectedRoute requireSetup={true}>
+              <ResumeTailorSetup />
             </ProtectedRoute>
           } 
         />

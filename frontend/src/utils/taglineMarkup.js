@@ -1,5 +1,5 @@
 /**
- * Mirrors backend/generator/builders.py tagline rules:
+ * Mirrors backend/generator/html/tagline.py + shared/tagline.py rules:
  * ==underline==, **bold**, _italic_, * → middle dot (·). Keep in sync when Python changes.
  */
 const INTERPUNCT = '\u00b7'

@@ -19,9 +19,11 @@ import toast from 'react-hot-toast'
 import { listTemplates } from '@/api/services/templates'
 import { generateResumePreview, generateResumePDF, generateResumeWord } from '@/api/services/resume'
 import { getMyProfile, upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, updateSectionLabels, listSavedResumes, createSavedResume, getSavedResume, deleteSavedResume } from '@/api/services/profile'
+import { suggestJobTailor } from '@/api/services/ai'
 
 // component imports.
 // component imports.
+import TopNav from '@/components/TopNav'
 import LeftPanel from './components/left/LeftPanel'
 import RightPanel from './components/right/RightPanel'
 
@@ -43,7 +45,7 @@ const PREVIEW_ZOOM = { min: 50, max: 150, step: 25, default: 100 }
 const DRAFT_PREVIEW_DEBOUNCE_MS = 450
 const EXACT_PDF_DEBOUNCE_MS = 1000
 
-/** Aligns with backend `template_slug.normalize_template_slug` (legacy `default` → `classic`). */
+/** Aligns with backend `shared.template_slug.normalize_template_slug` (legacy `default` → `classic`). */
 function normalizeTemplateSlug(name) {
 	if (name == null || name === '') return 'classic'
 	const s = String(name).trim()
@@ -67,6 +69,9 @@ function ResumePreview() {
     // allows us to navigate to other pages.
 	const navigate = useNavigate()
 	const location = useLocation()
+	const tailorIntent = location.state?.createMode === 'tailor' ? location.state?.tailorIntent : null
+	const [aiTailorResult, setAiTailorResult] = useState(location.state?.aiTailorResult || null)
+	const lastTailorRequestKeyRef = useRef(null)
 
     // ----- states -----
 
@@ -863,6 +868,57 @@ function ResumePreview() {
 		loadFromHome()
 	}, [user, location.state?.loadSavedId, navigate])
 
+	// Trigger AI tailor request once resume/profile data is ready in preview.
+	useEffect(() => {
+		if (!tailorIntent || !hasSetBaseline) return
+
+		const requestKey = JSON.stringify({
+			jobTitle: tailorIntent.jobTitle || '',
+			company: tailorIntent.company || '',
+			jobDescription: tailorIntent.jobDescription || '',
+			focus: tailorIntent.focus || 'balanced',
+			tone: tailorIntent.tone || 'balanced',
+			strictTruth: Boolean(tailorIntent.strictTruth),
+		})
+
+		if (lastTailorRequestKeyRef.current === requestKey) return
+		lastTailorRequestKeyRef.current = requestKey
+
+		let isCancelled = false
+
+		const requestTailor = async () => {
+			try {
+				const result = await suggestJobTailor({
+					job_description: tailorIntent.jobDescription,
+					resume_data: {
+						...resumeData,
+						sectionLabels,
+					},
+					template_name: template || 'classic',
+					target_role: tailorIntent.jobTitle,
+					style_preferences: {
+						focus: tailorIntent.focus,
+						tone: tailorIntent.tone,
+						company: tailorIntent.company,
+					},
+					strict_truth: Boolean(tailorIntent.strictTruth),
+				})
+
+				if (isCancelled) return
+				setAiTailorResult(result?.data || result)
+			} catch (error) {
+				if (isCancelled) return
+				console.error('Tailor preview request failed:', error)
+				toast.error('Could not generate AI tailoring suggestions yet.')
+			}
+		}
+
+		requestTailor()
+		return () => {
+			isCancelled = true
+		}
+	}, [tailorIntent, hasSetBaseline, resumeData, sectionLabels, template])
+
 	useEffect(() => {
 		exactPdfBlobUrlRef.current = exactPdfBlobUrl
 	}, [exactPdfBlobUrl])
@@ -1039,85 +1095,14 @@ function ResumePreview() {
 
 	return (
 		<div className="h-screen flex flex-col bg-white overflow-hidden">
-			{/* Header/Navbar */}
-			<header className="flex-shrink-0 bg-brand-pink text-white py-2 shadow-md">
-				<div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
-					<h1 className="text-xl font-bold">Resume</h1>
-					<div className="flex items-center gap-2">
-						{/* Save for later */}
-						<div className="relative">
-							<button
-								type="button"
-								onClick={() => setSavedResumesOpen(!savedResumesOpen)}
-								className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-all"
-							>
-								Saved ({savedResumes.items.length}/{savedResumes.max})
-							</button>
-							{savedResumesOpen && (
-								<>
-									<div className="fixed inset-0 z-10" onClick={() => setSavedResumesOpen(false)} aria-hidden="true" />
-									<div className="absolute right-0 top-full mt-1 w-72 bg-white text-gray-900 rounded-lg shadow-lg border border-gray-200 py-2 z-20">
-										<div className="px-3 py-2 border-b border-gray-100">
-											<input
-												type="text"
-												value={saveResumeName}
-												onChange={(e) => setSaveResumeName(e.target.value)}
-												placeholder="Name for this resume"
-												className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded"
-											/>
-											<button
-												type="button"
-												onClick={handleSaveForLater}
-												disabled={isSavingResume || savedResumes.items.length >= savedResumes.max}
-												className="mt-2 w-full px-3 py-1.5 bg-brand-pink text-white text-sm font-medium rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-											>
-												{isSavingResume ? 'Saving...' : 'Save for later'}
-											</button>
-											{savedResumes.items.length >= savedResumes.max && (
-												<p className="mt-1 text-xs text-gray-500">Limit reached. Delete one to save more.</p>
-											)}
-										</div>
-										{savedResumes.items.length > 0 ? (
-											<div className="max-h-48 overflow-y-auto">
-												{savedResumes.items.map((s) => (
-													<div
-														key={s.id}
-														className="px-3 py-2 hover:bg-gray-50 flex justify-between items-center group"
-													>
-														<button
-															type="button"
-															onClick={() => handleLoadSaved(s.id)}
-															className="text-left flex-1 min-w-0 truncate text-sm"
-														>
-															{s.name}
-														</button>
-														<button
-															type="button"
-															onClick={(e) => handleDeleteSaved(s.id, e)}
-															className="text-red-500 hover:text-red-700 text-xs opacity-0 group-hover:opacity-100 transition-opacity ml-2"
-														>
-															Delete
-														</button>
-													</div>
-												))}
-											</div>
-										) : (
-											<p className="px-3 py-4 text-sm text-gray-500">No saved resumes yet</p>
-										)}
-									</div>
-								</>
-							)}
-						</div>
-						<button
-							type="button"
-							onClick={handleBackClick}
-							className="px-3 py-1.5 bg-white-bright text-brand-pink font-semibold rounded-lg hover:opacity-90 transition-all text-sm"
-						>
-							← Back
-						</button>
-					</div>
-				</div>
-			</header>
+			<TopNav
+				user={user}
+				onLogout={() => {
+					localStorage.removeItem('token')
+					localStorage.removeItem('user')
+					navigate('/')
+				}}
+			/>
 
 			<main className="flex-1 flex overflow-hidden min-h-0">
 				<LeftPanel
@@ -1161,6 +1146,8 @@ function ResumePreview() {
 					onVisibilityChange={handleVisibilityChange}
 					sectionLabels={sectionLabels}
 					onSectionLabelChange={handleSectionLabelChange}
+					tailorIntent={tailorIntent}
+					aiTailorResult={aiTailorResult}
 				/>
 
 				{/* resizable divider */}
@@ -1192,6 +1179,16 @@ function ResumePreview() {
 					isSavingResume={isSaving}
 					onDiscardChanges={handleDiscardChanges}
 					onSaveChanges={handleSaveChanges}
+					savedResumes={savedResumes}
+					savedResumesOpen={savedResumesOpen}
+					onToggleSavedResumes={() => setSavedResumesOpen((v) => !v)}
+					onCloseSavedResumes={() => setSavedResumesOpen(false)}
+					saveResumeName={saveResumeName}
+					onSaveResumeNameChange={setSaveResumeName}
+					isSavingResumeForLater={isSavingResume}
+					onSaveForLater={handleSaveForLater}
+					onLoadSaved={handleLoadSaved}
+					onDeleteSaved={handleDeleteSaved}
 				/>
 			</main>
 		</div>

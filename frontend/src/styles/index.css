@@ -284,6 +284,56 @@
 	animation: fade-in 0.8s ease-out;
 }
 
+/* Landing page — hero mesh & preview motion */
+@keyframes landing-hero-breathe {
+	0%, 100% {
+		opacity: 0.45;
+		transform: scale(1) translate(0, 0);
+	}
+	50% {
+		opacity: 0.65;
+		transform: scale(1.05) translate(2%, -1%);
+	}
+}
+
+@keyframes landing-float {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-8px);
+	}
+}
+
+.landing-hero-mesh {
+	background:
+		radial-gradient(ellipse 80% 60% at 20% 20%, rgba(255, 255, 255, 0.22) 0%, transparent 55%),
+		radial-gradient(ellipse 70% 50% at 85% 75%, rgba(255, 255, 255, 0.14) 0%, transparent 50%),
+		radial-gradient(ellipse 50% 80% at 50% 100%, rgba(0, 0, 0, 0.06) 0%, transparent 45%),
+		linear-gradient(155deg, rgb(214, 86, 86) 0%, rgb(190, 70, 70) 48%, rgb(175, 62, 72) 100%);
+}
+
+.landing-hero-orb {
+	animation: landing-hero-breathe 14s ease-in-out infinite;
+}
+
+.landing-hero-orb-delayed {
+	animation: landing-hero-breathe 18s ease-in-out infinite;
+	animation-delay: -6s;
+}
+
+.landing-preview-float {
+	animation: landing-float 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.landing-hero-orb,
+	.landing-hero-orb-delayed,
+	.landing-preview-float {
+		animation: none;
+	}
+}
+
 /* remove default focus outline from all buttons */
 button:focus {
 	outline: none;

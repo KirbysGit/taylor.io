@@ -1,0 +1,181 @@
+{
+  "timestamp_utc": "2026-04-04T05:39:12.949020+00:00",
+  "user_id": 1,
+  "request": {
+    "target_role": "AI Developer - Model Creation & Full Stack Python",
+    "job_description_chars": 2681,
+    "template_name": "classic",
+    "strict_truth": true
+  },
+  "extraction": {
+    "active_domains": [
+      "engineering",
+      "ai",
+      "cloud"
+    ],
+    "top_keywords_raw": [
+      {
+        "term": "ai",
+        "score": 7.8,
+        "frequency": 5.0,
+        "sources": [
+          "title_token",
+          "token"
+        ]
+      },
+      {
+        "term": "restful apis",
+        "score": 7.2,
+        "frequency": 1.0,
+        "sources": [
+          "known_phrase"
+        ]
+      },
+      {
+        "term": "python",
+        "score": 6.4,
+        "frequency": 2.0,
+        "sources": [
+          "title_token",
+          "token"
+        ]
+      },
+      {
+        "term": "ci/cd",
+        "score": 6.2,
+        "frequency": 1.0,
+        "sources": [
+          "known_phrase"
+        ]
+      },
+      {
+        "term": "model",
+        "score": 5.4,
+        "frequency": 4.0,
+        "sources": [
+          "title_token",
+          "token"
+        ]
+      },
+      {
+        "term": "vue",
+        "score": 5.2,
+        "frequency": 1.0,
+        "sources": [
+          "known_phrase"
+        ]
+      },
+      {
+        "term": "performance",
+        "score": 5.0,
+        "frequency": 2.0,
+        "sources": [
+          "token"
+        ]
+      },
+      {
+        "term": "machine learning",
+        "score": 4.9,
+        "frequency": 2.0,
+        "sources": [
+          "dynamic_phrase"
+        ]
+      },
+      {
+        "term": "models using",
+        "score": 4.9,
+        "frequency": 2.0,
+        "sources": [
+          "dynamic_phrase"
+        ]
+      },
+      {
+        "term": "github",
+        "score": 4.2,
+        "frequency": 1.0,
+        "sources": [
+          "known_phrase"
+        ]
+      },
+      {
+        "term": "microservices",
+        "score": 4.2,
+        "frequency": 1.0,
+        "sources": [
+          "known_phrase"
+        ]
+      },
+      {
+        "term": "models",
+        "score": 4.0,
+        "frequency": 4.0,
+        "sources": [
+          "token"
+        ]
+      }
+    ],
+    "keywords_filtered": [
+      "ai",
+      "restful apis",
+      "python",
+      "ci/cd",
+      "model",
+      "vue",
+      "performance",
+      "machine learning",
+      "models using",
+      "github",
+      "microservices",
+      "models"
+    ],
+    "keywords_abstracted": [
+      "evaluation and performance robustness",
+      "application development stack",
+      "cloud and platform infrastructure",
+      "ai",
+      "restful apis",
+      "python",
+      "ci/cd",
+      "model",
+      "vue",
+      "performance",
+      "machine learning",
+      "models using"
+    ],
+    "dynamic_phrase_candidates": [
+      [
+        "machine learning",
+        2
+      ],
+      [
+        "models using",
+        2
+      ]
+    ]
+  },
+  "prompt_setup": {
+    "prompt_version": "job_tailor_v1_scaffold",
+    "context": {
+      "target_role": "AI Developer - Model Creation & Full Stack Python",
+      "company": null,
+      "focus": "balanced",
+      "tone": "balanced",
+      "strict_truth": true,
+      "template_name": "classic",
+      "resume_keys": [
+        "education",
+        "experience",
+        "header",
+        "hiddenSkills",
+        "projects",
+        "sectionLabels",
+        "sectionOrder",
+        "sectionVisibility",
+        "skills",
+        "summary"
+      ]
+    },
+    "system_prompt": "You are a resume tailoring assistant for Taylor.io.\nYour job is to analyze job requirements, map them to resume evidence, and propose truthful rewrites.\nFollow these rules exactly:\n- Use only details present in user resume data and job description.\n- Keep output ATS-friendly with clear, concrete language.\n- Return recommendations at section level and line-edit level.\n- Do not invent facts, companies, titles, dates, metrics, or certifications.\n- Balance impact, technical detail, and leadership signals.\n- Use a balanced professional tone suitable for modern resume formats.",
+    "user_prompt": "Target role: AI Developer - Model Creation & Full Stack Python\nCompany: Not specified\nTemplate: classic\nFocus: balanced\nTone: balanced\nStrict truth mode: on\n\nJob description:\nECS is seeking a highly skilled AI Developer with expertise in Model Creation, Machine Learning and Full-Stack Application Development. This is an exciting role that works closely with the US Postal Service to improve efficiencies, parcel delivery, and fraud and loss prevention. The ideal candidate will be excited to join an organization that is heavily investing in AI.\n\n\nThis role requires the need to build high performance Python-based AI/ML solutions capable of processing extremely large data sets and integrating them into scalable web applications, including LLMs. This role also requires strong problem-solving skills, a deep understanding of AI frameworks, and the ability to work across the entire technology stack.\n\n\nNote: Candidates MUST be able to qualify for a USPS Public Trust Clearance (which requires US Citizenship or Perm. Resident Alien status and passing a stringent background records check). Also, though this is a Remote / Work from Home (WFH) position, candidates must be based in the continental United States of America.\n\n\n\nKey Responsibilities: \n\nAI/ML Model Development\nDesign, build, fine tune and train machine learning and deep learning models using Python.\nPerform data preprocessing, feature engineering, and model optimization.\nEvaluate models using domain appropriate metrics and improve performance iteratively.\nDeploy custom models to production environments (cloud/on-premises) using MLOps best practices.\nFull-Stack Development\nDevelop high throughput, event-driven microservices (RESTful APIs, GraphQL) for application backends and MCP servers to serve AI models.\nBuild responsive and user-friendly front-end interfaces for AI-powered applications.\nIntegrate AI models into web and mobile applications.\nEnsure scalability, security, and performance of deployed solutions.\nCollaboration & Documentation\nWork closely with data scientists, developers, frontend developers, and product managers.\nDocument model architectures, APIs, and deployment processes.\nParticipate in code reviews and maintain high coding standards.\n\n\nRequired Skills & Experience\n\nProgramming: Strong proficiency in Python (NumPy, Pandas, scikit-learn, TensorFlow, PyTorch, Transformers).\nFull Stack: Experience with backend frameworks (Django, Flask, FastAPI) and frontend frameworks (React, Angular, or Vue.js).\nDatabases: Knowledge of SQL (PostgreSQL, MySQL) and NoSQL (MongoDB, Redis).\nDevOps & Deployment: Familiarity with Docker, Kubernetes, CI/CD pipelines, and cloud platforms (AWS, Azure, GCP).\nVersion Control: Proficiency with GitHub workflows.\nMathematics & AI Concepts: Strong understanding of statistics, linear algebra, and machine learning algorithms.\n\nResume data (JSON): [omitted for debug]"
+  }
+}

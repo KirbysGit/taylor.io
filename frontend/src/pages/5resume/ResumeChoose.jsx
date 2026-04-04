@@ -101,10 +101,10 @@ function ResumeChoose() {
 	const handleContinue = () => {
 		navigate('/resume/preview', {
 			state: {
-				createMode: 'choose',
-				selectedEducationIds: Array.from(selectedEduIds),
-				selectedExperienceIds: Array.from(selectedExpIds),
-				selectedProjectIds: Array.from(selectedProjIds),
+			createMode: 'choose',
+			selectedEducationIds: Array.from(selectedEduIds),
+			selectedExperienceIds: Array.from(selectedExpIds),
+			selectedProjectIds: Array.from(selectedProjIds),
 			},
 		})
 	}

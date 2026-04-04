@@ -17,6 +17,7 @@ const iconSm = 'h-4 w-4 shrink-0'
 import ExactPdfPages from './ExactPdfPages'
 import PreviewUnsavedBar from './PreviewUnsavedBar'
 import ResumeValidationNotice from '../ResumeValidationNotice'
+import SavedResumesPopover from './SavedResumesPopover'
 
 function RightPanel({
 	previewHtml,
@@ -39,6 +40,16 @@ function RightPanel({
 	isSavingResume = false,
 	onDiscardChanges = () => {},
 	onSaveChanges = () => {},
+	savedResumes,
+	savedResumesOpen,
+	onToggleSavedResumes,
+	onCloseSavedResumes,
+	saveResumeName,
+	onSaveResumeNameChange,
+	isSavingResumeForLater = false,
+	onSaveForLater,
+	onLoadSaved,
+	onDeleteSaved,
 }) {
 	const hasValidationIssues = validationIssues.length > 0
 	const isDownloadBusy = downloadStatus?.phase === 'loading'
@@ -196,7 +207,20 @@ function RightPanel({
 						+
 					</button>
 				</div>
-				<div className="min-w-0" aria-hidden="true" />
+				<div className="min-w-0 justify-self-end">
+					<SavedResumesPopover
+						savedResumes={savedResumes}
+						savedResumesOpen={savedResumesOpen}
+						onToggleSavedResumes={onToggleSavedResumes}
+						onCloseSavedResumes={onCloseSavedResumes}
+						saveResumeName={saveResumeName}
+						onSaveResumeNameChange={onSaveResumeNameChange}
+						isSavingResumeForLater={isSavingResumeForLater}
+						onSaveForLater={onSaveForLater}
+						onLoadSaved={onLoadSaved}
+						onDeleteSaved={onDeleteSaved}
+					/>
+				</div>
 			</div>
 
 			{/* Download progress / success (over preview) */}

@@ -1,0 +1,162 @@
+{
+  "generated_at_utc": "2026-04-04T05:25:14.390420+00:00",
+  "input_file": "C:\\Users\\Colin Kirby\\Desktop\\projects\\tailor\\backend\\ai\\debug_inputs\\jd_batch.txt",
+  "total_jds": 2,
+  "results": [
+    {
+      "index": 1,
+      "title": "Example Forward Deployed Engineer JD",
+      "role": "Forward Deployed Engineer",
+      "company": "Example Co",
+      "job_description_chars": 26,
+      "active_domains": [
+        "engineering"
+      ],
+      "keywords_raw_ranked": [
+        {
+          "term": "deployed",
+          "score": 2.4,
+          "frequency": 1.0,
+          "sources": [
+            "title_token"
+          ]
+        },
+        {
+          "term": "forward",
+          "score": 2.4,
+          "frequency": 1.0,
+          "sources": [
+            "title_token"
+          ]
+        },
+        {
+          "term": "engineer",
+          "score": 1.8,
+          "frequency": 1.0,
+          "sources": [
+            "title_token"
+          ]
+        },
+        {
+          "term": "full",
+          "score": 1.0,
+          "frequency": 1.0,
+          "sources": [
+            "token"
+          ]
+        },
+        {
+          "term": "here...",
+          "score": 1.0,
+          "frequency": 1.0,
+          "sources": [
+            "token"
+          ]
+        },
+        {
+          "term": "paste",
+          "score": 1.0,
+          "frequency": 1.0,
+          "sources": [
+            "token"
+          ]
+        },
+        {
+          "term": "text",
+          "score": 1.0,
+          "frequency": 1.0,
+          "sources": [
+            "token"
+          ]
+        }
+      ],
+      "keywords_filtered": [
+        "deployed",
+        "forward",
+        "engineer",
+        "full",
+        "here...",
+        "paste",
+        "text"
+      ],
+      "keywords_abstracted": [
+        "deployed",
+        "forward",
+        "engineer",
+        "full",
+        "here...",
+        "paste",
+        "text"
+      ],
+      "dynamic_phrase_candidates": []
+    },
+    {
+      "index": 2,
+      "title": "Example Automation Developer JD",
+      "role": "Automation Developer",
+      "company": "Example Co",
+      "job_description_chars": 24,
+      "active_domains": [
+        "ai",
+        "engineering"
+      ],
+      "keywords_raw_ranked": [
+        {
+          "term": "automation",
+          "score": 5.4,
+          "frequency": 1.0,
+          "sources": [
+            "title_token"
+          ]
+        },
+        {
+          "term": "developer",
+          "score": 4.4,
+          "frequency": 1.0,
+          "sources": [
+            "title_token"
+          ]
+        },
+        {
+          "term": "another",
+          "score": 1.0,
+          "frequency": 1.0,
+          "sources": [
+            "token"
+          ]
+        },
+        {
+          "term": "here...",
+          "score": 1.0,
+          "frequency": 1.0,
+          "sources": [
+            "token"
+          ]
+        },
+        {
+          "term": "paste",
+          "score": 1.0,
+          "frequency": 1.0,
+          "sources": [
+            "token"
+          ]
+        }
+      ],
+      "keywords_filtered": [
+        "automation",
+        "developer",
+        "another",
+        "here...",
+        "paste"
+      ],
+      "keywords_abstracted": [
+        "automation",
+        "developer",
+        "another",
+        "here...",
+        "paste"
+      ],
+      "dynamic_phrase_candidates": []
+    }
+  ]
+}

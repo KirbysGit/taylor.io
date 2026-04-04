@@ -23,7 +23,7 @@ from models import Base
 from database import engine
 
 # import routers.
-from routers import auth_router, users_router, profile_router, generator_router, templates_router
+from routers import auth_router, users_router, profile_router, generator_router, templates_router, ai_router
 
 
 # ---------------- backend startup ----------------
@@ -56,6 +56,7 @@ app.include_router(users_router)
 app.include_router(profile_router)
 app.include_router(generator_router)
 app.include_router(templates_router)
+app.include_router(ai_router)
 
 # ---------------- routes startup ----------------
 

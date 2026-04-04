@@ -1,35 +1,23 @@
-// components / 2auth / components / SignUpModal.jsx
-
-// sign up modal component.
-
-// to-do:
-//	- password complexity
-//	- email verification
-// 	- proper loading state, like three dots in a wave in the create account button.
-
-// imports.
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import { RequiredAsterisk, Checkmark, XIcon } from '@/components/icons'
-
-// --- services imports.
 import { registerUser } from '@/api/services/auth'
+import { AuthModalDocPreview } from './AuthModalDocPreview'
 
 function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
+	const formId = useId()
+	const formErrorId = `${formId}-form-error`
 
-	// ---- states ----
-	const [isLoading, setIsLoading] = useState(false)						// loading state.
-	const [showPassword, setShowPassword] = useState(false)					// show password or not.
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false)	// show confirm password.
+	const [isLoading, setIsLoading] = useState(false)
+	const [showPassword, setShowPassword] = useState(false)
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+	const [formError, setFormError] = useState('')
+	const [emailError, setEmailError] = useState('')
+	const [showPasswordRequirements, setShowPasswordRequirements] = useState(false)
+	const [isPasswordRequirementsClosing, setIsPasswordRequirementsClosing] = useState(false)
+	const [showConfirmPasswordMatch, setShowConfirmPasswordMatch] = useState(false)
 
-	const [formError, setFormError] = useState('')							// form error state.
-	const [emailError, setEmailError] = useState('')							// email error state.
-	const [showPasswordRequirements, setShowPasswordRequirements] = useState(false) // show password requirements.
-	const [isPasswordRequirementsClosing, setIsPasswordRequirementsClosing] = useState(false) // track if closing animation is playing.
-	const [showConfirmPasswordMatch, setShowConfirmPasswordMatch] = useState(false) // show confirm password match status.
-	
-	// field validation states (for checkmarks).
 	const [successStates, setSuccessStates] = useState({
 		first_name: false,
 		last_name: false,
@@ -38,7 +26,6 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 		confirmPassword: false,
 	})
 
-	// form data.
 	const [formData, setFormData] = useState({
 		first_name: '',
 		last_name: '',
@@ -47,50 +34,56 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 		confirmPassword: '',
 	})
 
-	const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-	
-	// password validation checks.
+	const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+
 	const passwordChecks = {
 		minLength: formData.password.length >= 8,
 		hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password),
 		hasTwoNumbers: (formData.password.match(/\d/g) || []).length >= 2,
 		hasCapital: /[A-Z]/.test(formData.password),
 	}
-	
-	const isPasswordValid = Object.values(passwordChecks).every(check => check === true)
-	
-	// check if all fields are valid.
-	const isFormValid = successStates.first_name && 
-		successStates.last_name && 
-		successStates.email && 
-		successStates.password && 
+
+	const isPasswordValid = Object.values(passwordChecks).every((check) => check === true)
+
+	const isFormValid =
+		successStates.first_name &&
+		successStates.last_name &&
+		successStates.email &&
+		successStates.password &&
 		successStates.confirmPassword &&
 		formData.password === formData.confirmPassword
-	
-	// ---- functions ----
 
-	// function to handle form submission.
-  	const handleSubmit = async (e) => {
+	useEffect(() => {
+		if (!isOpen) return
+		const prevOverflow = document.body.style.overflow
+		document.body.style.overflow = 'hidden'
+		const onKeyDown = (e) => {
+			if (e.key === 'Escape') onClose()
+		}
+		window.addEventListener('keydown', onKeyDown)
+		return () => {
+			document.body.style.overflow = prevOverflow
+			window.removeEventListener('keydown', onKeyDown)
+		}
+	}, [isOpen, onClose])
+
+	const handleSubmit = async (e) => {
 		e.preventDefault()
 		setFormError('')
-		
-		// if passwords do not match, set error and return.
+
 		if (formData.password !== formData.confirmPassword) {
 			setFormError('Passwords do not match')
 			return
 		}
 
-		// validate password requirements.
 		if (!isPasswordValid) {
 			setFormError('Password does not meet all requirements')
 			return
 		}
 
-		// set loading state to true.
 		setIsLoading(true)
 
 		try {
-			// construct user data object.
 			const userData = {
 				first_name: formData.first_name,
 				last_name: formData.last_name,
@@ -98,38 +91,33 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 				password: formData.password,
 			}
 
-			// api call to register user.
 			const response = await registerUser(userData)
-			
-			// store user data in localStorage.
+
 			if (response.data.user) {
 				localStorage.setItem('user', JSON.stringify(response.data.user))
 			}
 
-			// call success callback (this will handle navigation).
 			onSignUpSuccess(response.data.user || response.data)
-
 		} catch (err) {
-			setFormError(err.response?.data?.detail || err.response?.data?.message || 'Sign up failed. Please try again.')
+			setFormError(
+				err.response?.data?.detail || err.response?.data?.message || 'Sign up failed. Please try again.',
+			)
 		} finally {
 			setIsLoading(false)
 		}
-  	}
+	}
 
-	// function to handle form field changes with validation.
 	const handleChange = (e) => {
 		const { name, value } = e.target
-		
-		// update form data.
-		setFormData(prev => ({
+
+		setFormData((prev) => ({
 			...prev,
-			[name]: value
+			[name]: value,
 		}))
-		
-		// validate and update success state immediately.
+
 		let isValid = false
 		let errorMessage = ''
-		
+
 		if (name === 'email') {
 			isValid = emailRegex.test(value) && value.trim() !== ''
 			if (!isValid && value.trim() !== '') {
@@ -140,298 +128,337 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 			isValid = value.trim().length > 0
 		} else if (name === 'password') {
 			setShowPasswordRequirements(true)
-			// compute password validity with updated value.
-			const passwordChecks = {
+			const checks = {
 				minLength: value.length >= 8,
 				hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value),
 				hasTwoNumbers: (value.match(/\d/g) || []).length >= 2,
 				hasCapital: /[A-Z]/.test(value),
 			}
-			isValid = Object.values(passwordChecks).every(check => check === true)
+			isValid = Object.values(checks).every((check) => check === true)
 		} else if (name === 'confirmPassword') {
 			isValid = value === formData.password && value.trim() !== '' && formData.password.trim() !== ''
 		}
-		
-		// update success state.
-		setSuccessStates(prev => ({
+
+		setSuccessStates((prev) => ({
 			...prev,
-			[name]: isValid && value.trim() !== ''
+			[name]: isValid && value.trim() !== '',
 		}))
 	}
-	
-	// validate confirmPassword when password changes.
+
 	useEffect(() => {
 		if (formData.confirmPassword.trim() !== '') {
-			const isValid = formData.confirmPassword === formData.password && formData.password.trim() !== ''
-			setSuccessStates(prev => ({
+			const isValid =
+				formData.confirmPassword === formData.password && formData.password.trim() !== ''
+			setSuccessStates((prev) => ({
 				...prev,
-				confirmPassword: isValid
+				confirmPassword: isValid,
 			}))
 		}
 	}, [formData.password, formData.confirmPassword])
 
-	// hide password requirements dropdown after all criteria are met (with delay to show last checkmark).
 	useEffect(() => {
 		if (isPasswordValid && showPasswordRequirements && !isPasswordRequirementsClosing) {
-			// wait 1 second to show the last checkmark, then start slide-out animation
 			const timer = setTimeout(() => {
 				setIsPasswordRequirementsClosing(true)
-				// after animation completes, hide the element
 				setTimeout(() => {
 					setShowPasswordRequirements(false)
 					setIsPasswordRequirementsClosing(false)
-				}, 300) // match animation duration
+				}, 300)
 			}, 1000)
-			
+
 			return () => clearTimeout(timer)
 		}
 	}, [isPasswordValid, showPasswordRequirements, isPasswordRequirementsClosing])
 
-	// if modal is not open, return null.
-  	if (!isOpen) return null
+	if (!isOpen) return null
 
-  	return (
-		<div className="fixed inset-0 flex items-center justify-center z-50">
-			<div className="bg-white-bright/95 backdrop-blur-sm rounded-lg shadow-xl w-full max-w-[496px] p-8 relative">
-				{/* x button */}
-				<button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-					<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-					</svg>
-				</button>
+	const describedBy = [formError ? formErrorId : null, emailError ? `${formId}-email-error` : null]
+		.filter(Boolean)
+		.join(' ') || undefined
 
-				{/* header & divider*/}
-				<div className="text-center mb-4">
-					<h2 className="text-3xl font-bold text-gray-900 mb-3">
-						Create Account
-					</h2>
-					<div className="smallDivider"></div>
+	return (
+		<div
+			className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm animate-fade-in"
+			role="presentation"
+			onClick={onClose}
+		>
+			<div
+				className="animate-fade-in grid max-h-[min(92vh,calc(100vh-2rem))] w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-200/90 bg-white-bright shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] sm:max-w-lg md:max-w-4xl md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.1fr)]"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="signup-modal-title"
+				aria-describedby={describedBy}
+				onClick={(e) => e.stopPropagation()}
+			>
+				<div className="landing-hero-mesh relative hidden flex-col justify-between px-8 py-10 text-white md:flex md:min-h-0">
+					<div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/10" />
+					<div className="landing-hero-orb pointer-events-none absolute -left-16 top-0 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
+					<div className="relative">
+						<p className="text-xs font-semibold uppercase tracking-widest text-white/80">taylor.io</p>
+						<h2 id="signup-modal-title" className="mt-4 text-2xl font-bold leading-snug tracking-tight">
+							Create your account
+						</h2>
+						<p className="mt-3 max-w-[260px] text-sm font-light leading-relaxed text-white/90">
+							One workspace for your profile, templates, and exports — let&apos;s get you started.
+						</p>
+					</div>
+					<AuthModalDocPreview />
 				</div>
 
-				{/* sign up form */}
-				<form onSubmit={handleSubmit} className="space-y-4" noValidate>
-					{/* name entry fields */}
-					<div className="flex gap-2">
-						{/* first name field */}
-						<div className="flex-1">
-							<label className="block text-sm font-medium text-gray-700 mb-1">
-								First Name <RequiredAsterisk />
-							</label>
-							<div className="relative">
-								<input
-									type="text"
-									name="first_name"
-									value={formData.first_name}
-									onChange={handleChange}
-									className={`input ${successStates.first_name ? 'input-success' : ''}`}
-									placeholder="anita"
-									required
-								/>
-								{successStates.first_name && (
-									<div className="successCheckmark">
-										<Checkmark className="w-3 h-3 text-white" />
-									</div>
-								)}
-							</div>
-						</div>
-
-						{/* last name field */}
-						<div className="flex-1">
-							<label className="block text-sm font-medium text-gray-700 mb-1">
-								Last Name <RequiredAsterisk />
-							</label>
-							<div className="relative">
-								<input
-									type="text"
-									name="last_name"
-									value={formData.last_name}
-									onChange={handleChange}
-									className={`input ${successStates.last_name ? 'input-success' : ''}`}
-									placeholder="job"
-									required
-								/>
-								{successStates.last_name && (
-									<div className="successCheckmark">
-										<Checkmark className="w-3 h-3 text-white" />
-									</div>
-								)}
-							</div>
-						</div>
-					</div>
-
-					{/* email entry field */}
-					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">
-							Email <RequiredAsterisk />
-						</label>
-						<div className="relative">
-							<input
-								type="email"
-								name="email"
-								value={formData.email}
-								onChange={handleChange}
-								className={`input ${successStates.email ? 'input-success' : ''}`}
-								placeholder="you@example.com"
-								required
-							/>
-							{successStates.email && (
-								<div className="successCheckmark">
-									<Checkmark className="w-3 h-3 text-white" />
-								</div>
-							)}
-						</div>
-					</div>
-
-					{/* email error message if any */}
-					{emailError && (
-						<div className="errorMessage">
-							{emailError}
-						</div>
-					)}
-					
-					{/* password entry field */}
-					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">
-							Password <RequiredAsterisk />
-						</label>
-						<div className="relative">
-							<input
-								type={showPassword ? 'text' : 'password'}
-								name="password"
-								value={formData.password}
-								onChange={handleChange}
-								onFocus={() => setShowPasswordRequirements(true)}
-								className={`input pr-11 ${successStates.password ? 'input-success' : ''}`}
-								placeholder="your password"
-								required
-							/>
-							{successStates.password && (
-								<div className="successCheckmark" style={{ right: '2.75rem' }}>
-									<Checkmark className="w-3 h-3 text-white" />
-								</div>
-							)}
-							<button
-								type="button"
-								onClick={() => setShowPassword(prev => !prev)}
-								aria-label={showPassword ? 'Hide password' : 'Show password'}
-								tabIndex={-1}
-								className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-							>
-								<FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
-							</button>
-						</div>
-						
-						{/* password requirements */}
-						{showPasswordRequirements && (
-							<div 
-								className={`passwordRequirements mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm space-y-1.5 ${
-									isPasswordRequirementsClosing ? 'slide-out' : ''
-								}`}
-								style={isPasswordRequirementsClosing ? {
-									animation: 'slide-out 0.3s ease-in-out forwards'
-								} : {}}
-							>
-								<div className={`flex items-center gap-2 ${passwordChecks.minLength ? 'text-brand-pink-light' : 'text-gray-600'}`}>
-									<span>{passwordChecks.minLength ? '✓' : '✗'}</span>
-									<span>At least 8 characters</span>
-								</div>
-								<div className={`flex items-center gap-2 ${passwordChecks.hasSpecialChar ? 'text-brand-pink-light' : 'text-gray-600'}`}>
-									<span>{passwordChecks.hasSpecialChar ? '✓' : '✗'}</span>
-									<span>One special character (!@#$%^&*)</span>
-								</div>
-								<div className={`flex items-center gap-2 ${passwordChecks.hasTwoNumbers ? 'text-brand-pink-light' : 'text-gray-600'}`}>
-									<span>{passwordChecks.hasTwoNumbers ? '✓' : '✗'}</span>
-									<span>At least 2 numbers</span>
-								</div>
-								<div className={`flex items-center gap-2 ${passwordChecks.hasCapital ? 'text-brand-pink-light' : 'text-gray-600'}`}>
-									<span>{passwordChecks.hasCapital ? '✓' : '✗'}</span>
-									<span>One capital letter</span>
-								</div>
-							</div>
-						)}
-					</div>
-
-					{/* confirm password entry field */}
-					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">
-							Confirm Password <RequiredAsterisk />
-						</label>
-						<div className="relative">
-							<input
-								type={showConfirmPassword ? 'text' : 'password'}
-								name="confirmPassword"
-								value={formData.confirmPassword}
-								onChange={handleChange}
-								onFocus={() => setShowConfirmPasswordMatch(true)}
-								className={`input pr-11 ${successStates.confirmPassword ? 'input-success' : ''}`}
-								placeholder="your password again"
-								required
-							/>
-							{successStates.confirmPassword && (
-								<div className="successCheckmark" style={{ right: '2.75rem' }}>
-									<Checkmark className="w-3 h-3 text-white" />
-								</div>
-							)}
-							<button
-								type="button"
-								onClick={() => setShowConfirmPassword(prev => !prev)}
-								aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-								tabIndex={-1}
-								className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-							>
-								<FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
-							</button>
-						</div>
-						
-						{/* confirm password match status */}
-						{showConfirmPasswordMatch && formData.confirmPassword.trim() !== '' && (
-							<div className="passwordRequirements mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm space-y-1.5">
-								<div className={`flex items-center gap-2 ${formData.confirmPassword === formData.password ? 'text-brand-pink-light' : 'text-gray-600'}`}>
-									{formData.confirmPassword === formData.password ? (
-										<Checkmark className="w-4 h-4" />
-									) : (
-										<XIcon className="w-4 h-4" />
-									)}
-									<span>Passwords match</span>
-								</div>
-							</div>
-						)}
-					</div>
-
-					{/* error message if any */}
-					{formError && (
-						<div className="errorMessage">
-							{formError}
-						</div>
-					)}
-
-					{/* create account button */}
+				<div className="relative flex max-h-[min(92vh,calc(100vh-2rem))] flex-col overflow-y-auto p-6 sm:p-8">
 					<button
-						type="submit"
-						disabled={isLoading || !isFormValid}
-						className="w-full bg-brand-pink text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						type="button"
+						onClick={onClose}
+						className="absolute right-3 top-3 z-10 rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 sm:right-4 sm:top-4"
+						aria-label="Close"
 					>
-						{isLoading ? 'Creating Your Account...' : 'Create Your Account'}
+						<XIcon className="h-5 w-5" />
 					</button>
-				</form>
 
-				{/* switch to login */}
-				<div className="mt-4 text-center">
-					<div className="smallDivider"></div>
-					<p className="text-sm text-gray-600 mt-4">
-						Already have an account?{' '}
+					<div className="md:hidden">
+						<p className="text-center text-xs font-semibold uppercase tracking-widest text-brand-pink">taylor.io</p>
+					</div>
+
+					<div className="mb-5 mt-2 text-center md:mt-0 md:text-left">
+						<h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl md:hidden">Sign up</h2>
+						<p className="mt-2 text-sm text-gray-600 md:hidden">
+							Fill in your details below. All fields are required.
+						</p>
+						<div className="mx-auto mt-3 h-0.5 max-w-[5rem] rounded-full bg-brand-pink md:hidden" />
+					</div>
+
+					<form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4" noValidate>
+						<div className="flex gap-3">
+							<div className="min-w-0 flex-1">
+								<label htmlFor="signup-first-name" className="label">
+									First name <RequiredAsterisk />
+								</label>
+								<div className="relative">
+									<input
+										id="signup-first-name"
+										type="text"
+										name="first_name"
+										value={formData.first_name}
+										onChange={handleChange}
+										className={`input ${successStates.first_name ? 'input-success' : ''}`}
+										placeholder="Jordan"
+										autoComplete="given-name"
+										required
+									/>
+									{successStates.first_name && (
+										<div className="successCheckmark">
+											<Checkmark className="h-3 w-3 text-white" />
+										</div>
+									)}
+								</div>
+							</div>
+							<div className="min-w-0 flex-1">
+								<label htmlFor="signup-last-name" className="label">
+									Last name <RequiredAsterisk />
+								</label>
+								<div className="relative">
+									<input
+										id="signup-last-name"
+										type="text"
+										name="last_name"
+										value={formData.last_name}
+										onChange={handleChange}
+										className={`input ${successStates.last_name ? 'input-success' : ''}`}
+										placeholder="Lee"
+										autoComplete="family-name"
+										required
+									/>
+									{successStates.last_name && (
+										<div className="successCheckmark">
+											<Checkmark className="h-3 w-3 text-white" />
+										</div>
+									)}
+								</div>
+							</div>
+						</div>
+
+						<div>
+							<label htmlFor="signup-email" className="label">
+								Email <RequiredAsterisk />
+							</label>
+							<div className="relative">
+								<input
+									id="signup-email"
+									type="email"
+									name="email"
+									value={formData.email}
+									onChange={handleChange}
+									className={`input ${successStates.email ? 'input-success' : ''}`}
+									placeholder="you@example.com"
+									autoComplete="email"
+									required
+									aria-invalid={emailError ? 'true' : undefined}
+									aria-describedby={emailError ? `${formId}-email-error` : undefined}
+								/>
+								{successStates.email && (
+									<div className="successCheckmark">
+										<Checkmark className="h-3 w-3 text-white" />
+									</div>
+								)}
+							</div>
+						</div>
+
+						{emailError && (
+							<div id={`${formId}-email-error`} className="errorMessage" role="alert">
+								{emailError}
+							</div>
+						)}
+
+						<div>
+							<label htmlFor="signup-password" className="label">
+								Password <RequiredAsterisk />
+							</label>
+							<div className="relative">
+								<input
+									id="signup-password"
+									type={showPassword ? 'text' : 'password'}
+									name="password"
+									value={formData.password}
+									onChange={handleChange}
+									onFocus={() => setShowPasswordRequirements(true)}
+									className={`input pr-11 ${successStates.password ? 'input-success' : ''}`}
+									placeholder="Create a strong password"
+									autoComplete="new-password"
+									required
+								/>
+								{successStates.password && (
+									<div className="successCheckmark" style={{ right: '2.75rem' }}>
+										<Checkmark className="h-3 w-3 text-white" />
+									</div>
+								)}
+								<button
+									type="button"
+									onClick={() => setShowPassword((p) => !p)}
+									aria-label={showPassword ? 'Hide password' : 'Show password'}
+									className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+								>
+									<FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="h-4 w-4" />
+								</button>
+							</div>
+
+							{showPasswordRequirements && (
+								<div
+									className={`passwordRequirements mt-2 space-y-1.5 rounded-xl border border-gray-200 bg-gray-50/90 p-3 text-sm ${
+										isPasswordRequirementsClosing ? 'slide-out' : ''
+									}`}
+									style={
+										isPasswordRequirementsClosing
+											? { animation: 'slide-out 0.3s ease-in-out forwards' }
+											: undefined
+									}
+								>
+									<div
+										className={`flex items-center gap-2 ${passwordChecks.minLength ? 'text-brand-pink' : 'text-gray-600'}`}
+									>
+										<span>{passwordChecks.minLength ? '✓' : '○'}</span>
+										<span>At least 8 characters</span>
+									</div>
+									<div
+										className={`flex items-center gap-2 ${passwordChecks.hasSpecialChar ? 'text-brand-pink' : 'text-gray-600'}`}
+									>
+										<span>{passwordChecks.hasSpecialChar ? '✓' : '○'}</span>
+										<span>One special character (!@#$%…)</span>
+									</div>
+									<div
+										className={`flex items-center gap-2 ${passwordChecks.hasTwoNumbers ? 'text-brand-pink' : 'text-gray-600'}`}
+									>
+										<span>{passwordChecks.hasTwoNumbers ? '✓' : '○'}</span>
+										<span>At least 2 numbers</span>
+									</div>
+									<div
+										className={`flex items-center gap-2 ${passwordChecks.hasCapital ? 'text-brand-pink' : 'text-gray-600'}`}
+									>
+										<span>{passwordChecks.hasCapital ? '✓' : '○'}</span>
+										<span>One capital letter</span>
+									</div>
+								</div>
+							)}
+						</div>
+
+						<div>
+							<label htmlFor="signup-confirm-password" className="label">
+								Confirm password <RequiredAsterisk />
+							</label>
+							<div className="relative">
+								<input
+									id="signup-confirm-password"
+									type={showConfirmPassword ? 'text' : 'password'}
+									name="confirmPassword"
+									value={formData.confirmPassword}
+									onChange={handleChange}
+									onFocus={() => setShowConfirmPasswordMatch(true)}
+									className={`input pr-11 ${successStates.confirmPassword ? 'input-success' : ''}`}
+									placeholder="Repeat password"
+									autoComplete="new-password"
+									required
+								/>
+								{successStates.confirmPassword && (
+									<div className="successCheckmark" style={{ right: '2.75rem' }}>
+										<Checkmark className="h-3 w-3 text-white" />
+									</div>
+								)}
+								<button
+									type="button"
+									onClick={() => setShowConfirmPassword((p) => !p)}
+									aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+									className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+								>
+									<FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} className="h-4 w-4" />
+								</button>
+							</div>
+
+							{showConfirmPasswordMatch && formData.confirmPassword.trim() !== '' && (
+								<div className="passwordRequirements mt-2 rounded-xl border border-gray-200 bg-gray-50/90 p-3 text-sm">
+									<div
+										className={`flex items-center gap-2 ${formData.confirmPassword === formData.password ? 'text-brand-pink' : 'text-gray-600'}`}
+									>
+										{formData.confirmPassword === formData.password ? (
+											<Checkmark className="h-4 w-4" />
+										) : (
+											<XIcon className="h-4 w-4" />
+										)}
+										<span>Passwords match</span>
+									</div>
+								</div>
+							)}
+						</div>
+
+						{formError && (
+							<div id={formErrorId} className="errorMessage" role="alert">
+								{formError}
+							</div>
+						)}
+
 						<button
-							onClick={onSwitchToLogin}
-							className="text-brand-pink hover:opacity-80 font-semibold underline"
+							type="submit"
+							disabled={isLoading || !isFormValid}
+							className="w-full rounded-xl bg-brand-pink py-3.5 text-sm font-semibold text-white shadow-md transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:text-base"
 						>
-							Sign in
+							{isLoading ? 'Creating account…' : 'Create account'}
 						</button>
-					</p>
+					</form>
+
+					<div className="mt-6 border-t border-gray-100 pt-6 text-center">
+						<p className="text-sm text-gray-600">
+							Already have an account?{' '}
+							<button
+								type="button"
+								onClick={onSwitchToLogin}
+								className="font-semibold text-brand-pink underline decoration-brand-pink/40 underline-offset-2 transition hover:opacity-90 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+							>
+								Sign in
+							</button>
+						</p>
+					</div>
 				</div>
 			</div>
 		</div>
-  )
+	)
 }
 
 export default SignUpModal
-

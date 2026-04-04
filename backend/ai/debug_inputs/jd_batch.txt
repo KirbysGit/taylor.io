@@ -1,0 +1,24 @@
+# Batch JD input for extraction evaluation.
+# Use one or both formats:
+#
+# 1) Text blocks separated by === JD ===
+# 2) JSON list in the same file (replace everything below)
+#
+# Fields supported in text mode:
+#   TITLE: <free text>
+#   ROLE: <free text>
+#   COMPANY: <free text>
+#
+# Everything else in each block is treated as job description text.
+
+=== JD ===
+TITLE: Example Forward Deployed Engineer JD
+ROLE: Forward Deployed Engineer
+COMPANY: Example Co
+Paste full JD text here...
+
+=== JD ===
+TITLE: Example Automation Developer JD
+ROLE: Automation Developer
+COMPANY: Example Co
+Paste another JD here...
