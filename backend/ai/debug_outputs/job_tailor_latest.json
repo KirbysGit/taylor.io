@@ -1,30 +1,38 @@
 {
-  "timestamp_utc": "2026-04-04T05:39:12.949020+00:00",
+  "timestamp_utc": "2026-04-07T03:19:47.095389+00:00",
   "user_id": 1,
   "request": {
-    "target_role": "AI Developer - Model Creation & Full Stack Python",
-    "job_description_chars": 2681,
+    "target_role": "Data Scientist",
+    "job_description_chars": 6070,
     "template_name": "classic",
     "strict_truth": true
   },
   "extraction": {
     "active_domains": [
-      "engineering",
       "ai",
-      "cloud"
+      "engineering",
+      "operations"
     ],
     "top_keywords_raw": [
       {
-        "term": "ai",
-        "score": 7.8,
-        "frequency": 5.0,
+        "term": "customer success",
+        "score": 8.9,
+        "frequency": 6.0,
         "sources": [
-          "title_token",
+          "dynamic_phrase"
+        ]
+      },
+      {
+        "term": "python",
+        "score": 8.2,
+        "frequency": 4.0,
+        "sources": [
+          "concrete_stack",
           "token"
         ]
       },
       {
-        "term": "restful apis",
+        "term": "a/b testing",
         "score": 7.2,
         "frequency": 1.0,
         "sources": [
@@ -32,33 +40,33 @@
         ]
       },
       {
-        "term": "python",
-        "score": 6.4,
-        "frequency": 2.0,
-        "sources": [
-          "title_token",
-          "token"
-        ]
-      },
-      {
-        "term": "ci/cd",
-        "score": 6.2,
+        "term": "data analysis",
+        "score": 7.2,
         "frequency": 1.0,
         "sources": [
           "known_phrase"
         ]
       },
       {
-        "term": "model",
-        "score": 5.4,
-        "frequency": 4.0,
+        "term": "sql",
+        "score": 6.6,
+        "frequency": 3.0,
         "sources": [
-          "title_token",
+          "concrete_stack",
           "token"
         ]
       },
       {
-        "term": "vue",
+        "term": "scikit-learn",
+        "score": 5.6,
+        "frequency": 2.0,
+        "sources": [
+          "concrete_stack",
+          "token"
+        ]
+      },
+      {
+        "term": "tableau",
         "score": 5.2,
         "frequency": 1.0,
         "sources": [
@@ -66,7 +74,23 @@
         ]
       },
       {
-        "term": "performance",
+        "term": "dashboards",
+        "score": 5.1,
+        "frequency": 5.0,
+        "sources": [
+          "token"
+        ]
+      },
+      {
+        "term": "reporting",
+        "score": 5.0,
+        "frequency": 3.0,
+        "sources": [
+          "token"
+        ]
+      },
+      {
+        "term": "sales",
         "score": 5.0,
         "frequency": 2.0,
         "sources": [
@@ -74,7 +98,7 @@
         ]
       },
       {
-        "term": "machine learning",
+        "term": "building dashboards",
         "score": 4.9,
         "frequency": 2.0,
         "sources": [
@@ -82,82 +106,102 @@
         ]
       },
       {
-        "term": "models using",
+        "term": "customer analytics",
         "score": 4.9,
         "frequency": 2.0,
         "sources": [
           "dynamic_phrase"
-        ]
-      },
-      {
-        "term": "github",
-        "score": 4.2,
-        "frequency": 1.0,
-        "sources": [
-          "known_phrase"
-        ]
-      },
-      {
-        "term": "microservices",
-        "score": 4.2,
-        "frequency": 1.0,
-        "sources": [
-          "known_phrase"
-        ]
-      },
-      {
-        "term": "models",
-        "score": 4.0,
-        "frequency": 4.0,
-        "sources": [
-          "token"
         ]
       }
     ],
     "keywords_filtered": [
-      "ai",
-      "restful apis",
+      "customer success",
       "python",
-      "ci/cd",
-      "model",
-      "vue",
-      "performance",
-      "machine learning",
-      "models using",
-      "github",
-      "microservices",
-      "models"
+      "a/b testing",
+      "data analysis",
+      "sql",
+      "scikit-learn",
+      "tableau",
+      "dashboards",
+      "reporting",
+      "sales",
+      "building dashboards",
+      "customer analytics"
     ],
     "keywords_abstracted": [
-      "evaluation and performance robustness",
-      "application development stack",
-      "cloud and platform infrastructure",
-      "ai",
-      "restful apis",
+      "customer success",
       "python",
-      "ci/cd",
-      "model",
-      "vue",
-      "performance",
-      "machine learning",
-      "models using"
+      "a/b testing",
+      "data analysis"
     ],
     "dynamic_phrase_candidates": [
       [
-        "machine learning",
+        "customer success",
+        6
+      ],
+      [
+        "building dashboards",
         2
       ],
       [
-        "models using",
+        "customer analytics",
+        2
+      ],
+      [
+        "customer success organization",
         2
       ]
-    ]
+    ],
+    "tailor_context": {
+      "target_role": "Data Scientist",
+      "active_domains": [
+        "ai",
+        "engineering",
+        "operations"
+      ],
+      "keywords_primary": [
+        "customer success",
+        "python",
+        "a/b testing",
+        "data analysis",
+        "sql",
+        "scikit-learn",
+        "tableau",
+        "building dashboards"
+      ],
+      "keywords_secondary": [
+        "dashboards",
+        "reporting",
+        "sales",
+        "customer analytics"
+      ],
+      "phrase_focus": [
+        "customer success",
+        "a/b testing",
+        "data analysis",
+        "building dashboards",
+        "customer analytics",
+        "customer success organization"
+      ],
+      "resume_hits": [
+        "python",
+        "sql"
+      ],
+      "resume_gaps": [
+        "customer success",
+        "a/b testing",
+        "data analysis",
+        "scikit-learn",
+        "tableau",
+        "building dashboards"
+      ]
+    }
   },
   "prompt_setup": {
-    "prompt_version": "job_tailor_v1_scaffold",
+    "prompt_version": "job_tailor_v2_context",
     "context": {
-      "target_role": "AI Developer - Model Creation & Full Stack Python",
-      "company": null,
+      "target_role": "Data Scientist",
+      "company": "Cresta",
       "focus": "balanced",
       "tone": "balanced",
       "strict_truth": true,
@@ -173,9 +217,10 @@
         "sectionVisibility",
         "skills",
         "summary"
-      ]
+      ],
+      "using_tailor_context": true
     },
     "system_prompt": "You are a resume tailoring assistant for Taylor.io.\nYour job is to analyze job requirements, map them to resume evidence, and propose truthful rewrites.\nFollow these rules exactly:\n- Use only details present in user resume data and job description.\n- Keep output ATS-friendly with clear, concrete language.\n- Return recommendations at section level and line-edit level.\n- Do not invent facts, companies, titles, dates, metrics, or certifications.\n- Balance impact, technical detail, and leadership signals.\n- Use a balanced professional tone suitable for modern resume formats.",
-    "user_prompt": "Target role: AI Developer - Model Creation & Full Stack Python\nCompany: Not specified\nTemplate: classic\nFocus: balanced\nTone: balanced\nStrict truth mode: on\n\nJob description:\nECS is seeking a highly skilled AI Developer with expertise in Model Creation, Machine Learning and Full-Stack Application Development. This is an exciting role that works closely with the US Postal Service to improve efficiencies, parcel delivery, and fraud and loss prevention. The ideal candidate will be excited to join an organization that is heavily investing in AI.\n\n\nThis role requires the need to build high performance Python-based AI/ML solutions capable of processing extremely large data sets and integrating them into scalable web applications, including LLMs. This role also requires strong problem-solving skills, a deep understanding of AI frameworks, and the ability to work across the entire technology stack.\n\n\nNote: Candidates MUST be able to qualify for a USPS Public Trust Clearance (which requires US Citizenship or Perm. Resident Alien status and passing a stringent background records check). Also, though this is a Remote / Work from Home (WFH) position, candidates must be based in the continental United States of America.\n\n\n\nKey Responsibilities: \n\nAI/ML Model Development\nDesign, build, fine tune and train machine learning and deep learning models using Python.\nPerform data preprocessing, feature engineering, and model optimization.\nEvaluate models using domain appropriate metrics and improve performance iteratively.\nDeploy custom models to production environments (cloud/on-premises) using MLOps best practices.\nFull-Stack Development\nDevelop high throughput, event-driven microservices (RESTful APIs, GraphQL) for application backends and MCP servers to serve AI models.\nBuild responsive and user-friendly front-end interfaces for AI-powered applications.\nIntegrate AI models into web and mobile applications.\nEnsure scalability, security, and performance of deployed solutions.\nCollaboration & Documentation\nWork closely with data scientists, developers, frontend developers, and product managers.\nDocument model architectures, APIs, and deployment processes.\nParticipate in code reviews and maintain high coding standards.\n\n\nRequired Skills & Experience\n\nProgramming: Strong proficiency in Python (NumPy, Pandas, scikit-learn, TensorFlow, PyTorch, Transformers).\nFull Stack: Experience with backend frameworks (Django, Flask, FastAPI) and frontend frameworks (React, Angular, or Vue.js).\nDatabases: Knowledge of SQL (PostgreSQL, MySQL) and NoSQL (MongoDB, Redis).\nDevOps & Deployment: Familiarity with Docker, Kubernetes, CI/CD pipelines, and cloud platforms (AWS, Azure, GCP).\nVersion Control: Proficiency with GitHub workflows.\nMathematics & AI Concepts: Strong understanding of statistics, linear algebra, and machine learning algorithms.\n\nResume data (JSON): [omitted for debug]"
+    "user_prompt": "Target role: Data Scientist\nTemplate: classic\nFocus: balanced\nTone: balanced\nStrict truth mode: on\n\nActive domains: ai, engineering, operations\nPrimary keywords: customer success, python, a/b testing, data analysis, sql, scikit-learn, tableau, building dashboards\nPhrase focus: customer success, a/b testing, data analysis, building dashboards, customer analytics, customer success organization\nResume hits: python, sql\nResume gaps: customer success, a/b testing, data analysis, scikit-learn, tableau, building dashboards\n\nJD requirements snippet:\n(not found)\n\nJD responsibilities snippet:\n(not found)\n\nJD qualifications snippet:\nExperience with conversational data (call transcripts, chats) or text analytics\nFamiliarity with causal inference, uplift modeling, or A/B testing frameworks\n\nRelevant resume sections:\n[summary]\n{\"summary\":\"Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications.\"}\n\n[skills]\n[{\"id\":1,\"name\":\"Python\",\"category\":\"Languages\"},{\"id\":2,\"name\":\"JavaScript\",\"category\":\"Languages\"},{\"id\":4,\"name\":\"SQL\",\"category\":\"Languages\"},{\"id\":5,\"name\":\"Java\",\"category\":\"Languages\"},{\"id\":6,\"name\":\"Django\",\"category\":\"Frameworks\"},{\"id\":7,\"name\":\"FastAPI\",\"category\":\"Frameworks\"},{\"id\":8,\"name\":\"React\",\"category\":\"Frameworks\"},{\"id\":9,\"name\":\"Node.js\",\"category\":\"Frameworks\"},{\"id\":10,\"name\":\"PyTorch\",\"category\":\"Frameworks\"},{\"id\":11,\"name\":\"TensorFlow Lite\",\"category\":\"Frameworks\"},{\"id\":12,\"name\":\"PostgreSQL\",\"category\":\"Data Tools\"},{\"id\":13,\"name\":\"MySQL\",\"category\":\"Data Tools\"},{\"id\":14,\"name\":\"MongoDB\",\"category\":\"Data Tools\"},{\"id\":15,\"name\":\"Pandas\",\"category\":\"Data To...\n\n[experience]\n[{\"id\":1,\"title\":\"Software Engineering Intern\",\"company\":\"BitGo\",\"description\":\"\\u2022 Designed and maintained backend services and REST APIs in Python/Django supporting secure data flows across internal financial/compliance systems.\\n\\u2022 Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.\\n\\u2022 Built internal dashboards using React + Django APIs, enabling real-time visibility into backend data workflows and operational metrics.\\n\\u2022 Optimized Python data-processing pipelines and PostgreSQL queries, improving system scalability and reducing latency by ~40%.\",\"start_date\":\"2024-05-01\",\"end_date\":\"2025-06-01\",\"current\":false,\"location\":\"Remote\",\"skills\":\"Python, Django, React, PostgreSQL, AWS EC2\"}]\n\n[projects]\n[{\"id\":1,\"title\":\"Centi \\u2013 Personal Finance Web App\",\"description\":\"\\u2022 Built FastAPI backend services deployed in production, integrating financial data via ETL pipelines and normalized SQL schemas to support real-time account analytics.\\n\\u2022 Implemented scalable API endpoints, caching, and data modeling patterns for high-volume financial transactions.\\n\\u2022 Developed React dashboards for insights and authentication; deployed via containerized services and cloud-based CI/CD.\",\"tech_stack\":[\"Python\",\"SQL\",\"FinBERT\",\"XGBoost\"],\"url\":\"https://centi.dev\"},{\"id\":2,\"title\":\"SentimentTrader \\u2013 Real-Time Stock Sentiment Pipeline \",\"description\":\"\\u2022 Designed and implemented a full ML-driven data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.\\n\\u2022 Applied NLP models (FinBERT) and feature engineering to build 4..."
   }
 }

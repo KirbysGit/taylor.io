@@ -8,7 +8,9 @@ from .extraction import (
     filter_non_reusable,
     get_extraction_profile,
 )
+from .planning import build_edit_plan
 from .prompt_builder import build_job_tailor_prompt
+from .processing import build_tailor_context
 from .schemas import (
     JobTailorSuggestRequest,
     JobTailorSuggestResponse,
@@ -25,6 +27,8 @@ __all__ = [
     "detect_domain_from_role",
     "detect_domains",
     "get_extraction_profile",
+    "build_tailor_context",
+    "build_edit_plan",
     "JobTailorSuggestRequest",
     "JobTailorSuggestResponse",
     "JobTailorSuggestion",

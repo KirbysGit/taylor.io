@@ -51,6 +51,14 @@ _ABSTRACTION_RULES: Sequence[tuple[str, tuple[str, ...]]] = (
 )
 
 
+def _match_count(lowered_terms: Sequence[str], hints: Sequence[str]) -> int:
+    matched = 0
+    for hint in hints:
+        if any(hint in term for term in lowered_terms):
+            matched += 1
+    return matched
+
+
 def _looks_non_reusable(term: str) -> bool:
     t = term.strip().lower()
     if not t:
@@ -91,10 +99,9 @@ def abstract_terms(terms: Iterable[str], limit: int = 12) -> List[str]:
     selected: "OrderedDict[str, None]" = OrderedDict()
 
     for label, hints in _ABSTRACTION_RULES:
-        for term in lowered_terms:
-            if any(h in term for h in hints):
-                selected[label] = None
-                break
+        # Require multiple concrete supports before promoting an abstraction label.
+        if _match_count(lowered_terms, hints) >= 2:
+            selected[label] = None
         if len(selected) >= limit:
             break
 

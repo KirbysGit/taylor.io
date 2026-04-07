@@ -12,6 +12,8 @@ from typing import Any, Dict, List
 
 # Local imports.
 from .extraction import abstract_terms, extract_job_keywords_detailed, filter_non_reusable
+from .planning import build_edit_plan
+from .processing import build_tailor_context
 from .prompt_builder import build_job_tailor_prompt
 from .schemas import (
     JobTailorSuggestRequest,
@@ -79,7 +81,6 @@ def build_job_tailor_suggestions(
     MVP mock response for frontend integration.
     Keeps shape stable so OpenAI implementation can replace internals later.
     """
-    prompt_bundle = build_job_tailor_prompt(payload)
     extraction_result = extract_job_keywords_detailed(
         payload.job_description,
         target_role=payload.target_role,
@@ -87,8 +88,22 @@ def build_job_tailor_suggestions(
     )
     raw_keywords = [entry["term"] for entry in extraction_result["keywords"]]
     reusable_keywords = filter_non_reusable(raw_keywords)
-    abstracted_keywords = abstract_terms(reusable_keywords, limit=12)
-    ui_keywords = abstracted_keywords or reusable_keywords or raw_keywords
+    abstracted_keywords = abstract_terms(reusable_keywords, limit=4)
+    tailor_context = build_tailor_context(
+        target_role=payload.target_role,
+        extraction_result=extraction_result,
+        resume_data=payload.resume_data if isinstance(payload.resume_data, dict) else {},
+    )
+    edit_plan = build_edit_plan(
+        tailor_context=tailor_context,
+        resume_data=payload.resume_data if isinstance(payload.resume_data, dict) else {},
+    )
+    prompt_bundle = build_job_tailor_prompt(payload, tailor_context=tailor_context, edit_plan=edit_plan)
+    # Keep UI/prompt keywords concrete; abstractions remain debug metadata.
+    ui_keywords = (
+        tailor_context.get("keywords_primary", [])
+        + [term for term in tailor_context.get("keywords_secondary", []) if term not in tailor_context.get("keywords_primary", [])]
+    )[:12] or reusable_keywords or raw_keywords
 
     _write_debug_output(
         {
@@ -106,6 +121,8 @@ def build_job_tailor_suggestions(
                 "keywords_filtered": reusable_keywords[:12],
                 "keywords_abstracted": abstracted_keywords[:12],
                 "dynamic_phrase_candidates": extraction_result["dynamic_phrase_candidates"][:10],
+                "tailor_context": tailor_context,
+                "edit_plan": edit_plan,
             },
             "prompt_setup": {
                 "prompt_version": prompt_bundle["prompt_version"],
@@ -146,6 +163,9 @@ def build_job_tailor_suggestions(
             "job_description_chars": len(payload.job_description),
             "suggestion_count": len(suggestions),
             "is_mock": True,
+            # Expose post-extraction transformer output directly for UI/testing.
+            "tailor_context": tailor_context,
+            "edit_plan": edit_plan,
             "prompt_debug": {
                 "context": prompt_bundle["context"],
                 "prompt_char_counts": {
@@ -162,6 +182,8 @@ def build_job_tailor_suggestions(
                     "keywords_filtered": reusable_keywords[:12],
                     "keywords_abstracted": abstracted_keywords[:12],
                     "dynamic_phrase_candidates": extraction_result["dynamic_phrase_candidates"][:10],
+                    "tailor_context": tailor_context,
+                    "edit_plan": edit_plan,
                 },
             },
         },

@@ -13,22 +13,34 @@ GLOBAL_WEAK_TOKENS = {
     "benefits", "compensation", "salary", "full-time", "schedule", "location",
     "travel", "in person", "weekly pay", "mileage", "reimbursement",
     "data", "company", "paid", "employee", "work",
-    "jack", "jill", "step", "candidate", "required", "engineer", "fullstack", "applications", "communication", "contributor", "end",
+    "step", "candidate", "required", "engineer", "fullstack", "applications", "communication", "contributor", "end",
     "support", "developer", "business", "onboarding", "note",
     # Important in context, weak by default rather than hard-stop.
     "design", "production", "system", "systems", "strategy", "build", "built", "building",
+    # Common generic business/resume language that should rarely outrank concrete terms.
+    "manager", "management", "lead", "service", "platform", "engineering", "business",
+    "performance", "delivery", "execution", "opportunities", "create", "developing",
+    "defined", "related", "assistant", "area", "needs",
+    "ensure", "through", "teams", "clients", "ownership", "all", "daily", "using",
+    "software", "flow", "hiring", "join", "make", "customer",
+    "can", "information", "another", "top", "care", "clear", "comprehensive",
+    "eligible", "employment", "privacy", "recruiting", "supported", "projects",
+    "during", "functions", "environment", "degree", "must", "perform", "across", "analyses",
+    "choose", "their", "based", "career", "open", "position", "who", "any", "able", "providing", "ensures", "receive", "requires",
+    "university", "campus", "location",
+    "graduates", "graduate", "students", "recent",
+    "may", "needed", "knowledge", "duties", "custom", "effectively", "familiarity", "mission",
 }
-GLOBAL_GARBAGE_TOKENS = {"etc", "etcetera", "misc", "various"}
+GLOBAL_GARBAGE_TOKENS = {"etc", "etcetera", "misc", "various", "eg", "e.g"}
 
 GLOBAL_FILLER_PHRASES = {
     "team player", "move fast", "strong communication skills", "excellent communication skills", "high standards",
     "seat at the table", "works well under pressure", "self starter", "detail oriented",
     "customer first", "integrity", "collaborative", "innovative", "passionate", "best in class",
-    "unparalleled customer service", "life at", "vacation time", "sick time", "holiday pay",
+    "unparalleled customer service", "vacation time", "sick time", "holiday pay",
     "healthcare benefits", "401k", "tuition reimbursement", "self-motivated", "skilled and motivated",
     "communicates effectively", "nimble learning", "functional skills", "situational adaptability",
-    "largest small to medium-sized business consulting firm", "our mission is clear and simple",
-    "opportunity for tested executives", "change agents", "improve their lives and livelihood",
+    "our mission is clear and simple", "change agents", "improve their lives and livelihood",
     "send us your resume for consideration", "integral part of the continued growth of our organization",
     "women and minorities are encouraged to apply", "equal employment opportunity company", "drug free work place",
     "competitive compensation package", "passion confidence and tenacity",
@@ -42,11 +54,11 @@ GLOBAL_FILLER_PHRASES = {
     "we value our communities", "equal opportunity employer", "not sure if you meet every requirement",
     "company paid", "business casual dress code", "community outreach opportunities",
     "employee recognition programs", "holiday bonus", "hybrid work",
-    "the pay range is the lowest to highest compensation", "all qualified applicants will receive consideration",
+    "pay range is the lowest to highest compensation", "all qualified applicants will receive consideration",
     "by clicking apply today you agree to receive calls", "message and data rates may apply",
     "carriers are not liable for delayed or undelivered messages", "you will always have the right to cease communicating",
-    "talk to jack", "jack's network", "who are jack and jill", "we never post fake jobs",
-    "give jack a spin", "next steps", "dream job", "for free",
+    "talk to recruiter", "recruiter network", "who are our recruiters", "we never post fake jobs",
+    "next steps", "dream job", "for free", "apply now", "apply today",
     "public trust clearance", "us citizenship or perm resident alien status", "background records check",
     "remote work from home", "continental united states of america",
 }
@@ -95,6 +107,15 @@ GLOBAL_PHRASES = [
     "mcp servers", "ai-powered applications", "cloud on-premises deployment", "mlops best practices",
     "data preprocessing", "deep learning models", "high throughput services", "fraud prevention",
     "loss prevention", "parcel delivery optimization",
+    "speech analytics", "sentiment analytics", "intent models", "dialog flows", "self-service automation",
+    "ivr improvements", "agent assist", "cx analytics", "automation workflows", "customer satisfaction",
+    "containment rate", "escalation rate", "contact center", "cisco webex contact center", "calabrio one",
+    "patient care", "appointment scheduling", "medical records", "clinical documentation", "care coordination",
+    "classroom instruction", "lesson planning", "curriculum development", "student assessment", "behavior management",
+    "legal documentation", "case management", "document review", "court filings", "docket management",
+    "construction materials testing", "field testing", "site inspection", "quality control", "safety compliance",
+    "sales engineering", "solution selling", "technical demos", "pre-sales support", "support operations",
+    "service desk support", "incident triage", "ticket resolution", "business systems analysis", "requirements analysis",
 ]
 
 GLOBAL_BOOST_WORDS = {
@@ -128,6 +149,7 @@ GLOBAL_BOOST_WORDS = {
     "fastapi": 3, "flask": 2, "django": 3, "angular": 2, "vue.js": 2, "graphql": 3,
     "redis": 2, "postgresql": 2, "mysql": 2, "azure": 2, "mlops": 3, "feature engineering": 3,
     "model optimization": 3, "data preprocessing": 2, "deep learning": 3, "microservices": 3,
+    "webex": 3, "calabrio": 3, "ivr": 3, "fcr": 3, "csat": 3, "dialogflow": 3, "cx": 2, "wfo": 2, "ccaas": 2, "wxcc": 2,
 }
 
 GLOBAL_PHRASE_CANONICAL = {
@@ -164,8 +186,11 @@ GLOBAL_PHRASE_CANONICAL = {
     "ai ml": "machine learning model development",
     "vue js": "vue.js",
     "cloud/on-premises": "cloud on-premises deployment",
+    "cross-functional teams": "cross functional collaboration",
+    "architectural discussions": "technical architecture",
+    "user facing web applications": "user-facing web applications",
 }
-GLOBAL_ALLOW_SHORT_TOKENS = {"c++", "c#", "go", "r", "ai", "ml", "ui", "ux", "qa"}
+GLOBAL_ALLOW_SHORT_TOKENS = {"c++", "c#", "go", "r", "ai", "ml", "ui", "ux", "qa", "cx", "ivr", "fcr", "csat", "wfo", "ccaas", "wxcc"}
 
 DOMAIN_LEXICONS = {
     "engineering": {
@@ -178,6 +203,8 @@ DOMAIN_LEXICONS = {
             "javascript frameworks", "full stack web development", "github", "notion",
             "full-stack application development", "event-driven microservices", "graphql", "mcp servers",
             "feature engineering", "model optimization", "data preprocessing", "deep learning",
+            "go", "sql", "full-stack", "user-facing web applications", "cross-functional teams",
+            "product features", "architectural discussions", "shipping complex software projects",
         },
         "phrases": [
             "system design", "distributed systems", "api design", "ci/cd", "technical architecture", "real-time collaboration",
@@ -186,7 +213,8 @@ DOMAIN_LEXICONS = {
             "full stack engineer", "end-to-end", "individual contributor", "multiple applications",
             "restful apis", "third-party apis", "full stack web development", "javascript frameworks",
             "event-driven microservices", "graphql", "mcp servers", "high throughput services",
-            "cloud on-premises deployment",
+            "cloud on-premises deployment", "user-facing web applications", "cross-functional teams",
+            "product features", "architectural discussions", "shipping complex software projects",
         ],
         "boost_words": {
             "python": 3, "java": 2, "typescript": 3, "react": 3, "next.js": 3, "node": 2, "aws": 3, "kubernetes": 2,
@@ -196,6 +224,9 @@ DOMAIN_LEXICONS = {
             "github": 2, "notion": 1,
             "graphql": 3, "fastapi": 3, "flask": 2, "angular": 2, "vue.js": 2, "redis": 2,
             "postgresql": 2, "mysql": 2, "feature engineering": 3, "model optimization": 3, "microservices": 3,
+            "go": 3, "sql": 3, "full-stack": 3, "user-facing web applications": 2,
+            "cross-functional teams": 2, "product features": 2, "architectural discussions": 2,
+            "shipping complex software projects": 2,
         },
         "weak_tokens": {"codebase", "coding"},
         "garbage_tokens": set(),
@@ -255,8 +286,9 @@ DOMAIN_LEXICONS = {
     "ai": {
         "aliases": {
             "ai", "ml", "mlops", "llm", "rag", "generative ai", "ml pipelines", "models", "training", "deployment", "monitoring",
-            "copilot", "power automate", "automation", "prompt engineering", "automation governance",
+            "copilot", "power automate", "prompt engineering", "automation governance",
             "numpy", "pandas", "scikit-learn", "tensorflow", "pytorch", "transformers", "deep learning",
+            "speech analytics", "sentiment analytics", "intent models", "dialog flows", "agent assist", "dialogflow",
         },
         "phrases": [
             "ml pipelines", "training deployment monitoring", "llm-based solutions", "rag architectures",
@@ -264,12 +296,15 @@ DOMAIN_LEXICONS = {
             "governance models", "automation governance", "workflow automation", "process automation",
             "machine learning model development", "feature engineering", "data preprocessing", "model optimization",
             "domain appropriate metrics", "model performance evaluation", "mlops best practices", "model creation",
+            "speech analytics", "sentiment analytics", "intent models", "dialog flows", "self-service automation",
+            "agent assist", "automation workflows", "cx analytics",
         ],
         "boost_words": {
             "mlops": 3, "llm": 3, "rag": 3, "generative": 2, "ai": 2, "ml": 2, "deployment": 2, "monitoring": 2,
-            "copilot": 3, "power automate": 3, "automation": 3, "prompt engineering": 2, "governance": 2, "dataverse": 3,
+            "copilot": 3, "power automate": 3, "prompt engineering": 2, "governance": 2, "dataverse": 3,
             "numpy": 3, "pandas": 3, "scikit-learn": 3, "tensorflow": 3, "pytorch": 3, "transformers": 3,
             "feature engineering": 3, "model optimization": 3, "deep learning": 3, "data preprocessing": 2,
+            "speech analytics": 3, "sentiment analytics": 3, "intent models": 3, "dialogflow": 3, "agent assist": 3, "cx": 2,
         },
         "weak_tokens": {"ai", "ml"},
         "garbage_tokens": set(),
@@ -314,6 +349,10 @@ DOMAIN_LEXICONS = {
             "account management", "prospecting", "lead generation", "outbound", "revenue growth", "client relationships",
             "sales process", "forecasting", "quota", "revenue", "sales improvement",
             "sales representative", "sales operations", "sales presentations", "customer service", "face-to-face",
+            "business development representative", "etf wholesaler", "wholesaler", "wholesaling", "advisor relationships",
+            "financial advisor", "broker dealer", "territory management", "channel sales",
+            "outside sales representative", "field sales", "territory sales", "account coordinator", "inside sales",
+            "sales engineer", "solutions engineer", "pre-sales", "solution selling", "technical demos",
         },
         "phrases": [
             "pipeline management", "territory planning", "deal strategy", "customer expansion", "business development",
@@ -321,12 +360,20 @@ DOMAIN_LEXICONS = {
             "new business opportunities", "revenue-focused pipeline", "client activity", "recurring volume",
             "relationship-building", "client experience", "pipeline health", "performance metrics",
             "market trends", "competitive developments", "prospecting strategies", "sales process", "activity tracking",
+            "advisor relationships", "business development representative", "etf wholesaler", "territory management",
+            "channel partner sales", "broker dealer coverage", "financial advisor outreach", "book of business",
+            "outside sales representative", "field sales", "territory sales", "account coordinator",
+            "sales territory coverage", "client account support", "channel account support",
+            "sales engineering", "solution selling", "technical demos", "pre-sales support",
         ],
         "boost_words": {
             "crm": 3, "salesforce": 2, "forecasting": 2, "quota": 2, "sales": 3, "pipeline": 3,
             "prospecting": 3, "outbound": 2, "lead": 2, "leads": 2, "revenue": 3, "clients": 2,
             "client": 2, "account": 2, "relationships": 2, "relationship": 2, "onboarding": 2, "metrics": 2,
             "targets": 2, "opportunities": 2, "volume": 2, "reporting": 2,
+            "wholesaler": 3, "etf": 3, "advisor": 2, "broker dealer": 2, "territory": 2, "book of business": 2,
+            "outside sales": 3, "field sales": 3, "account coordinator": 3, "territory sales": 3, "inside sales": 2,
+            "sales engineer": 3, "solution selling": 3, "pre-sales": 3, "technical demos": 2,
         },
         "weak_tokens": {"hunter"},
         "garbage_tokens": set(),
@@ -339,42 +386,244 @@ DOMAIN_LEXICONS = {
             "profit", "loss", "cash flow", "budgeting", "forecasting", "p&l",
             "fintech", "banking", "modern accounting", "financial infrastructure", "b2b saas",
             "quantitative investment", "investment management", "private markets", "investment decision-making",
-            "quantitative research",
+            "quantitative research", "liquidity solutions", "securities services", "capital markets",
         },
         "phrases": [
             "financial modeling", "variance analysis", "internal controls", "regulatory compliance",
             "foreign exchange", "global payment solutions", "financial institutions", "commercial prospects",
             "currency needs", "logistics workflows", "decision-making criteria", "banknote solutions",
             "quantitative investment", "investment decision-making", "investment management", "private markets",
-            "quantitative research", "business requirements",
+            "quantitative research", "business requirements", "liquidity solutions", "securities services",
         ],
         "boost_words": {
             "gaap": 3, "forecasting": 2, "budgeting": 2, "reconciliation": 2, "compliance": 2, "settlement": 2, "fx": 2,
             "quantitative": 3, "investment": 3, "private markets": 3, "investment management": 3, "research": 2,
+            "liquidity": 3, "securities": 3,
         },
         "weak_tokens": {"numbers"},
         "garbage_tokens": set(),
         "filler_phrases": {"numbers oriented"},
+    },
+    "insurance": {
+        "aliases": {
+            "commercial lines", "account manager", "brokerage", "underwriter", "underwriting", "insurance",
+            "policy servicing", "claims", "renewals", "carrier", "risk placement",
+        },
+        "phrases": [
+            "commercial lines account management", "policy administration", "policy servicing", "renewal management",
+            "risk placement", "carrier negotiations", "underwriting support", "claims coordination",
+        ],
+        "boost_words": {
+            "insurance": 3, "underwriting": 3, "underwriter": 3, "brokerage": 3, "policy": 2, "renewals": 2,
+            "claims": 2, "carrier": 2, "commercial lines": 3,
+        },
+        "weak_tokens": {"producer"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"insurance passion"},
+    },
+    "retail": {
+        "aliases": {
+            "assistant store manager", "store manager", "retail", "merchandising", "store operations",
+            "customer engagement", "floor leadership", "inventory", "outlets",
+        },
+        "phrases": [
+            "store operations", "customer engagement", "visual merchandising", "floor leadership",
+            "retail team management", "inventory control", "sales floor operations",
+        ],
+        "boost_words": {
+            "retail": 3, "store": 3, "merchandising": 2, "inventory": 2, "customer engagement": 3,
+            "assistant store manager": 3,
+        },
+        "weak_tokens": {"associate"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"retail rockstar"},
+    },
+    "brokerage": {
+        "aliases": {
+            "brokerage", "underwriter assistants", "underwriter assistant", "securities services",
+            "liquidity solutions", "trade support", "client servicing", "portfolio operations",
+        },
+        "phrases": [
+            "brokerage operations", "underwriting workflows", "trade support", "client servicing",
+            "liquidity solutions", "securities services", "portfolio operations",
+        ],
+        "boost_words": {
+            "brokerage": 3, "underwriter": 3, "underwriting": 3, "securities": 3, "liquidity": 3, "trade": 2,
+        },
+        "weak_tokens": {"assistant"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"brokerage hustle"},
     },
     "operations": {
         "aliases": {
             "operations", "ops", "supply chain", "logistics", "program manager", "process",
             "director of operations", "operator", "execution", "workforce planning", "accountability", "operational", "sops", "performance",
             "turnaround", "business management", "operational turnaround",
+            "office manager", "administrative operations", "food production", "production manager", "inventory control",
+            "scheduling", "vendor coordination", "facilities coordination",
+            "contact center", "ivr", "fcr", "csat", "wfo", "ccaas", "wxcc", "webex", "calabrio",
         },
         "phrases": [
             "process optimization", "service level agreements", "capacity planning", "vendor management",
             "day-to-day operations", "daily operations", "revenue performance", "operational performance",
             "operational inefficiencies", "performance standards", "drive accountability",
+            "office administration", "administrative operations", "calendar coordination", "invoice processing",
+            "accounts payable", "accounts receivable", "inventory management", "production scheduling",
+            "quality assurance", "food safety compliance", "facility operations", "cross-team coordination",
+            "contact center", "cisco webex contact center", "calabrio one", "ivr improvements",
+            "containment rate", "escalation rate", "customer satisfaction", "support operations", "service desk support",
+            "incident triage", "ticket resolution",
         ],
         "boost_words": {
             "sla": 2, "sop": 2, "workflow": 2, "throughput": 2, "operations": 3, "execution": 3,
             "performance": 3, "revenue": 3, "billing": 3, "collections": 3, "kpis": 3, "dashboards": 2,
             "hiring": 2, "recruiting": 2, "efficiency": 2, "implementation": 2,
+            "office manager": 3, "administrative": 2, "inventory": 3, "scheduling": 2, "vendor": 2, "invoicing": 2,
+            "accounts payable": 3, "accounts receivable": 3, "food safety": 3, "quality assurance": 3, "production": 2,
+            "ivr": 3, "fcr": 3, "csat": 3, "contact center": 3, "webex": 3, "calabrio": 3, "wfo": 2, "ccaas": 2, "wxcc": 2,
+            "service desk": 3, "incident": 2, "tickets": 2, "triage": 2,
         },
         "weak_tokens": {"busy"},
         "garbage_tokens": set(),
         "filler_phrases": {"wear many hats"},
+    },
+    "industrial": {
+        "aliases": {
+            "electrical engineer", "automation engineer", "controls engineer", "industrial engineer", "plc",
+            "scada", "hmi", "instrumentation", "control systems", "motor controls", "commissioning",
+            "panel design", "electrical schematics", "industrial automation", "process controls",
+        },
+        "phrases": [
+            "industrial automation", "electrical systems", "control systems", "process controls", "plc programming",
+            "scada integration", "hmi development", "motor controls", "electrical schematics", "panel design",
+            "instrumentation and controls", "field commissioning", "factory automation", "safety interlocks",
+        ],
+        "boost_words": {
+            "plc": 3, "scada": 3, "hmi": 3, "instrumentation": 3, "controls": 3, "electrical": 3,
+            "commissioning": 2, "automation": 2, "schematics": 2, "panel": 2, "interlocks": 2,
+        },
+        "weak_tokens": {"technician"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"hands-on environment"},
+    },
+    "aviation": {
+        "aliases": {
+            "pilot", "first officer", "captain", "flight instructor", "aviation", "flight operations",
+            "faa", "aircraft", "flight planning", "flight safety", "instrument rating",
+        },
+        "phrases": [
+            "flight operations", "flight safety", "aircraft systems", "instrument flight rules",
+            "flight planning", "crew resource management", "faa compliance", "flight instruction",
+        ],
+        "boost_words": {
+            "pilot": 3, "aviation": 3, "aircraft": 3, "faa": 3, "flight": 3, "captain": 2, "first officer": 2,
+            "instrument": 2, "airspace": 2,
+        },
+        "weak_tokens": {"hours", "current"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"equal opportunity pilot employer"},
+    },
+    "marine": {
+        "aliases": {
+            "naval architect", "marine engineer", "ship design", "vessel", "hull", "stability", "classification society",
+            "abs", "bureau veritas", "dnv", "maritime", "offshore",
+        },
+        "phrases": [
+            "naval architecture", "ship design", "stability analysis", "classification compliance",
+            "marine structural analysis", "vessel design", "regulatory compliance",
+        ],
+        "boost_words": {
+            "naval": 3, "marine": 3, "architect": 2, "vessel": 2, "hull": 2, "stability": 3, "abs": 3, "dnv": 2,
+        },
+        "weak_tokens": {"american", "bureau"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"marine passion"},
+    },
+    "mechanical": {
+        "aliases": {
+            "mechanical engineer", "cad designer", "mechanical design", "cad", "solidworks", "autocad",
+            "blueprints", "tolerances", "drafting", "assemblies", "manufacturing drawings",
+        },
+        "phrases": [
+            "mechanical design", "cad modeling", "engineering drawings", "gd&t", "design for manufacturing",
+            "bill of materials", "tolerance analysis",
+        ],
+        "boost_words": {
+            "mechanical": 3, "cad": 3, "solidworks": 3, "autocad": 3, "blueprints": 2, "drawings": 2, "assemblies": 2,
+        },
+        "weak_tokens": {"knowledge", "needed"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"strong mechanical aptitude"},
+    },
+    "construction": {
+        "aliases": {
+            "construction", "field engineer", "materials testing", "site inspection", "project site",
+            "concrete", "asphalt", "soil testing", "quality control", "safety compliance",
+        },
+        "phrases": [
+            "construction materials testing", "field testing", "site inspection", "project coordination",
+            "quality control", "safety compliance", "construction documentation", "materials sampling",
+        ],
+        "boost_words": {
+            "construction": 3, "materials": 2, "field testing": 3, "inspection": 2, "concrete": 2, "asphalt": 2,
+            "quality control": 3, "safety": 2, "site": 2,
+        },
+        "weak_tokens": {"labor"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"fast paced construction environment"},
+    },
+    "healthcare": {
+        "aliases": {
+            "medical assistant", "clinic coordinator", "patient care", "clinical", "healthcare",
+            "appointment scheduling", "emr", "ehr", "patient records", "front desk medical",
+        },
+        "phrases": [
+            "patient care", "appointment scheduling", "medical records", "clinical documentation",
+            "care coordination", "insurance verification", "patient intake", "provider scheduling",
+        ],
+        "boost_words": {
+            "patient": 3, "clinical": 3, "medical": 3, "ehr": 3, "emr": 3, "scheduling": 2,
+            "insurance verification": 2, "care coordination": 3,
+        },
+        "weak_tokens": {"caregiver"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"compassionate bedside manner"},
+    },
+    "education": {
+        "aliases": {
+            "teacher", "instructor", "classroom", "lesson planning", "curriculum", "student",
+            "advanced placement", "ap english", "education", "school",
+        },
+        "phrases": [
+            "classroom instruction", "lesson planning", "curriculum development", "student assessment",
+            "behavior management", "learning outcomes", "parent communication",
+        ],
+        "boost_words": {
+            "teacher": 3, "instructor": 3, "classroom": 3, "curriculum": 3, "lesson": 2, "assessment": 2,
+            "student": 2, "education": 2,
+        },
+        "weak_tokens": {"kids"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"passion for teaching"},
+    },
+    "legal_admin": {
+        "aliases": {
+            "legal assistant", "paralegal", "legal documentation", "case management", "docket", "court filing",
+            "law office", "litigation support", "document review", "legal research", "pleadings",
+            "discovery", "court calendar", "case files",
+        },
+        "phrases": [
+            "legal documentation", "case management", "document review", "court filings",
+            "docket management", "litigation support", "client intake", "legal research",
+            "discovery support", "court calendar management", "pleadings drafting", "case file maintenance",
+        ],
+        "boost_words": {
+            "legal": 3, "paralegal": 3, "filings": 2, "docket": 2, "litigation": 2, "documentation": 2,
+            "research": 2, "pleadings": 2, "discovery": 2, "calendar": 2, "case files": 2,
+        },
+        "weak_tokens": {"clerical", "graduates", "graduate", "students", "recent", "school"},
+        "garbage_tokens": set(),
+        "filler_phrases": {"legal rockstar"},
     },
     "legal": {
         "aliases": {"law firm", "legal", "attorney", "managing attorney", "firm"},
