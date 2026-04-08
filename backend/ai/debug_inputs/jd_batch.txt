@@ -1,238 +1,342 @@
 === JD ===
-TITLE: Nurse Practitioner
-Requirements
-Minimum of two (2) years experience in hospice, home health or community health in the past five (5) years.
-Employee is regularly required to assist in lifting and transferring patients as required.
-Lift objects in excess of twenty pounds.
-Specific vision abilities required by this job include: close vision, distance vision and ability to adjust focus.
-The employee will be required to stand or walk in excess of one hour per day, talk, hear, sit, stoop, kneel and crouch as needed.
-Requires completion of accredited Nurse Practitioner program.
-State licensure is also required.
-Responsibilities
-Records physical findings, and formulates plan and prognosis, based on patient's condition.
-Discusses case with physician and other health professionals to prepare comprehensive patient care plan.
-Prescribes or recommends drugs or other forms of treatment.
-Monitors and maintains progress of patients and reports progress to supervising physician.
-Has the ability to work collaboratively with hospice employees and volunteers as part of an Interdisciplinary Team.
+TITLE: Data Scientist
+COMPANY: Cresta
+Cresta is on a mission to turn every customer conversation into a competitive advantage by unlocking the true potential of the contact center. Our platform combines the best of AI and human intelligence to help contact centers discover customer insights and behavioral best practices, automate conversations and inefficient processes, and empower every team member to work smarter and faster. Born from the prestigious Stanford AI lab, Cresta's co-founder and chairman is Sebastian Thrun, the genius behind Google X, Waymo, Udacity, and more. Our leadership also includes CEO, Ping Wu, the co-founder of Google Contact Center AI and Vertex AI platform, & co-founder, Tim Shi, an early member of Open AI.
+
+
+We’ve assembled a world-class team of AI and ML experts, go-to-market leaders, and top-tier investors including Andreessen Horowitz, Greylock Partners, Sequoia, and former AT&T CEO John Donovan. Our valued customers include brands like Intuit, Cox Communications, Hilton, and Carmax and we’ve been recognized by Forbes and Bain Consulting as one of the top private AI companies in the world.
+
+
+Join us on this thrilling journey to revolutionize the workforce with AI. The future of work is here, and it's at Cresta.
+
+
+Role Overview:
+
+
+Cresta is expanding its Customer Success organization with a dedicated analytics function focused on customer value realization. As a Data Scientist, Customer Analytics, you’ll be the technical engine behind measuring and storytelling customer impact—designing experiments, analyzing conversational and operational data, and building dashboards that quantify Cresta’s value.
+
+
+You’ll sit within the Customer Success organization and partner closely with Business Value, Customer Success Managers, Sales, Product, and Engineering. Your work will power ROI discussions, QBRs, pilots, and renewal conversations.
+
+
+This role is ideal for someone early in their data science career who enjoys hands-on analytics, problem-solving, and turning ambiguous business questions into clear, actionable insights.
+
+
+Key Responsibilities:
+
+
+Customer Analytics & Insight Generation
+
+
+
+Conduct exploratory data analysis (EDA) across conversational, operational, and performance datasets
+
+Translate ambiguous business questions into structured analytical problems
+
+Analyze how workflow, behavior, and product usage changes translate into business value
+
+Partner with Business Value consultants on customer-facing insights
+
+
+Experimentation & Pilot Measurement
+
+
+
+Design and analyze A/B tests and quasi-experiments to measure Cresta’s impact
+
+Establish baselines, metrics, and measurement plans for pilots
+
+Ensure results are statistically rigorous and easy for non-technical stakeholders to understand
+
+Build reusable templates and frameworks for consistent experimentation
+
+
+Dashboards, Reporting & Automation
+
+
+
+Build and maintain dashboards for Customer Success, Business Value, and Sales
+
+Develop Python and SQL tools to improve repeatability, accuracy, and scalability
+
+Create standardized reporting packages for pilots, QBRs, and renewals
+
+
+Modeling & Advanced Analytics
+
+
+
+Develop custom statistical or ML models (e.g., segmentation, predictive scoring, lightweight NLP)
+
+Maintain reusable modeling pipelines for value insights and roadmap analysis
+
+Partner with Engineering when guidance or productionization support is needed
+
+
+Cross-Functional Collaboration
+
+
+
+Translate analyses into clear business and financial narratives
+
+Support CSMs with data and insights for strategic QBRs
+
+Partner with Product and Engineering on metrics, data availability, and analytics enhancements
+
+
+Required Qualifications:
+
+
+
+1–3 years of experience in a data-focused role or relevant academic experience
+
+Strong proficiency in SQL and experience working with large datasets
+
+Proficiency in Python (Pandas, NumPy, scikit-learn)
+
+Solid understanding of statistics, hypothesis testing, and experimental design
+
+Experience building dashboards in tools such as Hex, Looker, Tableau, or similar
+
+Strong communication skills with non-technical stakeholders
+
+Comfort working in a fast-paced, cross-functional environment
+
+
+Preferred Qualifications:
+
+
+
+Experience with conversational data (call transcripts, chats) or text analytics
+
+Familiarity with causal inference, uplift modeling, or A/B testing frameworks
+
+Exposure to customer-facing analytics or support roles
+
+Experience with cloud data stacks (Snowflake, Redshift, etc.)
+
+Basic NLP or classification experience related to agent behavior or customer intent
+
+
+Success Criteria:
+
+
+Within 6–9 months, a successful hire will have:
+
+
+
+Built dashboards and reporting foundations used across Customer Success
+
+Implemented standardized pilot measurement and experimentation approaches
+
+Supported strategic customer analyses that improved renewals or expansion confidence
+
+Created scripts and automations that significantly reduce manual analysis
+
+Earned trust as the go-to analytics partner for Customer Success
+
+
+Compensation At Cresta:
+
+
+Cresta’s approach to compensation is simple: recognize impact, reward excellence, and invest in our people. We offer competitive, location-based pay that reflects the market and what each individual brings to the table.
+
+
+Compensation for this position includes a Base salary + Bonus + Equity
+
+
+Actual base salaries will be based on candidate-specific factors, including experience, skillset, and location, and local minimum pay requirements as applicable. Your recruiter can provide further details. In addition, total compensation includes a comprehensive benefits package for you and your family.
+
+
+We have noticed a rise in recruiting impersonations across the industry, where scammers attempt to access candidates' personal and financial information through fake interviews and offers. All Cresta recruiting email communications will always come from the @cresta.ai domain. Any outreach claiming to be from Cresta via other sources should be ignored. If you are uncertain whether you have been contacted by an official Cresta employee, reach out to recruiting@cresta.ai
+
 
 === JD ===
-TITLE: Electric Foreman
-Requirements
-Progressive electrical leaders who love using technology and want a clear career path
-Skilled field supervisor with at least five (5) years of experience managing a scope and running multimillion dollar projects for an electrical contractor
-Must have an active journeyman or master electrician license
-Proficient knowledge of the National Electrical Code (NEC), local codes and construction safety requirements
-Must have at least basic computer and writing skills
-Responsibilities
-Working closely with project superintendent and other trades, oversee the assigned scope, including the management of material and manpower
-Accountable for enforcing and promoting high quality and safety standards
-Utilize technology such as company-provided iPad and smartphone to ensure the job gets done on time and exceeds customer expectations
-Supervise, mentor and motivate employees working on designated scope
+TITLE: Implementation Engineer
+COMPANY: Tailscale
+About Tailscale 
+
+
+Tailscale is building the new Internet by delivering software that makes it easy to securely interconnect people and their devices, no matter where they are. From hobbyists to multinational corporations, teams of every size use Tailscale each day to protect their networks, share access to internal tools, and more. We're building a future for the Internet that's easy, sensible, and safe, like it used to be. Founded in 2019 and fully distributed, we're backed by Accel, CRV, Insight, Heavybit, and Uncork Capital.
+
+Job Description
+
+
+As an Implementation Engineer (IE) at Tailscale, you are the primary architect of a customers’ first experience with our product. Reporting to the CSE Team Lead, you will sit at the intersection of Pre-sales, Support, and Product with the mission of value attainment for our customers. You will manage a high volume of accounts across commercial and enterprise segments, guiding them through the critical first 30 days of their journey. This is a high-impact, technical role designed for someone with intellectual curiosity, empathy, strong networking fundamentals, and a passion for helping customers solve complex connectivity/security challenges with Tailscale. You will ensure that Tailscale becomes a foundational part of our customers’ infrastructure from day one.
+
+
+Key Responsibilities
+
+
+
+Own the end-to-end technical onboarding journey for a high volume of accounts, with a relentless focus on ensuring customers reach Time To Value (TTV) in under 30 days.
+
+Provide hands-on guidance for technical configurations, including Identity Provider (IdP) integration, Tailnet administration, ACL policy definition, and MDM deployments.
+
+Partner closely with AEs and SEs to ingest technical requirements from the pre-sales cycle and ensure a seamless transition to active usage.
+
+Act as a critical feedback loop for the Product and Engineering teams by identifying recurring friction points or bugs during the onboarding phase and advocating for fixes.
+
+Maintain rigorous data hygiene within sales (SFDC) and CSP tooling to provide visibility into onboarding completion rates, TTV, and overall customer health metrics.
+
+Bridge the gap between initial setup and long-term support by facilitating clean handoffs to the Support and Post-sales teams once adoption milestones are met.
+
+Define and refine onboarding success metrics, including the development of post-onboarding surveys and in-product adoption targets.
+
+
+What We Are Looking For
+
+
+
+2–4+ years of experience in a technical, customer-facing role such as Technical Support, Implementation, or Solutions Engineering
+
+Strong foundational knowledge of networking concepts including the OSI model, DNS, routing, and VPN operations (experience with Tailscale preferred)
+
+Proficiency in installing software across diverse operating systems, including Linux, Windows, macOS, and iOS/Android (experience with Mobile Device Management is a plus)
+
+Strong skills in diagnosing, troubleshooting, and resolving issues related to networking
+
+Ability to read and modify JSON or YAML configs for ACL and Kubernetes deployments
+
+Exceptional organizational skills with a proven ability to manage a high volume of concurrent tasks across multiple revenue segments without compromising quality
+
+Clear and empathetic communication style, with the ability to translate complex networking concepts into actionable steps for technical and non-technical stakeholders alike
+
+A builder’s mindset, meaning you enjoy solving technical puzzles and are motivated by seeing a customer successfully deploy a solution you helped architect
+
+
+As a company, we strive to maintain fair and equitable compensation practices within our team across all roles and all levels. Tailscale's compensation package includes base salary, equity, and comprehensive benefits. The salary range displayed on each job posting represents the target range for a new hire's base salary. Individual offers may vary based on experience and skill set.
+
+For this position, our pay ranges reflect target OTE (on target earnings), inclusive of base salary and variable compensation tied to the attainment of quarterly sales targets.
+
+US Pay Range (OTE)
+$107,000—$127,000 USD
+Frequently cited statistics show that people who identify with historically marginalized groups are likely to apply to jobs only if they meet 100% of the qualifications. We encourage you to help us break that statistic!
+
+
+What We Offer
+
+
+
+An inclusive, flexible environment where you can be your authentic self. We recognize the impact of diverse voices and backgrounds on the growth of our people, product, and company. And that flexibility in how and when you work empowers our team to integrate work and life.
+
+A competitive total compensation package. This includes a base salary, an equity incentive plan and variable commission (for quota-based roles).
+
+Comprehensive group benefits with no waiting period. Take advantage of coverage for health, vision, dental, and more for you and your family!
+
+Remote first company—most of our teams work fully remotely. Enjoy a change of scenery wherever you can get wifi, participate in virtual and in-person social events, and leverage our corporate co-working program to visit WeWork (or other similar spaces near you). Some roles require in-office collaboration depending on team needs, which will be clearly noted in the job description.
+
+Connect with other Tailscalars IRL. Attend our annual company retreat, participate in team off-sites, and collaborate in person with teammates across Canada, the United States, and the United Kingdom. We support intentional in-person connection through team travel and distributed collaboration.
+
+Support for your personal and professional development. Grow your career thoughtfully with $1500 USD annually for professional development, or take advantage of mentorship, coaching, and internal promotion opportunities. 
+
+Paid time off and a healthy work-life integration. Our flexible, paid time off program supports you for any situation life throws your way, whether moving homes or travelling the world! 
+
+A build-your-own home office setup. You choose your own company-owned laptop (Mac or PC), receive a monthly home internet reimbursement, and $1000 USD to customize your workstation to make it your own. 
+
+Generous parental leave program from your first day. We care about your life outside of work and encourage new parents to take advantage of parental leave top-ups for up to 26 weeks. 
+
+
+Please be aware that legitimate emails from Tailscale's talent team will only originate from @tailscale.com, @greenhouse.io, and @interviews.modernloop.io email addresses. For more information about protecting yourself from impersonators and scams, please visit https://tailscale.com/scam-awareness.
 
 === JD ===
-TITLE: Physician - Pathologist
-Requirements
-MD, MD/PhD, or DO degree or foreign equivalent
-Eligible for state medical license
-Board certified or eligible in Anatomic Pathology (AP) or Anatomic Pathology/Clinical Pathology (AP/CP)
+TITLE: Software Engineer
+COMPANY: Pomelo Care
 
-=== JD ===
-TITLE: Retail Assistant Manager
-Requirements
-1 year of customer service experience
-Supervisory experience preferred
-Ability to foster a team while creating a positive working environment
-Experience in training and directing others
-Ability to take initiative and participate in making decisions
-Demonstrated ability to achieve goals
-Computer proficiency
-Ability to work a flexible schedule
-Assistant Manager applicants must be at least 18 years of age
-Responsibilities
-Assist in the supervision of a store team focused on creating an unforgettable shopping experience that leaves our customers looking and feeling their best
-As a sales lead, interact with customers on a regular basis leading the customer experience with the store team
-The assistant manager strategizes to achieve team sales goals
-As a key holder, involved in efficiently and accurately executing maurices Standard Operating Practices (SOPs), such as opening and closing the store
+At Pomelo Care, we are redefining the healthcare journey for women and children. As the leading virtual medical practice in our field, we provide a continuous circle of support—from the first steps of family building and the complexities of pregnancy to the nuances of postpartum, pediatric, and midlife care. We aren't just a clinic; we are a multidisciplinary engine of clinicians, engineers, and problem-solvers dedicated to closing the gaps in traditional care. By leveraging a high-touch, technology-driven platform, we identify risks early and deliver deeply personalized, 24/7 virtual care. We are here to prove that better data and patient-centered care lead to better outcomes, raising the standard of care for families nationwide.
 
-=== JD ===
-TITLE: Commercial Lines Account Manager
-Requirements
-High school diploma or equivalent
-5-7 years of recent agency experience handling the service of multi-line commercial lines book of business
-Current Washington State Insurance License and appropriate Non-Resident Licenses
-Working knowledge of MS Office (Word, Excel, and Outlook)
-Responsibilities
-Assist Producers in the placement of new and renewal business
-Prepare and send Future ACORD applications to market for Renewal indications, per AE/Producer instructions
-Assist with the marketing of New Business
-Provide direct customer service support for commercial lines clients
-Issue appropriate documentation, as needed including certificates of insurance, auto insurance ID cards, etc.
-Compose or assist in composition of highly technical or sensitive correspondence
-Ability to translate highly technical information for the client’s understanding
-Compile applications, negotiate with underwriters and prepare proposals for new and renewal business proposals/offerings
-Contact clients and/or underwriters to obtain additional information or answer questions
-Resolve policy and coverage related concerns for clients, insurance carriers, and Producers
-Ability to communicate negative actions to the client, while offering a solution to remedy the situation
-Bind or place coverage with acceptable carriers adhering to appropriate carriers binding authority
-Stay current on company insurance products and offerings
-Be cognizant of developments in the marketplace, including product line offerings, changing insurance consumer trends and needs when advising clients
-Set up and maintain electronic file information in the Agency Management System including data entry and client & policy database maintenance
-Desired Qualifications
-Professional designation (ACSR, CIC, CPCU, CISR)
-Knowledge of carrier websites
-Experience with Agency Management Software Systems
+Our engineering team is the engine behind our virtual care platform, building AI-powered solutions that transform care delivery and create exceptional experiences for both patients and clinicians. If you're passionate about using technology to do real, tangible good in the world, we'd love to meet you.
 
-=== JD ===
-TITLE: Lead Electrical Test Technician
-Requirements
-Associate degree in Electrical/Electronics, Computer, Mechanical Technologies, or related fields.
-4+ years of electronics testing experience in an R&D environment.
-Familiarity with reading electrical system and component schematics.
-Familiarity with product development life cycle, reliability, and compliance testing.
-Familiarity with electronics test equipment such as power supplies, electronic loads, oscilloscope, function generators, data acquisition and measurement sensors.
-Strong root cause analysis skills.
-Excellent written, verbal, interpersonal and communication skills.
-Able to pivot quickly between tasks and prioritize simultaneous tasks in a fast-paced environment.
-U.S. Person status is required as this position needs to access export controlled data.
-Ability to lift a minimum of 25 lbs. Unassisted.
-Responsibilities
-Setup, execute and analyze test experiments per test procedures and record findings into test records.
-Support with builds of test harnesses, racks, and environmental setups.
-Update existing test systems to improve automation, consistency, and coverage per engineering instructions.
-Proficient at troubleshooting and repair of electrical, electronics and integrated circuits to the component level.
-Maintenance and calibration of electrical and/or mechanical test equipment.
-Create assembly instructions and bill of materials for test equipment and fixtures.
-Document test plans, user instructions and manuals.
-Maintain a clean and safe work environment.
-Travel to test sites and external laboratories as required.
-Desired Qualifications
-5+ years electronics testing experience.
-Bachelor’s Degree in Electrical Engineering, Electronics Engineering Mechanical Engineering, Computer Science, or related field.
-Familiarity with IPC Quality Standards, IPC-610, IPC-620, J-STD and other assembly and inspection standards.
-Experience with High Voltage and High Power Testing such as propulsion inverters and batteries.
-Experience with equipment calibration and metrology.
-Experience with electrical compliance testing such as EMI/EMC testing.
 
-=== JD ===
-TITLE: Territory Sales Manager
-Requirements
-5+ years of outside business-to-business sales, with experience in direct-store-delivery, route sales, car, wireless, or similar high-activity environments strongly preferred
-Demonstrated ability to open new accounts while retaining and growing an existing book
-Comfort with 50+ daily outbound touches alongside consistent field activity
-Strong customer relationship management discipline and forecasting accuracy
-Ability to operate autonomously with clear performance accountability
-Responsibilities
-The phone comes first. Emails go out before 9 AM so every call has a reason to connect. Fifty outbound touches per day — calls, texts, emails, and in-person visits — is the floor, not the goal.
-Sell into convenience stores by understanding how the buyers business works — margin, category performance, shelf velocity, reorder cycles; lead with economics rather than product.
-Work with distributors; hold distributor partners accountable to door count targets and velocity benchmarks — not just taking orders.
-Open new accounts every month; minimum of 20 new c-store accounts per month; maintain existing accounts with consistent touchpoints and an 80%+ reorder rate within 60 days of opening.
-Manage a pipeline with daily CRM updates; follow up every open quote within 24 hours; maintain pipeline coverage at 3x monthly quota (yellow flag below 3x, red flag below 2x).
-Desired Qualifications
-Experience managing distributor or broker relationships preferred
-Convenience store channel experience preferred
-Independent retail channel experience preferred
+We are a remote-first company with offices in New York and San Francisco. Our New York office has a strong in-person culture with regular collaboration, and our San Francisco office is available for those who enjoy working together in person.
 
-=== JD ===
-TITLE: Retail Sales Associate
-Requirements
-Less than 1 Year Experience using a computer, including inputting, accessing, modifying, or outputting information
-Less than 1 Year Experience using common retail technology, such as smart phones and tablets
-Less than 1 Year Retail experience, performing tasks such as: identifying and selling products based on customer needs; explaining warranties, product features, and benefits; assisting customers in locating products; building customer relationships; identifying and resolving customer issues; zone recovery; and housekeeping
-Ability to obtain sales related licensure or registration as may be required by law
-Responsibilities
-Provides SMART customer service at all times through the daily execution of Lowe's customer service policies, procedures and programs
-Seeks out customers to understand his/her needs and assists in locating, demonstrating, selecting, carrying, and/or loading merchandise
-Listens to and responds knowledgeably and promptly to customer and associate questions by taking them to areas of the store and walking them through projects when necessary
-Demonstrates sincere appreciation to customers
-Communicates information to customers regarding all stock, special order merchandise, feature benefits, application, and warranty information related to Lowe’s programs
-Writes customer contracts and invoices for equipment rental and tool repairs (Tool Rental Department)
-Cross-functionally trains in other areas of the store to help deliver the best customer service
-Detects common signs of shoplifting, theft, and other security risks, and promptly communicates them to management and/or Asset Protection
-Ensures compliance with housekeeping standards and programs (e.g., Zone Recovery) to maintain cleanliness and organization of store and working areas
-Maintains a safe and secure work environment, which may include conducting daily safety reviews, noting hazards, keeping aisles clear, and securing doors and gates
-Adheres to all safety requirements relevant to one’s regular job duties: top stock safety, reinstalling safety cables, use of aisle blockers, a tether line on power equipment, spotters, and safety devices
-Operates store equipment as needed depending on one specific role and department (e.g., Zebra phone, telephone, paging system, copiers, fax machines, computers, CCTV surveillance system, key cutter, panel saw, paint mixer, flooring cutters, compacter baler, tool rentals)
 
-=== JD ===
-TITLE: Securities Services Associate - Liquidity Solutions
-equirements
-Experience analyzing complex information from a variety of sources utilizing Excel, Access, and other analytical applications
-Effective communication and presentation skills, professionalism, and ability to interact with all levels ranging from Analyst to Senior MDs as well as Clients
-Track record of acclimating to new technologies quickly, identifying product gaps, and representing client requirements to assist in prioritizing product development
-Ability to work well in a matrixed and complex organization, with clear, results-driven focus
-Proven ability to partner well, particularly as part of a global business
-Strong aptitude for math and general financial principles
-Responsibilities
-Manage the deposit book through rate cycle environment: Repricing of accounts through an evolving rate environment
-Quantifying revenue impacts from incremental deposits and repricing activities
-Implement and maintain oversight of client deposit pricing structures, developing expertise to support the team and assist colleagues with troubleshooting
-Develop expertise in implementation processes and systems across client accounts spanning multiple lines of business
-Engage and coordinate proactively with product and technology partners to ensure timely account setup and updates
-Stay informed on evolving system technologies and the impact of ongoing system migrations
-Assist in creation and maintenance of the Securities Services on-balance sheet deposit program
-Engage internal stakeholders, e.g., Sales and Relationship Managers, along with Global Business constituents to align the proposition to other products and market needs
-Strategic road-mapping of liquidity solutions, including product extensions and variations
-Support ad-hoc research and resolution of daily issues, data requests, reporting requirements, as well as regulatory requests
-Keep abreast of industry trends, regulatory changes and buying behavior patterns, identifying potential challenges and opportunities that could impact revenues and client activities
-Desired Qualifications
-Undergraduate degree required; MBA, Treasury, Securities, or Investment business qualifications preferred
-Strong technical and operational aptitude with the ability to work with and synthesize large data sets
-Proficient in Microsoft suite of products (e.g., Excel, Word, PowerPoint), and working knowledge of Alteryx preferred
+Why This Role Matters
 
-=== JD ===
-TITLE: Brokerage and Underwriter Assistants
+We are just scratching the surface of how to use advancements in AI to attract new patients and keep them retained throughout their care journey. The Growth team steers how patients see Pomelo when they first hear about us, and how we stay connected with them over time. There is real, wide-open opportunity to try novel approaches using LLMs to craft messaging, optimize likelihood of responses, and automate call campaigns with voice AI. You'll work directly with our data team to find meaningful insights on patient engagement patterns and turn them into systems that work at scale.
 
-Responsibilities
-Broker Assistants: Executes and coordinates day-to-day brokerage operations and supports the implementation and improvement of operational procedures.
-Broker Assistants: Coordinates with the broker to prepare documents, cover letters etc. to market renewal business and provides necessary administrative support in filing, printing, and archiving documents.
-Broker Assistants: Administers and updates new and current client information in all required systems accurately.
-Broker Assistants: Maintains accurate and organized records of client accounts, transactions, and other relevant documentation and ensures compliance with record-keeping regulations.
-Broker Assistants: Performs customer service functions by answering broker requests and questions by telephone, email, chat, or in person.
-Broker Assistants: Contributes to the preparation of compliance reports related to brokerage operations and collaborates across broker and finance teams on business requirements.
-Broker Assistants: Adheres to regulatory requirements and internal policies and assists in the preparation of compliance reports.
-Broker Assistants: Assists in identifying and mitigating operational risks and collaborates with risk management teams to implement controls.
-Broker Assistants: Supports the Brokerage team with any ad hoc tasks and requests.
-Underwriting Assistants: Evaluates and maintains existing policy information to ensure data is current, accurate, and appropriately priced for renewal.
-Underwriting Assistants: Responds to client requests and questions, offering information and advice regarding the insurance products & underwriting appetite.
-Underwriting Assistants: Communicates with clients to gather necessary information, resolves inquiries, and ensures a smooth underwriting process.
-Underwriting Assistants: Prepares and organizes documentation related to underwriting submissions and policy issuance.
-Underwriting Assistants: Assesses risks associated with individual insurance applications, considering both standard and substandard criteria.
-Underwriting Assistants: Provides support in premium calculations, ensuring accurate application of rates based on underwriting guidelines.
-Underwriting Assistants: Builds and maintains reports on underwriting activities, key performance indicators, and relevant metrics.
-Underwriting Assistants: Conducts internal and external audits by providing necessary documentation and information related to underwriting activities.
-Underwriting Assistants: Ensures adherence to company policies, guidelines, industry regulations, and compliance standards in underwriting activities.
-Underwriting Assistants: Collaborates with underwriting teams to relay information, coordinate tasks, and contribute to the overall underwriting process.
-Underwriting Assistants: Serves as the key point of contact for customers and agents and delivers excellent customer service by addressing inquiries, resolving issues, and ensuring a positive experience for them.
 
-=== JD ===
-TITLE: Water and Wastewater Engineering Designer
-Requirements
-Bachelor of Science in Civil, Environmental, Chemical, Mechanical, or a related engineering discipline.
-0–4 years of water and wastewater engineering or other applicable industry experience.
-Engineer-in-Training (EIT) certification or verification certification is in process.
-Basic proficiency in AutoCAD & Civil 3D software is a plus but not required.
-Responsibilities
-Prepare and edit design drawings, layouts, and plan sheets using CAD software under the direction of senior staff.
-Assist with basic design calculations, quantity estimates, and project documentation for water and wastewater systems.
-Support data collection and field verification to confirm existing infrastructure conditions.
-Collaborate with engineers and designers to ensure design accuracy, completeness, and compliance with applicable standards.
+What You'll Do
 
-=== JD ===
-TITLE: Assistant Store Manager - Camarillo Premium Outlets
-Requirements
-3+ years of related professional/retail management experience
-Ability to meet business goals by driving results through store teams
-Ability to work a flexible schedule to meet the needs of the business; will require weekends, evenings, and holidays
-Ability to coach and motivate a team to excel at sales and profit results
-Proven communication skills, both written and verbal
-Solution oriented
-Ability to be flexible in a fastpaced-environment
-A formal education andsubsequentundergraduate/graduate degrees are nice to have, but we are most interested in your total experience and professional achievements
-Responsibilities
-Maximize store sales, achieve store sales goals and monitorsales progress & results against key targets
-Inspire and model a consumer centric mindset by exemplifying selling behaviors through genuine interactions with customers for the teams to emulate
-Support the Store Manager with networking, attracting, recruiting, and interviewing high caliber talent
-Provide direct coaching, feedback, training and supervision of the associates, ensuring that all company policies and procedures are followed and in compliance
-Demonstrate clear communication, training, and coaching to assist in setting expectations on customer engagement, store policies and procedures as well as fostering a strong team
-Assist in managing expenses to maximize sales and profitability
-Cultivate an environment of productivity by ensuring the store team has the knowledge and skills to meet store goals for sales and customer engagement
+
+Prototype and build features to improve our patient outreach and automated re-engagement platform
+
+Test and iterate on voice agents to streamline patient onboarding
+
+Improve our AI-generated messaging framework and expand into new communication modalities
+
+Own large product areas end-to-end, with the opportunity to build net-new products from scratch
+
+Partner with data science to analyze engagement patterns and turn insights into product improvements
+
+
+Problems You'll Dig Into
+
+
+How do we effectively and efficiently pitch our message to prospective patients?
+
+How can we leverage new advancements in voice AI to reach patients at scale?
+
+When patients stop engaging, how do we best reach them across app, SMS, email, and voice channels?
+
+How do we use LLMs to personalize messaging and optimize response rates?
+
+Why do certain patients stay engaged and others churn?
+
+
+Tech Stack
+
+React, Kotlin, Python, Dagster, dbt, SQL. Voice AI models and LLMs for messaging and outreach.
+
+
+Who You Are
+
+
+You have a strong foundation in computer science, typically from a bachelor's or master's degree, or equivalent professional experience
+
+You have experience building and shipping high-quality software, ideally in growth, engagement, or outreach-oriented products
+
+You're comfortable working across the full stack and moving between frontend, backend, and data tooling
+
+You're excited about applying AI and LLMs to real product problems, not just experimenting with them
+
+You're keeping up with trends in LLM coding agents to multiply your engineering impact
+
+You enjoy rapid experimentation and are comfortable with ambiguity
+
+
+We'll be especially excited if you:
+
+
+
+Have experience building outreach, messaging, or communication systems at scale
+
+Have worked with voice AI, conversational agents, or similar technologies
+
+Have experience with data pipelines, analytics, or experimentation frameworks
+
+Have previously worked in a fast-paced, product-oriented environment
+
+
+Why You Should Join
+
+By joining Pomelo, you will help shape the future of a fast-moving, well-funded, and mission-driven startup that always puts the patient first. You will learn, grow, and be challenged, and have fun with your team while doing it. We strive to create an environment where employees from all backgrounds are respected. We also offer:
+
+
+
+Competitive healthcare benefits
+
+Generous equity compensation
+
+Unlimited vacation
+
+Membership in the First Round Network (a curated and confidential community with events, guides, thousands of Q&A questions, and opportunities for 1-1 mentorship)
+
+
+At Pomelo, we are committed to hiring the best team to improve outcomes for all mothers and babies, regardless of their background. We need diverse perspectives to reflect the diversity of problems we face and the population we serve. We look to hire people from a variety of backgrounds, including but not limited to race, age, sexual orientation, gender identity and expression, national origin, religion, disability, and veteran status.
+
+
+Our salary ranges are based on paying competitively for our company’s size and industry, and are one part of the total compensation package that also includes equity, benefits, and other opportunities at Pomelo Care. In accordance with New York City, Colorado, California, and other applicable laws, Pomelo Care is required to provide a reasonable estimate of the compensation range for this role. Individual pay decisions are ultimately based on a number of factors, including qualifications for the role, experience level, skillset, geography, and balancing internal equity. Given that this role is open to candidates of different skill levels, determining a salary range is challenging. A reasonable estimate of the current salary range is $160,000 to $220,000. We expect most candidates to fall in the middle of the range.
+
+
+#LI-Remote

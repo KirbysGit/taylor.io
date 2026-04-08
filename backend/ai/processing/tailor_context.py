@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import re
+from copy import deepcopy
 from typing import Any, Dict, Iterable, List, Set
 
 from .alias_map import canonicalize_term, get_term_aliases
@@ -131,19 +133,53 @@ def _extract_phrase_focus(
     return phrases
 
 
+def _make_item_id(section: str, item: Dict[str, Any], index: int) -> str:
+    if str(item.get("item_id") or "").strip():
+        return str(item.get("item_id")).strip()
+    seed = "||".join(
+        [
+            section,
+            str(item.get("title") or item.get("name") or "").strip().lower(),
+            str(item.get("company") or "").strip().lower(),
+            str(item.get("description") or "").strip().lower(),
+            str(index),
+        ]
+    )
+    digest = hashlib.sha1(seed.encode("utf-8")).hexdigest()[:12]
+    return f"{section}_{digest}"
+
+
+def _ensure_section_item_ids(resume_data: Dict[str, Any], section: str) -> List[str]:
+    ids: List[str] = []
+    section_value = resume_data.get(section)
+    if not isinstance(section_value, list):
+        return ids
+    for idx, row in enumerate(section_value):
+        if not isinstance(row, dict):
+            continue
+        item_id = _make_item_id(section, row, idx)
+        row["item_id"] = item_id
+        ids.append(item_id)
+    return ids
+
+
 def build_tailor_context(
     *,
     target_role: str | None,
     extraction_result: Dict[str, Any],
     resume_data: Dict[str, Any],
 ) -> Dict[str, Any]:
+    resume_data_copy = deepcopy(resume_data if isinstance(resume_data, dict) else {})
+    exp_ids = _ensure_section_item_ids(resume_data_copy, "experience")
+    proj_ids = _ensure_section_item_ids(resume_data_copy, "projects")
+
     ranked_keywords = list(extraction_result.get("keywords", []))
     dynamic_candidates = list(extraction_result.get("dynamic_phrase_candidates", []))
     primary_terms = _select_primary_terms(ranked_keywords, limit=8)
     secondary_terms = _select_secondary_terms(ranked_keywords, set(primary_terms), limit=8)
     phrase_focus = _extract_phrase_focus(primary_terms, dynamic_candidates, limit=6)
 
-    resume_text_raw = _resume_blob(resume_data if isinstance(resume_data, dict) else {})
+    resume_text_raw = _resume_blob(resume_data_copy)
     resume_text_normalized = _normalize_search_text(resume_text_raw)
     resume_hits = [term for term in primary_terms if _is_term_in_resume(term, resume_text_raw, resume_text_normalized)]
     resume_gaps = [term for term in primary_terms if term not in resume_hits]
@@ -156,4 +192,12 @@ def build_tailor_context(
         "phrase_focus": phrase_focus,
         "resume_hits": resume_hits,
         "resume_gaps": resume_gaps,
+        # Explicit split between provable evidence vs desired targets.
+        "verified_resume_terms": resume_hits,
+        "target_gap_terms": resume_gaps,
+        "section_item_ids": {
+            "experience": exp_ids,
+            "projects": proj_ids,
+        },
+        "normalized_resume_data": resume_data_copy,
     }

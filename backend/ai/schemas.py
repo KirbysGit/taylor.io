@@ -14,6 +14,42 @@ class JobTailorSuggestion(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0, default=0.75)
 
 
+class SectionOptimizationSummary(BaseModel):
+    before: Optional[str] = None
+    after: str
+    reason: str
+    confidence: float = Field(ge=0.0, le=1.0, default=0.75)
+
+
+class SectionOptimizationItem(BaseModel):
+    item_id: str = Field(..., min_length=1)
+    section: Literal["experience", "projects"]
+    decision: Literal["keep", "rewrite", "downrank", "omit"] = "keep"
+    before: Optional[str] = None
+    after: Optional[str] = None
+    reason: str = ""
+    confidence: float = Field(ge=0.0, le=1.0, default=0.7)
+    jd_alignment_score: float = Field(ge=0.0, le=1.0, default=0.0)
+    evidence_strength_score: float = Field(ge=0.0, le=1.0, default=0.0)
+    risk_score: float = Field(ge=0.0, le=1.0, default=0.0)
+    overall_priority: float = Field(ge=0.0, le=1.0, default=0.0)
+
+
+class SectionOptimizationSkills(BaseModel):
+    mode: Literal["replace_top_n"] = "replace_top_n"
+    before: List[str] = Field(default_factory=list)
+    after: List[str] = Field(default_factory=list)
+    reason: str = ""
+    confidence: float = Field(ge=0.0, le=1.0, default=0.72)
+
+
+class SectionOptimizations(BaseModel):
+    summary: Optional[SectionOptimizationSummary] = None
+    experience: List[SectionOptimizationItem] = Field(default_factory=list)
+    projects: List[SectionOptimizationItem] = Field(default_factory=list)
+    skills: Optional[SectionOptimizationSkills] = None
+
+
 class JobTailorSuggestRequest(BaseModel):
     job_description: str = Field(min_length=40, max_length=24000)
     resume_data: Dict[str, Any] = Field(default_factory=dict)
@@ -28,7 +64,11 @@ class JobTailorSuggestResponse(BaseModel):
     model: str
     summary: str
     ats_keywords: List[str] = Field(default_factory=list)
+    verified_ats_keywords: List[str] = Field(default_factory=list)
+    target_gap_keywords: List[str] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
     suggestions: List[JobTailorSuggestion] = Field(default_factory=list)
+    section_optimizations: SectionOptimizations = Field(default_factory=SectionOptimizations)
+    suggested_resume_data_patch: Dict[str, Any] = Field(default_factory=dict)
     suggested_resume_data: Dict[str, Any] = Field(default_factory=dict)
     usage: Dict[str, Any] = Field(default_factory=dict)

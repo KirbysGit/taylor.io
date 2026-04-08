@@ -9,8 +9,16 @@ from .extraction import (
     get_extraction_profile,
 )
 from .planning import build_edit_plan
-from .prompt_builder import build_job_tailor_prompt
+from .prompt import build_job_tailor_prompt
 from .processing import build_tailor_context
+from .openai import (
+    build_chat_messages,
+    build_openai_request_payload,
+    get_openai_model,
+    is_openai_configured,
+    is_openai_enabled,
+    request_chat_completion,
+)
 from .schemas import (
     JobTailorSuggestRequest,
     JobTailorSuggestResponse,
@@ -29,6 +37,12 @@ __all__ = [
     "get_extraction_profile",
     "build_tailor_context",
     "build_edit_plan",
+    "build_chat_messages",
+    "build_openai_request_payload",
+    "request_chat_completion",
+    "is_openai_configured",
+    "is_openai_enabled",
+    "get_openai_model",
     "JobTailorSuggestRequest",
     "JobTailorSuggestResponse",
     "JobTailorSuggestion",

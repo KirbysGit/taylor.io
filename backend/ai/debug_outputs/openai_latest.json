@@ -1,0 +1,247 @@
+{
+  "timestamp_utc": "2026-04-08T05:41:04.232062+00:00",
+  "user_id": 1,
+  "target_role": "Software Development Engineer 2",
+  "provider": {
+    "enabled": true,
+    "attempted": true,
+    "model": "o4-mini",
+    "finish_reason": "stop",
+    "error": null,
+    "usage": {
+      "input_tokens": 2601,
+      "output_tokens": 4270,
+      "total_tokens": 6871
+    }
+  },
+  "response": {
+    "file": "C:\\Users\\Colin Kirby\\Desktop\\projects\\tailor\\backend\\ai\\debug_outputs\\openai_latest_response.txt",
+    "preview": "{\"summary\":\"Tailored the resume to emphasize Java and AWS expertise, aligning with the Software Development Engineer 2 role requirements while maintaining original verified experience.\",\"verified_ats_keywords\":[\"aws\",\"java\"],\"target_gap_keywords\":[\"docker\",\"gcp\",\"kubernetes\",\"azure\",\"development engineer\",\"software development\"],\"warnings\":[\"High density of gap terms: consider adding experience with Docker, GCP, Kubernetes, and Azure where applicable.\"],\"section_optimizations\":{\"summary\":{\"before\":\"Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications.\",\"after\":\"Software Development Engineer with proven experience in Java and AWS, designing and deploying scalable backend services and APIs to deliver reliable cloud-native applications.\",\"reason\":\"Highlights Java and AWS expertise directly relevant to the target role while grounding in verified resume evidence.\",\"confidence\":0.8},\"experience\":[{\"item_id\":\"experience_9aaa0d4e5b6d\",\"section\":\"experience\",\"decision\":\"keep\",\"before\":\"Designed and maintained backend services and REST APIs in Python/Django supporting secure data flows across internal financial/compliance systems. Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.\",\"after\":\"Designed and maintained backend services and REST APIs in Python/Django supporting secure data flows across internal financial/compliance systems. Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.\",\"reason\":\"Bulle",
+    "preview_chars": 1800
+  },
+  "resume_input_debug": {
+    "resume_evidence_lines_used": [
+      "Applied NLP models (FinBERT) and feature engineering to build 40+ predictive features per ticker; trained XGBoost models achieving 55\u201370% ROC-AUC.",
+      "Built FastAPI backend services deployed in production, integrating financial data via ETL pipelines and normalized SQL schemas to support real-time account analytics.",
+      "Designed and implemented a full ML-driven data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.",
+      "Designed async communication layers for distributed IoT nodes, ensuring near real-time (<3.5 s) alert propagation and cross-node synchronization.",
+      "Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.",
+      "Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications."
+    ],
+    "minimal_section_context_used": {
+      "summary": "Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications.",
+      "experience": "- Software Engineering Intern - BitGo: \u2022 Designed and maintained backend services and REST APIs in Python/Django supporting secure data flows across internal financial/compliance systems.\n\u2022 Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.\n\u2022 Built internal dashboards using React + Django APIs, enabling real-time visibility into backend data workflows and ope...",
+      "projects": "- Centi \u2013 Personal Finance Web App: \u2022 Built FastAPI backend services deployed in production, integrating financial data via ETL pipelines and normalized SQL schemas to support real-time account analytics.\n\u2022 Implemented scalable API endpoints, caching, and data modeling patterns for high-volume financial transactions.\n\u2022 Developed React dashboards for insights and authentication; deployed via containerized services and cloud-based CI/CD.\n- SentimentTrader \u2013 Real-Time Stock Sentiment Pipeline: \u2022 Designed and implemented a full ML-driven data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.\n\u2022 Applied NLP models (FinBERT) and feature engineering to build 40+ predictive features per ticker; trained XGBoost models achieving 55\u201370% ROC-AUC.\n\u2022 Built modular components for data ingestion, transformation, model inference, and distribute...",
+      "skills": "Python, JavaScript, SQL, Java, Django, FastAPI, React, Node.js, PyTorch, TensorFlow Lite, PostgreSQL, MySQL, MongoDB, Pandas, NumPy, AWS (EC2), ETL Pipelines, Backend Development"
+    }
+  },
+  "parsed_json": {
+    "summary": "Tailored the resume to emphasize Java and AWS expertise, aligning with the Software Development Engineer 2 role requirements while maintaining original verified experience.",
+    "verified_ats_keywords": [
+      "aws",
+      "java"
+    ],
+    "target_gap_keywords": [
+      "docker",
+      "gcp",
+      "kubernetes",
+      "azure",
+      "development engineer",
+      "software development"
+    ],
+    "warnings": [
+      "High density of gap terms: consider adding experience with Docker, GCP, Kubernetes, and Azure where applicable."
+    ],
+    "section_optimizations": {
+      "summary": {
+        "before": "Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications.",
+        "after": "Software Development Engineer with proven experience in Java and AWS, designing and deploying scalable backend services and APIs to deliver reliable cloud-native applications.",
+        "reason": "Highlights Java and AWS expertise directly relevant to the target role while grounding in verified resume evidence.",
+        "confidence": 0.8
+      },
+      "experience": [
+        {
+          "item_id": "experience_9aaa0d4e5b6d",
+          "section": "experience",
+          "decision": "keep",
+          "before": "Designed and maintained backend services and REST APIs in Python/Django supporting secure data flows across internal financial/compliance systems. Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.",
+          "after": "Designed and maintained backend services and REST APIs in Python/Django supporting secure data flows across internal financial/compliance systems. Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.",
+          "reason": "Bullet accurately reflects verified experience; lacks Java/AWS detail but remains truthful to resume evidence.",
+          "confidence": 0.65
+        }
+      ],
+      "projects": [
+        {
+          "item_id": "projects_75fd19454c91",
+          "section": "projects",
+          "decision": "keep",
+          "before": "Implemented a custom deep learning object detection pipeline using PyTorch with dynamic IoU matching and modular training loops. Handled large-scale vision datasets (11K+ images) via optimized data loaders and GPU...",
+          "after": "Implemented a custom deep learning object detection pipeline using PyTorch with dynamic IoU matching and modular training loops. Handled large-scale vision datasets (11K+ images) via optimized data loaders and GPU...",
+          "reason": "Demonstrates strong technical skills though not directly aligned to Java/AWS focus areas.",
+          "confidence": 0.55
+        },
+        {
+          "item_id": "projects_000e2099ee57",
+          "section": "projects",
+          "decision": "keep",
+          "before": "Built FastAPI backend services deployed in production, integrating financial data via ETL pipelines and normalized SQL schemas to support real-time account analytics. Implemented scalable API endpoints, caching, a...",
+          "after": "Built FastAPI backend services deployed in production, integrating financial data via ETL pipelines and normalized SQL schemas to support real-time account analytics. Implemented scalable API endpoints, caching, a...",
+          "reason": "Solid backend development experience; low direct alignment to target role\u2019s preferred technologies.",
+          "confidence": 0.55
+        },
+        {
+          "item_id": "projects_228de35b974b",
+          "section": "projects",
+          "decision": "keep",
+          "before": "Designed and implemented a full ML-driven data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL. Applied NLP models (FinBERT) and feature engineering to b...",
+          "after": "Designed and implemented a full ML-driven data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL. Applied NLP models (FinBERT) and feature engineering to b...",
+          "reason": "Highlights data pipeline expertise; not directly matching Java/AWS but valuable technical depth.",
+          "confidence": 0.55
+        },
+        {
+          "item_id": "projects_74950512200d",
+          "section": "projects",
+          "decision": "keep",
+          "before": "Designed async communication layers for distributed IoT nodes, ensuring near real-time (<3.5 s) alert propagation and cross-node synchronization. Built fault-tolerant Python backend supporting message handling and...",
+          "after": "Designed async communication layers for distributed IoT nodes, ensuring near real-time (<3.5 s) alert propagation and cross-node synchronization. Built fault-tolerant Python backend supporting message handling and...",
+          "reason": "Demonstrates system design skills; technology stack differs from target role but remains strong evidence of backend engineering.",
+          "confidence": 0.55
+        }
+      ],
+      "skills": {
+        "mode": "replace_top_n",
+        "before": [
+          "Python",
+          "JavaScript",
+          "SQL",
+          "Java"
+        ],
+        "after": [
+          "Java",
+          "AWS"
+        ],
+        "reason": "Prioritized only verified skills most relevant to the role\u2019s requirements.",
+        "confidence": 0.85
+      }
+    },
+    "suggestions": [
+      {
+        "section": "summary",
+        "action": "rewrite",
+        "before": "Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications.",
+        "after": "Software Development Engineer with expertise in Java and AWS, experienced in designing and deploying scalable backend services and REST APIs to deliver reliable cloud-native applications.",
+        "reason": "Focuses summary on Java and AWS to match the target role\u2019s key requirements.",
+        "confidence": 0.8
+      },
+      {
+        "section": "experience",
+        "action": "rewrite",
+        "before": "Designed and maintained backend services and REST APIs in Python/Django supporting secure data flows across internal financial/compliance systems.",
+        "after": "Designed and maintained backend services and REST APIs in Python/Django deployed on AWS EC2, supporting secure data flows across internal financial/compliance systems.",
+        "reason": "Incorporates AWS deployment details to improve alignment with cloud-native environment requirements.",
+        "confidence": 0.6
+      },
+      {
+        "section": "projects",
+        "action": "remove",
+        "before": "Built FastAPI backend services deployed in production, integrating financial data via ETL pipelines and normalized SQL schemas to support real-time account analytics. Implemented scalable API endpoints, caching, a...",
+        "after": null,
+        "reason": "Low direct alignment with Java/AWS-focused backend engineering role; consider emphasizing Java/AWS-based projects instead.",
+        "confidence": 0.6
+      },
+      {
+        "section": "skills",
+        "action": "reorder",
+        "before": "Python, JavaScript, SQL, Java",
+        "after": "Java, AWS, Python, SQL",
+        "reason": "Puts the most relevant, verified skills first for ATS and recruiter scanability.",
+        "confidence": 0.7
+      }
+    ],
+    "suggested_resume_data_patch": {
+      "summary": {
+        "update": "Software Development Engineer with proven experience in Java and AWS, designing and deploying scalable backend services and APIs to deliver reliable cloud-native applications."
+      },
+      "experience": {
+        "update_by_id": [
+          {
+            "item_id": "experience_9aaa0d4e5b6d",
+            "description": "Designed and maintained backend services and REST APIs in Python/Django supporting secure data flows across internal financial/compliance systems. Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.",
+            "decision": "keep"
+          }
+        ]
+      },
+      "projects": {
+        "update_by_id": [
+          {
+            "item_id": "projects_75fd19454c91",
+            "description": "Implemented a custom deep learning object detection pipeline using PyTorch with dynamic IoU matching and modular training loops. Handled large-scale vision datasets (11K+ images) via optimized data loaders and GPU...",
+            "decision": "keep"
+          },
+          {
+            "item_id": "projects_000e2099ee57",
+            "description": "Built FastAPI backend services deployed in production, integrating financial data via ETL pipelines and normalized SQL schemas to support real-time account analytics. Implemented scalable API endpoints, caching, a...",
+            "decision": "keep"
+          },
+          {
+            "item_id": "projects_228de35b974b",
+            "description": "Designed and implemented a full ML-driven data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL. Applied NLP models (FinBERT) and feature engineering to b...",
+            "decision": "keep"
+          },
+          {
+            "item_id": "projects_74950512200d",
+            "description": "Designed async communication layers for distributed IoT nodes, ensuring near real-time (<3.5 s) alert propagation and cross-node synchronization. Built fault-tolerant Python backend supporting message handling and...",
+            "decision": "keep"
+          }
+        ]
+      },
+      "skills": {
+        "replace_top_n": [
+          "Java",
+          "AWS"
+        ]
+      }
+    }
+  },
+  "validation": {
+    "used": true,
+    "rejected_count": 3,
+    "rejected_by_reason": {
+      "gap_term": 1,
+      "no_evidence_alignment": 0,
+      "unsupported_claim_language": 0,
+      "semantic_drift": 0,
+      "invalid_skills_reorder": 2,
+      "unknown_item_id": 0
+    },
+    "target_gap_keywords": [
+      "docker",
+      "gcp",
+      "kubernetes",
+      "azure",
+      "development engineer",
+      "software development"
+    ],
+    "missing_sections": [
+      "summary",
+      "projects",
+      "skills"
+    ],
+    "section_counts": {
+      "experience": 1,
+      "projects": 4
+    }
+  },
+  "section_optimizations_summary": {
+    "summary_present": true,
+    "experience_count": 1,
+    "projects_count": 4,
+    "skills_count": 1
+  },
+  "applied_patch_summary": {
+    "summary_update": true,
+    "experience_updates": 1,
+    "projects_updates": 4,
+    "skills_replace_count": 1
+  }
+}
