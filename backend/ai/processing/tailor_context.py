@@ -7,6 +7,19 @@ from typing import Any, Dict, Iterable, List, Set
 
 from .alias_map import canonicalize_term, get_term_aliases
 
+INFRA_PROCESS_HINTS = {
+    "ci/cd",
+    "cicd",
+    "devops",
+    "cloud",
+    "cloud native",
+    "deployment",
+    "deploy",
+    "production infrastructure",
+    "infrastructure",
+    "sre",
+}
+
 
 def _normalize_term(value: str) -> str:
     text = str(value or "").strip().lower()
@@ -63,6 +76,62 @@ def _is_term_in_resume(term: str, resume_raw: str, resume_normalized: str) -> bo
         if _is_variant_in_resume(variant, resume_raw, resume_normalized):
             return True
     return False
+
+
+def _is_exact_term_literal_in_resume(term: str, resume_raw: str, resume_normalized: str) -> bool:
+    return _is_variant_in_resume(term, resume_raw, resume_normalized)
+
+
+def _is_infra_process_term(term: str) -> bool:
+    lowered = _normalize_term(term)
+    if not lowered:
+        return False
+    return any(hint in lowered for hint in INFRA_PROCESS_HINTS)
+
+
+def _split_verified_term_tiers(
+    *,
+    ranked_keywords: List[Dict[str, Any]],
+    resume_hits: List[str],
+    resume_raw: str,
+    resume_normalized: str,
+) -> tuple[List[str], List[str]]:
+    by_canonical: Dict[str, Dict[str, Any]] = {}
+    for entry in ranked_keywords:
+        term = _normalize_term(entry.get("term", ""))
+        if not term:
+            continue
+        canon = canonicalize_term(term)
+        if canon not in by_canonical:
+            by_canonical[canon] = entry
+
+    core: List[str] = []
+    supporting: List[str] = []
+    for term in resume_hits:
+        canon = canonicalize_term(term)
+        entry = by_canonical.get(canon, {})
+        sources = set(entry.get("sources", []))
+        score = float(entry.get("score", 0.0) or 0.0)
+        has_phrase_or_stack = bool({"known_phrase", "dynamic_phrase", "concrete_stack", "title_phrase", "title_phrase_ngram"} & sources) or (" " in term)
+        direct_literal = _is_exact_term_literal_in_resume(term, resume_raw, resume_normalized)
+        infra_process = _is_infra_process_term(term)
+
+        # Infra/process claims require stronger direct support to be core-safe.
+        if infra_process and not direct_literal:
+            supporting.append(term)
+            continue
+        if direct_literal and (has_phrase_or_stack or score >= 2.0):
+            core.append(term)
+        else:
+            supporting.append(term)
+
+    # Ensure we always have at least one core keyword when any verified evidence exists.
+    if not core and supporting:
+        core.append(supporting.pop(0))
+    # Preserve stable ordering and dedupe.
+    core = list(dict.fromkeys(core))
+    supporting = [term for term in dict.fromkeys(supporting) if term not in set(core)]
+    return core, supporting
 
 
 def _select_primary_terms(keywords: List[Dict[str, Any]], limit: int = 8) -> List[str]:
@@ -183,6 +252,12 @@ def build_tailor_context(
     resume_text_normalized = _normalize_search_text(resume_text_raw)
     resume_hits = [term for term in primary_terms if _is_term_in_resume(term, resume_text_raw, resume_text_normalized)]
     resume_gaps = [term for term in primary_terms if term not in resume_hits]
+    core_verified, supporting_verified = _split_verified_term_tiers(
+        ranked_keywords=ranked_keywords,
+        resume_hits=resume_hits,
+        resume_raw=resume_text_raw,
+        resume_normalized=resume_text_normalized,
+    )
 
     return {
         "target_role": (target_role or "").strip() or None,
@@ -194,6 +269,8 @@ def build_tailor_context(
         "resume_gaps": resume_gaps,
         # Explicit split between provable evidence vs desired targets.
         "verified_resume_terms": resume_hits,
+        "core_verified_keywords": core_verified,
+        "supporting_verified_keywords": supporting_verified,
         "target_gap_terms": resume_gaps,
         "section_item_ids": {
             "experience": exp_ids,

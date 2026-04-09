@@ -45,6 +45,152 @@ const PREVIEW_ZOOM = { min: 50, max: 150, step: 25, default: 100 }
 const DRAFT_PREVIEW_DEBOUNCE_MS = 450
 const EXACT_PDF_DEBOUNCE_MS = 1000
 
+function _toLower(value) {
+	return String(value || '').trim().toLowerCase()
+}
+
+function reorderSkillsFront(skills, frontList) {
+	const source = Array.isArray(skills) ? skills : []
+	const front = Array.isArray(frontList) ? frontList.map((x) => String(x || '').trim()).filter(Boolean) : []
+	if (!front.length) return source
+
+	const byName = new Map()
+	source.forEach((item) => {
+		const name = typeof item === 'object' ? String(item?.name || '').trim() : String(item || '').trim()
+		if (name) byName.set(_toLower(name), item)
+	})
+
+	const used = new Set()
+	const reordered = []
+	front.forEach((name) => {
+		const key = _toLower(name)
+		if (used.has(key)) return
+		const match = byName.get(key)
+		if (match != null) {
+			reordered.push(match)
+			used.add(key)
+		}
+	})
+
+	source.forEach((item) => {
+		const name = typeof item === 'object' ? String(item?.name || '').trim() : String(item || '').trim()
+		const key = _toLower(name)
+		if (!used.has(key)) reordered.push(item)
+	})
+	return reordered
+}
+
+function applyClassifiedChanges(baseResumeData, classifiedChanges) {
+	const changes = Array.isArray(classifiedChanges) ? classifiedChanges : []
+	return changes.reduce((acc, change) => {
+		if (!change || typeof change !== 'object') return acc
+		const section = String(change.section || '').trim()
+		const changeType = String(change.change_type || '').trim()
+		const decision = changeType
+		const itemId = String(change.item_id || '').trim()
+		const after = String(change.after || '').trim()
+
+		if (section === 'summary' && changeType === 'summary_rewrite' && after) {
+			return {
+				...acc,
+				summary: { ...(acc.summary || {}), summary: after },
+			}
+		}
+
+		if ((section === 'experience' || section === 'projects') && itemId) {
+			const rows = Array.isArray(acc[section]) ? acc[section] : []
+			const rowIndex = Number.isInteger(change?.row_index) ? Number(change.row_index) : -1
+			return {
+				...acc,
+				[section]: rows.map((row, idx) => {
+					if (!row || typeof row !== 'object') return row
+					const itemIdMatch = String(row.item_id || '').trim() === itemId
+					const rowIndexMatch = rowIndex >= 0 && idx === rowIndex
+					if (!itemIdMatch && !rowIndexMatch) return row
+					if (decision === 'omit') {
+						return { ...row, _omit_suggested: true }
+					}
+					if (after) {
+						return { ...row, description: after }
+					}
+					return row
+				}),
+			}
+		}
+
+		if (section === 'skills' && changeType === 'reorder_skills') {
+			const afterList = Array.isArray(change.after_list) ? change.after_list : []
+			return {
+				...acc,
+				skills: reorderSkillsFront(acc.skills, afterList),
+			}
+		}
+
+		return acc
+	}, baseResumeData)
+}
+
+function revertClassifiedChange(baseResumeData, change) {
+	if (!change || typeof change !== 'object') return baseResumeData
+	const section = String(change.section || '').trim()
+	const changeType = String(change.change_type || '').trim()
+	const decision = changeType
+	const itemId = String(change.item_id || '').trim()
+	const before = String(change.before || '').trim()
+
+	if (section === 'summary' && changeType === 'summary_rewrite') {
+		return {
+			...baseResumeData,
+			summary: { ...(baseResumeData.summary || {}), summary: before },
+		}
+	}
+
+	if ((section === 'experience' || section === 'projects') && itemId) {
+		const rows = Array.isArray(baseResumeData[section]) ? baseResumeData[section] : []
+		const rowIndex = Number.isInteger(change?.row_index) ? Number(change.row_index) : -1
+		return {
+			...baseResumeData,
+			[section]: rows.map((row, idx) => {
+				if (!row || typeof row !== 'object') return row
+				const itemIdMatch = String(row.item_id || '').trim() === itemId
+				const rowIndexMatch = rowIndex >= 0 && idx === rowIndex
+				if (!itemIdMatch && !rowIndexMatch) return row
+				if (decision === 'omit') {
+					const next = { ...row }
+					delete next._omit_suggested
+					return next
+				}
+				return { ...row, description: before || row.description }
+			}),
+		}
+	}
+
+	if (section === 'skills' && changeType === 'reorder_skills') {
+		const beforeList = Array.isArray(change.before_list) ? change.before_list : []
+		return {
+			...baseResumeData,
+			skills: reorderSkillsFront(baseResumeData.skills, beforeList),
+		}
+	}
+
+	return baseResumeData
+}
+
+function shouldAutoApplyChange(change) {
+	if (!change || typeof change !== 'object') return false
+	const risk = String(change.risk_level || '').trim().toLowerCase()
+	const confidence = Number(change.confidence || 0)
+	const reason = String(change.reason || '').toLowerCase()
+	const driftSignals = ['adjacent evidence', 'limited direct evidence', 'true gap', 'semantic drift']
+	const driftLow = !driftSignals.some((token) => reason.includes(token))
+
+	if (risk === 'low') return true
+	if (risk === 'medium') {
+		return confidence >= 0.84 && driftLow
+	}
+	return false
+}
+
 /** Aligns with backend `shared.template_slug.normalize_template_slug` (legacy `default` → `classic`). */
 function normalizeTemplateSlug(name) {
 	if (name == null || name === '') return 'classic'
@@ -71,6 +217,15 @@ function ResumePreview() {
 	const location = useLocation()
 	const tailorIntent = location.state?.createMode === 'tailor' ? location.state?.tailorIntent : null
 	const [aiTailorResult, setAiTailorResult] = useState(location.state?.aiTailorResult || null)
+	const [aiAppliedChanges, setAiAppliedChanges] = useState([])
+	const [aiPendingChanges, setAiPendingChanges] = useState([])
+	const [aiRejectedChanges, setAiRejectedChanges] = useState([])
+	const [aiTailorPhase, setAiTailorPhase] = useState('idle')
+	const aiBaselineResumeRef = useRef(null)
+	const aiHistoryRef = useRef([])
+	const hasFetchedProfileRef = useRef(false)
+	const hasFetchedTemplatesRef = useRef(false)
+	const lastSavedResumesUserIdRef = useRef(null)
 	const lastTailorRequestKeyRef = useRef(null)
 
     // ----- states -----
@@ -123,7 +278,6 @@ function ResumePreview() {
 
 	const getMaxLeftPanelWidth = () => {
 		const viewportWidth = window.innerWidth
-		console.log('viewportWidth', viewportWidth)
 		// Breakpoint-based maximum widths
 		// Ensures right panel always has adequate space
 		// Adjust these pixel values as needed during debugging
@@ -281,32 +435,20 @@ function ResumePreview() {
 		}
 
 		setValidationIssues([])
-		exactPdfRequestIdRef.current += 1
 		setIsGeneratingPreview(true)
-		setExactPdfRefreshing(true)
 		try {
 			const previewData = {
 				...applyVisibilityFilters(resumeData),
 				sectionLabels: sectionLabels,
 			}
-			const inputKey = JSON.stringify({ template, previewData, stylePreferences })
-			const [htmlContent, pdfBlob] = await Promise.all([
-				generateResumePreview(template, previewData, stylePreferences),
-				generateResumePDF(template, previewData, stylePreferences),
-			])
+			const htmlContent = await generateResumePreview(template, previewData, stylePreferences)
 			setPreviewHtml(htmlContent)
-			lastPreviewInputRef.current = inputKey
-			setExactPdfBlobUrl((prev) => {
-				if (prev) URL.revokeObjectURL(prev)
-				return URL.createObjectURL(pdfBlob)
-			})
-			lastExactInputRef.current = inputKey
+			lastPreviewInputRef.current = JSON.stringify({ template, previewData, stylePreferences })
 		} catch (error) {
 			console.error('Refresh preview failed:', error)
 			toast.error('Could not refresh preview.')
 		} finally {
 			setIsGeneratingPreview(false)
-			setExactPdfRefreshing(false)
 		}
 	}
 
@@ -450,6 +592,110 @@ function ResumePreview() {
 			}
 		}))
 	}, [])
+
+	const applyOneAiChange = useCallback((change) => {
+		if (!change) return
+		setResumeData((prev) => {
+			const beforeSnapshot = JSON.parse(JSON.stringify(prev))
+			const updated = applyClassifiedChanges(prev, [change])
+			aiHistoryRef.current = [...aiHistoryRef.current, { change, before: beforeSnapshot }]
+			return updated
+		})
+	}, [])
+
+	const handleAiAcceptChange = useCallback((changeId) => {
+		const accepted = aiPendingChanges.find((change) => String(change?.change_id || '') === String(changeId || ''))
+		if (!accepted) return
+		setAiPendingChanges((prev) =>
+			prev.filter((change) => String(change?.change_id || '') !== String(changeId || ''))
+		)
+		applyOneAiChange(accepted)
+		setAiAppliedChanges((prev) => [...prev, accepted])
+	}, [aiPendingChanges, applyOneAiChange])
+
+	const handleAiRejectChange = useCallback((changeId) => {
+		const rejected = aiPendingChanges.find((change) => String(change?.change_id || '') === String(changeId || ''))
+		if (!rejected) return
+		setAiPendingChanges((prev) =>
+			prev.filter((change) => String(change?.change_id || '') !== String(changeId || ''))
+		)
+		setAiRejectedChanges((prev) => [...prev, rejected])
+	}, [aiPendingChanges])
+
+	const handleAiAcceptAllPending = useCallback(() => {
+		const batch = [...aiPendingChanges]
+		if (!batch.length) return
+		setAiPendingChanges([])
+		setAiAppliedChanges((prev) => [...prev, ...batch])
+		setResumeData((prev) => {
+			let rolling = prev
+			const historyRows = []
+			batch.forEach((change) => {
+				const before = JSON.parse(JSON.stringify(rolling))
+				rolling = applyClassifiedChanges(rolling, [change])
+				historyRows.push({ change, before })
+			})
+			aiHistoryRef.current = [...aiHistoryRef.current, ...historyRows]
+			return rolling
+		})
+		toast.success(`Accepted ${batch.length} pending AI change${batch.length === 1 ? '' : 's'}.`)
+	}, [aiPendingChanges])
+
+	const handleAiRejectAllPending = useCallback(() => {
+		const batch = [...aiPendingChanges]
+		if (!batch.length) return
+		setAiRejectedChanges((prev) => [...prev, ...batch])
+		setAiPendingChanges([])
+		toast('Rejected all pending AI changes.')
+	}, [aiPendingChanges])
+
+	const handleAiUndoLastChange = useCallback(() => {
+		const history = aiHistoryRef.current
+		if (!history.length) return
+		const last = history[history.length - 1]
+		if (!last?.before) return
+		setResumeData(last.before)
+		const revertedId = String(last?.change?.change_id || '')
+		if (revertedId) {
+			setAiAppliedChanges((prev) => prev.filter((change) => String(change?.change_id || '') !== revertedId))
+			setAiPendingChanges((prev) => [last.change, ...prev])
+		}
+		aiHistoryRef.current = history.slice(0, -1)
+		toast('Undid last AI-applied change.')
+	}, [])
+
+	const handleAiRevertSingleChange = useCallback((changeId) => {
+		const target = aiAppliedChanges.find((change) => String(change?.change_id || '') === String(changeId || ''))
+		if (!target) return
+		setAiAppliedChanges((prev) =>
+			prev.filter((change) => String(change?.change_id || '') !== String(changeId || ''))
+		)
+		setResumeData((prev) => revertClassifiedChange(prev, target))
+		setAiPendingChanges((prev) => [target, ...prev])
+		toast('Reverted AI change.')
+	}, [aiAppliedChanges])
+
+	const handleAiRevertSection = useCallback((sectionKey) => {
+		const section = String(sectionKey || '').trim()
+		if (!section) return
+		const moved = aiAppliedChanges.filter((change) => String(change?.section || '') === section)
+		if (!moved.length) return
+		setAiAppliedChanges((prev) => prev.filter((change) => String(change?.section || '') !== section))
+		setResumeData((prev) => moved.reduce((acc, change) => revertClassifiedChange(acc, change), prev))
+		setAiPendingChanges((prev) => [...moved, ...prev])
+		toast(`Reverted AI changes for ${section}.`)
+	}, [aiAppliedChanges])
+
+	const handleAiRevertAllChanges = useCallback(() => {
+		const baseline = aiBaselineResumeRef.current
+		if (!baseline) return
+		const snapshot = JSON.parse(JSON.stringify(baseline))
+		setResumeData(snapshot)
+		setAiPendingChanges((prev) => [...aiAppliedChanges, ...prev])
+		setAiAppliedChanges([])
+		aiHistoryRef.current = []
+		toast('Reverted all AI-applied changes.')
+	}, [aiAppliedChanges])
 
 	// ----- saved resumes (preview snapshots) -----
 	const [savedResumes, setSavedResumes] = useState({ items: [], max: 3 })
@@ -712,6 +958,8 @@ function ResumePreview() {
 
 	// auth guard on mount.
 	useEffect(() => {
+		if (hasFetchedProfileRef.current) return
+		hasFetchedProfileRef.current = true
 
 		// if user not logged in, redirect to auth page.
 		const token = localStorage.getItem('token')
@@ -723,14 +971,7 @@ function ResumePreview() {
 		// fetch user data from backend.
 		try {
 			
-			// step 1 : fetch user data from local storage.
-			// we can immediately display name & email.
-			const userData = localStorage.getItem('user')
-			if (userData) {
-				setUser(JSON.parse(userData))
-			}
-
-			// step 2 : fetch user data from backend.
+			// fetch profile from backend once for this page lifecycle.
 			const fetchCurrentUser = async () => {
 				// --- grab user data from backend.
 				const response = await getMyProfile()
@@ -777,6 +1018,8 @@ function ResumePreview() {
 
 	// fetch available templates.
 	useEffect(() => {
+		if (hasFetchedTemplatesRef.current) return
+		hasFetchedTemplatesRef.current = true
 		setIsLoadingTemplates(true)
 
 		const fetchTemplates = async () => {
@@ -811,8 +1054,12 @@ function ResumePreview() {
 
 	// fetch saved resumes when user is loaded
 	useEffect(() => {
-		if (user) fetchSavedResumes()
-	}, [user, fetchSavedResumes])
+		const userId = user?.id
+		if (!userId) return
+		if (lastSavedResumesUserIdRef.current === userId) return
+		lastSavedResumesUserIdRef.current = userId
+		fetchSavedResumes()
+	}, [user?.id, fetchSavedResumes])
 
 	// load saved resume when navigated from Home with loadSavedId
 	useEffect(() => {
@@ -869,6 +1116,10 @@ function ResumePreview() {
 	}, [user, location.state?.loadSavedId, navigate])
 
 	// Trigger AI tailor request once resume/profile data is ready in preview.
+	// Intentionally keyed only by tailor intent + baseline readiness.
+	// If we include mutable deps like resumeData/sectionLabels/template,
+	// React reruns this effect, cleanup marks previous request as cancelled,
+	// and valid responses can be dropped before state updates.
 	useEffect(() => {
 		if (!tailorIntent || !hasSetBaseline) return
 
@@ -885,16 +1136,25 @@ function ResumePreview() {
 		lastTailorRequestKeyRef.current = requestKey
 
 		let isCancelled = false
+		const requestResumeData = {
+			...resumeData,
+			sectionLabels,
+		}
+		const requestTemplate = template || 'classic'
 
 		const requestTailor = async () => {
 			try {
+				setAiTailorPhase('requesting')
+				aiBaselineResumeRef.current = JSON.parse(JSON.stringify(resumeData))
+				aiHistoryRef.current = []
+				setAiAppliedChanges([])
+				setAiPendingChanges([])
+				setAiRejectedChanges([])
+
 				const result = await suggestJobTailor({
 					job_description: tailorIntent.jobDescription,
-					resume_data: {
-						...resumeData,
-						sectionLabels,
-					},
-					template_name: template || 'classic',
+					resume_data: requestResumeData,
+					template_name: requestTemplate,
 					target_role: tailorIntent.jobTitle,
 					style_preferences: {
 						focus: tailorIntent.focus,
@@ -905,11 +1165,40 @@ function ResumePreview() {
 				})
 
 				if (isCancelled) return
-				setAiTailorResult(result?.data || result)
+				const response = result?.data || result || {}
+				const classifiedChanges = Array.isArray(response.classified_changes) ? response.classified_changes : []
+				const autoApplyChanges = classifiedChanges.filter((change) => shouldAutoApplyChange(change))
+				const pendingReviewChanges = classifiedChanges.filter((change) => !shouldAutoApplyChange(change))
+				console.log('response', response)
+				
+				setAiTailorResult(response)
+				setAiPendingChanges(pendingReviewChanges)
+				setAiAppliedChanges(autoApplyChanges)
+				setAiTailorPhase('applying')
+				
+
+				if (autoApplyChanges.length > 0) {
+					setResumeData((prev) => {
+						let rolling = prev
+						const historyRows = []
+						autoApplyChanges.forEach((change) => {
+							const before = JSON.parse(JSON.stringify(rolling))
+							rolling = applyClassifiedChanges(rolling, [change])
+							historyRows.push({ change, before })
+						})
+						aiHistoryRef.current = [...aiHistoryRef.current, ...historyRows]
+						return rolling
+					})
+					toast.success(
+						`Applied ${autoApplyChanges.length} AI update${autoApplyChanges.length === 1 ? '' : 's'} automatically.`
+					)
+				}
+				setAiTailorPhase('reviewing')
 			} catch (error) {
 				if (isCancelled) return
 				console.error('Tailor preview request failed:', error)
 				toast.error('Could not generate AI tailoring suggestions yet.')
+				setAiTailorPhase('error')
 			}
 		}
 
@@ -917,7 +1206,16 @@ function ResumePreview() {
 		return () => {
 			isCancelled = true
 		}
-	}, [tailorIntent, hasSetBaseline, resumeData, sectionLabels, template])
+	}, [tailorIntent, hasSetBaseline])
+
+	// Defensive phase sync: if we already have a tailor result,
+	// the assist panel should not remain in "Thinking...".
+	useEffect(() => {
+		if (!aiTailorResult) return
+		if (aiTailorPhase === 'requesting' || aiTailorPhase === 'applying' || aiTailorPhase === 'idle') {
+			setAiTailorPhase('reviewing')
+		}
+	}, [aiTailorResult, aiTailorPhase])
 
 	useEffect(() => {
 		exactPdfBlobUrlRef.current = exactPdfBlobUrl
@@ -932,6 +1230,12 @@ function ResumePreview() {
 
 	// Debounced exact PDF preview (hybrid: draft HTML + true PDF pages).
 	useEffect(() => {
+		// During tailor request/apply, defer exact PDF generation to avoid duplicate requests.
+		if (tailorIntent && (aiTailorPhase === 'requesting' || aiTailorPhase === 'applying')) {
+			setExactPdfRefreshing(true)
+			return
+		}
+
 		const issues = validateResumeData(resumeData)
 		if (issues.length > 0) {
 			setExactPdfBlobUrl((prev) => {
@@ -979,7 +1283,7 @@ function ResumePreview() {
 		}, EXACT_PDF_DEBOUNCE_MS)
 
 		return () => clearTimeout(timer)
-	}, [template, resumeData, sectionLabels, stylePreferences])
+	}, [template, resumeData, sectionLabels, stylePreferences, tailorIntent, aiTailorPhase])
 
 	// resizing global listener.
 	useEffect(() => {
@@ -1148,6 +1452,18 @@ function ResumePreview() {
 					onSectionLabelChange={handleSectionLabelChange}
 					tailorIntent={tailorIntent}
 					aiTailorResult={aiTailorResult}
+					aiAppliedChanges={aiAppliedChanges}
+					aiPendingChanges={aiPendingChanges}
+					aiRejectedChanges={aiRejectedChanges}
+					aiTailorPhase={aiTailorPhase}
+					onAiUndoLastChange={handleAiUndoLastChange}
+					onAiRevertAllChanges={handleAiRevertAllChanges}
+					onAiAcceptAllPending={handleAiAcceptAllPending}
+					onAiRejectAllPending={handleAiRejectAllPending}
+					onAiAcceptChange={handleAiAcceptChange}
+					onAiRejectChange={handleAiRejectChange}
+					onAiRevertSingleChange={handleAiRevertSingleChange}
+					onAiRevertSection={handleAiRevertSection}
 				/>
 
 				{/* resizable divider */}

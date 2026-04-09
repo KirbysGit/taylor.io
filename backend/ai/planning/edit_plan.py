@@ -41,6 +41,19 @@ SEMANTIC_DRIFT_HINTS = {
     "go-to-market",
 }
 
+# Keep this taxonomy intentionally small and stable.
+# It is a secondary alignment hint, not the primary evidence engine.
+CAPABILITY_SIGNAL_MAP = {
+    "backend": {"backend", "api", "microservices", "service"},
+    "full_stack": {"full-stack", "fullstack", "frontend", "web", "ui"},
+    "production_systems": {"production", "deploy", "scalable", "reliable", "performance", "monitoring"},
+    "data_analytics": {"data", "analytics", "etl", "pipeline", "sql", "dashboard"},
+    "system_design": {"architecture", "design", "distributed", "integration", "requirements"},
+    "cloud_devops": {"cloud", "kubernetes", "docker", "ci/cd", "infra"},
+}
+
+
+# --- helper functions
 
 def _as_list(value: Any) -> List[str]:
     if not isinstance(value, list):
@@ -52,15 +65,26 @@ def _as_list(value: Any) -> List[str]:
             out.append(text)
     return out
 
-
+# normalize text.
 def _norm(text: str) -> str:
     return re.sub(r"\s+", " ", str(text or "").strip().lower())
 
-
+# tokenize text.
 def _tokens(text: str) -> List[str]:
     return re.findall(r"[a-z0-9+#./-]{2,}", _norm(text))
 
 
+# extract capability signals from text.
+def _capability_signals(text: str) -> set[str]:
+    lowered = _norm(text)
+    found: set[str] = set()
+    for capability, hints in CAPABILITY_SIGNAL_MAP.items():
+        if any(hint in lowered for hint in hints):
+            found.add(capability)
+    return found
+
+
+# split job description into lines.
 def _split_jd_lines(job_description: str) -> List[str]:
     lines: List[str] = []
     for raw in str(job_description or "").splitlines():
@@ -73,36 +97,57 @@ def _split_jd_lines(job_description: str) -> List[str]:
     return list(dict.fromkeys(lines))
 
 
+# score a job description line.
 def _score_jd_line(line: str, role_tokens: set[str], focus_terms: List[str]) -> float:
+
+    # normalize the line.
     lowered = _norm(line)
+
+    # tokenized the normalized line.
     toks = _tokens(lowered)
     if not toks:
         return 0.0
 
+    # initialize the score.
     score = 0.0
+
+    # check for must have hints.
     if any(hint in lowered for hint in MUST_HAVE_HINTS):
         score += 3.0
+
+    # check for preferred hints.
     if any(hint in lowered for hint in PREFERRED_HINTS):
         score += 1.0
+
+    # check for action hints.
     if any(hint in toks for hint in ACTION_HINTS):
         score += 1.8
 
+    # check for specific terms.
     specific_terms = [t for t in toks if len(t) >= 4 and t not in {"team", "skills", "experience"}]
     score += min(3.0, 0.25 * len(specific_terms))
 
+    # check for focus hits.
     focus_hits = sum(1 for term in focus_terms if term and term in lowered)
     score += min(3.0, 0.9 * focus_hits)
 
+    # check for role hits.
     role_hits = sum(1 for tok in role_tokens if tok in toks)
     score += min(2.0, 0.5 * role_hits)
 
+    # check for generic noise.
     if any(noise in lowered for noise in GENERIC_JD_NOISE):
         score -= 3.0
+    
     return score
 
-
+# select job description evidence lines.
 def _select_jd_evidence_lines(job_description: str, target_role: str, focus_terms: List[str], limit: int = 6) -> List[str]:
+
+    # tokenize the target role.
     role_tokens = set(_tokens(target_role))
+
+    # score the job description lines.
     scored = []
     for line in _split_jd_lines(job_description):
         s = _score_jd_line(line, role_tokens, focus_terms)
@@ -112,83 +157,143 @@ def _select_jd_evidence_lines(job_description: str, target_role: str, focus_term
     return [line for _, line in scored[:limit]]
 
 
+# flatten resume lines.
 def _flatten_resume_lines(resume_data: Dict[str, Any]) -> List[str]:
+
+    # initialize the lines.
     lines: List[str] = []
+
+    # get the summary.
     summary = resume_data.get("summary")
+
+    # if the summary is a dictionary, extract the text.
     if isinstance(summary, dict):
         text = str(summary.get("summary") or "").strip()
         if text:
             lines.append(text)
+
+    # if the summary is a string, add it to the lines.
     elif isinstance(summary, str) and summary.strip():
         lines.append(summary.strip())
 
+    # get the experience and projects.
     for key in ("experience", "projects"):
+        
+        # get the section.
         section = resume_data.get(key)
         if not isinstance(section, list):
             continue
+
+        # iterate over the first 8 items in that section.
         for item in section[:8]:
             if not isinstance(item, dict):
                 continue
+
+            # get the description.
             desc = str(item.get("description") or "").strip()
             if not desc:
                 continue
+
+            # split the description into lines and add to the lines.
             for raw in desc.splitlines():
                 line = raw.strip(" \t-*•")
                 if len(line) >= 18:
                     lines.append(line)
+
+    # return the unique lines.
     return list(dict.fromkeys(lines))
 
+# --- used for scoring the resume lines its passed.
 
 def _score_resume_line(line: str, jd_lines: List[str], focus_terms: List[str]) -> float:
+
+    # normalize the line.
     lowered = _norm(line)
+
+    # tokenize the normalized line.
     toks = _tokens(lowered)
     if not toks:
         return 0.0
 
+    # initialize the score.
     score = 0.0
     jd_overlap = 0.0
+
+    # check for jd overlap.
     for jd in jd_lines:
+        # tokenize the jd.
         jd_tokens = set(_tokens(jd))
         if not jd_tokens:
             continue
+
+        # calculate the overlap.
         overlap = len(set(toks).intersection(jd_tokens)) / float(max(1, len(jd_tokens)))
         jd_overlap = max(jd_overlap, overlap)
+
+    # add the jd overlap score.
     score += min(4.0, jd_overlap * 8.0)
 
+    # check for focus hits.
     focus_hits = sum(1 for term in focus_terms if term and term in lowered)
     score += min(2.0, 0.6 * focus_hits)
 
+    # check for metric hits.
     if re.search(r"\d|%", lowered):
         score += 1.5
+
+    # check for action hints.
     if any(tok in ACTION_HINTS for tok in toks):
         score += 1.0
+
+    # check for vague resume hints.
     if any(v in lowered for v in VAGUE_RESUME_HINTS):
         score -= 1.5
+
     return score
 
+# --- used for selecting the resume evidence lines its passed based on the scores of the top N lines.
 
 def _select_resume_evidence_lines(resume_data: Dict[str, Any], jd_lines: List[str], focus_terms: List[str], limit: int = 6) -> List[str]:
-    scored = []
+
+    # initialize the scored lines.
+    scored: List[Tuple[float, str]] = []
+
+    # score the resume lines.
     for line in _flatten_resume_lines(resume_data):
         s = _score_resume_line(line, jd_lines, focus_terms)
         if s > 0.8:
             scored.append((s, line))
+
+    # sort the scored lines.
     scored.sort(key=lambda x: (-x[0], x[1]))
+
+    # return the top lines.
     return [line for _, line in scored[:limit]]
 
+# ---
 
 def _iter_section_items(resume_data: Dict[str, Any], section: str) -> List[Dict[str, Any]]:
+
+    # initialize the output.
     out: List[Dict[str, Any]] = []
     rows = resume_data.get(section)
     if not isinstance(rows, list):
         return out
+
+    # iterate over the rows.
     for idx, row in enumerate(rows):
         if not isinstance(row, dict):
             continue
+
+        # get the item id.
         item_id = str(row.get("item_id") or "").strip() or f"{section}_{idx}"
+
+        # get the description.
         desc = str(row.get("description") or "").strip()
         if not desc:
             continue
+
+        # add the item to the output.
         out.append(
             {
                 "item_id": item_id,
@@ -198,10 +303,17 @@ def _iter_section_items(resume_data: Dict[str, Any], section: str) -> List[Dict[
         )
     return out
 
+# ---
 
 def _score_section_item(item: Dict[str, Any], jd_lines: List[str], focus_terms: List[str]) -> Dict[str, Any]:
+    
+    # normalize the text.
     text = _norm(item.get("description", ""))
+
+    # tokenize the text.
     toks = _tokens(text)
+
+    # if the text is empty, return the default score.
     if not toks:
         return {
             "jd_alignment_score": 0.0,
@@ -211,24 +323,64 @@ def _score_section_item(item: Dict[str, Any], jd_lines: List[str], focus_terms: 
             "decision": "keep",
         }
 
+    # initialize the jd alignment.
     jd_alignment = 0.0
+    jd_capabilities: set[str] = set()
+
+    # iterate over the jd lines.
     for jd in jd_lines:
+        # tokenize the jd.
         jd_tokens = set(_tokens(jd))
         if not jd_tokens:
             continue
+
+        # calculate the overlap.
         overlap = len(set(toks).intersection(jd_tokens)) / float(max(1, len(jd_tokens)))
         jd_alignment = max(jd_alignment, overlap)
-    jd_alignment = min(1.0, jd_alignment * 2.0)
+        jd_capabilities.update(_capability_signals(jd))
 
+    # get the item capabilities.
+    item_capabilities = _capability_signals(text)
+
+    # calculate the capability overlap.
+    capability_overlap = 0.0
+    if jd_capabilities:
+        capability_overlap = len(item_capabilities.intersection(jd_capabilities)) / float(max(1, len(jd_capabilities)))
+
+    # our primary signal is the direct lexical evidence.
+    literal_alignment = min(1.0, jd_alignment * 2.0)
+
+    # our secondary signal is the bounded capability bonus.
+    # capabilities should never override weak/missing direct evidence.
+    capability_bonus = 0.0
+    if literal_alignment >= 0.18:
+        capability_bonus = min(0.18, capability_overlap * 0.22)
+    elif literal_alignment > 0.0:
+        capability_bonus = min(0.06, capability_overlap * 0.10)
+
+    # calculate the jd alignment.
+    jd_alignment = min(1.0, literal_alignment + capability_bonus)
+
+    # check for focus hits.
     focus_hits = sum(1 for term in focus_terms if term and term in text)
+
+    # check for metric hits.
     has_metric = bool(re.search(r"\d|%", text))
+
+    # calculate the evidence strength.
     evidence_strength = min(1.0, (0.18 * focus_hits) + (0.35 if has_metric else 0.15))
 
+    # check for vague hits.
     vague_hits = sum(1 for hint in VAGUE_RESUME_HINTS if hint in text)
+
+    # check for semantic drift hits.
     drift_hits = sum(1 for hint in SEMANTIC_DRIFT_HINTS if hint in text)
+
+    # calculate the risk score.
     risk_score = min(1.0, (0.22 * vague_hits) + (0.28 * drift_hits))
 
-    overall = max(0.0, min(1.0, (0.55 * jd_alignment) + (0.45 * evidence_strength) - (0.35 * risk_score)))
+    # calculate the overall priority.
+    overall = max(0.0, min(1.0, (0.52 * jd_alignment) + (0.48 * evidence_strength) - (0.32 * risk_score)))
     if overall >= 0.62:
         decision = "rewrite"
     elif overall >= 0.42:
@@ -237,6 +389,7 @@ def _score_section_item(item: Dict[str, Any], jd_lines: List[str], focus_terms: 
         decision = "downrank"
     else:
         decision = "omit"
+        
     return {
         "jd_alignment_score": round(jd_alignment, 4),
         "evidence_strength_score": round(evidence_strength, 4),

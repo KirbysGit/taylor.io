@@ -85,7 +85,8 @@ def _output_contract() -> str:
     # JSON shape the model must return.
     example = {
         "summary": "1-2 sentence overview of how resume was tailored for this role.",
-        "verified_ats_keywords": ["keyword_from_verified_resume_evidence"],
+        "core_verified_keywords": ["directly evidenced and central role-fit keyword"],
+        "supporting_verified_keywords": ["evidenced but secondary/adjacent keyword"],
         "target_gap_keywords": ["important_jd_term_not_verified_in_resume"],
         "warnings": ["optional warning if evidence is weak"],
         "section_optimizations": {
@@ -118,10 +119,10 @@ def _output_contract() -> str:
                 }
             ],
             "skills": {
-                "mode": "replace_top_n",
+                "mode": "reorder_verified_front",
                 "before": ["python", "react", "sql", "java"],
                 "after": ["python", "sql", "react"],
-                "reason": "tailored top-N from verified skills for this role",
+                "reason": "reorder verified skills to prioritize highest role relevance",
                 "confidence": 0.76,
             },
         },
@@ -138,7 +139,7 @@ def _output_contract() -> str:
                 ]
             },
             "skills": {
-                "replace_top_n": ["python", "sql", "react"]
+                "reorder_front": ["python", "sql", "react"]
             }
         },
     }
@@ -335,7 +336,9 @@ def _build_v2_user_prompt(
         "",
         # 2) Minimal planning summary
         f"Primary keywords: {', '.join(tailor_context.get('keywords_primary', [])) or 'none'}",
-        f"Verified resume terms: {', '.join(tailor_context.get('verified_resume_terms', tailor_context.get('resume_hits', []))) or 'none'}",
+        f"Core verified keywords: {', '.join(tailor_context.get('core_verified_keywords', [])) or 'none'}",
+        f"Supporting verified keywords: {', '.join(tailor_context.get('supporting_verified_keywords', [])) or 'none'}",
+        f"Verified resume terms (all): {', '.join(tailor_context.get('verified_resume_terms', tailor_context.get('resume_hits', []))) or 'none'}",
         f"Target gap terms: {', '.join(tailor_context.get('target_gap_terms', tailor_context.get('resume_gaps', []))) or 'none'}",
     ]
 
@@ -412,10 +415,12 @@ def _build_v2_user_prompt(
             "",
             "Hard constraint:",
             "In rewritten resume text, use only verified resume terms/evidence.",
+            "Prioritize core verified keywords first; use supporting verified keywords only as secondary context.",
             "Missing target terms may appear only in warnings/gap notes.",
             "Never place target gap terms directly into rewritten resume claims.",
             "Do not introduce business/user/product framing unless that framing is present in matched resume evidence.",
-            "Skills optimization must output replace_top_n from existing verified skills; do not add new categories.",
+            "Skills optimization must output reorder_verified_front using existing verified skills only; do not add new categories.",
+            "When rewriting aligned bullets, preserve quantified proof points (percentages, scale, latency, throughput, ROC/AUC, counts) unless clearly irrelevant.",
             "Optimize full sections, not sample edits. Every experience/project item must get a decision.",
             "Use item_id references in outputs and patch operations; do not rely on full-string matching.",
             "Do not output legacy suggestions when section_optimizations is present.",
@@ -424,7 +429,7 @@ def _build_v2_user_prompt(
             "- Include summary optimization when summary exists.",
             "- For experience context, return decisions for all listed item_ids.",
             "- For project context, return decisions for all listed item_ids.",
-            "- For skills context, return a tailored top-N replacement list from verified skills only.",
+            "- For skills context, return a front-priority reorder list from verified skills only (preserve full skill inventory).",
             "",
             "Required output format:",
             "Return ONLY a valid JSON object. No markdown, no prose, no code fences.",

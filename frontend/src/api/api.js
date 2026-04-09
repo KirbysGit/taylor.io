@@ -4,6 +4,7 @@
 
 // base url for connecting to backend.
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const inFlightGetJsonRequests = new Map()
 
 // unified helper function to make api requests.
 // options.responseType: 'json' (default, returns { data }), 'blob', or 'text'
@@ -31,8 +32,18 @@ async function apiRequestCore(endpoint, options = {}) {
         ...(options.body && { body: options.body }),
     }
 
+    const method = String(config.method || 'GET').toUpperCase()
+    const responseType = options.responseType || 'json'
+    const canDedupeGetJson = method === 'GET' && !options.body && responseType === 'json'
+    const dedupeKey = canDedupeGetJson ? `${url}::${token || ''}` : null
+
+    if (canDedupeGetJson && inFlightGetJsonRequests.has(dedupeKey)) {
+        return inFlightGetJsonRequests.get(dedupeKey)
+    }
+
     // try to make request.
-    try {
+    const runRequest = async () => {
+        try {
         // make request.
         const response = await fetch(url, config)
         
@@ -49,21 +60,30 @@ async function apiRequestCore(endpoint, options = {}) {
         }
         
         // parse response based on responseType.
-        const responseType = options.responseType || 'json'
-        
         if (responseType === 'blob') {
             return await response.blob()
         } else if (responseType === 'text') {
             return await response.text()
         } else {
             const data = await response.json()
-        return { data }
+            return { data }
         }
 
     // if error, throw error.
     } catch (error) {
         throw error
     }
+    }
+
+    if (!canDedupeGetJson) {
+        return runRequest()
+    }
+
+    const inFlight = runRequest().finally(() => {
+        inFlightGetJsonRequests.delete(dedupeKey)
+    })
+    inFlightGetJsonRequests.set(dedupeKey, inFlight)
+    return inFlight
 }
 
 // --- convenience functions.

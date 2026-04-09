@@ -9,3 +9,9 @@ venv/
 node_modules/
 
 .env
+
+debug_outputs/
+debug_inputs/
+
+pytest_cache/
+.vscode/

@@ -36,7 +36,7 @@ class SectionOptimizationItem(BaseModel):
 
 
 class SectionOptimizationSkills(BaseModel):
-    mode: Literal["replace_top_n"] = "replace_top_n"
+    mode: Literal["reorder_verified_front"] = "reorder_verified_front"
     before: List[str] = Field(default_factory=list)
     after: List[str] = Field(default_factory=list)
     reason: str = ""
@@ -65,10 +65,14 @@ class JobTailorSuggestResponse(BaseModel):
     summary: str
     ats_keywords: List[str] = Field(default_factory=list)
     verified_ats_keywords: List[str] = Field(default_factory=list)
+    core_verified_keywords: List[str] = Field(default_factory=list)
+    supporting_verified_keywords: List[str] = Field(default_factory=list)
     target_gap_keywords: List[str] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
     suggestions: List[JobTailorSuggestion] = Field(default_factory=list)
     section_optimizations: SectionOptimizations = Field(default_factory=SectionOptimizations)
     suggested_resume_data_patch: Dict[str, Any] = Field(default_factory=dict)
     suggested_resume_data: Dict[str, Any] = Field(default_factory=dict)
+    classified_changes: List[Dict[str, Any]] = Field(default_factory=list)
+    reasoning_feed: Dict[str, Any] = Field(default_factory=dict)
     usage: Dict[str, Any] = Field(default_factory=dict)
