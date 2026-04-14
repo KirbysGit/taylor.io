@@ -4,698 +4,195 @@ import re
 from collections import defaultdict
 from typing import Any, Dict, List, Set
 
-from .lexicon import DOMAIN_LEXICONS
+from .lexicon import domainDicts, globalAllowShortTokens, globalPhraseCanonical, globalStopWords
 from .profiles import get_extraction_profile
 
-SECTION_HEADERS_TO_DOWNWEIGHT = {
-    "our values",
-    "benefits",
-    "benefits compensation",
-    "compensation",
-    "compensation package",
-    "compensation range",
-    "additional benefits",
-    "pay",
-    "weekly pay",
-    "salary",
-    "job type",
-    "full-time",
-    "schedule",
-    "work location",
-    "in person",
-    "on the road",
-    "referral program",
-    "paid training",
-    "health insurance",
-    "vision insurance",
-    "dental insurance",
-    "paid time off",
-    "mileage reimbursement",
-    "equal employment opportunity",
-    "equal opportunity employer",
-    "what s in it for you",
-    "what's in it for you",
-    "note",
-    "drug free work place",
-    "value statement",
-    "competencies",
-    "about us",
-    "life at",
-    "required education & experience",
-}
-
-SECTION_HEADERS_TO_SUPPRESS = {
-    "our benefits",
-    "benefits",
-    "perks",
-    "compensation",
-    "compensation package",
-    "compensation range",
-    "the pay range",
-    "we offer comprehensive benefits",
-    "this job is not eligible",
-    "by clicking apply today",
-    "next steps",
-}
-
-ROLE_SECTION_HEADERS = {
-    "job description",
-    "about the role",
-    "role overview",
-    "why this role is remarkable",
-    "what you will do",
-    "responsibilities",
-    "key responsibilities",
-    "requirements",
-    "key qualifications",
-    "qualifications",
-    "nice to have",
-    "preferred qualifications",
-    "ideal candidate",
-    "you might be the right person for the job if you",
-}
-
-NON_ROLE_SECTION_HEADERS = {
-    "who are",
-    "next steps",
-    "our benefits",
-    "benefits",
-    "perks",
-    "compensation",
-    "compensation package",
-    "compensation range",
-    "equal opportunity",
-    "equal employment opportunity",
-    "by clicking apply",
-    "apply today",
-    "about us",
-    "why join us",
-    "what s in it for you",
-    "what's in it for you",
-}
-
-BENEFIT_NOISE_TOKENS = {
-    "company",
-    "paid",
-    "employee",
-    "insurance",
-    "benefits",
-    "vacation",
-    "holidays",
-    "bonus",
-    "compensation",
-    "work",
-    "sick",
-    "off",
-    "pto",
-    "leave",
-}
-
-RECRUITER_NOISE_TOKENS = {
-    "recruiter",
-    "network",
-    "step",
-    "steps",
-    "talk",
-    "spin",
-    "free",
-    "fake",
-    "apply",
-    "application",
-    "dream",
-    "job",
-    "jobs",
-    "recruiting",
-    "employment",
-    "eligible",
-    "privacy",
-    "opt",
-    "supported",
-}
-
-LEGAL_NOISE_TOKENS = {
-    "eligible",
-    "employment",
-    "privacy",
-    "citizenship",
-    "resident",
-    "background",
-    "check",
-    "checks",
-    "disability",
-    "veteran",
-    "criminal",
-    "drug",
-    "felony",
-    "misdemeanor",
-    "conviction",
-    "authorization",
-    "authorized",
-}
-
-CONNECTOR_EDGE_WORDS = {
-    "a",
-    "an",
-    "and",
-    "as",
-    "at",
-    "for",
-    "from",
-    "if",
-    "in",
-    "is",
-    "not",
-    "of",
-    "on",
-    "or",
-    "the",
-    "to",
-    "we",
-    "with",
-    "such",
-    "using",
-    "whether",
-    "into",
-}
-
-VERB_LEAD_TOKENS = {
-    "build",
-    "design",
-    "assess",
-    "use",
-    "work",
-    "develop",
-    "create",
-    "implement",
-    "perform",
-    "integrate",
-    "ensure",
-    "evaluate",
-    "collaborate",
-    "participate",
-}
-
-CONNECTOR_TRAIL_TOKENS = {
-    "and",
-    "or",
-    "such",
-    "using",
-    "whether",
-    "into",
-    "with",
-    "for",
-    "to",
-    "of",
-}
-
-STACK_TOKEN_BLOCKLIST = {
-    "to",
-    "full",
-    "engineering",
-    "development",
-    "work",
-    "sales",
-    "business",
-    "performance",
-    "account",
-    "opportunities",
-    "clients",
-    "relationships",
-    "leadership",
-    "ownership",
-    "company",
-    "benefits",
-    "experience",
-    "technical",
-    "customer",
-    "using",
-}
-
-STACK_ALLOW_SHORT_TOKENS = {
-    "ai",
-    "ml",
-    "sql",
-    "api",
-    "aws",
-    "gcp",
-    "gke",
-    "llm",
-    "rag",
-    "cx",
-    "ivr",
-    "fcr",
-    "csat",
-    "wfo",
-    "ccaas",
-    "wxcc",
-}
-
-CONCRETE_STACK_TERMS = {
-    "react", "next.js", "nextjs", "react-native", "react native", "typescript", "javascript", "node", "node.js",
-    "python", "java", "go", "rust", "php", "nestjs", "django", "flask", "fastapi", "graphql", "rest", "restful",
-    "api", "apis", "sql", "postgres", "postgresql", "mysql", "mongodb", "redis", "databricks", "kafka", "nifi",
-    "opensearch", "tableau", "power bi", "salesforce", "posthog", "aws", "gcp", "azure", "docker", "kubernetes",
-    "gke", "rag", "llm", "mlops", "tensorflow", "pytorch", "scikit-learn", "transformers", "langchain", "langgraph",
-    "webex", "calabrio", "dialogflow", "ci/cd", "linux", "vue", "vue.js", "angular",
-}
-
-ROLE_CAPABILITY_STACK_TERMS = {
-    "workflow", "operations", "documentation", "implementation", "management", "execution", "delivery", "support",
-    "billing", "efficiency", "security", "performance", "platform", "integration", "kpis", "compliance",
-}
-
-ORG_TOKEN_STOPWORDS = {
-    "the",
-    "and",
-    "for",
-    "with",
-    "inc",
-    "llc",
-    "corp",
-    "company",
-    "remote",
-    "today",
-    "apply",
-    "job",
-    "jobs",
-    "manager",
-    "engineer",
-    "developer",
-    "position",
-    "opening",
-    "career",
-    "opportunity",
-    "role",
-}
-
-LOCATION_NOISE_TOKENS = {
-    "york",
-    "aventura",
-    "county",
-    "city",
-    "state",
-    "campus",
-    "onsite",
-    "on-site",
-    "hybrid",
-    "remote",
-}
-
-SCHOOL_LOCATION_CONTEXT_TOKENS = {
-    "new",
-    "york",
-    "university",
-    "campus",
-    "county",
-    "city",
-    "state",
-    "camp",
-    "campers",
-    "school",
-}
-
-GENERIC_OVERLAP_TOKENS = {
-    "experience",
-    "systems",
-    "technical",
-    "customer",
-    "lead",
-    "platform",
-    "support",
-    "business",
-    "using",
-    "performance",
-    "data",
-    "ai",
-    "ml",
-}
-
-WRAPPER_SUPPRESS_HEADER_PATTERNS = (
-    r"^who are .+$",
-    r"^next steps?$",
-    r"^about (us|the company)$",
-    r"^apply( now| today)?$",
-    r"^equal opportunity.*$",
-    r"^(compensation|benefits|perks).*$",
-    r"^equal employment.*$",
-    r"^privacy notice.*$",
-    r"^eligibility.*$",
-    r"^background check.*$",
-    r"^work authorization.*$",
-    r"^security clearance.*$",
-    r"^drug testing.*$",
-    r"^background screening.*$",
+from .tokens import (
+    benefitNoiseTokens,
+    comparativeGlueTokens,
+    complianceFooterSubstrings,
+    concreteStackTerms,
+    connectorEdgeWords,
+    connectorTrailTokens,
+    downweightFactor,
+    fillerFunctionTokens,
+    genericOverlapTokens,
+    instructionNoiseTokens,
+    legalNoiseTokens,
+    locationNoiseTokens,
+    lowSignalModifierTokens,
+    missionCultureLineSubstrings,
+    narrativeTrailTokens,
+    nonRoleSectionHeaders,
+    orgLocationPhraseTokens,
+    orgTokenStopwords,
+    phraseGlueTrailTokens,
+    phraseOverlapExactPrefer,
+    phrasePronounTokens,
+    recruiterNoiseTokens,
+    roleCapabilityStackTerms,
+    rolePhraseHeadTokens,
+    roleSectionHeaders,
+    safeDottedTokens,
+    schoolLocationContextTokens,
+    sectionHeadersToDownweight,
+    sectionHeadersToSuppress,
+    stackAllowShortTokens,
+    wrapperSuppressLineSubstrings,
 )
 
-WRAPPER_SUPPRESS_LINE_SUBSTRINGS = {
-    "apply now",
-    "apply today",
-    "talk to",
-    "for free",
-    "message and data rates",
-    "we never post fake jobs",
-    "equal opportunity",
-    "we are looking for",
-    "ideal candidate",
-    "join our team",
-    "opportunity to",
-    "hiring for",
-    "submit your resume",
-    "all qualified applicants",
-    "women and minorities are encouraged",
-    "equal employment opportunity",
-    "background records check",
-    "public trust clearance",
-    "us citizenship",
-    "perm resident alien",
-    "privacy policy",
-    "employment eligibility",
-    "opt out",
-    "message and data rates may apply",
-    "must be able to pass",
-    "drug screening",
-    "drug test",
-    "criminal background check",
-    "work authorization required",
-    "subject to background",
-    "equal opportunity employer",
-    "please include",
-    "relevant title",
-    "job title in subject",
-    "if interested send",
-    "paid time off",
-    "holiday pay",
-    "sick leave",
-    "medical dental vision",
-}
 
-MISSION_CULTURE_LINE_SUBSTRINGS = {
-    "our mission",
-    "our values",
-    "our culture",
-    "why join us",
-    "who we are",
-    "about us",
-    "value statement",
-    "inclusive environment",
-    "open-door policy",
-    "we value your",
-    "personally accountable",
-    "build trusted relationships",
-    "drive innovation",
-    "work in partnership",
-    "ready to work hard",
-}
+def count_phrases_by_source(text, source, phrases, source_weight):
 
-PHRASE_OVERLAP_EXACT_PREFER = {
-    "api": {"restful apis", "api integration", "third-party apis"},
-    "ai": {"generative ai", "ai agents", "llm-based solutions"},
-    "management": {"project management", "account management", "hospitality management"},
-    "customer": {"customer service", "customer outcomes"},
-    "service": {"customer service", "professional services"},
-}
+    # initialize a dict for phrase counts.
+    phrase_counts = {}
 
-LOW_SIGNAL_MODIFIER_TOKENS = {
-    "strong",
-    "clear",
-    "comprehensive",
-    "another",
-    "top",
-    "green",
-    "new",
-    "high",
-    "great",
-}
-
-TOOL_LIST_FRAGMENT_TOKENS = {
-    "python",
-    "java",
-    "javascript",
-    "typescript",
-    "node",
-    "node.js",
-    "django",
-    "fastapi",
-    "flask",
-    "react",
-    "next.js",
-    "nestjs",
-    "aws",
-    "gcp",
-    "azure",
-    "docker",
-    "kubernetes",
-    "sql",
-    "mysql",
-    "postgresql",
-    "graphql",
-    "alteryx",
-    "tableau",
-    "power bi",
-}
-
-FILLER_FUNCTION_TOKENS = {
-    "during",
-    "functions",
-    "environment",
-    "degree",
-    "must",
-    "perform",
-    "across",
-    "analyses",
-    "analysis",
-    "eg",
-    "e.g",
-}
-
-ROLE_PHRASE_HEAD_TOKENS = {
-    "management",
-    "engineering",
-    "automation",
-    "systems",
-    "operations",
-    "support",
-    "compliance",
-    "scheduling",
-    "documentation",
-    "testing",
-}
-
-PHRASE_PRONOUN_TOKENS = {
-    "you",
-    "your",
-    "yours",
-    "our",
-    "ours",
-    "their",
-    "theirs",
-    "we",
-    "us",
-}
-
-INSTRUCTION_NOISE_TOKENS = {
-    "not",
-    "please",
-    "relevant",
-    "title",
-    "description",
-    "least",
-    "more",
-    "than",
-    "then",
-    "three",
-}
-
-TITLE_FRAGMENT_BLACKLIST_TAIL_TOKENS = {"associate", "assistant"}
-
-ORG_LOCATION_PHRASE_TOKENS = {
-    "outlet",
-    "outlets",
-    "school",
-    "university",
-    "college",
-    "hospital",
-    "clinic",
-    "center",
-    "centre",
-    "district",
-    "campus",
-    "county",
-    "city",
-    "state",
-    "region",
-    "branch",
-    "location",
-    "office",
-}
-
-PHRASE_GLUE_TRAIL_TOKENS = {
-    "will",
-    "would",
-    "could",
-    "should",
-    "ability",
-    "teams",
-    "team",
-    "group",
-    "groups",
-}
-
-COMPARATIVE_GLUE_TOKENS = {
-    "least",
-    "more",
-    "most",
-    "than",
-    "then",
-    "only",
-    "just",
-}
-
-NARRATIVE_TRAIL_TOKENS = {
-    "business",
-    "vertical",
-    "role",
-    "position",
-    "candidate",
-    "opportunity",
-    "title",
-}
-
-SAFE_DOTTED_TOKENS = {"node.js", "next.js", "vue.js", "u.s"}
-
-URL_LINE_PATTERNS = (
-    r"https?://",
-    r"\bwww\.",
-    r"\.(gov|mil|pdf|docx?|pptx?|xlsx?)\b",
-    r"\b[A-Za-z0-9.-]+\.(gov|mil|pdf|org|com)\b",
-)
-
-COMPLIANCE_FOOTER_SUBSTRINGS = {
-    "know your rights",
-    "pay transparency",
-    "ofccp",
-    "equal employment opportunity",
-    "eeo",
-    "dol.gov",
-    "department of labor",
-    "poster",
-    "supplement",
-    "download",
-    "pdf",
-    "poster notice",
-}
-
-DOWNWEIGHT_FACTOR = 0.35
-
-
-def _canonical_keyword(token: str, phrase_canonical: Dict[str, str]) -> str:
-    return phrase_canonical.get(token, token)
-
-
-def _count_phrases_by_source(
-    text: str,
-    source: str,
-    phrases: List[str],
-    phrase_canonical: Dict[str, str],
-    source_weight: float = 1.0,
-) -> tuple[Dict[str, Dict[str, float]], str]:
-    phrase_counts: Dict[str, Dict[str, float]] = {}
+    # scrub the text.
     scrubbed_text = f" {text} "
+
+    # iterate over the phrases.
     for phrase in phrases:
+        # create a regex pattern for the phrase.
         pattern = r"(?<!\w)" + re.escape(phrase.lower()) + r"(?!\w)"
+        
+        # find all matches in the scrubbed text.
         matches = re.findall(pattern, scrubbed_text)
+        
+        # if no matches, continue.
         if not matches:
             continue
-        canonical = _canonical_keyword(phrase, phrase_canonical)
-        phrase_counts.setdefault(canonical, {})
-        phrase_counts[canonical][source] = phrase_counts[canonical].get(source, 0.0) + (len(matches) * source_weight)
+
+        # initialize the phrase count for the source.
+        phrase_counts.setdefault(phrase, {})
+
+        # get the current count for the source and add the matches * the source weight.
+        phrase_counts[phrase][source] = phrase_counts[phrase].get(source, 0.0) + (len(matches) * source_weight)
+
+        # remove the matches from the scrubbed text.
         scrubbed_text = re.sub(pattern, " ", scrubbed_text)
+
+    # return the phrase counts and the scrubbed text.
     return phrase_counts, scrubbed_text
 
+# --- gets any relevant keywords from the title text. --- #
+# input -> role title text, phrases, weak tokens, domain signal tokens.
+# output -> dict of phrases and their frequencies.
+def extract_title_ngram_phrases(roleTitle, phrases, weakTokens, domainSignalTokens):
 
-def _extract_title_ngram_phrases(
-    role_text: str,
-    phrase_canonical: Dict[str, str],
-    weak_tokens: Set[str],
-    domain_signal_tokens: Set[str],
-    known_phrases: Set[str],
-) -> Dict[str, float]:
+    # find all tokens in the role text.
     tokens = re.findall(r"[a-z][a-z0-9+.#-]{1,}", (role_text or "").lower())
+
+    # if the number of tokens is less than 2, return an empty dict.
     if len(tokens) < 2:
         return {}
-    found: Dict[str, float] = {}
+
+    # initialize a dict for found phrases.
+    found = {}
+
+    # find all n-grams in the tokens.
     max_n = min(4, len(tokens))
+
+    # iterate over the n-grams.
     for n in range(2, max_n + 1):
+        
+        # iterate over the tokens.
         for i in range(0, len(tokens) - n + 1):
+            
+            # get the parts of the n-gram.
             parts = tokens[i : i + n]
-            if parts[0] in CONNECTOR_EDGE_WORDS or parts[-1] in CONNECTOR_EDGE_WORDS:
+
+            # if the parts are connector edge words, continue.
+            if parts[0] in connectorEdgeWords or parts[-1] in connectorEdgeWords:
                 continue
-            if any(tok in PHRASE_PRONOUN_TOKENS or tok in INSTRUCTION_NOISE_TOKENS for tok in parts):
+
+            # if the parts are phrase pronouns or instruction noise, continue.
+            if any(tok in phrasePronounTokens or tok in instructionNoiseTokens for tok in parts):
                 continue
-            phrase = _normalize_term(" ".join(parts))
-            if phrase not in known_phrases:
-                # Reject generic title fragments like "<noun> associate" unless explicitly known.
-                if len(parts) == 2 and parts[-1] in TITLE_FRAGMENT_BLACKLIST_TAIL_TOKENS:
+
+            # normalize the phrase.
+            phrase = normalize_term(" ".join(parts))
+
+            # if the phrase is not in the known phrases, continue.
+            if phrase not in phrases:
+                
+                # reject generic title fragments like "<noun> associate" unless explicitly known.
+                if len(parts) == 2 and parts[-1] in titleFragmentBlacklistTailTokens:
                     continue
-                # Reject "<noun> manager <location/org chunk>" style fragments unless explicitly known.
-                if len(parts) >= 3 and "manager" in parts and any(tok in ORG_LOCATION_PHRASE_TOKENS for tok in parts):
+
+                # reject "<noun> manager <location/org chunk>" style fragments unless explicitly known.
+                if len(parts) >= 3 and "manager" in parts and any(tok in orgLocationPhraseTokens for tok in parts):
                     continue
-            if all(tok in weak_tokens for tok in parts):
+            
+            # if all the parts are weak tokens, continue.
+            if all(tok in weakTokens for tok in parts):
                 continue
-            if not any(tok in domain_signal_tokens for tok in parts):
+
+            # if not any of the parts are domain signal tokens, continue.
+            if not any(tok in domainSignalTokens for tok in parts):
                 continue
-            canonical = _canonical_keyword(phrase, phrase_canonical)
-            found[canonical] = max(found.get(canonical, 0.0), 1.0)
+
+            # add the phrase to the found dict.
+            found[phrase] = max(found.get(phrase, 0.0), 1.0)
     return found
 
 
-def _is_numeric_or_noise(token: str, garbage_tokens: set[str]) -> bool:
+def is_numeric_or_noise(token, garbage_tokens):
     return token in garbage_tokens or bool(re.fullmatch(r"\d+[+]?", token))
 
-
-def _normalize_term(term: str) -> str:
+# --- phrase-friendly clean up for a term. --- #
+# input -> term.
+# output -> cleaned term. (lowercase, strips punctuation and junk)
+def normalize_term(term):
     cleaned = re.sub(r"^[^a-z0-9+#./-]+|[^a-z0-9+#./-]+$", "", term.strip().lower())
     cleaned = re.sub(r"[.,;:!?]+$", "", cleaned)
     cleaned = re.sub(r"\s+", " ", cleaned)
     return cleaned
 
 
-def _build_signal_token_set(boost_words: Dict[str, int], allow_short_tokens: Set[str]) -> Set[str]:
-    signal_tokens: Set[str] = set()
-    for key in boost_words.keys():
-        phrase = _normalize_term(str(key))
-        if not phrase:
-            continue
-        signal_tokens.add(phrase)
+def build_signal_token_set(boostWords):
+
+    # initialize a set for signal tokens.
+    signalTokens = set()
+
+    # iterate over the boost words.
+    for key in boostWords.keys():
+        signalTokens.add(key)
         if " " in phrase:
-            # Keep multiword boosts as phrase-level signals only.
+            # keep multiword boosts as phrase-level signals only.
             continue
-        # Only explode multiword boosts into tokens when each token is non-generic.
-        for piece in re.findall(r"[a-z0-9+#.-]{2,}", phrase):
+
+        # only explode multiword boosts into tokens when each token is non-generic.
+        for piece in re.findall(r"[a-z0-9+#.-]{2,}", key):
             if piece in STACK_TOKEN_BLOCKLIST or piece in CONNECTOR_EDGE_WORDS:
                 continue
+            # add the piece to the signal tokens.
             signal_tokens.add(piece)
+
+    # update the signal tokens with the allow short tokens.
     signal_tokens.update(allow_short_tokens)
     signal_tokens.update(STACK_ALLOW_SHORT_TOKENS)
     return signal_tokens
 
 
-def _extract_stack_list_terms(
-    text: str,
-    signal_tokens: Set[str],
-    stop_words: Set[str],
-    weak_tokens: Set[str],
-    boost_words: Dict[str, int],
-) -> tuple[Dict[str, float], Dict[str, float]]:
-    """
-    Promote concrete technologies/frameworks explicitly listed in JD stack sections.
-    """
-    concrete_found: Dict[str, float] = {}
-    capability_found: Dict[str, float] = {}
+def extract_stack_list_terms(text, signal_tokens, stop_words, weak_tokens, boost_words):
+
+    # initialize a dict for concrete found tokens.
+    concrete_found = {}
+
+    # initialize a dict for capability found tokens.
+    capability_found = {}
+
+    # iterate over the lines in the text.
     for raw_line in text.splitlines():
+
+        # get the line.
         line = raw_line.lower()
+
+        # if the line is empty, continue.
         if not line.strip():
             continue
+
+        # check if the line looks like a stack line.
         looks_like_stack_line = (
             line.count(",") >= 2
             or "/" in line
@@ -724,27 +221,30 @@ def _extract_stack_list_terms(
     return concrete_found, capability_found
 
 
-def _extract_dynamic_phrases(
-    text: str,
-    stop_words: Set[str],
-    weak_tokens: Set[str],
-    filler_phrases: Set[str],
-    signal_tokens: Set[str],
-    domain_signal_tokens: Set[str],
-    known_phrases: Set[str],
-    min_count: int = 1,
-) -> Dict[str, int]:
+# --- extracts dynamic phrases from the text. --- #
+# input -> text, weak tokens, domain signal tokens, phrases, min count.
+# output -> dict of phrases and their frequencies.
+def extract_dynamic_phrases(text, weakTokens, domainSignalTokens, phrases, minCount):
+
+    # find all tokens in the text.
     tokens = re.findall(r"[a-z][a-z0-9+.#-]{1,}", text.lower())
     if not tokens:
         return {}
 
-    counts: Dict[str, int] = defaultdict(int)
+    # initialize a dict for counts.
+    counts = defaultdict(int)
+
+    # iterate over the n-grams.
     for n in (2, 3, 4):
         for i in range(0, max(0, len(tokens) - n + 1)):
-            phrase_tokens = tokens[i : i + n]
-            if sum(1 for tok in phrase_tokens if tok in stop_words) >= n - 1:
+            
+            # get the parts of the n-gram.
+            parts = tokens[i : i + n]
+
+            # if the parts are stop words, continue.
+            if sum(1 for tok in parts if tok in stopWords) >= n - 1:
                 continue
-            if phrase_tokens[0] in CONNECTOR_EDGE_WORDS or phrase_tokens[-1] in CONNECTOR_EDGE_WORDS:
+            if parts[0] in CONNECTOR_EDGE_WORDS or parts[-1] in CONNECTOR_EDGE_WORDS:
                 continue
             if phrase_tokens[0] in VERB_LEAD_TOKENS:
                 continue
@@ -823,57 +323,14 @@ def _extract_dynamic_phrases(
         filtered[phrase] = freq
     return filtered
 
-
-def _extract_org_like_tokens(raw_text: str) -> Set[str]:
-    counts: Dict[str, int] = defaultdict(int)
-    lines = (raw_text or "").splitlines()[:40]
-    for line_idx, line in enumerate(lines):
-        for token in re.findall(r"\b[A-Z][A-Za-z0-9&.+-]{2,}\b", line):
-            t = _normalize_term(token)
-            if not t or t in ORG_TOKEN_STOPWORDS:
-                continue
-            if t in CONCRETE_STACK_TERMS or t in STACK_ALLOW_SHORT_TOKENS:
-                continue
-            counts[t] += 1
-            # Header-heavy top lines are often company/title/location context.
-            if line_idx <= 6 and len(t) >= 5:
-                counts[t] += 1
-    return {token for token, freq in counts.items() if freq >= 2}
-
-
-def _is_footer_or_link_line(normalized: str) -> bool:
-    if any(re.search(pattern, normalized) for pattern in URL_LINE_PATTERNS):
+# --- checks if line is bs footer or redirect link line. --- #
+def is_footer_or_link_line(normalized):
+    # if line is url or link.
+    if any(re.search(pattern, normalized) for pattern in urlLinePatterns):
         return True
-    return any(snippet in normalized for snippet in COMPLIANCE_FOOTER_SUBSTRINGS)
 
-
-def _preclean_job_text(text: str) -> str:
-    kept: List[str] = []
-    for raw in (text or "").splitlines():
-        line = raw.strip()
-        if not line:
-            kept.append("")
-            continue
-        lowered = line.lower()
-        if _is_footer_or_link_line(lowered):
-            continue
-        kept.append(raw)
-    return "\n".join(kept)
-
-
-def _build_domain_signal_tokens(active_domains: List[str]) -> Set[str]:
-    signal: Set[str] = set()
-    for domain in active_domains:
-        pack = DOMAIN_LEXICONS.get(domain, {})
-        aliases = set(pack.get("aliases", set()))
-        phrases = list(pack.get("phrases", []))
-        for term in aliases.union(set(phrases)):
-            t = _normalize_term(str(term))
-            if not t:
-                continue
-            for tok in re.findall(r"[a-z0-9+#.-]{3,}", t):
-                signal.add(tok)
-    return signal
+    # if line is compliance footer.
+    return any(snippet in normalized for snippet in complianceFooterSubstrings)
 
 
 def _phrase_tokens(term: str) -> Set[str]:
@@ -993,178 +450,277 @@ def _score_term(
     return score
 
 
-def _normalize_header(line: str) -> str:
+# --- normalize the header. --- #
+# input -> raw header text.
+# output -> normalized header text.
+def normalize_header(line: str) -> str:
+
+    # remove all non-alphanumeric characters and spaces.
     clean = re.sub(r"[^a-z0-9& ]+", " ", line.lower()).strip()
     clean = re.sub(r"\s+", " ", clean)
     return clean
 
 
-def _is_wrapper_header_line(normalized: str) -> bool:
-    if any(normalized.startswith(header) for header in SECTION_HEADERS_TO_SUPPRESS):
-        return True
-    return any(re.match(pattern, normalized) for pattern in WRAPPER_SUPPRESS_HEADER_PATTERNS)
-
-
-def _is_wrapper_cta_line(normalized: str) -> bool:
-    return any(snippet in normalized for snippet in WRAPPER_SUPPRESS_LINE_SUBSTRINGS)
-
-
-def _line_has_concrete_signal(line: str) -> bool:
+def line_has_concrete_signal(line: str) -> bool:
     lowered = (line or "").lower()
     if re.search(r"[+#./-]|\d", lowered):
         return True
+    
+    # iterate over the tokens in the line.
     for token in re.findall(r"[a-z0-9+#.-]{2,}", lowered):
-        if token in CONCRETE_STACK_TERMS or token in STACK_ALLOW_SHORT_TOKENS:
+        if token in concreteStackTerms or token in stackAllowShortTokens:
             return True
     return False
 
+# --- splits the role description lines into normal and downweighted lines. --- #
+# input -> role description lines.
+# output -> normal lines (like skills or responsibilities) & downweighted lines (like our values).
+def split_weighted_sections(roleDescriptionLines):
+    
+    # initialize the lines.
+    normalLines = []
+    downweightedLines = []
 
-def _is_mission_culture_line(normalized: str, raw_line: str) -> bool:
-    if any(snippet in normalized for snippet in MISSION_CULTURE_LINE_SUBSTRINGS):
-        return not _line_has_concrete_signal(raw_line)
-    return False
-
-
-def _split_weighted_sections(text: str) -> tuple[str, str]:
-    normal_lines: List[str] = []
-    downweighted_lines: List[str] = []
+    # initialize the mode.
     mode = "normal"  # normal | downweighted | suppressed
 
-    for raw_line in text.splitlines():
-        line = raw_line.strip()
-        normalized = _normalize_header(line)
+    # iterate over the lines.
+    for line in roleDescriptionLines:
+
+        # normalize the line.
+        normalized = normalize_header(line)
 
         if normalized:
-            if _is_wrapper_cta_line(normalized):
+            # if line is a wrapper supress line (e.g. "Apply Now")
+            if any(snippet in normalized for snippet in wrapperSuppressLineSubstrings):
                 mode = "suppressed"
                 continue
-            if _is_wrapper_header_line(normalized):
+
+            # if line is a section header to suppress (e.g. "Our Benefits")
+            if any(normalized.startswith(header) for header in sectionHeadersToSuppress):
                 mode = "suppressed"
                 continue
-            if any(normalized.startswith(header) for header in SECTION_HEADERS_TO_DOWNWEIGHT):
+
+            # if line is a section header to downweight (e.g. "Our Values")
+            if any(normalized.startswith(header) for header in sectionHeadersToDownweight):
                 mode = "downweighted"
-                downweighted_lines.append(line)
+                downweightedLines.append(line)
                 continue
-            if _is_mission_culture_line(normalized, line):
+
+            # if line is a mission culture line (e.g. "Our Mission") and does not have a concrete signal.
+            if any(snippet in normalized for snippet in missionCultureLineSubstrings) and not line_has_concrete_signal(line):
                 mode = "downweighted"
-                downweighted_lines.append(line)
+                downweightedLines.append(line)
                 continue
         else:
-            # reset after blank line so we do not suppress the entire remainder of the JD
+            # reset after blank line so we do not suppress the entire remainder of the JD.
             mode = "normal"
             continue
 
+        # if mode is suppressed, do not add the line to the normal or downweighted lines.
         if mode == "suppressed":
             continue
+
+        # if mode is downweighted, add the line to the downweighted lines.
         if mode == "downweighted":
-            downweighted_lines.append(line)
+            downweightedLines.append(line)
         else:
-            normal_lines.append(line)
+            normalLines.append(line)
 
-    return "\n".join(normal_lines), "\n".join(downweighted_lines)
+    return normalLines, downweightedLines
 
+# --- precleans the job description text. --- #
+# input -> raw JD text.
+# output -> parsed JD lines
+def parse_jd_lines(jobDescription):
+    keep = []
+    for raw in jobDescription.splitlines():
+        line = raw.strip()
 
-def _extract_role_focused_text(text: str) -> str:
-    """
-    Prefer role-specific sections over recruiter wrapper copy.
-    Falls back to original text if no role sections are found.
-    """
-    lines = text.splitlines()
-    focused_lines: List[str] = []
-    mode = "neutral"  # neutral | include | exclude
-    saw_include_header = False
-
-    for raw_line in lines:
-        line = raw_line.strip()
+        # if line is empty, add an empty string.
         if not line:
-            if mode == "include":
-                focused_lines.append("")
+            keep.append("")
+            continue
+        
+        # normalize the line.
+        lowered = line.lower()
+
+        # if line is footer or link, don't add it.
+        if is_footer_or_link_line(lowered):
             continue
 
-        normalized = _normalize_header(line)
+        # add the line to the kept lines.
+        keep.append(lowered)
 
-        if any(normalized.startswith(header) for header in ROLE_SECTION_HEADERS):
+    return keep
+
+# --- based on key headers, extract role focused text. --- #
+# input -> role description lines.
+# output -> role focused text. (e.g. "Responsibilities: ...\n\nRequirements: ...\n\nQualifications: ...")
+def extract_role_focused_text(roleDescriptionLines):
+
+    focused = []
+
+    # initialize the mode.
+    mode = "neutral"  # neutral | include | exclude
+    sawIncludeHeader = False
+
+    # iterate over role description lines toggling mode based on headers.
+    for line in roleDescriptionLines:
+
+        # normalize the line for sake of headers. (e.g. "**Responsibilities**" -> "responsibilities")
+        normalized = normalize_header(line)
+
+        # if the line is a role section header, add it to the focused lines.
+        if any(normalized.startswith(header) for header in roleSectionHeaders):
             mode = "include"
-            saw_include_header = True
-            focused_lines.append(line)
+            sawIncludeHeader = True
+            focused.append(line)
             continue
 
-        if any(normalized.startswith(header) for header in NON_ROLE_SECTION_HEADERS):
+        # if the line is a non-role section header, exclude it.
+        if any(normalized.startswith(header) for header in nonRoleSectionHeaders):
             mode = "exclude"
             continue
 
-        # Keep bullets and plain lines only while inside include mode.
+        # if the line is a bullet or plain line, add it to the focused lines.
         if mode == "include":
-            focused_lines.append(line)
+            focused.append(line)
 
-    if saw_include_header and focused_lines:
-        return "\n".join(focused_lines)
-    return text
+    # return array of focused lines (if we have any).
+    if sawIncludeHeader and focused:
+        return focused
+
+    return []
+
+# --- extract the org like tokens from the text. --- #
+# input -> raw JD text.
+# output -> org like tokens. (e.g. ["bloomberg", "deloitte", "wayfair"])
+def extract_org_like_tokens(rawText):
+
+    # initialize a dict for counts.
+    counts = defaultdict(int)
+
+    # get the lines from the text.
+    lines = (rawText or "").splitlines()[:40]
+
+    # iterate over the lines.
+    for line_idx, line in enumerate(lines):
+
+        # find all tokens in the line.
+        for token in re.findall(r"\b[A-Z][A-Za-z0-9&.+-]{2,}\b", line):
+
+            # normalize the token.
+            token = normalize_term(token)
+
+            # if the token is empty or a stop word, continue.
+            if not token or token in ORG_TOKEN_STOPWORDS:
+                continue
+
+            # if the token is a concrete stack term or a short token, continue.
+            if token in CONCRETE_STACK_TERMS or token in STACK_ALLOW_SHORT_TOKENS:
+                continue
+
+            # add the token to the counts.
+            counts[token] += 1
+
+    # return the org like tokens.
+    return {token for token, freq in counts.items() if freq >= 2}
+
+# --- breaks down aliases and phrases for each domain into signal tokens. --- #
+# input -> active domains. (e.g. engineering, sales)
+# output -> signal tokens.
+def build_domain_signal_tokens(activeDomains):
+
+    # initialize a set for signal tokens.
+    signalTokens = set()
+
+    # iterate over the active domains.
+    for domain in activeDomains:
+        pack = domainDicts.get(domain, {})
+
+        # grab aliases and phrases for that domain.
+        aliases = set(pack.get("aliases", set()))
+        phrases = list(pack.get("phrases", []))
+
+        # iterate over the aliases and phrases.
+        for term in aliases.union(set(phrases)):
+
+            # find all tokens in the term. (e.g. "full stack engineer" -> ["full", "stack", "engineer"])
+            for token in re.findall(r"[a-z0-9+#.-]{3,}", term):
+
+                # add the token to the signal tokens.
+                signalTokens.add(token)
+
+    # return the signal tokens.
+    return signalTokens
 
 
-def extract_job_keywords_detailed(
-    job_description: str,
-    limit: int = 12,
-    target_role: str | None = None,
-) -> Dict[str, Any]:
-    profile = get_extraction_profile(job_description, target_role)
-    org_like_tokens = _extract_org_like_tokens(job_description or "")
-    domain_signal_tokens = _build_domain_signal_tokens(profile.get("active_domains", []))
-    phrases = list(profile["phrases"])
-    stop_words = set(profile["stop_words"])
-    weak_tokens = set(profile["weak_tokens"])
-    garbage_tokens = set(profile["garbage_tokens"])
-    filler_phrases = set(profile["filler_phrases"])
-    boost_words = dict(profile["boost_words"])
-    phrase_canonical = dict(profile["phrase_canonical"])
-    allow_short_tokens = set(profile["allow_short_tokens"])
-    signal_tokens = _build_signal_token_set(boost_words, allow_short_tokens)
-    known_phrases = set(phrases)
+def extract_job_keywords_detailed(jobDescription, limit, targetRole):
 
-    role_text = (target_role or "").lower().strip()
-    body_text = _preclean_job_text(job_description or "")
-    body_text = body_text.lower()
-    body_text = _extract_role_focused_text(body_text)
+    # get extraction profile.
+    profile = get_extraction_profile(jobDescription, targetRole)
 
-    term_sources: Dict[str, Dict[str, float]] = defaultdict(dict)
+    # extract the org like tokens.
+    orgLikeTokens = extract_org_like_tokens(jobDescription)
 
-    weighted_body, downweighted_body = _split_weighted_sections(body_text)
-    title_phrase_counts, clean_title = _count_phrases_by_source(role_text, "title_phrase", phrases, phrase_canonical, 1.0)
-    body_phrase_counts, clean_body = _count_phrases_by_source(weighted_body, "known_phrase", phrases, phrase_canonical, 1.0)
-    downweighted_phrase_counts, clean_downweighted_body = _count_phrases_by_source(
-        downweighted_body, "known_phrase_downweighted", phrases, phrase_canonical, DOWNWEIGHT_FACTOR
-    )
-    for phrase_bucket in (body_phrase_counts, downweighted_phrase_counts, title_phrase_counts):
-        for term, source_map in phrase_bucket.items():
-            existing = term_sources.get(term, {})
-            for source_name, count in source_map.items():
-                existing[source_name] = existing.get(source_name, 0.0) + count
-            term_sources[term] = existing
-    title_ngram_phrases = _extract_title_ngram_phrases(
-        role_text,
-        phrase_canonical,
-        weak_tokens,
-        domain_signal_tokens,
-        known_phrases,
-    )
-    for term, freq in title_ngram_phrases.items():
-        term_sources.setdefault(term, {})
-        term_sources[term]["title_phrase_ngram"] = max(term_sources[term].get("title_phrase_ngram", 0.0), float(freq))
+    # build the domain signal tokens.
+    domainSignalTokens = build_domain_signal_tokens(profile["activeDomains"])
 
-    dynamic_candidates = _extract_dynamic_phrases(
-        clean_body,
-        stop_words,
-        weak_tokens,
-        filler_phrases,
-        signal_tokens,
-        domain_signal_tokens,
-        known_phrases,
-        min_count=2,
-    )
-    for term, freq in dynamic_candidates.items():
-        canonical = _canonical_keyword(term, phrase_canonical)
-        term_sources.setdefault(canonical, {})
-        term_sources[canonical]["dynamic_phrase"] = term_sources[canonical].get("dynamic_phrase", 0.0) + float(freq)
+    # initialize the phrases.
+    phrases = set(list(profile["phrases"]))
+    weakTokens = set(profile["weakTokens"])
+    boostWords = dict(profile["boostWords"])
+
+    # build the signal tokens.
+    signalTokens = build_signal_token_set(boostWords)
+
+    # extract text from JD.
+    roleTitle = targetRole.lower().strip()
+
+    # cleans out footer and link lines.
+    roleDescriptionLines = parse_jd_lines(jobDescription)
+
+    # extracts role focused text like Responsibilites or Qualifications.
+    roleDescriptionLines = extract_role_focused_text(roleDescriptionLines)
+
+    # splits the role description lines into normal and downweighted lines.
+    weightedBodyLines, downweightedBodyLines = split_weighted_sections(roleDescriptionLines)
+
+    # counts the phrases by source.
+    titlePhraseCounts, cleanTitle = count_phrases_by_source(roleTitle, "title_phrase", phrases, 1.0)
+    bodyPhraseCounts, cleanBody = count_phrases_by_source(weightedBodyLines, "known_phrase", phrases, 1.0)
+    downweightedPhraseCounts, cleanDownweightedBody = count_phrases_by_source(downweightedBodyLines, "known_phrase_downweighted", phrases, downweightFactor)
+    
+    # initialize the term sources.
+    termSources = defaultdict(dict)
+
+    # iterate over the phrase buckets and add the counts to the term sources.
+    for phraseBucket in (bodyPhraseCounts, downweightedPhraseCounts, titlePhraseCounts):
+        # iterate over the phrase bucket (body, downweighted, title).
+        for term, sourceMap in phraseBucket.items():
+            # get the term sources.
+            ts = termSources[term]
+            
+            # iterate over the source map.
+            for sourceName, count in sourceMap.items():
+                ts[source_name] = ts.get(source_name, 0.0) + count
+    
+    # extracts title n-gram phrases.
+    titleNgramPhrases = extract_title_ngram_phrases(roleTitle, phrases, weakTokens, domainSignalTokens)
+
+    # iterate over the title n-gram phrases and add the counts to the term sources.
+    for term, freq in titleNgramPhrases.items():
+        termSources.setdefault(term, {})
+        termSources[term]["titlePhraseNgram"] = max(termSources[term].get("titlePhraseNgram", 0.0), float(freq))
+
+    # extracts dynamic phrases.
+    dynamicCandidates = extract_dynamic_phrases(cleanBody, weakTokens, domainSignalTokens, phrases, 2)
+
+    # iterate over the dynamic candidates and add the counts to the term sources.
+    for term, freq in dynamicCandidates.items():
+        termSources.setdefault(term, {})
+        termSources[term]["dynamicPhrase"] = termSources[term].get("dynamicPhrase", 0.0) + freq
 
     concrete_stack_terms, capability_stack_terms = _extract_stack_list_terms(
         clean_body,
@@ -1206,7 +762,7 @@ def extract_job_keywords_detailed(
         if len(term) < 3 and term not in allow_short_tokens:
             continue
         term_sources.setdefault(term, {})
-        term_sources[term]["token_downweighted"] = term_sources[term].get("token_downweighted", 0.0) + DOWNWEIGHT_FACTOR
+        term_sources[term]["token_downweighted"] = term_sources[term].get("token_downweighted", 0.0) + downweightFactor
 
     for token in re.findall(r"[A-Za-z][A-Za-z0-9+.#-]{0,}", clean_title):
         term = _normalize_term(_canonical_keyword(token.lower(), phrase_canonical))

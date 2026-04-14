@@ -1,12 +1,65 @@
 from __future__ import annotations
 
-GLOBAL_STOP_WORDS = {
+# this file is just kind of an amalgamation of diff dicts for our extraction profile.
+
+# it serves to tell us what to extract and how strong it is.
+
+# --- the minimum number of hits required for a domain to be considered active. --- #
+minAliasHits = 2
+
+# --- target role title substrings per domain key, used when scoring which lexicon domains are active (detect_domains). --- #
+titleAnchorHints = {
+    "operations": {
+        "project manager",
+        "operations manager",
+        "program manager",
+        "superintendent",
+        "estimator",
+        "general manager",
+        "restaurant manager",
+        "grille manager",
+        "hospitality manager",
+    },
+    "sales": {"account executive", "sales manager", "business development", "account manager"},
+    "marketing": {"marketing manager", "assistant marketing manager", "demand generation", "brand manager", "content manager"},
+    "finance": {"financial analyst", "controller", "accounting manager", "treasury"},
+    "legal": {"legal counsel", "paralegal", "compliance manager"},
+    "engineering": {"software engineer", "full stack", "backend", "frontend", "developer", "front end engineer", "front end developer"},
+    "data": {"data engineer", "data analyst", "analytics engineer", "data scientist", "machine learning scientist"},
+    "ai": {"machine learning engineer", "ai engineer", "ml engineer"},
+    "industrial": {"electrical engineer", "automation engineer", "controls engineer", "industrial engineer"},
+    "construction": {"construction materials professional", "field technician", "construction engineer", "site inspector"},
+    "healthcare": {
+        "medical assistant",
+        "clinic coordinator",
+        "patient coordinator",
+        "clinical assistant",
+        "psychiatrist",
+        "licensed psychiatrist",
+        "psychologist",
+        "therapist",
+        "counselor",
+    },
+    "education": {"teacher", "summer camp instructor", "advanced placement", "faculty"},
+    "legal_admin": {"legal assistant", "paralegal", "litigation assistant"},
+    "aviation": {"pilot", "first officer", "captain", "flight instructor"},
+    "marine": {"naval architect", "marine engineer"},
+    "mechanical": {"cad designer", "mechanical engineer", "mechanical designer"},
+    "insurance": {"commercial lines account manager", "account manager", "underwriter", "brokerage"},
+    "retail": {"assistant store manager", "store manager", "retail manager"},
+    "brokerage": {"underwriter assistant", "brokerage assistant", "securities services associate"},
+}
+
+# --- a set of global stop words, aka words that are not relevant to the job description and should be ignored. --- #
+globalStopWords = {
     "and", "the", "with", "for", "from", "that", "this", "will", "are", "you", "your", "our", "have", "has",
     "into", "about", "job", "role", "candidate", "candidates", "requirements", "requirement", "required", "including",
     "preferred", "qualification", "qualifications", "ability", "abilities", "responsibilities", "responsibility",
+    "etc", "etcetera", "misc", "various", "eg", "e.g",
 }
 
-GLOBAL_WEAK_TOKENS = {
+# --- a set of global weak tokens, aka words that are relevant to the job description but are not strong enough to be considered a boost word. --- #
+globalWeakTokens = {
     "experience", "skills", "team", "work", "working", "help", "plus", "years", "year",
     "modern", "feature", "features", "tool", "tools", "quick", "strong", "solid", "ideal", "ideally", "familiar",
     "comfortable", "proficient", "high", "fast", "pace", "paced", "note", "final", "right",
@@ -15,9 +68,7 @@ GLOBAL_WEAK_TOKENS = {
     "data", "company", "paid", "employee", "work",
     "step", "candidate", "required", "engineer", "fullstack", "applications", "communication", "contributor", "end",
     "support", "developer", "business", "onboarding", "note",
-    # Important in context, weak by default rather than hard-stop.
     "design", "production", "system", "systems", "strategy", "build", "built", "building",
-    # Common generic business/resume language that should rarely outrank concrete terms.
     "manager", "management", "lead", "service", "platform", "engineering", "business",
     "performance", "delivery", "execution", "opportunities", "create", "developing",
     "defined", "related", "assistant", "area", "needs",
@@ -31,9 +82,9 @@ GLOBAL_WEAK_TOKENS = {
     "graduates", "graduate", "students", "recent",
     "may", "needed", "knowledge", "duties", "custom", "effectively", "familiarity", "mission",
 }
-GLOBAL_GARBAGE_TOKENS = {"etc", "etcetera", "misc", "various", "eg", "e.g"}
 
-GLOBAL_FILLER_PHRASES = {
+# --- a set of global filler phrases. --- #
+globalFillerPhrases = {
     "team player", "move fast", "strong communication skills", "excellent communication skills", "high standards",
     "seat at the table", "works well under pressure", "self starter", "detail oriented",
     "customer first", "integrity", "collaborative", "innovative", "passionate", "best in class",
@@ -63,7 +114,8 @@ GLOBAL_FILLER_PHRASES = {
     "remote work from home", "continental united states of america",
 }
 
-GLOBAL_PHRASES = [
+# --- a list of global phrases. --- #
+globalPhrases = [
     "stakeholder management", "cross functional collaboration", "end-to-end ownership", "process improvement", "risk mitigation",
     "incident response", "root cause analysis", "data analysis", "business impact", "customer outcomes", "go to market",
     "a/b testing", "ab testing", "user acquisition", "user activation", "user retention",
@@ -118,7 +170,8 @@ GLOBAL_PHRASES = [
     "service desk support", "incident triage", "ticket resolution", "business systems analysis", "requirements analysis",
 ]
 
-GLOBAL_BOOST_WORDS = {
+# --- a dict of global boost words and their strengths. --- #
+globalBoostWords = {
     "stakeholder management": 3, "cross functional collaboration": 2, "end-to-end ownership": 3, "process improvement": 3,
     "risk mitigation": 3, "incident response": 3, "root cause analysis": 3, "data analysis": 3, "business impact": 3,
     "customer outcomes": 2, "go to market": 2, "a/b testing": 3, "user acquisition": 3, "user activation": 3, "user retention": 3,
@@ -152,7 +205,8 @@ GLOBAL_BOOST_WORDS = {
     "webex": 3, "calabrio": 3, "ivr": 3, "fcr": 3, "csat": 3, "dialogflow": 3, "cx": 2, "wfo": 2, "ccaas": 2, "wxcc": 2,
 }
 
-GLOBAL_PHRASE_CANONICAL = {
+# --- a dict of global phrase canonicals. --- #
+globalPhraseCanonical = {
     "ab testing": "a/b testing",
     "end to end ownership": "end-to-end ownership",
     "daily operations": "day-to-day operations",
@@ -190,9 +244,29 @@ GLOBAL_PHRASE_CANONICAL = {
     "architectural discussions": "technical architecture",
     "user facing web applications": "user-facing web applications",
 }
-GLOBAL_ALLOW_SHORT_TOKENS = {"c++", "c#", "go", "r", "ai", "ml", "ui", "ux", "qa", "cx", "ivr", "fcr", "csat", "wfo", "ccaas", "wxcc"}
 
-DOMAIN_LEXICONS = {
+# --- a set of short tokens allowed as stack tokens despite length (sql, api, aws, etc.). --- #
+globalAllowShortTokens = {
+    "c++", 
+    "c#", 
+    "go", 
+    "r", 
+    "ai", 
+    "ml", 
+    "ui", 
+    "ux", 
+    "qa", 
+    "cx", 
+    "ivr", 
+    "fcr", 
+    "csat", 
+    "wfo", 
+    "ccaas", 
+    "wxcc",
+}
+
+# --- a dict of domains and their aliases, phrases, boost words, and weak tokens. --- #
+domainDicts = {
     "engineering": {
         "aliases": {
             "engineer", "engineering", "developer", "software", "frontend", "backend", "full stack", "platform",
@@ -216,7 +290,7 @@ DOMAIN_LEXICONS = {
             "cloud on-premises deployment", "user-facing web applications", "cross-functional teams",
             "product features", "architectural discussions", "shipping complex software projects",
         ],
-        "boost_words": {
+        "boostWords": {
             "python": 3, "java": 2, "typescript": 3, "react": 3, "next.js": 3, "node": 2, "aws": 3, "kubernetes": 2,
             "api": 3, "integration": 3, "embedded": 3, "platform": 2, "architecture": 2, "sdk": 2, "microservices": 2,
             "troubleshooting": 2, "support": 2, "deployment": 2, "implementation": 2, "delivery": 2, "customization": 2,
@@ -228,9 +302,7 @@ DOMAIN_LEXICONS = {
             "cross-functional teams": 2, "product features": 2, "architectural discussions": 2,
             "shipping complex software projects": 2,
         },
-        "weak_tokens": {"codebase", "coding"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"clean code mindset"},
+        "weakTokens": {"codebase", "coding"},
     },
     "solutions": {
         "aliases": {
@@ -243,21 +315,17 @@ DOMAIN_LEXICONS = {
             "architecture reviews", "technical escalation support", "customer-specific development", "technical direction",
             "partner tools", "integration workflows", "developer support", "platform capabilities",
         ],
-        "boost_words": {
+        "boostWords": {
             "customer": 2, "partner": 2, "partners": 2, "implementation": 2, "delivery": 2,
             "integration": 3, "support": 2, "developer": 2, "architecture": 2, "platform": 2,
         },
-        "weak_tokens": set(),
-        "garbage_tokens": set(),
-        "filler_phrases": {"trusted advisor mindset"},
+        "weakTokens": set(),
     },
     "cloud": {
         "aliases": {"gcp", "gke", "docker", "kubernetes", "cloud", "cloud deployed", "container", "containers"},
         "phrases": ["cloud-deployed scripts", "container orchestration", "kubernetes deployment"],
-        "boost_words": {"gcp": 3, "gke": 3, "docker": 3, "kubernetes": 3, "cloud": 2, "deployment": 2},
-        "weak_tokens": set(),
-        "garbage_tokens": set(),
-        "filler_phrases": {"cloud native mindset"},
+        "boostWords": {"gcp": 3, "gke": 3, "docker": 3, "kubernetes": 3, "cloud": 2, "deployment": 2},
+        "weakTokens": set(),
     },
     "data": {
         "aliases": {
@@ -273,15 +341,13 @@ DOMAIN_LEXICONS = {
             "data analytics platform", "data modeling", "structured and unstructured data", "business intelligence",
             "working prototypes", "development specifications",
         ],
-        "boost_words": {
+        "boostWords": {
             "sql": 3, "kafka": 3, "databricks": 3, "nifi": 3, "druid": 2, "mongodb": 2, "opensearch": 2, "postgres": 2,
             "governance": 2, "security": 2, "privacy": 2, "pipelines": 2, "streaming": 2, "architecture": 2, "monitoring": 2,
             "kpi": 2, "kpis": 3, "dashboarding": 2, "tableau": 3, "power bi": 3, "business intelligence": 3,
             "data modeling": 3, "analytics platform": 3, "prototypes": 2,
         },
-        "weak_tokens": {"data"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"data driven culture"},
+        "weakTokens": {"data"},
     },
     "ai": {
         "aliases": {
@@ -299,16 +365,14 @@ DOMAIN_LEXICONS = {
             "speech analytics", "sentiment analytics", "intent models", "dialog flows", "self-service automation",
             "agent assist", "automation workflows", "cx analytics",
         ],
-        "boost_words": {
+        "boostWords": {
             "mlops": 3, "llm": 3, "rag": 3, "generative": 2, "ai": 2, "ml": 2, "deployment": 2, "monitoring": 2,
             "copilot": 3, "power automate": 3, "prompt engineering": 2, "governance": 2, "dataverse": 3,
             "numpy": 3, "pandas": 3, "scikit-learn": 3, "tensorflow": 3, "pytorch": 3, "transformers": 3,
             "feature engineering": 3, "model optimization": 3, "deep learning": 3, "data preprocessing": 2,
             "speech analytics": 3, "sentiment analytics": 3, "intent models": 3, "dialogflow": 3, "agent assist": 3, "cx": 2,
         },
-        "weak_tokens": {"ai", "ml"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"ai first mindset"},
+        "weakTokens": {"ai", "ml"},
     },
     "product": {
         "aliases": {
@@ -319,18 +383,14 @@ DOMAIN_LEXICONS = {
             "product strategy", "requirements gathering", "user research", "roadmap planning", "feature prioritization",
             "customer discovery", "end-to-end delivery", "product-minded",
         ],
-        "boost_words": {"kpi": 2, "okr": 2, "experimentation": 2, "retention": 2, "adoption": 2},
-        "weak_tokens": {"backlog"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"wear many hats"},
+        "boostWords": {"kpi": 2, "okr": 2, "experimentation": 2, "retention": 2, "adoption": 2},
+        "weakTokens": {"backlog"},
     },
     "design": {
         "aliases": {"designer", "ux", "ui", "product design", "visual design", "brand"},
         "phrases": ["design systems", "interaction design", "user journey", "information architecture", "accessibility standards"],
-        "boost_words": {"figma": 2, "prototype": 2, "wireframe": 2, "accessibility": 2},
-        "weak_tokens": {"pixel"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"good eye for design"},
+        "boostWords": {"figma": 2, "prototype": 2, "wireframe": 2, "accessibility": 2},
+        "weakTokens": {"pixel"},
     },
     "marketing": {
         "aliases": {
@@ -338,10 +398,8 @@ DOMAIN_LEXICONS = {
             "marketing representative", "sales and marketing", "customer acquisition",
         },
         "phrases": ["campaign optimization", "conversion rate optimization", "attribution modeling", "funnel analysis"],
-        "boost_words": {"seo": 3, "sem": 2, "email": 2, "crm": 2, "analytics": 2, "posthog": 2},
-        "weak_tokens": {"creative"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"brand voice champion"},
+        "boostWords": {"seo": 3, "sem": 2, "email": 2, "crm": 2, "analytics": 2, "posthog": 2},
+        "weakTokens": {"creative"},
     },
     "sales": {
         "aliases": {
@@ -366,7 +424,7 @@ DOMAIN_LEXICONS = {
             "sales territory coverage", "client account support", "channel account support",
             "sales engineering", "solution selling", "technical demos", "pre-sales support",
         ],
-        "boost_words": {
+        "boostWords": {
             "crm": 3, "salesforce": 2, "forecasting": 2, "quota": 2, "sales": 3, "pipeline": 3,
             "prospecting": 3, "outbound": 2, "lead": 2, "leads": 2, "revenue": 3, "clients": 2,
             "client": 2, "account": 2, "relationships": 2, "relationship": 2, "onboarding": 2, "metrics": 2,
@@ -375,9 +433,7 @@ DOMAIN_LEXICONS = {
             "outside sales": 3, "field sales": 3, "account coordinator": 3, "territory sales": 3, "inside sales": 2,
             "sales engineer": 3, "solution selling": 3, "pre-sales": 3, "technical demos": 2,
         },
-        "weak_tokens": {"hunter"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"rockstar salesperson"},
+        "weakTokens": {"hunter"},
     },
     "finance": {
         "aliases": {
@@ -395,14 +451,12 @@ DOMAIN_LEXICONS = {
             "quantitative investment", "investment decision-making", "investment management", "private markets",
             "quantitative research", "business requirements", "liquidity solutions", "securities services",
         ],
-        "boost_words": {
+        "boostWords": {
             "gaap": 3, "forecasting": 2, "budgeting": 2, "reconciliation": 2, "compliance": 2, "settlement": 2, "fx": 2,
             "quantitative": 3, "investment": 3, "private markets": 3, "investment management": 3, "research": 2,
             "liquidity": 3, "securities": 3,
         },
-        "weak_tokens": {"numbers"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"numbers oriented"},
+        "weakTokens": {"numbers"},
     },
     "insurance": {
         "aliases": {
@@ -413,13 +467,11 @@ DOMAIN_LEXICONS = {
             "commercial lines account management", "policy administration", "policy servicing", "renewal management",
             "risk placement", "carrier negotiations", "underwriting support", "claims coordination",
         ],
-        "boost_words": {
+        "boostWords": {
             "insurance": 3, "underwriting": 3, "underwriter": 3, "brokerage": 3, "policy": 2, "renewals": 2,
             "claims": 2, "carrier": 2, "commercial lines": 3,
         },
-        "weak_tokens": {"producer"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"insurance passion"},
+        "weakTokens": {"producer"},
     },
     "retail": {
         "aliases": {
@@ -430,13 +482,11 @@ DOMAIN_LEXICONS = {
             "store operations", "customer engagement", "visual merchandising", "floor leadership",
             "retail team management", "inventory control", "sales floor operations",
         ],
-        "boost_words": {
+        "boostWords": {
             "retail": 3, "store": 3, "merchandising": 2, "inventory": 2, "customer engagement": 3,
             "assistant store manager": 3,
         },
-        "weak_tokens": {"associate"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"retail rockstar"},
+        "weakTokens": {"associate"},
     },
     "brokerage": {
         "aliases": {
@@ -447,12 +497,10 @@ DOMAIN_LEXICONS = {
             "brokerage operations", "underwriting workflows", "trade support", "client servicing",
             "liquidity solutions", "securities services", "portfolio operations",
         ],
-        "boost_words": {
+        "boostWords": {
             "brokerage": 3, "underwriter": 3, "underwriting": 3, "securities": 3, "liquidity": 3, "trade": 2,
         },
-        "weak_tokens": {"assistant"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"brokerage hustle"},
+        "weakTokens": {"assistant"},
     },
     "operations": {
         "aliases": {
@@ -474,7 +522,7 @@ DOMAIN_LEXICONS = {
             "containment rate", "escalation rate", "customer satisfaction", "support operations", "service desk support",
             "incident triage", "ticket resolution",
         ],
-        "boost_words": {
+        "boostWords": {
             "sla": 2, "sop": 2, "workflow": 2, "throughput": 2, "operations": 3, "execution": 3,
             "performance": 3, "revenue": 3, "billing": 3, "collections": 3, "kpis": 3, "dashboards": 2,
             "hiring": 2, "recruiting": 2, "efficiency": 2, "implementation": 2,
@@ -483,9 +531,7 @@ DOMAIN_LEXICONS = {
             "ivr": 3, "fcr": 3, "csat": 3, "contact center": 3, "webex": 3, "calabrio": 3, "wfo": 2, "ccaas": 2, "wxcc": 2,
             "service desk": 3, "incident": 2, "tickets": 2, "triage": 2,
         },
-        "weak_tokens": {"busy"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"wear many hats"},
+        "weakTokens": {"busy"},
     },
     "industrial": {
         "aliases": {
@@ -498,13 +544,11 @@ DOMAIN_LEXICONS = {
             "scada integration", "hmi development", "motor controls", "electrical schematics", "panel design",
             "instrumentation and controls", "field commissioning", "factory automation", "safety interlocks",
         ],
-        "boost_words": {
+        "boostWords": {
             "plc": 3, "scada": 3, "hmi": 3, "instrumentation": 3, "controls": 3, "electrical": 3,
             "commissioning": 2, "automation": 2, "schematics": 2, "panel": 2, "interlocks": 2,
         },
-        "weak_tokens": {"technician"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"hands-on environment"},
+        "weakTokens": {"technician"},
     },
     "aviation": {
         "aliases": {
@@ -515,13 +559,11 @@ DOMAIN_LEXICONS = {
             "flight operations", "flight safety", "aircraft systems", "instrument flight rules",
             "flight planning", "crew resource management", "faa compliance", "flight instruction",
         ],
-        "boost_words": {
+        "boostWords": {
             "pilot": 3, "aviation": 3, "aircraft": 3, "faa": 3, "flight": 3, "captain": 2, "first officer": 2,
             "instrument": 2, "airspace": 2,
         },
-        "weak_tokens": {"hours", "current"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"equal opportunity pilot employer"},
+        "weakTokens": {"hours", "current"},
     },
     "marine": {
         "aliases": {
@@ -532,12 +574,10 @@ DOMAIN_LEXICONS = {
             "naval architecture", "ship design", "stability analysis", "classification compliance",
             "marine structural analysis", "vessel design", "regulatory compliance",
         ],
-        "boost_words": {
+        "boostWords": {
             "naval": 3, "marine": 3, "architect": 2, "vessel": 2, "hull": 2, "stability": 3, "abs": 3, "dnv": 2,
         },
-        "weak_tokens": {"american", "bureau"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"marine passion"},
+        "weakTokens": {"american", "bureau"},
     },
     "mechanical": {
         "aliases": {
@@ -548,12 +588,10 @@ DOMAIN_LEXICONS = {
             "mechanical design", "cad modeling", "engineering drawings", "gd&t", "design for manufacturing",
             "bill of materials", "tolerance analysis",
         ],
-        "boost_words": {
+        "boostWords": {
             "mechanical": 3, "cad": 3, "solidworks": 3, "autocad": 3, "blueprints": 2, "drawings": 2, "assemblies": 2,
         },
-        "weak_tokens": {"knowledge", "needed"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"strong mechanical aptitude"},
+        "weakTokens": {"knowledge", "needed"},
     },
     "construction": {
         "aliases": {
@@ -564,13 +602,11 @@ DOMAIN_LEXICONS = {
             "construction materials testing", "field testing", "site inspection", "project coordination",
             "quality control", "safety compliance", "construction documentation", "materials sampling",
         ],
-        "boost_words": {
+        "boostWords": {
             "construction": 3, "materials": 2, "field testing": 3, "inspection": 2, "concrete": 2, "asphalt": 2,
             "quality control": 3, "safety": 2, "site": 2,
         },
-        "weak_tokens": {"labor"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"fast paced construction environment"},
+        "weakTokens": {"labor"},
     },
     "healthcare": {
         "aliases": {
@@ -581,13 +617,11 @@ DOMAIN_LEXICONS = {
             "patient care", "appointment scheduling", "medical records", "clinical documentation",
             "care coordination", "insurance verification", "patient intake", "provider scheduling",
         ],
-        "boost_words": {
+        "boostWords": {
             "patient": 3, "clinical": 3, "medical": 3, "ehr": 3, "emr": 3, "scheduling": 2,
             "insurance verification": 2, "care coordination": 3,
         },
-        "weak_tokens": {"caregiver"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"compassionate bedside manner"},
+        "weakTokens": {"caregiver"},
     },
     "education": {
         "aliases": {
@@ -598,13 +632,11 @@ DOMAIN_LEXICONS = {
             "classroom instruction", "lesson planning", "curriculum development", "student assessment",
             "behavior management", "learning outcomes", "parent communication",
         ],
-        "boost_words": {
+        "boostWords": {
             "teacher": 3, "instructor": 3, "classroom": 3, "curriculum": 3, "lesson": 2, "assessment": 2,
             "student": 2, "education": 2,
         },
-        "weak_tokens": {"kids"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"passion for teaching"},
+        "weakTokens": {"kids"},
     },
     "legal_admin": {
         "aliases": {
@@ -617,20 +649,16 @@ DOMAIN_LEXICONS = {
             "docket management", "litigation support", "client intake", "legal research",
             "discovery support", "court calendar management", "pleadings drafting", "case file maintenance",
         ],
-        "boost_words": {
+        "boostWords": {
             "legal": 3, "paralegal": 3, "filings": 2, "docket": 2, "litigation": 2, "documentation": 2,
             "research": 2, "pleadings": 2, "discovery": 2, "calendar": 2, "case files": 2,
         },
-        "weak_tokens": {"clerical", "graduates", "graduate", "students", "recent", "school"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"legal rockstar"},
+        "weakTokens": {"clerical", "graduates", "graduate", "students", "recent", "school"},
     },
     "legal": {
         "aliases": {"law firm", "legal", "attorney", "managing attorney", "firm"},
         "phrases": ["law firm", "professional services", "law firm financial performance"],
-        "boost_words": {"compliance": 2, "regulatory": 2, "governance": 2, "contract": 2},
-        "weak_tokens": {"matter"},
-        "garbage_tokens": set(),
-        "filler_phrases": {"legal ninja"},
+        "boostWords": {"compliance": 2, "regulatory": 2, "governance": 2, "contract": 2},
+        "weakTokens": {"matter"},
     },
 }

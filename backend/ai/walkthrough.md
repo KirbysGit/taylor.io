@@ -27,8 +27,7 @@ File:
 Called by orchestrator:
 
 - `extract_job_keywords_detailed(job_description, target_role, limit=12)`
-- `filter_non_reusable(...)`
-- `abstract_terms(...)`
+
 
 Output includes:
 

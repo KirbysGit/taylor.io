@@ -1,0 +1,23 @@
+---
+description: Local variables and parameters use lowerCamelCase, not snake_case
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Variable and parameter naming (lowerCamelCase)
+
+For **new** code in this project:
+
+- Use **lowerCamelCase** for **local variables**, **loop variables**, and **function parameters** (e.g. `roleHits`, `jdText`, `hasTitleSignal`, `topScore`).
+- **Do not** use `snake_case` for those (`role_hits`, `jd_text`, `has_title_signal`) in new or heavily edited blocks.
+
+**Exceptions**
+
+- **Unpacking** from APIs or dicts that use snake_keys: you may keep the key string as-is; bind to a camelCase local if you touch the line.
+- **Existing** large files: do not mass-rename unrelated code unless the user asks; apply this style in **new** functions and in code you are already changing.
+
+**Together with**
+
+- Module-level data/constants: see `python-data-constants-camelcase.mdc` (also lowerCamelCase, not `ALL_CAPS` for data tables).
+
+This intentionally diverges from PEP 8’s `snake_case` for locals.

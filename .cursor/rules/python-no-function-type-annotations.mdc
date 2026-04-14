@@ -1,0 +1,16 @@
+---
+description: New Python functions omit parameter and return type annotations
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# No type annotations on new Python functions
+
+For **new** functions and methods (and when adding signatures that did not exist before):
+
+- **Do not** annotate parameters: no `name: str`, `items: list`, `ctx: dict`, `Optional[...]`, `Union[...]`, etc.
+- **Do not** annotate the return value: no `-> str`, `-> dict`, `-> tuple[...]`, `-> None`, etc.
+
+Use plain parameters and a bare `def name(a, b=None):` style unless the user explicitly asks for types.
+
+**Existing code:** Do not bulk-remove annotations from functions that already have them. If you touch an existing annotated function for a small fix, you may leave its annotations as-is. Do not **add** new annotations when introducing new helpers or expanding the codebase.

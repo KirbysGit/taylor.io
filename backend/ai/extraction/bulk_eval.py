@@ -117,8 +117,6 @@ def _evaluate_jds(items: List[Dict[str, Any]], limit: int) -> List[Dict[str, Any
             limit=limit,
         )
         raw_terms = [entry["term"] for entry in extraction["keywords"]]
-        filtered = filter_non_reusable(raw_terms)
-        abstracted = abstract_terms(filtered, limit=limit)
 
         results.append(
             {

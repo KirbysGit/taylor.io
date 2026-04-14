@@ -3,10 +3,10 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from ..extraction.lexicon import GLOBAL_STOP_WORDS
+from ..extraction.lexicon import globalStopWords
 
 
-CONCEPT_STOPWORDS = set(GLOBAL_STOP_WORDS) | {"team", "work", "skills", "experience"}
+conceptStopwords = set(globalStopWords) | {"team", "work", "skills", "experience"}
 
 
 def contains_term(text: str, term: str) -> bool:
@@ -21,7 +21,7 @@ def contains_term(text: str, term: str) -> bool:
 
 
 def tokenize(value: str) -> set[str]:
-    ignored = set(GLOBAL_STOP_WORDS) | {"your", "our", "you"}
+    ignored = set(globalStopWords) | {"your", "our", "you"}
     return {
         tok
         for tok in re.findall(r"[a-z0-9+#./-]{2,}", str(value or "").lower())
@@ -44,7 +44,7 @@ def concept_tokens(concept: str) -> set[str]:
     out = set()
     for tok in raw:
         norm = normalize_concept_token(tok)
-        if norm and len(norm) >= 3 and norm not in CONCEPT_STOPWORDS:
+        if norm and len(norm) >= 3 and norm not in conceptStopwords:
             out.add(norm)
     return out
 

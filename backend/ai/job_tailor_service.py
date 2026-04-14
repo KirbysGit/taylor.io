@@ -11,13 +11,8 @@ from .debug import (
     write_provider_debug_output,
     write_provider_response_text,
 )
-from .extraction import abstract_terms, extract_job_keywords_detailed, filter_non_reusable
-from .openai import (
-    build_openai_request_payload,
-    get_openai_model,
-    is_openai_enabled,
-    request_chat_completion,
-)
+from .extraction import extract_job_keywords_detailed
+from .openai import build_openai_request_payload, get_openai_model, is_openai_enabled, request_chat_completion
 from .planning import build_edit_plan
 from .post_processing import (
     apply_patch_to_resume_data,
@@ -36,21 +31,21 @@ from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse, SectionO
 logger = logging.getLogger(__name__)
 
 
-def build_job_tailor_suggestions(
-    payload: JobTailorSuggestRequest,
-    *,
-    user_id: int,
-) -> JobTailorSuggestResponse:
-    extraction_result = extract_job_keywords_detailed(
-        payload.job_description,
-        target_role=payload.target_role,
-        limit=12,
-    )
-    raw_keywords = [entry["term"] for entry in extraction_result["keywords"]]
-    reusable_keywords = filter_non_reusable(raw_keywords)
-    abstracted_keywords = abstract_terms(reusable_keywords, limit=4)
+def build_job_tailor_suggestions(payload: JobTailorSuggestRequest, *, user_id: int) -> JobTailorSuggestResponse:
+    
+    # extract the job's keywords.
+    # - payload.job_description -> the job description
+    # - limit=12 -> the number of keywords to extract
+    # - target_role=payload.target_role -> the target role
 
+    extraction_result = extract_job_keywords_detailed(payload.job_description, limit=12, target_role=payload.target_role)
+
+    # turn keywords into a list of strings.
+    raw_keywords = [entry["term"] for entry in extraction_result["keywords"]]
+
+    # get the resume data.
     resume_data = payload.resume_data if isinstance(payload.resume_data, dict) else {}
+
     tailor_context = build_tailor_context(
         target_role=payload.target_role,
         extraction_result=extraction_result,

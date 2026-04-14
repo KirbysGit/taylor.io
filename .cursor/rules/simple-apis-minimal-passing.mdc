@@ -1,0 +1,21 @@
+---
+description: Prefer simple APIs—return and pass only what varies; avoid bulky context objects
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Simple APIs: minimal surface, minimal passing
+
+When designing or refactoring functions and data flow:
+
+- **Return and pass only what actually differs per call** (e.g. merged domain-specific `boostWords`, `weakTokens`, `phrases`, `activeDomains`). Do not expand return dicts with values that are **unchanging globals** unless the caller truly needs a single snapshot for tests or logging.
+- **Import static config** (global stop lists, filler phrases, canonical maps, allow-short tokens) **from the module that owns them** at the **use site**, instead of threading the same globals through a larger “profile” or context object “so everything is in one place.” One extra import is shorter than dragging a fat dict through the stack.
+- **Avoid “fluff” fields** on API responses: if a field is always the same as `lexicon` / a constant, the consumer can import it—unless you have a concrete reason (one snapshot for debugging, or you are about to make that field job-dependent).
+- **Prefer a few explicit arguments** over one opaque bag when the bag mostly duplicates imports.
+
+**When a bigger object is justified**
+
+- Multiple consumers need the **same merged snapshot** in one shot (e.g. logging the whole extraction input).
+- You are about to add **per-job or per-domain** behavior to a field that is global today—then centralizing merge in one function still makes sense, but **keep the returned shape as small as possible.**
+
+Default bias: **smaller return types, fewer layers of indirection, no redundant data in motion.**

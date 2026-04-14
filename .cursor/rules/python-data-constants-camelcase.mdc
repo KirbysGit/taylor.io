@@ -1,0 +1,24 @@
+---
+description: Module-level data dicts/sets and config use lowerCamelCase, not ALL_CAPS
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Module-level data and shared config naming
+
+For **module-level** values that are **data** (dicts, sets, lists, tuples of config) or **numeric/string tuning constants** shared across the module:
+
+- Use **lowerCamelCase** (e.g. `minAliasHits`, `titleAnchorHints`, `domainLexicons`).
+- **Do not** use `ALL_CAPS_SNAKE_CASE` for these (`GLOBAL_STOP_WORDS`, `MIN_JD_ALIAS_HITS`, etc.) in **new** code.
+
+**Exceptions**
+
+- Follow **third-party / public API** names exactly when matching external contracts.
+- **Enums** or names forced by a library may stay as required.
+
+**Not covered by this rule**
+
+- `ClassName` and `function_name` stay as usual.
+- Private module internals prefixed with `_` remain valid when needed.
+
+This project intentionally diverges from PEP 8’s “constants in ALL_CAPS” for readability of large data tables.

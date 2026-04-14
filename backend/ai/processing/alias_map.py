@@ -4,10 +4,10 @@ import re
 from functools import lru_cache
 from typing import Dict, Set, Tuple
 
-from ..extraction.lexicon import DOMAIN_LEXICONS, GLOBAL_PHRASE_CANONICAL
-from ..extraction.profiles import TITLE_ANCHOR_HINTS
+from ..extraction.lexicon import domainDicts, globalPhraseCanonical
+from ..extraction.lexicon import titleAnchorHints
 
-MANUAL_ALIAS_GROUPS: Dict[str, Set[str]] = {
+manualAliasGroups: Dict[str, Set[str]] = {
     "postgresql": {"postgres"},
     "mysql": {"my sql"},
     "mongodb": {"mongo"},
@@ -129,10 +129,10 @@ def _build_alias_index() -> Tuple[Dict[str, str], Dict[str, Set[str]]]:
         for variant in alias_variants:
             alias_to_canonical.setdefault(variant, canonical_norm)
 
-    for alias, canonical in GLOBAL_PHRASE_CANONICAL.items():
+    for alias, canonical in globalPhraseCanonical.items():
         register(alias, canonical)
 
-    for domain_pack in DOMAIN_LEXICONS.values():
+    for domain_pack in domainDicts.values():
         for alias in domain_pack.get("aliases", set()):
             alias_norm = _normalize_term(alias)
             canonical = alias_to_canonical.get(alias_norm, alias_norm)
@@ -142,13 +142,13 @@ def _build_alias_index() -> Tuple[Dict[str, str], Dict[str, Set[str]]]:
             canonical = alias_to_canonical.get(phrase_norm, phrase_norm)
             register(phrase_norm, canonical)
 
-    for hints in TITLE_ANCHOR_HINTS.values():
+    for hints in titleAnchorHints.values():
         for hint in hints:
             hint_norm = _normalize_term(hint)
             canonical = alias_to_canonical.get(hint_norm, hint_norm)
             register(hint_norm, canonical)
 
-    for canonical, aliases in MANUAL_ALIAS_GROUPS.items():
+    for canonical, aliases in manualAliasGroups.items():
         register(canonical, canonical)
         for alias in aliases:
             register(alias, canonical)

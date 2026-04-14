@@ -81,6 +81,11 @@ idea stack :
         - list the goal (this will be different based on the ai function called)
         - set up so that the output of the AI is a shorter resume, or less bs words, or more organized sections.
 
+    - clear up the assist output, right now extemely long.
+    - allow ai to reorganize and set up honors & awards, clubs & extracurriculars, relevant coursework, etc.
+    - verify all of our data is "touched" by the AI to verify if it should be tailored or not.
+    - speed up tailoring process (however we can.)
+
 - keep pipeline.py under ~400 lines.
 
 - one page resume only templates. 
