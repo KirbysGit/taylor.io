@@ -16,44 +16,6 @@ sectionHeadersToDownweight = {
     "required education & experience",
 }
 
-# section title prefixes: drop these blocks entirely from scoring (noise sections).
-sectionHeadersToSuppress = {
-    "about us",
-    "additional benefits",
-    "benefits",
-    "benefits compensation",
-    "by clicking apply today",
-    "compensation",
-    "compensation package",
-    "compensation range",
-    "dental insurance",
-    "drug free work place",
-    "equal employment opportunity",
-    "equal opportunity employer",
-    "full-time",
-    "health insurance",
-    "in person",
-    "life at",
-    "mileage reimbursement",
-    "next steps",
-    "on the road",
-    "our benefits",
-    "paid time off",
-    "paid training",
-    "pay",
-    "perks",
-    "referral program",
-    "salary",
-    "schedule",
-    "the pay range",
-    "this job is not eligible",
-    "vision insurance",
-    "we offer comprehensive benefits",
-    "weekly pay",
-    "what s in it for you",
-    "what's in it for you",
-    "work location",
-}
 
 # section title prefixes: treat as role-relevant body text (responsibilities, requirements, etc.).
 roleSectionHeaders = {
@@ -75,7 +37,7 @@ roleSectionHeaders = {
 
 # section title prefixes: not core role content (benefits, apply, about company); used to classify lines.
 nonRoleSectionHeaders = {
-    "who are",
+    "who we are",
     "next steps",
     "our benefits",
     "benefits",
@@ -93,26 +55,7 @@ nonRoleSectionHeaders = {
     "what's in it for you",
 }
 
-# tokens that dominate benefit/comp lines; used to penalize phrases that look like perks not skills.
-benefitNoiseTokens = {
-    "company",
-    "paid",
-    "employee",
-    "insurance",
-    "benefits",
-    "vacation",
-    "holidays",
-    "bonus",
-    "compensation",
-    "work",
-    "sick",
-    "off",
-    "pto",
-    "leave",
-}
-
-# tokens from recruiter/apply boilerplate; penalize phrases containing them.
-recruiterNoiseTokens = {
+hardNoiseTokens = {
     "recruiter",
     "network",
     "step",
@@ -132,10 +75,6 @@ recruiterNoiseTokens = {
     "privacy",
     "opt",
     "supported",
-}
-
-# legal/equal-opportunity/screening vocabulary; penalize as non-skill noise.
-legalNoiseTokens = {
     "eligible",
     "employment",
     "privacy",
@@ -153,6 +92,24 @@ legalNoiseTokens = {
     "conviction",
     "authorization",
     "authorized",
+}
+
+# tokens that dominate benefit/comp lines; used to penalize phrases that look like perks not skills.
+benefitNoiseTokens = {
+    "company",
+    "paid",
+    "employee",
+    "insurance",
+    "benefits",
+    "vacation",
+    "holidays",
+    "bonus",
+    "compensation",
+    "work",
+    "sick",
+    "off",
+    "pto",
+    "leave",
 }
 
 # stopwords at start/end of ngrams: phrases shouldn't start or end on these (weak boundaries).
@@ -197,20 +154,6 @@ verbLeadTokens = {
     "evaluate",
     "collaborate",
     "participate",
-}
-
-# weak tokens often at phrase end; used with connectors to score "gluey" phrases down.
-connectorTrailTokens = {
-    "and",
-    "or",
-    "such",
-    "using",
-    "whether",
-    "into",
-    "with",
-    "for",
-    "to",
-    "of",
 }
 
 # generic tokens: never promote as stack/signal terms when building domain signals from boosts.
@@ -264,7 +207,8 @@ concreteStackTerms = {
     "api", "apis", "sql", "postgres", "postgresql", "mysql", "mongodb", "redis", "databricks", "kafka", "nifi",
     "opensearch", "tableau", "power bi", "salesforce", "posthog", "aws", "gcp", "azure", "docker", "kubernetes",
     "gke", "rag", "llm", "mlops", "tensorflow", "pytorch", "scikit-learn", "transformers", "langchain", "langgraph",
-    "webex", "calabrio", "dialogflow", "ci/cd", "linux", "vue", "vue.js", "angular",
+    "webex", "calabrio", "dialogflow", "ci/cd", "linux", "vue", "vue.js", "angular", "html", "css", "gpu", "cuda",
+    "javascript", "nodejs"
 }
 
 # softer capability words: stack-adjacent but not a named product (workflow, compliance, etc.).
@@ -298,68 +242,7 @@ orgTokenStopwords = {
     "role",
 }
 
-# geography / jobsite tokens that are weak as standalone keywords.
-locationNoiseTokens = {
-    "york",
-    "aventura",
-    "county",
-    "city",
-    "state",
-    "campus",
-    "onsite",
-    "on-site",
-    "hybrid",
-    "remote",
-}
 
-# school/place context: single-token hits need stronger sources or we drop as noise.
-schoolLocationContextTokens = {
-    "new",
-    "york",
-    "university",
-    "campus",
-    "county",
-    "city",
-    "state",
-    "camp",
-    "campers",
-    "school",
-}
-
-# very common tokens: require stronger overlap / prefer longer phrases in merge logic.
-genericOverlapTokens = {
-    "experience",
-    "systems",
-    "technical",
-    "customer",
-    "lead",
-    "platform",
-    "support",
-    "business",
-    "using",
-    "performance",
-    "data",
-    "ai",
-    "ml",
-}
-
-# regexes: section header lines that should not contribute keywords (wrapper/apply/legal headers).
-wrapperSuppressHeaderPatterns = (
-    r"^who are .+$",
-    r"^next steps?$",
-    r"^about (us|the company)$",
-    r"^apply( now| today)?$",
-    r"^equal opportunity.*$",
-    r"^(compensation|benefits|perks).*$",
-    r"^equal employment.*$",
-    r"^privacy notice.*$",
-    r"^eligibility.*$",
-    r"^background check.*$",
-    r"^work authorization.*$",
-    r"^security clearance.*$",
-    r"^drug testing.*$",
-    r"^background screening.*$",
-)
 
 # substrings: any line containing these is treated as non-skill boilerplate for suppression.
 wrapperSuppressLineSubstrings = {
@@ -376,6 +259,7 @@ wrapperSuppressLineSubstrings = {
     "opportunity to",
     "hiring for",
     "submit your resume",
+    "send us your resume",
     "all qualified applicants",
     "women and minorities are encouraged",
     "equal employment opportunity",
@@ -402,25 +286,40 @@ wrapperSuppressLineSubstrings = {
     "holiday pay",
     "sick leave",
     "medical dental vision",
-}
-
-# culture/mission marketing lines: downrank or skip as keyword sources.
-missionCultureLineSubstrings = {
-    "our mission",
-    "our values",
-    "our culture",
-    "why join us",
-    "who we are",
-    "about us",
-    "value statement",
-    "inclusive environment",
-    "open-door policy",
+    "next steps",
+    "dream job",
+    "recruiter network",
+    "who are our recruiters",
+    "by clicking apply today you agree",
+    "carriers are not liable",
+    "cease communicating",
+    "not sure if you meet every requirement",
     "we value your",
-    "personally accountable",
-    "build trusted relationships",
-    "drive innovation",
-    "work in partnership",
-    "ready to work hard",
+    "we value our communities",
+    "continental united states of america",
+    "integral part of the continued growth",
+    "our mission is clear",
+    "improve their lives and livelihood",
+    "additional benefits and pay",
+    "pay range is the lowest",
+    "competitive compensation package",
+    "women and minorities are encouraged to apply",
+    "equal employment opportunity company",
+    "drug free work place",
+    "company paid",
+    "business casual dress code",
+    "community outreach opportunities",
+    "employee recognition programs",
+    "holiday bonus",
+    "hybrid work",
+    "tuition reimbursement",
+    "healthcare benefits",
+    "401k",
+    "vacation time",
+    "sick time",
+    "team building activities",
+    "friends and family nights",
+    "active lifestyle",
 }
 
 # when merging overlapping terms: if generic token overlaps a longer phrase, prefer these exact phrases.
@@ -488,19 +387,6 @@ fillerFunctionTokens = {
     "e.g",
 }
 
-# domain phrase heads for non-tech roles (short domain phrases allowed when these lead).
-rolePhraseHeadTokens = {
-    "management",
-    "engineering",
-    "automation",
-    "systems",
-    "operations",
-    "support",
-    "compliance",
-    "scheduling",
-    "documentation",
-    "testing",
-}
 
 # pronouns in ngrams: skip (not skill terms).
 phrasePronounTokens = {
@@ -515,19 +401,6 @@ phrasePronounTokens = {
     "us",
 }
 
-# application-instruction vocabulary inside lines.
-instructionNoiseTokens = {
-    "not",
-    "please",
-    "relevant",
-    "title",
-    "description",
-    "least",
-    "more",
-    "than",
-    "then",
-    "three",
-}
 
 # reject two-word title fragments ending in these unless phrase is in known list.
 titleFragmentBlacklistTailTokens = {"associate", "assistant"}
@@ -567,17 +440,6 @@ phraseGlueTrailTokens = {
     "groups",
 }
 
-# comparative filler tokens; penalize alone from weak sources.
-comparativeGlueTokens = {
-    "least",
-    "more",
-    "most",
-    "than",
-    "then",
-    "only",
-    "just",
-}
-
 # narrative/job-meta words at end of ing-phrase (weak skill signal).
 narrativeTrailTokens = {
     "business",
@@ -588,9 +450,6 @@ narrativeTrailTokens = {
     "opportunity",
     "title",
 }
-
-# allow dots inside these tokens (node.js) without treating as suspicious.
-safeDottedTokens = {"node.js", "next.js", "vue.js", "u.s"}
 
 # line looks like a url or document link; skip keyword extraction on that line.
 urlLinePatterns = (

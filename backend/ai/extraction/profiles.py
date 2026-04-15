@@ -5,18 +5,7 @@
 
 import re # regex.
 
-from .lexicon import (
-    minAliasHits,
-    domainDicts,
-    globalAllowShortTokens,
-    globalBoostWords,
-    globalFillerPhrases,
-    globalPhrases,
-    globalPhraseCanonical,
-    globalStopWords,
-    globalWeakTokens,
-    titleAnchorHints,
-)
+from .lexicon import minAliasHits, domainDicts, globalBoostWords, globalPhrases, globalWeakTokens, titleAnchorHints
 
 # --- just check if the term is in the text. --- #
 def contains_alias(text, term):
@@ -45,7 +34,7 @@ def merge_dict_add(base, addon):
 
 # --- using our domainDicts, detect active domains (e.g. engineering, sales) based on the job description & target role --- #
 def detect_domains(jobDescription, targetRole, maxDomains):
-
+    
     # get role and jd text.
     roleText = targetRole.lower()
     jdText = jobDescription.lower()

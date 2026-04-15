@@ -1,10 +1,5 @@
 from .job_tailor_service import build_job_tailor_suggestions
-from .extraction import (
-    detect_domains,
-    extract_job_keywords,
-    extract_job_keywords_detailed,
-    get_extraction_profile,
-)
+from .extraction import extract_keywords
 from .planning import build_edit_plan
 from .prompt import build_job_tailor_prompt
 from .processing import build_tailor_context

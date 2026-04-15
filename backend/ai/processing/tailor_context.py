@@ -1,56 +1,17 @@
 from __future__ import annotations
 
-import hashlib
 import re
-from copy import deepcopy
+from collections import defaultdict
 from typing import Any, Dict, Iterable, List, Set
+import json
 
+# --- local imports.
+from ..shared.text_utils import normalize_term
 from .alias_map import canonicalize_term, get_term_aliases
 
-INFRA_PROCESS_HINTS = {
-    "ci/cd",
-    "cicd",
-    "devops",
-    "cloud",
-    "cloud native",
-    "deployment",
-    "deploy",
-    "production infrastructure",
-    "infrastructure",
-    "sre",
-}
 
 
-def _normalize_term(value: str) -> str:
-    text = str(value or "").strip().lower()
-    text = re.sub(r"\s+", " ", text)
-    return text
 
-
-def _flatten_resume_text(value: Any) -> Iterable[str]:
-    if value is None:
-        return
-    if isinstance(value, str):
-        text = value.strip()
-        if text:
-            yield text
-        return
-    if isinstance(value, dict):
-        for v in value.values():
-            yield from _flatten_resume_text(v)
-        return
-    if isinstance(value, list):
-        for item in value:
-            yield from _flatten_resume_text(item)
-        return
-    text = str(value).strip()
-    if text:
-        yield text
-
-
-def _resume_blob(resume_data: Dict[str, Any]) -> str:
-    chunks = list(_flatten_resume_text(resume_data))
-    return " \n ".join(chunks).lower()
 
 
 def _normalize_search_text(value: str) -> str:
@@ -77,61 +38,6 @@ def _is_term_in_resume(term: str, resume_raw: str, resume_normalized: str) -> bo
             return True
     return False
 
-
-def _is_exact_term_literal_in_resume(term: str, resume_raw: str, resume_normalized: str) -> bool:
-    return _is_variant_in_resume(term, resume_raw, resume_normalized)
-
-
-def _is_infra_process_term(term: str) -> bool:
-    lowered = _normalize_term(term)
-    if not lowered:
-        return False
-    return any(hint in lowered for hint in INFRA_PROCESS_HINTS)
-
-
-def _split_verified_term_tiers(
-    *,
-    ranked_keywords: List[Dict[str, Any]],
-    resume_hits: List[str],
-    resume_raw: str,
-    resume_normalized: str,
-) -> tuple[List[str], List[str]]:
-    by_canonical: Dict[str, Dict[str, Any]] = {}
-    for entry in ranked_keywords:
-        term = _normalize_term(entry.get("term", ""))
-        if not term:
-            continue
-        canon = canonicalize_term(term)
-        if canon not in by_canonical:
-            by_canonical[canon] = entry
-
-    core: List[str] = []
-    supporting: List[str] = []
-    for term in resume_hits:
-        canon = canonicalize_term(term)
-        entry = by_canonical.get(canon, {})
-        sources = set(entry.get("sources", []))
-        score = float(entry.get("score", 0.0) or 0.0)
-        has_phrase_or_stack = bool({"known_phrase", "dynamic_phrase", "concrete_stack", "title_phrase", "title_phrase_ngram"} & sources) or (" " in term)
-        direct_literal = _is_exact_term_literal_in_resume(term, resume_raw, resume_normalized)
-        infra_process = _is_infra_process_term(term)
-
-        # Infra/process claims require stronger direct support to be core-safe.
-        if infra_process and not direct_literal:
-            supporting.append(term)
-            continue
-        if direct_literal and (has_phrase_or_stack or score >= 2.0):
-            core.append(term)
-        else:
-            supporting.append(term)
-
-    # Ensure we always have at least one core keyword when any verified evidence exists.
-    if not core and supporting:
-        core.append(supporting.pop(0))
-    # Preserve stable ordering and dedupe.
-    core = list(dict.fromkeys(core))
-    supporting = [term for term in dict.fromkeys(supporting) if term not in set(core)]
-    return core, supporting
 
 
 def _select_primary_terms(keywords: List[Dict[str, Any]], limit: int = 8) -> List[str]:
@@ -162,106 +68,169 @@ def _select_primary_terms(keywords: List[Dict[str, Any]], limit: int = 8) -> Lis
     return picked
 
 
-def _select_secondary_terms(keywords: List[Dict[str, Any]], primary: Set[str], limit: int = 8) -> List[str]:
-    primary_canonical = {canonicalize_term(term) for term in primary}
-    secondary: List[str] = []
-    seen_canonical: Set[str] = set()
+# --- takes our nested resume data & flattens it to a single string. --- #
+# input -> resume data (dict)
+# output -> flattened resume text (str)
+def flatten_resume_text(resume_data):
+
+    # verifies resume data is a dictionary.
+    if not isinstance(resume_data, dict):
+        return {
+            "summary": [],
+            "education": [],
+            "experience": [],
+            "projects": [],
+            "skills": [],
+        }
+
+    buckets = {
+        "summary": [],
+        "education": [],
+        "experience": [],
+        "projects": [],
+        "skills": [],
+    }
+
+    # initialize chunks.
+    chunks = []
+
+    # get the summary.
+    summary = resume_data.get("summary", {})
+    if isinstance(summary, dict):
+        value = summary.get("summary")
+        if isinstance(value, str) and value.strip():
+            buckets["summary"].append(value.strip())
+
+    # get the education.
+    education = resume_data.get("education", [])
+    if isinstance(education, list):
+        for row in education:
+            if not isinstance(row, dict):
+                continue
+                
+            parts = []
+            for key in ("school", "degree", "discipline", "location", "gpa", "minor"):
+                value = row.get(key)
+                if isinstance(value, str) and value.strip():
+                    parts.append(value.strip())
+
+            # deal w/ subsections (if any).
+            subsections = row.get("subsections", {})
+            if isinstance(subsections, dict):
+                for key, value in subsections.items():
+                    if isinstance(value, str) and value.strip():
+                        parts.append(f"{key.strip().lower()}: {value.strip()}")
+
+            if parts:
+                buckets["education"].append(f"{' | '.join(parts)}")
+
+
+    # get the experience.
+    experience = resume_data.get("experience", [])
+    if isinstance(experience, list):
+        for row in experience:
+            if not isinstance(row, dict):
+                continue
+
+            parts = []
+            for key in ("title", "company", "description", "location", "skills"):
+                value = row.get(key)
+                if isinstance(value, str) and value.strip():
+                    parts.append(value.strip())
+
+            if parts:
+                buckets["experience"].append(f"{' | '.join(parts)}")
+
+    # get the projects.
+    projects = resume_data.get("projects", [])
+    if isinstance(projects, list):
+        for row in projects:
+            if not isinstance(row, dict):
+                continue
+
+            parts = []
+
+            # get main project details.
+            for key in ("title", "description", "url"):
+                value = row.get(key)
+                if isinstance(value, str) and value.strip():
+                    parts.append(value.strip())
+
+            # deal w/ tech stack (if any).
+            tech_stack = row.get("tech_stack", [])
+            if isinstance(tech_stack, list):
+                techs = [tech.strip() for tech in tech_stack if isinstance(tech, str) and tech.strip()]
+                if techs:
+                    parts.append(f"tech: {', '.join(techs)}")
+
+            if parts:
+                buckets["projects"].append(f"{' | '.join(parts)}")
+
+    # get the skills.
+    skills = resume_data.get("skills", [])
+    if isinstance(skills, list):
+        grouped_skills = defaultdict(list)
+
+        for row in skills:
+            if not isinstance(row, dict):
+                continue
+                
+            category = str(row.get("category", "")).strip()
+            name = str(row.get("name", "")).strip()
+
+            if not category or not name:
+                continue
+
+            grouped_skills[category].append(name)
+
+        for category, names in grouped_skills.items():
+            buckets["skills"].append(f"{category.strip().lower()}: {', '.join(names)}")
+
+    # return the chunks.
+    return buckets
+
+
+# --- converts our resume data to a single string. --- #
+# input -> resume data (dict)
+# output -> joined resume text (str)
+def resume_blob(resume_sections):
+    return " \n ".join(chunk for section_items in resume_sections.values() for chunk in section_items).lower()
+
+
+
+def build_tailor_context(target_role, keywords, resume_data):
+
+    # grab keywords & resume data.
+    resume_data = resume_data if isinstance(resume_data, dict) else {}
+
+    # converts resume dict to single string.
+    resume_sections = flatten_resume_text(resume_data)
+
+    # turn resume sections into a single string.
+    resume_str = resume_blob(resume_sections)
+
+    # initialize hits & gaps.
+    resume_hits = []
+    resume_gaps = []
+    seen = set()
+
     for entry in keywords:
-        term = _normalize_term(entry.get("term", ""))
-        canonical = canonicalize_term(term)
-        if not term or canonical in primary_canonical or canonical in seen_canonical:
-            continue
-        secondary.append(term)
-        seen_canonical.add(canonical)
-        if len(secondary) >= limit:
-            break
-    return secondary
+        term = normalize_term(entry.get("term", ""))
 
+        if term in resume_str:
+            resume_hits.append(term)
+        else:
+            resume_gaps.append(term)
 
-def _extract_phrase_focus(
-    primary_terms: List[str],
-    dynamic_phrase_candidates: List[Any],
-    limit: int = 6,
-) -> List[str]:
-    phrases: List[str] = []
-    for term in primary_terms:
-        if " " in term and term not in phrases:
-            phrases.append(term)
-            if len(phrases) >= limit:
-                return phrases
-    for candidate in dynamic_phrase_candidates:
-        phrase = ""
-        if isinstance(candidate, (list, tuple)) and candidate:
-            phrase = _normalize_term(candidate[0])
-        elif isinstance(candidate, str):
-            phrase = _normalize_term(candidate)
-        if phrase and " " in phrase and phrase not in phrases:
-            phrases.append(phrase)
-            if len(phrases) >= limit:
-                break
-    return phrases
+    #dynamic_candidates = []
+    #primary_terms = _select_primary_terms(ranked_keywords, limit=8)
 
+    return
 
-def _make_item_id(section: str, item: Dict[str, Any], index: int) -> str:
-    if str(item.get("item_id") or "").strip():
-        return str(item.get("item_id")).strip()
-    seed = "||".join(
-        [
-            section,
-            str(item.get("title") or item.get("name") or "").strip().lower(),
-            str(item.get("company") or "").strip().lower(),
-            str(item.get("description") or "").strip().lower(),
-            str(index),
-        ]
-    )
-    digest = hashlib.sha1(seed.encode("utf-8")).hexdigest()[:12]
-    return f"{section}_{digest}"
-
-
-def _ensure_section_item_ids(resume_data: Dict[str, Any], section: str) -> List[str]:
-    ids: List[str] = []
-    section_value = resume_data.get(section)
-    if not isinstance(section_value, list):
-        return ids
-    for idx, row in enumerate(section_value):
-        if not isinstance(row, dict):
-            continue
-        item_id = _make_item_id(section, row, idx)
-        row["item_id"] = item_id
-        ids.append(item_id)
-    return ids
-
-
-def build_tailor_context(
-    *,
-    target_role: str | None,
-    extraction_result: Dict[str, Any],
-    resume_data: Dict[str, Any],
-) -> Dict[str, Any]:
-    resume_data_copy = deepcopy(resume_data if isinstance(resume_data, dict) else {})
-    exp_ids = _ensure_section_item_ids(resume_data_copy, "experience")
-    proj_ids = _ensure_section_item_ids(resume_data_copy, "projects")
-
-    ranked_keywords = list(extraction_result.get("keywords", []))
-    dynamic_candidates = list(extraction_result.get("dynamic_phrase_candidates", []))
-    primary_terms = _select_primary_terms(ranked_keywords, limit=8)
-    secondary_terms = _select_secondary_terms(ranked_keywords, set(primary_terms), limit=8)
-    phrase_focus = _extract_phrase_focus(primary_terms, dynamic_candidates, limit=6)
-
-    resume_text_raw = _resume_blob(resume_data_copy)
-    resume_text_normalized = _normalize_search_text(resume_text_raw)
-    resume_hits = [term for term in primary_terms if _is_term_in_resume(term, resume_text_raw, resume_text_normalized)]
-    resume_gaps = [term for term in primary_terms if term not in resume_hits]
-    core_verified, supporting_verified = _split_verified_term_tiers(
-        ranked_keywords=ranked_keywords,
-        resume_hits=resume_hits,
-        resume_raw=resume_text_raw,
-        resume_normalized=resume_text_normalized,
-    )
 
     return {
         "target_role": (target_role or "").strip() or None,
-        "active_domains": list(extraction_result.get("active_domains", [])),
+        "active_domains": [],
         "keywords_primary": primary_terms,
         "keywords_secondary": secondary_terms,
         "phrase_focus": phrase_focus,
@@ -276,5 +245,4 @@ def build_tailor_context(
             "experience": exp_ids,
             "projects": proj_ids,
         },
-        "normalized_resume_data": resume_data_copy,
     }
