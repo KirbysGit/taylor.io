@@ -38,6 +38,11 @@ def normalize_concept_token(token: str) -> str:
             break
     return t
 
+def normalize_term(value: str) -> str:
+    text = str(value or "").strip().lower()
+    text = re.sub(r"\s+", " ", text)
+    return text
+
 
 def concept_tokens(concept: str) -> set[str]:
     raw = re.findall(r"[a-z0-9+#./-]{2,}", str(concept or "").lower())

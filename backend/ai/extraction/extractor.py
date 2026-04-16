@@ -416,7 +416,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
 
     return {
         "keywords": rankedTerms[:numKeywords],
-        "active_domains": res.profile["activeDomains"],
+        "activeDomains": res.profile["activeDomains"],
     }
 
 

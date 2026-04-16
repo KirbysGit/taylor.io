@@ -11,7 +11,16 @@ from .debug import (
     write_provider_debug_output,
     write_provider_response_text,
 )
+
+
+
+# in use.
 from .extraction import extract_keywords
+from .processing import build_tailor_context
+from .planning import build_tailor_plan
+
+
+
 from .openai import build_openai_request_payload, get_openai_model, is_openai_enabled, request_chat_completion
 from .planning import build_edit_plan
 from .post_processing import (
@@ -24,7 +33,6 @@ from .post_processing import (
     build_reasoning_feed,
     extract_skill_names_from_resume,
 )
-from .processing import build_tailor_context
 from .prompt import build_job_tailor_prompt
 from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse, SectionOptimizations
 
@@ -42,24 +50,17 @@ def build_job_tailor_suggestions(payload, user_id):
     
     # get the keywords and active domains from our extraction result.
     keywords = ext_result["keywords"]
-    active_domains = ext_result["active_domains"]
+    activeDomains = ext_result["activeDomains"]
 
     # get the resume data.
-    resume_data = payload["resume_data"] if isinstance(payload["resume_data"], dict) else {}
+    resumeData = payload["resume_data"] if isinstance(payload["resume_data"], dict) else {}
 
-    #print(f"keywords: {keywords}\n")
-    #print(f"active_domains: {active_domains}\n")
-    #print(f"resume_data: {resume_data}\n")
+    tailorContext = build_tailor_context(targetRole=payload["target_role"], activeDomains=activeDomains, keywords=keywords, resumeData=resumeData)
 
-    tailor_context = build_tailor_context(
-        target_role=payload["target_role"],
-        keywords=keywords,
-        resume_data=resume_data,
-    )
-
-    #print(f"tailor_context: {tailor_context}\n")
-
+    tailorPlan = build_tailor_plan(resumeData=resumeData, tailorContext=tailorContext)
+    
     return 
+
     edit_plan = build_edit_plan(
         tailor_context=tailor_context,
         resume_data=resume_data,

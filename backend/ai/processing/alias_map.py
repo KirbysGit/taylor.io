@@ -1,180 +1,109 @@
-from __future__ import annotations
+
 
 import re
 from functools import lru_cache
-from typing import Dict, Set, Tuple
 
 from ..extraction.lexicon import domainDicts, globalPhraseCanonical
 from ..extraction.lexicon import titleAnchorHints
+from ..shared.text_utils import normalize_term
 
-manualAliasGroups: Dict[str, Set[str]] = {
-    "postgresql": {"postgres"},
-    "mysql": {"my sql"},
-    "mongodb": {"mongo"},
-    "javascript frameworks": {"js frameworks", "javascript framework", "js framework"},
-    "javascript": {"js"},
-    "typescript": {"ts"},
-    "node.js": {"node"},
-    "react": {"reactjs", "react.js"},
-    "next.js": {"nextjs", "next js"},
-    "vue.js": {"vue", "vuejs"},
-    "react native": {"react-native"},
-    "full stack engineer": {"full-stack engineer", "full stack developer", "full-stack developer", "fullstack engineer"},
-    "microservices": {"micro services"},
-    "restful apis": {"rest api", "rest apis", "restful api", "restful services"},
-    "graphql": {"graph ql"},
-    "scikit-learn": {"scikit learn", "sklearn"},
-    "machine learning": {"ml", "ai/ml"},
-    "artificial intelligence": {"ai"},
-    "large language models": {"llm", "llms"},
-    "retrieval augmented generation": {"rag"},
-    "mlops": {"ml ops", "m l ops"},
-    "natural language processing": {"nlp"},
-    "computer vision": {"cv"},
-    "deep learning": {"dl"},
-    "continuous integration continuous delivery": {"ci/cd", "ci cd"},
-    "docker": {"containers", "containerization"},
-    "kubernetes": {"k8s"},
-    "amazon web services": {"aws"},
-    "google cloud platform": {"gcp"},
-    "google kubernetes engine": {"gke"},
-    "microsoft azure": {"azure"},
-    "power automate": {"microsoft power automate", "power-automate", "powerautomate"},
-    "copilot": {"microsoft copilot"},
-    "business intelligence": {"bi"},
-    "tableau": {"tableau desktop"},
-    "power bi": {"powerbi", "power-bi"},
-    "customer relationship management": {"crm"},
-    "salesforce": {"sfdc"},
-    "key performance indicators": {"kpi", "kpis"},
-    "search engine optimization": {"seo"},
-    "customer success": {"cs"},
-    "customer satisfaction": {"csat"},
-    "first call resolution": {"fcr"},
-    "contact center as a service": {"ccaas", "ccaaS"},
-    "user experience": {"ux"},
-    "user interface": {"ui"},
-    "quality assurance": {"qa"},
-    "application programming interface": {"api", "apis"},
-    "project management": {"project mgr", "project mgmt", "pm"},
-    "program management": {"program mgr", "program mgmt", "pgm"},
-    "product management": {"product mgr", "product mgmt", "pdm"},
-    "account management": {"account mgmt", "acct mgmt"},
-    "business development": {"biz dev", "bd"},
-    "go to market": {"gtm"},
-    "search engine marketing": {"sem"},
-    "requirements gathering": {"requirement gathering"},
-    "stakeholder management": {"stakeholder mgmt"},
-    "process improvement": {"process optimization", "continuous improvement"},
-    "operational efficiency": {"ops efficiency"},
-    "service desk support": {"help desk", "helpdesk", "it support"},
-    "incident response": {"incident management", "incident mgmt"},
-    "standard operating procedures": {"sop", "sops"},
-    "service level agreements": {"sla", "slas"},
-    "quality control": {"qc"},
-    "financial planning and analysis": {"fp&a", "fpa"},
-    "profit and loss statements": {"p&l", "pnl"},
-    "enterprise resource planning": {"erp"},
-    "accounts payable": {"ap"},
-    "accounts receivable": {"ar"},
-    "software as a service": {"saas"},
-    "business to business saas": {"b2b saas", "b2b software"},
-    "proof of concept": {"poc"},
-    "minimum viable product": {"mvp"},
-    "subject matter expert": {"sme"},
-    "return on investment": {"roi"},
-    "end-to-end": {"end to end", "e2e"},
-    "object oriented programming": {"oop"},
-    "test driven development": {"tdd"},
-    "database management systems": {"dbms"},
-    "customer experience": {"cx"},
-    "contact center": {"call center"},
-    "human resources": {"hr"},
-    "identity and access management": {"iam"},
-    "single sign on": {"sso"},
-    "multi factor authentication": {"mfa"},
-    "security operations center": {"soc"},
-    "virtual private cloud": {"vpc"},
-    "data loss prevention": {"dlp"},
-}
+# --- takes our alias value and expands it to all possible variants. --- #
+# e.g. "react.js" -> {"react", "react js", "react.js", "react js", "react-js", "react-js"}
+def expand_alias_variants(value):
 
+    # normalize the value.
+    normalized = normalize_term(value)
 
-def _normalize_term(value: str) -> str:
-    text = str(value or "").strip().lower()
-    text = re.sub(r"\s+", " ", text)
-    return text
-
-
-def _expand_alias_variants(value: str) -> Set[str]:
-    normalized = _normalize_term(value)
+    # if the normalized value is empty, return an empty set.
     if not normalized:
         return set()
+
+    # initialize our variants set.
     variants = {normalized}
+
+    # iterate over the old and new values.
     for old, new in ((".", " "), (".", ""), ("/", " "), ("/", ""), ("-", " "), ("-", "")):
         if old in normalized:
-            variants.add(_normalize_term(normalized.replace(old, new)))
+            variants.add(normalize_term(normalized.replace(old, new)))
+
+    # return the variants set.
     return {item for item in variants if item}
 
-
+# --- builds the alias maps. --- #
+# this is a cache of the alias maps to avoid rebuilding them on every call.
+# returns the alias to canonical and canonical to aliases maps.
 @lru_cache(maxsize=1)
-def _build_alias_index() -> Tuple[Dict[str, str], Dict[str, Set[str]]]:
-    alias_to_canonical: Dict[str, str] = {}
+def build_alias_index():
 
-    def register(alias: str, canonical: str) -> None:
-        canonical_norm = _normalize_term(canonical)
-        alias_variants = _expand_alias_variants(alias)
+    # initialize our alias to canonical map.
+    alias_to_canonical = {}
+
+
+    # --- helper function to register new alias and canonical. --- #
+    def register(alias, canonical):
+        
+        # normalize the alias & canonical.
+        canonical_norm = normalize_term(canonical)
+
+        # expand the alias variants.
+        alias_variants = expand_alias_variants(alias)
+        
+        # if the canonical or alias variants are empty, return.
         if not canonical_norm or not alias_variants:
             return
+
+        # set the canonical to the alias to canonical map.
         alias_to_canonical.setdefault(canonical_norm, canonical_norm)
+
+        # iterate over the alias variants.
         for variant in alias_variants:
             alias_to_canonical.setdefault(variant, canonical_norm)
 
+    # iterate over the global phrase canonical.
     for alias, canonical in globalPhraseCanonical.items():
         register(alias, canonical)
 
-    for domain_pack in domainDicts.values():
-        for alias in domain_pack.get("aliases", set()):
-            alias_norm = _normalize_term(alias)
-            canonical = alias_to_canonical.get(alias_norm, alias_norm)
-            register(alias_norm, canonical)
-        for phrase in domain_pack.get("phrases", []):
-            phrase_norm = _normalize_term(phrase)
-            canonical = alias_to_canonical.get(phrase_norm, phrase_norm)
-            register(phrase_norm, canonical)
-
-    for hints in titleAnchorHints.values():
-        for hint in hints:
-            hint_norm = _normalize_term(hint)
-            canonical = alias_to_canonical.get(hint_norm, hint_norm)
-            register(hint_norm, canonical)
-
-    for canonical, aliases in manualAliasGroups.items():
-        register(canonical, canonical)
-        for alias in aliases:
-            register(alias, canonical)
-
+    # initialize our canonical to aliases map.
     canonical_to_aliases: Dict[str, Set[str]] = {}
     for alias, canonical in alias_to_canonical.items():
         canonical_to_aliases.setdefault(canonical, set()).add(alias)
 
+    # return the alias to canonical and canonical to aliases maps.
     return alias_to_canonical, canonical_to_aliases
 
 
-def canonicalize_term(term: str) -> str:
-    normalized = _normalize_term(term)
-    if not normalized:
-        return ""
-    alias_to_canonical, _ = _build_alias_index()
-    return alias_to_canonical.get(normalized, normalized)
+# --- canonicalize a term. --- #
+# e.g. "react.js" -> "react"
+def canonicalize_term(term):
+    # get maps from alias index.
+    alias_to_canonical, _ = build_alias_index()
+
+    # return the canonicalized term.
+    return alias_to_canonical.get(term, term)
 
 
-def get_term_aliases(term: str) -> Set[str]:
-    normalized = _normalize_term(term)
+# --- get the aliases for a term. --- #
+# e.g. "react.js" -> {"react", "react js", "react.js", "react js", "react-js", "react-js"}
+def get_term_aliases(term):
+    # normalize the term.
+    normalized = normalize_term(term)
     if not normalized:
         return set()
+
+    # canonicalize the term.
     canonical = canonicalize_term(normalized)
-    _, canonical_to_aliases = _build_alias_index()
+
+    # get the aliases from the canonical to aliases map.
+    _, canonical_to_aliases = build_alias_index()
+
+    # get the aliases from the canonical to aliases map.
     aliases = set(canonical_to_aliases.get(canonical, set()))
+
+    # add the normalized and canonical terms to the aliases.
     aliases.add(normalized)
+
+    # add the canonical term to the aliases.
     aliases.add(canonical)
+
+    # return the aliases.
     return aliases

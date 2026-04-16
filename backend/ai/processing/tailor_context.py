@@ -9,72 +9,13 @@ import json
 from ..shared.text_utils import normalize_term
 from .alias_map import canonicalize_term, get_term_aliases
 
-
-
-
-
-
-def _normalize_search_text(value: str) -> str:
-    normalized = _normalize_term(value)
-    normalized = re.sub(r"[^a-z0-9+#./\s-]+", " ", normalized)
-    normalized = re.sub(r"\s+", " ", normalized).strip()
-    return normalized
-
-
-def _is_variant_in_resume(variant: str, resume_raw: str, resume_normalized: str) -> bool:
-    v = _normalize_term(variant)
-    if not v:
-        return False
-    if " " in v:
-        return f" {v} " in f" {resume_normalized} "
-    pattern = r"(?<![a-z0-9])" + re.escape(v) + r"(?![a-z0-9])"
-    return bool(re.search(pattern, resume_raw)) or bool(re.search(pattern, resume_normalized))
-
-
-def _is_term_in_resume(term: str, resume_raw: str, resume_normalized: str) -> bool:
-    canonical = canonicalize_term(term)
-    for variant in get_term_aliases(canonical):
-        if _is_variant_in_resume(variant, resume_raw, resume_normalized):
-            return True
-    return False
-
-
-
-def _select_primary_terms(keywords: List[Dict[str, Any]], limit: int = 8) -> List[str]:
-    picked: List[str] = []
-    seen_canonical: Set[str] = set()
-    for entry in keywords:
-        term = _normalize_term(entry.get("term", ""))
-        canonical = canonicalize_term(term)
-        if not term or canonical in seen_canonical:
-            continue
-        sources = set(entry.get("sources", []))
-        strong = bool({"known_phrase", "dynamic_phrase", "concrete_stack", "title_phrase", "title_phrase_ngram"} & sources)
-        if strong or (" " in term):
-            picked.append(term)
-            seen_canonical.add(canonical)
-        if len(picked) >= limit:
-            break
-    if len(picked) < limit:
-        for entry in keywords:
-            term = _normalize_term(entry.get("term", ""))
-            canonical = canonicalize_term(term)
-            if not term or canonical in seen_canonical:
-                continue
-            picked.append(term)
-            seen_canonical.add(canonical)
-            if len(picked) >= limit:
-                break
-    return picked
-
-
 # --- takes our nested resume data & flattens it to a single string. --- #
 # input -> resume data (dict)
 # output -> flattened resume text (str)
-def flatten_resume_text(resume_data):
+def flatten_resume_text(resumeData):
 
     # verifies resume data is a dictionary.
-    if not isinstance(resume_data, dict):
+    if not isinstance(resumeData, dict):
         return {
             "summary": [],
             "education": [],
@@ -95,14 +36,14 @@ def flatten_resume_text(resume_data):
     chunks = []
 
     # get the summary.
-    summary = resume_data.get("summary", {})
+    summary = resumeData.get("summary", {})
     if isinstance(summary, dict):
         value = summary.get("summary")
         if isinstance(value, str) and value.strip():
             buckets["summary"].append(value.strip())
 
     # get the education.
-    education = resume_data.get("education", [])
+    education = resumeData.get("education", [])
     if isinstance(education, list):
         for row in education:
             if not isinstance(row, dict):
@@ -126,7 +67,7 @@ def flatten_resume_text(resume_data):
 
 
     # get the experience.
-    experience = resume_data.get("experience", [])
+    experience = resumeData.get("experience", [])
     if isinstance(experience, list):
         for row in experience:
             if not isinstance(row, dict):
@@ -142,7 +83,7 @@ def flatten_resume_text(resume_data):
                 buckets["experience"].append(f"{' | '.join(parts)}")
 
     # get the projects.
-    projects = resume_data.get("projects", [])
+    projects = resumeData.get("projects", [])
     if isinstance(projects, list):
         for row in projects:
             if not isinstance(row, dict):
@@ -167,7 +108,7 @@ def flatten_resume_text(resume_data):
                 buckets["projects"].append(f"{' | '.join(parts)}")
 
     # get the skills.
-    skills = resume_data.get("skills", [])
+    skills = resumeData.get("skills", [])
     if isinstance(skills, list):
         grouped_skills = defaultdict(list)
 
@@ -193,56 +134,65 @@ def flatten_resume_text(resume_data):
 # --- converts our resume data to a single string. --- #
 # input -> resume data (dict)
 # output -> joined resume text (str)
-def resume_blob(resume_sections):
-    return " \n ".join(chunk for section_items in resume_sections.values() for chunk in section_items).lower()
+def resume_blob(resumeSections):
+    return " \n ".join(chunk for section_items in resumeSections.values() for chunk in section_items).lower()
 
+def is_in_resume(term, resumeStr):
+    # iterate over the potential aliases checking the resume.
+    for alias in get_term_aliases(term):
 
+        # create a regex pattern for the alias.
+        pattern = r"(?<![a-z0-9])" + re.escape(alias) + r"(?![a-z0-9])"
 
-def build_tailor_context(target_role, keywords, resume_data):
+        # if the alias is in the resume string, return True.
+        if re.search(pattern, resumeStr):
+            return True
+        
+    return False
+
+# --- builds the tailor context. --- #
+# input -> target role (str), keywords (list), resume data (dict)
+# output -> tailor context (dict)
+def build_tailor_context(targetRole, activeDomains, keywords, resumeData):
 
     # grab keywords & resume data.
-    resume_data = resume_data if isinstance(resume_data, dict) else {}
+    resumeData = resumeData if isinstance(resumeData, dict) else {}
 
     # converts resume dict to single string.
-    resume_sections = flatten_resume_text(resume_data)
+    resumeSections = flatten_resume_text(resumeData)
 
     # turn resume sections into a single string.
-    resume_str = resume_blob(resume_sections)
+    resumeStr = resume_blob(resumeSections)
 
     # initialize hits & gaps.
-    resume_hits = []
-    resume_gaps = []
+    resumeHits = []
+    resumeGaps = []
     seen = set()
 
     for entry in keywords:
-        term = normalize_term(entry.get("term", ""))
+        # get the term and canonicalize it.
+        term = entry.get("term", "")
+        canon = canonicalize_term(term)
 
-        if term in resume_str:
-            resume_hits.append(term)
+        # if term is empty or canonical already seen, continue.
+        if not term or canon in seen:
+            continue
+
+        # add the canonical to the seen set.
+        seen.add(canon)
+
+        # checks all alias variants against resume str.
+        if is_in_resume(term, resumeStr):
+            resumeHits.append(canon)
         else:
-            resume_gaps.append(term)
+            resumeGaps.append(canon)
 
-    #dynamic_candidates = []
-    #primary_terms = _select_primary_terms(ranked_keywords, limit=8)
-
-    return
-
-
+    # return the tailor context.
     return {
-        "target_role": (target_role or "").strip() or None,
-        "active_domains": [],
-        "keywords_primary": primary_terms,
-        "keywords_secondary": secondary_terms,
-        "phrase_focus": phrase_focus,
-        "resume_hits": resume_hits,
-        "resume_gaps": resume_gaps,
-        # Explicit split between provable evidence vs desired targets.
-        "verified_resume_terms": resume_hits,
-        "core_verified_keywords": core_verified,
-        "supporting_verified_keywords": supporting_verified,
-        "target_gap_terms": resume_gaps,
-        "section_item_ids": {
-            "experience": exp_ids,
-            "projects": proj_ids,
-        },
+        "targetRole": (targetRole or "").strip() or None,
+        "activeDomains": activeDomains,
+        "keywords": keywords,
+        "resumeHits": resumeHits,
+        "resumeGaps": resumeGaps,
+        "resumeSections": resumeSections,
     }
