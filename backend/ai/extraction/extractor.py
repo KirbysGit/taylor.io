@@ -298,6 +298,35 @@ def score_terms(termSources, boostWords, weakTokens):
     # return scored listed sorted by score (desc), frequency (desc), term (asc).
     return sorted(scored, key=lambda item: (-item["score"], -item["frequency"], item["term"]))
  
+
+def get_relevant_jd_lines(bodyLines, keywords):
+
+    keywords = [keyword["term"] for keyword in keywords]
+
+    relevantLineHits = {}
+
+    for idx, line in enumerate(bodyLines):
+        
+        for keyword in keywords:
+
+            pattern = r"(?<![a-z0-9])" + re.escape(keyword) + r"(?![a-z0-9])"
+            
+            if re.search(pattern, line):
+                relevantLineHits[idx] = relevantLineHits.get(idx, 0) + 1
+
+    sortedLinesByHits = sorted(relevantLineHits.items(), key=lambda item: (-item[1], item[0]))
+
+    relevantLines = []
+
+    for idx, hits in sortedLinesByHits[:10]:
+        relevantLines.append(bodyLines[idx])
+    
+    print(relevantLines)
+
+    return relevantLines
+
+
+    
 # --- extract keywords from the job description. --- #
 # main function that calls our other functions in sequence.
 # input -> job description, target role, number of keywords.
@@ -413,10 +442,13 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
     
     if wanna_count:
         update_aggregate_counts(rankedTerms, 30)
+    
+    relevantLines = get_relevant_jd_lines(res.bodyLines, rankedTerms[:numKeywords])
 
     return {
         "keywords": rankedTerms[:numKeywords],
         "activeDomains": res.profile["activeDomains"],
+        "relevantJDLines": relevantLines,
     }
 
 

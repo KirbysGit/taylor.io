@@ -2,15 +2,8 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
+import json
 from typing import Any, Dict, List
-
-from .debug import (
-    PROVIDER_RESPONSE_LATEST,
-    strip_resume_data_from_user_prompt,
-    write_debug_output,
-    write_provider_debug_output,
-    write_provider_response_text,
-)
 
 
 
@@ -18,11 +11,10 @@ from .debug import (
 from .extraction import extract_keywords
 from .processing import build_tailor_context
 from .planning import build_tailor_plan
+from .prompt import build_prompt
+from .openai import ai_chat_completion
 
 
-
-from .openai import build_openai_request_payload, get_openai_model, is_openai_enabled, request_chat_completion
-from .planning import build_edit_plan
 from .post_processing import (
     apply_patch_to_resume_data,
     apply_provider_json_if_safe,
@@ -33,56 +25,44 @@ from .post_processing import (
     build_reasoning_feed,
     extract_skill_names_from_resume,
 )
-from .prompt import build_job_tailor_prompt
 from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse, SectionOptimizations
 
 logger = logging.getLogger(__name__)
 
 
-def build_job_tailor_suggestions(payload, user_id):
+def build_job_tailor_suggestions(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
+    payload = JobTailorSuggestRequest.model_dump()
     
-    # extract the job's keywords.
-    # - payload.job_description -> the job description
-    # - limit=12 -> the number of keywords to extract
-    # - target_role=payload.target_role -> the target role
+    print(payload)
 
     ext_result = extract_keywords(payload["job_description"], payload["target_role"], numKeywords=12)
     
     # get the keywords and active domains from our extraction result.
     keywords = ext_result["keywords"]
     activeDomains = ext_result["activeDomains"]
+    relevantJDLines = ext_result["relevantJDLines"]
 
     # get the resume data.
     resumeData = payload["resume_data"] if isinstance(payload["resume_data"], dict) else {}
 
+    # build the tailor context.
     tailorContext = build_tailor_context(targetRole=payload["target_role"], activeDomains=activeDomains, keywords=keywords, resumeData=resumeData)
 
-    tailorPlan = build_tailor_plan(resumeData=resumeData, tailorContext=tailorContext)
+    # get what we want to focus on per section and row.
+    sectionDetails = build_tailor_plan(resumeData=resumeData, tailorContext=tailorContext)
+
+    # build the prompts.
+    system_prompt, user_prompt = build_prompt(payload=payload, tailorContext=tailorContext, sectionDetails=sectionDetails, relevantJDLines=relevantJDLines)
+
+    # request chat completion.
+    text, usage = ai_chat_completion(system_prompt=system_prompt, user_prompt=user_prompt)
+
+    print(text)
+    print(usage)
+    
     
     return 
 
-    edit_plan = build_edit_plan(
-        tailor_context=tailor_context,
-        resume_data=resume_data,
-        job_description=payload.job_description,
-        target_role=payload.target_role or "",
-    )
-    prompt_bundle = build_job_tailor_prompt(payload, tailor_context=tailor_context, edit_plan=edit_plan)
-
-    core_verified_keywords = list(tailor_context.get("core_verified_keywords", []))[:12]
-    supporting_verified_keywords = list(tailor_context.get("supporting_verified_keywords", []))[:12]
-    verified_keywords = list(
-        dict.fromkeys(
-            core_verified_keywords
-            + supporting_verified_keywords
-            + list(tailor_context.get("verified_resume_terms", tailor_context.get("resume_hits", [])))
-        )
-    )[:12]
-    target_gap_keywords = list(tailor_context.get("target_gap_terms", tailor_context.get("resume_gaps", [])))[:12]
-    ui_keywords = core_verified_keywords or verified_keywords or (
-        tailor_context.get("keywords_primary", [])
-        + [term for term in tailor_context.get("keywords_secondary", []) if term not in tailor_context.get("keywords_primary", [])]
-    )[:12] or reusable_keywords or raw_keywords
 
     selected_model = get_openai_model()
     provider_output_debug: Dict[str, Any] = {
@@ -404,6 +384,7 @@ if __name__ == "__main__":
 
     payload = {
         "job_description": job_description,
+        "company": "Interval Partners",
         "target_role": target_role,
         "resume_data": resume_data,
     }

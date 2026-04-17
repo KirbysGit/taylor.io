@@ -4,7 +4,7 @@
       "engineering",
       "data"
     ],
-    "weakTokens": "{'experience', 'codebase', 'coding', 'platform', 'delivery', 'team', 'feature', 'tools', 'data', 'skills'}",
+    "weakTokens": "{'experience', 'coding', 'delivery', 'team', 'tools', 'platform', 'data', 'feature', 'skills', 'codebase'}",
     "phrases": [
       "stakeholder management",
       "cross functional collaboration",

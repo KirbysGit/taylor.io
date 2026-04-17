@@ -1,5 +1,7 @@
 import json
 
+import re
+from collections import defaultdict
 from ..shared.text_utils import normalize_term
 
 # --- buckets for our resume sections. --- #
@@ -44,11 +46,13 @@ def build_relevant_resume_sections(resumeData):
                         cleaned = normalize_term(subvalue)
                         if cleaned:
                             cleanedFields[f"{field} | {normalize_term(subkey)}"] = cleaned
+
                 elif isinstance(value, list):
                     joined = ", ".join(str(x) for x in value if str(x).strip())
                     cleaned = normalize_term(joined)
                     if cleaned:
                         cleanedFields[field] = cleaned
+
                 else:
                     cleaned = normalize_term(value)
                     if cleaned:
@@ -72,22 +76,10 @@ def score_resume_sections(resumeSections, resumeHits):
 
     # initialize our section scores.
     sectionScores = {
-        "experience": {
-            "hits": 0,
-            "rows": []
-        },
-        "projects": {
-            "hits": 0,
-            "rows": []
-        },
-        "skills": {
-            "hits": 0,
-            "rows": []
-        },
-        "education": {
-            "hits": 0,
-            "rows": []
-        }
+        "experience": {"hits": 0, "rows": []},
+        "projects": {"hits": 0, "rows": []},
+        "skills": {"hits": 0, "rows": []},
+        "education": {"hits": 0, "rows": []}
     }
 
     # if the resume sections are not a dictionary, return the section scores.
@@ -113,10 +105,12 @@ def score_resume_sections(resumeSections, resumeHits):
 
             # iterate over resume hits.
             for hit in resumeHits:
+                
+                pattern = r"(?<![a-z0-9])" + re.escape(hit) + r"(?![a-z0-9])"
 
                 # checking if the hit is in the search text.
-                if hit in searchText:
-
+                if re.search(pattern, searchText):
+                    
                     # if it is, add it to our matched terms.
                     matchedTerms.add(hit)
 
@@ -135,54 +129,136 @@ def score_resume_sections(resumeSections, resumeHits):
                 "id": rowId,
                 "hits": rowHits,
                 "matchedTerms": list(matchedTerms),
-                "searchText": searchText,
                 "cleanedFields": row.get("cleanedFields", {}),
             })
 
-    # sort the section rows by # of hits.
-    sectionScores[section]["rows"].sort(key=lambda row: (-row["hits"], row["id"]))
+        # sort the section rows by # of hits.
+        sectionScores[section]["rows"].sort(key=lambda row: (-row["hits"], row["id"]))
 
     return sectionScores
 
-def build_section_priorities(sectionScores, resumeSections):
-    priorities = {
-        "projectsPriorityIds": [],
-        "educationPriorityIds": [],
-        "experiencePriorityIds": [],
-        "skillsCategoriesToEmphasize": [],
+def list_scored_sections(sectionScores):
+
+    # create initial buckets.
+    buckets = {
+        "experience": 0,
+        "projects": 0,
+        "skills": 0,
+        "education": 0,
     }
 
+    # make sure scores are dict.
     if not isinstance(sectionScores, dict):
-        return priorities
-
-    for row in sectionScores.get("experience", {}).get("rows", []):
-        priorities["experiencePriorityIds"].append(row["id"])
-
-    for row in sectionScores.get("projects", {}).get("rows", []):
-        priorities["projectsPriorityIds"].append(row["id"])
-
-    for row in sectionScores.get("education", {}).get("rows", []):
-        priorities["educationPriorityIds"].append(row["id"])
-
-    skillCategoryHits = {}
-
-    skillRows = {row.get("id"): row for row in resumeSections.get("skills", [])}
-
-    print(skillRows)
-
-    for scoredRow in sectionScores.get("skills", {}).get("rows", []):
-        rowId = scoredRow.get("id", -1)
-        rawRow = skillRows.get(rowId, {})
-        category = rawRow.get("category", "")
-
-        if not category:
+        return buckets
+    
+    # iterate over the section scores, add the hits to the buckets.
+    for section, data in sectionScores.items():
+        # if the section is not in the buckets, continue.
+        if section not in buckets:
             continue
 
-        skillCategoryHits[category] = skillCategoryHits.get(category, 0) + scoredRow.get("hits", 0)
+        # add the hits to the buckets.
+        buckets[section] = data.get("hits", 0)
 
-    priorities["skillCategoriesToEmphasize"] = sorted(skillCategoryHits.items(), key=lambda x: (-x[1], x[0]))
+    # return the buckets.
+    return sorted(buckets.items(), key=lambda x: (-x[1], x[0]))
 
-    return priorities
+def list_rows_per_section(sectionScores, resumeSections):
+    # initialize our buckets.
+    buckets = {
+        "experience": [],
+        "projects": [],
+        "skills": defaultdict(list),
+        "education": [],
+    }
+
+    # create a dictionary of skill rows by id.
+    skillRows = {row.get("id"): row for row in resumeSections.get("skills", []) if isinstance(row, dict)}
+
+    # iterate over the section scores.
+    for section, data in sectionScores.items():
+        # get the rows for the section.
+        rows = data.get("rows", [])
+
+        # if the section is skills, group by category.
+        if section == "skills":
+            # initialize our category hits.
+            categoryHits = defaultdict(lambda: {"hits": 0, "rows": []})
+
+            # iterate over the rows.
+            for row in rows:
+                # get the row id and cleaned fields.
+                rowId = row.get("id", -1)
+                rawRow = row.get("cleanedFields", {})
+                category = rawRow.get("category", "")
+
+                # if the category is not in the buckets, continue.
+                if not category:
+                    continue
+
+                # add the hits to the category hits.
+                categoryHits[category]["hits"] += row.get("hits", 0)
+                categoryHits[category]["rows"].append({
+                    "id": rowId,
+                    "hits": row.get("hits", 0),
+                    "matchedTerms": row.get("matchedTerms", []),
+                })
+
+            # sort the category hits by hits and id.
+            for category, data in categoryHits.items():
+                data["rows"].sort(key=lambda x: (-x["hits"], x["id"]))
+
+            # add the category hits to the buckets.
+            buckets["skills"] = dict(
+                sorted(categoryHits.items(), key=lambda x: (-x[1]["hits"], x[0]))
+            )
+            
+            continue
+
+        # iterate over the rows.
+        for row in data.get("rows", []):
+            # get the row id and hits.
+            buckets[section].append({
+                "id": row.get("id", -1),
+                "hits": row.get("hits", 0),
+                "matchedTerms": row.get("matchedTerms", []),
+            })
+
+        # sort the rows by hits and id.
+        buckets[section].sort(key=lambda x: (-x["hits"], x["id"]))
+
+    return buckets
+
+def list_gaps_per_section(resumeGaps, sectionScores):
+
+    buckets = {
+        "experience": [],
+        "projects": [],
+        "skills": [],
+        "education": [],
+    }
+
+    if not isinstance(resumeGaps, list):
+        return buckets
+
+    if not isinstance(sectionScores, dict):
+        return buckets
+
+    for section, data in sectionScores.items():
+        if section not in buckets:
+            continue
+
+        matched = set()
+
+        for row in data.get("rows", []):
+            if not isinstance(row, dict):
+                continue
+
+            for term in row.get("matchedTerms", []):
+                matched.add(term)
+        buckets[section] = [gap for gap in resumeGaps if gap not in matched]
+
+    return buckets
 
 # --- builds the tailor plan. --- #
 # input -> job description (str), tailor context (dict)
@@ -196,12 +272,26 @@ def build_tailor_plan(resumeData, tailorContext):
     targetRole = tailorContext["targetRole"]
     activeDomains = tailorContext["activeDomains"]
 
-
+    # build relevant resume sections into strings for us to parse.
     resumeSections = build_relevant_resume_sections(resumeData)
 
+    # score each section based on the number of hits per section.
     sectionScores = score_resume_sections(resumeSections=resumeSections, resumeHits=resumeHits)
 
-    sectionPriorities = build_section_priorities(sectionScores, resumeSections)
+    # rank the sections by the number of hits.
+    sectionScoresRanked = list_scored_sections(sectionScores)
+
+    # rank the rows per section by the number of hits.
+    rowsPerSectionRanked = list_rows_per_section(sectionScores, resumeSections)
+
+    gapsPerSection = list_gaps_per_section(resumeGaps, sectionScores)
+
+    return {
+        "sectionScoresRanked": sectionScoresRanked,
+        "rowsPerSectionRanked": rowsPerSectionRanked,
+        "gapsPerSection": gapsPerSection,
+    }
+
     
     # plan our edit.
 
@@ -228,5 +318,16 @@ def build_tailor_plan(resumeData, tailorContext):
 
     # - rewrite the sections important data included in our buckets, like the description for projects or experience, or the relevant courses for education.
     # - rearrange our section ordering based on the number of hits per section.
+
+
+    # basically telling the ai
+    # - what the user has that is most relevant to the jd throughout our sections.
+    # - what the user is missing.
+
+    # so that spectrum we need to designate,
+    # - we have stronger keywords that are more relevant, how do we prioritze our data to best support those keywords
+    # - also rearranging our data to also support the keywords we are missing. 
+
+    # also setting up our resume based prioritization.
 
     return

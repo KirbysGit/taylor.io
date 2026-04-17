@@ -1,15 +1,10 @@
 from .job_tailor_service import build_job_tailor_suggestions
 from .extraction import extract_keywords
-from .planning import build_edit_plan
-from .prompt import build_job_tailor_prompt
+from .planning import build_tailor_plan
+from .prompt import build_prompt
 from .processing import build_tailor_context
 from .openai import (
-    build_chat_messages,
-    build_openai_request_payload,
-    get_openai_model,
-    is_openai_configured,
-    is_openai_enabled,
-    request_chat_completion,
+    ai_chat_completion,
 )
 from .schemas import (
     JobTailorSuggestRequest,
@@ -19,19 +14,13 @@ from .schemas import (
 
 __all__ = [
     "build_job_tailor_suggestions",
-    "build_job_tailor_prompt",
     "extract_job_keywords",
     "extract_job_keywords_detailed",
     "detect_domains",
     "get_extraction_profile",
     "build_tailor_context",
-    "build_edit_plan",
-    "build_chat_messages",
-    "build_openai_request_payload",
-    "request_chat_completion",
-    "is_openai_configured",
-    "is_openai_enabled",
-    "get_openai_model",
+    "build_tailor_plan",
+    "ai_chat_completion",
     "JobTailorSuggestRequest",
     "JobTailorSuggestResponse",
     "JobTailorSuggestion",

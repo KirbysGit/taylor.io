@@ -55,6 +55,7 @@ class JobTailorSuggestRequest(BaseModel):
     resume_data: Dict[str, Any] = Field(default_factory=dict)
     template_name: Optional[str] = Field(default="classic")
     target_role: Optional[str] = Field(default=None, max_length=180)
+    company: Optional[str] = Field(default=None, max_length=180)
     style_preferences: Optional[Dict[str, Any]] = None
     strict_truth: bool = True
 
