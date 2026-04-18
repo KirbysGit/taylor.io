@@ -29,8 +29,7 @@ function RightPanel({
 	onZoomOut,
 	onZoomReset = () => {},
 	downloadStatus = null,
-	onDownloadPDF,
-	onDownloadWord,
+	onDownloadDocument,
 	onRefreshPreview,
 	validationIssues = [],
 	exactPdfUrl = null,
@@ -109,7 +108,7 @@ function RightPanel({
 					<div className="inline-flex h-10 overflow-hidden rounded-xl border border-gray-200/95 bg-gradient-to-b from-white to-gray-50/95 shadow-sm ring-1 ring-gray-900/[0.04]">
 						<button
 							type="button"
-							onClick={onDownloadPDF}
+							onClick={() => onDownloadDocument('pdf')}
 							disabled={isDownloadBusy}
 							className="inline-flex items-center gap-2 px-3.5 text-sm font-semibold text-brand-pink transition-colors duration-150 hover:bg-brand-pink/[0.08] active:bg-brand-pink/15 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-pink/40"
 							aria-label="Download PDF"
@@ -120,7 +119,7 @@ function RightPanel({
 						<span className="w-px shrink-0 self-stretch bg-gray-200" aria-hidden="true" />
 						<button
 							type="button"
-							onClick={onDownloadWord}
+							onClick={() => onDownloadDocument('word')}
 							disabled={isDownloadBusy}
 							className="inline-flex items-center gap-2 px-3.5 text-sm font-semibold text-sky-900 transition-colors duration-150 hover:bg-sky-50 active:bg-sky-100/80 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-sky-400/50"
 							aria-label="Download Word document"

@@ -14,26 +14,13 @@ from .planning import build_tailor_plan
 from .prompt import build_prompt
 from .openai import ai_chat_completion
 
-
-from .post_processing import (
-    apply_patch_to_resume_data,
-    apply_provider_json_if_safe,
-    build_classified_changes,
-    build_concept_warnings,
-    build_fallback_section_optimizations,
-    build_patch_from_section_optimizations,
-    build_reasoning_feed,
-    extract_skill_names_from_resume,
-)
-from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse, SectionOptimizations
+from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse
 
 logger = logging.getLogger(__name__)
 
 
-def build_job_tailor_suggestions(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
+def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     payload = JobTailorSuggestRequest.model_dump()
-    
-    print(payload)
 
     ext_result = extract_keywords(payload["job_description"], payload["target_role"], numKeywords=12)
     
@@ -57,239 +44,21 @@ def build_job_tailor_suggestions(JobTailorSuggestRequest: JobTailorSuggestReques
     # request chat completion.
     text, usage = ai_chat_completion(system_prompt=system_prompt, user_prompt=user_prompt)
 
-    print(text)
-    print(usage)
+    # add usage later to debugging.
+
+    genSummary = text["summary"]
+    updatedResumeData = text["updatedResumeData"]
+    patchDiff = text["patchDiff"]
+    changeReasons = text["changeReasons"]
+    warnings = text["warnings"]
     
     
-    return 
-
-
-    selected_model = get_openai_model()
-    provider_output_debug: Dict[str, Any] = {
-        "enabled": is_openai_enabled(),
-        "attempted": False,
-        "model": selected_model,
-        "finish_reason": None,
-        "error": None,
-        "response_preview": None,
-        "parsed_json": None,
-        "usage": None,
-    }
-    provider_full_content = ""
-
-    logger.info("AI provider status enabled=%s model=%s user_id=%s", provider_output_debug["enabled"], selected_model, user_id)
-    if provider_output_debug["enabled"]:
-        provider_output_debug["attempted"] = True
-        try:
-            provider_result = request_chat_completion(
-                model=selected_model,
-                system_prompt=prompt_bundle["system_prompt"],
-                user_prompt=prompt_bundle["user_prompt"],
-            )
-            provider_output_debug["finish_reason"] = provider_result.get("finish_reason")
-            provider_full_content = str(provider_result.get("content") or "")
-            provider_output_debug["response_preview"] = provider_full_content[:1800]
-            provider_output_debug["parsed_json"] = provider_result.get("parsed_json")
-            provider_output_debug["usage"] = provider_result.get("usage")
-            logger.info(
-                "AI provider response ok model=%s finish_reason=%s tokens=%s",
-                selected_model,
-                provider_output_debug["finish_reason"],
-                provider_output_debug["usage"],
-            )
-        except Exception as exc:
-            provider_output_debug["error"] = str(exc)
-            logger.exception("AI provider call failed model=%s", selected_model)
-    else:
-        logger.info("AI provider call skipped (AI_USE_OPENAI not enabled or API key missing)")
-
-    write_debug_output(
-        {
-            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-            "user_id": user_id,
-            "request": {
-                "target_role": payload.target_role,
-                "job_description_chars": len(payload.job_description),
-                "template_name": payload.template_name,
-                "strict_truth": payload.strict_truth,
-            },
-            "extraction": {
-                "active_domains": extraction_result["active_domains"],
-                "top_keywords_raw": extraction_result["keywords"][:12],
-                "keywords_filtered": reusable_keywords[:12],
-                "keywords_abstracted": abstracted_keywords[:12],
-                "dynamic_phrase_candidates": extraction_result["dynamic_phrase_candidates"][:10],
-                "tailor_context": tailor_context,
-                "edit_plan": edit_plan,
-            },
-            "prompt_setup": {
-                "prompt_version": prompt_bundle["prompt_version"],
-                "context": prompt_bundle["context"],
-                "system_prompt": prompt_bundle["system_prompt"],
-                "user_prompt": strip_resume_data_from_user_prompt(prompt_bundle["user_prompt"]),
-                "resume_input_debug": prompt_bundle.get("resume_input_debug", {}),
-                "openai_payload_preview": build_openai_request_payload(
-                    model=selected_model,
-                    system_prompt=prompt_bundle["system_prompt"],
-                    user_prompt=strip_resume_data_from_user_prompt(prompt_bundle["user_prompt"]),
-                ),
-                "provider_output_debug": provider_output_debug,
-            },
-        }
-    )
-
-    normalized_resume_data = tailor_context.get("normalized_resume_data") if isinstance(tailor_context.get("normalized_resume_data"), dict) else resume_data
-    keywords = ui_keywords
-    warnings: List[str] = []
-
-    section_optimizations = build_fallback_section_optimizations(
-        edit_plan=edit_plan if isinstance(edit_plan, dict) else {},
-        resume_data=normalized_resume_data if isinstance(normalized_resume_data, dict) else {},
-    )
-    suggested_resume_data_patch = build_patch_from_section_optimizations(section_optimizations)
-    suggested_resume_data = apply_patch_to_resume_data(normalized_resume_data, suggested_resume_data_patch)
-
-    provider_parse_debug: Dict[str, Any] = {"used": False}
-    parsed_json = provider_output_debug.get("parsed_json")
-    if isinstance(parsed_json, dict):
-        (
-            keywords,
-            core_verified_keywords,
-            supporting_verified_keywords,
-            target_gap_keywords,
-            warnings,
-            suggested_resume_data,
-            section_optimizations,
-            suggested_resume_data_patch,
-            provider_parse_debug,
-        ) = apply_provider_json_if_safe(
-            parsed_json=parsed_json,
-            resume_gaps=list(tailor_context.get("resume_gaps", [])),
-            resume_hits=list(tailor_context.get("resume_hits", [])),
-            core_verified_keywords=core_verified_keywords,
-            supporting_verified_keywords=supporting_verified_keywords,
-            resume_evidence_lines=list(edit_plan.get("resume_evidence_lines", [])) if isinstance(edit_plan, dict) else [],
-            has_experience=isinstance(resume_data.get("experience"), list) and bool(resume_data.get("experience")),
-            has_projects=isinstance(resume_data.get("projects"), list) and bool(resume_data.get("projects")),
-            has_skills=isinstance(resume_data.get("skills"), list) and bool(resume_data.get("skills")),
-            fallback_resume_data=normalized_resume_data,
-            fallback_section_optimizations=section_optimizations,
-            fallback_keywords=keywords,
-            fallback_core_keywords=core_verified_keywords,
-            fallback_supporting_keywords=supporting_verified_keywords,
-            fallback_target_gap_keywords=target_gap_keywords,
-            available_skills=extract_skill_names_from_resume(normalized_resume_data if isinstance(normalized_resume_data, dict) else {}),
-            fallback_warnings=warnings,
-        )
-
-    concept_warnings = build_concept_warnings(
-        target_concepts=target_gap_keywords[:6],
-        resume_hits=list(tailor_context.get("verified_resume_terms", tailor_context.get("resume_hits", []))),
-        resume_evidence_lines=list(edit_plan.get("resume_evidence_lines", [])) if isinstance(edit_plan, dict) else [],
-        resume_data=normalized_resume_data if isinstance(normalized_resume_data, dict) else {},
-        limit=4,
-    )
-    for warning in concept_warnings:
-        if warning not in warnings:
-            warnings.append(warning)
-
-    classified_changes = build_classified_changes(section_optimizations)
-    reasoning_feed = build_reasoning_feed(
-        target_role=payload.target_role or "",
-        verified_keywords=keywords,
-        target_gap_keywords=target_gap_keywords,
-        warnings=warnings,
-        edit_plan=edit_plan if isinstance(edit_plan, dict) else {},
-        classified_changes=classified_changes,
-    )
-
-    write_provider_response_text(provider_full_content)
-    write_provider_debug_output(
-        {
-            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-            "user_id": user_id,
-            "target_role": payload.target_role,
-            "provider": {
-                "enabled": provider_output_debug.get("enabled"),
-                "attempted": provider_output_debug.get("attempted"),
-                "model": provider_output_debug.get("model"),
-                "finish_reason": provider_output_debug.get("finish_reason"),
-                "error": provider_output_debug.get("error"),
-                "usage": provider_output_debug.get("usage"),
-            },
-            "response": {
-                "file": str(PROVIDER_RESPONSE_LATEST),
-                "preview": provider_output_debug.get("response_preview"),
-                "preview_chars": len(str(provider_output_debug.get("response_preview") or "")),
-            },
-            "resume_input_debug": prompt_bundle.get("resume_input_debug", {}),
-            "parsed_json": provider_output_debug.get("parsed_json"),
-            "validation": provider_parse_debug,
-            "classified_changes": classified_changes,
-            "reasoning_feed": reasoning_feed,
-        }
-    )
-
     return JobTailorSuggestResponse(
-        prompt_version=prompt_bundle["prompt_version"],
-        model=selected_model,
-        summary=(
-            "Prompt scaffold prepared and mock tailoring complete. "
-            "Use usage.prompt_debug and usage.provider_output_debug to inspect request/response mapping."
-        ),
-        ats_keywords=keywords,
-        verified_ats_keywords=keywords,
-        core_verified_keywords=core_verified_keywords,
-        supporting_verified_keywords=supporting_verified_keywords,
-        target_gap_keywords=target_gap_keywords,
+        genSummary=genSummary,
+        updatedResumeData=updatedResumeData,
+        patchDiff=patchDiff,
+        changeReasons=changeReasons,
         warnings=warnings,
-        suggestions=[],
-        section_optimizations=SectionOptimizations.model_validate(section_optimizations),
-        suggested_resume_data_patch=suggested_resume_data_patch,
-        suggested_resume_data=suggested_resume_data,
-        classified_changes=classified_changes,
-        reasoning_feed=reasoning_feed,
-        usage={
-            "user_id": user_id,
-            "job_description_chars": len(payload.job_description),
-            "suggestion_count": 0,
-            "is_mock": True,
-            "openai_live_enabled": provider_output_debug["enabled"],
-            "provider_response_file": str(PROVIDER_RESPONSE_LATEST),
-            "verified_ats_keywords": keywords,
-            "core_verified_keywords": core_verified_keywords,
-            "supporting_verified_keywords": supporting_verified_keywords,
-            "target_gap_keywords": target_gap_keywords,
-            "classified_changes": classified_changes,
-            "reasoning_feed": reasoning_feed,
-            "suggested_resume_data_patch": suggested_resume_data_patch,
-            "section_optimizations": section_optimizations,
-            "tailor_context": tailor_context,
-            "edit_plan": edit_plan,
-            "provider_output_debug": provider_output_debug,
-            "provider_parse_debug": provider_parse_debug,
-            "prompt_debug": {
-                "context": prompt_bundle["context"],
-                "resume_input_debug": prompt_bundle.get("resume_input_debug", {}),
-                "prompt_char_counts": {
-                    "system_prompt": len(prompt_bundle["system_prompt"]),
-                    "user_prompt": len(prompt_bundle["user_prompt"]),
-                },
-                "prompt_preview": {
-                    "system_prompt": prompt_bundle["system_prompt"][:600],
-                    "user_prompt": prompt_bundle["user_prompt"][:1200],
-                },
-                "extraction_debug": {
-                    "active_domains": extraction_result["active_domains"],
-                    "top_keywords_raw": extraction_result["keywords"][:12],
-                    "keywords_filtered": reusable_keywords[:12],
-                    "keywords_abstracted": abstracted_keywords[:12],
-                    "dynamic_phrase_candidates": extraction_result["dynamic_phrase_candidates"][:10],
-                    "tailor_context": tailor_context,
-                    "edit_plan": edit_plan,
-                },
-            },
-        },
     )
 
 

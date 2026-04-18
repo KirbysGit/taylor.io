@@ -21,12 +21,6 @@ function LeftPanel({
 	stylePreferences,
 	onStylePreferenceChange,
 	onScrollToSection,
-	headerData,
-	educationData,
-	experienceData,
-	projectsData,
-	skillsData,
-	summaryData,
 	resumeData,
 	onHeaderChange,
 	onEducationChange,
@@ -42,40 +36,14 @@ function LeftPanel({
 	onSectionLabelChange,
 	tailorIntent,
 	aiTailorResult,
-	aiAppliedChanges,
-	aiPendingChanges,
-	aiRejectedChanges,
 	aiTailorPhase,
-	onAiUndoLastChange,
-	onAiRevertAllChanges,
-	onAiAcceptAllPending,
-	onAiRejectAllPending,
-	onAiAcceptChange,
-	onAiRejectChange,
-	onAiRevertSingleChange,
-	onAiRevertSection,
 }) {
 	return (
 		<aside 
 			style={{ width: `${width}px` }} 
 			className="flex-shrink-0 bg-white border-r border-gray-200 pl-8 pt-8 pb-8 pr-4 overflow-y-auto [scrollbar-gutter:stable]"
 		>
-			<TailorAssistPanel
-				tailorIntent={tailorIntent}
-				aiTailorResult={aiTailorResult}
-				aiAppliedChanges={aiAppliedChanges}
-				aiPendingChanges={aiPendingChanges}
-				aiRejectedChanges={aiRejectedChanges}
-				aiTailorPhase={aiTailorPhase}
-				onAiUndoLastChange={onAiUndoLastChange}
-				onAiRevertAllChanges={onAiRevertAllChanges}
-				onAiAcceptAllPending={onAiAcceptAllPending}
-				onAiRejectAllPending={onAiRejectAllPending}
-				onAiAcceptChange={onAiAcceptChange}
-				onAiRejectChange={onAiRejectChange}
-				onAiRevertSingleChange={onAiRevertSingleChange}
-				onAiRevertSection={onAiRevertSection}
-			/>
+			<TailorAssistPanel tailorIntent={tailorIntent} aiTailorResult={aiTailorResult} aiTailorPhase={aiTailorPhase} />
 
 			{welcomeMessage && (
 				<WelcomeMessage
@@ -97,12 +65,6 @@ function LeftPanel({
 			<SimpleResumeSections
 					sectionOrder={sectionOrder}
 					onSectionOrderChange={onSectionOrderChange}
-					headerData={headerData}
-					educationData={educationData}
-					experienceData={experienceData}
-					projectsData={projectsData}
-					skillsData={skillsData}
-					summaryData={summaryData}
 					resumeData={resumeData}
 					onHeaderChange={onHeaderChange}
 					onEducationChange={onEducationChange}

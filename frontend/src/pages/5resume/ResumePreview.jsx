@@ -1,17 +1,6 @@
-// pages/5resume/ResumePreview.jsx
+// pages/5resume/ResumePreview.jsx — main resume editor + preview; helpers in resumePreviewHelpers.js
 
-// building back incrementally.
-// loading state for downloading and processing.
-// templates up top.
-// welcome message only appears on first load.
-// save banner shouldn't appear if visibility change.
-// add like recommendations for features, like you should at least have a linkedin or something else.
-// more contrast in fields just for sake of "easy on the eyes".
-// preview scrolls to where the user is in input fields.
-// always have padding on left side for scroll bar (like the left panel).
-
-// imports.
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
@@ -21,8 +10,6 @@ import { generateResumePreview, generateResumePDF, generateResumeWord } from '@/
 import { getMyProfile, upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, updateSectionLabels, listSavedResumes, createSavedResume, getSavedResume, deleteSavedResume } from '@/api/services/profile'
 import { suggestJobTailor } from '@/api/services/ai'
 
-// component imports.
-// component imports.
 import TopNav from '@/components/TopNav'
 import LeftPanel from './components/left/LeftPanel'
 import RightPanel from './components/right/RightPanel'
@@ -37,6 +24,13 @@ import {
 import { applyVisibilityFilters, hasResumeDataChanged, getResumeChangeDescriptions, downloadBlob, normalizeSectionOrder } from './utils/resumeDataTransform'
 import { initializeResumeDataFromBackend, initializeResumeDataWithOptions } from './utils/resumeDataInitializer'
 import { validateResumeData } from './utils/resumeValidation'
+import {
+	getPanelWidthBounds,
+	snapshotResumeBaseline,
+	buildResumeStateFromResumeData,
+	mergeTailoredResumePayload,
+	DEFAULT_SECTION_VISIBILITY,
+} from './resumePreviewHelpers'
 
 /** Preview iframe scale: 50%–150%, step 25% (no % label in UI) */
 const PREVIEW_ZOOM = { min: 50, max: 150, step: 25, default: 100 }
@@ -44,152 +38,6 @@ const PREVIEW_ZOOM = { min: 50, max: 150, step: 25, default: 100 }
 /** Draft HTML: quick feedback. Exact PDF: debounced; matches export. */
 const DRAFT_PREVIEW_DEBOUNCE_MS = 450
 const EXACT_PDF_DEBOUNCE_MS = 1000
-
-function _toLower(value) {
-	return String(value || '').trim().toLowerCase()
-}
-
-function reorderSkillsFront(skills, frontList) {
-	const source = Array.isArray(skills) ? skills : []
-	const front = Array.isArray(frontList) ? frontList.map((x) => String(x || '').trim()).filter(Boolean) : []
-	if (!front.length) return source
-
-	const byName = new Map()
-	source.forEach((item) => {
-		const name = typeof item === 'object' ? String(item?.name || '').trim() : String(item || '').trim()
-		if (name) byName.set(_toLower(name), item)
-	})
-
-	const used = new Set()
-	const reordered = []
-	front.forEach((name) => {
-		const key = _toLower(name)
-		if (used.has(key)) return
-		const match = byName.get(key)
-		if (match != null) {
-			reordered.push(match)
-			used.add(key)
-		}
-	})
-
-	source.forEach((item) => {
-		const name = typeof item === 'object' ? String(item?.name || '').trim() : String(item || '').trim()
-		const key = _toLower(name)
-		if (!used.has(key)) reordered.push(item)
-	})
-	return reordered
-}
-
-function applyClassifiedChanges(baseResumeData, classifiedChanges) {
-	const changes = Array.isArray(classifiedChanges) ? classifiedChanges : []
-	return changes.reduce((acc, change) => {
-		if (!change || typeof change !== 'object') return acc
-		const section = String(change.section || '').trim()
-		const changeType = String(change.change_type || '').trim()
-		const decision = changeType
-		const itemId = String(change.item_id || '').trim()
-		const after = String(change.after || '').trim()
-
-		if (section === 'summary' && changeType === 'summary_rewrite' && after) {
-			return {
-				...acc,
-				summary: { ...(acc.summary || {}), summary: after },
-			}
-		}
-
-		if ((section === 'experience' || section === 'projects') && itemId) {
-			const rows = Array.isArray(acc[section]) ? acc[section] : []
-			const rowIndex = Number.isInteger(change?.row_index) ? Number(change.row_index) : -1
-			return {
-				...acc,
-				[section]: rows.map((row, idx) => {
-					if (!row || typeof row !== 'object') return row
-					const itemIdMatch = String(row.item_id || '').trim() === itemId
-					const rowIndexMatch = rowIndex >= 0 && idx === rowIndex
-					if (!itemIdMatch && !rowIndexMatch) return row
-					if (decision === 'omit') {
-						return { ...row, _omit_suggested: true }
-					}
-					if (after) {
-						return { ...row, description: after }
-					}
-					return row
-				}),
-			}
-		}
-
-		if (section === 'skills' && changeType === 'reorder_skills') {
-			const afterList = Array.isArray(change.after_list) ? change.after_list : []
-			return {
-				...acc,
-				skills: reorderSkillsFront(acc.skills, afterList),
-			}
-		}
-
-		return acc
-	}, baseResumeData)
-}
-
-function revertClassifiedChange(baseResumeData, change) {
-	if (!change || typeof change !== 'object') return baseResumeData
-	const section = String(change.section || '').trim()
-	const changeType = String(change.change_type || '').trim()
-	const decision = changeType
-	const itemId = String(change.item_id || '').trim()
-	const before = String(change.before || '').trim()
-
-	if (section === 'summary' && changeType === 'summary_rewrite') {
-		return {
-			...baseResumeData,
-			summary: { ...(baseResumeData.summary || {}), summary: before },
-		}
-	}
-
-	if ((section === 'experience' || section === 'projects') && itemId) {
-		const rows = Array.isArray(baseResumeData[section]) ? baseResumeData[section] : []
-		const rowIndex = Number.isInteger(change?.row_index) ? Number(change.row_index) : -1
-		return {
-			...baseResumeData,
-			[section]: rows.map((row, idx) => {
-				if (!row || typeof row !== 'object') return row
-				const itemIdMatch = String(row.item_id || '').trim() === itemId
-				const rowIndexMatch = rowIndex >= 0 && idx === rowIndex
-				if (!itemIdMatch && !rowIndexMatch) return row
-				if (decision === 'omit') {
-					const next = { ...row }
-					delete next._omit_suggested
-					return next
-				}
-				return { ...row, description: before || row.description }
-			}),
-		}
-	}
-
-	if (section === 'skills' && changeType === 'reorder_skills') {
-		const beforeList = Array.isArray(change.before_list) ? change.before_list : []
-		return {
-			...baseResumeData,
-			skills: reorderSkillsFront(baseResumeData.skills, beforeList),
-		}
-	}
-
-	return baseResumeData
-}
-
-function shouldAutoApplyChange(change) {
-	if (!change || typeof change !== 'object') return false
-	const risk = String(change.risk_level || '').trim().toLowerCase()
-	const confidence = Number(change.confidence || 0)
-	const reason = String(change.reason || '').toLowerCase()
-	const driftSignals = ['adjacent evidence', 'limited direct evidence', 'true gap', 'semantic drift']
-	const driftLow = !driftSignals.some((token) => reason.includes(token))
-
-	if (risk === 'low') return true
-	if (risk === 'medium') {
-		return confidence >= 0.84 && driftLow
-	}
-	return false
-}
 
 /** Aligns with backend `shared.template_slug.normalize_template_slug` (legacy `default` → `classic`). */
 function normalizeTemplateSlug(name) {
@@ -209,6 +57,14 @@ const DEFAULT_STYLE_PREFERENCES = {
 	contactUrlDisplay: 'full',
 }
 
+const DEFAULT_SECTION_LABELS = {
+	summary: 'Professional Summary',
+	education: 'Education',
+	experience: 'Experience',
+	projects: 'Projects',
+	skills: 'Skills',
+}
+
 // ----------- main component -----------
 function ResumePreview() {
 
@@ -216,13 +72,8 @@ function ResumePreview() {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const tailorIntent = location.state?.createMode === 'tailor' ? location.state?.tailorIntent : null
-	const [aiTailorResult, setAiTailorResult] = useState(location.state?.aiTailorResult || null)
-	const [aiAppliedChanges, setAiAppliedChanges] = useState([])
-	const [aiPendingChanges, setAiPendingChanges] = useState([])
-	const [aiRejectedChanges, setAiRejectedChanges] = useState([])
+	const [aiTailorResult, setAiTailorResult] = useState(null)
 	const [aiTailorPhase, setAiTailorPhase] = useState('idle')
-	const aiBaselineResumeRef = useRef(null)
-	const aiHistoryRef = useRef([])
 	const hasFetchedProfileRef = useRef(false)
 	const hasFetchedTemplatesRef = useRef(false)
 	const lastSavedResumesUserIdRef = useRef(null)
@@ -232,12 +83,8 @@ function ResumePreview() {
 
 	const [user, setUser] = useState(null)										// user's data.
 
-	// welcome message states.
-	// Check localStorage on initial render - only show if user hasn't seen it before
-	const [welcomeMessage, setWelcomeMessage] = useState(() => {
-		const hasSeenWelcome = localStorage.getItem('hasSeenResumeWelcome')
-		return !hasSeenWelcome // Show if they haven't seen it
-	})
+	// One-time welcome: checks localStorage on first render.
+	const [welcomeMessage, setWelcomeMessage] = useState(() => !localStorage.getItem('hasSeenResumeWelcome'))
 
 	// template states.
 	const [template, setTemplate] = useState('classic')
@@ -246,58 +93,9 @@ function ResumePreview() {
 	const [isLoadingTemplates, setIsLoadingTemplates] = useState(true)          // loading state for templates.
 	const [stylePreferences, setStylePreferences] = useState(() => ({ ...DEFAULT_STYLE_PREFERENCES }))
 	
-	// panel states.
-	const DEFAULT_LEFT_PANEL_WIDTH = 700; // default width for left panel
-	const [leftPanelWidth, setLeftPanelWidth] = useState(DEFAULT_LEFT_PANEL_WIDTH);                  // width of left panel.
-	const [isResizing, setIsResizing] = useState(false);						// if user is currently resizing panel.
-
-	// Calculate min and max panel widths based on viewport size
-	// Using breakpoint-based approach for more precise control
-	const getMinLeftPanelWidth = () => {
-		const viewportWidth = window.innerWidth
-		
-		// Breakpoint-based minimum widths
-		// Adjust these pixel values as needed during debugging
-		if (viewportWidth < 768) {
-			// Mobile/Tablet (< 768px)
-			return 320 // Minimum for small screens
-		} else if (viewportWidth < 1024) {
-			// Tablet (768px - 1023px)
-			return 400
-		} else if (viewportWidth < 1440) {
-			// Desktop (1024px - 1439px)
-			return 500
-		} else if (viewportWidth < 1920) {
-			// Desktop (1440px - 1919px)
-			return 600
-		} else {
-			// Large Desktop (>= 1920px)
-			return 700 // Fixed max for large screens
-		}
-	}
-
-	const getMaxLeftPanelWidth = () => {
-		const viewportWidth = window.innerWidth
-		// Breakpoint-based maximum widths
-		// Ensures right panel always has adequate space
-		// Adjust these pixel values as needed during debugging
-		if (viewportWidth < 768) {
-			// Mobile/Tablet (< 768px)
-			return Math.floor(viewportWidth * 0.60) // Max 60% on small screens
-		} else if (viewportWidth < 1024) {
-			// Tablet (768px - 1023px)
-			return Math.floor(viewportWidth * 0.55) // Max 55% on tablets
-		} else if (viewportWidth < 1440) {
-			// Desktop (1024px - 1439px)
-			return 800 // Fixed max for standard desktop
-		} else if (viewportWidth < 1920) {
-			// Large Desktop (>= 1440px)
-			return 1000 // Fixed max for large screens
-		} else {
-			// Large Desktop (>= 1920px)
-			return 1200 // Fixed max for large screens
-		}
-	}
+	const DEFAULT_LEFT_PANEL_WIDTH = 700
+	const [leftPanelWidth, setLeftPanelWidth] = useState(DEFAULT_LEFT_PANEL_WIDTH)
+	const [isResizing, setIsResizing] = useState(false)
 
 	// preview states.
 	const [previewHtml, setPreviewHtml] = useState(null)
@@ -324,14 +122,6 @@ function ResumePreview() {
 	/** Right-panel download overlay: loading bar + success animation (PDF / Word) */
 	const [downloadStatus, setDownloadStatus] = useState(null)
 
-	// header data state.
-	const [headerData, setHeaderData] = useState(null)
-	const [educationData, setEducationData] = useState([])
-	const [experienceData, setExperienceData] = useState([])
-	const [projectsData, setProjectsData] = useState([])
-	const [skillsData, setSkillsData] = useState([])
-	const [summaryData, setSummaryData] = useState(null)
-	
 	// save banner state.
 	const [showSaveBanner, setShowSaveBanner] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
@@ -348,7 +138,7 @@ function ResumePreview() {
 		summary: null,
 	})
 
-	// flag to track if we've set baseline after Education component normalization.
+	// Baseline snapshot runs once profile data is hydrated (see effect below).
 	const [hasSetBaseline, setHasSetBaseline] = useState(false)
 
 	// section ordering state
@@ -357,14 +147,6 @@ function ResumePreview() {
 		return normalizeSectionOrder(savedOrder ? JSON.parse(savedOrder) : null)
 	})
 
-	// section labels state - default labels
-	const DEFAULT_SECTION_LABELS = {
-		summary: 'Professional Summary',
-		education: 'Education',
-		experience: 'Experience',
-		projects: 'Projects',
-		skills: 'Skills'
-	}
 	const [sectionLabels, setSectionLabels] = useState(DEFAULT_SECTION_LABELS)
 
 	// resume data state.
@@ -386,17 +168,23 @@ function ResumePreview() {
 		skills: [],
 		hiddenSkills: [],
 		summary: { summary: '' },
-		// section visibility - controls which sections show in preview/PDF
-		sectionVisibility: {
-			summary: false, // hidden by default
-			education: true,
-			experience: true,
-			projects: true,
-			skills: true,
-		},
-		sectionOrder: normalizeSectionOrder(sectionOrder), // summary locked under header
+		sectionVisibility: { ...DEFAULT_SECTION_VISIBILITY },
+		sectionOrder: normalizeSectionOrder(sectionOrder),
 	})
 
+	// Payload sent to preview/PDF/Word (visibility-filtered + labels).
+	const visibleResumePayload = useMemo(
+		() => ({
+			...applyVisibilityFilters(resumeData),
+			sectionLabels,
+		}),
+		[resumeData, sectionLabels]
+	)
+
+	const previewInputKey = useMemo(
+		() => JSON.stringify({ template, previewData: visibleResumePayload, stylePreferences }),
+		[template, visibleResumePayload, stylePreferences]
+	)
 
 	// ----- handlers -----
 
@@ -406,11 +194,9 @@ function ResumePreview() {
 	}
 
 	const handleMouseMove = (e) => {
-		if (!isResizing) return;
-		const newWidth = e.clientX
-		const minWidth = getMinLeftPanelWidth()
-		const maxWidth = getMaxLeftPanelWidth()
-		setLeftPanelWidth(Math.min(Math.max(minWidth, newWidth), maxWidth))
+		if (!isResizing) return
+		const { min, max } = getPanelWidthBounds(window.innerWidth)
+		setLeftPanelWidth(Math.min(Math.max(min, e.clientX), max))
 	}
 
 	const handleMouseUp = () => {
@@ -418,15 +204,11 @@ function ResumePreview() {
 	}
 
 	const handleDoubleClick = () => {
-		// Ensure default width is within bounds
-		const minWidth = getMinLeftPanelWidth()
-		const maxWidth = getMaxLeftPanelWidth()
-		const constrainedDefault = Math.min(Math.max(minWidth, DEFAULT_LEFT_PANEL_WIDTH), maxWidth)
-		setLeftPanelWidth(constrainedDefault)
+		const { min, max } = getPanelWidthBounds(window.innerWidth)
+		setLeftPanelWidth(Math.min(Math.max(min, DEFAULT_LEFT_PANEL_WIDTH), max))
 	}
 
 	const handleRefreshPreview = async () => {
-		// Validate before generating preview
 		const issues = validateResumeData(resumeData)
 		if (issues.length > 0) {
 			setValidationIssues(issues)
@@ -437,13 +219,9 @@ function ResumePreview() {
 		setValidationIssues([])
 		setIsGeneratingPreview(true)
 		try {
-			const previewData = {
-				...applyVisibilityFilters(resumeData),
-				sectionLabels: sectionLabels,
-			}
-			const htmlContent = await generateResumePreview(template, previewData, stylePreferences)
+			const htmlContent = await generateResumePreview(template, visibleResumePayload, stylePreferences)
 			setPreviewHtml(htmlContent)
-			lastPreviewInputRef.current = JSON.stringify({ template, previewData, stylePreferences })
+			lastPreviewInputRef.current = previewInputKey
 		} catch (error) {
 			console.error('Refresh preview failed:', error)
 			toast.error('Could not refresh preview.')
@@ -452,74 +230,34 @@ function ResumePreview() {
 		}
 	}
 
-	const handleDownloadPDF = async () => {
-		setDownloadStatus({ type: 'pdf', phase: 'loading' })
+	const handleDownloadDocument = async (type) => {
+		const isWord = type === 'word'
+		setDownloadStatus({ type: isWord ? 'word' : 'pdf', phase: 'loading' })
 		try {
-			const pdfData = {
-				...applyVisibilityFilters(resumeData),
-				sectionLabels: sectionLabels
-			}
-			const pdfBlob = await generateResumePDF(template, pdfData, stylePreferences)
-			downloadBlob(pdfBlob, 'resume.pdf')
-			setDownloadStatus({ type: 'pdf', phase: 'success' })
+			const blob = isWord
+				? await generateResumeWord(template, visibleResumePayload, stylePreferences)
+				: await generateResumePDF(template, visibleResumePayload, stylePreferences)
+			downloadBlob(blob, isWord ? 'resume.docx' : 'resume.pdf')
+			setDownloadStatus({ type: isWord ? 'word' : 'pdf', phase: 'success' })
 			window.setTimeout(() => setDownloadStatus(null), 2200)
 		} catch (error) {
-			console.error('Failed to generate PDF:', error)
-			toast.error('Could not generate PDF. Try again.')
-			setDownloadStatus({ type: 'pdf', phase: 'error' })
-			window.setTimeout(() => setDownloadStatus(null), 2400)
-		}
-	}
-
-	const handleDownloadWord = async () => {
-		setDownloadStatus({ type: 'word', phase: 'loading' })
-		try {
-			const docData = {
-				...applyVisibilityFilters(resumeData),
-				sectionLabels: sectionLabels
-			}
-			const docBlob = await generateResumeWord(template, docData, stylePreferences)
-			downloadBlob(docBlob, 'resume.docx')
-			setDownloadStatus({ type: 'word', phase: 'success' })
-			window.setTimeout(() => setDownloadStatus(null), 2200)
-		} catch (error) {
-			console.error('Failed to generate Word:', error)
-			toast.error('Could not generate Word document. Try again.')
-			setDownloadStatus({ type: 'word', phase: 'error' })
+			console.error('Download failed:', error)
+			toast.error(isWord ? 'Could not generate Word document. Try again.' : 'Could not generate PDF. Try again.')
+			setDownloadStatus({ type: isWord ? 'word' : 'pdf', phase: 'error' })
 			window.setTimeout(() => setDownloadStatus(null), 2400)
 		}
 	}
 
 	const handleDiscardChanges = () => {
-		// reset to baseline data.
 		if (baselineData.header) {
 			const resetData = {
-				header: JSON.parse(JSON.stringify(baselineData.header)),
-				education: JSON.parse(JSON.stringify(baselineData.education)),
-				experience: JSON.parse(JSON.stringify(baselineData.experience || [])),
-				projects: JSON.parse(JSON.stringify(baselineData.projects || [])),
-				skills: JSON.parse(JSON.stringify(baselineData.skills || [])),
-				hiddenSkills: JSON.parse(JSON.stringify(baselineData.hiddenSkills || [])),
-				summary: JSON.parse(JSON.stringify(baselineData.summary || { summary: '' })),
-				// preserve sectionVisibility when discarding (visibility is separate from data)
-				sectionVisibility: resumeData.sectionVisibility || {
-					summary: false,
-					education: true,
-					experience: true,
-					projects: true,
-					skills: true,
-				},
+				...snapshotResumeBaseline(baselineData),
+				sectionVisibility: resumeData.sectionVisibility || DEFAULT_SECTION_VISIBILITY,
 				sectionOrder: normalizeSectionOrder(resumeData.sectionOrder),
 			}
 			setResumeData(resetData)
 			setSectionOrder(resetData.sectionOrder)
 			localStorage.setItem('resumeSectionOrder', JSON.stringify(resetData.sectionOrder))
-			setHeaderData(resetData.header)
-			setEducationData(resetData.education)
-			setExperienceData(resetData.experience)
-			setProjectsData(resetData.projects)
-			setSkillsData(resetData.skills)
-			setSummaryData(resetData.summary)
 		}
 		setShowSaveBanner(false)
 	}
@@ -577,125 +315,12 @@ function ResumePreview() {
 	}, [])
 
 	const handleSummaryChange = useCallback((exportedSummary) => {
-		// Keep summaryData in sync so Summary component shows correct data when it remounts after reorder
-		setSummaryData(exportedSummary)
-		setResumeData(prev => ({ 
-			...prev, 
+		setResumeData((prev) => ({
+			...prev,
 			summary: exportedSummary,
-			// preserve sectionVisibility if it exists, otherwise set defaults
-			sectionVisibility: prev.sectionVisibility || {
-				summary: false,
-				education: true,
-				experience: true,
-				projects: true,
-				skills: true,
-			}
+			sectionVisibility: prev.sectionVisibility || { ...DEFAULT_SECTION_VISIBILITY },
 		}))
 	}, [])
-
-	const applyOneAiChange = useCallback((change) => {
-		if (!change) return
-		setResumeData((prev) => {
-			const beforeSnapshot = JSON.parse(JSON.stringify(prev))
-			const updated = applyClassifiedChanges(prev, [change])
-			aiHistoryRef.current = [...aiHistoryRef.current, { change, before: beforeSnapshot }]
-			return updated
-		})
-	}, [])
-
-	const handleAiAcceptChange = useCallback((changeId) => {
-		const accepted = aiPendingChanges.find((change) => String(change?.change_id || '') === String(changeId || ''))
-		if (!accepted) return
-		setAiPendingChanges((prev) =>
-			prev.filter((change) => String(change?.change_id || '') !== String(changeId || ''))
-		)
-		applyOneAiChange(accepted)
-		setAiAppliedChanges((prev) => [...prev, accepted])
-	}, [aiPendingChanges, applyOneAiChange])
-
-	const handleAiRejectChange = useCallback((changeId) => {
-		const rejected = aiPendingChanges.find((change) => String(change?.change_id || '') === String(changeId || ''))
-		if (!rejected) return
-		setAiPendingChanges((prev) =>
-			prev.filter((change) => String(change?.change_id || '') !== String(changeId || ''))
-		)
-		setAiRejectedChanges((prev) => [...prev, rejected])
-	}, [aiPendingChanges])
-
-	const handleAiAcceptAllPending = useCallback(() => {
-		const batch = [...aiPendingChanges]
-		if (!batch.length) return
-		setAiPendingChanges([])
-		setAiAppliedChanges((prev) => [...prev, ...batch])
-		setResumeData((prev) => {
-			let rolling = prev
-			const historyRows = []
-			batch.forEach((change) => {
-				const before = JSON.parse(JSON.stringify(rolling))
-				rolling = applyClassifiedChanges(rolling, [change])
-				historyRows.push({ change, before })
-			})
-			aiHistoryRef.current = [...aiHistoryRef.current, ...historyRows]
-			return rolling
-		})
-		toast.success(`Accepted ${batch.length} pending AI change${batch.length === 1 ? '' : 's'}.`)
-	}, [aiPendingChanges])
-
-	const handleAiRejectAllPending = useCallback(() => {
-		const batch = [...aiPendingChanges]
-		if (!batch.length) return
-		setAiRejectedChanges((prev) => [...prev, ...batch])
-		setAiPendingChanges([])
-		toast('Rejected all pending AI changes.')
-	}, [aiPendingChanges])
-
-	const handleAiUndoLastChange = useCallback(() => {
-		const history = aiHistoryRef.current
-		if (!history.length) return
-		const last = history[history.length - 1]
-		if (!last?.before) return
-		setResumeData(last.before)
-		const revertedId = String(last?.change?.change_id || '')
-		if (revertedId) {
-			setAiAppliedChanges((prev) => prev.filter((change) => String(change?.change_id || '') !== revertedId))
-			setAiPendingChanges((prev) => [last.change, ...prev])
-		}
-		aiHistoryRef.current = history.slice(0, -1)
-		toast('Undid last AI-applied change.')
-	}, [])
-
-	const handleAiRevertSingleChange = useCallback((changeId) => {
-		const target = aiAppliedChanges.find((change) => String(change?.change_id || '') === String(changeId || ''))
-		if (!target) return
-		setAiAppliedChanges((prev) =>
-			prev.filter((change) => String(change?.change_id || '') !== String(changeId || ''))
-		)
-		setResumeData((prev) => revertClassifiedChange(prev, target))
-		setAiPendingChanges((prev) => [target, ...prev])
-		toast('Reverted AI change.')
-	}, [aiAppliedChanges])
-
-	const handleAiRevertSection = useCallback((sectionKey) => {
-		const section = String(sectionKey || '').trim()
-		if (!section) return
-		const moved = aiAppliedChanges.filter((change) => String(change?.section || '') === section)
-		if (!moved.length) return
-		setAiAppliedChanges((prev) => prev.filter((change) => String(change?.section || '') !== section))
-		setResumeData((prev) => moved.reduce((acc, change) => revertClassifiedChange(acc, change), prev))
-		setAiPendingChanges((prev) => [...moved, ...prev])
-		toast(`Reverted AI changes for ${section}.`)
-	}, [aiAppliedChanges])
-
-	const handleAiRevertAllChanges = useCallback(() => {
-		const baseline = aiBaselineResumeRef.current
-		if (!baseline) return
-		const snapshot = JSON.parse(JSON.stringify(baseline))
-		setResumeData(snapshot)
-		setAiPendingChanges((prev) => [...aiAppliedChanges, ...prev])
-		setAiAppliedChanges([])
-		aiHistoryRef.current = []
-		toast('Reverted all AI-applied changes.')
-	}, [aiAppliedChanges])
 
 	// ----- saved resumes (preview snapshots) -----
 	const [savedResumes, setSavedResumes] = useState({ items: [], max: 3 })
@@ -743,31 +368,13 @@ function ResumePreview() {
 		}
 	}, [resumeData, template, sectionOrder, saveResumeName, fetchSavedResumes])
 
-	const handleLoadSaved = useCallback(async (id) => {
+	/** Fetch saved snapshot + merge into editor (from popover or Home navigation). */
+	const loadSavedResumeIntoState = useCallback(async (id, { clearNavState = false } = {}) => {
 		try {
 			const res = await getSavedResume(id)
 			const data = res.data || res
-			const rd = data.resume_data || {}
-			const ord = normalizeSectionOrder(rd.sectionOrder)
-			const merged = {
-				header: rd.header,
-				education: rd.education ?? [],
-				experience: rd.experience ?? [],
-				projects: rd.projects ?? [],
-				skills: rd.skills ?? [],
-				hiddenSkills: rd.hiddenSkills ?? [],
-				summary: rd.summary ?? { summary: '' },
-				sectionVisibility: rd.sectionVisibility,
-				sectionOrder: ord,
-				skillsCategoryOrder: rd.skillsCategoryOrder,
-			}
-			setResumeData(prev => ({ ...prev, ...merged }))
-			setHeaderData(merged.header)
-			setEducationData(merged.education)
-			setExperienceData(merged.experience)
-			setProjectsData(merged.projects)
-			setSkillsData(merged.skills)
-			setSummaryData(merged.summary)
+			const merged = buildResumeStateFromResumeData(data.resume_data || {})
+			setResumeData((prev) => ({ ...prev, ...merged }))
 			setBaselineData({
 				header: merged.header,
 				education: merged.education,
@@ -777,15 +384,17 @@ function ResumePreview() {
 				hiddenSkills: merged.hiddenSkills,
 				summary: merged.summary,
 			})
-			setSectionOrder(ord)
-			localStorage.setItem('resumeSectionOrder', JSON.stringify(ord))
+			setSectionOrder(merged.sectionOrder)
+			localStorage.setItem('resumeSectionOrder', JSON.stringify(merged.sectionOrder))
 			if (data.template) setTemplate(normalizeTemplateSlug(data.template))
-			setSavedResumesOpen(false)
 			toast.success('Resume loaded')
+			if (clearNavState) navigate('/resume/preview', { replace: true })
+			else setSavedResumesOpen(false)
 		} catch {
-			toast.error('Failed to load')
+			toast.error(clearNavState ? 'Failed to load saved resume' : 'Failed to load')
+			if (clearNavState) navigate('/resume/preview', { replace: true })
 		}
-	}, [])
+	}, [navigate])
 
 	const handleDeleteSaved = useCallback(async (id, e) => {
 		e?.stopPropagation()
@@ -817,48 +426,37 @@ function ResumePreview() {
 		}))
 	}
 
-	// Handle section label change
-	const handleSectionLabelChange = useCallback(async (sectionKey, newLabel) => {
-		// Save current value for potential revert
-		const previousLabel = sectionLabels[sectionKey]
-
-		// Update local state immediately (optimistic update)
-		const updatedLabels = { ...sectionLabels, [sectionKey]: newLabel }
-		setSectionLabels(updatedLabels)
-
-		// Save to backend
-		try {
-			await updateSectionLabels(updatedLabels)
-			
-			// If preview exists, refresh it with new section labels
-			if (previewHtml) {
-				// Validate before generating preview
-				const issues = validateResumeData(resumeData)
-				if (issues.length === 0) {
+	const handleSectionLabelChange = useCallback(
+		async (sectionKey, newLabel) => {
+			const previousLabel = sectionLabels[sectionKey]
+			const updatedLabels = { ...sectionLabels, [sectionKey]: newLabel }
+			setSectionLabels(updatedLabels)
+			try {
+				await updateSectionLabels(updatedLabels)
+				if (previewHtml && validateResumeData(resumeData).length === 0) {
 					setIsGeneratingPreview(true)
 					try {
-						const previewData = {
-							...applyVisibilityFilters(resumeData),
-							sectionLabels: updatedLabels
-						}
-						const htmlContent = await generateResumePreview(template, previewData, stylePreferences)
+						const nextPayload = { ...applyVisibilityFilters(resumeData), sectionLabels: updatedLabels }
+						const htmlContent = await generateResumePreview(template, nextPayload, stylePreferences)
 						setPreviewHtml(htmlContent)
+						lastPreviewInputRef.current = JSON.stringify({
+							template,
+							previewData: nextPayload,
+							stylePreferences,
+						})
 					} catch (error) {
 						console.error('Failed to refresh preview:', error)
 					} finally {
 						setIsGeneratingPreview(false)
 					}
 				}
+			} catch (error) {
+				console.error('Failed to update section label:', error)
+				setSectionLabels((prev) => ({ ...prev, [sectionKey]: previousLabel }))
 			}
-		} catch (error) {
-			console.error('Failed to update section label:', error)
-			// Revert on error
-			setSectionLabels(prev => ({
-				...prev,
-				[sectionKey]: previousLabel
-			}))
-		}
-	}, [sectionLabels, previewHtml, resumeData, template, stylePreferences])
+		},
+		[sectionLabels, previewHtml, resumeData, template, stylePreferences]
+	)
 
 	// Handle welcome message dismissal
 	const handleDismissWelcome = () => {
@@ -912,16 +510,7 @@ function ResumePreview() {
 				localStorage.setItem('resumeHeaderContactOrder', JSON.stringify(resumeData.header.contactOrder))
 			}
 
-			// update baseline to current data.
-			setBaselineData({
-				header: JSON.parse(JSON.stringify(resumeData.header)),
-				education: JSON.parse(JSON.stringify(resumeData.education)),
-				experience: JSON.parse(JSON.stringify(resumeData.experience)),
-				projects: JSON.parse(JSON.stringify(resumeData.projects)),
-				skills: JSON.parse(JSON.stringify(resumeData.skills || [])),
-				hiddenSkills: JSON.parse(JSON.stringify(resumeData.hiddenSkills || [])),
-				summary: JSON.parse(JSON.stringify(resumeData.summary || { summary: '' })),
-			})
+			setBaselineData(snapshotResumeBaseline(resumeData))
 			setShowSaveBanner(false)
 			return true
 		} catch (error) {
@@ -931,16 +520,6 @@ function ResumePreview() {
 		} finally {
 			setIsSaving(false)
 		}
-	}
-
-	// Save on Back/navigation - save first if dirty, then navigate
-	const handleBackClick = async () => {
-		if (showSaveBanner) {
-			const saved = await handleSaveChanges()
-			if (!saved) return
-			toast.success('Your changes have been saved.')
-		}
-		navigate('/home')
 	}
 
 	// ----- use effects -----
@@ -993,12 +572,6 @@ function ResumePreview() {
 				}
 
 				setUser(initialized.user)
-				setHeaderData(initialized.headerData)
-				setEducationData(initialized.educationData)
-				setExperienceData(initialized.experienceData)
-				setProjectsData(initialized.projectsData)
-				setSkillsData(initialized.skillsData)
-				setSummaryData(initialized.summaryData)
 				const ord = normalizeSectionOrder(initialized.resumeData.sectionOrder)
 				setResumeData({ ...initialized.resumeData, sectionOrder: ord })
 				setSectionOrder(ord)
@@ -1061,65 +634,14 @@ function ResumePreview() {
 		fetchSavedResumes()
 	}, [user?.id, fetchSavedResumes])
 
-	// load saved resume when navigated from Home with loadSavedId
+	// Home → preview: consume loadSavedId once (clears route state inside loader).
 	useEffect(() => {
 		const loadSavedId = location.state?.loadSavedId
 		if (!user || !loadSavedId) return
+		loadSavedResumeIntoState(loadSavedId, { clearNavState: true })
+	}, [user, location.state?.loadSavedId, loadSavedResumeIntoState])
 
-		const loadFromHome = async () => {
-			try {
-				const res = await getSavedResume(loadSavedId)
-				const data = res.data || res
-				const rd = data.resume_data || {}
-				const ord = normalizeSectionOrder(rd.sectionOrder)
-				const merged = {
-					header: rd.header,
-					education: rd.education ?? [],
-					experience: rd.experience ?? [],
-					projects: rd.projects ?? [],
-					skills: rd.skills ?? [],
-					hiddenSkills: rd.hiddenSkills ?? [],
-					summary: rd.summary ?? { summary: '' },
-					sectionVisibility: rd.sectionVisibility,
-					sectionOrder: ord,
-					skillsCategoryOrder: rd.skillsCategoryOrder,
-				}
-				setResumeData(prev => ({ ...prev, ...merged }))
-				setHeaderData(merged.header)
-				setEducationData(merged.education)
-				setExperienceData(merged.experience)
-				setProjectsData(merged.projects)
-				setSkillsData(merged.skills)
-				setSummaryData(merged.summary)
-				setBaselineData({
-					header: merged.header,
-					education: merged.education,
-					experience: merged.experience,
-					projects: merged.projects,
-					skills: merged.skills,
-					hiddenSkills: merged.hiddenSkills,
-					summary: merged.summary,
-				})
-				setSectionOrder(ord)
-				localStorage.setItem('resumeSectionOrder', JSON.stringify(ord))
-				if (data.template) setTemplate(normalizeTemplateSlug(data.template))
-				toast.success('Resume loaded')
-				// clear navigation state so we don't reload on re-render
-				navigate('/resume/preview', { replace: true })
-			} catch {
-				toast.error('Failed to load saved resume')
-				navigate('/resume/preview', { replace: true })
-			}
-		}
-
-		loadFromHome()
-	}, [user, location.state?.loadSavedId, navigate])
-
-	// Trigger AI tailor request once resume/profile data is ready in preview.
-	// Intentionally keyed only by tailor intent + baseline readiness.
-	// If we include mutable deps like resumeData/sectionLabels/template,
-	// React reruns this effect, cleanup marks previous request as cancelled,
-	// and valid responses can be dropped before state updates.
+	// Tailor: one request per intent; response `updatedResumeData` is merged into editor (no per-change patches yet).
 	useEffect(() => {
 		if (!tailorIntent || !hasSetBaseline) return
 
@@ -1136,68 +658,47 @@ function ResumePreview() {
 		lastTailorRequestKeyRef.current = requestKey
 
 		let isCancelled = false
-		const requestResumeData = {
-			...resumeData,
-			sectionLabels,
-		}
+		const requestResumeData = { ...resumeData, sectionLabels }
 		const requestTemplate = template || 'classic'
 
 		const requestTailor = async () => {
 			try {
 				setAiTailorPhase('requesting')
-				aiBaselineResumeRef.current = JSON.parse(JSON.stringify(resumeData))
-				aiHistoryRef.current = []
-				setAiAppliedChanges([])
-				setAiPendingChanges([])
-				setAiRejectedChanges([])
 
 				const result = await suggestJobTailor({
 					job_description: tailorIntent.jobDescription,
 					resume_data: requestResumeData,
 					template_name: requestTemplate,
 					target_role: tailorIntent.jobTitle,
+					company: tailorIntent.company,
 					style_preferences: {
 						focus: tailorIntent.focus,
 						tone: tailorIntent.tone,
-						company: tailorIntent.company,
 					},
 					strict_truth: Boolean(tailorIntent.strictTruth),
 				})
 
 				if (isCancelled) return
 				const response = result?.data || result || {}
-				const classifiedChanges = Array.isArray(response.classified_changes) ? response.classified_changes : []
-				const autoApplyChanges = classifiedChanges.filter((change) => shouldAutoApplyChange(change))
-				const pendingReviewChanges = classifiedChanges.filter((change) => !shouldAutoApplyChange(change))
-				console.log('response', response)
-				
 				setAiTailorResult(response)
-				setAiPendingChanges(pendingReviewChanges)
-				setAiAppliedChanges(autoApplyChanges)
-				setAiTailorPhase('applying')
-				
 
-				if (autoApplyChanges.length > 0) {
-					setResumeData((prev) => {
-						let rolling = prev
-						const historyRows = []
-						autoApplyChanges.forEach((change) => {
-							const before = JSON.parse(JSON.stringify(rolling))
-							rolling = applyClassifiedChanges(rolling, [change])
-							historyRows.push({ change, before })
-						})
-						aiHistoryRef.current = [...aiHistoryRef.current, ...historyRows]
-						return rolling
+				setResumeData((prev) => {
+					const next = mergeTailoredResumePayload(prev, response.updatedResumeData)
+					queueMicrotask(() => {
+						if (next.sectionOrder) {
+							setSectionOrder(next.sectionOrder)
+							localStorage.setItem('resumeSectionOrder', JSON.stringify(next.sectionOrder))
+						}
 					})
-					toast.success(
-						`Applied ${autoApplyChanges.length} AI update${autoApplyChanges.length === 1 ? '' : 's'} automatically.`
-					)
-				}
+					return next
+				})
+
+				toast.success('Tailored draft loaded into the editor.')
 				setAiTailorPhase('reviewing')
 			} catch (error) {
 				if (isCancelled) return
 				console.error('Tailor preview request failed:', error)
-				toast.error('Could not generate AI tailoring suggestions yet.')
+				toast.error('Could not generate tailored resume yet.')
 				setAiTailorPhase('error')
 			}
 		}
@@ -1207,15 +708,6 @@ function ResumePreview() {
 			isCancelled = true
 		}
 	}, [tailorIntent, hasSetBaseline])
-
-	// Defensive phase sync: if we already have a tailor result,
-	// the assist panel should not remain in "Thinking...".
-	useEffect(() => {
-		if (!aiTailorResult) return
-		if (aiTailorPhase === 'requesting' || aiTailorPhase === 'applying' || aiTailorPhase === 'idle') {
-			setAiTailorPhase('reviewing')
-		}
-	}, [aiTailorResult, aiTailorPhase])
 
 	useEffect(() => {
 		exactPdfBlobUrlRef.current = exactPdfBlobUrl
@@ -1230,8 +722,7 @@ function ResumePreview() {
 
 	// Debounced exact PDF preview (hybrid: draft HTML + true PDF pages).
 	useEffect(() => {
-		// During tailor request/apply, defer exact PDF generation to avoid duplicate requests.
-		if (tailorIntent && (aiTailorPhase === 'requesting' || aiTailorPhase === 'applying')) {
+		if (tailorIntent && aiTailorPhase === 'requesting') {
 			setExactPdfRefreshing(true)
 			return
 		}
@@ -1247,13 +738,7 @@ function ResumePreview() {
 			return
 		}
 
-		const previewData = {
-			...applyVisibilityFilters(resumeData),
-			sectionLabels: sectionLabels,
-		}
-		const exactInput = JSON.stringify({ template, previewData, stylePreferences })
-
-		if (lastExactInputRef.current === exactInput) {
+		if (lastExactInputRef.current === previewInputKey) {
 			setExactPdfRefreshing(false)
 			return
 		}
@@ -1263,13 +748,13 @@ function ResumePreview() {
 
 		const timer = setTimeout(async () => {
 			try {
-				const blob = await generateResumePDF(template, previewData, stylePreferences)
+				const blob = await generateResumePDF(template, visibleResumePayload, stylePreferences)
 				if (reqId !== exactPdfRequestIdRef.current) return
 				setExactPdfBlobUrl((prev) => {
 					if (prev) URL.revokeObjectURL(prev)
 					return URL.createObjectURL(blob)
 				})
-				lastExactInputRef.current = exactInput
+				lastExactInputRef.current = previewInputKey
 			} catch (error) {
 				console.error('Exact PDF preview failed:', error)
 				if (reqId === exactPdfRequestIdRef.current) {
@@ -1283,7 +768,7 @@ function ResumePreview() {
 		}, EXACT_PDF_DEBOUNCE_MS)
 
 		return () => clearTimeout(timer)
-	}, [template, resumeData, sectionLabels, stylePreferences, tailorIntent, aiTailorPhase])
+	}, [resumeData, previewInputKey, visibleResumePayload, tailorIntent, aiTailorPhase, template, stylePreferences])
 
 	// resizing global listener.
 	useEffect(() => {
@@ -1302,14 +787,11 @@ function ResumePreview() {
 		}
 	}, [isResizing])
 
-	// Constrain panel width when window is resized
 	useEffect(() => {
 		const handleResize = () => {
-			const minWidth = getMinLeftPanelWidth()
-			const maxWidth = getMaxLeftPanelWidth()
-			setLeftPanelWidth(prev => Math.min(Math.max(minWidth, prev), maxWidth))
+			const { min, max } = getPanelWidthBounds(window.innerWidth)
+			setLeftPanelWidth((prev) => Math.min(Math.max(min, prev), max))
 		}
-
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
 	}, [])
@@ -1333,16 +815,7 @@ function ResumePreview() {
 
 		setValidationIssues([])
 
-		// compute the data that would actually be sent to the preview (visibility-filtered)
-		const previewData = {
-			...applyVisibilityFilters(resumeData),
-			sectionLabels: sectionLabels
-		}
-		const previewInput = JSON.stringify({ template, previewData, stylePreferences })
-
-		// skip fetch if nothing visible changed (e.g. editing a hidden section)
-		if (lastPreviewInputRef.current === previewInput) {
-			// ensure loading is cleared (previous run may have been cancelled before its callback ran)
+		if (lastPreviewInputRef.current === previewInputKey) {
 			setIsGeneratingPreview(false)
 			return
 		}
@@ -1351,9 +824,9 @@ function ResumePreview() {
 
 		const timer = setTimeout(async () => {
 			try {
-				const htmlContent = await generateResumePreview(template, previewData, stylePreferences)
+				const htmlContent = await generateResumePreview(template, visibleResumePayload, stylePreferences)
 				setPreviewHtml(htmlContent)
-				lastPreviewInputRef.current = previewInput
+				lastPreviewInputRef.current = previewInputKey
 			} catch (error) {
 				console.error('Failed to generate preview: ', error)
 			} finally {
@@ -1362,28 +835,15 @@ function ResumePreview() {
 		}, DRAFT_PREVIEW_DEBOUNCE_MS)
 
 		return () => clearTimeout(timer)
-	}, [template, resumeData, sectionLabels, stylePreferences])
+	}, [resumeData, previewInputKey, visibleResumePayload, template, stylePreferences])
 
-	// set baseline data after components mount and data is loaded.
+	// First baseline after profile hydration (enables dirty detection + tailor).
 	useEffect(() => {
 		if (hasSetBaseline) return
-		// wait for data to be loaded from backend (headerData starts as null)
-		if (!headerData) return
-		// ensure resumeData has been populated (not just initial empty state)
-		if (!resumeData.header || !resumeData.header.first_name) return
-
-		// --- set baseline with the normalized data from components.
-		setBaselineData({
-			header: JSON.parse(JSON.stringify(resumeData.header)),
-			education: JSON.parse(JSON.stringify(resumeData.education || [])),
-			experience: JSON.parse(JSON.stringify(resumeData.experience || [])),
-			projects: JSON.parse(JSON.stringify(resumeData.projects || [])),
-			skills: JSON.parse(JSON.stringify(resumeData.skills || [])),
-			hiddenSkills: JSON.parse(JSON.stringify(resumeData.hiddenSkills || [])),
-			summary: JSON.parse(JSON.stringify(resumeData.summary || { summary: '' })),
-		})
+		if (!resumeData.header?.first_name) return
+		setBaselineData(snapshotResumeBaseline(resumeData))
 		setHasSetBaseline(true)
-	}, [resumeData, headerData, hasSetBaseline])
+	}, [resumeData, hasSetBaseline])
 
 	// check for changes from og data and show save banner.
 	useEffect(() => {
@@ -1431,12 +891,6 @@ function ResumePreview() {
 							element.scrollIntoView({ behavior: 'smooth', block: 'start' })
 						}
 					}}
-					headerData={headerData}
-					educationData={resumeData.education ?? educationData}
-					experienceData={resumeData.experience ?? experienceData}
-					projectsData={resumeData.projects ?? projectsData}
-					skillsData={resumeData.skills ?? skillsData}
-					summaryData={resumeData.summary ?? summaryData}
 					resumeData={resumeData}
 					onHeaderChange={handleHeaderChange}
 					onEducationChange={handleEducationChange}
@@ -1452,18 +906,7 @@ function ResumePreview() {
 					onSectionLabelChange={handleSectionLabelChange}
 					tailorIntent={tailorIntent}
 					aiTailorResult={aiTailorResult}
-					aiAppliedChanges={aiAppliedChanges}
-					aiPendingChanges={aiPendingChanges}
-					aiRejectedChanges={aiRejectedChanges}
 					aiTailorPhase={aiTailorPhase}
-					onAiUndoLastChange={handleAiUndoLastChange}
-					onAiRevertAllChanges={handleAiRevertAllChanges}
-					onAiAcceptAllPending={handleAiAcceptAllPending}
-					onAiRejectAllPending={handleAiRejectAllPending}
-					onAiAcceptChange={handleAiAcceptChange}
-					onAiRejectChange={handleAiRejectChange}
-					onAiRevertSingleChange={handleAiRevertSingleChange}
-					onAiRevertSection={handleAiRevertSection}
 				/>
 
 				{/* resizable divider */}
@@ -1484,8 +927,7 @@ function ResumePreview() {
 					onZoomOut={handleZoomOut}
 					onZoomReset={handleZoomReset}
 					downloadStatus={downloadStatus}
-					onDownloadPDF={handleDownloadPDF}
-					onDownloadWord={handleDownloadWord}
+					onDownloadDocument={handleDownloadDocument}
 					onRefreshPreview={handleRefreshPreview}
 					validationIssues={validationIssues}
 					exactPdfUrl={exactPdfBlobUrl}
@@ -1503,7 +945,7 @@ function ResumePreview() {
 					onSaveResumeNameChange={setSaveResumeName}
 					isSavingResumeForLater={isSavingResume}
 					onSaveForLater={handleSaveForLater}
-					onLoadSaved={handleLoadSaved}
+					onLoadSaved={loadSavedResumeIntoState}
 					onDeleteSaved={handleDeleteSaved}
 				/>
 			</main>

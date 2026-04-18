@@ -123,12 +123,6 @@ function ExpandedChromeSimple({ children }) {
 function SimpleResumeSections({
 	sectionOrder,
 	onSectionOrderChange,
-	headerData,
-	educationData,
-	experienceData,
-	projectsData,
-	skillsData,
-	summaryData,
 	resumeData,
 	onHeaderChange,
 	onEducationChange,
@@ -152,7 +146,7 @@ function SimpleResumeSections({
 	const draggableOrder = sectionOrder.filter((k) => k !== 'header' && k !== 'summary')
 	const displayOrder = [
 		'header',
-		...(summaryData != null ? ['summary'] : []),
+		...(resumeData?.summary != null ? ['summary'] : []),
 		...draggableOrder,
 	]
 
@@ -192,12 +186,12 @@ function SimpleResumeSections({
 		setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }))
 	}
 
-	const skillsList = Array.isArray(skillsData) ? skillsData : []
+	const skillsList = Array.isArray(resumeData?.skills) ? resumeData.skills : []
 
 	const renderSection = (sectionKey) => {
 		switch (sectionKey) {
 			case 'header': {
-				if (!headerData) return null
+				if (!resumeData?.header) return null
 				const ex = !!expandedSections.header
 				return (
 					<div key="header" id="section-header" className="mb-4">
@@ -212,7 +206,7 @@ function SimpleResumeSections({
 						/>
 						<AnimatedExpand expanded={ex}>
 							<ExpandedChromeSimple>
-								<ResumeHeader headerData={headerData} onHeaderChange={onHeaderChange} bare />
+								<ResumeHeader headerData={resumeData.header} onHeaderChange={onHeaderChange} bare />
 							</ExpandedChromeSimple>
 						</AnimatedExpand>
 					</div>
@@ -220,7 +214,7 @@ function SimpleResumeSections({
 			}
 
 			case 'summary': {
-				if (!summaryData) return null
+				if (resumeData?.summary == null) return null
 				const ex = !!expandedSections.summary
 				return (
 					<div key="summary" id="section-summary" className="mb-4">
@@ -239,7 +233,7 @@ function SimpleResumeSections({
 							<ExpandedChromeSimple>
 								<Summary
 									bare
-									summaryData={summaryData}
+									summaryData={resumeData.summary}
 									onSummaryChange={onSummaryChange}
 									isVisible={vis.summary ?? false}
 									onVisibilityChange={(v) => onVisibilityChange('summary', v)}
@@ -253,7 +247,7 @@ function SimpleResumeSections({
 			}
 
 			case 'education': {
-				if (!educationData) return null
+				if (!resumeData?.education) return null
 				const ex = !!expandedSections.education
 				return (
 					<div key="education" id="section-education" className="mb-4">
@@ -279,7 +273,7 @@ function SimpleResumeSections({
 							<ExpandedChromeSimple>
 								<Education
 									bare
-									educationData={educationData}
+									educationData={resumeData.education}
 									onEducationChange={onEducationChange}
 									isVisible={vis.education ?? true}
 									onVisibilityChange={(v) => onVisibilityChange('education', v)}
@@ -293,7 +287,7 @@ function SimpleResumeSections({
 			}
 
 			case 'experience': {
-				if (!experienceData) return null
+				if (!resumeData?.experience) return null
 				const ex = !!expandedSections.experience
 				return (
 					<div key="experience" id="section-experience" className="mb-4">
@@ -319,7 +313,7 @@ function SimpleResumeSections({
 							<ExpandedChromeSimple>
 								<Experience
 									bare
-									experienceData={experienceData}
+									experienceData={resumeData.experience}
 									onExperienceChange={onExperienceChange}
 									isVisible={vis.experience ?? true}
 									onVisibilityChange={(v) => onVisibilityChange('experience', v)}
@@ -333,7 +327,7 @@ function SimpleResumeSections({
 			}
 
 			case 'projects': {
-				if (!projectsData) return null
+				if (!resumeData?.projects) return null
 				const ex = !!expandedSections.projects
 				return (
 					<div key="projects" id="section-projects" className="mb-4">
@@ -359,7 +353,7 @@ function SimpleResumeSections({
 							<ExpandedChromeSimple>
 								<Projects
 									bare
-									projectsData={projectsData}
+									projectsData={resumeData.projects}
 									onProjectsChange={onProjectsChange}
 									isVisible={vis.projects ?? true}
 									onVisibilityChange={(v) => onVisibilityChange('projects', v)}
@@ -373,7 +367,7 @@ function SimpleResumeSections({
 			}
 
 			case 'skills': {
-				if (!Array.isArray(skillsData) && !skillsData) return null
+				if (!Array.isArray(resumeData?.skills) && !resumeData?.skills) return null
 				const ex = !!expandedSections.skills
 				return (
 					<div key="skills" id="section-skills" className="mb-4">
