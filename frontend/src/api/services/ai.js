@@ -11,8 +11,8 @@ import { apiRequest } from '../api'
  * @param {Object=} payload.style_preferences
  * @param {boolean=} payload.strict_truth
  */
-export async function suggestJobTailor(payload) {
-	return apiRequest('/api/ai/job-tailor/suggest', {
+export async function tailorResume(payload) {
+	return apiRequest('/api/ai/job-tailor/tailor', {
 		method: 'POST',
 		body: JSON.stringify(payload),
 	})

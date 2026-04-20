@@ -16,7 +16,8 @@ class JobTailorSuggestRequest(BaseModel):
 
 
 class JobTailorSuggestResponse(BaseModel):
-    updated_resume_data: Dict[str, Any]
-    patch_diff: Dict[str, Any]
-    change_reasons: List[Dict[str, Any]]
+    updatedResumeData: Dict[str, Any]
+    patchDiff: Dict[str, Any]
+    changeReasons: List[Dict[str, Any]]
     warnings: List[str]
+    genSummary: str
