@@ -1,13 +1,38 @@
 // Shared helpers for ResumePreview: panel bounds, saved-resume / tailor merge.
 
-import { normalizeSectionOrder } from './utils/resumeDataTransform'
+import { normalizeSectionOrder } from './resumeDataTransform'
 
-export const DEFAULT_SECTION_VISIBILITY = {
+export const defaultSectionVisibility = {
 	summary: false,
 	education: true,
 	experience: true,
 	projects: true,
 	skills: true,
+}
+
+// --- normalized empty resume data.
+export function createEmptyResumeData() {
+	return {
+		header: {
+			first_name: '',
+			last_name: '',
+			email: '',
+			phone: '',
+			location: '',
+			github: '',
+			linkedin: '',
+			portfolio: '',
+			tagline: '',
+		},
+		education: [],
+		experience: [],
+		projects: [],
+		skills: [],
+		hiddenSkills: [],
+		summary: { summary: '' },
+		sectionVisibility: { ...defaultSectionVisibility },
+		sectionOrder: normalizeSectionOrder(null),
+	}
 }
 
 /** Min/max left panel width from viewport (used for drag, double-click, window resize). */

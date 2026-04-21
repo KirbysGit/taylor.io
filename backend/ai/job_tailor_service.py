@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 import json
+from pathlib import Path
 from typing import Any, Dict, List
 
 
@@ -15,6 +16,8 @@ from .prompt import build_prompt
 from .openai import ai_chat_completion
 
 from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse
+
+debug = True
 
 logger = logging.getLogger(__name__)
 
@@ -46,11 +49,16 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
 
     # add usage later to debugging.
 
-    genSummary = text["summary"]
-    updatedResumeData = text["updatedResumeData"]
-    patchDiff = text["patchDiff"]
-    changeReasons = text["changeReasons"]
-    warnings = text["warnings"]
+    if debug:
+        p = Path(__file__).resolve().parent / "debug_outputs" / "job_tailor_latest.json"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps({"system_prompt": system_prompt, "user_prompt": user_prompt, "text": text}, indent=2), encoding="utf-8")
+
+    genSummary = str(text.get("summary") or "")
+    updatedResumeData = text["updatedResumeData"] or {}
+    patchDiff = text["patchDiff"] or {}
+    changeReasons = text["changeReasons"] or []
+    warnings = text["warnings"] or []
     
     
     return JobTailorSuggestResponse(

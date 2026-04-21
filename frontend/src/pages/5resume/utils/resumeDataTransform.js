@@ -6,20 +6,12 @@
 // getResumeChangeDescriptions -> get simple descriptions of what changed.
 // downloadBlob -> download a blob as a file.
 
-import {
-	transformEducationForStep,
-	transformExperienceForStep,
-	transformProjectForStep,
-	transformSkillForStep,
-} from '@/pages/info/utils/dataTransform'
-import {
-	normalizeEducationForBackend,
-	normalizeExperienceForBackend,
-	normalizeProjectForBackend,
-	normalizeSkillForBackend,
-} from '@/pages/utils/DataFormatting'
+import { transformEducationForStep, transformExperienceForStep, transformProjectForStep, transformSkillForStep } from '@/pages/info/utils/dataTransform'
+import { normalizeEducationForBackend, normalizeExperienceForBackend, normalizeProjectForBackend, normalizeSkillForBackend } from '@/pages/utils/DataFormatting'
 
-/** Map list entries through step transform + backend normalizer so shape matches what Save sends (ignores harmless UI-only / key-alias drift). */
+// ----- functions -----
+
+// map list entries through a step transform & backend normalizer so shape matches what Save sends.
 function canonicalEducationList(arr) {
 	if (!Array.isArray(arr)) return []
 	return arr.map((edu) => normalizeEducationForBackend(transformEducationForStep(edu)))
@@ -40,41 +32,44 @@ function canonicalSkillList(arr) {
 	return arr.map((skill) => normalizeSkillForBackend(transformSkillForStep(skill)))
 }
 
-/** Full section order including locked `header` (first) and `summary` (second). */
-const DEFAULT_FULL_SECTION_ORDER = [
-	'header',
-	'summary',
-	'education',
-	'experience',
-	'projects',
-	'skills',
-]
+// ----- normalize section order -----
 
-/**
- * Lock Professional Summary directly under header; user may only reorder other sections.
- * @param {string[]|null|undefined} order
- * @returns {string[]}
- */
+// full section order (header & summary are fixed at the front).
+const defaultSectionOrder = ['header', 'summary', 'education', 'experience', 'projects', 'skills']
+
+// sections that are reorderable.
+const reorderableSectionKeys = ['education', 'experience', 'projects', 'skills']
+
 export function normalizeSectionOrder(order) {
-	if (!Array.isArray(order) || order.length === 0) {
-		return [...DEFAULT_FULL_SECTION_ORDER]
-	}
-	const allowed = new Set(DEFAULT_FULL_SECTION_ORDER)
+	// worst case, return the default order.
+	if (!Array.isArray(order)) return [...defaultSectionOrder]
+
+	// create a set of allowed section keys.
+	const allowed = new Set(reorderableSectionKeys)
+
+	// create a set of seen section keys.
 	const seen = new Set()
 	const tail = []
+
+	// iterate through the order and add the section keys to the tail.
 	for (const k of order) {
-		if (k === 'header' || k === 'summary') continue
-		if (allowed.has(k) && !seen.has(k)) {
-			seen.add(k)
-			tail.push(k)
-		}
+		// if the section key is not allowed or has already been seen, skip it.
+		if (!allowed.has(k) || seen.has(k)) continue
+
+		// add the section key to the seen set.
+		seen.add(k)
+
+		// add the section key to the tail.
+		tail.push(k)
 	}
-	for (const k of DEFAULT_FULL_SECTION_ORDER) {
-		if (k !== 'header' && k !== 'summary' && !seen.has(k)) {
-			seen.add(k)
-			tail.push(k)
-		}
+
+	// iterate through the reorderable section keys and add the section keys to the tail.
+	for (const k of reorderableSectionKeys) {
+		// if the section key has not been seen, add it to the tail.
+		if (!seen.has(k)) tail.push(k)
 	}
+
+	// return the default order with the tail added.
 	return ['header', 'summary', ...tail]
 }
 
@@ -132,12 +127,12 @@ export function applyVisibilityFilters(resumeData) {
 		filteredData.skills = []
 	}
 
-	// preserve sectionOrder for backend (exclude 'header' as it's always first)
-	// only include visible sections - reordering hidden sections should not affect preview
+	// if the section order exists, filter it to only include visible sections.
 	if (resumeData.sectionOrder) {
+
+		// filter the section order to only include visible sections.
 		filteredData.sectionOrder = resumeData.sectionOrder.filter((key) => {
 			if (key === 'header') return false
-			// exclude hidden sections so reordering them won't trigger a preview refresh
 			if (key === 'summary' && !sectionVisibility.summary) return false
 			if (key === 'education' && !sectionVisibility.education) return false
 			if (key === 'experience' && !sectionVisibility.experience) return false
@@ -145,8 +140,9 @@ export function applyVisibilityFilters(resumeData) {
 			if (key === 'skills' && !sectionVisibility.skills) return false
 			return true
 		})
-		// summary always first in document body (under fixed header), matching editor lock
-		if (filteredData.sectionOrder.length) {
+
+		// if the section order is not empty and the summary is not null, move the summary to the front.
+		if (filteredData.sectionOrder.length && filteredData.summary != null) {
 			const si = filteredData.sectionOrder.indexOf('summary')
 			if (si > 0) {
 				filteredData.sectionOrder = [

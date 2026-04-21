@@ -74,7 +74,7 @@ function SavedResumesPopover({
 										</button>
 										<button
 											type="button"
-											onClick={(e) => onDeleteSaved(s.id, e)}
+											onClick={(e) => onDeleteSaved(s.id, s.name, e)}
 											className="rounded px-2 py-1 text-xs font-medium text-red-500 opacity-0 transition hover:bg-red-50 hover:text-red-700 group-hover:opacity-100"
 										>
 											Delete

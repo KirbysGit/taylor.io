@@ -9,163 +9,98 @@
 // toggle for "https://".
 // add your own link sort of thing (more for people not on linkedin, github, etc.)
 
-// imports.
-import { useState, useEffect } from 'react'
-
-// icons imports.
+import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash, faGripVertical, faPencil, faCheck } from '@fortawesome/free-solid-svg-icons'
 import { RequiredAsterisk } from '@/components/icons'
 
-// ----------- component -----------
+const DEFAULT_CONTACT_ORDER = ['email', 'phone', 'location', 'linkedin', 'github', 'portfolio']
+
+function mergeHeaderPatch(prev, patch) {
+	const base = prev && typeof prev === 'object' ? prev : {}
+	const next = { ...base, ...patch }
+	if (patch.visibility) {
+		next.visibility = { ...(base.visibility || {}), ...patch.visibility }
+	}
+	return next
+}
+
 const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
-	
-	// which field is being edited: 'name' | 'email' | 'phone' | ... or null
+	const h = headerData && typeof headerData === 'object' ? headerData : {}
+
 	const [editingField, setEditingField] = useState(null)
-
-	// visibility states for contacts (including email).
-	const [showEmail, setShowEmail] = useState(headerData?.visibility?.showEmail ?? true)
-	const [showPhone, setShowPhone] = useState(headerData?.visibility?.showPhone ?? true)
-	const [showLocation, setShowLocation] = useState(headerData?.visibility?.showLocation ?? true)
-	const [showLinkedin, setShowLinkedin] = useState(headerData?.visibility?.showLinkedin ?? true)
-	const [showGithub, setShowGithub] = useState(headerData?.visibility?.showGithub ?? true)
-	const [showPortfolio, setShowPortfolio] = useState(headerData?.visibility?.showPortfolio ?? true)
-	const [showTagline, setShowTagline] = useState(headerData?.visibility?.showTagline ?? true)
-
-	// contact ordering (includes email now)
-	const [contactOrder, setContactOrder] = useState(
-		headerData?.contactOrder || ['email', 'phone', 'location', 'linkedin', 'github', 'portfolio']
-	)
-	
-	// drag and drop state
 	const [draggedField, setDraggedField] = useState(null)
 	const [dragOverIndex, setDragOverIndex] = useState(null)
 
-	// internal state for all header fields.
-	// Initialize from localStorage first, then from headerData if available
-	const getInitialName = () => {
-		if (headerData?.first_name || headerData?.last_name) {
-			return headerData.first_name || ''
-		}
-		// Try localStorage as fallback
-		try {
-			const userData = localStorage.getItem('user')
-			if (userData) {
-				const user = JSON.parse(userData)
-				return user.first_name || ''
-			}
-		} catch (e) {
-			// Ignore parse errors
-		}
-		return ''
-	}
+	const vis = h.visibility || {}
+	const showEmail = vis.showEmail ?? true
+	const showPhone = vis.showPhone ?? true
+	const showLocation = vis.showLocation ?? true
+	const showLinkedin = vis.showLinkedin ?? true
+	const showGithub = vis.showGithub ?? true
+	const showPortfolio = vis.showPortfolio ?? true
+	const showTagline = vis.showTagline ?? true
 
-	const getInitialLastName = () => {
-		if (headerData?.last_name) {
-			return headerData.last_name
-		}
-		// Try localStorage as fallback
-		try {
-			const userData = localStorage.getItem('user')
-			if (userData) {
-				const user = JSON.parse(userData)
-				return user.last_name || ''
-			}
-		} catch (e) {
-			//Ignore parse errors
-		}
-		return ''
-	}
+	const contactOrder =
+		Array.isArray(h.contactOrder) && h.contactOrder.length ? h.contactOrder : DEFAULT_CONTACT_ORDER
 
-	const getInitialEmail = () => {
-		if (headerData?.email) {
-			return headerData.email
-		}
-		// Try localStorage as fallback
-		try {
-			const userData = localStorage.getItem('user')
-			if (userData) {
-				const user = JSON.parse(userData)
-				return user.email || ''
-			}
-		} catch (e) {
-			//Ignore parse errors
-		}
-		return ''
-	}
+	const firstName = h.first_name ?? ''
+	const lastName = h.last_name ?? ''
+	const email = h.email ?? ''
+	const phoneValue = h.phone ?? ''
+	const locationValue = h.location ?? ''
+	const linkedinValue = h.linkedin ?? ''
+	const githubValue = h.github ?? ''
+	const portfolioValue = h.portfolio ?? ''
+	const taglineValue = h.tagline ?? ''
 
-	const [firstName, setFirstName] = useState(getInitialName())
-	const [lastName, setLastName] = useState(getInitialLastName())
-	const [email, setEmail] = useState(getInitialEmail())
-	const [phoneValue, setPhoneValue] = useState(headerData?.phone || '')
-	const [locationValue, setLocationValue] = useState(headerData?.location || '')
-	const [linkedinValue, setLinkedinValue] = useState(headerData?.linkedin || '')
-	const [githubValue, setGithubValue] = useState(headerData?.github || '')
-	const [portfolioValue, setPortfolioValue] = useState(headerData?.portfolio || '')
-	const [taglineValue, setTaglineValue] = useState(headerData?.tagline || '')
+	const patch = (partial) => onHeaderChange(mergeHeaderPatch(h, partial))
 
-	// Update local state when headerData changes (e.g., from discard changes)
-	useEffect(() => {
-		if (headerData) {
-			setFirstName(headerData.first_name || '')
-			setLastName(headerData.last_name || '')
-			setEmail(headerData.email || '')
-			setPhoneValue(headerData.phone || '')
-			setLocationValue(headerData.location || '')
-			setLinkedinValue(headerData.linkedin || '')
-			setGithubValue(headerData.github || '')
-			setPortfolioValue(headerData.portfolio || '')
-			setTaglineValue(headerData.tagline || '')
-			setShowEmail(headerData.visibility?.showEmail ?? true)
-			setShowPhone(headerData.visibility?.showPhone ?? true)
-			setShowLocation(headerData.visibility?.showLocation ?? true)
-			setShowLinkedin(headerData.visibility?.showLinkedin ?? true)
-			setShowGithub(headerData.visibility?.showGithub ?? true)
-			setShowPortfolio(headerData.visibility?.showPortfolio ?? true)
-			setShowTagline(headerData.visibility?.showTagline ?? true)
-			if (headerData.contactOrder) {
-				setContactOrder(headerData.contactOrder)
-			}
-		}
-	}, [headerData])
-
-	// export header data whenever any header-related states change.
-	// export both actual values and visibility states separately.
-	useEffect(() => {
-		const exportedData = {
-			// actual values (always exported, regardless of visibility).
-			first_name: firstName,
-			last_name: lastName,
-			email: email,
-			phone: phoneValue,
-			location: locationValue,
-			linkedin: linkedinValue,
-			github: githubValue,
-			portfolio: portfolioValue,
-			tagline: taglineValue,
-			// visibility states.
-			visibility: {
-				showEmail,
-				showPhone,
-				showLocation,
-				showLinkedin,
-				showGithub,
-				showPortfolio,
-				showTagline,
-			},
-			// contact ordering (includes email).
-			contactOrder: contactOrder,
-		}
-		onHeaderChange(exportedData)
-	}, [firstName, lastName, email, phoneValue, locationValue, linkedinValue, githubValue, portfolioValue, taglineValue, showEmail, showPhone, showLocation, showLinkedin, showGithub, showPortfolio, showTagline, contactOrder])
+	const setShow = (key, value) => patch({ visibility: { [key]: value } })
 
 	const fieldMap = {
-		email: { label: 'Email', value: email, setValue: setEmail, show: showEmail, setShow: setShowEmail },
-		phone: { label: 'Phone Number', value: phoneValue, setValue: setPhoneValue, show: showPhone, setShow: setShowPhone },
-		location: { label: 'Location', value: locationValue, setValue: setLocationValue, show: showLocation, setShow: setShowLocation },
-		linkedin: { label: 'LinkedIn', value: linkedinValue, setValue: setLinkedinValue, show: showLinkedin, setShow: setShowLinkedin },
-		github: { label: 'GitHub', value: githubValue, setValue: setGithubValue, show: showGithub, setShow: setShowGithub },
-		portfolio: { label: 'Portfolio', value: portfolioValue, setValue: setPortfolioValue, show: showPortfolio, setShow: setShowPortfolio },
+		email: {
+			label: 'Email',
+			value: email,
+			setValue: (v) => patch({ email: v }),
+			show: showEmail,
+			setShow: (v) => setShow('showEmail', v),
+		},
+		phone: {
+			label: 'Phone Number',
+			value: phoneValue,
+			setValue: (v) => patch({ phone: v }),
+			show: showPhone,
+			setShow: (v) => setShow('showPhone', v),
+		},
+		location: {
+			label: 'Location',
+			value: locationValue,
+			setValue: (v) => patch({ location: v }),
+			show: showLocation,
+			setShow: (v) => setShow('showLocation', v),
+		},
+		linkedin: {
+			label: 'LinkedIn',
+			value: linkedinValue,
+			setValue: (v) => patch({ linkedin: v }),
+			show: showLinkedin,
+			setShow: (v) => setShow('showLinkedin', v),
+		},
+		github: {
+			label: 'GitHub',
+			value: githubValue,
+			setValue: (v) => patch({ github: v }),
+			show: showGithub,
+			setShow: (v) => setShow('showGithub', v),
+		},
+		portfolio: {
+			label: 'Portfolio',
+			value: portfolioValue,
+			setValue: (v) => patch({ portfolio: v }),
+			show: showPortfolio,
+			setShow: (v) => setShow('showPortfolio', v),
+		},
 	}
 
 	const fullName = [firstName, lastName].filter(Boolean).join(' ').trim() || ''
@@ -186,7 +121,6 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 	)
 
 	const handleInputBlur = (e) => {
-		// Don't exit if focus moved to our done button (avoid re-opening edit)
 		if (e.relatedTarget?.closest?.('[data-done-btn]')) return
 		setEditingField(null)
 	}
@@ -213,7 +147,7 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 							type="text"
 							value={taglineValue}
 							onBlur={handleInputBlur}
-							onChange={(e) => setTaglineValue(e.target.value)}
+							onChange={(e) => patch({ tagline: e.target.value })}
 							onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
 							className="input py-1.5 text-sm flex-1 disabled:opacity-60"
 							disabled={!showTagline}
@@ -222,7 +156,7 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 						/>
 						<button
 							type="button"
-							onClick={() => setShowTagline((prev) => !prev)}
+							onClick={() => patch({ visibility: { showTagline: !showTagline } })}
 							className="p-2 rounded-md text-gray-400 hover:text-brand-pink hover:bg-gray-50 transition-colors"
 							title={showTagline ? 'Hide on resume' : 'Show on resume'}
 						>
@@ -237,7 +171,7 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 						</span>
 						<button
 							type="button"
-							onClick={() => setShowTagline((prev) => !prev)}
+							onClick={() => patch({ visibility: { showTagline: !showTagline } })}
 							className="p-2 rounded-md text-gray-400 hover:text-brand-pink hover:bg-gray-50 transition-colors"
 							title={showTagline ? 'Hide on resume' : 'Show on resume'}
 						>
@@ -266,16 +200,13 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 								const val = e.target.value
 								const lastSpaceIndex = val.lastIndexOf(' ')
 								if (lastSpaceIndex === -1) {
-									setFirstName(val)
-									setLastName('')
+									patch({ first_name: val, last_name: '' })
 								} else {
 									const afterSpace = val.substring(lastSpaceIndex + 1)
 									if (afterSpace.length > 0) {
-										setFirstName(val.substring(0, lastSpaceIndex))
-										setLastName(afterSpace)
+										patch({ first_name: val.substring(0, lastSpaceIndex), last_name: afterSpace })
 									} else {
-										setFirstName(val)
-										setLastName('')
+										patch({ first_name: val, last_name: '' })
 									}
 								}
 							}}
@@ -311,7 +242,11 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 					e.dataTransfer.effectAllowed = 'move'
 					e.dataTransfer.setData('text/plain', fieldKey)
 				}}
-				onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverIndex(index) }}
+				onDragOver={(e) => {
+					e.preventDefault()
+					e.dataTransfer.dropEffect = 'move'
+					setDragOverIndex(index)
+				}}
 				onDragLeave={() => setDragOverIndex(null)}
 				onDrop={(e) => {
 					e.preventDefault()
@@ -321,11 +256,14 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 					const next = [...contactOrder]
 					const [removed] = next.splice(di, 1)
 					next.splice(index, 0, removed)
-					setContactOrder(next)
+					patch({ contactOrder: next })
 					setDraggedField(null)
 					setDragOverIndex(null)
 				}}
-				onDragEnd={() => { setDraggedField(null); setDragOverIndex(null) }}
+				onDragEnd={() => {
+					setDraggedField(null)
+					setDragOverIndex(null)
+				}}
 				className={`flex items-center gap-4 py-3.5 transition-colors
 					${isDragOver ? 'bg-gray-50/80 rounded-lg -mx-1 px-2' : ''}
 					${isDragging ? 'opacity-50' : ''}`}
@@ -350,7 +288,7 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 							/>
 							<button
 								type="button"
-								onClick={() => field.setShow(prev => !prev)}
+								onClick={() => field.setShow(!field.show)}
 								className="p-2 rounded-md text-gray-400 hover:text-brand-pink hover:bg-gray-50 transition-colors"
 								title={field.show ? 'Hide on resume' : 'Show on resume'}
 							>
@@ -365,7 +303,7 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 							</span>
 							<button
 								type="button"
-								onClick={() => field.setShow(prev => !prev)}
+								onClick={() => field.setShow(!field.show)}
 								className="p-2 rounded-md text-gray-400 hover:text-brand-pink hover:bg-gray-50 transition-colors"
 								title={field.show ? 'Hide on resume' : 'Show on resume'}
 							>
@@ -402,4 +340,4 @@ const ResumeHeader = ({ headerData, onHeaderChange, bare = false }) => {
 	)
 }
 
-export default ResumeHeader;
+export default ResumeHeader

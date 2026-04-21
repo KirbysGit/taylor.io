@@ -1,6 +1,7 @@
 // components / left / LeftPanel.jsx
 // Left panel container: assist + styling + sections.
 
+import { useState } from 'react'
 import WelcomeMessage from './WelcomeMessage'
 import ResumeStyling from './ResumeStyling'
 import SimpleResumeSections from './SimpleResumeSections'
@@ -8,9 +9,7 @@ import TailorAssistPanel from './tailorAssist/TailorAssistPanel'
 
 function LeftPanel({
 	width,
-	welcomeMessage,
 	user,
-	onDismissWelcome,
 	sectionOrder,
 	onSectionOrderChange,
 	template,
@@ -38,6 +37,13 @@ function LeftPanel({
 	aiTailorResult,
 	aiTailorPhase,
 }) {
+	const [welcomeMessage, setWelcomeMessage] = useState(() => !localStorage.getItem('hasSeenResumeWelcome'))
+
+	const handleDismissWelcome = () => {
+		localStorage.setItem('hasSeenResumeWelcome', 'true')
+		setWelcomeMessage(false)
+	}
+
 	return (
 		<aside 
 			style={{ width: `${width}px` }} 
@@ -48,7 +54,7 @@ function LeftPanel({
 			{welcomeMessage && (
 				<WelcomeMessage
 					user={user}
-					onDismiss={onDismissWelcome}
+					onDismiss={handleDismissWelcome}
 				/>
 			)}
 

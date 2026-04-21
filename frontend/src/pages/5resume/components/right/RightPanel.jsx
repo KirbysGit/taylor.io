@@ -19,15 +19,12 @@ import PreviewUnsavedBar from './PreviewUnsavedBar'
 import ResumeValidationNotice from '../ResumeValidationNotice'
 import SavedResumesPopover from './SavedResumesPopover'
 
+/** Preview iframe scale: 50%–150%, step 25% (no % label in UI) */
+const PREVIEW_ZOOM = { min: 50, max: 150, step: 25, default: 100 }
+
 function RightPanel({
 	previewHtml,
 	isGeneratingPreview,
-	previewZoom,
-	zoomMin = 50,
-	zoomMax = 150,
-	onZoomIn,
-	onZoomOut,
-	onZoomReset = () => {},
 	downloadStatus = null,
 	onDownloadDocument,
 	onRefreshPreview,
@@ -50,11 +47,13 @@ function RightPanel({
 	onLoadSaved,
 	onDeleteSaved,
 }) {
+	const [previewZoom, setPreviewZoom] = useState(PREVIEW_ZOOM.default)
+
 	const hasValidationIssues = validationIssues.length > 0
 	const isDownloadBusy = downloadStatus?.phase === 'loading'
 	const downloadLabel =
 		downloadStatus?.type === 'word' ? 'Word document' : 'PDF'
-	const isDefaultZoom = previewZoom === 100
+	const isDefaultZoom = previewZoom === PREVIEW_ZOOM.default
 	const showExact = Boolean(exactPdfUrl)
 	const showPreviewRefreshOverlay =
 		!hasValidationIssues &&
@@ -84,6 +83,16 @@ function RightPanel({
 		)
 		setPreviewContentHeight(Math.max(MIN_PAGE_H, Math.ceil(rawH)))
 	}
+
+	const handleZoomIn = () => {
+		setPreviewZoom((prev) => Math.min(prev + PREVIEW_ZOOM.step, PREVIEW_ZOOM.max))
+	}
+
+	const handleZoomOut = () => {
+		setPreviewZoom((prev) => Math.max(prev - PREVIEW_ZOOM.step, PREVIEW_ZOOM.min))
+	}
+
+	const handleZoomReset = () => setPreviewZoom(PREVIEW_ZOOM.default)
 
 	return (
 		<section className="flex-1 bg-white overflow-hidden p-4 flex flex-col relative min-h-0">
@@ -170,8 +179,8 @@ function RightPanel({
 				>
 					<button
 						type="button"
-						onClick={onZoomOut}
-						disabled={previewZoom <= zoomMin}
+						onClick={handleZoomOut}
+						disabled={previewZoom <= PREVIEW_ZOOM.min}
 						className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 bg-white font-semibold text-gray-700 transition-all hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
 						title="Zoom out"
 						aria-label="Zoom preview out"
@@ -187,7 +196,7 @@ function RightPanel({
 						) : (
 							<button
 								type="button"
-								onClick={onZoomReset}
+								onClick={handleZoomReset}
 								className="text-xs font-medium text-brand-pink hover:underline"
 								title="Reset to default size"
 							>
@@ -197,8 +206,8 @@ function RightPanel({
 					</div>
 					<button
 						type="button"
-						onClick={onZoomIn}
-						disabled={previewZoom >= zoomMax}
+						onClick={handleZoomIn}
+						disabled={previewZoom >= PREVIEW_ZOOM.max}
 						className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 bg-white font-semibold text-gray-700 transition-all hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
 						title="Zoom in"
 						aria-label="Zoom preview in"

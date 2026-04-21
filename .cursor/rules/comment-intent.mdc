@@ -1,0 +1,40 @@
+---
+description: Prefer comments that explain behavior and intent, not a literal reading of the code.
+alwaysApply: true
+---
+
+# Inline comments: intent, not literalism
+
+When adding or editing comments (including AI-filled notes), explain **what the code achieves in the system** and **why it exists**, not a word-for-word translation of operators and identifiers.
+
+## Prefer
+
+- **Effect in the flow**: what would go wrong or what would happen twice without this line?
+- **The question the code answers** (e.g. “have we already fetched for this user in this mount?”) rather than restating the comparison (`ref === userId`).
+- **Reader outcome**: after reading the comment, someone should know *when* this runs and *what it avoids* or *what it guarantees*.
+
+## Avoid
+
+- Comments that only rename the code: `// if ref equals userId then return`
+- Misleading “security” or domain guesses unless the code actually enforces that
+- Restating `if`/`return` structure without adding why
+
+## Examples
+
+```javascript
+// ❌ Literal — duplicates the condition, no new information
+// If the user id is the same as the last saved resumes user id, return.
+
+// ✅ Intent — what the guard is for
+// Only load the saved-resume list once per hook mount per user; skip duplicate API calls when the effect re-runs with the same user.id.
+```
+
+```javascript
+// ❌ Literal
+// Set lastSavedResumesUserIdRef to userId
+
+// ✅ Intent
+// Remember we already kicked off the fetch for this user so the effect doesn't listSavedResumes() again on every dependency tick.
+```
+
+For hooks, tie comments to **re-render / effect / user lifecycle** when that’s why the line exists.
