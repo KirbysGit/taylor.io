@@ -564,7 +564,7 @@
 .summary-section {
     font-family: var(--rt-font-stack-primary);
     font-size: var(--rt-summary-font-size-pt);
-    line-height: var(--rt-prose-line-height);
+    line-height: var(--rt-summary-line-height);
     font-weight: normal;
     padding-left: var(--rt-summary-text-padding-left-pt);
     text-indent: var(--rt-summary-first-line-indent-pt);

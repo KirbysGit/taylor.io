@@ -60,7 +60,7 @@ globalStopWords = {
 
 # --- a set of global weak tokens, aka words that are relevant to the job description but are not strong enough to be considered a boost word. --- #
 globalWeakTokens = {
-    "experience", "skills", "team", "tools", "feature", "platform", "delivery"
+    "experience", "skills", "team", "feature", "features",
 }
 
 # --- a set of global filler phrases. --- #
@@ -160,6 +160,15 @@ globalPhrases = [
     "construction materials testing", "field testing", "site inspection", "quality control", "safety compliance",
     "sales engineering", "solution selling", "technical demos", "pre-sales support", "support operations",
     "service desk support", "incident triage", "ticket resolution", "business systems analysis", "requirements analysis",
+    "key performance indicators", "data visualization",
+    "user-centric", "user centric",
+    "early-stage", "early stage",
+    "healthcare", "health care",
+    "daily deploy", "deploy daily",
+    "physician", "practitioners", "practitioner-facing", "practitioner facing",
+    "product strategy",
+    "early-stage startup", "early stage startup",
+    "user-centric product", "user centric product",
 ]
 
 # --- a dict of global boost words and their strengths. --- #
@@ -168,7 +177,7 @@ globalBoostWords = {
     "risk mitigation": 3, "incident response": 3, "root cause analysis": 3, "data analysis": 3, "business impact": 3,
     "customer outcomes": 2, "go to market": 2, "a/b testing": 3, "user acquisition": 3, "user activation": 3, "user retention": 3,
     "operations": 3, "ownership": 3, "accountability": 3, "execution": 3, "revenue": 3, "collections": 3, "billing": 3,
-    "kpis": 3, "dashboards": 2, "hiring": 2, "recruiting": 2, "performance": 3, "operator": 2, "efficiency": 2, "implementation": 2,
+    "kpis": 3, "dashboards": 2, "hiring": 2, "recruiting": 2, "performance": 2, "operator": 2, "efficiency": 2, "implementation": 2,
     "sales": 3, "pipeline": 3, "prospecting": 3, "outbound": 2, "lead": 2, "leads": 2, "crm": 3,
     "forecasting": 2, "reporting": 2, "clients": 2, "client": 2, "account": 2, "relationships": 2, "relationship": 2,
     "onboarding": 2, "metrics": 2, "targets": 2, "opportunities": 2, "volume": 2, "compliance": 2, "product": 1,
@@ -195,6 +204,14 @@ globalBoostWords = {
     "redis": 2, "postgresql": 2, "mysql": 2, "azure": 2, "mlops": 3, "feature engineering": 3,
     "model optimization": 3, "data preprocessing": 2, "deep learning": 3, "microservices": 3,
     "webex": 3, "calabrio": 3, "ivr": 3, "fcr": 3, "csat": 3, "dialogflow": 3, "cx": 2, "wfo": 2, "ccaas": 2, "wxcc": 2,
+    "key performance indicators": 2, "ruby": 3, "ruby on rails": 3, "tailwind css": 2, "anthropic claude": 3,
+    "ios": 2, "android": 2, "visualization": 2, "automations": 3, "flows": 1,
+    "user-centric": 3, "healthcare": 3, "early-stage": 2, "startup": 2,
+    "physician": 2, "practitioners": 2, "practitioner": 2, "product strategy": 3,
+    "software": 1, "solutions": 1, "components": 1, "frontend": 2, "backend": 2, "infrastructure": 2, "web": 1, "mobile": 2,
+    "strategy": 1, "decisions": 1, "technical": 1,
+    "design": 1, "implement": 1, "build": 1, "deploy": 1, "collaborate": 1, "communicate": 1, "contribute": 1, "share": 1,
+    "signup": 1, "founders": 1,
 }
 
 # --- a dict of global phrase canonicals. --- #
@@ -210,6 +227,17 @@ globalPhraseCanonical = {
     "node": "node.js",
     "reactjs": "react",
     "react.js": "react",
+    "front-end": "frontend",
+    "front end": "frontend",
+    "infra-engineer": "infrastructure",
+    "infra": "infrastructure",
+    "rails": "ruby on rails",
+    "tailwind": "tailwind css",
+    "claude": "anthropic claude",
+    "user centric": "user-centric",
+    "early stage": "early-stage",
+    "health care": "healthcare",
+    "practitioner facing": "practitioner-facing",
     "next js": "next.js",
     "vue": "vue.js",
     "vuejs": "vue.js",
@@ -389,6 +417,8 @@ domainDicts = {
             "feature engineering", "model optimization", "data preprocessing", "deep learning",
             "go", "sql", "full-stack", "user-facing web applications", "cross-functional teams",
             "product features", "architectural discussions", "shipping complex software projects",
+            "ruby", "ruby on rails", "tailwind css", "anthropic claude", "ios", "android",
+            "infrastructure", "components", "software", "solutions", "frontend", "backend", "mobile", "web",
         },
         "phrases": [
             "system design", "distributed systems", "api design", "ci/cd", "technical architecture", "real-time collaboration",
@@ -399,6 +429,7 @@ domainDicts = {
             "event-driven microservices", "graphql", "mcp servers", "high throughput services",
             "cloud on-premises deployment", "user-facing web applications", "cross-functional teams",
             "product features", "architectural discussions", "shipping complex software projects",
+            "daily deploy", "deploy daily", "user-centric product", "early-stage",
         ],
         "boostWords": {
             "python": 3, "java": 2, "typescript": 3, "react": 3, "next.js": 3, "node": 2, "aws": 3, "kubernetes": 2,
@@ -411,6 +442,10 @@ domainDicts = {
             "go": 3, "sql": 3, "full-stack": 3, "user-facing web applications": 2,
             "cross-functional teams": 2, "product features": 2, "architectural discussions": 2,
             "shipping complex software projects": 2,
+            "ruby": 3, "ruby on rails": 3, "tailwind css": 2, "anthropic claude": 3, "ios": 2, "android": 2,
+            "infrastructure": 2, "frontend": 2, "backend": 2, "mobile": 2,
+            "deploy": 2, "implement": 2, "build": 2, "design": 2, "collaborate": 2,
+            "user-centric": 2, "automations": 2,
         },
         "weakTokens": {"codebase", "coding"},
     },
@@ -428,6 +463,7 @@ domainDicts = {
         "boostWords": {
             "customer": 2, "partner": 2, "partners": 2, "implementation": 2, "delivery": 2,
             "integration": 3, "support": 2, "developer": 2, "architecture": 2, "platform": 2,
+            "communicate": 1, "collaborate": 1, "contribute": 1, "share": 1,
         },
         "weakTokens": set(),
     },
@@ -441,7 +477,7 @@ domainDicts = {
         "aliases": {
             "data engineer", "data engineering", "data pipelines", "sql", "kafka", "databricks", "nifi",
             "data governance", "data architectures", "data processing", "bi", "streaming", "etl",
-            "data modeling", "analytics platform", "tableau", "power bi",
+            "data modeling", "analytics platform", "tableau", "power bi", "data visualization", "automations", "flows",
         },
         "phrases": [
             "data pipelines", "sql optimization", "complex query design", "kafka streaming", "connector development",
@@ -449,13 +485,14 @@ domainDicts = {
             "data architectures", "data integration", "privacy best practices", "data security",
             "monitoring solutions", "performance tracking", "dashboarding",
             "data analytics platform", "data modeling", "structured and unstructured data", "business intelligence",
-            "working prototypes", "development specifications",
+            "working prototypes", "development specifications", "data visualization",
         ],
         "boostWords": {
             "sql": 3, "kafka": 3, "databricks": 3, "nifi": 3, "druid": 2, "mongodb": 2, "opensearch": 2, "postgres": 2,
             "governance": 2, "security": 2, "privacy": 2, "pipelines": 2, "streaming": 2, "architecture": 2, "monitoring": 2,
             "kpi": 2, "kpis": 3, "dashboarding": 2, "tableau": 3, "power bi": 3, "business intelligence": 3,
             "data modeling": 3, "analytics platform": 3, "prototypes": 2,
+            "visualization": 2, "automations": 2, "flows": 1,
         },
         "weakTokens": {"data"},
     },
@@ -481,6 +518,7 @@ domainDicts = {
             "numpy": 3, "pandas": 3, "scikit-learn": 3, "tensorflow": 3, "pytorch": 3, "transformers": 3,
             "feature engineering": 3, "model optimization": 3, "deep learning": 3, "data preprocessing": 2,
             "speech analytics": 3, "sentiment analytics": 3, "intent models": 3, "dialogflow": 3, "agent assist": 3, "cx": 2,
+            "anthropic claude": 3,
         },
         "weakTokens": {"ai", "ml"},
     },
@@ -488,12 +526,18 @@ domainDicts = {
         "aliases": {
             "product manager", "product owner", "roadmap", "prioritization", "discovery", "pm",
             "product-minded", "customer discovery", "development velocity", "end-to-end delivery",
+            "signup", "founders", "user-centric", "consumer",
         },
         "phrases": [
             "product strategy", "requirements gathering", "user research", "roadmap planning", "feature prioritization",
             "customer discovery", "end-to-end delivery", "product-minded",
+            "user-centric", "user centric", "early-stage startup", "early stage startup",
         ],
-        "boostWords": {"kpi": 2, "okr": 2, "experimentation": 2, "retention": 2, "adoption": 2},
+        "boostWords": {
+            "kpi": 2, "okr": 2, "experimentation": 2, "retention": 2, "adoption": 2,
+            "strategy": 2, "decisions": 2, "technical": 2, "signup": 1, "founders": 1, "user-centric": 3, "consumer": 1,
+            "product strategy": 3, "early-stage": 2, "startup": 2, "healthcare": 2,
+        },
         "weakTokens": {"backlog"},
     },
     "design": {
@@ -505,7 +549,7 @@ domainDicts = {
     "marketing": {
         "aliases": {
             "marketing", "growth", "seo", "content", "campaign", "demand generation",
-            "marketing representative", "sales and marketing", "customer acquisition",
+            "marketing representative", "sales and marketing", "customer acquisition", "signup",
         },
         "phrases": ["campaign optimization", "conversion rate optimization", "attribution modeling", "funnel analysis"],
         "boostWords": {"seo": 3, "sem": 2, "email": 2, "crm": 2, "analytics": 2, "posthog": 2},
@@ -619,11 +663,13 @@ domainDicts = {
             "turnaround", "business management", "operational turnaround",
             "office manager", "administrative operations", "food production", "production manager", "inventory control",
             "scheduling", "vendor coordination", "facilities coordination",
-            "contact center", "ivr", "fcr", "csat", "wfo", "ccaas", "wxcc", "webex", "calabrio",
+            "contact center", "ivr", "fcr", "csat", "wfo", "ccaas", "wxcc", "webex", "calabrio", "founders",
         },
         "phrases": [
             "process optimization", "service level agreements", "capacity planning", "vendor management",
-            "day-to-day operations", "daily operations", "revenue performance", "operational performance",
+            "day-to-day operations", "daily operations", "daily deploy", "deploy daily",
+            "early-stage startup", "early stage startup",
+            "revenue performance", "operational performance",
             "operational inefficiencies", "performance standards", "drive accountability",
             "office administration", "administrative operations", "calendar coordination", "invoice processing",
             "accounts payable", "accounts receivable", "inventory management", "production scheduling",
@@ -722,14 +768,19 @@ domainDicts = {
         "aliases": {
             "medical assistant", "clinic coordinator", "patient care", "clinical", "healthcare",
             "appointment scheduling", "emr", "ehr", "patient records", "front desk medical",
+            "health", "physicians", "physician", "practitioner", "user-centric", "consumer",
         },
         "phrases": [
             "patient care", "appointment scheduling", "medical records", "clinical documentation",
             "care coordination", "insurance verification", "patient intake", "provider scheduling",
+            "healthcare", "health care", "physician", "practitioners", "practitioner-facing", "practitioner facing",
+            "user-centric", "user centric",
         ],
         "boostWords": {
             "patient": 3, "clinical": 3, "medical": 3, "ehr": 3, "emr": 3, "scheduling": 2,
             "insurance verification": 2, "care coordination": 3,
+            "health": 2, "physicians": 2, "practitioner": 2, "consumer": 1, "user-centric": 3,
+            "healthcare": 3, "physician": 2, "practitioners": 2, "product strategy": 2,
         },
         "weakTokens": {"caregiver"},
     },

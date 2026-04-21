@@ -4,6 +4,8 @@
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { tailorResume } from '@/api/services/ai'
+import { mergeTailoredResumePayload } from '../utils/resumePreviewHelpers'
+import { normalizeSectionOrder } from '../utils/resumeDataTransform'
 
 // --- hook ---
 
@@ -23,38 +25,33 @@ export function useTailorJob({
 	// state for the ai tailor phase.
 	const [aiTailorPhase, setAiTailorPhase] = useState('idle')
 
-	// reference to the last tailor request key.
-	const lastTailorRequestKeyRef = useRef(null)
+	// reference to the tailor run generation — only that run may merge results (avoids Strict Mode / effect cleanup applying a stale response).
+	const tailorGenerationRef = useRef(0)
+
+	// references for the latest editor snapshot; keeps the tailor request off the resumeData dependency list so finishing the request does not cancel and strand the phase.
+	const resumeDataRef = useRef(resumeData)
+	const sectionLabelsRef = useRef(sectionLabels)
+	const templateRef = useRef(template)
+	resumeDataRef.current = resumeData
+	sectionLabelsRef.current = sectionLabels
+	templateRef.current = template
 
 	// we need to know if we've set the baseline.
 	useEffect(() => {
-		// if we haven't set the baseline, return.
+		// if we don't have tailor intent or haven't set the baseline, return.
 		if (!tailorIntent || !hasSetBaseline) return
 
-		// create a request key.
-		const requestKey = JSON.stringify({
-			jobTitle: tailorIntent.jobTitle || '',
-			company: tailorIntent.company || '',
-			jobDescription: tailorIntent.jobDescription || '',
-			focus: tailorIntent.focus || 'balanced',
-			tone: tailorIntent.tone || 'balanced',
-			strictTruth: Boolean(tailorIntent.strictTruth),
-		})
-
-		// if the last tailor request key is the same as the current request key, return.
-		if (lastTailorRequestKeyRef.current === requestKey) return
-
-		// set the last tailor request key.
-		lastTailorRequestKeyRef.current = requestKey
+		// bump generation so any in-flight completion from a previous mount or effect run is ignored.
+		const gen = ++tailorGenerationRef.current
 
 		// set the is cancelled flag.
 		let isCancelled = false
 
 		// create the request resume data.
-		const requestResumeData = { ...resumeData, sectionLabels }
+		const requestResumeData = { ...resumeDataRef.current, sectionLabels: sectionLabelsRef.current }
 
 		// create the request template.
-		const requestTemplate = template || 'classic'
+		const requestTemplate = templateRef.current || 'classic'
 
 		// create the request tailor function.
 		const requestTailor = async () => {
@@ -75,7 +72,8 @@ export function useTailorJob({
 					strict_truth: Boolean(tailorIntent.strictTruth),
 				})
 
-				if (isCancelled) return
+				// drop late completions (unmounted, newer effect run, or cleanup).
+				if (isCancelled || gen !== tailorGenerationRef.current) return
 
 				// set the ai tailor result.
 				const response = result?.data || result || {}
@@ -85,20 +83,21 @@ export function useTailorJob({
 				// set the resume data.
 				const patch = response.updatedResumeData
 
-				// if the patch is not null and is an object, normalize the section order.
+				// if the patch is not null and is an object, merge tailored sections and optional section order.
 				if (patch && typeof patch === 'object') {
-					const orderNorm = patch.sectionOrder ?? null
-					setResumeData((prev) => ({ ...prev, ...patch, sectionOrder: orderNorm }))
-					setSectionOrder(orderNorm)
+					setResumeData((prev) => mergeTailoredResumePayload(prev, patch))
+					if (patch.sectionOrder != null) {
+						setSectionOrder(normalizeSectionOrder(patch.sectionOrder))
+					}
 				}
-				
+
 				// set the ai tailor phase to reviewing.
 				setAiTailorPhase('reviewing')
 
 				// show a success toast.
 				toast.success('Tailored draft loaded into the editor.')
 			} catch (error) {
-				if (isCancelled) return
+				if (isCancelled || gen !== tailorGenerationRef.current) return
 				console.error('Tailor preview request failed:', error)
 				toast.error('Could not generate tailored resume yet.')
 				setAiTailorPhase('error')
@@ -113,7 +112,8 @@ export function useTailorJob({
 			// set the is cancelled flag.
 			isCancelled = true
 		}
-	}, [tailorIntent, hasSetBaseline, resumeData, sectionLabels, template, setResumeData, setSectionOrder])
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- one tailor run when intent + baseline are ready; snapshot comes from refs above, not from listing resumeData here (that re-entry cancelled the merge).
+	}, [tailorIntent, hasSetBaseline])
 
 	// return the ai tailor result and phase.
 	return { aiTailorResult, aiTailorPhase }

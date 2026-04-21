@@ -112,6 +112,12 @@ benefitNoiseTokens = {
     "leave",
 }
 
+# bucket from debugging.
+keywordTrashTokens = {
+    "great",
+    "sleep",
+}
+
 # stopwords at start/end of ngrams: phrases shouldn't start or end on these (weak boundaries).
 connectorEdgeWords = {
     "a",
@@ -208,13 +214,14 @@ concreteStackTerms = {
     "opensearch", "tableau", "power bi", "salesforce", "posthog", "aws", "gcp", "azure", "docker", "kubernetes",
     "gke", "rag", "llm", "mlops", "tensorflow", "pytorch", "scikit-learn", "transformers", "langchain", "langgraph",
     "webex", "calabrio", "dialogflow", "ci/cd", "linux", "vue", "vue.js", "angular", "html", "css", "gpu", "cuda",
-    "javascript", "nodejs"
+    "javascript", "nodejs",
+    "ruby", "rails", "tailwind", "claude", "ios", "android",
 }
 
 # softer capability words: stack-adjacent but not a named product (workflow, compliance, etc.).
 roleCapabilityStackTerms = {
     "workflow", "operations", "documentation", "implementation", "management", "execution", "delivery", "support",
-    "billing", "efficiency", "security", "performance", "platform", "integration", "kpis", "compliance",
+    "billing", "efficiency", "security", "integration", "kpis", "compliance",
 }
 
 # tokens to skip when mining org/employer name chunks from titles (too generic).

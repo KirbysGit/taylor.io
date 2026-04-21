@@ -3,7 +3,7 @@
     "activeDomains": [
       "engineering"
     ],
-    "weakTokens": "{'delivery', 'team', 'feature', 'codebase', 'platform', 'coding', 'skills', 'experience', 'tools'}",
+    "weakTokens": "{'delivery', 'feature', 'tools', 'coding', 'team', 'experience', 'codebase', 'platform', 'skills'}",
     "phrases": [
       "stakeholder management",
       "cross functional collaboration",
@@ -429,304 +429,287 @@
     }
   },
   "bodyLines": [
-    "about the job",
-    "about nira energy",
-    "nira's mission is to help convert the us power grid to be 100% fossil-free.",
-    "we are profitable!",
-    "nira is a software platform that helps renewable energy developers find the cheapest points on the grid to connect.",
-    "we focus on estimating the cost to interconnect with the electrical grid (aka the interconnection process). depending on where developers connect, they may be on the hook to pay millions of dollars to upgrade power lines, substations etc.",
-    "what you'll do",
-    "as a software engineer at nira, you'll work on software and data products that our customers use every week. your work will directly accelerate renewables getting built. this work could include rolling out new regions, adding new features or even building brand new products out.",
-    "nira operates in the niche world of grid interconnection, which means as a swe, you'll get to learn about how new renewables get connected to the grid. day to day, you'll work very closely with transmission planning engineers (tpes) to get your job done. both the swes and tpes only have half the picture, so our teams have to be extremely cross-discipline and collaborative. most teams are structured with 1 pm, 1 swe and 1 tpe.",
-    "most of the code you'll write will be python data pipelines. there is occasionally some frontend work as well (having fe experience is not a requirement). however, the swes that do best here are the ones that don't really care what part of the stack they're working on - they're just excited to be building products that help fix climate.",
-    "about you",
-    "4+ years as a swe.",
-    "mission-oriented and focused on working on climate.",
-    "excited about working with transmission engineers.",
-    "operate well in ambiguity and able to take ownership over large pieces of work.",
-    "capable of rolling with the punches; plans change at a growing startup.",
-    "python experience is a plus",
-    "we are hiring any kind of swe, except for pure frontend engineers.",
-    "this role can be remote, or in-person hybrid from our nyc office."
+    "you will be responsible for suggesting features and business kpis and often stepping into product manager, designer, or infra-engineer shoes. we will meet once a day, deploy daily, and communicate using slack.",
+    "this is a long-term contract position (100-140 hours a month)",
+    "what you’ll do",
+    "design and implement software solutions, from front-end components to backend infrastructure",
+    "collaborate with founders, physicians, and other engineers to share a user-centric health platform",
+    "build consumer and practitioner features (mobile and web) such as ai coaching/insights, signup flows, data visualization, and automations",
+    "own technical decisions and contribute to the company’s product strategy",
+    "you’re a great fit if you have",
+    "passion towards helping humans live a healthier life",
+    "3+ experience as a software engineer with a focus on full stack development",
+    "experience with react, typescript, ruby on rails, claude ai, aws, tailwind, ios & android",
+    "have worked at an early-stage healthcare startup",
+    "comfort working in a rapidly-evolving specialty",
+    "our promise to you",
+    "you’ll do good - sleep is fundamental to life: it improves our mental well-being, physical health, performance, and energy. we’re reinventing healthcare and helping the 70 million americans suffering from poor sleep, and you’ll be pivotal in making this happen.",
+    "you’ll have fun - we’re early in our journey. you’ll experience tons of personal and professional growth with founders who are enthusiastic to make this vision a reality",
+    "you’ll sleep well - we work hard, but also make sure to recharge. every great dream begins with a dreamer, and every great dreamer needs to be a good sleeper."
   ],
   "downweightedLines": [],
-  "cleanTitle": "software engineer",
-  "cleanBody": "about the job about nira energy nira's mission is to help convert the us power grid to be 100% fossil-free. we are profitable! nira is a software platform that helps renewable energy developers find the cheapest points on the grid to connect. we focus on estimating the cost to interconnect with the electrical grid (aka the interconnection process). depending on where developers connect, they may be on the hook to pay millions of dollars to upgrade power lines, substations etc. what you'll do as a software engineer at nira, you'll work on software and data products that our customers use every week. your work will directly accelerate renewables getting built. this work could include rolling out new regions, adding new features or even building brand new products out. nira operates in the niche world of grid interconnection, which means as a swe, you'll get to learn about how new renewables get connected to the grid. day to day, you'll work very closely with transmission planning engineers (tpes) to get your job done. both the swes and tpes only have half the picture, so our teams have to be extremely cross-discipline and collaborative. most teams are structured with 1 pm, 1 swe and 1 tpe. most of the code you'll write will be python . there is occasionally some frontend work as well (having fe experience is not a requirement). however, the swes that do best here are the ones that don't really care what part of the stack they're working on - they're just excited to be building products that help fix climate. about you 4+ years as a swe. mission-oriented and focused on working on climate. excited about working with transmission engineers. operate well in ambiguity and able to take ownership over large pieces of work. capable of rolling with the punches; plans change at a growing startup. python experience is a plus we are hiring any kind of swe, except for pure frontend engineers. this role can be remote, or in-person hybrid from our nyc office.",
+  "cleanTitle": "",
+  "cleanBody": "you will be responsible for suggesting features and business kpis and often stepping into product manager, designer, or infra-engineer shoes. we will meet once a day, deploy daily, and communicate using slack. this is a long-term contract position (100-140 hours a month) what you’ll do design and implement software solutions, from front-end components to backend infrastructure collaborate with founders, physicians, and other engineers to share a user-centric health platform build consumer and practitioner features (mobile and web) such as ai coaching/insights, signup flows, data visualization, and automations own technical decisions and contribute to the company’s product strategy you’re a great fit if you have passion towards helping humans live a healthier life 3+ experience as a software engineer with a focus on full stack development experience with react, typescript, ruby on rails, claude ai, aws, tailwind, ios & android have worked at an early-stage healthcare startup comfort working in a rapidly-evolving specialty our promise to you you’ll do good - sleep is fundamental to life: it improves our mental well-being, physical health, performance, and energy. we’re reinventing healthcare and helping the 70 million americans suffering from poor sleep, and you’ll be pivotal in making this happen. you’ll have fun - we’re early in our journey. you’ll experience tons of personal and professional growth with founders who are enthusiastic to make this vision a reality you’ll sleep well - we work hard, but also make sure to recharge. every great dream begins with a dreamer, and every great dreamer needs to be a good sleeper.",
   "cleanDownweightedBody": "",
-  "titlePhraseCounts": {},
-  "bodyPhraseCounts": {
-    "data pipelines": {
-      "knownPhrase": 1.0
+  "titlePhraseCounts": {
+    "full stack engineer": {
+      "titlePhrase": 1.0
     }
   },
+  "bodyPhraseCounts": {},
   "downweightedPhraseCounts": {},
   "termSources_after_known_phrases": {
-    "data pipelines": {
-      "knownPhrase": 1.0
+    "full stack engineer": {
+      "titlePhrase": 1.0
     }
   },
   "concreteStackCounts": {
-    "python": 1.0
+    "react": 1.0,
+    "typescript": 1.0,
+    "aws": 1.0
   },
-  "capabilityStackCounts": {},
-  "titleTokenCounts": {
-    "software": 1.0,
-    "engineer": 1.0
-  },
-  "bodyTokenCounts": {
-    "nira": 5.0,
-    "energy": 2.0,
-    "mission": 1.0,
-    "help": 2.0,
-    "convert": 1.0,
-    "power": 2.0,
-    "grid": 4.0,
-    "fossil-free.": 1.0,
-    "profitable": 1.0,
-    "software": 3.0,
+  "capabilityStackCounts": {
+    "kpis": 1.0,
     "platform": 1.0,
-    "helps": 1.0,
-    "renewable": 1.0,
-    "developers": 2.0,
-    "find": 1.0,
-    "cheapest": 1.0,
-    "points": 1.0,
-    "connect.": 1.0,
-    "focus": 1.0,
-    "estimating": 1.0,
-    "cost": 1.0,
-    "interconnect": 1.0,
-    "electrical": 1.0,
-    "aka": 1.0,
-    "interconnection": 2.0,
-    "process": 1.0,
-    "depending": 1.0,
-    "where": 1.0,
-    "connect": 1.0,
-    "they": 3.0,
-    "may": 1.0,
-    "hook": 1.0,
-    "pay": 1.0,
-    "millions": 1.0,
-    "dollars": 1.0,
-    "upgrade": 1.0,
-    "lines": 1.0,
-    "substations": 1.0,
-    "etc.": 1.0,
-    "what": 2.0,
-    "engineer": 1.0,
-    "data": 1.0,
-    "products": 3.0,
-    "customers": 1.0,
-    "use": 1.0,
-    "every": 1.0,
-    "week.": 1.0,
-    "directly": 1.0,
-    "accelerate": 1.0,
-    "renewables": 2.0,
-    "getting": 1.0,
-    "built.": 1.0,
-    "could": 1.0,
-    "include": 1.0,
-    "rolling": 2.0,
-    "out": 1.0,
-    "new": 4.0,
-    "regions": 1.0,
-    "adding": 1.0,
-    "features": 1.0,
-    "even": 1.0,
-    "building": 2.0,
-    "brand": 1.0,
-    "out.": 1.0,
-    "operates": 1.0,
-    "niche": 1.0,
-    "world": 1.0,
-    "which": 1.0,
-    "means": 1.0,
-    "swe": 3.0,
-    "get": 3.0,
-    "learn": 1.0,
-    "how": 1.0,
-    "connected": 1.0,
-    "grid.": 1.0,
-    "day": 2.0,
-    "very": 1.0,
-    "closely": 1.0,
-    "transmission": 2.0,
-    "planning": 1.0,
+    "performance": 1.0
+  },
+  "titleTokenCounts": {},
+  "bodyTokenCounts": {
+    "responsible": 1.0,
+    "suggesting": 1.0,
+    "features": 2.0,
+    "business": 1.0,
+    "key performance indicators": 1.0,
+    "often": 1.0,
+    "stepping": 1.0,
+    "product": 2.0,
+    "manager": 1.0,
+    "designer": 1.0,
+    "infra-engineer": 1.0,
+    "shoes.": 1.0,
+    "meet": 1.0,
+    "once": 1.0,
+    "day": 1.0,
+    "deploy": 1.0,
+    "daily": 1.0,
+    "communicate": 1.0,
+    "using": 1.0,
+    "slack.": 1.0,
+    "long-term": 1.0,
+    "contract": 1.0,
+    "position": 1.0,
+    "hours": 1.0,
+    "month": 1.0,
+    "what": 1.0,
+    "design": 1.0,
+    "implement": 1.0,
+    "software": 2.0,
+    "solutions": 1.0,
+    "front-end": 1.0,
+    "components": 1.0,
+    "backend": 1.0,
+    "infrastructure": 1.0,
+    "collaborate": 1.0,
+    "founders": 2.0,
+    "physicians": 1.0,
+    "other": 1.0,
     "engineers": 1.0,
-    "tpes": 2.0,
-    "done.": 1.0,
-    "both": 1.0,
-    "swes": 2.0,
-    "only": 1.0,
-    "half": 1.0,
-    "picture": 1.0,
-    "teams": 2.0,
-    "extremely": 1.0,
-    "cross-discipline": 1.0,
-    "collaborative.": 1.0,
-    "most": 2.0,
-    "structured": 1.0,
-    "project management": 1.0,
-    "tpe.": 1.0,
-    "code": 1.0,
-    "write": 1.0,
-    "python": 2.0,
-    "there": 1.0,
-    "occasionally": 1.0,
-    "some": 1.0,
-    "frontend": 2.0,
-    "well": 2.0,
-    "having": 1.0,
-    "experience": 2.0,
-    "not": 1.0,
-    "however": 1.0,
-    "best": 1.0,
-    "here": 1.0,
-    "ones": 1.0,
-    "don": 1.0,
-    "really": 1.0,
-    "care": 1.0,
-    "part": 1.0,
+    "share": 1.0,
+    "user-centric": 1.0,
+    "health": 2.0,
+    "platform": 1.0,
+    "build": 1.0,
+    "consumer": 1.0,
+    "practitioner": 1.0,
+    "mobile": 1.0,
+    "web": 1.0,
+    "such": 1.0,
+    "artificial intelligence": 2.0,
+    "coaching/insights": 1.0,
+    "signup": 1.0,
+    "flows": 1.0,
+    "data": 1.0,
+    "visualization": 1.0,
+    "automations": 1.0,
+    "own": 1.0,
+    "technical": 1.0,
+    "decisions": 1.0,
+    "contribute": 1.0,
+    "strategy": 1.0,
+    "great": 3.0,
+    "fit": 1.0,
+    "passion": 1.0,
+    "towards": 1.0,
+    "helping": 2.0,
+    "humans": 1.0,
+    "live": 1.0,
+    "healthier": 1.0,
+    "life": 2.0,
+    "experience": 3.0,
+    "engineer": 1.0,
+    "focus": 1.0,
+    "full": 1.0,
     "stack": 1.0,
-    "working": 3.0,
-    "just": 1.0,
-    "excited": 2.0,
-    "fix": 1.0,
-    "climate.": 2.0,
-    "years": 1.0,
-    "swe.": 1.0,
-    "mission-oriented": 1.0,
-    "focused": 1.0,
-    "engineers.": 2.0,
-    "operate": 1.0,
-    "ambiguity": 1.0,
-    "able": 1.0,
-    "take": 1.0,
-    "ownership": 1.0,
-    "over": 1.0,
-    "large": 1.0,
-    "pieces": 1.0,
-    "work.": 1.0,
-    "capable": 1.0,
-    "punches": 1.0,
-    "plans": 1.0,
-    "change": 1.0,
-    "growing": 1.0,
-    "startup.": 1.0,
-    "plus": 1.0,
-    "hiring": 1.0,
-    "any": 1.0,
-    "kind": 1.0,
-    "except": 1.0,
-    "pure": 1.0,
-    "can": 1.0,
-    "remote": 1.0,
-    "in-person": 1.0,
-    "hybrid": 1.0,
-    "nyc": 1.0,
-    "office.": 1.0
+    "development": 1.0,
+    "react": 1.0,
+    "typescript": 1.0,
+    "ruby": 1.0,
+    "rails": 1.0,
+    "claude": 1.0,
+    "amazon web services": 1.0,
+    "tailwind": 1.0,
+    "ios": 1.0,
+    "android": 1.0,
+    "worked": 1.0,
+    "early-stage": 1.0,
+    "healthcare": 2.0,
+    "startup": 1.0,
+    "comfort": 1.0,
+    "working": 1.0,
+    "rapidly-evolving": 1.0,
+    "specialty": 1.0,
+    "promise": 1.0,
+    "good": 2.0,
+    "sleep": 3.0,
+    "fundamental": 1.0,
+    "improves": 1.0,
+    "mental": 1.0,
+    "well-being": 1.0,
+    "physical": 1.0,
+    "performance": 1.0,
+    "energy.": 1.0,
+    "reinventing": 1.0,
+    "million": 1.0,
+    "americans": 1.0,
+    "suffering": 1.0,
+    "poor": 1.0,
+    "pivotal": 1.0,
+    "making": 1.0,
+    "happen.": 1.0,
+    "fun": 1.0,
+    "early": 1.0,
+    "journey.": 1.0,
+    "tons": 1.0,
+    "personal": 1.0,
+    "professional": 1.0,
+    "growth": 1.0,
+    "who": 1.0,
+    "enthusiastic": 1.0,
+    "make": 2.0,
+    "vision": 1.0,
+    "reality": 1.0,
+    "well": 1.0,
+    "hard": 1.0,
+    "but": 1.0,
+    "also": 1.0,
+    "sure": 1.0,
+    "recharge.": 1.0,
+    "every": 2.0,
+    "begins": 1.0,
+    "dreamer": 2.0,
+    "needs": 1.0,
+    "sleeper.": 1.0
   },
   "downweightedTokenCounts": {},
   "rankedTerms": [
     {
-      "term": "python",
-      "score": 7.5,
-      "frequency": 3.0,
+      "term": "react",
+      "score": 6.5,
+      "frequency": 2.0,
       "sources": [
         "bodyToken",
         "concreteStack"
       ]
     },
     {
-      "term": "nira",
-      "score": 5.0,
-      "frequency": 5.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "software",
-      "score": 5.0,
-      "frequency": 4.0,
-      "sources": [
-        "bodyToken",
-        "titleToken"
-      ]
-    },
-    {
-      "term": "grid",
-      "score": 4.0,
-      "frequency": 4.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "new",
-      "score": 4.0,
-      "frequency": 4.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "ownership",
-      "score": 4.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "get",
-      "score": 3.0,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "products",
-      "score": 3.0,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "swe",
-      "score": 3.0,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "they",
-      "score": 3.0,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "working",
-      "score": 3.0,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "engineer",
-      "score": 3.0,
+      "term": "typescript",
+      "score": 6.5,
       "frequency": 2.0,
       "sources": [
         "bodyToken",
-        "titleToken"
+        "concreteStack"
+      ]
+    },
+    {
+      "term": "performance",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "capabilityStack"
+      ]
+    },
+    {
+      "term": "aws",
+      "score": 5.5,
+      "frequency": 1.0,
+      "sources": [
+        "concreteStack"
+      ]
+    },
+    {
+      "term": "kpis",
+      "score": 4.5,
+      "frequency": 1.0,
+      "sources": [
+        "capabilityStack"
+      ]
+    },
+    {
+      "term": "platform",
+      "score": 3.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "capabilityStack"
+      ]
+    },
+    {
+      "term": "great",
+      "score": 3.0,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "sleep",
+      "score": 3.0,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "product",
+      "score": 3.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "full stack engineer",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "titlePhrase"
+      ]
+    },
+    {
+      "term": "experience",
+      "score": 2.0,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "artificial intelligence",
+      "score": 2.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
       ]
     }
   ]

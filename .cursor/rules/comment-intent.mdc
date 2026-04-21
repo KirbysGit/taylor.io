@@ -1,7 +1,13 @@
 ---
-description: Prefer comments that explain behavior and intent, not a literal reading of the code.
+description: Prefer comments that explain behavior and intent; preserve the author's inline note style when editing.
 alwaysApply: true
 ---
+
+# Preserve existing inline notes
+
+When editing a file that already has **step-by-step or section-scaffold comments** (e.g. `// create the request …`, `// if we haven't … return`, `// return a cleanup function.`), **do not delete them** to “clean up.” Keep them in place and **update the wording only where behavior changed**, or **add new lines in the same tone** next to new code.
+
+If a comment is wrong after a refactor, **rewrite it** to match the new behavior instead of removing it.
 
 # Inline comments: intent, not literalism
 

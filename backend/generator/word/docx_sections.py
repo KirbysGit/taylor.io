@@ -84,6 +84,7 @@ def _render_docx_summary_section(
         first_line_indent_pt=style.summary_first_line_indent_pt,
         space_after_pt=style.summary_space_after_pt,
         alignment=WD_ALIGN_PARAGRAPH.JUSTIFY,
+        line_height_multiple=style.summary_line_height,
     )
 
 

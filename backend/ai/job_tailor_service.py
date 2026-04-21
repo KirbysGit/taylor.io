@@ -14,7 +14,9 @@ from .processing import build_tailor_context
 from .planning import build_tailor_plan
 from .prompt import build_prompt
 from .openai import ai_chat_completion
+from .post_processing.parse_chat_json import parse_chat_json
 
+# schemas.
 from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse
 
 debug = True
@@ -49,17 +51,26 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
 
     # add usage later to debugging.
 
-    if debug:
-        p = Path(__file__).resolve().parent / "debug_outputs" / "job_tailor_latest.json"
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps({"system_prompt": system_prompt, "user_prompt": user_prompt, "text": text}, indent=2), encoding="utf-8")
+    out = parse_chat_json(text)
 
-    genSummary = str(text.get("summary") or "")
-    updatedResumeData = text["updatedResumeData"] or {}
-    patchDiff = text["patchDiff"] or {}
-    changeReasons = text["changeReasons"] or []
-    warnings = text["warnings"] or []
-    
+    if debug:
+        # create the debug output directory.
+        base = Path(__file__).resolve().parent / "debug_out"
+        base.mkdir(parents=True, exist_ok=True)
+
+        # write the debug output.
+        def write_debug(name, obj):
+            (base / name).write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        write_debug("job_tailor_latest_system.json", {"prompt": system_prompt})
+        write_debug("job_tailor_latest_user.json", {"prompt": user_prompt})
+        write_debug("job_tailor_latest_model.json", out)
+
+    genSummary = str(out.get("genSummary") or "")
+    updatedResumeData = out.get("updatedResumeData") or {}
+    patchDiff = out.get("patchDiff") or {}
+    changeReasons = out.get("changeReasons") or []
+    warnings = out.get("warnings") or []
     
     return JobTailorSuggestResponse(
         genSummary=genSummary,

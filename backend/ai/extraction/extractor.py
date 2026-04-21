@@ -14,10 +14,10 @@ from .rules import (
     urlLinePatterns, complianceFooterSubstrings, wrapperSuppressLineSubstrings,
     nonRoleSectionHeaders, sectionHeadersToDownweight, roleSectionHeaders,
     downweightFactor, concreteStackTerms, roleCapabilityStackTerms,
-    hardNoiseTokens, benefitNoiseTokens,
+    hardNoiseTokens, benefitNoiseTokens, keywordTrashTokens,
 )
 from .lexicon import (
-    globalStopWords, globalAllowShortTokens, globalPhraseCanonical,
+    globalStopWords, globalAllowShortTokens, globalPhraseCanonical, globalWeakTokens,
 )
 
 # --- debugging.
@@ -71,6 +71,37 @@ def looks_like_stack_line(line):
 def canonicalize_token(token):
     term = token.strip()
     return globalPhraseCanonical.get(term, term)
+
+# --- words inside a matched phrase get partOfPhrase so the weak-token penalty does not fire for phrase-only use. --- #
+def merge_part_of_phrase_hits(termSources, phraseCounts, scale):
+
+    # for each phrase and its source map.
+    for phrase, sourceMap in phraseCounts.items():
+        # get the weight of the phrase.
+        w = sum(sourceMap.values()) * scale
+
+        # if the weight is less than or equal to 0, continue.
+        if w <= 0:
+            continue
+
+        # for each raw token in the phrase.
+        for raw in re.findall(r"[a-z][a-z0-9+.#/-]{0,}", phrase.lower()):
+            # canonicalize the token.
+            t = canonicalize_token(raw.rstrip(".,;:"))
+
+            # if the token is empty, stop word, or weak token, continue.
+            if not t or t in globalStopWords or t in globalWeakTokens:
+                continue
+
+            # if the token is less than 3 characters and not in the global allow short tokens, continue.
+            if len(t) < 3 and t not in globalAllowShortTokens:
+                continue
+
+            # get the term source.
+            ts = termSources[t]
+
+            # add the weight to the term source.
+            ts["partOfPhrase"] = ts.get("partOfPhrase", 0.0) + w
 
 # --- update the aggregate counts (for my own personal debugging).--- #
 def update_aggregate_counts(rankedTerms, limit=10):
@@ -225,7 +256,7 @@ def extract_tokens(text):
 
     # for each raw token in text. (e.g. "")
     for rawToken in re.findall(r"[a-z][a-z0-9+.#/-]{0,}", text):
-        term = canonicalize_token(rawToken)
+        term = canonicalize_token(rawToken.rstrip(".,;:"))
 
         # if token is empty, continue.
         if not term:
@@ -237,6 +268,10 @@ def extract_tokens(text):
 
         # if token is a hard noise token or benefit noise token, continue.
         if term in hardNoiseTokens or term in benefitNoiseTokens:
+            continue
+
+        # drop narrative/culture tokens so they never enter body/title token counts or termSources.
+        if term in keywordTrashTokens:
             continue
 
         if len(term) < 3 and term not in globalAllowShortTokens:
@@ -278,11 +313,13 @@ def score_terms(termSources, boostWords, weakTokens):
         if "knownPhraseDownweighted" in sourceMap:
             score += 0.75
         if "capabilityStack" in sourceMap:
-            score += 0.5
+            score += 0.3
 
         # check if term has a strong source.
         strongSource = any(key in sourceMap for key in ("titlePhrase", "knownPhrase", "concreteStack", "titleToken"))
-        
+        if sourceMap.get("partOfPhrase", 0.0) > 0.0:
+            strongSource = True
+
         # if term is a weak token and does not have a strong source, penalize it.
         if term in weakTokens and not strongSource:
             score -= 1.0
@@ -321,8 +358,6 @@ def get_relevant_jd_lines(bodyLines, keywords):
     for idx, hits in sortedLinesByHits[:10]:
         relevantLines.append(bodyLines[idx])
     
-    print(relevantLines)
-
     return relevantLines
 
 
@@ -378,6 +413,13 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
                 # add the count to the term source.
                 ts[sourceName] = ts.get(sourceName, 0.0) + count
 
+    # 6. words inside matched phrases get partOfPhrase on their token rows (weak-token rule).
+
+    # helps tokens that appear in phrases so scoring doesn't punish them like random filler.
+    merge_part_of_phrase_hits(res.termSources, bodyPhraseCounts, 1.0)
+    merge_part_of_phrase_hits(res.termSources, titlePhraseCounts, 1.0)
+    merge_part_of_phrase_hits(res.termSources, downweightedPhraseCounts, downweightFactor)
+
     if wanna_debug:
         debug["cleanTitle"] = res.cleanTitle
         debug["cleanBody"] = res.cleanBody
@@ -387,7 +429,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
         debug["downweightedPhraseCounts"] = downweightedPhraseCounts
         debug["termSources_after_known_phrases"] = dict(res.termSources)
 
-    # 6. extract stack terms & update termSources.
+    # 7. extract stack terms & update termSources.
     concreteStackCounts, capabilityStackCounts = extract_stack_terms(res.bodyLines)
 
     # iterate over the concrete stack counts, and update our termSources.
@@ -404,7 +446,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
         debug["concreteStackCounts"] = concreteStackCounts
         debug["capabilityStackCounts"] = capabilityStackCounts
 
-    # 7. extract tokens from text.
+    # 8. extract tokens from text.
     titleTokenCounts = extract_tokens(res.cleanTitle)
     bodyTokenCounts = extract_tokens(res.cleanBody)
     downweightedTokenCounts = extract_tokens(res.cleanDownweightedBody)
@@ -429,7 +471,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
         debug["bodyTokenCounts"] = bodyTokenCounts
         debug["downweightedTokenCounts"] = downweightedTokenCounts
 
-    # 8. score our term sources.
+    # 9. score our term sources.
 
     rankedTerms = score_terms(res.termSources, res.profile["boostWords"], res.profile["weakTokens"])
 

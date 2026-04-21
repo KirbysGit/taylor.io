@@ -152,11 +152,13 @@ class DocxStyleConfig:
     skill_line_height: float = 1.2
 
     # ---- Summary / body prose ----
-    # Line height for summary + experience/project bullets (matches preview.css line-height)
+    # Line height for experience/project bullets and other body prose (preview: --rt-prose-line-height).
     prose_line_height: float = 1.15
 
     # .section-content padding-left 10pt + .summary-section padding-left 1.25pt (see preview.css)
     summary_font_size_pt: int = 10
+    # Summary paragraph only (preview: .summary-section line-height / --rt-summary-line-height).
+    summary_line_height: float = 1.15
     summary_space_after_pt: float = 2.5
     summary_text_padding_left_pt: float = 1.25
     # First-line “tab” (body lines align to section indent + padding only)

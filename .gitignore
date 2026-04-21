@@ -15,3 +15,6 @@ debug_inputs/
 
 pytest_cache/
 .vscode/
+
+.cursor/
+.debug_out/

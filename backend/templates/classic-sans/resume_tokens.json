@@ -107,6 +107,7 @@
   "skill_line_height": 1.2,
 
   "summary_font_size_pt": 10,
+  "summary_line_height": 1.15,
   "summary_space_after_pt": 2.5,
   "summary_text_padding_left_pt": 1.25,
   "summary_first_line_indent_pt": 30,

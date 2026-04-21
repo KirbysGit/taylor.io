@@ -153,9 +153,10 @@ export function applyVisibilityFilters(resumeData) {
 		}
 	}
 
-	// remove sectionVisibility object (not needed for backend)
+	// remove sectionVisibility object (not needed for backend).
 	delete filteredData.sectionVisibility
 
+	// return the filtered data.
 	return filteredData
 }
 

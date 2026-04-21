@@ -113,6 +113,7 @@ def _add_para(
     space_before_pt: float = 0,
     space_after_pt: float = 0,
     alignment: Optional[WD_ALIGN_PARAGRAPH] = None,
+    line_height_multiple: Optional[float] = None,
 ) -> None:
 
     # Check if there is any text.
@@ -136,7 +137,9 @@ def _add_para(
         p.paragraph_format.first_line_indent = Pt(first_line_indent_pt)
     p.paragraph_format.space_before = Pt(space_before_pt)
     p.paragraph_format.space_after = Pt(space_after_pt)
-    _set_line_spacing_multiple(p, style.prose_line_height)
+    _set_line_spacing_multiple(
+        p, line_height_multiple if line_height_multiple is not None else style.prose_line_height
+    )
     if alignment is not None:
         p.alignment = alignment
 
