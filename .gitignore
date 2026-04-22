@@ -10,11 +10,12 @@ node_modules/
 
 .env
 
-debug_outputs/
-debug_inputs/
+backend/ai/debug_outputs/
+backend/ai/debug_inputs/
 
 pytest_cache/
 .vscode/
 
 .cursor/
-.debug_out/
+backend/ai/debug_out
+backend/ai/debug_out/

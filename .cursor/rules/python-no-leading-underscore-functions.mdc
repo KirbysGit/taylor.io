@@ -9,6 +9,7 @@ alwaysApply: false
 When adding **new** functions or methods in Python, **do not** prefix the name with `_` (e.g. avoid `_helper`, `_parse_chunk`).
 
 - Prefer **public-style names**: `canonical_keyword`, `count_phrases_by_source`, `normalize_line`.
+- **Module-level** helpers (e.g. debug path `Path`s, small writers) follow the same rule: use `write_narrative_debug`, `narrativeDebugOutBase`—not `_write_narrative_debug` or `_debug_out_base`.
 - **Existing** module-private helpers that already use `_` (e.g. `_canonical_keyword`) are fine to **call or edit in place**; do not rename them unless the user asks.
 - Do not create **new** `_prefixed` helpers to mirror that style—use names without the leading underscore instead.
 

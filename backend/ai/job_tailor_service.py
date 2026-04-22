@@ -12,9 +12,10 @@ from typing import Any, Dict, List
 from .extraction import extract_keywords
 from .processing import build_tailor_context
 from .planning import build_tailor_plan
+from .narrative import request_narrative_brief
 from .prompt import build_prompt
 from .openai import ai_chat_completion
-from .post_processing.parse_chat_json import parse_chat_json
+from .post_processing import parse_chat_json
 
 # schemas.
 from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse
@@ -43,8 +44,17 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     # get what we want to focus on per section and row.
     sectionDetails = build_tailor_plan(resumeData=resumeData, tailorContext=tailorContext)
 
+    # narrative spine: second cheap call so the rewrite pass is not inventing editorial target from scratch.
+    narrative_brief = request_narrative_brief(payload=payload, tailorContext=tailorContext, sectionDetails=sectionDetails)
+
     # build the prompts.
-    system_prompt, user_prompt = build_prompt(payload=payload, tailorContext=tailorContext, sectionDetails=sectionDetails, relevantJDLines=relevantJDLines)
+    system_prompt, user_prompt = build_prompt(
+        payload=payload,
+        tailorContext=tailorContext,
+        sectionDetails=sectionDetails,
+        relevantJDLines=relevantJDLines,
+        narrativeBrief=narrative_brief,
+    )
 
     # request chat completion.
     text, usage = ai_chat_completion(system_prompt=system_prompt, user_prompt=user_prompt)
@@ -64,9 +74,10 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
 
         write_debug("job_tailor_latest_system.json", {"prompt": system_prompt})
         write_debug("job_tailor_latest_user.json", {"prompt": user_prompt})
+        write_debug("job_tailor_narrative.json", narrative_brief)
         write_debug("job_tailor_latest_model.json", out)
 
-    genSummary = str(out.get("genSummary") or "")
+    genSummary = str(out.get("summary") or out.get("genSummary") or "")
     updatedResumeData = out.get("updatedResumeData") or {}
     patchDiff = out.get("patchDiff") or {}
     changeReasons = out.get("changeReasons") or []

@@ -3,6 +3,55 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import TopNav from '@/components/TopNav'
 
+const TAILOR_HISTORY_KEY = 'tailorIntentHistory'
+const TAILOR_HISTORY_MAX = 12
+
+function fingerprintTailorIntent(i) {
+	return JSON.stringify({
+		jobTitle: (i.jobTitle || '').trim(),
+		company: (i.company || '').trim(),
+		jobDescription: (i.jobDescription || '').trim(),
+		focus: i.focus,
+		tone: i.tone,
+		strictTruth: Boolean(i.strictTruth),
+	})
+}
+
+function loadTailorHistory() {
+	try {
+		const raw = localStorage.getItem(TAILOR_HISTORY_KEY)
+		if (!raw) return []
+		const parsed = JSON.parse(raw)
+		return Array.isArray(parsed) ? parsed : []
+	} catch {
+		return []
+	}
+}
+
+function saveTailorHistoryEntry(entry) {
+	const prev = loadTailorHistory()
+	const fp = fingerprintTailorIntent(entry)
+	const filtered = prev.filter((h) => fingerprintTailorIntent(h) !== fp)
+	const next = [
+		{
+			id:
+				typeof crypto !== 'undefined' && crypto.randomUUID
+					? crypto.randomUUID()
+					: `t-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+			savedAt: new Date().toISOString(),
+			jobTitle: entry.jobTitle,
+			company: entry.company,
+			jobDescription: entry.jobDescription,
+			focus: entry.focus,
+			tone: entry.tone,
+			strictTruth: entry.strictTruth,
+		},
+		...filtered,
+	].slice(0, TAILOR_HISTORY_MAX)
+	localStorage.setItem(TAILOR_HISTORY_KEY, JSON.stringify(next))
+	return next
+}
+
 function ResumeTailorSetup() {
 	const navigate = useNavigate()
 	const [jobTitle, setJobTitle] = useState('')
@@ -11,6 +60,28 @@ function ResumeTailorSetup() {
 	const [focus, setFocus] = useState('balanced')
 	const [tone, setTone] = useState('balanced')
 	const [strictTruth, setStrictTruth] = useState(true)
+	const [recentSetups, setRecentSetups] = useState(() => loadTailorHistory())
+	const [recentSelectReset, setRecentSelectReset] = useState(0)
+
+	const applyRecentSetup = (id) => {
+		if (!id) return
+		const entry = recentSetups.find((h) => h.id === id)
+		if (!entry) return
+		setJobTitle(entry.jobTitle || '')
+		setCompany(entry.company || '')
+		setJobDescription(entry.jobDescription || '')
+		setFocus(entry.focus || 'balanced')
+		setTone(entry.tone || 'balanced')
+		setStrictTruth(entry.strictTruth !== false)
+		setRecentSelectReset((k) => k + 1)
+	}
+
+	const clearRecentSetups = () => {
+		localStorage.removeItem(TAILOR_HISTORY_KEY)
+		setRecentSetups([])
+		setRecentSelectReset((k) => k + 1)
+		toast.success('Cleared recent setups')
+	}
 
 	const handleContinue = () => {
 		if (!jobTitle.trim()) {
@@ -30,6 +101,8 @@ function ResumeTailorSetup() {
 			tone,
 			strictTruth,
 		}
+
+		setRecentSetups(saveTailorHistoryEntry(tailorIntent))
 
 		navigate('/resume/preview', {
 			state: {
@@ -110,6 +183,60 @@ function ResumeTailorSetup() {
 									placeholder="e.g. Stripe"
 									maxLength={180}
 								/>
+							</div>
+						</div>
+
+						<div className="mt-4 rounded-lg border border-gray-200 bg-gray-50/80 px-4 py-3">
+							<div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+								<div className="flex-1 min-w-0">
+									<label htmlFor="tailor-recent-setups" className="label mb-1">
+										Recent job setups
+									</label>
+									<select
+										key={recentSelectReset}
+										id="tailor-recent-setups"
+										defaultValue=""
+										onChange={(e) => applyRecentSetup(e.target.value)}
+										className="input text-sm"
+										disabled={recentSetups.length === 0}
+									>
+										<option value="">
+											{recentSetups.length === 0
+												? 'None yet — continue once to save this form'
+												: 'Load a recent title, company, JD, and options…'}
+										</option>
+										{recentSetups.map((h) => {
+											const when = h.savedAt
+												? new Date(h.savedAt).toLocaleString(undefined, {
+														month: 'short',
+														day: 'numeric',
+														hour: '2-digit',
+														minute: '2-digit',
+													})
+												: ''
+											const label = [h.jobTitle || 'Untitled role', h.company || null, when]
+												.filter(Boolean)
+												.join(' · ')
+											return (
+												<option key={h.id} value={h.id}>
+													{label}
+												</option>
+											)
+										})}
+									</select>
+									<p className="mt-1 text-xs text-gray-500">
+										Saved locally when you continue to preview — handy while you tweak backend prompts against the same JD.
+									</p>
+								</div>
+								{recentSetups.length > 0 && (
+									<button
+										type="button"
+										onClick={clearRecentSetups}
+										className="text-sm text-gray-600 hover:text-gray-900 underline underline-offset-2 shrink-0"
+									>
+										Clear history
+									</button>
+								)}
 							</div>
 						</div>
 

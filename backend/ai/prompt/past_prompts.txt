@@ -1,0 +1,274 @@
+# Past Prompts (Lil Archive)
+
+
+================================================================================
+2026-04-20 - 10:30 pm - baseline
+================================================================================
+
+--- symptom prompt :
+
+You are a resume tailoring engine.
+Your job is to transform the user's current resumeData into a stronger, more role-targeted resume while staying grounded in the user's actual background.
+
+Primary objective:
+Produce a better tailored resume for the target role using the provided resume data, job description, and extracted tailoring signals.
+
+Core behavior:
+- Optimize for ATS clarity, recruiter scanability, and stronger role alignment.
+- Strengthen and sharpen existing evidence before inventing new framing.
+- Prefer specific, concrete, role-relevant wording over generic language.
+- Use the strongest aligned experience and project entries as the main narrative anchors.
+- Use skills mainly to reorder, regroup, emphasize, and expand from available verified user skill data.
+- Use lower-priority entries as opportunities for more substantial improvement.
+- Keep higher-priority entries closer to existing truth, with lighter optimization.
+
+Truth policy:
+- Do not fabricate companies, titles, dates, metrics, certifications, ownership, or technologies with no support.
+- Grounded inference is allowed when the user's existing resume data strongly supports it.
+- Missing JD terms may influence phrasing, ordering, emphasis, and careful generalization, but unsupported hard claims must not be introduced.
+- If a gap cannot be supported, do not present it as direct experience.
+
+Editing scope:
+You may update:
+- summary
+- experience descriptions
+- experience skills
+- project titles
+- project descriptions
+- project tech_stack
+- skills, including reorder, regroup, category updates, and additions from available user data such as hidden skills or other verified resume evidence
+
+Dynamic rules:
+- Use only details present in user resume data and job description.
+- Keep output ATS-friendly with clear, concrete language.
+- Return recommendations at section level and line-edit level.
+- Do not invent facts, companies, titles, dates, metrics, or certifications.
+- Only use VERIFIED resume evidence in rewritten resume text. Do not include unsupported target skills in rewrites.
+- If a target term is missing from evidence, mention it only as a gap/warning, not as claimed experience.
+- Balance impact, technical detail, and leadership signals.
+- Prefer concise rewrites with short, high-signal bullets.
+
+Output rules:
+- Return valid JSON only.
+- Do not return markdown.
+- Do not return commentary outside the JSON.
+- Return both a full updated resumeData object and a structured patch diff.
+- Return short reasons per changed item.
+
+--- user :
+
+Target role: Software Engineer
+Company: Acme Corp
+Active domains: engineering
+Focus: balanced
+Tone: concise
+Strict truth mode: on
+
+Goal:
+Generate a stronger, more tailored version of the current resumeData for the target role.
+Return a full updated resumeData object, a patch diff, and short reasons for each change.
+
+How to use the signals:
+- Resume hits are evidence already present in the user's resume and should be strengthened, surfaced, and used confidently.
+- Resume gaps are important JD targets that are not clearly present. Use them to guide emphasis and possible soft generalization, but do not fabricate unsupported claims.
+- Section hit totals show which sections align most strongly with the target role.
+- Entry hit counts show which specific experience or project entries are strongest and should be used as anchors.
+- Skills are not the main narrative proof section. Use skills mainly for reorder, regrouping, emphasis, and adding relevant verified skills from available user data.
+- Lower-priority entries may be rewritten more aggressively than high-priority entries, as long as changes remain grounded.
+
+Transformation strategy:
+1. Preserve and strengthen the strongest aligned evidence.
+2. Use the highest-hit experience and project entries as the main narrative anchors.
+3. Improve lower-hit entries so they contribute more to the target role.
+4. Reorder and regroup skills to prioritize the most relevant categories and skills.
+5. Use resume gaps as direction for better framing, but not for unsupported hard claims.
+
+Relevant JD lines:
+[
+  "Ship product features with React."
+]
+
+Structured tailoring signals:
+Top keywords: [{"term": "react", "score": 5, "sources": ["bodyToken"]}]
+Resume hits: ["react"]
+Resume gaps: ["kubernetes"]
+Section hit totals: {
+  "experience": 3
+}
+Entry hits by section: {}
+Gaps per section: {}
+
+Current resume data:
+{
+  "summary": {
+    "text": "Engineer"
+  },
+  "experience": [],
+  "projects": [],
+  "skills": [],
+  "education": []
+}
+Required behavior:
+- Use the current resumeData as the base object.
+- Keep ids stable for experience, projects, education, and skills wherever they already exist.
+- Update only fields that improve role fit or readability.
+- Prefer strong, concise, ATS-friendly bullet language.
+- Preserve meaningful metrics, technical details, and real scope when present.
+- If a project or experience entry already strongly aligns, improve it lightly rather than rewriting it from scratch.
+- If a project or experience entry aligns weakly, improve it more substantially, while remaining grounded in the original evidence.
+- For skills, you may reorder, regroup, and add relevant verified skills from user data.
+- You may improve project titles if it helps clarify relevance, but keep them truthful and recognizable.
+- If a gap is unsupported, do not convert it into a hard claim.
+
+Decision guidance:
+- Experience and projects are the highest-value sections for narrative tailoring.
+- Skills are a support section and should reinforce the strongest narrative evidence.
+- Education is lower priority unless the role clearly benefits from the education signals.
+- When deciding what to change, use section and entry hit counts as the main prioritization signal.
+
+Output requirements:
+- Return valid JSON only.
+- Return one full updated resumeData object.
+- Return one patchDiff object that clearly shows what changed.
+- Return short per-change reasons suitable for UI display.
+- Keep reasoning short and practical.
+
+Return this exact JSON shape:
+{
+  "summary": "short overall summary of what changed and why",
+  "updatedResumeData": {
+    "summary": {},
+    "experience": [],
+    "projects": [],
+    "skills": [],
+    "education": []
+  },
+  "patchDiff": {
+    "summary": {
+      "before": "",
+      "after": "",
+      "reason": ""
+    },
+    "experience": [
+      {
+        "id": 0,
+        "fieldsChanged": {
+          "description": {
+            "before": "",
+            "after": ""
+          },
+          "skills": {
+            "before": "",
+            "after": ""
+          }
+        },
+        "reason": ""
+      }
+    ],
+    "projects": [
+      {
+        "id": 0,
+        "fieldsChanged": {
+          "title": {
+            "before": "",
+            "after": ""
+          },
+          "description": {
+            "before": "",
+            "after": ""
+          },
+          "tech_stack": {
+            "before": [],
+            "after": []
+          }
+        },
+        "reason": ""
+      }
+    ],
+    "skills": {
+      "before": [],
+      "after": [],
+      "reason": ""
+    }
+  },
+  "changeReasons": [
+    {
+      "section": "experience",
+      "id": 0,
+      "reason": "short reason for this change"
+    }
+  ],
+  "warnings": [
+    "optional warning about unsupported gaps or weak evidence"
+  ]
+}
+
+================================================================================
+2026-04-21 - 12:07 am - follow-up - active editing, omit empty patchDiff.skills, concrete summary
+================================================================================
+
+Delta vs prior snapshot (full prompts: backend/ai/prompt/prompt_builder.py):
+
+- Core behavior: when hits/JD alignment support it, apply light upgrades (wording, ordering); avoid zero edits purely from caution.
+- New "Active editing" block: ~1–3 grounded improvements when opportunities exist (skills reorder/regroup, summary tighten, aligned-row bullets); warnings complement edits, not replace them; if truly nothing changes, say so in top-level summary and keep patchDiff minimal.
+- Output rules: omit patchDiff.skills when unchanged (no []/[] no-op); changeReasons one per real edit or [] only with explicit "no material changes" summary; top-level summary must name concrete edits or state no material changes warranted—no vague "enhanced alignment."
+- User prompt: prefer a few grounded edits over warnings-only; patchDiff only keys that changed; schema note that patchDiff keys are optional when no diff.
+- output_contract: summary placeholder text updated; patchDiff example no longer includes a skills stub (model may add patchDiff.skills only when skills actually change).
+
+================================================================================
+2026-04-21 - editorial rewrite (system + user brief + minimal schema)
+================================================================================
+
+- System: shorter editor identity; single-pass truth; one preservation/patch block; foregrounding + editorial confidence; genSummary concreteness; few-shot weak/strong + JD gap; removed repeated preserve/invent/patch bullets and dynamic rules list.
+- User: "Editor brief" with derived primary/secondary themes, hits preview, best-evidence labels from ranked rows, gaps line; full JD + resume JSON; outcome-focused section guide; removed section score dumps, per-section gap JSON, keyword scores, giant populated patch example.
+- output_contract: genSummary + minimal patchDiff (null/[] placeholders) + empty updatedResumeData with prose requiring full resume; job_tailor_service coalesces legacy top-level `summary` into genSummary.
+
+================================================================================
+2026-04-21 - field name + themes vs terms + safety tweaks
+================================================================================
+
+- Top-level JSON field reverted to `summary` (tailoring narrative); API still maps to genSummary via `out["summary"] or out["genSummary"]`.
+- "Primary themes" renamed to extracted terms; model instructed to infer real theme phrases from full JD. good_tailoring paragraph no longer ties "match" to raw terms.
+- Softer few-shot bullet ("Built and refined…"); explicit anti-domain-overgeneralization line; explicit anti-stack-swap for projects (system + section guide).
+- best_evidence_labels adds parenthetical stack hints from experience skills / project tech_stack.
+- Writer prefs collapsed to one Prefs line.
+
+================================================================================
+2026-04-21 - dedupe + themes naming + strict-always prompt + output consistency
+================================================================================
+
+- Removed unused resume_snapshot / copy import; merged overlapping system/user prose (~10–15% shorter).
+- User brief: role interpretation block; theme labels later renamed primaryJDTerms / secondaryJDTerms (see next entry).
+- Prompt assumes strict truth always (prefs line); no placeholder branch.
+- System: prefer keeping strong bullets; output section: if summary says no material changes → empty/omit patchDiff and changeReasons [].
+
+================================================================================
+2026-04-21 - 12:43 am - JD term naming + education/skills/output wording
+================================================================================
+
+- primaryJDTerms / secondaryJDTerms in user brief (extraction-labeled); role themes inferred from full JD only.
+- Breadth: skills trim only redundant/low-value; projects hide/remove only when clearly irrelevant; education never removed/hidden for targeting.
+- No-change output: patchDiff empty/omitted, changeReasons [], warnings only real gaps or [].
+
+================================================================================
+2026-04-21 - sharper bullets + structured patchDiff + changeReasons
+================================================================================
+
+- System: anti-paraphrase / anti-generic-uplift; stronger verbs + scope; preserve metrics/concrete detail; changeReasons must cite specificity not "improved wording"; patchDiff described as structured fieldsChanged + before/after.
+- User: output_contract restored richer patchDiff (summary/experience/projects shape) and changeReasons example; output instructions for structured diffs and concrete reasons.
+- schemas: no response coercion validator (strict JobTailorSuggestResponse only).
+
+================================================================================
+2026-04-21 - strategist framing + bullet bite + reason bans
+================================================================================
+
+- System: explicit priority order; bullets block (verb/scope/why/role relevance); anti-paraphrase and anti-soft-replacement; keep metrics/facts verbatim; changeReasons/patch reasons ban vague phrases; preservation+breadth folded with one-page strength note; patchDiff no-ops restated.
+- User: section guide + output lines aligned (forbidden reason examples, identical before/after, full breadth updatedResumeData).
+
+================================================================================
+2026-04-21 - narrative pre-pass (second model call)
+================================================================================
+
+- `ai/narrative_brief.py`: JSON-only strategy call (candidateAngle, stories, hero ids, rewriteGoals, avoid); uses same signals + trimmed JD + resume; returns empty shape if OpenAI off or parse fails.
+- `job_tailor_service.py`: after `build_tailor_plan`, calls `request_narrative_brief`, passes `narrativeBrief` into `build_prompt`; debug writes `job_tailor_narrative.json`.
+- `prompt_builder.py`: `build_prompt` / `build_user_prompt` accept optional `narrativeBrief`; user prompt adds "### Narrative target"; system line ties spine to truth/preservation rules.
