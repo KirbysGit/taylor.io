@@ -69,8 +69,36 @@ def looks_like_stack_line(line):
 
 # --- canonicalize the token based on our alias list. --- #
 def canonicalize_token(token):
-    term = token.strip()
-    return globalPhraseCanonical.get(term, term)
+    term = (token or "").strip()
+    if not term:
+        return term
+    low = term.lower()
+    if low in globalPhraseCanonical:
+        return globalPhraseCanonical[low]
+    with_space = low.replace("/", " ")
+    if with_space in globalPhraseCanonical:
+        return globalPhraseCanonical[with_space]
+    return low
+
+
+# --- split slash-joined tool lists (e.g. node.js/express) into parts unless the full token is a known idiom (ci/cd, ml/ai, …). --- #
+def iter_slashed_token_pieces(raw):
+    t = (raw or "").rstrip(".,;:").lower()
+    if not t:
+        return
+    if "/" not in t:
+        yield t
+        return
+    if t in globalPhraseCanonical:
+        yield t
+        return
+    if t.replace("/", " ") in globalPhraseCanonical:
+        yield t
+        return
+    for part in t.split("/"):
+        part = part.strip()
+        if part:
+            yield part
 
 # --- words inside a matched phrase get partOfPhrase so the weak-token penalty does not fire for phrase-only use. --- #
 def merge_part_of_phrase_hits(termSources, phraseCounts, scale):
@@ -86,22 +114,22 @@ def merge_part_of_phrase_hits(termSources, phraseCounts, scale):
 
         # for each raw token in the phrase.
         for raw in re.findall(r"[a-z][a-z0-9+.#/-]{0,}", phrase.lower()):
-            # canonicalize the token.
-            t = canonicalize_token(raw.rstrip(".,;:"))
+            for piece in iter_slashed_token_pieces(raw):
+                t = canonicalize_token(piece)
 
-            # if the token is empty, stop word, or weak token, continue.
-            if not t or t in globalStopWords or t in globalWeakTokens:
-                continue
+                # if the token is empty, stop word, or weak token, continue.
+                if not t or t in globalStopWords or t in globalWeakTokens:
+                    continue
 
-            # if the token is less than 3 characters and not in the global allow short tokens, continue.
-            if len(t) < 3 and t not in globalAllowShortTokens:
-                continue
+                # if the token is less than 3 characters and not in the global allow short tokens, continue.
+                if len(t) < 3 and t not in globalAllowShortTokens:
+                    continue
 
-            # get the term source.
-            ts = termSources[t]
+                # get the term source.
+                ts = termSources[t]
 
-            # add the weight to the term source.
-            ts["partOfPhrase"] = ts.get("partOfPhrase", 0.0) + w
+                # add the weight to the term source.
+                ts["partOfPhrase"] = ts.get("partOfPhrase", 0.0) + w
 
 # --- update the aggregate counts (for my own personal debugging).--- #
 def update_aggregate_counts(rankedTerms, limit=10):
@@ -256,28 +284,29 @@ def extract_tokens(text):
 
     # for each raw token in text. (e.g. "")
     for rawToken in re.findall(r"[a-z][a-z0-9+.#/-]{0,}", text):
-        term = canonicalize_token(rawToken.rstrip(".,;:"))
+        for piece in iter_slashed_token_pieces(rawToken):
+            term = canonicalize_token(piece)
 
-        # if token is empty, continue.
-        if not term:
-            continue
+            # if token is empty, continue.
+            if not term:
+                continue
 
-        # if token is a stop word, continue.
-        if term in globalStopWords:
-            continue
+            # if token is a stop word, continue.
+            if term in globalStopWords:
+                continue
 
-        # if token is a hard noise token or benefit noise token, continue.
-        if term in hardNoiseTokens or term in benefitNoiseTokens:
-            continue
+            # if token is a hard noise token or benefit noise token, continue.
+            if term in hardNoiseTokens or term in benefitNoiseTokens:
+                continue
 
-        # drop narrative/culture tokens so they never enter body/title token counts or termSources.
-        if term in keywordTrashTokens:
-            continue
+            # drop narrative/culture tokens so they never enter body/title token counts or termSources.
+            if term in keywordTrashTokens:
+                continue
 
-        if len(term) < 3 and term not in globalAllowShortTokens:
-            continue
+            if len(term) < 3 and term not in globalAllowShortTokens:
+                continue
 
-        tokenCounts[term] = tokenCounts.get(term, 0.0) + 1.0
+            tokenCounts[term] = tokenCounts.get(term, 0.0) + 1.0
 
     return tokenCounts
 

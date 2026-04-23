@@ -58,16 +58,14 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
 
     # request chat completion.
     text, usage = ai_chat_completion(system_prompt=system_prompt, user_prompt=user_prompt)
-
-    # add usage later to debugging.
-
+    
+  
     out = parse_chat_json(text)
-
+    
     if debug:
         # create the debug output directory.
         base = Path(__file__).resolve().parent / "debug_out"
         base.mkdir(parents=True, exist_ok=True)
-
         # write the debug output.
         def write_debug(name, obj):
             (base / name).write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -77,7 +75,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         write_debug("job_tailor_narrative.json", narrative_brief)
         write_debug("job_tailor_latest_model.json", out)
 
-    genSummary = str(out.get("summary") or out.get("genSummary") or "")
+    genSummary = str(out.get("summary") or out.get("tailorSummary") or out.get("genSummary") or "")
     updatedResumeData = out.get("updatedResumeData") or {}
     patchDiff = out.get("patchDiff") or {}
     changeReasons = out.get("changeReasons") or []

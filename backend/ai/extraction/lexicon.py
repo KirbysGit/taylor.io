@@ -56,11 +56,14 @@ globalStopWords = {
     "into", "about", "job", "role", "candidate", "candidates", "requirements", "requirement", "required", "including",
     "preferred", "qualification", "qualifications", "ability", "abilities", "responsibilities", "responsibility",
     "etc", "etcetera", "misc", "various", "eg", "e.g",
+    "any", "not", "often", "other", "responsible", "such", "using", "what", "worked",
 }
 
 # --- a set of global weak tokens, aka words that are relevant to the job description but are not strong enough to be considered a boost word. --- #
 globalWeakTokens = {
     "experience", "skills", "team", "feature", "features",
+    "basic", "design", "exposure", "familiarity", "growth", "helping", "knowledge", "life", "passion", "personal",
+    "professional", "related", "strong", "understanding", "vision", "working",
 }
 
 # --- a set of global filler phrases. --- #
@@ -132,6 +135,7 @@ globalPhrases = [
     "data security", "privacy best practices", "ml pipelines", "training deployment monitoring",
     "data architectures", "ml workloads", "llm-based solutions", "rag architectures", "generative ai",
     "data integration",
+    "machine learning",
     "intelligent workflow automation", "internal process enhancements", "internal workflows", "workflow automation",
     "automation governance", "governance models", "process automation", "operational efficiency",
     "monitoring solutions", "performance tracking", "api integration", "cloud-deployed scripts",
@@ -142,10 +146,10 @@ globalPhrases = [
     "fintech", "b2b saas",
     "full stack engineer", "end-to-end", "microservices", "individual contributor", "multiple applications",
     "vue", "nextjs", "nestjs", "php", "linux", "restful apis", "third-party apis",
-    "full stack web development", "javascript frameworks", "github", "notion",
+    "full stack web development", "javascript frameworks", "notion",
     "quantitative investment", "investment decision-making", "data analytics platform", "business requirements",
     "development specifications", "working prototypes", "data modeling", "structured and unstructured data",
-    "quantitative research", "business intelligence", "tableau", "private markets", "investment management",
+    "quantitative research", "business intelligence", "private markets", "investment management",
     "model creation", "machine learning model development", "feature engineering", "model optimization",
     "domain appropriate metrics", "model performance evaluation", "event-driven microservices", "graphql",
     "mcp servers", "ai-powered applications", "cloud on-premises deployment", "mlops best practices",
@@ -193,11 +197,11 @@ globalBoostWords = {
     "kpi": 2, "kpis": 3, "dashboarding": 2, "workflow": 2, "prompt engineering": 2, "documentation": 2,
     "typescript": 3, "next.js": 3, "react native": 3, "full-stack": 3, "deployment": 2, "maintenance": 2,
     "fintech": 2, "banking": 2, "accounting": 2, "ci/cd": 2, "customers": 1,
-    "gcp": 3, "gke": 3, "docker": 3, "kubernetes": 3,
+    "gcp": 3, "gke": 3, "docker": 3, "kubernetes": 3, "machine learning": 3,
     "vue": 3, "nextjs": 3, "nestjs": 3, "php": 3, "linux": 2,
     "restful apis": 3, "third-party apis": 3, "full stack web development": 3, "javascript frameworks": 2,
-    "github": 2, "notion": 1,
-    "tableau": 3, "power bi": 3, "business intelligence": 3, "data modeling": 3, "quantitative": 3,
+    "notion": 1,
+    "power bi": 3, "business intelligence": 3, "data modeling": 3, "quantitative": 3,
     "investment": 3, "private markets": 3, "investment management": 3, "analytics platform": 3, "prototypes": 2,
     "numpy": 3, "pandas": 3, "scikit-learn": 3, "tensorflow": 3, "pytorch": 3, "transformers": 3,
     "fastapi": 3, "flask": 2, "django": 3, "angular": 2, "vue.js": 2, "graphql": 3,
@@ -253,6 +257,7 @@ globalPhraseCanonical = {
     "sklearn": "scikit-learn",
     "ml": "machine learning",
     "ai/ml": "machine learning",
+    "ml/ai": "machine learning",
     "ai": "artificial intelligence",
     "llm": "large language models",
     "llms": "large language models",
@@ -504,6 +509,7 @@ domainDicts = {
             "speech analytics", "sentiment analytics", "intent models", "dialog flows", "agent assist", "dialogflow",
         },
         "phrases": [
+            "machine learning",
             "ml pipelines", "training deployment monitoring", "llm-based solutions", "rag architectures",
             "generative ai", "agent performance", "model evaluation", "intelligent workflow automation",
             "governance models", "automation governance", "workflow automation", "process automation",
@@ -513,14 +519,15 @@ domainDicts = {
             "agent assist", "automation workflows", "cx analytics",
         ],
         "boostWords": {
-            "mlops": 3, "llm": 3, "rag": 3, "generative": 2, "ai": 2, "ml": 2, "deployment": 2, "monitoring": 2,
+            "machine learning": 3, "mlops": 3, "llm": 3, "rag": 3, "generative": 2, "ai": 2, "ml": 2,
+            "deployment": 2, "monitoring": 2,
             "copilot": 3, "power automate": 3, "prompt engineering": 2, "governance": 2, "dataverse": 3,
             "numpy": 3, "pandas": 3, "scikit-learn": 3, "tensorflow": 3, "pytorch": 3, "transformers": 3,
             "feature engineering": 3, "model optimization": 3, "deep learning": 3, "data preprocessing": 2,
             "speech analytics": 3, "sentiment analytics": 3, "intent models": 3, "dialogflow": 3, "agent assist": 3, "cx": 2,
             "anthropic claude": 3,
         },
-        "weakTokens": {"ai", "ml"},
+        "weakTokens": {"ai", "ml", "learning", "model", "models"},
     },
     "product": {
         "aliases": {

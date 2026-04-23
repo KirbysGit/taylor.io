@@ -53,6 +53,7 @@ nonRoleSectionHeaders = {
     "why join us",
     "what s in it for you",
     "what's in it for you",
+    "our promise to you",
 }
 
 hardNoiseTokens = {
@@ -92,6 +93,13 @@ hardNoiseTokens = {
     "conviction",
     "authorization",
     "authorized",
+    "agency",
+    "fax",
+    "placement",
+    "referred",
+    "resume",
+    "resumes",
+    "unsolicited",
 }
 
 # tokens that dominate benefit/comp lines; used to penalize phrases that look like perks not skills.
@@ -114,8 +122,14 @@ benefitNoiseTokens = {
 
 # bucket from debugging.
 keywordTrashTokens = {
+    "dreamer",
+    "fun",
     "great",
+    "reality",
+    "recharge",
     "sleep",
+    "sleeper",
+    "tons",
 }
 
 # stopwords at start/end of ngrams: phrases shouldn't start or end on these (weak boundaries).
@@ -212,7 +226,8 @@ concreteStackTerms = {
     "python", "java", "go", "rust", "php", "nestjs", "django", "flask", "fastapi", "graphql", "rest", "restful",
     "api", "apis", "sql", "postgres", "postgresql", "mysql", "mongodb", "redis", "databricks", "kafka", "nifi",
     "opensearch", "tableau", "power bi", "salesforce", "posthog", "aws", "gcp", "azure", "docker", "kubernetes",
-    "gke", "rag", "llm", "mlops", "tensorflow", "pytorch", "scikit-learn", "transformers", "langchain", "langgraph",
+    "gke", "rag", "llm", "mlops", "tensorflow", "pytorch", "pyspark", "scikit-learn", "transformers", "langchain", "langgraph",
+    "express",
     "webex", "calabrio", "dialogflow", "ci/cd", "linux", "vue", "vue.js", "angular", "html", "css", "gpu", "cuda",
     "javascript", "nodejs",
     "ruby", "rails", "tailwind", "claude", "ios", "android",
@@ -327,6 +342,18 @@ wrapperSuppressLineSubstrings = {
     "team building activities",
     "friends and family nights",
     "active lifestyle",
+    "agency including",
+    "agency submits",
+    "any candidate for whom",
+    "deemed referred",
+    "fax",
+    "mailing address",
+    "placement resulting from",
+    "property of the company",
+    "resume database",
+    "unsolicited resume",
+    "unsolicited resumes",
+    "will not pay a fee",
 }
 
 # when merging overlapping terms: if generic token overlaps a longer phrase, prefer these exact phrases.
