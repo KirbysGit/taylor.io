@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import logging
+import os
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -13,7 +15,7 @@ from .extraction import extract_keywords
 from .processing import build_tailor_context
 from .planning import build_tailor_plan
 from .narrative import request_narrative_brief
-from .prompt import build_prompt
+from .prompt import build_prompt, tailor_ab_experiment_enabled
 from .openai import ai_chat_completion
 from .post_processing import parse_chat_json
 from .post_processing.resume_diff import assemble_tailor_result
@@ -24,6 +26,95 @@ from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse
 debug = True
 
 logger = logging.getLogger(__name__)
+
+# A/B harness (no separate script):
+#   TAILOR_AB_LOG=1 — append one JSON line per run to backend/ai/debug_out/tailor_ab_runs.jsonl
+#   TAILOR_AB_EXPERIMENT=1 — use prompt text from prompt_builder.TAILOR_AB_EXPERIMENT_APPEND
+#   Rows pair by the same target_role+job_description via job_fingerprint in each line.
+
+
+def _env_truthy(name):
+    v = (os.getenv(name) or "").strip().lower()
+    return v in ("1", "true", "yes", "on")
+
+
+def _usage_to_dict(usage):
+    if usage is None:
+        return None
+    if isinstance(usage, dict):
+        return usage
+    d = getattr(usage, "model_dump", None)
+    if callable(d):
+        try:
+            return d()
+        except (TypeError, ValueError):
+            pass
+    out = {}
+    for k in ("prompt_tokens", "completion_tokens", "total_tokens"):
+        if hasattr(usage, k):
+            try:
+                out[k] = int(getattr(usage, k))
+            except (TypeError, ValueError):
+                out[k] = getattr(usage, k)
+    return out if out else str(usage)
+
+
+def _append_tailor_ab_log(*, payload, diff_audit, final_out, usage):
+    if not _env_truthy("TAILOR_AB_LOG"):
+        return
+    if diff_audit is None:
+        return
+    base = Path(__file__).resolve().parent / "debug_out"
+    base.mkdir(parents=True, exist_ok=True)
+    path = base / "tailor_ab_runs.jsonl"
+    tr = (payload.get("target_role") or "") if isinstance(payload, dict) else ""
+    jd = (payload.get("job_description") or "") if isinstance(payload, dict) else ""
+    co = (payload.get("company") or "") if isinstance(payload, dict) else ""
+    fp = hashlib.sha256(f"{tr}\n{jd}".encode("utf-8")).hexdigest()[:12]
+    wq = (diff_audit or {}).get("quality") or (diff_audit or {}).get("rewrite_quality") or {}
+    wint = wq.get("rewrite_intensity") or {}
+    wflags = wq.get("flags") or {}
+    warn = final_out.get("warnings") or [] if isinstance(final_out, dict) else []
+    cr = final_out.get("changeReasons") or [] if isinstance(final_out, dict) else []
+    patch_keys = list((final_out.get("patchDiff") or {}).keys()) if isinstance(final_out, dict) else []
+    merge = (diff_audit or {}).get("merge") or {}
+    row = {
+        "ts_utc": datetime.now(timezone.utc).isoformat(),
+        "ab_experiment": tailor_ab_experiment_enabled(),
+        "openai_model": (os.getenv("OPENAI_MODEL") or "gpt-4o-mini").strip(),
+        "job_fingerprint": fp,
+        "target_role": tr[:240] if tr else "",
+        "company": (co[:120] if isinstance(co, str) else ""),
+        "skill_rows_touched": wint.get("skill_rows_touched"),
+        "skills_section_changed": wint.get("skills_section_changed"),
+        "experience_rows_touched": wint.get("experience_rows_touched"),
+        "project_rows_touched": wint.get("project_rows_touched"),
+        "rows_removed_total": wint.get("rows_removed_total"),
+        "low_intensity_hint": wint.get("low_intensity_hint"),
+        "skills_expected_but_unchanged": wflags.get("skills_expected_but_unchanged"),
+        "warning_count": len(warn) if isinstance(warn, list) else 0,
+        "warnings": warn[:5] if isinstance(warn, list) else [],
+        "change_reasons_count": len(cr) if isinstance(cr, list) else 0,
+        "patch_sections": patch_keys,
+        "merge_fell_back": merge.get("fell_back"),
+        "flags_on": {k: v for k, v in wflags.items() if v},
+        "llm_tokens_rewrite": _usage_to_dict(usage),
+    }
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    logger.info(
+        "tailor_ab_runs: experiment=%s fp=%s model=%s exp=%s proj=%s sk=%s sk_exp_unch=%s low_int=%s warn=%s tok=%s",
+        row["ab_experiment"],
+        fp,
+        row["openai_model"],
+        row["experience_rows_touched"],
+        row["project_rows_touched"],
+        row["skill_rows_touched"],
+        row["skills_expected_but_unchanged"],
+        row["low_intensity_hint"],
+        row["warning_count"],
+        (row.get("llm_tokens_rewrite") or {}).get("total_tokens"),
+    )
 
 
 def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
@@ -69,7 +160,8 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     out = parse_chat_json(text)
     target_role_str = str((payload or {}).get("target_role") or "") if isinstance(payload, dict) else ""
 
-    if debug:
+    want_audit = debug or _env_truthy("TAILOR_AB_LOG")
+    if want_audit:
         final_out, diff_audit = assemble_tailor_result(
             original_resume=resumeData,
             stage_a=out,
@@ -88,7 +180,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
             rows_per_section_ranked=(sectionDetails or {}).get("rowsPerSectionRanked") or {},
         )
         diff_audit = None
-    
+
     if debug:
         # create the debug output directory.
         base = Path(__file__).resolve().parent / "debug_out"
@@ -145,6 +237,8 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
             hsg.get("projects"),
             seg.get("narrative_had_project_heroes"),
         )
+
+    _append_tailor_ab_log(payload=payload, diff_audit=diff_audit, final_out=final_out, usage=usage)
 
     ch = (final_out.get("summary") or "").strip()
     return JobTailorSuggestResponse(

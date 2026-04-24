@@ -48,6 +48,67 @@ titleAnchorHints = {
     "insurance": {"commercial lines account manager", "account manager", "underwriter", "brokerage"},
     "retail": {"assistant store manager", "store manager", "retail manager"},
     "brokerage": {"underwriter assistant", "brokerage assistant", "securities services associate"},
+    "social_media": {
+        "content creator",
+        "social media creator",
+        "tiktok creator",
+        "ugc creator",
+        "video creator",
+        "creator",
+        "social media manager",
+        "content strategist",
+        "influencer",
+        "brand ambassador",
+        "social media",
+    },
+    "leadership": {
+        "vice president",
+        "vp",
+        "executive director",
+        "chief of staff",
+        "director",
+        "head of operations",
+        "chief operating officer",
+        "coo",
+        "president",
+        "program director",
+    },
+    "research_development": {
+        "r&d",
+        "research and development",
+        "r&d intern",
+        "rd intern",
+        "formulation",
+        "product development",
+        "technical operations",
+    },
+    "industrial_operations": {
+        "plant operator",
+        "wastewater",
+        "wastewater treatment",
+        "treatment plant",
+        "operator",
+        "environmental utilities",
+        "water resources",
+        "mechanical equipment",
+    },
+    "agriculture": {
+        "ranch hand",
+        "farm hand",
+        "livestock",
+        "cattle",
+        "farm worker",
+        "ranch",
+        "agriculture",
+    },
+    "administrative": {
+        "human resources",
+        "hr",
+        "coordinator",
+        "administrative assistant",
+        "office coordinator",
+        "front office",
+    },
 }
 
 # --- a set of global stop words, aka words that are not relevant to the job description and should be ignored. --- #
@@ -66,28 +127,47 @@ globalStopWords = {
     "success", "entry", "level",
     # filler / junk as standalone “keywords”
     "their", "able",
+    # sentence glue: almost never a skill keyword by itself
+    "across", "all", "can", "based", "after", "who", "working",
+    # generic requirement / instruction verbs (not skills as standalone terms)
+    "accept", "demonstrate", "show", "exhibit", "ensuring",
+    # thin layout / CTA noise in creator and short JDs
+    "page", "make", "out",
+    # HR / struct boilerplate in government and service postings
+    "date", "minimum",
+    # junk split from "r&d" style abbreviations; prefer phrase "r&d" in research_development
+    "r",
+    # req/glue and compound fragments (side-by-side, per diem boilerplate, etc.)
+    "must", "per", "acceptable", "side",
+    # English "go" (careers CTA) is not the Go language; do not let it rank
+    "go", "available",
+    # schedule / intensifier noise (daily standups, “highly motivated”, etc.)
+    "daily", "highly", "active",
+    # verb from “answer phones / email”—not a skill keyword
+    "answer",
 }
 
 # --- a set of global weak tokens, aka words that are relevant to the job description but are not strong enough to be considered a boost word. --- #
+# Prefer multi-word phrases (e.g. api-first architectures, data integrity) so umbrella words do not outrank concrete stack.
 globalWeakTokens = {
-    "experience", "skills", "team", "feature", "features",
     "api",
-    "basic", "design", "ensure", "exposure", "familiarity", "growth", "helping", "knowledge", "life", "metrics", "passion", "personal",
-    "professional", "related", "strong", "understanding", "vision", "working",
-    # broad JD / culture tokens — keep credit via multi-word phrases (e.g. systems integration, end-to-end ownership).
-    "software", "ownership", "execution", "integration", "operations", "engineering",
-    # too generic to top-rank as standalone body tokens; prefer phrases (e.g. customer-facing engineering, embedded platform).
-    "technical", "platform", "customer", "customers", "client", "clients", "support",
-    # umbrella / split counting: prefer phrases (ai systems, agent logic) over standalone systems/system/behavior/tools.
-    "systems", "system", "behavior", "tools", "decisions", "product",
-    "workflow",
-    # generic in almost every eng JD; keep weight via multi-word phrases, not as a top standalone token
-    "documentation",
-    # fluffy sales / culture JDs: vague people-outcome language
-    "goals", "expectations", "opportunities",
-    "development", "management",
-    # repeated builder/umbrella words—prefer concrete stack + multi-word phrases
-    "build", "web", "partners",
+    "accountability", "alignment", "approach", "basic", "behavior", "build", "business", "client", "clients", "collaborate",
+    "executive", "leadership", "president", "strategic", "vice",
+    "core", "values", "customer", "customers",
+    "ethic", "innovation", "organizational", "professionalism", "rigor", "tenacity", "transparency", "urgency",
+    "communication", "field", "operational",
+    "assist", "career", "health", "industry", "process", "program", "term",
+    "materials", "sites", "updates",
+    "account", "controller", "information", "prepares",
+    "decisions", "design", "development", "documentation", "ensure", "execution", "experience", "exposure", "familiarity",
+    "feature", "features",
+    "goals", "growth", "helping", "expectations", "opportunities",
+    "infrastructure", "integration", "inventory", "knowledge", "life",
+    "management", "metrics", "operations", "ownership", "partners", "passion", "performance", "personal",
+    "platform", "product", "professional", "related", "relationship", "relationships", "skills", "software", "strong",
+    "system", "systems", "support", "team", "technical", "tools", "training", "understanding", "vision", "web", "workflow",
+    "hands-on",
+    "engineering",
 }
 
 # --- a set of global filler phrases. --- #
@@ -135,6 +215,19 @@ globalFillerPhrases = {
 
 # --- a list of global phrases. --- #
 globalPhrases = [
+    # compound anchors: beat umbrella tokens (system, platform, build) in phrase pass + ranking.
+    "api-first architectures", "event-driven services", "serverless infrastructure", "booking synchronization", "property technology",
+    "ai systems", "agent logic", "feedback loops", "evaluation frameworks", "large language models", "labeling systems",
+    "data integrity", "audit readiness", "food safety", "regulatory inspections",
+    # leadership / executive / nonprofit-ops: prefer phrases over split vice / president / execution / management.
+    "vice president", "executive leadership", "people management", "strategic priorities", "operational excellence",
+    "organizational capacity", "cross-functional oversight",
+    # field / biomedical / imaging (anchor phrases, no separate domain)
+    "field service engineer", "diagnostic imaging equipment", "ultrasound systems", "preventative maintenance", "system calibrations",
+    "medical devices", "clinical teams",
+    # hr / front office (keeps “human resources” and mail/call work from decomposing into junk tokens)
+    "human resources", "front office", "phone calls", "administrative tasks", "office supplies", "incoming and outgoing mail",
+    "appointments and meetings",
     "stakeholder management", "cross functional collaboration", "end-to-end ownership", "process improvement", "risk mitigation",
     "incident response", "root cause analysis", "data analysis", "business impact", "customer outcomes", "go to market",
     "a/b testing", "ab testing", "user acquisition", "user activation", "user retention",
@@ -205,30 +298,30 @@ globalPhrases = [
 # --- a dict of global boost words and their strengths. --- #
 globalBoostWords = {
     "stakeholder management": 3, "cross functional collaboration": 2, "end-to-end ownership": 3, "process improvement": 3,
-    "risk mitigation": 3, "incident response": 3, "root cause analysis": 3, "data analysis": 3, "business impact": 3,
-    "customer outcomes": 2, "go to market": 2, "a/b testing": 3, "user acquisition": 3, "user activation": 3, "user retention": 3,
-    "accountability": 3, "revenue": 3, "collections": 3, "billing": 3,
-    "kpis": 3, "dashboards": 2, "hiring": 2, "recruiting": 2, "performance": 2, "operator": 2, "efficiency": 2, "implementation": 2,
+    "risk mitigation": 3, "incident response": 3, "root cause analysis": 3, "data analysis": 2, "business impact": 3,
+    "customer outcomes": 2, "go to market": 2, "a/b testing": 1, "user acquisition": 3, "user activation": 3, "user retention": 3,
+    "revenue": 3, "collections": 3, "billing": 3,
+    "kpis": 3, "dashboards": 2, "hiring": 2, "recruiting": 2, "operator": 2, "implementation": 2,
     "sales": 3, "pipeline": 3, "prospecting": 3, "outbound": 2, "lead": 2, "leads": 2, "crm": 3,
-    "forecasting": 2, "reporting": 2, "clients": 2, "client": 2, "account": 2, "relationships": 2, "relationship": 2,
-    "onboarding": 2, "metrics": 2, "targets": 2, "opportunities": 2, "volume": 2, "compliance": 2, "product": 1,
-    "budgeting": 3, "profit": 3, "cash": 2, "flow": 2, "excel": 2, "management": 2, "turnaround": 3,
-    "productivity": 2, "forecasting": 3, "sales": 3, "marketing": 2, "customer": 1, "service": 1, "training": 1, "leadership": 1,
+    "forecasting": 2, "reporting": 2, "account": 2,
+    "onboarding": 2, "metrics": 2, "targets": 2, "opportunities": 2, "volume": 2, "compliance": 2,
+    "budgeting": 3, "profit": 3, "cash": 2, "flow": 2, "excel": 2, "turnaround": 3,
+    "productivity": 2, "forecasting": 3, "sales": 3, "marketing": 2, "service": 1, "leadership": 1,
     "python": 3, "django": 3, "react": 3, "aws": 3, "apis": 3, "api": 3,
-    "embedded": 3, "platform": 2, "partners": 2, "developer": 2, "architecture": 2, "sdk": 2, "microservices": 2,
-    "troubleshooting": 2, "support": 2, "deployment": 2, "delivery": 2, "customization": 2,
+    "embedded": 3, "partners": 2, "developer": 2, "architecture": 2, "sdk": 2, "microservices": 2,
+    "troubleshooting": 2, "deployment": 2, "delivery": 2, "customization": 2,
     "sql": 3, "kafka": 3, "databricks": 3, "nifi": 3, "druid": 2, "mongodb": 2, "opensearch": 2, "postgres": 2,
     "governance": 2, "security": 2, "privacy": 2, "mlops": 3, "rag": 3, "llm": 3, "generative": 2,
     "pipelines": 2, "architecture": 2, "monitoring": 2, "streaming": 2,
     "automation": 3, "copilot": 3, "power automate": 3, "power bi": 2, "dataverse": 3, "scripting": 3,
-    "kpi": 2, "kpis": 3, "dashboarding": 2, "workflow": 2, "prompt engineering": 2, "documentation": 2,
+    "kpi": 2, "kpis": 3, "dashboarding": 2, "prompt engineering": 2,
     "typescript": 3, "next.js": 3, "react native": 3, "full-stack": 3, "deployment": 2, "maintenance": 2,
-    "fintech": 2, "banking": 2, "accounting": 2, "ci/cd": 2, "customers": 1,
+    "fintech": 2, "banking": 2, "accounting": 2, "ci/cd": 2,
     "gcp": 3, "gke": 3, "docker": 3, "kubernetes": 3, "machine learning": 3,
     "nextjs": 3, "nestjs": 3, "php": 3, "linux": 2,
     "restful apis": 3, "third-party apis": 3, "full stack web development": 3, "javascript frameworks": 2,
     "notion": 1,
-    "power bi": 3, "business intelligence": 3, "data modeling": 3, "quantitative": 3,
+    "power bi": 3, "business intelligence": 1, "data modeling": 3, "quantitative": 3,
     "investment": 3, "private markets": 3, "investment management": 3, "analytics platform": 3, "prototypes": 2,
     "numpy": 3, "pandas": 3, "scikit-learn": 3, "tensorflow": 3, "pytorch": 3, "transformers": 3,
     "fastapi": 3, "flask": 2, "django": 3, "angular": 2, "vue.js": 3, "graphql": 3,
@@ -239,10 +332,11 @@ globalBoostWords = {
     "ios": 2, "android": 2, "visualization": 2, "automations": 3, "flows": 1,
     "user-centric": 3, "healthcare": 3, "early-stage": 2, "startup": 2,
     "physician": 2, "practitioners": 2, "practitioner": 2, "product strategy": 3,
-    "solutions": 1, "components": 1, "frontend": 2, "backend": 2, "infrastructure": 2, "web": 1, "mobile": 2,
-    "strategy": 1, "decisions": 1, "technical": 1,
+    "solutions": 1, "components": 1, "frontend": 2, "backend": 2, "mobile": 2,
+    "strategy": 1,
     "design": 1, "implement": 1, "build": 1, "deploy": 1, "collaborate": 1, "communicate": 1, "contribute": 1, "share": 1,
     "signup": 1, "founders": 1,
+    "ultrasound": 2, "imaging": 2, "equipment": 2, "biomedical": 2, "electronics": 2, "clinical": 2,
 }
 
 # --- a dict of global phrase canonicals. --- #
@@ -424,8 +518,6 @@ globalPhraseCanonical = {
 globalAllowShortTokens = {
     "c++", 
     "c#", 
-    "go", 
-    "r", 
     "ai", 
     "ml", 
     "ui", 
@@ -452,7 +544,7 @@ domainDicts = {
             "javascript frameworks", "full stack web development", "github", "notion",
             "full-stack application development", "event-driven microservices", "graphql", "mcp servers",
             "feature engineering", "model optimization", "data preprocessing", "deep learning",
-            "go", "sql", "full-stack", "user-facing web applications", "cross-functional teams",
+            "sql", "full-stack", "user-facing web applications", "cross-functional teams",
             "product features", "architectural discussions", "shipping complex software projects",
             "ruby", "ruby on rails", "tailwind css", "anthropic claude", "ios", "android",
             "infrastructure", "components", "software", "solutions", "frontend", "backend", "mobile", "web",
@@ -471,18 +563,18 @@ domainDicts = {
         ],
         "boostWords": {
             "python": 3, "java": 2, "typescript": 3, "react": 3, "next.js": 3, "node": 2, "aws": 3, "kubernetes": 2,
-            "api": 3, "integration": 3, "embedded": 3, "platform": 2, "architecture": 2, "sdk": 2, "microservices": 2,
-            "troubleshooting": 2, "support": 2, "deployment": 2, "implementation": 2, "delivery": 2, "customization": 2,
+            "api": 3, "integration": 1, "embedded": 3, "architecture": 2, "sdk": 2, "microservices": 2,
+            "troubleshooting": 2, "deployment": 2, "implementation": 2, "delivery": 2, "customization": 2,
             "vue.js": 3, "nextjs": 3, "nestjs": 3, "php": 3, "linux": 2, "restful apis": 3, "third-party apis": 3,
-            "github": 2, "notion": 1,
+            "github": 1, "notion": 1,
             "graphql": 3, "fastapi": 3, "flask": 2, "angular": 2, "vue.js": 3, "redis": 2,
             "postgresql": 2, "mysql": 2, "feature engineering": 3, "model optimization": 3, "microservices": 3,
-            "go": 3, "sql": 3, "full-stack": 3, "user-facing web applications": 2,
+            "sql": 3, "full-stack": 3, "user-facing web applications": 2,
             "cross-functional teams": 2, "product features": 2, "architectural discussions": 2,
             "shipping complex software projects": 2,
             "ruby": 3, "ruby on rails": 3, "tailwind css": 2, "anthropic claude": 3, "ios": 2, "android": 2,
-            "infrastructure": 2, "frontend": 2, "backend": 2, "mobile": 2,
-            "deploy": 2, "implement": 2, "build": 2, "design": 2, "collaborate": 2,
+            "frontend": 2, "backend": 2, "mobile": 2,
+            "deploy": 2, "implement": 2, "build": 1, "design": 2, "collaborate": 1,
             "user-centric": 2, "automations": 2,
         },
         "weakTokens": {"codebase", "coding"},
@@ -500,7 +592,7 @@ domainDicts = {
         ],
         "boostWords": {
             "customer": 2, "partner": 2, "partners": 2, "implementation": 2, "delivery": 2,
-            "integration": 3, "support": 2, "developer": 2, "architecture": 2, "platform": 2,
+            "integration": 1, "developer": 2, "architecture": 2,
             "communicate": 1, "collaborate": 1, "contribute": 1, "share": 1,
         },
         "weakTokens": set(),
@@ -533,7 +625,7 @@ domainDicts = {
         "boostWords": {
             "sql": 3, "kafka": 3, "databricks": 3, "nifi": 3, "druid": 2, "mongodb": 2, "opensearch": 2, "postgres": 2,
             "governance": 2, "security": 2, "privacy": 2, "pipelines": 2, "streaming": 2, "architecture": 2, "monitoring": 2,
-            "kpi": 2, "kpis": 3, "dashboarding": 2, "tableau": 2, "power bi": 3, "business intelligence": 3,
+            "kpi": 2, "kpis": 3, "dashboarding": 2, "tableau": 1, "power bi": 3, "business intelligence": 1,
             "data modeling": 3, "analytics platform": 3, "prototypes": 2,
             "visualization": 2, "automations": 2, "flows": 1,
         },
@@ -588,7 +680,7 @@ domainDicts = {
         ],
         "boostWords": {
             "kpi": 2, "okr": 2, "experimentation": 2, "retention": 2, "adoption": 2,
-            "strategy": 2, "decisions": 2, "technical": 2, "signup": 1, "founders": 1, "user-centric": 3, "consumer": 1,
+            "strategy": 2, "signup": 1, "founders": 1, "user-centric": 3, "consumer": 1,
             "product strategy": 3, "early-stage": 2, "startup": 2, "healthcare": 2,
         },
         "weakTokens": {"backlog"},
@@ -607,6 +699,101 @@ domainDicts = {
         "phrases": ["campaign optimization", "conversion rate optimization", "attribution modeling", "funnel analysis"],
         "boostWords": {"seo": 3, "sem": 2, "email": 2, "crm": 2, "analytics": 2, "posthog": 2},
         "weakTokens": {"creative"},
+    },
+    "social_media": {
+        "aliases": {
+            "content creator", "social media", "social media manager", "tiktok creator", "ugc creator",
+            "video creator", "influencer", "content strategist", "brand ambassador", "creator",
+            "tiktok", "instagram", "youtube", "ugc", "reels", "short-form",
+        },
+        "phrases": [
+            "content creator", "social media", "short videos", "video editing", "social media handles",
+            "tiktok trends", "brand page", "content creation", "short-form video", "talking-style video",
+        ],
+        "boostWords": {
+            "tiktok": 3, "instagram": 3, "youtube": 3, "creator": 3, "content": 2, "video": 3, "videos": 2,
+            "editing": 2, "brand": 2, "social": 2, "media": 2, "ugc": 3, "reels": 2, "short-form": 2,
+        },
+        "weakTokens": set(),
+    },
+    "leadership": {
+        "aliases": {
+            "vice president", "executive director", "chief of staff", "head of operations", "chief operating officer",
+            "coo", "vp", "program director", "president", "executive", "strategic", "mission", "nonprofit",
+        },
+        "phrases": [
+            "vice president", "executive leadership", "people management", "strategic priorities", "operational excellence",
+            "organizational capacity", "cross-functional oversight", "external representation", "mission alignment",
+        ],
+        "boostWords": {
+            "strategy": 3, "strategic": 2, "leadership": 3, "executive": 2, "oversight": 2, "operations": 2, "management": 2,
+            "organizational": 2, "mission": 2,
+        },
+        "weakTokens": set(),
+    },
+    "research_development": {
+        "aliases": {
+            "r&d", "research and development", "formulation", "r&d intern", "rd intern", "product development",
+            "technical operations", "chemical engineering", "cosmetic science", "chemistry", "biology",
+            "raw material", "plm", "product lifecycle", "cosmetics", "consumer goods", "personal care",
+            "regulatory", "manufacturing", "specright", "lab",
+        },
+        "phrases": [
+            "r&d", "research and development",
+            "raw material", "formula records", "technical documentation", "safety data sheets", "regulatory information",
+            "data management", "product lifecycle management", "plm systems", "portfolio management", "formulation",
+            "cosmetic science", "regulatory affairs", "consumer goods", "personal care", "structured technical information",
+            "contract manufacturing organizations",
+        ],
+        "boostWords": {
+            "plm": 3, "specright": 3, "formulation": 3, "regulatory": 2, "documentation": 2, "raw material": 2,
+            "chemistry": 2, "biology": 2, "cosmetic": 2, "manufacturing": 2, "consumer": 2, "portfolio": 2, "lifecycle": 2,
+        },
+        "weakTokens": set(),
+    },
+    "industrial_operations": {
+        "aliases": {
+            "plant operator", "wastewater", "wastewater treatment", "treatment plant", "operator", "treatment", "plant",
+            "environmental utilities", "water resources", "mechanical equipment", "mechanical", "environmental", "utilities",
+        },
+        "phrases": [
+            "wastewater treatment", "treatment plant", "plant operator", "mechanical equipment", "mechanical processes",
+            "environmental utilities", "water resources control board", "operator certificate",
+        ],
+        "boostWords": {
+            "wastewater": 3, "treatment": 2, "plant": 2, "operator": 3, "mechanical": 2, "utilities": 2, "environmental": 2,
+            "water": 2, "certificate": 2, "license": 2,
+        },
+        "weakTokens": set(),
+    },
+    "agriculture": {
+        "aliases": {
+            "ranch hand", "farm hand", "livestock", "cattle", "farm worker", "ranch", "agriculture", "rancher",
+            "artificial insemination", "calving", "pasture", "pastures", "harvest", "fence", "fencing", "cdl", "farm",
+        },
+        "phrases": [
+            "ranch hand", "livestock inspections", "artificial insemination", "cattle health", "farm cdl", "horseback riding",
+            "general maintenance", "semi-truck", "calving",
+        ],
+        "boostWords": {
+            "cattle": 3, "livestock": 3, "ranch": 2, "farm": 2, "calving": 2, "harvest": 2, "fence": 2,
+            "insemination": 2, "horseback": 2, "cdl": 2,
+        },
+        "weakTokens": set(),
+    },
+    "administrative": {
+        "aliases": {
+            "human resources", "hr", "administrative", "office", "receptionist", "front desk", "coordinator", "bilingual",
+            "administrative assistant", "office coordinator", "front office", "excel", "appointments", "meetings",
+        },
+        "phrases": [
+            "human resources", "front office", "phone calls", "administrative tasks", "office supplies", "appointments and meetings",
+            "incoming and outgoing mail", "mail and emails",
+        ],
+        "boostWords": {
+            "office": 2, "administrative": 2, "excel": 2, "bilingual": 2, "coordinator": 2, "appointments": 2, "meetings": 2,
+        },
+        "weakTokens": set(),
     },
     "sales": {
         "aliases": {
@@ -719,6 +906,8 @@ domainDicts = {
             "contact center", "ivr", "fcr", "csat", "wfo", "ccaas", "wxcc", "webex", "calabrio", "founders",
         },
         "phrases": [
+            "resource allocation", "logistics coordination", "dispatch systems", "field operations", "safety regulations",
+            "labor regulations",
             "process optimization", "service level agreements", "capacity planning", "vendor management",
             "day-to-day operations", "daily operations", "daily deploy", "deploy daily",
             "early-stage startup", "early stage startup",
@@ -810,6 +999,7 @@ domainDicts = {
             "concrete", "asphalt", "soil testing", "quality control", "safety compliance",
         },
         "phrases": [
+            "resource allocation", "job sites", "schedule conflicts", "punch list", "subcontractors", "material delays",
             "construction materials testing", "field testing", "site inspection", "project coordination",
             "quality control", "safety compliance", "construction documentation", "materials sampling",
         ],

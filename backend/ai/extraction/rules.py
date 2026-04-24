@@ -118,6 +118,12 @@ hardNoiseTokens = {
     "known",
     "groma",
     "lennar",
+    "classicorps",
+    "https",
+    "reflectmegirls",
+    "reflectmedolls.com",
+    "sanjana",
+    "freedomind.us",
 }
 
 # tokens that dominate benefit/comp lines; used to penalize phrases that look like perks not skills.
@@ -135,11 +141,21 @@ benefitNoiseTokens = {
     "commission",
     "commissions",
     "allowance",
+    "gas",
+    "draw",
+    "earnings",
+    "coverage",
+    "comprehensive",
+    "weekly",
     "work",
     "sick",
     "off",
     "pto",
     "leave",
+    "beef",
+    "pickup",
+    "disability",
+    "referral",
 }
 
 # bucket from debugging.
@@ -245,7 +261,7 @@ stackAllowShortTokens = {
 # concrete tech names for stack detection in jd "stack" style sections.
 concreteStackTerms = {
     "react", "next.js", "nextjs", "react-native", "react native", "typescript", "javascript", "node", "node.js",
-    "c++", "python", "java", "go", "rust", "php", "nestjs", "django", "flask", "fastapi",     "graphql", "rest", "restful",
+    "c++", "python", "java", "rust", "php", "nestjs", "django", "flask", "fastapi",     "graphql", "rest", "restful",
     "sql", "postgres", "postgresql", "mysql", "mongodb", "redis", "databricks", "kafka", "nifi",
     "opensearch", "tableau", "power bi", "salesforce", "posthog", "aws", "gcp", "azure", "docker", "kubernetes",
     "gke", "rag", "llm", "mlops", "tensorflow", "pytorch", "pyspark", "scikit-learn", "transformers", "langchain", "langgraph",
@@ -258,7 +274,7 @@ concreteStackTerms = {
 # softer capability words: stack-adjacent but not a named product (workflow, compliance, etc.).
 # omit integration / support / documentation / efficiency / operations: most JDs; operations over-boosted with body + capabilityStack.
 roleCapabilityStackTerms = {
-    "implementation", "management", "execution", "delivery",
+    "implementation", "delivery",
     "billing", "security", "kpis", "compliance",
 }
 
@@ -407,6 +423,26 @@ wrapperSuppressLineSubstrings = {
     "health benefits",
     "performance based role",
     "applications without this will not be reviewed",
+    "check us out: instagram",
+    "youtube:",
+    "tiktok:",
+    "website:",
+    "to apply, email",
+    "no resume needed",
+    "click here",
+    "employment list",
+    "temporary position",
+    "inclusive and supportive workforce",
+    "minimum qualifications",
+    "license or certificate",
+    "check out our career page",
+    "go to careers",
+    "401(k)",
+    "life insurance",
+    "short term",
+    "long term disability",
+    "employee referral bonus",
+    "advancement opportunities",
 }
 
 # when merging overlapping terms: if generic token overlaps a longer phrase, prefer these exact phrases.

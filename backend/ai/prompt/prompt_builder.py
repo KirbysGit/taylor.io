@@ -2,8 +2,18 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 
 from ..post_processing.resume_tailor_report import skills_change_expected_from_context
+
+# When `TAILOR_AB_EXPERIMENT` is truthy, this block is appended to the Stage A user prompt (A/B vs baseline).
+# Keep empty for identical token baseline; put your experiment instructions here only for the "on" runs.
+TAILOR_AB_EXPERIMENT_APPEND = ""
+
+
+def tailor_ab_experiment_enabled():
+    v = (os.getenv("TAILOR_AB_EXPERIMENT") or "").strip().lower()
+    return v in ("1", "true", "yes", "on")
 
 
 def top_keyword_terms(keywords, limit=8):
@@ -291,7 +301,7 @@ def build_system_prompt():
     )
 
 
-def build_user_prompt(payload, tailorContext, sectionDetails, relevantJDLines, narrativeBrief=None):
+def build_user_prompt(payload, tailorContext, sectionDetails, relevantJDLines, narrativeBrief=None, ab_experiment=False):
     targetRole = tailorContext.get("targetRole", "")
 
     companyRaw = payload.get("company")
@@ -391,12 +401,28 @@ def build_user_prompt(payload, tailorContext, sectionDetails, relevantJDLines, n
         json.dumps(output_contract, ensure_ascii=False, indent=2),
     ]
 
+    exp = (TAILOR_AB_EXPERIMENT_APPEND or "").strip()
+    if ab_experiment and exp:
+        lines.extend(
+            [
+                "",
+                "### A/B experiment override (TAILOR_AB_EXPERIMENT=on)",
+                exp,
+            ]
+        )
+
     return "\n".join(lines)
 
 
 def build_prompt(payload, tailorContext, sectionDetails, relevantJDLines, narrativeBrief=None):
+    ab = tailor_ab_experiment_enabled()
     system_prompt = build_system_prompt()
     user_prompt = build_user_prompt(
-        payload, tailorContext, sectionDetails, relevantJDLines, narrativeBrief=narrativeBrief
+        payload,
+        tailorContext,
+        sectionDetails,
+        relevantJDLines,
+        narrativeBrief=narrativeBrief,
+        ab_experiment=ab,
     )
     return system_prompt, user_prompt
