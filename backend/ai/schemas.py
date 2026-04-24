@@ -20,4 +20,5 @@ class JobTailorSuggestResponse(BaseModel):
     patchDiff: Dict[str, Any]
     changeReasons: List[Dict[str, Any]]
     warnings: List[str]
-    genSummary: str
+    # top-level tailoring changelog (merged model note + code changelog)
+    summary: str = ""

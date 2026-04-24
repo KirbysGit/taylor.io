@@ -81,6 +81,14 @@ def canonicalize_token(token):
     return low
 
 
+# --- map multi-word known phrases to a single ranked key (e.g. microsoft azure -> azure) so stack + phrase credit collapse. --- #
+def canonicalize_phrase_key(phrase):
+    if not phrase:
+        return phrase
+    low = phrase.strip().lower()
+    return globalPhraseCanonical.get(low, low)
+
+
 # --- split slash-joined tool lists (e.g. node.js/express) into parts unless the full token is a known idiom (ci/cd, ml/ai, …). --- #
 def iter_slashed_token_pieces(raw):
     t = (raw or "").rstrip(".,;:").lower()
@@ -252,7 +260,7 @@ def count_phrases(text, source, phrases, sourceWeight=1.0):
 # --- extract stack terms from jd. --- #
 # input -> body lines.
 # output -> concrete counts, capability counts.
-def extract_stack_terms(bodyLines):
+def extract_stack_terms(bodyLines, company=""):
     concreteCounts = {}
     capabilityCounts = {}
 
@@ -263,9 +271,10 @@ def extract_stack_terms(bodyLines):
             continue
 
         for token in re.findall(r"[a-z0-9+#.-]{2,}", low):
-            term = token.strip()
+            term = canonicalize_token(token.strip())
             if not term:
                 continue
+            if str(company or "").strip() and (str(company).lower() in (term or "") or (term in str(company).lower())): continue
 
             if term in concreteStackTerms:
                 concreteCounts[term] = concreteCounts.get(term, 0.0) + 1.0
@@ -278,7 +287,7 @@ def extract_stack_terms(bodyLines):
 # this func will leave us with a dict of terms that "make sense" as a token (based on our current ruleset).
 # input -> text.
 # output -> token counts.
-def extract_tokens(text):
+def extract_tokens(text, company=""):
     # initialize token counts.
     tokenCounts = {}
 
@@ -290,6 +299,7 @@ def extract_tokens(text):
             # if token is empty, continue.
             if not term:
                 continue
+            if str(company or "").strip() and (str(company).lower() in (term or "") or (term in str(company).lower())): continue
 
             # if token is a stop word, continue.
             if term in globalStopWords:
@@ -395,7 +405,7 @@ def get_relevant_jd_lines(bodyLines, keywords):
 # main function that calls our other functions in sequence.
 # input -> job description, target role, number of keywords.
 # output -> ranked terms.
-def extract_keywords(jobDescription, targetRole, numKeywords):
+def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
 
     # debugging control.
     wanna_debug = True
@@ -409,7 +419,9 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
     res = ExtractionResult(jobDescription=jobDescription, targetRole=targetRole, profile=profile)
 
     if wanna_debug: 
-        debug["profile"] = profile.copy()
+        debug["profile.activeDomains"] = profile["activeDomains"]
+        debug["profile.weakTokens"] = list(profile["weakTokens"])
+        debug["company"] = company
 
     # 2. parse jd into lines.
     res.bodyLines, res.downweightedLines = parse_jd_lines(jobDescription)
@@ -434,6 +446,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
     for phraseBucket in (bodyPhraseCounts, downweightedPhraseCounts, titlePhraseCounts):
         # get the term and its source map (term, { source: count })
         for term, sourceMap in phraseBucket.items():
+            term = canonicalize_phrase_key(term)
             # get the term sources.
             ts = res.termSources[term]
 
@@ -459,7 +472,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
         debug["termSources_after_known_phrases"] = dict(res.termSources)
 
     # 7. extract stack terms & update termSources.
-    concreteStackCounts, capabilityStackCounts = extract_stack_terms(res.bodyLines)
+    concreteStackCounts, capabilityStackCounts = extract_stack_terms(res.bodyLines, company=company)
 
     # iterate over the concrete stack counts, and update our termSources.
     for term, freq in concreteStackCounts.items():
@@ -476,9 +489,9 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
         debug["capabilityStackCounts"] = capabilityStackCounts
 
     # 8. extract tokens from text.
-    titleTokenCounts = extract_tokens(res.cleanTitle)
-    bodyTokenCounts = extract_tokens(res.cleanBody)
-    downweightedTokenCounts = extract_tokens(res.cleanDownweightedBody)
+    titleTokenCounts = extract_tokens(res.cleanTitle, company=company)
+    bodyTokenCounts = extract_tokens(res.cleanBody, company=company)
+    downweightedTokenCounts = extract_tokens(res.cleanDownweightedBody, company=company)
 
     # iterate over the title token counts, and update our termSources.
     for term, freq in titleTokenCounts.items():
@@ -499,6 +512,8 @@ def extract_keywords(jobDescription, targetRole, numKeywords):
         debug["titleTokenCounts"] = titleTokenCounts
         debug["bodyTokenCounts"] = bodyTokenCounts
         debug["downweightedTokenCounts"] = downweightedTokenCounts
+
+    if str(company or "").strip(): res.termSources = {k: v for k, v in res.termSources.items() if not (str(company).lower() in (k or "") or (k in str(company).lower()))}
 
     # 9. score our term sources.
 

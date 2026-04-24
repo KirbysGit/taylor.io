@@ -19,11 +19,18 @@ sectionHeadersToDownweight = {
 
 # section title prefixes: treat as role-relevant body text (responsibilities, requirements, etc.).
 roleSectionHeaders = {
-    "job description",
+    "about the position",
     "about the role",
+    "about this role",
+    "in this role",
+    "job description",
+    "must have",
+    "overview",
+    "qualified candidates will have",
     "role overview",
     "why this role is remarkable",
     "what you will do",
+    "what you ll do",
     "responsibilities",
     "key responsibilities",
     "requirements",
@@ -54,6 +61,14 @@ nonRoleSectionHeaders = {
     "what s in it for you",
     "what's in it for you",
     "our promise to you",
+    "some of our perks",
+    "one last thing to ask yourself",
+    "about our culture",
+    "about our company",
+    "our part employees expectations for the company",
+    "our part employees",
+    "disclaimers",
+    "job benefits",
 }
 
 hardNoiseTokens = {
@@ -100,6 +115,9 @@ hardNoiseTokens = {
     "resume",
     "resumes",
     "unsolicited",
+    "known",
+    "groma",
+    "lennar",
 }
 
 # tokens that dominate benefit/comp lines; used to penalize phrases that look like perks not skills.
@@ -112,7 +130,11 @@ benefitNoiseTokens = {
     "vacation",
     "holidays",
     "bonus",
+    "bonuses",
     "compensation",
+    "commission",
+    "commissions",
+    "allowance",
     "work",
     "sick",
     "off",
@@ -223,20 +245,21 @@ stackAllowShortTokens = {
 # concrete tech names for stack detection in jd "stack" style sections.
 concreteStackTerms = {
     "react", "next.js", "nextjs", "react-native", "react native", "typescript", "javascript", "node", "node.js",
-    "python", "java", "go", "rust", "php", "nestjs", "django", "flask", "fastapi", "graphql", "rest", "restful",
-    "api", "apis", "sql", "postgres", "postgresql", "mysql", "mongodb", "redis", "databricks", "kafka", "nifi",
+    "c++", "python", "java", "go", "rust", "php", "nestjs", "django", "flask", "fastapi",     "graphql", "rest", "restful",
+    "sql", "postgres", "postgresql", "mysql", "mongodb", "redis", "databricks", "kafka", "nifi",
     "opensearch", "tableau", "power bi", "salesforce", "posthog", "aws", "gcp", "azure", "docker", "kubernetes",
     "gke", "rag", "llm", "mlops", "tensorflow", "pytorch", "pyspark", "scikit-learn", "transformers", "langchain", "langgraph",
     "express",
-    "webex", "calabrio", "dialogflow", "ci/cd", "linux", "vue", "vue.js", "angular", "html", "css", "gpu", "cuda",
+    "webex", "calabrio", "dialogflow", "ci/cd", "linux", "vue.js", "angular", "html", "css", "gpu", "cuda",
     "javascript", "nodejs",
     "ruby", "rails", "tailwind", "claude", "ios", "android",
 }
 
 # softer capability words: stack-adjacent but not a named product (workflow, compliance, etc.).
+# omit integration / support / documentation / efficiency / operations: most JDs; operations over-boosted with body + capabilityStack.
 roleCapabilityStackTerms = {
-    "workflow", "operations", "documentation", "implementation", "management", "execution", "delivery", "support",
-    "billing", "efficiency", "security", "integration", "kpis", "compliance",
+    "implementation", "management", "execution", "delivery",
+    "billing", "security", "kpis", "compliance",
 }
 
 # tokens to skip when mining org/employer name chunks from titles (too generic).
@@ -354,6 +377,36 @@ wrapperSuppressLineSubstrings = {
     "unsolicited resume",
     "unsolicited resumes",
     "will not pay a fee",
+    "but enough about us",
+    "competitive salary",
+    "employer-paid",
+    "one last thing to ask yourself",
+    "the base salary for this position is",
+    "unlimited pto",
+    "we are looking to build something big",
+    "we have an ever-evolving list of values",
+    "we have created a world where",
+    "equal employment opportunities",
+    "without regard to race",
+    "qualified candidates should send a resume",
+    "life at lennar",
+    "follow us on social media",
+    "linkedin",
+    "physical & office site presence requirements",
+    "physical & office site presence",
+    "weekly team nights",
+    "paid traveling opportunities",
+    "networking with business owners",
+    "supportive and encouraging work environment",
+    "student-mentality",
+    "student mentality",
+    "base draw commission bonuses",
+    "gas allowance",
+    "discounted gym memberships",
+    "travel opportunities",
+    "health benefits",
+    "performance based role",
+    "applications without this will not be reviewed",
 }
 
 # when merging overlapping terms: if generic token overlaps a longer phrase, prefer these exact phrases.

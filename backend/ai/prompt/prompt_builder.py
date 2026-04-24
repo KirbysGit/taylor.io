@@ -1,4 +1,9 @@
+from __future__ import annotations
+
+import copy
 import json
+
+from ..post_processing.resume_tailor_report import skills_change_expected_from_context
 
 
 def top_keyword_terms(keywords, limit=8):
@@ -105,91 +110,192 @@ def real_gaps_line(resumeGaps, maxTerms=14):
     return ", ".join(terms) if terms else "None flagged from JD keyword scan."
 
 
+def _narrative_id_list(nb: dict, key: str) -> list:
+    """Stable int ids from narrative brief lists (heroExperience, heroProjects, etc.)."""
+    v = nb.get(key) if isinstance(nb, dict) else None
+    if not isinstance(v, list):
+        return []
+    out = []
+    for x in v:
+        if isinstance(x, int):
+            out.append(x)
+        elif isinstance(x, float) and x == int(x):
+            out.append(int(x))
+        elif isinstance(x, str) and x.strip().lstrip("-").isdigit():
+            out.append(int(x.strip()))
+    return out
+
+
+def _rows_with_ids(rows, ids):
+    """Return full row dicts for ids in resume section order; skip unknown ids."""
+    if not isinstance(rows, list) or not ids:
+        return []
+    id_order = []
+    seen = set()
+    for i in ids:
+        if i not in seen:
+            seen.add(i)
+            id_order.append(i)
+    by_id = {}
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        rid = r.get("id")
+        if isinstance(rid, float) and rid == int(rid):
+            rid = int(rid)
+        if isinstance(rid, int):
+            by_id[rid] = r
+    out = []
+    for i in id_order:
+        r = by_id.get(i)
+        if r is not None:
+            out.append(r)
+    return out
+
+
+def _supporting_projects_slim(proj_rows, support_proj_ids):
+    """id + title + tech_stack only—stage A must not edit these; full rows add noise."""
+    slim = []
+    for r in _rows_with_ids(proj_rows, support_proj_ids):
+        if not isinstance(r, dict):
+            continue
+        rid = _row_id_int(r)
+        if rid is None:
+            continue
+        slim.append({"id": rid, "title": r.get("title"), "tech_stack": r.get("tech_stack")})
+    return slim
+
+
+def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None) -> dict:
+    """
+    Slim JSON placed first in the stage-A user prompt: the rows the model should actually rewrite.
+    Full resume still appended later as a truth anchor.
+    """
+    rd = resume_data if isinstance(resume_data, dict) else {}
+    nb = narrative_brief if isinstance(narrative_brief, dict) else {}
+    hero_exp_ids = _narrative_id_list(nb, "heroExperience")
+    hero_proj_ids = _narrative_id_list(nb, "heroProjects")
+    support_proj_ids = _narrative_id_list(nb, "supportingProjects")
+
+    exp_rows = rd.get("experience") if isinstance(rd.get("experience"), list) else []
+    proj_rows = rd.get("projects") if isinstance(rd.get("projects"), list) else []
+    skills_rows = rd.get("skills") if isinstance(rd.get("skills"), list) else []
+
+    summary_block = rd.get("summary") if isinstance(rd.get("summary"), dict) else {}
+
+    return {
+        "allowedExperienceEditIds": hero_exp_ids,
+        "allowedProjectEditIds": hero_proj_ids,
+        "supportingProjectIds": support_proj_ids,
+        "summarySection": copy.deepcopy(summary_block),
+        "heroExperienceRows": _rows_with_ids(exp_rows, hero_exp_ids),
+        "heroProjectRows": _rows_with_ids(proj_rows, hero_proj_ids),
+        "supportingProjectRows_referenceOnly": _supporting_projects_slim(proj_rows, support_proj_ids),
+        "skillsRows": copy.deepcopy(skills_rows),
+    }
+
+
+def _row_id_int(row: dict) -> int | None:
+    if not isinstance(row, dict):
+        return None
+    rid = row.get("id")
+    if isinstance(rid, float) and rid == int(rid):
+        return int(rid)
+    return rid if isinstance(rid, int) else None
+
+
+def build_resume_truth_anchor_compact(resume_data: dict, narrative_brief: dict | None) -> dict:
+    """
+    Non-hero resume slices only—reduces “whole resume” dominance. Heroes + supporting appear in rewrite_focus.
+    """
+    rd = resume_data if isinstance(resume_data, dict) else {}
+    nb = narrative_brief if isinstance(narrative_brief, dict) else {}
+    hero_e = set(_narrative_id_list(nb, "heroExperience"))
+    hero_p = set(_narrative_id_list(nb, "heroProjects"))
+    sup_p = set(_narrative_id_list(nb, "supportingProjects"))
+
+    exp_rows = rd.get("experience") if isinstance(rd.get("experience"), list) else []
+    proj_rows = rd.get("projects") if isinstance(rd.get("projects"), list) else []
+
+    other_exp = []
+    for r in exp_rows:
+        rid = _row_id_int(r)
+        if rid is None or rid in hero_e:
+            continue
+        if not isinstance(r, dict):
+            continue
+        slim = {"id": rid}
+        for k in ("title", "company", "start_date", "end_date", "location", "current", "skills"):
+            v = r.get(k)
+            if v is not None and v != "":
+                slim[k] = v
+        other_exp.append(slim)
+
+    other_proj = []
+    for r in proj_rows:
+        rid = _row_id_int(r)
+        if rid is None or rid in hero_p or rid in sup_p:
+            continue
+        if not isinstance(r, dict):
+            continue
+        other_proj.append(
+            {
+                "id": rid,
+                "title": r.get("title"),
+                "tech_stack": r.get("tech_stack"),
+            }
+        )
+
+    return {
+        "education": copy.deepcopy(rd.get("education")) if isinstance(rd.get("education"), list) else [],
+        "experienceOtherThanHeroes": other_exp,
+        "projectsPeripheralOnly": other_proj,
+    }
+
+
 def build_system_prompt():
+    # Stage A: return only {"edits": ...}; merge + reporting happen downstream.
     return "\n".join(
         [
-            "You are a truth-first resume strategist for one role: selective, confident, recruiter-aware—never timid, never JD-literal, never inventing.",
+            "You are a truth-first resume rewriter for one target role. Your edits must be **intentional**: every changed block should read as redesigned for this posting (role language, lead bullets, and keyword placement that the candidate’s facts support)—not a polite polish.",
             "",
-            "Priority: (1) truth (2) ATS-honest keyword lift (3) recruiter-scannable story (4) section-shaped tailoring per the user’s Narrative target (5) minimal truthful patchDiff (6) concise JSON.",
-            "The user message’s Narrative target JSON is the primary editorial plan—execute it unless it conflicts with on-resume facts. It never overrides truth, frozen identity fields, stack, or domain rules.",
+            "Stage A only outputs rewrites. Do not explain, justify, warn, summarize, diff, or add commentary. No self-audit.",
             "",
-            "Tailoring goal: safe output that still reads intentionally shaped for this role—visible improvement in summary, hero rows, and skills when facts allow. A good run is not \"correct JSON plus a few polish lines.\"",
-            "Follow Narrative sectionStrategy and summaryGoal; rewrite updatedResumeData.summary when facts support it.",
+            "Return **only** `{\"edits\": { ... }}` as the JSON object. Exactly one top-level key: `edits`. No `warnings`, no `summary`, no `tailorSummary`, no other top-level keys.",
             "",
-            "Hero project execution (narrative heroProjects): minimum bar—for a story-central hero project, one tiny bullet touch-up or one-word substitution is not enough when stronger grounded reframes exist; expect multi-bullet rewriting in that case. Substantial hero execution is not satisfied by the insufficiency patterns below.",
-            "Hero insufficiency (does not count as substantial hero-row work when deeper, evidence-backed edits are available): punctuation-only or comma-only cleanup; conjunction swaps; shorthand→spelled numbers only; metric formatting/restyling without clearer scope/consumers/systems; one-word verb swaps; scan-only tidy-ups; single-bullet-only edits when the rest of the row could be truthfully reframed. If that is all you did: say changes were narrow in the top-level summary, or treat the row as mis-tiered—do not present trivial edits as major tailoring.",
-            "Hero experience execution (narrative heroExperience): spend the budget on weak bullets with stronger framing—systems, scope, downstream use/consumers, technical depth, why the work mattered. Strong bullets: leave them. Do not burn hero budget on comma cleanup, conjunction swaps, or number formatting alone.",
-            "Supporting projects: lighter; peripheral: preserve (true tech_stack).",
+            "Edit surface under `edits`:",
+            "- `summarySection` — full profile paragraph rewrite.",
+            "- `experience` — **only** rows whose `id` appears in `allowedExperienceEditIds` in the user message.",
+            "- `projects` — **only** rows whose `id` appears in `allowedProjectEditIds`. Never edit supporting or peripheral project ids.",
+            "- `skills` — if `skillsRows` is non-trivial, return `edits.skills` with *visible* regrouping, reorder, prioritization, or demotion. When the narrative `skillsStrategy` names rises/sinks, reflect that; when `evidencedKeywordAlignment` in the user message lists terms that are already in the candidate’s work, move those to prominent positions. Do not leave skills unchanged if reordering or regrouping would better match the target role and narrative. Exception: a single row or a list already in ideal order (rare).",
+            "- Other layout keys (e.g. `sectionOrder`) only if you intentionally change them.",
             "",
-            "Skills execution: implement Narrative skillsStrategy decisively within truth—actively raise role-relevant items, demote or trim low-signal or role-misaligned items when evidence allows, regroup/rename categories for scan/ATS clarity. Do not keep fluffy or theme buckets (e.g. vague \"focus\" groupings) just because they existed; apply categoryStrategy when non-empty; when skillsStrategy implies consolidation or cleanup, do it. Preserve breadth—no invented skills—but do not leave off-role noise prominent (e.g. AI-heavy lines floating for a non-AI target when trimming is justified).",
-            "Preserve already-strong, on-strategy lines; skip paraphrase-for-polish.",
-            "If nothing material should change, say so plainly in the top-level summary (changelog—not updatedResumeData.summary).",
+            "ATS / keyword reality: Many employers’ parsers match literal strings (job title, tools, and JD nouns from **evidencedKeywordAlignment**). Weave those terms into summary and hero text **where they are already true**—use standard spellings; avoid synthetic repetition. Never invent a skill or project technology to pass a filter.",
             "",
-            "Bullets (grounded, recruiter-effective):",
-            "Edit weak, vague, repetitive, or under-targeted bullets. On narrative hero rows, treat under-targeted broadly—bullets that are fine in isolation but do not carry the role story usually warrant a rewrite; hero work typically revisits most bullets on that row. If a line is already strong, specific, and on-strategy for this role, do not touch it.",
-            "A rewrite must add bite: stronger verb; clearer scope (what system, who used it, constraint); concrete technical nouns; why the work mattered; role relevance—more specific, scannable, and compelling, not merely smoother.",
-            "Do not rewrite to paraphrase. Do not replace strong concrete phrasing with softer generic language.",
-            "Never bury metrics or hard technical facts in vague wrappers (facilitated, supported, enhanced, improved clarity, effective, leveraged, robust as filler). Preserve numeric meaning; you may rephrase or reorder around metrics for ATS and scanability.",
+            "Hero rows are mandatory rewrite targets: include **every** allowed hero experience row and **every** allowed hero project row in `edits`, each with a **complete** new `description` (full bullet block, same shape as input, e.g. lines starting with •). Match counts: if `allowedExperienceEditIds` has N ids, `edits.experience` has N row objects; if `allowedProjectEditIds` has N ids, `edits.projects` has N row objects. Bullet-block rewrites only—no polish-only tweaks, no synonym swaps, no partial-line patches. Same facts allowed; stronger **posting-shaped** framing. A polished bullet may still need a full rewrite if it is not the strongest truthful version for this role.",
             "",
-            "Truth (no new facts):",
-            "Never invent companies, employment dates, locations, schools, degrees, certification names, metrics, users, domains, ownership, or technologies.",
-            "Experience job title may be rephrased for clarity or ATS when still accurate to the role; do not upgrade seniority or misstate the position.",
-            "Tools/stack only if already on that row or trusted skill pool (including hidden skills). JD steers priority and wording, not new claims; missing JD skills → verbose warnings, not fabricated bullets or tech_stack.",
-            "Do not imply domain experience (healthcare, finance, AI/ML product, mobile, etc.) unless the resume directly supports it on that row or summary.",
-            "Implied scope is OK in moderation (e.g. \"backend\" when APIs and data stores are on-row); do not jump to a specific stack (e.g. Node) unless that stack is evidenced.",
+            "STRUCTURAL REWRITE DEPTH: for each hero row, a valid rewrite must change at least one of: (a) bullet lead emphasis, (b) bullet order, (c) sentence structure, or (d) which technical signal is foregrounded first. Rewrites that only smooth wording while preserving the same lead, order, and structure are not sufficient.",
             "",
-            "Project tech stacks: preserve truthful tech_stack; add only when supported; never swap real tech for JD-shaped replacements.",
+            "Bullets are evidence pools: new wording must stay grounded in true claims already on that row—no invented stack, metrics, domain, or ownership. Preserve or improve technical specificity; never dumb bullets down.",
             "",
-            "Editable vs frozen:",
-            "Tailor when truthful: resume summary; header tagline; header visibility toggles; sectionOrder; experience title, skills, description; project title, tech_stack, description; skills categories and items (including hidden skills); education highlights/subsections; certifications and languages when present—relevance-first.",
-            "Frozen identity (do not change factual identity): company names; employment dates and locations; school names; degree credential lines as given (type + discipline); contact URLs and raw contact values (email, phone)—visibility toggles only.",
-            "Links: do not swap or invent URLs; user owns how they are reached.",
+            "SUMMARY ANTI-BROCHURE RULE: in `edits.summarySection.summary`, do not use generic résumé phrases such as `scalable solutions`, `reliable applications`, `impactful solutions`, `robust data processing`, `efficient applications`, or similar abstractions. Prefer concrete work shapes the resume proves: services, APIs, pipelines, data stores, dashboards, workflows, and integrations. Open with a **clear role-shaped hook** (aligned to the target role when true) and front-load 1–2 **literal** terms from evidencedKeywordAlignment / resume that match the posting when those terms are true.",
             "",
-            "Rows and breadth:",
-            "updatedResumeData = full resume after editing. You may omit entire experience rows that add little signal for this role (e.g. unrelated work when projects carry the story); explain verbosely in warnings.",
-            "Projects—mandatory default: every Narrative heroProjects id must appear in updatedResumeData.projects; supportingProjects ids should almost always appear. If you omit any heroProjects or supportingProjects row that exists in input resume_data.projects: mandatory verbose warning (id + title), concrete rationale in that warning, same omission stated plainly in the top-level changelog, and an explicit patchDiff.projects entry for that id documenting the removal (reason + accountable before/after)—zero silent drops.",
-            "Peripheral / non-narrative projects: omit only with strong cause, warning, changelog mention, and patchDiff trace—still no silent removals.",
-            "Education: always keep the single highest-level degree row (doctorate > master > bachelor > associate > other non-degree); keep it even if unrelated—it proves education. Additional education rows: keep when role-relevant; omit lesser rows when redundant or low-signal for this JD—warn when omitting. Never drop the top credential.",
-            "Skills: JD- and evidence-driven; reorder/regroup; aim for 3 categories (4 typical max, 5 only if needed). Preserve truthful breadth unless role relevance clearly justifies trimming; do not list skills with no evidence.",
-            "Certs/languages (if present): include what helps this role; omit low-signal lines with a warning—never invent credentials.",
+            "Skills: regroup / reorder / demote before removal. Do not casually delete core evidenced stack. Omit `removedSkillIds` (and similar) entirely unless you deliberately remove rows—never emit empty removal arrays as placeholders.",
             "",
-            "patchDiff (structured, minimal):",
-            "Only true deltas. Per changed row: id, fieldsChanged with before/after for each touched field only, row reason. Omit unchanged keys inside fieldsChanged; no no-op rows; no identical before/after.",
-            "Skills accountability: material change includes category regrouping, renaming, item removal, consolidation, compression, or demotion via move/delete/hide. If updatedResumeData.skills differs materially from input, patchDiff.skills must be a non-empty array of real per-row before/after deltas—same discipline as experience/projects. patchDiff.skills: [] is unacceptable when skills changed; absent/null/empty while skills changed is a hard miss. Omit the patchDiff.skills key only when skills are truly unchanged.",
+            "Sparse `edits`: include only keys and list entries you are actually changing. Omit unchanged sections. Do not output empty arrays, empty objects, placeholder strings, or unused keys.",
             "",
-            "Two different summaries—do not merge:",
-            "updatedResumeData.summary = profile paragraph on the resume (rewrite per Narrative summaryGoal).",
-            "Top-level JSON key summary = tailoring changelog for the user—never the profile text.",
+            "Truth: no invented facts, tools, scope, or domain. Follow the narrative JSON unless it conflicts with the resume.",
             "",
-            "Changelog & reasons:",
-            "Top-level summary: conservative and tied to patchDiff—describe real scope only. Narrow edits → say narrow. Do not claim broad project work if only light cleanup or one project nudged; do not claim skills reprioritization if patchDiff.skills is missing, empty, or token while skills changed. If a narrative-listed project was dropped, say so here. Accurate, not flattering.",
-            "Top-level summary: name real edits or state none warranted—no vague alignment/fit/optimized.",
-            "warnings: verbose—unsupported JD items, omitted rows, gaps the user could fill with real data.",
-            "changeReasons and patch row reasons: cite substance (e.g. clarified API surface and consumers; foregrounded production backend; improved scanability)—never \"improved wording,\" \"refined language,\" or \"enhanced alignment.\"",
-            "",
-            "Examples (pattern only):",
-            "Weak: \"Worked on APIs for the team.\"",
-            "Stronger (same facts, no inflated ownership): \"Built and refined REST APIs for internal workflows; collaborated on service boundaries and data models with senior engineers.\"",
-            "Gap: JD wants Rails, row shows Django → warn; do not add Rails to stack or skills.",
-            "",
-            "Return valid JSON only—no markdown outside the object.",
+            "Output valid JSON only—no markdown, no fences.",
         ]
     )
 
 
 def build_user_prompt(payload, tailorContext, sectionDetails, relevantJDLines, narrativeBrief=None):
     targetRole = tailorContext.get("targetRole", "")
-    activeDomains = tailorContext.get("activeDomains", [])
-    keywords = tailorContext.get("keywords", [])
-    resumeHits = tailorContext.get("resumeHits", [])
-    resumeGaps = tailorContext.get("resumeGaps", [])
-
-    rowsPerSectionRanked = sectionDetails.get("rowsPerSectionRanked", {})
 
     companyRaw = payload.get("company")
     company = companyRaw if isinstance(companyRaw, str) else ""
-    jdRaw = payload.get("job_description")
-    jobDescription = jdRaw if isinstance(jdRaw, str) else ""
     resumeRaw = payload.get("resume_data")
     resumeData = resumeRaw if isinstance(resumeRaw, dict) else {}
 
@@ -200,145 +306,88 @@ def build_user_prompt(payload, tailorContext, sectionDetails, relevantJDLines, n
     toneRaw = stylePreferences.get("tone")
     tone = toneRaw if isinstance(toneRaw, str) else "balanced"
 
-    # JD keyword extraction (not interpreted themes); upstream may later supply real theme phrases.
-    primaryJDTerms = top_keyword_terms(keywords, limit=8)
-    secondaryJDTerms = secondary_terms(activeDomains, keywords, primaryJDTerms, limit=6)
-    bestEvidence = best_evidence_labels(resumeData, rowsPerSectionRanked)
-    gapsLine = real_gaps_line(resumeGaps)
-    hitsPreview = resumeHits[:18] if isinstance(resumeHits, list) else []
-
     roleLabel = (targetRole or "").strip() or "this role"
 
     output_contract = {
-        "summary": "Top-level ONLY: honest tailoring changelog—scope must match actual edits in patchDiff (no overselling).",
-        "updatedResumeData": {
-            "header": {
-                "tagline": "optional; preserve bold/italic markers pattern from source if any",
-                "visibility": {
-                    "showTagline": True,
-                    "showEmail": True,
-                    "showPhone": True,
-                    "showLocation": True,
-                    "showLinkedin": True,
-                    "showGithub": True,
-                    "showPortfolio": True,
-                },
-            },
-            "sectionOrder": ["summary", "education", "experience", "projects", "skills"],
-            "summary": "Profile/summary text ON the resume (not the top-level changelog).",
-            "experience": [],
-            "projects": [],
-            "education": [],
-            "skills": [
-                {
-                    "id": 1,
-                    "category": "Category label",
-                    "name": "Skills text for this row (same list-of-rows shape as input resume_data.skills)",
-                }
-            ],
-        },
-        "patchDiff": {
-            "summary": {
-                "before": "",
-                "after": "",
-                "reason": "Why the new text is more specific or role-relevant",
-            },
+        "edits": {
+            "summarySection": {"summary": "…"},
             "experience": [
-                {
-                    "id": 0,
-                    "fieldsChanged": {
-                        "description": {"before": "", "after": ""},
-                        "skills": {"before": "", "after": ""},
-                    },
-                    "reason": "e.g. clarified API scope and kept existing metrics verbatim",
-                }
+                {"id": 1, "description": "full rewritten bullet block"},
+                {"id": 2, "description": "full rewritten bullet block"},
             ],
             "projects": [
-                {
-                    "id": 0,
-                    "fieldsChanged": {
-                        "title": {"before": "", "after": ""},
-                        "description": {"before": "", "after": ""},
-                        "tech_stack": {"before": [], "after": []},
-                    },
-                    "reason": "short concrete reason",
-                }
+                {"id": 1, "description": "full rewritten bullet block"},
+                {"id": 2, "description": "full rewritten bullet block"},
             ],
-            "skills": [
-                {
-                    "id": 0,
-                    "fieldsChanged": {
-                        "category": {"before": "", "after": ""},
-                        "name": {"before": "", "after": ""},
-                    },
-                    "reason": "non-empty per touched skill row when skills changed materially—never [] or omit if skills differ from input",
-                }
-            ],
-        },
-        "changeReasons": [
-            {
-                "section": "experience",
-                "id": 0,
-                "reason": "Good: clarified API scope and downstream consumers; kept 40% metric verbatim. Bad: improved wording / refined language / enhanced alignment.",
-            }
-        ],
-        "warnings": [],
+            "skills": [{"id": 1, "name": "Python", "category": "Languages"}],
+        }
     }
 
     prefsOneLine = (
         f"Prefs: focus={focus}, tone={tone}. "
-        "Strict truth: always—no invented facts; unsupported JD items → warnings. "
+        "Truth: every claim grounded in the resume; JD shapes emphasis only—no invented facts, stack, metrics, ownership, or domain. "
+        "Do not fabricate to match the JD. "
         + {
-            "impact": "Weight outcomes the resume can substantiate.",
-            "technical": "Weight on-row depth; no JD stack imports.",
-            "leadership": "Weight leadership only where supported.",
+            "impact": "Stress outcomes the resume can substantiate.",
+            "technical": "Stress on-row depth; no JD stack imports.",
+            "leadership": "Stress leadership only where supported.",
         }.get(focus, "Balance impact, depth, leadership.")
         + " "
         + {"concise": "Tight bullets.", "detailed": "Richer detail, no filler."}.get(tone, "Balanced length.")
     )
 
+    tc = tailorContext if isinstance(tailorContext, dict) else {}
+    ats_hits = list(tc.get("resumeHits") or [])[:24]
+    ats_jd_top = top_keyword_terms(tc.get("keywords") or [], limit=12)
+    evidenced_keyword_alignment = {
+        "resumeLiteralHits": ats_hits,
+        "jdKeywordPriority": ats_jd_top,
+    }
+
     nb = narrativeBrief if isinstance(narrativeBrief, dict) else {}
     narrative_json = json.dumps(nb, ensure_ascii=False, indent=2)
+    rewrite_focus = build_stage_a_rewrite_focus(resumeData, nb)
+    truth_anchor = build_resume_truth_anchor_compact(resumeData, nb)
+    skills_obligation_active = skills_change_expected_from_context(nb, resumeData)
 
     lines = [
-        "## Editor brief",
+        "## Stage A rewrite",
         f"Target role: {roleLabel}",
         f"Company (context only): {company or 'Not specified'}",
         prefsOneLine,
         "",
-        "### Narrative target — primary editorial plan",
-        "Execute this JSON first. Everything below (terms, gaps, JD, resume) supports facts and constraints only—it does not replace this plan. Do not re-center the rewrite on raw keyword lists after reading the narrative.",
-        "Truth and frozen fields still win over the narrative when they conflict.",
+        "### Task",
+        "Rewrite the profile summary (`edits.summarySection`). The opening should **signal fit to this target role** when the candidate’s real experience supports it; align wording with `rewriteGoals` and `summaryGoal` in the narrative JSON.",
+        "Rewrite **every** row in `allowedExperienceEditIds` under `edits.experience` with a **full** `description` (entire bullet block).",
+        "If `allowedExperienceEditIds` has **N** ids, `edits.experience` must contain **N** objects—one per id.",
+        "Rewrite **every** row in `allowedProjectEditIds` under `edits.projects` with a **full** `description`.",
+        "If `allowedProjectEditIds` has **N** ids, `edits.projects` must contain **N** objects—one per id.",
+        "If `skillsRows` is non-empty, produce **meaningful** `edits.skills` whenever reordering, regrouping, or demotion would better reflect `skillsStrategy` and the target role. If the narrative’s skillsStrategy names specific rises or sinks, the skills section must show that. Only skip `edits.skills` when the list is already optimal or a single line leaves nothing to do.",
+        "### Skills obligation (hard when triggered)",
+        "When **any** of: (1) narrative `skillsStrategy` contains a non-empty line, (2) resume skills use **≥2 distinct category** labels, (3) any category looks like **Focus Areas** (or similar theme bucket), you **must** return `edits.skills` with at least one visible change (reorder, regroup, or name/category field edit). Exception: exactly one skill row and no room to improve.",
+        f"**This resume — obligation active:** {str(skills_obligation_active).lower()}. When true, omitting `edits.skills` is a failed task.",
+        "Do **not** edit supporting or peripheral project ids—they appear for context only.",
+        "Use the same underlying facts; **assertive, posting-shaped** framing. No polish-only or synonym-swap passes.",
+        "For each rewritten hero row, change at least one of: bullet lead emphasis, bullet order, sentence structure, or which technical signal appears first. **Prioritize 1–2 `resumeLiteralHits` or `jdKeywordPriority` terms in the first bullet** when those terms are already true for that row.",
+        "For the summary, avoid brochure phrasing like `scalable solutions`, `reliable applications`, `impactful solutions`, and `robust data processing`. Lead with concrete work shapes; integrate literals from `evidencedKeywordAlignment` when they match the story.",
+        "Return **only** `{\"edits\": {...}}`. Omit any key you are not changing. Do not output empty arrays, empty objects, or placeholder fields.",
+        "",
+        "### Narrative target",
         narrative_json,
         "",
-        "### Supporting context (evidence; not a second plan)",
-        f"Strong rows for {roleLabel}: {', '.join(bestEvidence) if bestEvidence else 'infer from resume'}",
-        f"Theme cues from full JD (do not treat token lists as the plan): primaryJDTerms {primaryJDTerms if primaryJDTerms else '—'}; secondaryJDTerms {secondaryJDTerms if secondaryJDTerms else '—'}; resumeHits {hitsPreview if hitsPreview else '—'}; gaps {gapsLine}",
+        "### Evidenced keyword alignment (for ATS: weave where true—no stuffing, no new facts)",
+        json.dumps(evidenced_keyword_alignment, ensure_ascii=False, indent=2),
         "",
-        "### JD excerpts (highest-signal lines)",
+        "### Focused rewrite surface",
+        json.dumps(rewrite_focus, ensure_ascii=False, indent=2),
+        "",
+        "### JD excerpts",
         json.dumps(relevantJDLines, ensure_ascii=False, indent=2),
         "",
-        "### Full job description",
-        jobDescription.strip(),
+        "### Compact truth anchor (not editable)",
+        json.dumps(truth_anchor, ensure_ascii=False, indent=2),
         "",
-        "### Current resume (JSON)",
-        json.dumps(resumeData, ensure_ascii=False, indent=2),
-        "",
-        "## Section guide",
-        "Accountability: heroProjects → multi-bullet grounded reframes when central—trivial hero edits must be admitted as narrow in the changelog or treated as mis-tier; heroExperience → framing on weak bullets, not comma/conjunction/number cleanup; keep all narrative heroProjects + usually supportingProjects—any omission of those input ids → warning + summary + patchDiff.projects removal row.",
-        "Skills → skillsStrategy/categoryStrategy; material skills change → non-empty patchDiff.skills with real before/after per touched row—[] forbidden if skills differ from input.",
-        "Else: Narrative sectionStrategy; may drop low-signal experience (warn); education per rules; job–project overlap: same story, different wording.",
-        "",
-        "## Output",
-        "JSON only. Mirror input schema: updatedResumeData.skills = list of category rows like input—not one object.",
-        "Keys: top-level summary = changelog (conservative; match patchDiff); updatedResumeData.summary = profile on resume.",
-        "patchDiff: true deltas; omit unchanged sections; no no-ops; dropped narrative project → explicit projects patch row; material skills change → non-empty patchDiff.skills (omit skills key only if unchanged).",
-        "changeReasons: concrete substance; no vague improved/refined/enhanced alignment.",
-        "warnings: verbose for gaps and omissions.",
-        "If changes were light: say so in top-level summary—do not imply a full-resume overhaul.",
-        "Success: reader should see intentional shaping for this role in summary, heroes, and skills when opportunities existed—not a lightly polished base.",
-        "",
-        "JSON shape (example; fill updatedResumeData from real resume). If skills did not change, omit patchDiff.skills entirely—do not copy the example block.",
+        "### Output shape (omit unused sections; no extra top-level keys)",
         json.dumps(output_contract, ensure_ascii=False, indent=2),
     ]
 

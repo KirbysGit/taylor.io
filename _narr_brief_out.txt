@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 # --- narrative pre-pass: one cheap JSON-only completion so the main tailor pass gets an explicit editorial spine. --- #
 
@@ -10,13 +10,8 @@ from typing import Any
 
 # --- local imports.
 from ..openai import ai_chat_completion, is_openai_enabled
-from ..planning.build_plan import hero_rank_hints_for_narrative
 from ..post_processing import parse_chat_json
 from ..prompt import best_evidence_labels, secondary_terms, top_keyword_terms
-
-# --- Caps for hero rows after narrative normalize (align with narrative system prompt). --- #
-maxHeroProjectsNarrative = 4
-maxHeroExperienceNarrative = 2
 
 # ===== debug ===== #
 # --- flip off in prod if you do not want extra debug_out writes from this module. --- #
@@ -37,7 +32,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
         "secondaryStory": [],
         "summaryGoal": "",
         "skillsStrategy": [],
-        # --- categoryStrategy: optional tactics for broad/fluffy skill-like groupings *if* the resume has them ("Focus Areas" is one possible label—never assumed). Use [] when N/A. --- #
+        # --- categoryStrategy: optional tactics for broad/fluffy skill-like groupings *if* the resume has them ("Focus Areas" is one possible labelΓÇönever assumed). Use [] when N/A. --- #
         "categoryStrategy": [],
         "sectionStrategy": {},
         "heroProjects": [],
@@ -48,7 +43,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
         "avoid": [],
     }
 
-    # if openai is off, skip the second call—the main prompt still gets padded defaults via normalize.
+    # if openai is off, skip the second callΓÇöthe main prompt still gets padded defaults via normalize.
     if not is_openai_enabled():
         resume_data_early = payload.get("resume_data") if isinstance(payload.get("resume_data"), dict) else {}
         kw_early = tailorContext.get("keywords") or []
@@ -77,7 +72,6 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
     hits = tailorContext.get("resumeHits") or []
     gaps = tailorContext.get("resumeGaps") or []
     rows_ranked = sectionDetails.get("rowsPerSectionRanked") or {}
-    plan_ranked_rows = hero_rank_hints_for_narrative(rows_ranked, resume_data)
 
     # --- reuse prompt_builder helpers so narrative and rewrite steps see the same term/evidence hints. --- #
     primary = top_keyword_terms(keywords, limit=8)
@@ -88,102 +82,93 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
     company = (payload.get("company") or "").strip() if isinstance(payload.get("company"), str) else ""
     jd = payload.get("job_description") if isinstance(payload.get("job_description"), str) else ""
 
-    # --- system: editorial plan for the rewrite pass—full-resume signal, not project-only. --- #
+    # --- system: editorial plan for the rewrite passΓÇöfull-resume signal, not project-only. --- #
     system = "\n".join(
         [
             "Return JSON only. No markdown, no text outside the object.",
-            "You are writing a sharp editorial plan for the next pass—not a keyword summary, not a rewrite of the resume here.",
-            "The plan must drive where the story lands: summary opening, **narrative hero** experience/project emphasis, project tiers, skills regrouping, and per-section intensity. Downstream stage A rewrites **heroes + summary + skills** first—so heroes must be the right rows. Success is a **decisive** role-specific version—clear reader intent, not a lightly retouched base or incremental polish.",
-            "",
-            "ATS and scan alignment (evidence only): many ATS and recruiters literal-match the job title, stack, and JD nouns. The plan must **name where** (summary, which hero rows, skills order) to foreground **resume-supported** phrasing that overlaps primaryJDTerms and resumeHits—natural phrasing, not repeated buzzword stuffing, and no invented terms from resumeGaps.",
+            "You are writing a sharp editorial plan for the next passΓÇönot a keyword summary, not a rewrite of the resume here.",
+            "The plan must drive full-resume shaping: summary opening, experience emphasis, project tiers, skills regrouping, and per-section intensity. Success is downstream: a role-specific resume version, not a safe base with spot edits.",
             "",
             "Editorial questions the plan must answer:",
-            "What version of this candidate is foregrounded? Which rows carry the story? How should the summary open and what technical signal leads? How should skills be rebalanced for this posting? **Where do evidenced JD/candidate terms appear so the document scans as intentional?** What must never be implied?",
+            "What version of this candidate is foregrounded? Which rows carry the story? How should the summary open and what technical signal leads? How should skills be rebalanced? What must never be implied?",
             "",
-            "candidateAngle: one sentence, max ~28 words—sharp role positioning (what kind of engineer/builder for this job). Lead with concrete work shapes: backend, APIs, dashboards, data workflows, full-stack product delivery, internal tooling—not vague value language (no \"driving impactful solutions,\" generic \"user-facing applications\" without technical anchor, \"impactful outcomes\"). Not a comma list of every tool. Not meta about evidence. Must not contradict avoid. Ban: well-suited, versatile, passionate, detail-oriented, strong communication, highly motivated, results-driven, self-starter, dynamic, adept at, proven track record, and similar fluff.",
-            "primaryStory: 2–4 short phrases—strong impression pillars (e.g. production backend and API delivery, full-stack workflow ownership, data-intensive systems)—not topic buckets or JD echoes. Do not use user-centric or product-strategy phrasing unless the resume explicitly supports it.",
-            "secondaryStory: 0–3 phrases only if additive. No healthcare/health-solutions/clinical/practitioner/patient framing unless the resume explicitly supports that domain—prefer **concrete** cross-cutting themes (internal tooling, pipelines, real-time analytics, operational dashboards, data workflows). Drop generic culture glue.",
-            "rewriteGoals: 2–6 row-local **landing instructions** (one per hero row when possible; combine only if you must). **heroExperience and heroProjects ids only**—not supportingProjects (those are context in stage A, not rewritten there). Per hero row: what signal leads, what to foreground, **what concrete impression the row must leave for this role** (decisive, not timid). Use Make/Land/Use style. No vague \"impactful\" filler; no domain drift beyond the row; match contribution level—no ownership inflation or sweeping AI/product claims beyond bullets. No bare Highlight/Emphasize. No new facts.",
+            "candidateAngle: one sentence, max ~28 wordsΓÇösharp role positioning (what kind of engineer/builder for this job). Lead with concrete work shapes: backend, APIs, dashboards, data workflows, full-stack product delivery, internal toolingΓÇönot vague value language (no \"driving impactful solutions,\" generic \"user-facing applications\" without technical anchor, \"impactful outcomes\"). Not a comma list of every tool. Not meta about evidence. Must not contradict avoid. Ban: well-suited, versatile, passionate, detail-oriented, strong communication, highly motivated, results-driven, self-starter, dynamic, adept at, proven track record, and similar fluff.",
+            "primaryStory: 2ΓÇô4 short phrasesΓÇöstrong impression pillars (e.g. production backend and API delivery, full-stack workflow ownership, data-intensive systems)ΓÇönot topic buckets or JD echoes.",
+            "secondaryStory: 0ΓÇô3 phrases only if additive. No healthcare/health-solutions/clinical/practitioner/patient framing unless the resume explicitly supports that domainΓÇöprefer safe themes (dashboard/ops visibility, internal tooling, pipelines, real-time analytics, cross-functional delivery). Drop generic culture glue.",
+            "rewriteGoals: 2ΓÇô4 row-local stringsΓÇöhow the row lands and which technical signal leads; Make/Land/Use. No vague \"impactful\" filler; no domain drift beyond the row; match contribution levelΓÇöno ownership inflation or sweeping AI/product claims beyond bullets. No bare Highlight/Emphasize. No new facts.",
             "",
-            "One job archetype: **candidateAngle** and **summaryGoal** must express the same single positioning for this posting (e.g. data engineer & pipelines, full-stack product, backend platform, ML/LLM tooling, web3-adjacent systems)—the best fit to **target_role** and evidence, not a blend of every hat. If the target is data-leaning, do not also sell generic full-stack; pick the thread the JD rewards.",
+            "summaryGoal: one sentence, max ~32 wordsΓÇöhow updatedResumeData.summary should read (opening story + technical lead + safe role fit). Must not restate candidateAngle verbatim; must not contradict avoid. Say what to foreground and what not to imply (e.g. no unsupported domain/stack) when gaps warrant.",
+            "skillsStrategy: 2ΓÇô4 stringsΓÇödirectional, not a final org chart: rise vs sink/trim, whether consolidation helps, rough bucket count (~3ΓÇô4)ΓÇöbut do not prescribe exact category titles (no \"Backend Development, Data Engineering, Web Development\" schemes) unless copying labels already on the resume. No \"Focus Areas\" assumption. Both foreground and demotion required.",
+            "categoryStrategy: [] unless the resume JSON actually has a broad/fluffy skill-like category to fixΓÇöthen 1ΓÇô3 lines with concrete verbs: merge, rename, trim, deprioritize, collapse. No placeholder \"if a grouping exists.\" No assumption that any brand name (e.g. Focus Areas) appears.",
+            "sectionStrategy: short values for summary, experience, projects, skills (required); education if needed. experience must be operational: e.g. on heroExperience tighten scope/systems/outcomes on weak or under-targeted bullets only; leave strong bullets; do not force edits on every line. Align with hero ids; skills react to the role.",
             "",
-            "summaryGoal: one sentence, max ~32 words—how the **resume summary** should read: opening that matches the **archetype** above (include core technical nouns the resume can substantiate; role-title alignment when true). Must not restate candidateAngle verbatim; must not contradict avoid. Call out one **ATS-relevant** placement goal if appropriate (e.g. lead with stack + work shape the JD rewards). Ban brochure phrasing like `scalable solutions`, `reliable applications`, `impactful solutions`, `robust data processing`, and `efficient applications`.",
-            "skillsStrategy: 2–4 strings—directional, not a final org chart: **what should rise to the top** for this posting (evidenced stack that overlaps primaryJDTerms/resumeHits), **what should sink or demote**, that **regrouping and demotion come before removal**, and that **concrete stack usually beats fluffy focus-area content**—plus whether consolidation helps and rough bucket count (~3–4). Name **visibility for ATS/keyword scans** as a reason when moving rows (still truthful—no inventing skills). Do not prescribe exact category titles (no \"Backend Development, Data Engineering, Web Development\" schemes) unless copying labels already on the resume. No \"Focus Areas\" assumption. Both foreground and demotion required. Do not include sink/demote guidance for technologies that are not actually present in the visible resume skill pool or row evidence.",
-            "categoryStrategy: [] unless the resume JSON actually has a broad/fluffy skill-like category to fix—then 1–3 lines with concrete verbs: merge, rename, trim, deprioritize, collapse. No placeholder \"if such a grouping exists.\" No assumption that any brand name (e.g. Focus Areas) appears.",
-            "sectionStrategy: short values for summary, experience, projects, skills (required); education if needed. experience/projects: stage A **only** rewrites **hero** experience + **hero** projects (full `description` blocks); supportingProjects are **context-only** there—not edit targets. **Each value must read like a firm rewrite brief** (what changes, for whom, and why for this job)—and for skills, mention **reorder/visibility of evidenced JD hits** when relevant. Plan landing so hero rows and summary read **deliberately** matched to the posting, not generically strong.",
-            "",
-            "Projects (tiers—still required):",
+            "Projects (tiersΓÇöstill required):",
             "Review every project row in resume JSON. Classify each project id exactly once across heroProjects, supportingProjects, peripheralProjects.",
-            "Use **planRankedRows** (from build_tailor_plan) as the default **priority order** for Tier 1: higher `jdKeywordHits` first when the row fits the job archetype; you may only bump a lower-ranked project ahead if that row is clearly the better story (e.g. OpenAI/LLM app for an LLM tooling JD) and you say why in the brief mentally—not with new facts.",
-            "Tier 1 heroProjects (max 4 ids): strongest role fit—downstream stage A **always** full bullet-block rewrites these ids (entire `description`, role-shaped); plan landing accordingly.",
-            "Tier 2 supportingProjects: few ids only—**context/reference for stage A** (full rows may appear in the focused prompt); **not** rewritten in stage A. Classify role-adjacent rows you want the model to see without elevating to hero.",
-            "Tier 3 peripheralProjects: remaining ids—**preserve**; not stage A targets.",
-            "rewriteGoals must drive **Tier 1 hero** rows only (heroExperience + heroProjects)—one landing instruction per hero row when possible.",
+            "Tier 1 heroProjects (max 3 ids): strongest role fitΓÇöplan for the heaviest edits; when a hero anchors the story, expect most or all bullets to be in play for truthful sharpening.",
+            "Tier 2 supportingProjects: few ids onlyΓÇöstill role-relevant and worth light tailoring (cap instinct to dump every non-hero row here).",
+            "Tier 3 peripheralProjects: most non-hero projects default hereΓÇöpreserve; little or no tailoring unless a sharp truthful fix appears.",
+            "rewriteGoals must drive how Tier 1 (and selective Tier 2) rows landΓÇönot \"highlight\" with no destination.",
             "",
             "Consistency: anything in avoid (e.g. do not imply healthcare) must not appear as positioning in candidateAngle, summaryGoal, skillsStrategy, or rewriteGoals.",
-            "Evidence-first: infer angle, summaryGoal, skillsStrategy, sectionStrategy, and tier ids from **planRankedRows** and evidenceRows. JD terms tune emphasis only—not new identity, stack, or domain.",
-            "resumeGaps → avoid; keep angle and summaryGoal compatible with those guardrails.",
+            "Evidence-first: infer angle, summaryGoal, skillsStrategy, sectionStrategy, and tier ids from evidenceRows first. JD terms tune emphasis onlyΓÇönot new identity, stack, or domain.",
+            "resumeGaps ΓåÆ avoid; keep angle and summaryGoal compatible with those guardrails.",
             "",
             "Anti-overreach: do not plan positioning that implies healthcare, finance-industry, mobile-native, Ruby/Rails, TypeScript, or other unproven domain/stack just because the JD mentions them.",
             "Prefer angles the evidence rows can support (backend, APIs, dashboards, data workflows, full-stack delivery, AI/LLM when on-row, real-time systems, internal tooling).",
             "",
             "Hard limits (keep the brief short):",
             "candidateAngle: exactly one sentence, max ~28 words.",
-            "primaryStory: 2–4 phrases.",
-            "secondaryStory: 0–3 phrases.",
-            "rewriteGoals: 2–6 strings; **hero rows only**; each must be doable without new facts (one per hero row when you have 4+ hero projects or multiple hero experience rows).",
+            "primaryStory: 2ΓÇô4 phrases.",
+            "secondaryStory: 0ΓÇô3 phrases.",
+            "rewriteGoals: 2ΓÇô4 strings; each must be doable without new facts.",
             "summaryGoal: one sentence, max ~32 words.",
-            "skillsStrategy: 2–4 strings; categoryStrategy: 0–3 or [].",
+            "skillsStrategy: 2ΓÇô4 strings; categoryStrategy: 0ΓÇô3 or [].",
             "sectionStrategy: include at least summary, experience, projects, skills; education if non-trivial.",
-            f"heroExperience: at most {maxHeroExperienceNarrative} numeric ids; heroProjects: at most {maxHeroProjectsNarrative}—from the resume JSON only. Prefer ids that appear in planRankedRows in default order when they match the job archetype.",
+            "heroExperience: at most 2 numeric ids; heroProjects: at most 3ΓÇöfrom the resume JSON only.",
             "supportingProjects + peripheralProjects: every other project id on the resume (partition with heroProjects; no id in more than one list).",
-            "avoid: 2–6 concrete guardrails. Never empty: name unsupported JD stack/domain/platform asks; forbid swapping project tech for JD keywords; forbid fluffy user/product strategy language unless a row proves it. Skills trimming for JD relevance is fine in the rewrite pass—do not forbid it here.",
+            "avoid: 2ΓÇô6 concrete guardrails. Never empty: name unsupported JD stack/domain/platform asks; forbid swapping project tech for JD keywords; forbid fluffy user/product strategy language unless a row proves it. Skills trimming for JD relevance is fine in the rewrite passΓÇödo not forbid it here.",
             "",
             "Example (illustrative; ids and names are placeholders):",
-            '{"candidateAngle":"Full-stack engineer centered on production backend, APIs, dashboards, and data-backed product delivery.","primaryStory":["production backend and API delivery","full-stack product and dashboard work","data-intensive application systems"],"secondaryStory":["operational visibility through internal tooling"],"summaryGoal":"Open on shipped backend/API and dashboard work, then tie data workflows to the role—no industry claims the resume does not prove.","skillsStrategy":["Foreground Python, Django, React, PostgreSQL evidenced on hero rows","Sink thin buzzwords and demote fluffy focus-area lines before considering removal","Regroup and reorder so concrete stack leads; trim ornamental items last","Consider fewer, denser buckets (~3–4) without renaming to new formal category titles"],"categoryStrategy":[],"sectionStrategy":{"summary":"Full rewrite per summaryGoal; lead with role-shaped proof; surface evidenced JD/candidate terms for scan","experience":"Stage A: full-block rewrites for heroExperience ids; lead bullets aligned to this posting","projects":"Stage A: full-block rewrites for heroProjects only; supporting = reference-only","skills":"Regroup per skillsStrategy; top evidenced stack (JD hit overlap); demote noise; scan-friendly order","education":"Light; credentials unchanged"},"heroExperience":[1],"heroProjects":[1,2],"supportingProjects":[3],"peripheralProjects":[4,5],"rewriteGoals":["Land BitGo so each bullet reads as hands-on backend/services + internal tooling first—reader infers reliability and scope from concrete stack","Land Centi as shipping full-stack product: APIs, data path, and integrations foregrounded for this role","Use SentimentTrader to leave a pipeline/ML-analytics impression grounded in named components"],"avoid":["Do not imply healthcare domain experience","Do not use user-centric or product-strategy language unless the row supports it concretely","Do not add unsupported stack such as Ruby, Rails, or TypeScript","Do not replace real project technologies with JD technologies","Do not drop skills that anchor a kept hero row unless clearly redundant for this JD"]}',
+            '{"candidateAngle":"Full-stack engineer centered on production backend, APIs, dashboards, and data-backed product delivery.","primaryStory":["production backend and API delivery","full-stack product and dashboard work","data-intensive application systems"],"secondaryStory":["operational visibility through internal tooling"],"summaryGoal":"Open on shipped backend/API and dashboard work, then tie data workflows to the roleΓÇöno industry claims the resume does not prove.","skillsStrategy":["Foreground Python, Django, React, PostgreSQL evidenced on hero rows","Sink thin buzzwords and low-signal items for this JD","Consider fewer, denser buckets (~3ΓÇô4) without renaming to new formal category titles"],"categoryStrategy":[],"sectionStrategy":{"summary":"Full rewrite per summaryGoal; lead with proof, not adjectives","experience":"Hero jobs: sharpen scope, systems, outcomes on weak bullets only; leave strong lines; no full-row forced rewrite","projects":"Heavy on heroProjectsΓÇömost bullets in play; supporting lighter","skills":"Regroup per skillsStrategy; visible role reaction","education":"Light; credentials unchanged"},"heroExperience":[1],"heroProjects":[1,2],"supportingProjects":[3],"peripheralProjects":[4,5],"rewriteGoals":["Make BitGo read more like hands-on backend services and internal tooling delivery","Make Centi read more like scoped full-stack build with concrete integrations","Use SentimentTrader to reinforce pipeline and near-real-time analytics where bullets support it"],"avoid":["Do not imply healthcare domain experience","Do not use user-centric or product-strategy language unless the row supports it concretely","Do not add unsupported stack such as Ruby, Rails, or TypeScript","Do not replace real project technologies with JD technologies","Do not drop skills that anchor a kept hero row unless clearly redundant for this JD"]}',
         ]
     )
 
-    # --- trim JD here so this call stays smaller; main tailor pass uses excerpts + narrative + focused hero/summary/skills + compact truth anchor (not full resume JSON). --- #
-    jd_clip = jd[:5000] + ("…" if len(jd) > 5000 else "")
+    # --- trim JD here so this call stays smaller; full JD is still in the main tailor user prompt. --- #
+    jd_clip = jd[:5000] + ("ΓÇª" if len(jd) > 5000 else "")
 
     gaps_preview = list(gaps)[:24]
 
     user = "\n".join(
         [
-            "Produce one editorial plan JSON. Downstream success = a **fully reshaped**, intentionally targeted resume for this role—not a lightly edited base.",
-            "summaryGoal must guide the summary rewrite specifically (opening story, technical lead, **role-shaped scan/ATS phrasing** where true)—do not copy-paste candidateAngle.",
-            "skillsStrategy must name what rises, what sinks or demotes, that regroup/demotion precede removal, and that concrete evidenced stack usually beats fluffy focus-area lines; **when** resumeHits overlap primaryJDTerms, state that those strings should be **visibly** placed in skills order or category emphasis.",
-            "sectionStrategy: stage A rewrites **hero** experience + **hero** projects only (full blocks); supporting/peripheral are not rewritten in stage A. sectionStrategy text must be assertive and specific (per-section intent, not vapid \"improve SEO\").",
-            "rewriteGoals: **heroExperience + heroProjects only**—executable landing instructions (lead signal, foregrounding, impression for this role); no goals for supportingProjects; no ownership or scope beyond the row; no sweeping AI/UI claims; no vague \"impactful\"; Make/Land/Use; weak \"highlight X\" alone is unacceptable.",
+            "Produce one editorial plan JSON. Downstream success = a fully reshaped resume for this role, not a lightly edited base.",
+            "summaryGoal must guide the summary rewrite specifically (opening story, technical lead, safe fit)ΓÇödo not copy-paste candidateAngle.",
+            "skillsStrategy must include both foregrounding and demotion/trim guidanceΓÇöwhat rises and what sinksΓÇöplus regroup/consolidation when useful.",
+            "sectionStrategy.experience: operational (hero job weak bullets vs leave strong lines), not vague \"enhance impactful bullets.\"",
+            "rewriteGoals: executable landing only; no ownership or scope beyond the row; no sweeping AI/UI claims; no vague \"impactful\"; Make/Land/Use; weak \"highlight X\" alone is unacceptable.",
             "categoryStrategy: [] unless the resume JSON shows a real fluffy/broad skill grouping to merge, rename, or trim.",
             "Required: candidateAngle, primaryStory, summaryGoal, skillsStrategy, sectionStrategy, heroExperience, full project tier partition, rewriteGoals, avoid. secondaryStory optional; omit filler.",
             "Strict consistency: candidateAngle, summaryGoal, skillsStrategy, and rewriteGoals must obey every line in avoid.",
-            "Projects: every id exactly once—heroProjects (max 4), supportingProjects (few; **stage A reference only—not rewritten there**), peripheralProjects (default for remaining). Do not park every non-hero project in supporting.",
-            "Pick **heroProjects** and **heroExperience** primarily from **planRankedRows** order when ids fit the archetype; deprioritizing a higher `jdKeywordHits` row is allowed only for a clear, evidence-backed reason in avoid or row fit.",
-            "sectionStrategy: align with hero ids; narrative plans how those hero rows should land for this role.",
-            "JD terms are emphasis hints only—not license for unsupported stack or domain.",
+            "Projects: every id exactly onceΓÇöheroProjects (max 3), supportingProjects (few; light-touch only), peripheralProjects (default for remaining). Do not park every non-hero project in supporting.",
+            "sectionStrategy: per-section aggression; align with heroes; preserve content that is already strong.",
+            "JD terms are emphasis hints onlyΓÇönot license for unsupported stack or domain.",
             "",
             f"target_role: {target or 'Not specified'}",
             f"company: {company or 'Not specified'}",
             "",
-            "planRankedRows (from build_tailor_plan / JD hit scores—use for default hero order):",
-            json.dumps(plan_ranked_rows, ensure_ascii=False, indent=2),
-            "",
-            "evidenceRows (strongest matching rows—primary input):",
+            "evidenceRows (strongest matching rowsΓÇöprimary input):",
             json.dumps(evidence[:12], ensure_ascii=False),
             "",
-            "resumeGaps (JD terms not evidenced—use in avoid and caution):",
+            "resumeGaps (JD terms not evidencedΓÇöuse in avoid and caution):",
             json.dumps(gaps_preview, ensure_ascii=False),
             "",
             "primaryJDTerms (emphasis hints only):",
             json.dumps(primary, ensure_ascii=False),
             "secondaryJDTerms:",
             json.dumps(secondary, ensure_ascii=False),
-            "resumeHits (canonical hits—supporting only):",
+            "resumeHits (canonical hitsΓÇösupporting only):",
             json.dumps(list(hits)[:24], ensure_ascii=False),
             "",
-            "job_description (trimmed; main tailor pass uses **excerpts** + this brief—not full JD body):",
+            "job_description (trimmed; full JD is in the main pass):",
             jd_clip,
             "",
             "resume JSON:",
@@ -206,12 +191,11 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
         # --- write prompts + parsed + final brief + raw completion snippet for inspecting parse failures. --- #
         preview = text if isinstance(text, str) else ""
         if len(preview) > 12000:
-            preview = preview[:12000] + "\n… [truncated]"
+            preview = preview[:12000] + "\nΓÇª [truncated]"
         write_narrative_debug(
             {
                 "system_prompt": system,
                 "user_prompt": user,
-                "planRankedRows_input": plan_ranked_rows,
                 "completion_text": preview,
                 "model_raw": raw,
                 "normalized": normalized,
@@ -249,7 +233,7 @@ def collect_row_ids(rows_key: str, resume_data: dict) -> set:
 
 
 def build_project_rank_list(rows_ranked, resume_data):
-    # --- Plan-ranked project ids first, then remaining resume ids—stable tier capping uses this order. --- #
+    # --- Plan-ranked project ids first, then remaining resume idsΓÇöstable tier capping uses this order. --- #
     valid = collect_row_ids("projects", resume_data)
     if not valid:
         return []
@@ -296,25 +280,26 @@ def normalize_section_strategy_obj(raw_val: Any) -> dict:
         if isinstance(v, str) and v.strip():
             s = v.strip().replace("\n", " ")
             if len(s) > 180:
-                s = s[:177] + "…"
+                s = s[:177] + "ΓÇª"
             out[k] = s
     return out
 
 
 def _experience_strategy_operational_default():
     return (
-        "Stage A: full bullet-block rewrites for every heroExperience id; non-hero jobs are not stage A targets."
+        "On heroExperience: sharpen scope, systems touched, and outcomes on weak or under-targeted bullets only; "
+        "leave already-strong bullets; do not force edits across every line; lighter touch on non-hero jobs."
     )
 
 
 def pad_section_strategy_partial(d: dict) -> dict:
     # --- Fills missing section keys so the main pass always gets explicit section-level intent. --- #
     defaults = {
-        "summary": "Full rewrite per summaryGoal: assertive open; place evidenced JD/role terms the resume already supports; nothing avoid forbids.",
+        "summary": "Full rewrite: open per summaryGoal; technical proof first; nothing avoid forbids.",
         "experience": _experience_strategy_operational_default(),
-        "projects": "Stage A: full bullet-block rewrites for every heroProjects id; supporting/peripheral are reference-only, not rewritten there.",
-        "skills": "Regroup/reorder/demote before removal per skillsStrategy; top evidenced stack that overlaps the posting; sink fluff; scan-friendly order; ~3–4 dense categories.",
-        "education": "Light—credentials frozen; trim highlights only if they sharpen scan.",
+        "projects": "Heavy on heroProjectsΓÇömost bullets fair game when story-rich; supporting lighter; peripheral preserve.",
+        "skills": "Visible regroup per skillsStrategy; ~3ΓÇô4 dense categories; sink junk without row proof.",
+        "education": "LightΓÇöcredentials frozen; trim highlights only if they sharpen scan.",
     }
     merged = dict(d)
     for k, v in defaults.items():
@@ -323,7 +308,7 @@ def pad_section_strategy_partial(d: dict) -> dict:
     return merged
 
 
-# --- Strip common résumé clichés from brief text so the editorial plan stays sharp and actionable. --- #
+# --- Strip common r├⌐sum├⌐ clich├⌐s from brief text so the editorial plan stays sharp and actionable. --- #
 _cliche_patterns = (
     re.compile(r"\bwell[- ]suited\b", re.I),
     re.compile(r"\bversatile\b", re.I),
@@ -351,26 +336,6 @@ _weak_rewrite_opening_re = re.compile(
     re.I,
 )
 
-_user_centric_phrase_re = re.compile(
-    r"\buser[- ]centric\b|\bproduct strategy\b",
-    re.I,
-)
-
-_brochure_phrase_re = re.compile(
-    r"\bscalable solutions?\b|\breliable applications?\b|\bimpactful solutions?\b|\brobust data processing\b|\befficient applications?\b",
-    re.I,
-)
-
-_unsupported_stack_tokens = (
-    "ruby",
-    "rails",
-    "typescript",
-    "tailwind",
-    "ios",
-    "android",
-    "claude",
-)
-
 
 def strip_resume_cliche_phrases(text: str) -> str:
     if not text or not isinstance(text, str):
@@ -378,18 +343,18 @@ def strip_resume_cliche_phrases(text: str) -> str:
     t = text
     for p in _cliche_patterns:
         t = p.sub("", t)
-    t = re.sub(r"\s+", " ", t).strip(" ,;—-")
+    t = re.sub(r"\s+", " ", t).strip(" ,;ΓÇö-")
     return t
 
 
 # --- Remove evidence-meta tails so candidateAngle reads as positioning, not a proof footnote. --- #
 _angle_meta_tail_res = (
-    re.compile(r"\s*[—,;]\s*grounded in\b.*$", re.I),
-    re.compile(r"\s*[—,;]\s*anchored in\b.*$", re.I),
-    re.compile(r"\s*[—,;]\s*based on\b.*$", re.I),
-    re.compile(r"\s*[—,;]\s*with evidence from\b.*$", re.I),
-    re.compile(r"\s*[—,;]\s*evidenced on\b.*$", re.I),
-    re.compile(r"\s*[—,;]\s*from internships and projects\b.*$", re.I),
+    re.compile(r"\s*[ΓÇö,;]\s*grounded in\b.*$", re.I),
+    re.compile(r"\s*[ΓÇö,;]\s*anchored in\b.*$", re.I),
+    re.compile(r"\s*[ΓÇö,;]\s*based on\b.*$", re.I),
+    re.compile(r"\s*[ΓÇö,;]\s*with evidence from\b.*$", re.I),
+    re.compile(r"\s*[ΓÇö,;]\s*evidenced on\b.*$", re.I),
+    re.compile(r"\s*[ΓÇö,;]\s*from internships and projects\b.*$", re.I),
 )
 
 
@@ -399,7 +364,7 @@ def strip_candidate_angle_meta(text):
     t = text.strip()
     for pat in _angle_meta_tail_res:
         t = pat.sub("", t)
-    t = re.sub(r"\s+", " ", t).strip(" ,;—-")
+    t = re.sub(r"\s+", " ", t).strip(" ,;ΓÇö-")
     return t
 
 
@@ -420,7 +385,7 @@ def strip_vague_angle_wording(text):
         "web and API-backed product surfaces",
         t,
     )
-    return re.sub(r"\s+", " ", t).strip(" ,;—-")
+    return re.sub(r"\s+", " ", t).strip(" ,;ΓÇö-")
 
 
 _health_domain_signal_re = re.compile(
@@ -442,45 +407,6 @@ def secondary_story_line_keep(line, resume_has_health):
     if _health_domain_signal_re.search(line) and not resume_has_health:
         return False
     return True
-
-
-def avoid_forbids_user_centric(avoid_lines):
-    if not isinstance(avoid_lines, list):
-        return False
-    return any("user-centric" in str(x).lower() for x in avoid_lines)
-
-
-def strip_user_centric_story_phrase(text: str, avoid_lines: list) -> str:
-    if not text or not isinstance(text, str):
-        return ""
-    if avoid_forbids_user_centric(avoid_lines) and _user_centric_phrase_re.search(text):
-        return ""
-    return text.strip()
-
-
-def strip_brochure_phrases(text: str) -> str:
-    if not text or not isinstance(text, str):
-        return ""
-    t = _brochure_phrase_re.sub("", text)
-    t = re.sub(r"\s+", " ", t).strip(" ,;—-")
-    return t
-
-
-def resume_evidence_text(resume_data: dict) -> str:
-    if not isinstance(resume_data, dict):
-        return ""
-    return json.dumps(resume_data, ensure_ascii=False, default=str).lower()
-
-
-def skills_strategy_line_mentions_absent_stack(line: str, resume_data: dict) -> bool:
-    if not line or not isinstance(line, str):
-        return False
-    low = line.lower()
-    evidence_text = resume_evidence_text(resume_data)
-    for token in _unsupported_stack_tokens:
-        if token in low and token not in evidence_text:
-            return True
-    return False
 
 
 def skills_strategy_line_too_prescriptive(line):
@@ -601,7 +527,7 @@ def skill_category_row_count(resume_data: dict) -> int:
 
 
 def category_strategy_line_is_placeholder(line: str) -> bool:
-    # --- Drop meta "if such a grouping exists" lines—categoryStrategy should be concrete or []. --- #
+    # --- Drop meta "if such a grouping exists" linesΓÇöcategoryStrategy should be concrete or []. --- #
     low = line.lower().strip()
     if low.startswith("if ") and ("exists" in low or "vague" in low):
         return True
@@ -728,7 +654,7 @@ def differentiate_summary_goal(summary_goal: str, angle: str, primary_story: lis
 
 
 def pad_skills_strategy_lines(lines: list, keyword_hints: list) -> list:
-    # --- Ensure 2–4 actionable lines; fold JD emphasis terms when the model under-specifies. --- #
+    # --- Ensure 2ΓÇô4 actionable lines; fold JD emphasis terms when the model under-specifies. --- #
     out = dedupe_preserve_order([x for x in lines if x])
     if len(out) >= 2:
         return out[:4]
@@ -811,7 +737,6 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
             if line not in out["avoid"]:
                 out["avoid"].append(line)
     out["avoid"] = out["avoid"][:6]
-    avoid_user_centric = avoid_forbids_user_centric(out["avoid"])
 
     ca = raw.get("candidateAngle")
     angle = strip_resume_cliche_phrases(ca.strip() if isinstance(ca, str) else "")
@@ -822,20 +747,15 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
     angle = strip_vague_angle_wording(angle)
     out["candidateAngle"] = angle
 
-    primary = []
-    for x in dedupe_preserve_order(str_list("primaryStory"))[:4]:
-        cleaned = strip_resume_cliche_phrases(x)
-        cleaned = strip_user_centric_story_phrase(cleaned, out["avoid"])
-        cleaned = strip_brochure_phrases(cleaned)
-        if cleaned:
-            primary.append(cleaned)
-    out["primaryStory"] = primary
+    primary = [
+        strip_resume_cliche_phrases(x)
+        for x in dedupe_preserve_order(str_list("primaryStory"))[:4]
+    ]
+    out["primaryStory"] = [x for x in primary if x]
 
     sec_lines = []
     for x in dedupe_preserve_order(str_list("secondaryStory"))[:3]:
         c = strip_resume_cliche_phrases(x)
-        c = strip_user_centric_story_phrase(c, out["avoid"])
-        c = strip_brochure_phrases(c)
         if (
             c
             and not _weak_secondary_theme_re.search(c)
@@ -846,8 +766,6 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
 
     sg_raw = raw.get("summaryGoal")
     summary_goal = strip_resume_cliche_phrases(sg_raw.strip() if isinstance(sg_raw, str) else "")
-    summary_goal = strip_user_centric_story_phrase(summary_goal, out["avoid"])
-    summary_goal = strip_brochure_phrases(summary_goal)
 
     cat_candidates = dedupe_preserve_order(str_list("categoryStrategy"))[:3]
     if skill_category_row_count(resume_data) < 2:
@@ -871,8 +789,8 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
 
     valid_exp = collect_row_ids("experience", resume_data)
 
-    hero_exp = [i for i in int_ids("heroExperience") if i in valid_exp][:maxHeroExperienceNarrative]
-    hero_proj = [i for i in int_ids("heroProjects") if i in valid_proj][:maxHeroProjectsNarrative]
+    hero_exp = [i for i in int_ids("heroExperience") if i in valid_exp][:2]
+    hero_proj = [i for i in int_ids("heroProjects") if i in valid_proj][:3]
     hero_set = set(hero_proj)
 
     support_proj = [i for i in int_ids("supportingProjects") if i in valid_proj and i not in hero_set]
@@ -901,11 +819,11 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
             summary_goal = (
                 "Lead with "
                 + out["primaryStory"][0]
-                + "; fold in secondary proof from hero rows—nothing avoid forbids."
+                + "; fold in secondary proof from hero rowsΓÇönothing avoid forbids."
             )
         elif angle:
             summary_goal = (
-                "Open on the strongest hero-row proof; state scope the resume actually shows—aligned with avoid."
+                "Open on the strongest hero-row proof; state scope the resume actually showsΓÇöaligned with avoid."
             )
         else:
             summary_goal = (
@@ -914,7 +832,6 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
     summary_goal = strip_resume_cliche_phrases(summary_goal)
     summary_goal = differentiate_summary_goal(summary_goal, angle, out["primaryStory"])
     summary_goal = strip_resume_cliche_phrases(summary_goal)
-    summary_goal = strip_brochure_phrases(summary_goal)
     sg_words = summary_goal.split()
     if len(sg_words) > 32:
         summary_goal = " ".join(sg_words[:32]).rstrip(",;:")
@@ -924,21 +841,18 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
     sk_raw = [
         x
         for x in sk_raw
-        if x
-        and not skills_strategy_line_is_generic(x)
-        and not skills_strategy_line_too_prescriptive(x)
-        and not skills_strategy_line_mentions_absent_stack(x, resume_data)
+        if x and not skills_strategy_line_is_generic(x) and not skills_strategy_line_too_prescriptive(x)
     ]
     out["skillsStrategy"] = ensure_skills_strategy_rise_and_fall(
         pad_skills_strategy_lines(sk_raw, hints), hints
     )
 
-    rg = filter_rewrite_goals(dedupe_preserve_order(str_list("rewriteGoals"))[:6])
+    rg = filter_rewrite_goals(dedupe_preserve_order(str_list("rewriteGoals"))[:4])
     out["rewriteGoals"] = rg
 
     default_rewrite = [
-        "Land hero experience: lead with the role’s primary signal (services/APIs/pipelines/data) on each line; leave an evidence-backed impression of scope—full bullet-block rewrites when facts allow.",
-        "Land hero projects: foreground systems, integrations, consumers; state the impression the row should leave for this job—full-row rewrites when detail supports it.",
+        "Make hero experience rows read as scoped delivery with concrete stack and outcomesΓÇöonly on-row facts.",
+        "Land hero project bullets as the primary proof of the role story; rework most bullets there when evidence is rich.",
     ]
     if len(out["rewriteGoals"]) < 2:
         for line in default_rewrite:
@@ -947,6 +861,6 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
             softened = soften_rewrite_goal_scope(line)
             if softened not in out["rewriteGoals"]:
                 out["rewriteGoals"].append(softened)
-    out["rewriteGoals"] = [soften_rewrite_goal_scope(g) for g in out["rewriteGoals"][:6]]
+    out["rewriteGoals"] = [soften_rewrite_goal_scope(g) for g in out["rewriteGoals"][:4]]
 
     return out

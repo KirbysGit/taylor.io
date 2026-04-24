@@ -292,42 +292,84 @@ def build_tailor_plan(resumeData, tailorContext):
         "gapsPerSection": gapsPerSection,
     }
 
-    
-    # plan our edit.
 
-    # from this we basically want to tell the ai. 
-
-    # what the user has.
-
-    # what points in our resume support that, so like what our resume_hits tells us we should strengthen and focus on.
-
-    # what points in our resume are gaps, so like what our resume_gaps tells us we should fill in, if the user doesn't have it listed.
-
-    # we should do this through focusing our sections (education, experience, projects, skills) based on the number of hits per section.
-
-    # determine how we want to order based on the number of hits per section.
-
-    # coming back 04 / 16 / 2026 @ 2:20 am
-
-    # we're in the process of setting up section priorities.
-
-    # this will tell us how we should prioritize our sections, obviously there will be some discernment, 
-    # but we want a general like maybe we focus projects, maybe we focus experience, maybe we focus education, or maybe we rearrange skills.
-
-    # the idea is that per section from what we have the ai can :
-
-    # - rewrite the sections important data included in our buckets, like the description for projects or experience, or the relevant courses for education.
-    # - rearrange our section ordering based on the number of hits per section.
+def _label_experience_row(rid, resumeData):
+    if not isinstance(resumeData, dict):
+        return f"experience id {rid}"
+    for r in resumeData.get("experience") or []:
+        if not isinstance(r, dict):
+            continue
+        if r.get("id") != rid:
+            continue
+        c = str(r.get("company") or "").strip()
+        t = str(r.get("title") or "").strip()
+        if c and t:
+            return f"{c} — {t}"
+        return c or t or f"experience id {rid}"
+    return f"experience id {rid}"
 
 
-    # basically telling the ai
-    # - what the user has that is most relevant to the jd throughout our sections.
-    # - what the user is missing.
+def _label_project_row(rid, resumeData):
+    if not isinstance(resumeData, dict):
+        return f"project id {rid}"
+    for r in resumeData.get("projects") or []:
+        if not isinstance(r, dict):
+            continue
+        if r.get("id") != rid:
+            continue
+        t = str(r.get("title") or "").strip()
+        return t or f"project id {rid}"
+    return f"project id {rid}"
 
-    # so that spectrum we need to designate,
-    # - we have stronger keywords that are more relevant, how do we prioritze our data to best support those keywords
-    # - also rearranging our data to also support the keywords we are missing. 
 
-    # also setting up our resume based prioritization.
-
-    return
+def hero_rank_hints_for_narrative(rowsPerSectionRanked, resumeData, max_exp=6, max_proj=8):
+    # --- Same ordering as list_rows_per_section: JD keyword hit counts, then id; feeds narrative so heroes are not chosen in a vacuum. --- #
+    if not isinstance(rowsPerSectionRanked, dict):
+        rowsPerSectionRanked = {}
+    if not isinstance(resumeData, dict):
+        resumeData = {}
+    out_exp = []
+    for row in (rowsPerSectionRanked.get("experience") or [])[:max_exp]:
+        if not isinstance(row, dict):
+            continue
+        rid = row.get("id")
+        if isinstance(rid, float) and rid == int(rid):
+            rid = int(rid)
+        if not isinstance(rid, int):
+            continue
+        terms = row.get("matchedTerms") or []
+        if not isinstance(terms, list):
+            terms = []
+        out_exp.append(
+            {
+                "id": rid,
+                "jdKeywordHits": int(row.get("hits") or 0),
+                "matchedTerms": [str(t) for t in terms[:10]],
+                "label": _label_experience_row(rid, resumeData),
+            }
+        )
+    out_proj = []
+    for row in (rowsPerSectionRanked.get("projects") or [])[:max_proj]:
+        if not isinstance(row, dict):
+            continue
+        rid = row.get("id")
+        if isinstance(rid, float) and rid == int(rid):
+            rid = int(rid)
+        if not isinstance(rid, int):
+            continue
+        terms = row.get("matchedTerms") or []
+        if not isinstance(terms, list):
+            terms = []
+        out_proj.append(
+            {
+                "id": rid,
+                "jdKeywordHits": int(row.get("hits") or 0),
+                "matchedTerms": [str(t) for t in terms[:10]],
+                "label": _label_project_row(rid, resumeData),
+            }
+        )
+    return {
+        "howToUse": "Higher jdKeywordHits = more JD/resume term overlap. Choose heroExperience and heroProjects from these lists by default, in order, when they fit target_role; only skip a higher hit row for a reason in avoid or clear evidence on another row.",
+        "experience": out_exp,
+        "projects": out_proj,
+    }

@@ -1,40 +1,59 @@
-# convert our chat completion text into a dict.
-
+# --- model reply -> dict; anything unusable -> {}. --- #
 import json
+import re
+
+trailingCommaBeforeClose = re.compile(r",(\s*[}\]])")
+
+
+def repair_trailing_commas(s):
+    # LLMs often emit trailing commas; stdlib json rejects them.
+    t = s.lstrip("\ufeff")
+    prev = None
+    while prev != t:
+        prev = t
+        t = trailingCommaBeforeClose.sub(r"\1", t)
+    return t
+
+
+def decode_first_dict(s):
+    # First {...} only — model may append extra `{}` or text after the main object.
+    i = s.find("{")
+    if i == -1:
+        return None
+    try:
+        obj, _end = json.JSONDecoder().raw_decode(s, idx=i)
+    except json.JSONDecodeError:
+        return None
+    return obj if isinstance(obj, dict) else None
 
 
 def parse_chat_json(raw):
-
-    raw = raw.strip()
-
-    # if the raw is already a dict, return it.
     if isinstance(raw, dict):
-        print("hey in here 1!")
         return raw
-
-    # if the raw is missing or not a string, return empty dict (e.g. OpenAI disabled or no content).
     if raw is None or not isinstance(raw, str):
-        print("hey in here 2!")
         return {}
 
     s = raw.strip()
     if not s:
-        print("hey in here 3!")
         return {}
 
-    # Models sometimes append a second JSON value (e.g. `{}`) or trailing text after the main object.
-    # json.loads rejects that ("Extra data"); decode only the first top-level object instead.
+    if s.startswith("```"):
+        s = s.removeprefix("```").strip()
+        if s.lower().startswith("json"):
+            s = s[4:].lstrip()
+        if s.endswith("```"):
+            s = s[:-3].strip()
+
+    if s.find("{") == -1:
+        return {}
+
+    out = decode_first_dict(s)
+    if out is not None:
+        return out
+
     start = s.find("{")
-    if start == -1:
-        print("hey in here 4!")
-        return {}
+    out = decode_first_dict(repair_trailing_commas(s[start:]))
+    if out is not None:
+        return out
 
-    try:
-        parsed, _end = json.JSONDecoder().raw_decode(s, idx=start)
-    except json.JSONDecodeError:
-        print("hey in here 5!")
-        return {}
-        
-    print("hey in here 6!")
-    return parsed if isinstance(parsed, dict) else {}
-
+    return {}

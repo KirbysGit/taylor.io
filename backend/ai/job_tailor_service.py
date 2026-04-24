@@ -16,6 +16,7 @@ from .narrative import request_narrative_brief
 from .prompt import build_prompt
 from .openai import ai_chat_completion
 from .post_processing import parse_chat_json
+from .post_processing.resume_diff import assemble_tailor_result
 
 # schemas.
 from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse
@@ -28,7 +29,12 @@ logger = logging.getLogger(__name__)
 def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     payload = JobTailorSuggestRequest.model_dump()
 
-    ext_result = extract_keywords(payload["job_description"], payload["target_role"], numKeywords=12)
+    ext_result = extract_keywords(
+        payload["job_description"],
+        payload["target_role"],
+        numKeywords=12,
+        company=payload.get("company") or "",
+    )
     
     # get the keywords and active domains from our extraction result.
     keywords = ext_result["keywords"]
@@ -44,7 +50,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     # get what we want to focus on per section and row.
     sectionDetails = build_tailor_plan(resumeData=resumeData, tailorContext=tailorContext)
 
-    # narrative spine: second cheap call so the rewrite pass is not inventing editorial target from scratch.
+    # narrative spine: plan-ranked row hints (rowsPerSectionRanked) are passed in sectionDetails so hero picks are grounded in JD hit scores, not a vacuum.
     narrative_brief = request_narrative_brief(payload=payload, tailorContext=tailorContext, sectionDetails=sectionDetails)
 
     # build the prompts.
@@ -61,6 +67,27 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     
   
     out = parse_chat_json(text)
+    target_role_str = str((payload or {}).get("target_role") or "") if isinstance(payload, dict) else ""
+
+    if debug:
+        final_out, diff_audit = assemble_tailor_result(
+            original_resume=resumeData,
+            stage_a=out,
+            narrative_brief=narrative_brief,
+            target_role=target_role_str,
+            return_audit_debug=True,
+            rows_per_section_ranked=(sectionDetails or {}).get("rowsPerSectionRanked") or {},
+        )
+    else:
+        final_out = assemble_tailor_result(
+            original_resume=resumeData,
+            stage_a=out,
+            narrative_brief=narrative_brief,
+            target_role=target_role_str,
+            return_audit_debug=False,
+            rows_per_section_ranked=(sectionDetails or {}).get("rowsPerSectionRanked") or {},
+        )
+        diff_audit = None
     
     if debug:
         # create the debug output directory.
@@ -73,20 +100,59 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         write_debug("job_tailor_latest_system.json", {"prompt": system_prompt})
         write_debug("job_tailor_latest_user.json", {"prompt": user_prompt})
         write_debug("job_tailor_narrative.json", narrative_brief)
-        write_debug("job_tailor_latest_model.json", out)
+        write_debug("job_tailor_stage_a.json", out)
+        write_debug("job_tailor_latest_model.json", final_out)
+        if diff_audit is not None:
+            if usage is not None and isinstance(usage, dict):
+                diff_audit = {**diff_audit, "llm_usage_rewrite_pass": usage}
+            elif usage is not None:
+                diff_audit = {**diff_audit, "llm_usage_rewrite_pass": str(usage)}
+            write_debug("job_tailor_diff_audit.json", diff_audit)
+        text_meta = (diff_audit or {}).get("text") or {}
+        rw_chars = text_meta.get("rewrite_note_chars")
+        if rw_chars is None and diff_audit is not None:
+            rw_chars = (diff_audit.get("rewrite_note") or {}).get("chars")
+        wq = (diff_audit or {}).get("quality") or (diff_audit or {}).get("rewrite_quality") or {}
+        wint = wq.get("rewrite_intensity") or {}
+        wflags = wq.get("flags") or {}
+        phf = (diff_audit or {}).get("plan_hero_fit") or {}
+        p_proj = phf.get("projects") or {}
+        hsg = phf.get("hero_slot_gap") or {}
+        seg = phf.get("segment") or {}
+        logger.info(
+            "tailor diff_audit: patch_sections=%s change_reasons=%d warnings=%d rewrite_note_chars=%s fell_back=%s "
+            "intensity exp=%s proj=%s sk=%s heroes_proj=%s heroes_exp=%s low_intensity=%s removed_rows=%s flags=%s "
+            "plan_hero_in_top_k=%s plan_hero_ratio_proj=%s plan_inversions=%s "
+            "hero_slot_gap_proj=%s segment_proj_heroes=%s",
+            list((final_out.get("patchDiff") or {}).keys()),
+            len(final_out.get("changeReasons") or []),
+            len(final_out.get("warnings") or []),
+            rw_chars if rw_chars is not None else "n/a",
+            ((diff_audit or {}).get("merge") or {}).get("fell_back")
+            if diff_audit is not None
+            else "n/a",
+            wint.get("experience_rows_touched"),
+            wint.get("project_rows_touched"),
+            wint.get("skill_rows_touched"),
+            wint.get("hero_projects_edited_count"),
+            wint.get("hero_experience_edited_count"),
+            wint.get("low_intensity_hint"),
+            wint.get("rows_removed_total"),
+            {k: v for k, v in wflags.items() if v},
+            p_proj.get("in_top_k"),
+            p_proj.get("ratio"),
+            phf.get("inversion_pair_count"),
+            hsg.get("projects"),
+            seg.get("narrative_had_project_heroes"),
+        )
 
-    genSummary = str(out.get("summary") or out.get("tailorSummary") or out.get("genSummary") or "")
-    updatedResumeData = out.get("updatedResumeData") or {}
-    patchDiff = out.get("patchDiff") or {}
-    changeReasons = out.get("changeReasons") or []
-    warnings = out.get("warnings") or []
-    
+    ch = (final_out.get("summary") or "").strip()
     return JobTailorSuggestResponse(
-        genSummary=genSummary,
-        updatedResumeData=updatedResumeData,
-        patchDiff=patchDiff,
-        changeReasons=changeReasons,
-        warnings=warnings,
+        summary=ch,
+        updatedResumeData=final_out["updatedResumeData"],
+        patchDiff=final_out["patchDiff"],
+        changeReasons=final_out["changeReasons"],
+        warnings=final_out["warnings"],
     )
 
 
@@ -186,7 +252,12 @@ if __name__ == "__main__":
         "resume_data": resume_data,
     }
 
-    build_job_tailor_suggestions(
-        payload=payload,
+    tailor_resume(
+        JobTailorSuggestRequest=JobTailorSuggestRequest(
+            job_description=job_description,
+            company="Interval Partners",
+            target_role=target_role,
+            resume_data=resume_data,
+        ),
         user_id=1,
     )

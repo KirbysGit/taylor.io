@@ -10,7 +10,7 @@ function TailorAssistPanel({ tailorIntent, aiTailorResult, aiTailorPhase }) {
 		error: 'Tailor run failed',
 	}
 	const phaseLabel = phaseLabelMap[aiTailorPhase] || 'Ready'
-	const genSummary = aiTailorResult?.genSummary || aiTailorResult?.summary
+	const tailorChangelog = aiTailorResult?.summary
 	const warnings = Array.isArray(aiTailorResult?.warnings) ? aiTailorResult.warnings : []
 
 	return (
@@ -45,8 +45,8 @@ function TailorAssistPanel({ tailorIntent, aiTailorResult, aiTailorPhase }) {
 
 			{aiTailorPhase === 'reviewing' ? (
 				<div className="relative mt-3 rounded-lg border border-white/25 bg-white/90 p-3 text-gray-800">
-					{genSummary ? (
-						<p className="text-xs leading-relaxed text-gray-700">{genSummary}</p>
+					{tailorChangelog ? (
+						<p className="text-xs leading-relaxed text-gray-700">{tailorChangelog}</p>
 					) : (
 						<p className="text-xs leading-relaxed text-gray-600">
 							Tailored resume content was applied to the editor. A short summary was not included in this response.
