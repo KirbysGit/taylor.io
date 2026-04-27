@@ -8,7 +8,13 @@ from ..post_processing.resume_tailor_report import skills_change_expected_from_c
 
 # When `TAILOR_AB_EXPERIMENT` is truthy, this block is appended to the Stage A user prompt (A/B vs baseline).
 # Keep empty for identical token baseline; put your experiment instructions here only for the "on" runs.
-TAILOR_AB_EXPERIMENT_APPEND = ""
+TAILOR_AB_EXPERIMENT_APPEND = """
+    Experiment override — assertive retargeting (not polish):
+    - Treat this as a **full reframe for this exact posting**: the reader should feel the resume was **rebuilt around the role**, not lightly edited.
+    - For every allowed hero experience and hero project row, rewrite the **entire** bullet block so **leads, order, and emphasis** change to foreground what this JD rewards. Same facts; **new angle and structure** vs the source. If a paragraph could still read as “the old resume with tweaks,” it is not done.
+    - The summary must **open with a role-shaped hook** using concrete shapes from the candidate’s work (tools, systems, data/product surfaces) — avoid generic “builder / impactful / scalable” filler.
+    - Do not shrink scope: if a section is in `edits`, the change should be **obvious** on a 10-second skim that this version targets this job.
+"""
 
 
 def tailor_ab_experiment_enabled():

@@ -15,6 +15,7 @@ from .rules import (
     nonRoleSectionHeaders, sectionHeadersToDownweight, roleSectionHeaders,
     downweightFactor, concreteStackTerms, roleCapabilityStackTerms,
     hardNoiseTokens, benefitNoiseTokens, keywordTrashTokens,
+    umbrellaBodyWeakTokens,
 )
 from .lexicon import (
     globalStopWords, globalAllowShortTokens, globalPhraseCanonical, globalWeakTokens,
@@ -60,12 +61,18 @@ def is_footer_or_link_line(normalized):
     return any(snippet in normalized for snippet in complianceFooterSubstrings)
 
 # --- check if the line looks like a techical stack line. --- #
+# colons and bare commas match too many “requirements:” and prose lines; require lists / path-like patterns.
 def looks_like_stack_line(line):
-    
     if not line:
         return False
-
-    return ("," in line or "/" in line or "(" in line or ")" in line or ":" in line)
+    s = line
+    if "/" in s:
+        return True
+    if "(" in s and ")" in s:
+        return True
+    if "," in s and len(s) < 200:
+        return True
+    return False
 
 # --- canonicalize the token based on our alias list. --- #
 def canonicalize_token(token):
@@ -324,10 +331,11 @@ def extract_tokens(text, company=""):
 # this is how we'll rank our terms based on our sources.
 # input -> term sources, boost words, weak tokens.
 # output -> scored list.
-def score_terms(termSources, boostWords, weakTokens):
+def score_terms(termSources, boostWords, weakTokens, umbrellaWeak=None):
 
     # initialize scored list.
     scored = []
+    umbrellaW = umbrellaWeak or frozenset()
 
     for term, sourceMap in termSources.items():
         # get frequency of term.
@@ -359,9 +367,13 @@ def score_terms(termSources, boostWords, weakTokens):
         if sourceMap.get("partOfPhrase", 0.0) > 0.0:
             strongSource = True
 
-        # if term is a weak token and does not have a strong source, penalize it.
+        # weak tokens without a strong source: scale with repeat count (flat -1 is not enough for 4–10× body hits).
         if term in weakTokens and not strongSource:
-            score -= 1.0
+            score -= min(8.0, 1.2 + 0.55 * max(0.0, frequency - 1.0))
+
+        # extra dampening for high-frequency umbrella words (data, experience, systems, …) from body only.
+        if term in umbrellaW and not strongSource:
+            score -= min(5.0, 0.5 * float(frequency))
 
         # add the term to the scored list.
         scored.append({
@@ -515,9 +527,25 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
 
     if str(company or "").strip(): res.termSources = {k: v for k, v in res.termSources.items() if not (str(company).lower() in (k or "") or (k in str(company).lower()))}
 
+    # thin JD: metadata / location-only body should not let generic body tokens win over title+phrases.
+    body_len = sum(len(x) for x in res.bodyLines)
+    if len(res.bodyLines) < 3 or body_len < 200:
+        for _term, sm in res.termSources.items():
+            for k in ("bodyToken", "downweightedToken"):
+                if k in sm and sm[k]:
+                    sm[k] = sm[k] * 0.3
+        if wanna_debug:
+            debug["thinBodyDampen"] = True
+    else:
+        if wanna_debug:
+            debug["thinBodyDampen"] = False
+
     # 9. score our term sources.
 
-    rankedTerms = score_terms(res.termSources, res.profile["boostWords"], res.profile["weakTokens"])
+    rankedTerms = score_terms(
+        res.termSources, res.profile["boostWords"], res.profile["weakTokens"],
+        umbrellaWeak=umbrellaBodyWeakTokens,
+    )
 
     if wanna_debug:
         debug["rankedTerms"] = rankedTerms[:numKeywords].copy()

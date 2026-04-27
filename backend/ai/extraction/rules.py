@@ -69,6 +69,16 @@ nonRoleSectionHeaders = {
     "our part employees",
     "disclaimers",
     "job benefits",
+    "apply now",
+    "how to apply",
+    "application instructions",
+    "salary and benefits",
+    "pay and benefits",
+    "relocation",
+    "visa sponsorship",
+    "diversity, equity and inclusion",
+    "de&i",
+    "diversity, equity, and inclusion",
 }
 
 hardNoiseTokens = {
@@ -261,9 +271,9 @@ stackAllowShortTokens = {
 # concrete tech names for stack detection in jd "stack" style sections.
 concreteStackTerms = {
     "react", "next.js", "nextjs", "react-native", "react native", "typescript", "javascript", "node", "node.js",
-    "c++", "python", "java", "rust", "php", "nestjs", "django", "flask", "fastapi",     "graphql", "rest", "restful",
+    "c++", "python", "java", "rust", "php", "nestjs", "django", "flask", "fastapi",     "graphql",
     "sql", "postgres", "postgresql", "mysql", "mongodb", "redis", "databricks", "kafka", "nifi",
-    "opensearch", "tableau", "power bi", "salesforce", "posthog", "aws", "gcp", "azure", "docker", "kubernetes",
+    "opensearch", "power bi", "salesforce", "posthog", "aws", "gcp", "azure", "docker", "kubernetes",
     "gke", "rag", "llm", "mlops", "tensorflow", "pytorch", "pyspark", "scikit-learn", "transformers", "langchain", "langgraph",
     "express",
     "webex", "calabrio", "dialogflow", "ci/cd", "linux", "vue.js", "angular", "html", "css", "gpu", "cuda",
@@ -276,6 +286,13 @@ concreteStackTerms = {
 roleCapabilityStackTerms = {
     "implementation", "delivery",
     "billing", "security", "kpis", "compliance",
+}
+
+# body-derived umbrella tokens: extra downrank when only generic body/dw hits (not title/phrase/stack).
+# pairs with score_terms; keeps “data”, “experience”, etc. from winning on repetition alone.
+umbrellaBodyWeakTokens = {
+    "data", "experience", "system", "systems", "operations", "support", "technical", "communication", "team",
+    "client", "clients", "customer", "customers",
 }
 
 # tokens to skip when mining org/employer name chunks from titles (too generic).
@@ -443,6 +460,28 @@ wrapperSuppressLineSubstrings = {
     "long term disability",
     "employee referral bonus",
     "advancement opportunities",
+    "life at",
+    "what we offer",
+    "starting salary",
+    "performance-based pay",
+    "comprehensive benefits",
+    "nationwide opportunities",
+    "base draw + commission + bonuses",
+    "physical & office/site presence requirements",
+    "physical & office/site presence",
+    "work schedule",
+    "shift",
+    "shifts",
+    "on-site",
+    "onsite",
+    "remote work",
+    "hybrid work",
+    "work location",
+    "office address",
+    "get directions",
+    "submit an application",
+    "submit your application",
+    "how to apply for this",
 }
 
 # when merging overlapping terms: if generic token overlaps a longer phrase, prefer these exact phrases.

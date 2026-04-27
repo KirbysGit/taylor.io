@@ -8,7 +8,10 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
+from dotenv import load_dotenv
 
+# Load backend/.env even when the process cwd is not `backend/` (e.g. some uvicorn launches).
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 # in use.
 from .extraction import extract_keywords
@@ -27,10 +30,13 @@ debug = True
 
 logger = logging.getLogger(__name__)
 
-# A/B harness (no separate script):
-#   TAILOR_AB_LOG=1 — append one JSON line per run to backend/ai/debug_out/tailor_ab_runs.jsonl
+# A/B harness (no separate script). JSONL is opt-in: without TAILOR_AB_LOG, no tailor_ab_runs file is created.
+#   TAILOR_AB_LOG=1 — required in backend/.env (or the environment) to append each run to
+#       backend/ai/debug_out/tailor_ab_runs.jsonl. Does not run from TAILOR_AB_EXPERIMENT alone.
 #   TAILOR_AB_EXPERIMENT=1 — use prompt text from prompt_builder.TAILOR_AB_EXPERIMENT_APPEND
 #   Rows pair by the same target_role+job_description via job_fingerprint in each line.
+#   TAILOR_SAVE_SAMPLES=1 — append one JSON line to backend/ai/samples/job_samples.jsonl
+#       (target_role, company, job_description) plus a line id and role_fingerprint. Opt-in: no file without it.
 
 
 def _env_truthy(name):
@@ -57,6 +63,60 @@ def _usage_to_dict(usage):
             except (TypeError, ValueError):
                 out[k] = getattr(usage, k)
     return out if out else str(usage)
+
+
+def _job_sample_fingerprint(target_role, company, job_description):
+    tr = (target_role or "").strip()
+    co = (company or "").strip() if isinstance(company, str) else ""
+    jd = (job_description or "").strip() if isinstance(job_description, str) else ""
+    raw = f"{tr}\n{co}\n{jd}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
+
+
+def _next_jsonl_line_id(path):
+    if not path.is_file():
+        return 1
+    n = 0
+    with path.open("r", encoding="utf-8") as f:
+        for _ in f:
+            n += 1
+    return n + 1
+
+
+def _append_job_sample(payload) -> None:
+    if not _env_truthy("TAILOR_SAVE_SAMPLES"):
+        return
+    if not isinstance(payload, dict):
+        return
+    tr = payload.get("target_role") or ""
+    co = payload.get("company")
+    if not isinstance(co, str):
+        co = co or ""
+    jd = payload.get("job_description") or ""
+    if not (str(jd).strip() or str(tr).strip()):
+        return
+    base = Path(__file__).resolve().parent / "samples"
+    base.mkdir(parents=True, exist_ok=True)
+    path = base / "job_samples.jsonl"
+    fp = _job_sample_fingerprint(tr, co, jd)
+    line_id = _next_jsonl_line_id(path)
+    row = {
+        "id": line_id,
+        "role_fingerprint": fp,
+        "target_role": tr[:240] if tr else "",
+        "company": (co[:180] if co else "") or "",
+        "job_description": str(jd) if jd is not None else "",
+        "saved_at_utc": datetime.now(timezone.utc).isoformat(),
+    }
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    logger.info(
+        "job_samples: id=%s role_fingerprint=%s title=%r company=%r",
+        line_id,
+        fp,
+        (tr[:60] + "…") if len(tr) > 60 else tr,
+        (co[:40] + "…") if len(co) > 40 else co,
+    )
 
 
 def _append_tailor_ab_log(*, payload, diff_audit, final_out, usage):
@@ -119,6 +179,7 @@ def _append_tailor_ab_log(*, payload, diff_audit, final_out, usage):
 
 def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     payload = JobTailorSuggestRequest.model_dump()
+    _append_job_sample(payload)
 
     ext_result = extract_keywords(
         payload["job_description"],

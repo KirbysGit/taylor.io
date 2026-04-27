@@ -145,6 +145,8 @@ globalStopWords = {
     "daily", "highly", "active",
     # verb from “answer phones / email”—not a skill keyword
     "answer",
+    # aggregate: extra glue / comp / question words that should not compete as keywords
+    "before", "how", "sure", "time",
 }
 
 # --- a set of global weak tokens, aka words that are relevant to the job description but are not strong enough to be considered a boost word. --- #
@@ -219,6 +221,16 @@ globalPhrases = [
     "api-first architectures", "event-driven services", "serverless infrastructure", "booking synchronization", "property technology",
     "ai systems", "agent logic", "feedback loops", "evaluation frameworks", "large language models", "labeling systems",
     "data integrity", "audit readiness", "food safety", "regulatory inspections",
+    # series aggregate: phrase anchors so umbrella tokens do not win (also in domains; global = always in phrase pass)
+    "distributed systems", "resource allocation", "job sites", "schedule conflicts", "punch list", "material delays", "subcontractors",
+    "data engineering", "data science", "data warehousing", "etl pipelines", "elt pipelines",
+    "raw material", "formula records", "technical documentation", "safety data sheets", "regulatory information", "data management",
+    "product lifecycle management", "plm systems", "portfolio management", "formulation", "cosmetic science", "regulatory affairs",
+    "consumer goods", "personal care",
+    "registered behavior technician", "rbt certification", "cbt license", "skill acquisition programs", "treatment sessions", "client well-being", "bls certification",
+    "traceability", "labeling systems", "inventory control",
+    "wastewater treatment", "treatment plant", "plant operator", "mechanical equipment", "mechanical processes", "environmental utilities", "water resources control board",
+    "content creator", "social media", "short videos", "video editing", "social media handles", "tiktok trends", "brand page", "short-form video", "talking-style video",
     # leadership / executive / nonprofit-ops: prefer phrases over split vice / president / execution / management.
     "vice president", "executive leadership", "people management", "strategic priorities", "operational excellence",
     "organizational capacity", "cross-functional oversight",
@@ -298,7 +310,7 @@ globalPhrases = [
 # --- a dict of global boost words and their strengths. --- #
 globalBoostWords = {
     "stakeholder management": 3, "cross functional collaboration": 2, "end-to-end ownership": 3, "process improvement": 3,
-    "risk mitigation": 3, "incident response": 3, "root cause analysis": 3, "data analysis": 2, "business impact": 3,
+    "risk mitigation": 3, "incident response": 3, "root cause analysis": 3, "data analysis": 1, "business impact": 1,
     "customer outcomes": 2, "go to market": 2, "a/b testing": 1, "user acquisition": 3, "user activation": 3, "user retention": 3,
     "revenue": 3, "collections": 3, "billing": 3,
     "kpis": 3, "dashboards": 2, "hiring": 2, "recruiting": 2, "operator": 2, "implementation": 2,
@@ -324,7 +336,7 @@ globalBoostWords = {
     "power bi": 3, "business intelligence": 1, "data modeling": 3, "quantitative": 3,
     "investment": 3, "private markets": 3, "investment management": 3, "analytics platform": 3, "prototypes": 2,
     "numpy": 3, "pandas": 3, "scikit-learn": 3, "tensorflow": 3, "pytorch": 3, "transformers": 3,
-    "fastapi": 3, "flask": 2, "django": 3, "angular": 2, "vue.js": 3, "graphql": 3,
+    "fastapi": 3, "flask": 2, "django": 3, "angular": 2, "vue.js": 2, "graphql": 3,
     "redis": 2, "postgresql": 2, "mysql": 2, "azure": 2, "mlops": 3, "feature engineering": 3,
     "model optimization": 3, "data preprocessing": 2, "deep learning": 3, "microservices": 3,
     "webex": 3, "calabrio": 3, "ivr": 3, "fcr": 3, "csat": 3, "dialogflow": 3, "cx": 2, "wfo": 2, "ccaas": 2, "wxcc": 2,
@@ -565,9 +577,9 @@ domainDicts = {
             "python": 3, "java": 2, "typescript": 3, "react": 3, "next.js": 3, "node": 2, "aws": 3, "kubernetes": 2,
             "api": 3, "integration": 1, "embedded": 3, "architecture": 2, "sdk": 2, "microservices": 2,
             "troubleshooting": 2, "deployment": 2, "implementation": 2, "delivery": 2, "customization": 2,
-            "vue.js": 3, "nextjs": 3, "nestjs": 3, "php": 3, "linux": 2, "restful apis": 3, "third-party apis": 3,
+            "vue.js": 2, "nextjs": 3, "nestjs": 3, "php": 3, "linux": 2, "restful apis": 3, "third-party apis": 3,
             "github": 1, "notion": 1,
-            "graphql": 3, "fastapi": 3, "flask": 2, "angular": 2, "vue.js": 3, "redis": 2,
+            "graphql": 3, "fastapi": 3, "flask": 2, "angular": 2, "vue.js": 2, "redis": 2,
             "postgresql": 2, "mysql": 2, "feature engineering": 3, "model optimization": 3, "microservices": 3,
             "sql": 3, "full-stack": 3, "user-facing web applications": 2,
             "cross-functional teams": 2, "product features": 2, "architectural discussions": 2,

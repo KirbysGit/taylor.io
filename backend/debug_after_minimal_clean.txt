@@ -1,50 +1,56 @@
 === AFTER MINIMAL_CLEAN ===
 
-Colin Kirby
-Full-Stack Engineer | React · JavaScript · UI/UX Design
-407-876-8172 | kirbycolin26@gmail.com | github.com/KirbysGit | linkedin.com/in/colinwkirby/
-Summary
-Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in
-React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into
-reliable, user-focused applications.
-Skills & Extracurriculars
-Languages: Python, JavaScript, TypeScript, C#, SQL (PostgreSQL/SQLite), HTML/CSS, Java
-Frameworks & Libraries: React.js, Django, Node.js, Express, Tailwind CSS, Bootstrap, MongoDB, Pandas, NumPy
-Developer Tools: Git, Docker, AWS EC2, Nginx, Gunicorn, Celery, VS Code, Postman, Figma, WhiteNoise
-Technologies: RESTful APIs, OAuth 2.0, WebSockets, Unit Testing (PyTest, JUnit, Jest), Accessibility (WCAG, ARIA)
-Clubs: AI@UCF, SHPE @ UCF, Knight Hacks
-Experience
-Software Engineering Intern May 2024 – June 2025
-BitGo | Python, Django, React, PostgreSQL, Docker, Celery, AWS EC2, Gunicorn, Nginx, Git Remote
-• Designed and scaled Django APIs with optimized PostgreSQL queries, ensuring high-volume data pipelines ran
-reliably and securely.
-• Implemented real-time financial data pipelines with WebSocket updates and structured logging for observability.
-• Partnered with design and product teams to implement React components and UI flows, ensuring accessibility and
-seamless integration with backend services.
-• Deployed, tested, and monitored production services on AWS EC2 with Docker, Gunicorn, and Nginx, implementing
-high-availability and automated QA practices.
-Projects
-Centi – Personal Finance Web App | React, FastAPI, PostgreSQL, Plaid API | centi.dev
-• Developed a finance platform with data ingestion pipelines (Plaid API + CSV uploads) and user dashboards for cash-
-flow visualization. Focused on reliability, security, and accessibility.
-• Implemented secure JWT/OAuth authentication, modular backend, and CI/CD production deployment (Vercel +
-Railway).
-• Designed accessible dashboards that convert raw data into actionable insights, improving decision-making and
-transparency.
-SentimentTrader – Stock Sentiment Analysis Tool | Python, FinBERT, XGBoost, Random Forest, Reddit API
-• Built modular pipelines ingesting Reddit + market data, applying FinBERT models, and exporting structured outputs
-into dashboards. Enabled forecasting and debugging with daily metrics.
-• Built and validated predictive ML models (XGBoost + Random Forest) with automated backtesting pipelines.
-• Built analytics dashboards for debugging, forecasting accuracy, and evaluating system reliability.
-SecureScape – Portable Smart Security System | Python, Flutter, Arduino C++, TensorFlow Lite
-• Engineered a distributed IoT platform with real-time video/event pipelines, integrated into secure web and mobile
-monitoring systems.
-• Built a Flutter mobile app and React dashboard for secure, low-latency monitoring without reliance on cloud services.
-• Optimized lightweight ML pipelines (Edge Impulse) for constrained devices, with testing and debugging workflows to
-ensure reliability.
+Alyssa Farlow
+www.linkedin.com/in/alyssafarlow | alyssa.farlow3@gmail.com | 954-881-9422
+
 Education
-University of Central Florida
-Bachelor of Science in Computer Engineering, 3.7 GPA Orlando, FL
-Relevant Coursework: Algorithms for Machine Learning, Deep Learning, Data Structures & Algorithms, Massive
-Storage & Big Data, Enterprise Computing, Object-Oriented Programming, Processes of Object-Oriented Software
-Honors & Awards: Dean’s List 2021 , President’s Honor Roll 2023 - 2025
+University of Central Florida                                                                  	      Orlando, FL 
+Bachelor of Science in Mechanical Engineering 	          May 2028
+Minor in Criminal Justice
+Major GPA: 3.8
+	
+Honors: Florida Bright Futures Academic Scholar, Cambridge AICE Diploma
+
+Skills
+Microsoft Office: Word, PowerPoint, Excel
+Coding Languages: Python, C
+Hardware and Systems: Motor Control, Sensors, Circuit Integration
+Interpersonal: Conflict Resolution, Leadership, Public Speaking, Collaboration, Communication, Adaptability
+Certifications: Entrepreneurship and Small Business
+
+Academic Projects
+R/C Derby											    In Progress
+Design and assemble the chassis and drivetrain system for a competitive remote-control car
+Conduct performance evaluations to optimize mechanical efficiency and electronic control systems, implementing modifications based on testing data resulting in ~15% higher efficiency
+Integrate and wire electrical components including motor, ESC, battery system, and remote receiver
+
+Great Navel Orange Race								  Jan. 2025 – Apr. 2025
+Designed and constructed the hull of an autonomous boat for a race against 600 other groups
+Developed and debugged the navigation system in Arduino in a real-time setting using a closed loop system to optimize steering, speed regulation, and course correction
+Delegated project tasks amongst members in a multidisciplinary team to finalize a competition-ready system
+
+Work Experience
+Integrity C4, LLC	                     Orlando, FL
+Intern	         Nov. 2025 – Present
+Assist a private investigation firm specializing in cyber and financial fraud in a fast-paced environment
+Organize case materials, conduct research, and assist with investigative tasks
+Maintain strict confidentiality and adhere to non-disclosure agreements with sensitive information
+
+Bar Louie	                     Orlando, FL
+Hostess	         Sep. 2025 – Present
+Greet and welcome guests in a friendly manner ensuring a positive first impression
+Organize reservations, waitlists, and seating arrangements to maximize efficiency 
+Handle guest inquiries, concerns, or complaints with professionalism and focusing on problem solving
+
+Camp Adventure	               Cooper City, FL
+Camp Counselor	      Jun. 2022 – Aug. 2024
+Supervised and ensured the safety of groups of up to 20 campers in a rapid-moving environment
+Resolved conflicts and behavioral concerns using strong communication and leadership
+Collaborated with staff to plan and execute engaging activities and events
+
+Campus Involvement
+Knight Shadow | Job Shadow Program Participant
+NASA Deep Space Logistics 	                  Dec. 2024
+Whiting-Turner | Wharton-Smith	           	      Dec. 2025	       
+Selected as a participant in University’s competitive matched single-day shadow program
+Gained understanding of position, career path, and organization of each company
