@@ -273,6 +273,7 @@ globalPhrases = [
     "monitoring solutions", "performance tracking", "api integration", "cloud-deployed scripts",
     "automation strategies", "dashboarding", "documentation skills",
     "full-stack features", "next.js", "react native", "end-to-end delivery", "customer discovery",
+    "backend services", "sql queries", "system architecture", "performance optimization", "backend frameworks",
     "technical architecture", "development velocity", "ai dev tooling", "ci/cd", "production-grade web applications",
     "product-minded", "deployment and maintenance", "financial infrastructure", "modern accounting", "banking tools",
     "fintech", "b2b saas",

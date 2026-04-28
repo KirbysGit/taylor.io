@@ -46,6 +46,11 @@ function RightPanel({
 	onSaveForLater,
 	onLoadSaved,
 	onDeleteSaved,
+	canCompareTailoredResume = false,
+	resumePreviewCompareMode = 'tailored',
+	onResumePreviewCompareModeChange = () => {},
+	showExactPdfInCanvas = true,
+	isTailorHtmlCompare = false,
 }) {
 	const [previewZoom, setPreviewZoom] = useState(PREVIEW_ZOOM.default)
 
@@ -54,7 +59,7 @@ function RightPanel({
 	const downloadLabel =
 		downloadStatus?.type === 'word' ? 'Word document' : 'PDF'
 	const isDefaultZoom = previewZoom === PREVIEW_ZOOM.default
-	const showExact = Boolean(exactPdfUrl)
+	const showExact = Boolean(exactPdfUrl) && showExactPdfInCanvas
 	const showPreviewRefreshOverlay =
 		!hasValidationIssues &&
 		Boolean(previewHtml) &&
@@ -160,15 +165,20 @@ function RightPanel({
 				aria-live="polite"
 			>
 				<div className="min-w-0 justify-self-start">
-					{showExact ? (
+					{isTailorHtmlCompare ? (
+						<p className="text-xs text-gray-600">
+							<span className="font-medium text-gray-800">Quick preview</span>
+							<span> — fast to compare. Use Tailor Assist when you are ready for the print layout.</span>
+						</p>
+					) : showExact ? (
 						<p className="text-xs font-medium text-gray-700">
-							<span className="text-green-700">Exact preview</span>
+							<span className="text-green-700">Print layout</span>
 							<span className="font-normal text-gray-500"> — matches PDF export.</span>
 						</p>
 					) : (
 						<p className="text-xs text-gray-600">
 							<span className="font-medium text-gray-800">Draft preview</span>
-							<span> — fast while you edit. Exact preview loads after you pause.</span>
+							<span> — fast while you edit. Print layout loads after you pause.</span>
 						</p>
 					)}
 				</div>
@@ -216,18 +226,53 @@ function RightPanel({
 					</button>
 				</div>
 				<div className="min-w-0 justify-self-end">
-					<SavedResumesPopover
-						savedResumes={savedResumes}
-						savedResumesOpen={savedResumesOpen}
-						onToggleSavedResumes={onToggleSavedResumes}
-						onCloseSavedResumes={onCloseSavedResumes}
-						saveResumeName={saveResumeName}
-						onSaveResumeNameChange={onSaveResumeNameChange}
-						isSavingResumeForLater={isSavingResumeForLater}
-						onSaveForLater={onSaveForLater}
-						onLoadSaved={onLoadSaved}
-						onDeleteSaved={onDeleteSaved}
-					/>
+					<div className="flex flex-wrap items-center justify-end gap-2">
+						{canCompareTailoredResume ? (
+							<div
+								className="inline-flex h-10 items-stretch overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm"
+								role="group"
+								aria-label="Preview original resume or tailored draft"
+							>
+								<button
+									type="button"
+									onClick={() => onResumePreviewCompareModeChange('original')}
+									className={`px-2.5 text-xs font-semibold transition-colors ${
+										resumePreviewCompareMode === 'original'
+											? 'bg-gray-200 text-gray-900'
+											: 'text-gray-600 hover:bg-gray-50'
+									}`}
+									title="Show resume as it was before tailoring"
+								>
+									Original
+								</button>
+								<span className="w-px shrink-0 self-stretch bg-gray-200" aria-hidden="true" />
+								<button
+									type="button"
+									onClick={() => onResumePreviewCompareModeChange('tailored')}
+									className={`px-2.5 text-xs font-semibold transition-colors ${
+										resumePreviewCompareMode === 'tailored'
+											? 'bg-brand-pink/15 text-brand-pink'
+											: 'text-gray-600 hover:bg-gray-50'
+									}`}
+									title="Show tailored draft (current editor content)"
+								>
+									Tailored
+								</button>
+							</div>
+						) : null}
+						<SavedResumesPopover
+							savedResumes={savedResumes}
+							savedResumesOpen={savedResumesOpen}
+							onToggleSavedResumes={onToggleSavedResumes}
+							onCloseSavedResumes={onCloseSavedResumes}
+							saveResumeName={saveResumeName}
+							onSaveResumeNameChange={onSaveResumeNameChange}
+							isSavingResumeForLater={isSavingResumeForLater}
+							onSaveForLater={onSaveForLater}
+							onLoadSaved={onLoadSaved}
+							onDeleteSaved={onDeleteSaved}
+						/>
+					</div>
 				</div>
 			</div>
 
@@ -333,12 +378,12 @@ function RightPanel({
 									<div className="min-w-0">
 										<p className="text-sm font-semibold text-gray-900">
 											{exactPdfRefreshing
-												? 'Updating exact preview'
-												: 'Updating draft preview'}
+												? 'Updating print layout'
+												: 'Updating quick preview'}
 										</p>
 										<p className="mt-0.5 text-xs text-gray-500">
 											{exactPdfRefreshing
-												? 'Aligned with PDF export in a moment…'
+												? 'Aligning with PDF export…'
 												: 'Applying your latest edits…'}
 										</p>
 									</div>

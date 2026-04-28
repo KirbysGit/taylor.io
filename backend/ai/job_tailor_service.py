@@ -18,10 +18,18 @@ from .extraction import extract_keywords
 from .processing import build_tailor_context
 from .planning import build_tailor_plan
 from .narrative import request_narrative_brief
-from .prompt import build_prompt, tailor_ab_experiment_enabled
-from .openai import ai_chat_completion
-from .post_processing import parse_chat_json
-from .post_processing.resume_diff import assemble_tailor_result
+from fastapi import HTTPException
+
+from .prompt import (
+    build_pass_b_system,
+    build_pass_b_user,
+    build_prompt,
+    skillsFitSignals,
+    tailor_ab_experiment_enabled,
+)
+from .openai import ai_chat_completion, completion_usage_to_dict, get_openai_model, usage_tokens_compact
+from .post_processing import parse_chat_json, parse_pass_b_completion
+from .post_processing.resume_diff import apply_sparse_resume_edits, assemble_tailor_result
 
 # schemas.
 from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse
@@ -30,13 +38,116 @@ debug = True
 
 logger = logging.getLogger(__name__)
 
-# A/B harness (no separate script). JSONL is opt-in: without TAILOR_AB_LOG, no tailor_ab_runs file is created.
-#   TAILOR_AB_LOG=1 — required in backend/.env (or the environment) to append each run to
-#       backend/ai/debug_out/tailor_ab_runs.jsonl. Does not run from TAILOR_AB_EXPERIMENT alone.
+# A/B / compare log (qualitative, opt-in): without TAILOR_AB_LOG, no tailor_ab_runs file is created.
+#   TAILOR_AB_LOG=1 — append one line to backend/ai/debug_out/tailor_ab_runs.jsonl with identity,
+#       change_reasons, warnings, patch_preview (before/after text from patchDiff), merge_fell_back.
 #   TAILOR_AB_EXPERIMENT=1 — use prompt text from prompt_builder.TAILOR_AB_EXPERIMENT_APPEND
-#   Rows pair by the same target_role+job_description via job_fingerprint in each line.
-#   TAILOR_SAVE_SAMPLES=1 — append one JSON line to backend/ai/samples/job_samples.jsonl
-#       (target_role, company, job_description) plus a line id and role_fingerprint. Opt-in: no file without it.
+#   TAILOR_SAVE_SAMPLES=1 — append to backend/ai/samples/job_samples.jsonl (opt-in); skips if role_fingerprint already present.
+#   Pair rows by job_fingerprint (target_role + job_description hash).
+#   Each line includes `patch_preview`: before/after strings from `patchDiff` (truncated) to compare real edits.
+#   TAILOR_TOKEN_LOG — default on: append one JSON object per tailor run to backend/ai/debug_out/token_cost.jsonl
+#       (narrative + pass A + pass B token counts, char sizes, job_fingerprint, model). Set TAILOR_TOKEN_LOG=0 to disable.
+
+
+def usageToJson(usage):
+    # OpenAI CompletionUsage (and friends) are not json.dumps-friendly; we store a plain dict in debug.
+    d = completion_usage_to_dict(usage)
+    if d is not None:
+        return d
+    if usage is None:
+        return None
+    return str(usage)
+
+
+def _preview_trunc(s, max_chars):
+    if s is None:
+        return ""
+    t = str(s).strip()
+    if len(t) <= max_chars:
+        return t
+    return t[: max_chars - 1] + "…"
+
+
+def _patch_text_preview_for_log(patch, max_field_chars=480):
+    """
+    Pull string before/after from existing patchDiff; no second diff. Full lists in skills are not inlined.
+    """
+    if not isinstance(patch, dict) or not patch:
+        return None
+    out = {}
+    sm = patch.get("summary")
+    if isinstance(sm, dict) and "before" in sm and "after" in sm:
+        out["summary"] = {
+            "before": _preview_trunc(sm.get("before"), max_field_chars),
+            "after": _preview_trunc(sm.get("after"), max_field_chars),
+        }
+    for sec in ("experience", "projects", "education"):
+        rows = patch.get(sec)
+        if not isinstance(rows, list):
+            continue
+        block = []
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            rid = row.get("id")
+            fc = row.get("fieldsChanged")
+            if not isinstance(fc, dict):
+                continue
+            one = {"id": rid}
+            for fk, delta in fc.items():
+                if not isinstance(delta, dict) or "before" not in delta or "after" not in delta:
+                    continue
+                b, a = delta.get("before"), delta.get("after")
+                if isinstance(b, (dict, list)) and isinstance(a, (dict, list)):
+                    continue
+                if isinstance(b, (dict, list)) or isinstance(a, (dict, list)):
+                    one[fk] = {"before": None, "after": None, "note": "non-string field; see job_tailor_latest_model.json"}
+                    continue
+                one[fk] = {
+                    "before": _preview_trunc(b, max_field_chars),
+                    "after": _preview_trunc(a, max_field_chars),
+                }
+            if len(one) > 1:
+                block.append(one)
+        if block:
+            out[sec] = block
+    sk = patch.get("skills")
+    if isinstance(sk, list) and sk:
+        if any(isinstance(x, dict) and x.get("id") == "_orderOrFullReplace" for x in sk):
+            out["skills"] = [
+                {
+                    "id": "_orderOrFullReplace",
+                    "note": "skills reordered or full replace; see job_tailor_latest_model.json for full list",
+                }
+            ]
+        else:
+            sk_block = []
+            for row in sk:
+                if not isinstance(row, dict):
+                    continue
+                rid = row.get("id")
+                fc = row.get("fieldsChanged")
+                if not isinstance(fc, dict):
+                    continue
+                one = {"id": rid}
+                for fk, delta in fc.items():
+                    if not isinstance(delta, dict) or "before" not in delta or "after" not in delta:
+                        continue
+                    b, a = delta.get("before"), delta.get("after")
+                    if isinstance(b, (dict, list)) or isinstance(a, (dict, list)):
+                        one[fk] = {
+                            "note": "complex skill row delta; see job_tailor_latest_model.json",
+                        }
+                        continue
+                    one[fk] = {
+                        "before": _preview_trunc(b, max_field_chars),
+                        "after": _preview_trunc(a, max_field_chars),
+                    }
+                if len(one) > 1:
+                    sk_block.append(one)
+            if sk_block and "skills" not in out:
+                out["skills"] = sk_block
+    return out if out else None
 
 
 def _env_truthy(name):
@@ -44,25 +155,106 @@ def _env_truthy(name):
     return v in ("1", "true", "yes", "on")
 
 
-def _usage_to_dict(usage):
-    if usage is None:
-        return None
-    if isinstance(usage, dict):
-        return usage
-    d = getattr(usage, "model_dump", None)
-    if callable(d):
-        try:
-            return d()
-        except (TypeError, ValueError):
-            pass
-    out = {}
-    for k in ("prompt_tokens", "completion_tokens", "total_tokens"):
-        if hasattr(usage, k):
-            try:
-                out[k] = int(getattr(usage, k))
-            except (TypeError, ValueError):
-                out[k] = getattr(usage, k)
-    return out if out else str(usage)
+def _token_log_enabled():
+    # --- Default: log each tailor run to debug_out/token_cost.jsonl. Set TAILOR_TOKEN_LOG=0 to disable. --- #
+    v = (os.getenv("TAILOR_TOKEN_LOG") or "").strip().lower()
+    if v in ("0", "false", "no", "off"):
+        return False
+    return True
+
+
+def _sum_usage_compacts(*parts) -> dict:
+    inp = out = tot = 0
+    for p in parts:
+        if not p or not isinstance(p, dict):
+            continue
+        inp += int(p.get("input") or 0)
+        out += int(p.get("output") or 0)
+        tot += int(p.get("total") or 0)
+    return {"input": inp, "output": out, "total": tot}
+
+
+def _append_token_cost_jsonl(
+    *,
+    payload: dict,
+    model: str,
+    usage_narr,
+    usage_a,
+    usage_b,
+    pass_b_ran: bool,
+    text_a: str,
+    system_a: str,
+    user_a: str,
+    text_b: str,
+    system_b: str,
+    user_b: str,
+    narr_char_meta: dict,
+):
+    if not _token_log_enabled():
+        return
+    tr = (payload.get("target_role") or "") if isinstance(payload, dict) else ""
+    jd = (payload.get("job_description") or "") if isinstance(payload, dict) else ""
+    fp = hashlib.sha256(f"{tr}\n{jd}".encode("utf-8")).hexdigest()[:12]
+    nt = usage_tokens_compact(usage_narr) or {"input": 0, "output": 0, "total": 0}
+    at = usage_tokens_compact(usage_a) or {"input": 0, "output": 0, "total": 0}
+    bt = usage_tokens_compact(usage_b) if pass_b_ran and usage_b else None
+    if pass_b_ran:
+        total = _sum_usage_compacts(nt, at, bt or {"input": 0, "output": 0, "total": 0})
+    else:
+        total = _sum_usage_compacts(nt, at)
+
+    def _merge_tokens_and_chars(triple, ch):
+        d = {**triple}
+        if ch and isinstance(ch, dict):
+            for k, v in ch.items():
+                if v is not None:
+                    d[k] = v
+            if ch.get("system_chars") is not None and ch.get("user_chars") is not None:
+                d["prompt_chars"] = int(ch.get("system_chars") or 0) + int(ch.get("user_chars") or 0)
+        return d
+
+    n_ch = {k: v for k, v in (narr_char_meta or {}).items() if v is not None} if narr_char_meta else {}
+    if n_ch.get("system_chars") is not None and n_ch.get("user_chars") is not None:
+        n_ch["prompt_chars"] = int(n_ch.get("system_chars") or 0) + int(n_ch.get("user_chars") or 0)
+    a_ch = {
+        "system_chars": len(system_a) if isinstance(system_a, str) else 0,
+        "user_chars": len(user_a) if isinstance(user_a, str) else 0,
+        "completion_chars": len(text_a) if isinstance(text_a, str) else 0,
+    }
+    a_ch["prompt_chars"] = a_ch["system_chars"] + a_ch["user_chars"]
+    b_block = None
+    if pass_b_ran:
+        b_tok = bt if bt is not None else {"input": 0, "output": 0, "total": 0}
+        b_ch = {
+            "system_chars": len(system_b) if isinstance(system_b, str) else 0,
+            "user_chars": len(user_b) if isinstance(user_b, str) else 0,
+            "completion_chars": len(text_b) if isinstance(text_b, str) else 0,
+        }
+        b_ch["prompt_chars"] = b_ch["system_chars"] + b_ch["user_chars"]
+        b_block = _merge_tokens_and_chars(b_tok, b_ch)
+
+    row = {
+        "ts_utc": datetime.now(timezone.utc).isoformat(),
+        "job_fingerprint": fp,
+        "model": (model or "").strip() or None,
+        "total": total,
+        "narrative": _merge_tokens_and_chars(nt, n_ch),
+        "passA": _merge_tokens_and_chars(at, a_ch),
+        "passB": b_block,
+        "passB_skipped": None if pass_b_ran else "no_skill_rows",
+    }
+    base = Path(__file__).resolve().parent / "debug_out"
+    base.mkdir(parents=True, exist_ok=True)
+    path = base / "token_cost.jsonl"
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    logger.info(
+        "token_cost: job_fingerprint=%s total_tokens=%s (in=%s out=%s)",
+        fp,
+        total.get("total"),
+        total.get("input"),
+        total.get("output"),
+    )
 
 
 def _job_sample_fingerprint(target_role, company, job_description):
@@ -83,6 +275,23 @@ def _next_jsonl_line_id(path):
     return n + 1
 
 
+def _job_sample_fingerprint_exists(path, fp):
+    if not path.is_file():
+        return False
+    with path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                o = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if o.get("role_fingerprint") == fp:
+                return True
+    return False
+
+
 def _append_job_sample(payload) -> None:
     if not _env_truthy("TAILOR_SAVE_SAMPLES"):
         return
@@ -99,6 +308,8 @@ def _append_job_sample(payload) -> None:
     base.mkdir(parents=True, exist_ok=True)
     path = base / "job_samples.jsonl"
     fp = _job_sample_fingerprint(tr, co, jd)
+    if _job_sample_fingerprint_exists(path, fp):
+        return
     line_id = _next_jsonl_line_id(path)
     row = {
         "id": line_id,
@@ -119,7 +330,7 @@ def _append_job_sample(payload) -> None:
     )
 
 
-def _append_tailor_ab_log(*, payload, diff_audit, final_out, usage):
+def _append_tailor_ab_log(*, payload, diff_audit, final_out):
     if not _env_truthy("TAILOR_AB_LOG"):
         return
     if diff_audit is None:
@@ -131,50 +342,67 @@ def _append_tailor_ab_log(*, payload, diff_audit, final_out, usage):
     jd = (payload.get("job_description") or "") if isinstance(payload, dict) else ""
     co = (payload.get("company") or "") if isinstance(payload, dict) else ""
     fp = hashlib.sha256(f"{tr}\n{jd}".encode("utf-8")).hexdigest()[:12]
-    wq = (diff_audit or {}).get("quality") or (diff_audit or {}).get("rewrite_quality") or {}
-    wint = wq.get("rewrite_intensity") or {}
-    wflags = wq.get("flags") or {}
     warn = final_out.get("warnings") or [] if isinstance(final_out, dict) else []
     cr = final_out.get("changeReasons") or [] if isinstance(final_out, dict) else []
-    patch_keys = list((final_out.get("patchDiff") or {}).keys()) if isinstance(final_out, dict) else []
     merge = (diff_audit or {}).get("merge") or {}
+    pdiff = (final_out.get("patchDiff") or {}) if isinstance(final_out, dict) else {}
     row = {
         "ts_utc": datetime.now(timezone.utc).isoformat(),
         "ab_experiment": tailor_ab_experiment_enabled(),
-        "openai_model": (os.getenv("OPENAI_MODEL") or "gpt-4o-mini").strip(),
         "job_fingerprint": fp,
         "target_role": tr[:240] if tr else "",
         "company": (co[:120] if isinstance(co, str) else ""),
-        "skill_rows_touched": wint.get("skill_rows_touched"),
-        "skills_section_changed": wint.get("skills_section_changed"),
-        "experience_rows_touched": wint.get("experience_rows_touched"),
-        "project_rows_touched": wint.get("project_rows_touched"),
-        "rows_removed_total": wint.get("rows_removed_total"),
-        "low_intensity_hint": wint.get("low_intensity_hint"),
-        "skills_expected_but_unchanged": wflags.get("skills_expected_but_unchanged"),
-        "warning_count": len(warn) if isinstance(warn, list) else 0,
-        "warnings": warn[:5] if isinstance(warn, list) else [],
-        "change_reasons_count": len(cr) if isinstance(cr, list) else 0,
-        "patch_sections": patch_keys,
+        "change_reasons": cr if isinstance(cr, list) else [],
+        "warnings": warn if isinstance(warn, list) else [],
+        "patch_preview": _patch_text_preview_for_log(pdiff),
         "merge_fell_back": merge.get("fell_back"),
-        "flags_on": {k: v for k, v in wflags.items() if v},
-        "llm_tokens_rewrite": _usage_to_dict(usage),
     }
     with path.open("a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
-    logger.info(
-        "tailor_ab_runs: experiment=%s fp=%s model=%s exp=%s proj=%s sk=%s sk_exp_unch=%s low_int=%s warn=%s tok=%s",
-        row["ab_experiment"],
-        fp,
-        row["openai_model"],
-        row["experience_rows_touched"],
-        row["project_rows_touched"],
-        row["skill_rows_touched"],
-        row["skills_expected_but_unchanged"],
-        row["low_intensity_hint"],
-        row["warning_count"],
-        (row.get("llm_tokens_rewrite") or {}).get("total_tokens"),
-    )
+    logger.info("tailor_ab_runs: experiment=%s fp=%s", row["ab_experiment"], fp)
+
+
+def editsDropSkills(stage):
+    e = (stage or {}).get("edits")
+    if not isinstance(e, dict):
+        return stage
+    e2 = {k: v for k, v in e.items() if k != "skills"}
+    s = dict(stage) if isinstance(stage, dict) else {}
+    s["edits"] = e2
+    return s
+
+
+def countSkillRows(resume):
+    rows = (resume or {}).get("skills") if isinstance(resume, dict) else None
+    if not isinstance(rows, list):
+        return 0
+    n = 0
+    for x in rows:
+        if isinstance(x, dict) and (x.get("id") is not None or (str(x.get("name") or "")).strip()):
+            n += 1
+    return n
+
+
+def passBOnlySkills(stage):
+    if not stage or not isinstance((stage or {}).get("edits"), dict):
+        return None
+    e = (stage or {}).get("edits")
+    if "skills" not in e:
+        return None
+    return {"edits": {"skills": e["skills"]}}
+
+
+def mergePassEdits(out_a, out_b):
+    ea = (out_a or {}).get("edits")
+    if not isinstance(ea, dict):
+        ea = {}
+    ea = {k: v for k, v in ea.items() if k != "skills"}
+    if not out_b or not isinstance((out_b or {}).get("edits"), dict):
+        return {"edits": ea} if ea else (out_a or {"edits": {}})
+    sk = (out_b.get("edits") or {}).get("skills")
+    if sk is not None:
+        ea = {**ea, "skills": sk}
+    return {"edits": ea}
 
 
 def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
@@ -202,23 +430,53 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     # get what we want to focus on per section and row.
     sectionDetails = build_tailor_plan(resumeData=resumeData, tailorContext=tailorContext)
 
-    # narrative spine: plan-ranked row hints (rowsPerSectionRanked) are passed in sectionDetails so hero picks are grounded in JD hit scores, not a vacuum.
-    narrative_brief = request_narrative_brief(payload=payload, tailorContext=tailorContext, sectionDetails=sectionDetails)
+    # narrative spine: one brief for both passes; not recomputed after pass 1.
+    narrative_brief, usage_narr, narrative_char_meta = request_narrative_brief(
+        payload=payload, tailorContext=tailorContext, sectionDetails=sectionDetails
+    )
 
-    # build the prompts.
-    system_prompt, user_prompt = build_prompt(
+    # pass 1: summary + hero experience + hero projects (no skills in edits).
+    system_a, user_a = build_prompt(
         payload=payload,
         tailorContext=tailorContext,
         sectionDetails=sectionDetails,
         relevantJDLines=relevantJDLines,
         narrativeBrief=narrative_brief,
     )
-
-    # request chat completion.
-    text, usage = ai_chat_completion(system_prompt=system_prompt, user_prompt=user_prompt)
-    
-  
-    out = parse_chat_json(text)
+    text_a, usage_a = ai_chat_completion(system_prompt=system_a, user_prompt=user_a)
+    out1 = parse_chat_json(text_a)
+    if "edits" not in out1 or not isinstance(out1.get("edits"), dict):
+        raise HTTPException(status_code=502, detail="Tailor pass 1 did not return valid JSON with an `edits` object.")
+    out1 = editsDropSkills(out1)
+    resume_mid = apply_sparse_resume_edits(resumeData, out1)
+    out2_parsed = None
+    usage_b = None
+    text_b = None
+    system_b = None
+    user_b = None
+    if countSkillRows(resume_mid) > 0:
+        fit = skillsFitSignals(
+            resume_mid,
+            tailorContext,
+            (payload.get("job_description") or "") if isinstance(payload, dict) else "",
+        )
+        p2 = {**payload, "resume_data": resume_mid}
+        system_b = build_pass_b_system()
+        user_b = build_pass_b_user(
+            p2,
+            tailorContext,
+            relevantJDLines,
+            narrative_brief,
+            fit,
+        )
+        # Long `edits.skills` JSON needs headroom; default completion cap can truncate and yield unparseable output -> {}.
+        text_b, usage_b = ai_chat_completion(
+            system_prompt=system_b, user_prompt=user_b, max_tokens=8192
+        )
+        out2_parsed = parse_pass_b_completion(text_b)
+    out2 = passBOnlySkills(out2_parsed) if out2_parsed is not None else None
+    out = mergePassEdits(out1, out2)
+    usage = usage_b if usage_b is not None else usage_a
     target_role_str = str((payload or {}).get("target_role") or "") if isinstance(payload, dict) else ""
 
     want_audit = debug or _env_truthy("TAILOR_AB_LOG")
@@ -250,16 +508,38 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         def write_debug(name, obj):
             (base / name).write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
-        write_debug("job_tailor_latest_system.json", {"prompt": system_prompt})
-        write_debug("job_tailor_latest_user.json", {"prompt": user_prompt})
+        write_debug("job_tailor_pass_a_system.json", {"prompt": system_a})
+        write_debug("job_tailor_pass_a_user.json", {"prompt": user_a})
+        if system_b is not None:
+            write_debug("job_tailor_pass_b_system.json", {"prompt": system_b})
+        if user_b is not None:
+            write_debug("job_tailor_pass_b_user.json", {"prompt": user_b})
+        if system_b is not None:
+            write_debug(
+                "job_tailor_pass_b_completion.json",
+                {
+                    "assistantText": text_b if isinstance(text_b, str) else "",
+                    "parseNote": ""
+                    if (isinstance(text_b, str) and text_b.strip())
+                    else "empty_completion",
+                },
+            )
+        write_debug("job_tailor_latest_system.json", {"pass1": system_a, "pass2": system_b})
+        write_debug("job_tailor_latest_user.json", {"pass1": user_a, "pass2": user_b})
         write_debug("job_tailor_narrative.json", narrative_brief)
-        write_debug("job_tailor_stage_a.json", out)
+        write_debug("job_tailor_stage_a.json", out1)
+        if out2_parsed is not None:
+            write_debug("job_tailor_stage_b.json", out2_parsed)
+        write_debug("job_tailor_combined_edits.json", out)
         write_debug("job_tailor_latest_model.json", final_out)
         if diff_audit is not None:
-            if usage is not None and isinstance(usage, dict):
-                diff_audit = {**diff_audit, "llm_usage_rewrite_pass": usage}
-            elif usage is not None:
-                diff_audit = {**diff_audit, "llm_usage_rewrite_pass": str(usage)}
+            diff_audit = {
+                **diff_audit,
+                "llm_usage_pass1": usageToJson(usage_a),
+                "llm_usage_pass2": usageToJson(usage_b),
+            }
+            if usage is not None:
+                diff_audit = {**diff_audit, "llm_usage_rewrite_pass": usageToJson(usage)}
             write_debug("job_tailor_diff_audit.json", diff_audit)
         text_meta = (diff_audit or {}).get("text") or {}
         rw_chars = text_meta.get("rewrite_note_chars")
@@ -299,7 +579,24 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
             seg.get("narrative_had_project_heroes"),
         )
 
-    _append_tailor_ab_log(payload=payload, diff_audit=diff_audit, final_out=final_out, usage=usage)
+    _append_tailor_ab_log(payload=payload, diff_audit=diff_audit, final_out=final_out)
+
+    pass_b_ran = countSkillRows(resume_mid) > 0
+    _append_token_cost_jsonl(
+        payload=payload if isinstance(payload, dict) else {},
+        model=get_openai_model(),
+        usage_narr=usage_narr,
+        usage_a=usage_a,
+        usage_b=usage_b,
+        pass_b_ran=pass_b_ran,
+        text_a=text_a if isinstance(text_a, str) else "",
+        system_a=system_a if isinstance(system_a, str) else "",
+        user_a=user_a if isinstance(user_a, str) else "",
+        text_b=text_b if isinstance(text_b, str) else "",
+        system_b=system_b if isinstance(system_b, str) else "",
+        user_b=user_b if isinstance(user_b, str) else "",
+        narr_char_meta=narrative_char_meta if isinstance(narrative_char_meta, dict) else {},
+    )
 
     ch = (final_out.get("summary") or "").strip()
     return JobTailorSuggestResponse(

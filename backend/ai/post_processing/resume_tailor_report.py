@@ -370,6 +370,22 @@ def countRowsWithFieldChanges(patch, section):
     return n
 
 
+def countSkillPatchActivity(patch):
+    # --- Reorder, removals, and adds all count; full-list replace is one “activity” for intensity. --- #
+    rows = (patch or {}).get("skills") or []
+    if not isinstance(rows, list):
+        return 0
+    n = 0
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        if row.get("id") == "_orderOrFullReplace":
+            return max(n, 1)
+        if row.get("removed") or row.get("added") or row.get("fieldsChanged"):
+            n += 1
+    return n
+
+
 def narrative_skills_strategy_nonempty(narrative_brief):
     # --- Non-empty skillsStrategy means the narrative already asked for rises/sinks — Stage A should reflect it. --- #
     ss = (narrative_brief or {}).get("skillsStrategy") if isinstance(narrative_brief, dict) else None
@@ -504,13 +520,10 @@ def build_rewrite_quality_audit(original, updated, patch, narrative_brief, stage
     gen_found = findGenericPhrasesInText(after_summary)
     n_exp_ch = countRowsWithFieldChanges(p, "experience")
     n_pr_ch = countRowsWithFieldChanges(p, "projects")
-    n_sk_ch = countRowsWithFieldChanges(p, "skills")
-    if p.get("skills") and any(
-        isinstance(x, dict) and x.get("id") == "_orderOrFullReplace" for x in (p.get("skills") or [])
-    ):
-        n_sk_ch = max(n_sk_ch, 1)
+    n_sk_ch = countSkillPatchActivity(p)
     n_removed = len(re_sk) + len(re_pr) + len(re_ex)
     skills_expected = skills_change_expected_from_context(nb, o)
+    # --- Field-only diffs undercounted reorder/drop/trim before; any skills patch means work landed. --- #
     skills_changed = n_sk_ch > 0
     skills_expected_but_unchanged = bool(skills_expected and not skills_changed)
     return {

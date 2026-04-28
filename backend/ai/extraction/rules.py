@@ -482,6 +482,7 @@ wrapperSuppressLineSubstrings = {
     "submit an application",
     "submit your application",
     "how to apply for this",
+    "job search faster with premium",
 }
 
 # when merging overlapping terms: if generic token overlaps a longer phrase, prefer these exact phrases.

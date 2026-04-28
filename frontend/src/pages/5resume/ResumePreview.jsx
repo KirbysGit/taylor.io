@@ -1,7 +1,7 @@
 // pages/5resume/ResumePreview.jsx — main resume editor + preview; helpers in utils/resumePreviewHelpers.js
 
 import toast from 'react-hot-toast'
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 // --- api imports.
@@ -55,6 +55,13 @@ function ResumePreview() {
 	// --- right panel state.
 	const [downloadStatus, setDownloadStatus] = useState(null)
 
+	// when a tailor run has finished, optionally preview the pre-tailor resume in the right panel only.
+	const [resumePreviewCompareMode, setResumePreviewCompareMode] = useState('tailored')
+
+	// tailor-only: "compare" = HTML original/tailored only; "final" = user asked for print-accurate (exact) PDF in the main preview.
+	const [tailorLayoutPreview, setTailorLayoutPreview] = useState(null)
+	const tailorSnapshotRef = useRef(null)
+
 	const [isSaving, setIsSaving] = useState(false)
 
 	// section order & labels state (order from profile/saved resume/tailor via bootstrap + handlers; default when absent).
@@ -99,8 +106,8 @@ function ResumePreview() {
 		setTemplate,
 	})
 
-	// this is the payload that is sent to the preview (apply visibility filters & section labels).
-	const visibleResumePayload = useMemo(
+	// payload for downloads, save, and the live editor (always the current resume in state).
+	const editorVisibleResumePayload = useMemo(
 		() => ({
 			...applyVisibilityFilters(resumeData),
 			sectionLabels,
@@ -108,15 +115,8 @@ function ResumePreview() {
 		[resumeData, sectionLabels]
 	)
 
-	// this is the key that is used to store the preview in the cache.
-	const previewInputKey = useMemo(
-		() => JSON.stringify({ template, previewData: visibleResumePayload, stylePreferences }),
-		[template, visibleResumePayload, stylePreferences]
-	)
-
-
 	// call the resume tailoring request & get new data if tailor intent is present.
-	const { aiTailorResult, aiTailorPhase } = useTailorJob({
+	const { aiTailorResult, aiTailorPhase, preTailorSnapshot } = useTailorJob({
 		tailorIntent,
 		hasSetBaseline,
 		resumeData,
@@ -125,6 +125,66 @@ function ResumePreview() {
 		setResumeData,
 		setSectionOrder,
 	})
+
+	// drop back to the tailored preview when there is no snapshot (new run or left tailor flow).
+	useEffect(() => {
+		if (!preTailorSnapshot) {
+			setResumePreviewCompareMode('tailored')
+		}
+	}, [preTailorSnapshot])
+
+	// reset tailor layout step when leaving tailor; new snapshot in reviewing → start in HTML-compare (no exact PDF until the user opts in).
+	useEffect(() => {
+		if (!tailorIntent) {
+			setTailorLayoutPreview(null)
+			tailorSnapshotRef.current = null
+			return
+		}
+		if (!preTailorSnapshot) {
+			setTailorLayoutPreview(null)
+			tailorSnapshotRef.current = null
+			return
+		}
+		if (aiTailorPhase !== 'reviewing') {
+			return
+		}
+		if (tailorSnapshotRef.current === preTailorSnapshot) {
+			return
+		}
+		tailorSnapshotRef.current = preTailorSnapshot
+		setTailorLayoutPreview('compare')
+	}, [tailorIntent, preTailorSnapshot, aiTailorPhase])
+
+	// only generate/show exact PDF in the main canvas after the user asks; non-tailor pages behave as before.
+	const allowExactPdfForTailor = !tailorIntent || tailorLayoutPreview === 'final'
+
+	// what the right panel renders: live tailored state or the stored pre-merge snapshot.
+	const isPreviewingOriginal = Boolean(preTailorSnapshot && resumePreviewCompareMode === 'original')
+	const previewVisibleResumePayload = useMemo(
+		() =>
+			isPreviewingOriginal && preTailorSnapshot
+				? {
+						...applyVisibilityFilters(preTailorSnapshot.resumeData),
+						sectionLabels: preTailorSnapshot.sectionLabels,
+					}
+				: editorVisibleResumePayload,
+		[editorVisibleResumePayload, isPreviewingOriginal, preTailorSnapshot]
+	)
+	const previewResumeDataForValidation = isPreviewingOriginal && preTailorSnapshot
+		? preTailorSnapshot.resumeData
+		: resumeData
+
+	// this is the key that is used to store the preview in the cache.
+	const previewInputKey = useMemo(
+		() =>
+			JSON.stringify({
+				template,
+				previewData: previewVisibleResumePayload,
+				stylePreferences,
+				compare: resumePreviewCompareMode,
+			}),
+		[template, previewVisibleResumePayload, stylePreferences, resumePreviewCompareMode]
+	)
 
 	// this is the debounced previews hook.
 	const {
@@ -135,13 +195,14 @@ function ResumePreview() {
 		validationIssues,
 		refreshDraftNow,
 	} = useDebouncedPreviews({
-		resumeData,
-		visibleResumePayload,
+		resumeData: previewResumeDataForValidation,
+		visibleResumePayload: previewVisibleResumePayload,
 		previewInputKey,
 		template,
 		stylePreferences,
 		tailorIntent,
 		aiTailorPhase,
+		allowExactPdfPreview: allowExactPdfForTailor,
 	})
 
 	// this is the saved resumes sidecar hook.
@@ -193,8 +254,8 @@ function ResumePreview() {
 		try {
 			// generate the document.
 			const blob = isWord
-				? await generateResumeWord(template, visibleResumePayload, stylePreferences)
-				: await generateResumePDF(template, visibleResumePayload, stylePreferences)
+				? await generateResumeWord(template, editorVisibleResumePayload, stylePreferences)
+				: await generateResumePDF(template, editorVisibleResumePayload, stylePreferences)
 
 			// download the document.
 			downloadBlob(blob, isWord ? 'resume.docx' : 'resume.pdf')
@@ -457,6 +518,8 @@ function ResumePreview() {
 					tailorIntent={tailorIntent}
 					aiTailorResult={aiTailorResult}
 					aiTailorPhase={aiTailorPhase}
+					tailorLayoutPreview={tailorLayoutPreview}
+					onShowTailorFinalLayout={() => setTailorLayoutPreview('final')}
 				/>
 
 				{/* resizable divider */}
@@ -491,6 +554,13 @@ function ResumePreview() {
 					onSaveForLater={handleSaveForLater}
 					onLoadSaved={loadSavedResumeIntoState}
 					onDeleteSaved={handleDeleteSaved}
+					canCompareTailoredResume={Boolean(preTailorSnapshot) && aiTailorPhase === 'reviewing'}
+					resumePreviewCompareMode={resumePreviewCompareMode}
+					onResumePreviewCompareModeChange={setResumePreviewCompareMode}
+					showExactPdfInCanvas={allowExactPdfForTailor}
+					isTailorHtmlCompare={Boolean(
+						tailorIntent && tailorLayoutPreview === 'compare' && preTailorSnapshot
+					)}
 				/>
 			</main>
 		</div>

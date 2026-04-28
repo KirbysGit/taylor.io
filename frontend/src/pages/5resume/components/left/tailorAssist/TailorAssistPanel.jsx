@@ -1,6 +1,12 @@
 // Tailor flow: shows intent + status. Full resume merge happens in ResumePreview (no per-change patch UI yet).
 
-function TailorAssistPanel({ tailorIntent, aiTailorResult, aiTailorPhase }) {
+function TailorAssistPanel({
+	tailorIntent,
+	aiTailorResult,
+	aiTailorPhase,
+	tailorLayoutPreview,
+	onShowTailorFinalLayout = () => {},
+}) {
 	if (!tailorIntent) return null
 
 	const phaseLabelMap = {
@@ -12,6 +18,12 @@ function TailorAssistPanel({ tailorIntent, aiTailorResult, aiTailorPhase }) {
 	const phaseLabel = phaseLabelMap[aiTailorPhase] || 'Ready'
 	const tailorChangelog = aiTailorResult?.summary
 	const warnings = Array.isArray(aiTailorResult?.warnings) ? aiTailorResult.warnings : []
+	const changeReasons = Array.isArray(aiTailorResult?.changeReasons) ? aiTailorResult.changeReasons : []
+	const changeReasonLines = changeReasons
+		.map((row) =>
+			typeof row === 'string' ? row : row && typeof row.reason === 'string' ? row.reason : ''
+		)
+		.filter((t) => String(t).trim().length > 0)
 
 	return (
 		<section className="landing-hero-mesh relative mb-5 overflow-hidden rounded-xl border border-brand-pink/25 p-4 text-white shadow-[0_14px_36px_-16px_rgba(214,86,86,0.45)]">
@@ -52,6 +64,16 @@ function TailorAssistPanel({ tailorIntent, aiTailorResult, aiTailorPhase }) {
 							Tailored resume content was applied to the editor. A short summary was not included in this response.
 						</p>
 					)}
+					{changeReasonLines.length > 0 ? (
+						<div className="mt-2 border-t border-gray-200/80 pt-2">
+							<p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">What changed</p>
+							<ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs leading-relaxed text-gray-700">
+								{changeReasonLines.map((line, i) => (
+									<li key={i}>{line}</li>
+								))}
+							</ul>
+						</div>
+					) : null}
 					{warnings.length > 0 ? (
 						<div className="mt-2 rounded border border-amber-200 bg-amber-50 p-2">
 							<p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-amber-800">Notes</p>
@@ -60,6 +82,20 @@ function TailorAssistPanel({ tailorIntent, aiTailorResult, aiTailorPhase }) {
 									<li key={i}>- {w}</li>
 								))}
 							</ul>
+						</div>
+					) : null}
+					{tailorLayoutPreview === 'compare' ? (
+						<div className="mt-3 border-t border-gray-200/80 pt-3">
+							<p className="text-xs text-gray-700">
+								Like what you see? You can open a print-accurate view that matches your PDF download.
+							</p>
+							<button
+								type="button"
+								onClick={onShowTailorFinalLayout}
+								className="mt-2 w-full rounded-lg border border-brand-pink/50 bg-white px-3 py-2 text-center text-sm font-semibold text-brand-pink shadow-sm transition hover:bg-brand-pink/10"
+							>
+								Show print layout
+							</button>
 						</div>
 					) : null}
 				</div>

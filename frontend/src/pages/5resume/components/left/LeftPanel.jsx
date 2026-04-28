@@ -36,6 +36,8 @@ function LeftPanel({
 	tailorIntent,
 	aiTailorResult,
 	aiTailorPhase,
+	tailorLayoutPreview,
+	onShowTailorFinalLayout,
 }) {
 	const [welcomeMessage, setWelcomeMessage] = useState(() => !localStorage.getItem('hasSeenResumeWelcome'))
 
@@ -49,7 +51,13 @@ function LeftPanel({
 			style={{ width: `${width}px` }} 
 			className="flex-shrink-0 bg-white border-r border-gray-200 pl-8 pt-8 pb-8 pr-4 overflow-y-auto [scrollbar-gutter:stable]"
 		>
-			<TailorAssistPanel tailorIntent={tailorIntent} aiTailorResult={aiTailorResult} aiTailorPhase={aiTailorPhase} />
+			<TailorAssistPanel
+				tailorIntent={tailorIntent}
+				aiTailorResult={aiTailorResult}
+				aiTailorPhase={aiTailorPhase}
+				tailorLayoutPreview={tailorLayoutPreview}
+				onShowTailorFinalLayout={onShowTailorFinalLayout}
+			/>
 
 			{welcomeMessage && (
 				<WelcomeMessage

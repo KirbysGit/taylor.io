@@ -19,6 +19,7 @@ export function useDebouncedPreviews({
 	stylePreferences,
 	tailorIntent,
 	aiTailorPhase,
+	allowExactPdfPreview = true,
 }) {
 	// state for the preview html.
 	const [previewHtml, setPreviewHtml] = useState(null)
@@ -62,6 +63,17 @@ export function useDebouncedPreviews({
 	// --- SLOWER PDF PREVIEW.
 	// if the tailor intent is present and the ai tailor phase is requesting, set the exact pdf refreshing flag.
 	useEffect(() => {
+		// tailor flow: skip PDF generation until the user asks for the print-accurate step (saves work; HTML is enough for compare).
+		if (!allowExactPdfPreview) {
+			setExactPdfBlobUrl((prev) => {
+				if (prev) URL.revokeObjectURL(prev)
+				return null
+			})
+			lastExactInputRef.current = null
+			setExactPdfRefreshing(false)
+			return
+		}
+
 		if (tailorIntent && aiTailorPhase === 'requesting') {
 			setExactPdfRefreshing(true)
 			return
@@ -132,7 +144,17 @@ export function useDebouncedPreviews({
 
 		// upon unmount, clear the timer.
 		return () => clearTimeout(timer)
-	}, [resumeData, previewInputKey, visibleResumePayload, tailorIntent, aiTailorPhase, template, stylePreferences, exactPdfDebounceMs])
+	}, [
+		resumeData,
+		previewInputKey,
+		visibleResumePayload,
+		tailorIntent,
+		aiTailorPhase,
+		template,
+		stylePreferences,
+		exactPdfDebounceMs,
+		allowExactPdfPreview,
+	])
 
 	// --- FAST HTML PREVIEW.
 	// if the resume data is changed, validate the resume data and set fast HTML preview.

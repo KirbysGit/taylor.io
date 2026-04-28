@@ -89,3 +89,19 @@ idea stack :
 - keep pipeline.py under ~400 lines.
 
 - one page resume only templates. 
+
+
+- ai preview - 
+
+    - are you sure you want to navigate away while taylor.io is working ? 
+
+- in our frontend / backend :
+    - allow users to customize , resume 1 page or else ... [2, 3, 4]
+    - choose how specific they want the tailoring to be, like trim all info, or be a bit more general
+    - 
+
+- with strict truth 
+    - if not strict truth, summary and angle can be a bit more like "un-true", like targeting.
+
+- with ai, make company mandatory input
+    - weaken company name input

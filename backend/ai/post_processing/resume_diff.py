@@ -34,6 +34,17 @@ def asDict(v):
     return v if isinstance(v, dict) else {}
 
 
+def skillRowIdsInOrder(resume):
+    rows = (resume or {}).get("skills") if isinstance(resume, dict) else None
+    if not isinstance(rows, list):
+        return []
+    out = []
+    for r in rows:
+        if isinstance(r, dict) and r.get("id") is not None:
+            out.append(r.get("id"))
+    return out
+
+
 def mergeValues(base, patch):
     if isinstance(base, dict) and isinstance(patch, dict):
         out = copy.deepcopy(base)
@@ -67,6 +78,8 @@ def apply_sparse_resume_edits(original_resume, stage_a):
     """
     Deep-copy the original resume and apply only the sparse `edits` object from stage A.
     Omitted fields mean 'leave unchanged'. Removals use explicit id lists.
+    `edits.skills` (when a list) is a **pass-2 full replacement**: the array is the visible section in
+    that order; ids absent from the array are dropped; each row is merged onto the original by id.
     Legacy: if `edits` is absent but `updatedResumeData` is present, return a copy of that full object.
     """
     o = copy.deepcopy(asDict(original_resume))
@@ -123,10 +136,31 @@ def apply_sparse_resume_edits(original_resume, stage_a):
                 out_list.append(row)
         o[section] = out_list
 
+    def applySkillsAsPassOrderedSection():
+        # Pass-2 is the only producer of `edits.skills` here: the array is the **visible** section in
+        # that order. Rows not included are demoted/trimmed; merge row patches only for ids that appear.
+        lst = e.get("skills")
+        if not isinstance(lst, list):
+            return
+        by = listById(o.get("skills"))
+        out = []
+        for row in lst:
+            if not isinstance(row, dict) or row.get("id") is None:
+                continue
+            rid = row.get("id")
+            if rid in by:
+                out.append(applyRowPatch(by[rid], row))
+            else:
+                out.append(copy.deepcopy(row))
+        o["skills"] = out
+
     applyList("experience", applyRowPatch)
     applyList("projects", applyRowPatch)
     applyList("education", applyRowPatch)
-    applyList("skills", applyRowPatch)
+    if isinstance(e.get("skills"), list):
+        applySkillsAsPassOrderedSection()
+    else:
+        applyList("skills", applyRowPatch)
 
     if "hiddenSkills" in e:
         o["hiddenSkills"] = copy.deepcopy(e["hiddenSkills"])
@@ -516,6 +550,10 @@ def assemble_tailor_result(
             "fell_back": bool(fell_back),
             "had_edits_key": has_edits_key,
             "had_updated_resume_in_stage_a": bool((stage_a or {}).get("updatedResumeData")),
+            "skill_row_ids_order": {
+                "before": skillRowIdsInOrder(o),
+                "after": skillRowIdsInOrder(updated),
+            },
         },
         "stage_a": {"top_level_keys": stage_keys},
         "patch": {

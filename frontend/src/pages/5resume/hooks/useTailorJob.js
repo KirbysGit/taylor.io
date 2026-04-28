@@ -25,6 +25,9 @@ export function useTailorJob({
 	// state for the ai tailor phase.
 	const [aiTailorPhase, setAiTailorPhase] = useState('idle')
 
+	// editor snapshot taken right before the tailored patch is applied (for original vs tailored preview).
+	const [preTailorSnapshot, setPreTailorSnapshot] = useState(null)
+
 	// reference to the tailor run generation — only that run may merge results (avoids Strict Mode / effect cleanup applying a stale response).
 	const tailorGenerationRef = useRef(0)
 
@@ -57,6 +60,7 @@ export function useTailorJob({
 		const requestTailor = async () => {
 			try {
 				setAiTailorPhase('requesting')
+				setPreTailorSnapshot(null)
 
 				// try to tailor the resume.
 				const result = await tailorResume({
@@ -82,6 +86,19 @@ export function useTailorJob({
 
 				// set the resume data.
 				const patch = response.updatedResumeData
+
+				// capture pre-merge editor state for original vs tailored preview (structuredClone keeps nested arrays).
+				const snap = {
+					resumeData:
+						typeof structuredClone === 'function'
+							? structuredClone(resumeDataRef.current)
+							: JSON.parse(JSON.stringify(resumeDataRef.current)),
+					sectionLabels:
+						typeof structuredClone === 'function'
+							? structuredClone(sectionLabelsRef.current)
+							: JSON.parse(JSON.stringify(sectionLabelsRef.current)),
+				}
+				setPreTailorSnapshot(snap)
 
 				// if the patch is not null and is an object, merge tailored sections and optional section order.
 				if (patch && typeof patch === 'object') {
@@ -116,5 +133,5 @@ export function useTailorJob({
 	}, [tailorIntent, hasSetBaseline])
 
 	// return the ai tailor result and phase.
-	return { aiTailorResult, aiTailorPhase }
+	return { aiTailorResult, aiTailorPhase, preTailorSnapshot }
 }
