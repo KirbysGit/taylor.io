@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import copy
 import json
+import math
 import os
+import re
 
 # When `TAILOR_AB_EXPERIMENT` is truthy, this block is appended to the Stage A user prompt (A/B vs baseline).
 # Focus: direct JD-shaped retarget of experience + project bullets; keep empty to match baseline tokens.
@@ -61,7 +63,7 @@ def skillsFitSignals(mergedResume, tailorContext, jobDescription):
         "categoriesWithAJdHit": hits,
         "jdPriorityTerms": jdp,
         # Category *labels* (e.g. Languages, Frameworks) often share no words with the JD; row *names* (Python, React) still fit. Prevents over-trimming stack rows when fit reads "low."
-        "note": "This checklist scores category *label* words against the JD, not each skill *name*. `low` or `medium` is common and is **not** a signal to drop Languages/Frameworks/DB rows—reorder them instead.",
+        "note": "Scores category labels vs JD—not resume skill strings. Prefer **`resumeWideSkillEvidence`** + **`peripheralSkillEvidence`** in the user bundle for survival confidence. Low/medium fit is **not** a signal to strip stack rows.",
     }
 
 
@@ -295,6 +297,289 @@ def _skill_name_vocabulary(skills_rows) -> list:
     return out
 
 
+def _experience_evidence_label(row):
+    # --- Compact label where a skill name matched an experience blob. --- #
+    if not isinstance(row, dict):
+        return "experience"
+    company = str(row.get("company") or "").strip()
+    title = str(row.get("title") or "").strip()
+    if company and title:
+        return f"{company[:40]} — {title[:52]}"
+    return (company or title or "experience")[:90]
+
+
+def _experience_text_lower(row):
+    if not isinstance(row, dict):
+        return ""
+    parts = []
+    for k in ("title", "company", "location", "skills", "description"):
+        v = row.get(k)
+        if isinstance(v, str) and v.strip():
+            parts.append(v.strip())
+    return "\n".join(parts).lower()
+
+
+def _project_text_lower(row):
+    if not isinstance(row, dict):
+        return ""
+    parts = []
+    t = row.get("title")
+    if isinstance(t, str) and t.strip():
+        parts.append(t.strip())
+    ts = row.get("tech_stack")
+    if isinstance(ts, list):
+        parts.append(" ".join(str(x).strip() for x in ts if str(x).strip()))
+    elif isinstance(ts, str) and ts.strip():
+        parts.append(ts.strip())
+    d = row.get("description")
+    if isinstance(d, str) and d.strip():
+        parts.append(d.strip())
+    return "\n".join(parts).lower()
+
+
+def build_resume_wide_skill_evidence(resume_data, max_labels_per_skill=4, max_skill_names=70):
+    # --- Map each resume skill line → short anchor labels wherever that string appears across exp/projects/summary. --- #
+    rd = resume_data if isinstance(resume_data, dict) else {}
+    skills_rows = rd.get("skills") if isinstance(rd.get("skills"), list) else []
+    names = []
+    seen_lower = set()
+    for r in skills_rows:
+        if not isinstance(r, dict):
+            continue
+        n = r.get("name")
+        if not isinstance(n, str) or not n.strip():
+            continue
+        k = n.strip().lower()
+        if k in seen_lower:
+            continue
+        seen_lower.add(k)
+        names.append(n.strip())
+        if len(names) >= max_skill_names:
+            break
+
+    blobs = []
+    for exp in rd.get("experience") or []:
+        if isinstance(exp, dict):
+            blobs.append((_experience_text_lower(exp), _experience_evidence_label(exp)))
+    for proj in rd.get("projects") or []:
+        if isinstance(proj, dict):
+            title = str(proj.get("title") or "Project").strip()[:90]
+            blobs.append((_project_text_lower(proj), title))
+    sm = rd.get("summary")
+    if isinstance(sm, dict):
+        st = sm.get("summary")
+        if isinstance(st, str) and st.strip():
+            blobs.append((st.lower(), "summary"))
+
+    out = {}
+    for name in names:
+        needle = name.lower().strip()
+        if len(needle) < 2:
+            continue
+        hits = []
+        hit_labels = set()
+        for blob, label in blobs:
+            if needle not in blob:
+                continue
+            if label not in hit_labels:
+                hit_labels.add(label)
+                hits.append(label[:130])
+            if len(hits) >= max_labels_per_skill:
+                break
+        if hits:
+            out[name] = hits
+    return out
+
+
+def build_peripheral_skill_evidence(resume_data, peripheral_ids):
+    # --- Peripheral projects carry stack + prose snippets so semi-hits are defensible beyond hero rows. --- #
+    rd = resume_data if isinstance(resume_data, dict) else {}
+    proj_rows = rd.get("projects") if isinstance(rd.get("projects"), list) else []
+    by_id = {}
+    for r in proj_rows:
+        if not isinstance(r, dict):
+            continue
+        rid = r.get("id")
+        if isinstance(rid, float) and rid == int(rid):
+            rid = int(rid)
+        if isinstance(rid, int):
+            by_id[rid] = r
+    out = []
+    for pid in peripheral_ids or []:
+        if isinstance(pid, float) and pid == int(pid):
+            pid = int(pid)
+        if not isinstance(pid, int):
+            continue
+        row = by_id.get(pid)
+        if not isinstance(row, dict):
+            continue
+        title = str(row.get("title") or "").strip()[:120]
+        ts = row.get("tech_stack")
+        supported = []
+        if isinstance(ts, list):
+            for x in ts:
+                if isinstance(x, str) and x.strip():
+                    supported.append(x.strip()[:80])
+        elif isinstance(ts, str) and ts.strip():
+            supported = [ts.strip()[:120]]
+        d = row.get("description")
+        evidence_text = ""
+        if isinstance(d, str) and d.strip():
+            evidence_text = " ".join(d.strip().split())[:280]
+        out.append(
+            {
+                "projectId": pid,
+                "title": title or f"project {pid}",
+                "skillsSupported": supported[:16],
+                "evidenceText": evidence_text,
+            }
+        )
+    return out
+
+
+# --- Pass A: max extra project rows we open for thin-placeholder bullet repair (supporting/peripheral). --- #
+THIN_BULLET_PROJECT_MAX_ADD = 2
+PASS_A_MAX_PROJECT_EDIT_IDS = 6
+
+
+def _norm_project_id(row):
+    if not isinstance(row, dict):
+        return None
+    rid = row.get("id")
+    if isinstance(rid, float) and rid == int(rid):
+        return int(rid)
+    return rid if isinstance(rid, int) else None
+
+
+def _split_project_description_bullets(desc):
+    if not isinstance(desc, str) or not desc.strip():
+        return []
+    lines = []
+    for raw in re.split(r"[\n\r]+", desc):
+        ln = raw.strip()
+        if not ln:
+            continue
+        ln = re.sub(r"^[\-\*\u2022\u25cf\u25cb\d]+[\.\)\s]*", "", ln).strip()
+        if ln:
+            lines.append(ln)
+    return lines
+
+
+_thin_placeholder_re = re.compile(
+    r"(?i)\b(built\s+stuff|did\s+stuff|made\s+stuff|worked\s+on\s+stuff|various\s+stuff|just\s+stuff|"
+    r"learned\s+a\s+lot|made\s+things|did\s+things|worked\s+on\s+things|etc\.?|"
+    r"different\s+things|some\s+stuff)\b|^stuff\.?$|^things\.?$"
+)
+
+
+def _project_row_has_thin_bullets(row):
+    # --- Supporting/peripheral rows with empty or meme bullets still need Stage A quality pass. --- #
+    if not isinstance(row, dict):
+        return False
+    desc = row.get("description")
+    if not isinstance(desc, str):
+        return not desc
+    t = desc.strip()
+    if not t:
+        return True
+    if len(t) < 42:
+        return True
+    bullets = _split_project_description_bullets(t)
+    if not bullets:
+        return len(t) < 130
+    for b in bullets:
+        bw = len(b.split())
+        if _thin_placeholder_re.search(b):
+            return True
+        if len(b.strip()) < 16:
+            return True
+        if bw <= 4 and len(b) < 45:
+            return True
+    if len(bullets) == 1 and len(t) < 90:
+        return True
+    return False
+
+
+def _thin_bullet_project_repair_candidates(proj_rows, hero_proj_ids, support_proj_ids, peripheral_proj_ids, max_add):
+    """Pick non-hero projects with visibly weak bullets — opened for rewrite like heroes, capped."""
+    hero = set()
+    for x in hero_proj_ids or []:
+        if isinstance(x, float) and x == int(x):
+            x = int(x)
+        if isinstance(x, int):
+            hero.add(x)
+    by_id = {}
+    order = []
+    for r in proj_rows or []:
+        if not isinstance(r, dict):
+            continue
+        rid = _norm_project_id(r)
+        if rid is None:
+            continue
+        by_id[rid] = r
+        order.append(rid)
+    prioritized = []
+    for pid in support_proj_ids or []:
+        if isinstance(pid, float) and pid == int(pid):
+            pid = int(pid)
+        if isinstance(pid, int) and pid not in prioritized:
+            prioritized.append(pid)
+    for pid in peripheral_proj_ids or []:
+        if isinstance(pid, float) and pid == int(pid):
+            pid = int(pid)
+        if isinstance(pid, int) and pid not in prioritized:
+            prioritized.append(pid)
+    for rid in order:
+        if rid not in prioritized:
+            prioritized.append(rid)
+
+    picks = []
+    for rid in prioritized:
+        if rid in hero or rid in picks:
+            continue
+        row = by_id.get(rid)
+        if row is None:
+            continue
+        if _project_row_has_thin_bullets(row):
+            picks.append(rid)
+        if len(picks) >= max_add:
+            break
+    return picks
+
+
+def pass_b_deletion_budget(n_skill_rows):
+    # --- Soft caps surfaced in Prompt B — keeps pruning visibly rare vs row count. --- #
+    try:
+        n = int(float(n_skill_rows))
+    except (TypeError, ValueError):
+        n = 0
+    if n <= 0:
+        return {
+            "skillsRowCount": 0,
+            "minSurvivorsTarget": 0,
+            "maxOmissionsBudget": 0,
+            "note": "No skill rows.",
+        }
+    if n >= 20:
+        min_pct = 0.75
+    elif n >= 12:
+        min_pct = 0.82
+    else:
+        min_pct = 0.88
+    min_survivors_target = max(1, int(math.ceil(min_pct * n)))
+    raw_omit = n - min_survivors_target
+    max_omit = min(5, max(0, raw_omit))
+    if n < 14:
+        max_omit = min(max_omit, 3)
+    floor_survivors = max(min_survivors_target, n - max_omit)
+    return {
+        "skillsRowCount": n,
+        "minSurvivorsTarget": floor_survivors,
+        "maxOmissionsBudget": max_omit,
+        "note": "Rare pruning: stay within maxOmissionsBudget unless duplicate or avoid removes more; prefer demotion.",
+    }
+
+
 def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None) -> dict:
     """
     Slim JSON placed first in the stage-A user prompt: the rows the model should actually rewrite.
@@ -305,12 +590,44 @@ def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None)
     hero_exp_ids = _narrative_id_list(nb, "heroExperience")
     hero_proj_ids = _narrative_id_list(nb, "heroProjects")
     support_proj_ids = _narrative_id_list(nb, "supportingProjects")
+    peripheral_proj_ids = _narrative_id_list(nb, "peripheralProjects")
 
     exp_rows = rd.get("experience") if isinstance(rd.get("experience"), list) else []
     proj_rows = rd.get("projects") if isinstance(rd.get("projects"), list) else []
     skills_rows = rd.get("skills") if isinstance(rd.get("skills"), list) else []
 
     summary_block = rd.get("summary") if isinstance(rd.get("summary"), dict) else {}
+
+    thin_repairs = _thin_bullet_project_repair_candidates(
+        proj_rows,
+        hero_proj_ids,
+        support_proj_ids,
+        peripheral_proj_ids,
+        THIN_BULLET_PROJECT_MAX_ADD,
+    )
+    allowed_proj_ids = []
+    seen_proj = set()
+    for hid in hero_proj_ids:
+        if isinstance(hid, float) and hid == int(hid):
+            hid = int(hid)
+        if not isinstance(hid, int) or hid in seen_proj:
+            continue
+        seen_proj.add(hid)
+        allowed_proj_ids.append(hid)
+    for tid in thin_repairs:
+        if len(allowed_proj_ids) >= PASS_A_MAX_PROJECT_EDIT_IDS:
+            break
+        if tid in seen_proj:
+            continue
+        seen_proj.add(tid)
+        allowed_proj_ids.append(tid)
+    narrative_hero_set = set()
+    for h in hero_proj_ids:
+        if isinstance(h, float) and h == int(h):
+            h = int(h)
+        if isinstance(h, int):
+            narrative_hero_set.add(h)
+    thin_only = [x for x in allowed_proj_ids if x not in narrative_hero_set]
 
     hero_exp_filled = []
     for r in _rows_with_ids(exp_rows, hero_exp_ids):
@@ -321,7 +638,7 @@ def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None)
         hero_exp_filled.append(row)
 
     hero_proj_filled = []
-    for r in _rows_with_ids(proj_rows, hero_proj_ids):
+    for r in _rows_with_ids(proj_rows, allowed_proj_ids):
         if not isinstance(r, dict):
             continue
         row = copy.deepcopy(r)
@@ -331,7 +648,9 @@ def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None)
 
     return {
         "allowedExperienceEditIds": hero_exp_ids,
-        "allowedProjectEditIds": hero_proj_ids,
+        "allowedProjectEditIds": allowed_proj_ids,
+        "narrativeHeroProjectIds": hero_proj_ids,
+        "thinBulletRepairProjectIds": thin_only,
         "supportingProjectIds": support_proj_ids,
         "summarySection": copy.deepcopy(summary_block),
         "resumeSkillVocabulary": _skill_name_vocabulary(skills_rows),
@@ -414,7 +733,7 @@ def build_pass_a_system():
             "Edit surface under `edits` in this pass:",
             "- `summarySection` when the user message includes it (profile summary for the role).",
             "- `experience` — **only** rows whose `id` appears in `allowedExperienceEditIds`.",
-            "- `projects` — **only** rows whose `id` appears in `allowedProjectEditIds`. You may include **`tech_stack`** (list of strings) on a project row to **correct** labels so they match what the project actually did—**before** you lean on bullets (remove unsupported framework/ML/data-science names; keep the row’s story coherent). Never edit supporting or peripheral project ids.",
+            "- `projects` — **only** rows listed in **`allowedProjectEditIds`** (narrative **heroProjects** plus optional **`thinBulletRepairProjectIds`** flagged for shallow/placeholder bullets). Same full rewrite surface for listed ids—including **non-hero** repair rows (**not** arbitrary supporting/peripheral). You may set **`tech_stack`** to align with `rowProseOnly` before bullets.",
             "- Other layout keys only if the user message explicitly includes them; omit `skills` entirely.",
             "",
             "ATS / keyword: weave JD-aligned terms from **evidencedKeywordAlignment** into summary and hero text where the resume already supports them—use standard spellings. **Do not fabricate** employers, dates, degrees, or responsibilities.",
@@ -454,9 +773,12 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
 
     nb = narrativeBrief if isinstance(narrativeBrief, dict) else {}
     hero_exp = _narrative_id_list(nb, "heroExperience")
-    hero_proj = _narrative_id_list(nb, "heroProjects")
+    narrative_json = json.dumps(nb, ensure_ascii=False, indent=2)
+    rewrite_focus = build_stage_a_rewrite_focus(resumeData, nb)
+    allowed_proj_edit = rewrite_focus.get("allowedProjectEditIds") or []
+    thin_repairs = rewrite_focus.get("thinBulletRepairProjectIds") or []
     has_exp = len(hero_exp) > 0
-    has_proj = len(hero_proj) > 0
+    has_proj = len(allowed_proj_edit) > 0
     sm = resumeData.get("summary") if isinstance(resumeData.get("summary"), dict) else {}
     has_summary_text = bool((sm.get("summary") or "").strip())
 
@@ -493,8 +815,6 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
         "resumeLiteralHits": ats_hits,
         "jdKeywordPriority": ats_jd_top,
     }
-    narrative_json = json.dumps(nb, ensure_ascii=False, indent=2)
-    rewrite_focus = build_stage_a_rewrite_focus(resumeData, nb)
     truth_anchor = build_resume_truth_anchor_compact(resumeData, nb)
     strict_truth = bool(payload.get("strict_truth", True))
 
@@ -517,7 +837,13 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
         lines.append("Include `edits.experience`: one row object per `allowedExperienceEditIds`, each with a full `description` bullet block. **Make the retargeting obvious**—re-lead and reorder so this role’s reader sees why the job fits.")
     if has_proj:
         lines.append(
-            "Include `edits.projects`: one object per `allowedProjectEditIds`. For each, you may set **`tech_stack`** first (Strings only) so labels match the project’s real work—**remove** names that only appeared in a bloated or wrong `tech_stack` and never in `rowProseOnly` for that id; then set **`description`** to match. Same **assertive** refocus for this job; do not edit rows outside the allowed id lists. Supporting and peripheral project ids are context only."
+            "Include `edits.projects`: one object per `allowedProjectEditIds`. For each, you may set **`tech_stack`** first (Strings only) so labels match the project’s real work—**remove** names that only appeared in a bloated or wrong `tech_stack` and never in `rowProseOnly` for that id; then set **`description`** to match. **Do not** edit project ids outside `allowedProjectEditIds`. Narrative **heroes** drive role-shaped retargets; **`thinBulletRepairProjectIds`** (if present) are **quality passes** for placeholder/empty bullets on non-hero rows—replace vague lines with concrete, evidence-safe claims from `rowProseOnly` only; full JD retarget is optional there but **no** ghost tools."
+        )
+    if thin_repairs:
+        lines.append(
+            "**Thin-bullet repair ids** (non-hero, opened for rewrite): "
+            + json.dumps(thin_repairs, ensure_ascii=False)
+            + " — treat like hero rows for **description** depth; keep facts inside anchors."
         )
     if not has_exp and not has_proj:
         lines.append("There are no hero experience or project rows in this run—`edits` may be summary-only, or empty keys omitted.")
@@ -570,22 +896,23 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
 def build_pass_b_system():
     return "\n".join(
         [
-            "You are editing **only** the `skills` section of a resume for one target role. Nothing else in the resume is in scope for this call.",
-            "**Required:** respond with **exactly one** JSON object. It **must** include `edits` → `skills` as a **non-empty** array of `{id, name, category}` rows (in display order) listing every skill line to show. **Do not** return `{}`, do not omit `edits` or `skills`, and do not return only an empty object unless the user context truly has zero skill rows (rare in this call).",
-            "**Selected toolkit:** the JD is a **compass**—what leads, how categories read—not the **exclusive** keep roster. Start from **`skillsRows`**: **reorder + recategorize**, **demote** Supporting depth, then **light trim** (**noise**, **wrong archetype**, sparse **redundant** tail when the bank is busy). **Keep** plausible archetype skills—including strong lines **without** verbatim JD overlap—so the section reads like a **credible senior toolkit**, not a JD strip.",
-            "Return **only** `{\"edits\": { \"skills\": [ ... ] } }`. Exactly one top-level key: `edits`, and only `skills` under it.",
-            "**Decision order:** (a) **`category`** / **`categoryStrategy`**. (b) **Lead** (JD+hero emphasis when supported) then **Supporting** (honest breadth for this role family). (c) **Trim last:** **light**—after reorder, drop **obvious** clutter / duplicates / wrong-role fluff **plus** a **few** weakest **redundant** Supporting lines when the bank is long (same story told twice, or tail tools that don’t fit this role family). Still **truthful**: no fabricated skills.",
-            "**If unsure:** **demote first** (order or category). If still borderline: **keep** when plausible for this role family; **omit** only when the line is **clearly redundant** with stronger lines above or clearly **off-archetype** for this job (per narrative + evidence).",
-            "**Languages / Frameworks / Libraries / Databases / Cloud/primitives:** **reorder** first so JD heroes lead; **keep** the credible core. **Omit sparingly**—duplicate names, weakest **redundant** peripherals at the tail, or narrative **`avoid`**—**not** because a token is absent from JD text. **Fluff/grouping** buckets (Focus Areas, etc.) may tighten a bit more.",
-            "**skillsStrategy** lines: named skills in examples are **illustrative**; default **keep** unless the brief or role fit clearly excludes a row.",
-            "Truth & names: **start from** existing skill rows (pass-1 merged resume). **Recategorize** when it helps scan. **Add** rows only for **conservative prerequisites** in line with `skillsStrategy` and **repeated** project/experience evidence (examples: JavaScript with React-heavy work, SQL with PostgreSQL/MySQL, Python with FastAPI, HTML/CSS with UI work).",
-            "**Do not** add neighboring or substitute stack (e.g. TypeScript from React alone; warehouse DBs from SQL; Django→Flask; LangChain from API use alone; k8s from a lone host; broad AWS from one service). **Focus-area** phrasing only when the body supports it. Light casing fixes on **existing** lines are fine.",
-            "**JD terms / `jdKeywordPriority`:** order and prominence—**not** “delete if not listed.”",
-            "Implement **`skillsStrategy`** (+ `categoryStrategy` when non-empty). Prefer **most** of the bank with **light** trims busy lists can carry; avoid over-pruning **and** avoid JD-only echo lists.",
-            "For **new** prerequisite lines only: use a **new unique numeric `id`** not used in the list; add **sparingly**.",
-            "If only one category label makes sense, a single category is OK.",
-            "**JSON shape:** each skill object closes with **one** `}` before the next `,` or the `]` that ends `skills`; do not insert an extra `}` right before that `]` (validate that the output parses as JSON).",
-            "Output valid JSON only—no markdown, no fences, no leading commentary before the JSON object.",
+            "You edit **only** `skills`. Return **`edits`** with **non-empty** `skills` (`{id,name,category}` in display order). **Pass B = reorder/recategorize first; pruning rare.** Optionally include **`_debugOmitted`** (see below)—no other top-level keys except `edits` + optional `_debugOmitted`.",
+            "### Evidence-first",
+            "**`resumeWideSkillEvidence`** maps each skill label you might keep to anchor strings matched **across the whole resume**. Use this (plus **`peripheralSkillEvidence`**) before doubting survival—**semi-hits** often show up outside hero snippets. **`deletionBudget`** caps how aggressive omissions can be versus row count.",
+            "### Task framing",
+            "**Default: every existing `skillsRows` row survives** (same numeric `id`). **Fit = order + category**, not disappearance.",
+            "### Hierarchy",
+            "**1** Preserve baseline. **2** Reorder/recategorize: JD + **`skillsStrategy`** ⇒ **Lead** (**hero rows** adjust lead order—not survival tests). **3** Treat **semi-hits**: resume-evidenced, not top JD wording, still same **role family** as `candidateAngle`—**keep**, place later unless `resumeWideSkillEvidence` is thin and **`deletionBudget`** forbids pruning. **4** Demote procedurally **before** optional omit. **5** Omit **only** per rules + budget.",
+            "### Semi-hit (named tier)",
+            "**Semi-hit** = resume-evidenced skill that is **not** a top JD keyword match but still fits the candidate’s **broader role family** per `candidateAngle`. **Keep**; **move later**—do **not** drop for JD thinness alone.",
+            "### Demote-before-omit (procedural)",
+            "Relocate lower in order or to a lower-prominence **category** first; omit only if still misleading after that **and** allowed by **omit rules** + **`deletionBudget`**.",
+            "### Omit rules (each omitted id must qualify + fit budget)",
+            "**A** Duplicate story. **B** **`avoid`**. **C** Fabrication (do not add). **D (stricter)** Do **not** omit because a tool is **missing from the JD** or **missing from hero rows only**. Omit **D** only when **off-role for `candidateAngle`** **and** **no substantive resume-wide evidence** in `resumeWideSkillEvidence` / peripheral text for that row’s name—absence from JD or hero lead is **not** enough.",
+            "### Debug (optional)",
+            "If you omit **any** id, you may set **`_debugOmitted`**: `[{\\\"id\\\": <int>, \\\"reason\\\": \\\"<short>\\\"}, …]` so reviewers see why. Pair reasons with evidence map + budget.",
+            "### Narrative + adds",
+            "`skillsStrategy` = staging; trim language = **demotion-heavy**. New prerequisite rows = repeated proof; fresh `id`. Valid JSON only.",
         ]
     )
 
@@ -613,37 +940,43 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
     nb = narrativeBrief if isinstance(narrativeBrief, dict) else {}
     narrative_json = json.dumps(nb, ensure_ascii=False, indent=2)
     skills_focus = build_stage_a_rewrite_focus(resumeData, nb)
+    n_skill = len([r for r in (skills_focus.get("skillsRows") or []) if isinstance(r, dict)])
+    peripheral_ids = _narrative_id_list(nb, "peripheralProjects")
+    pass_b_bundle = dict(skills_focus)
+    pass_b_bundle["resumeWideSkillEvidence"] = build_resume_wide_skill_evidence(resumeData)
+    pass_b_bundle["peripheralSkillEvidence"] = build_peripheral_skill_evidence(resumeData, peripheral_ids)
+    pass_b_bundle["deletionBudget"] = pass_b_deletion_budget(n_skill)
+    budget = pass_b_bundle["deletionBudget"]
+    budget_line = (
+        f"**Deletion budget for this resume:** `{budget.get('skillsRowCount')}` skill rows → aim ≥ `{budget.get('minSurvivorsTarget')}` "
+        f"survivors; **`maxOmissionsBudget` = `{budget.get('maxOmissionsBudget')}`** absent duplicate/`avoid`. Prefer demotion."
+    )
     return "\n".join(
         [
-            "## Pass 2 — skills only",
+            "## Pass 2 — reorder + recategorize skills (evidence-informed)",
             prefsOneLine,
-            "**Skill bank:** start from **`skillsRows`**. **Default: keep most rows**—reorder / recategorized first—then allow **a handful** of omissions on **busy** lists for **redundant** Supporting or **off-archetype** lines (not JD keyword matching).",
-            "**Follow** **`skillsStrategy`**: Lead → Supporting breadth → **light trim** at the tail. **Do not** shrink the list to JD keywords.",
-            "**Languages & Frameworks (similar tool rows):** **reorder** heavily; **omit** only **weak redundant** tail entries or duplicates—**not** absence from JD text.",
-            "If the narrative **explicitly keeps** a named skill, **retain** it.",
-            "Return `{id, name, category}` in display order. Demote **before** drop.",
+            budget_line,
+            "**Preserve first:** output **one row per surviving `skillsRows` id** by default. **Semi-hit** rows (resume-evidenced, not JD-top) ⇒ **keep**, order later. **Lead** flows from JD + **`skillsStrategy`** — **not** survivor filters.",
+            "Return **`edits.skills`**; optional **`_debugOmitted`** if you omit any id.",
             "",
-            "### Precomputed fit checklist (code — not a delete list)",
-            "Explains category↔JD overlap density; use with **`skillsStrategy`**. Low overlap does **not** mean delete non-keyword skills—usually **regroup** or **Supporting** placement. Read the embedded `note`: label-based scores do **not** reflect whether Python/React/etc. fit the JD.",
+            "### Fit checklist (category labels vs JD—not per-skill names)",
             json.dumps(fitSignals, ensure_ascii=False, indent=2),
             "",
-            "### Narrative (same as pass 1)",
+            "### Narrative brief",
             narrative_json,
             "",
-            "### Evidenced keyword alignment (ordering + ATS—not membership)",
-            "`jdKeywordPriority` ranks what should **lead** when supported on the resume; **`resumeLiteralHits`** are supporting signals. Neither list is the full roster of allowed skills.",
+            "### Keyword hints for **order** only (not membership)",
             json.dumps(evidenced_keyword_alignment, ensure_ascii=False, indent=2),
             "",
-            "### Current skills + rewrite_focus.skillsRows (after pass 1 merge)",
-            json.dumps(skills_focus, ensure_ascii=False, indent=2),
+            "### Structured skill context (read before dropping anything)",
+            "Includes **`skillsRows`**, **`resumeWideSkillEvidence`**, **`peripheralSkillEvidence`**, **`deletionBudget`**, hero/supporting rows.",
+            json.dumps(pass_b_bundle, ensure_ascii=False, indent=2),
             "",
             "### JD excerpts",
             json.dumps(relevantJDLines, ensure_ascii=False, indent=2),
             "",
-            "### Output contract (shape—not length)",
-            "**Bracket discipline:** `{` `\"edits\"` `{` `\"skills\"` `[` rows… `]` `}` `}` — the `]` closes **only** the array; the next **`}` closes the `edits` object** (not doubled before `]`). If your JSON checker fails validation, rewrite until it parses.",
-            "**Typical output:** **most** `skillsRows` ids, reordered; on long lists, **a few** purposeful drops are OK. Example shape:",
-            "{\"edits\": {\"skills\": [{\"id\": 1, \"name\": \"Python\", \"category\": \"Languages\"}, {\"id\": 8, \"name\": \"React\", \"category\": \"Frameworks\"}]}}",
+            "### Output contract",
+            "Valid **`edits`** with **`skills`** array. Optional **`_debugOmitted`** paired with omissions.",
         ]
     )
 

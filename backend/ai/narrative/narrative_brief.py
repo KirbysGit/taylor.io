@@ -112,7 +112,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             "**(1) Categories / alignment:** which `category` labels fit this **role archetype + JD** (rename or regroup for scan; prefer labels already on the resume). A **thin** bucket: demote or lighten the label—**do not** invent a JD-shaped taxonomy that misrepresents the bank.",
             "**(2) Lead (recruiter + ATS headline):** what sits **first in display order**—JD emphasis **plus** hero-thread and strongest resume proof; **not** JD-only fluff.",
             "**(3) Supporting / peripheral:** skills **below Lead** in scan—resume-backed **and** plausible for the **role family**; **JD-adjacent** tools that match the JD’s **work shape** belong here too (e.g. viz/UI/data-viz stack when the posting stresses charts or product surfaces—even if Python leads). **The JD headline is not the full keep/drop roster.** Same rule as React when the JD spotlights backend only—**demote**, don’t discard without trim criteria.",
-            "**(4) Trim last:** **rare**—only rows clearly **noise** or **wrong for this role archetype** (hobby fluff, wildly off-topic, or duplicate story-telling). Prefer **Lead → Supporting** first: keep strong lines that show **credible senior breadth**—the JD is **not** a keyword membership test. **Do not** plan a JD-copy list or over-prune archetype-plausible tools that lack literal JD overlap. **Named trim examples are one-offs, not a quota.**",
+            "**(4) Trim last:** **rare**—only rows clearly **noise** or **wrong for this role archetype** (hobby fluff, wildly off-topic, or duplicate story-telling). Prefer **Lead → Supporting** first: keep strong lines that show **credible senior breadth**—the JD is **not** a keyword membership test. **Do not** phrase this as generic “remove non-relevant / irrelevant skills” (that invites JD-only stripping)—name **realm** (off-archetype) or **duplicate** when you trim. **Named trim examples are one-offs, not a quota.**",
             "**Profile strength > JD keyword strip:** the JD sets **priority and headline**, **not** the exclusive skill membership. Do **not** plan a block that reads like a copy-paste of JD terms; **meaningful rearrangement** and variety matter.",
             "**Role archetype vs JD:** one string should name the **archetype** (e.g. full-stack product, backend-heavy, data/pipelines). Archetype defines **credible breadth**; **primaryJDTerms** define what **leads**. Lexical JD overlap is **secondary** to a **coherent, evidenced person**.",
             "**categoryStrategy** (bucket-level; optional): use this for **merge / rename / collapse** of vague skill-like groupings (“Focus Areas” etc.)—**not** duplicate the whole ordering job of skillsStrategy; pass B respects both. `[]` when N/A.",
@@ -496,6 +496,33 @@ def skills_strategy_line_mentions_absent_stack(line: str, resume_data: dict) -> 
         if token in low and token not in evidence_text:
             return True
     return False
+
+
+def skills_strategy_trim_line_signals_blanket_prune(line):
+    # --- Pass B historically read these as JD-like strips; replace with sparing trim at normalize time. --- #
+    if not line or not isinstance(line, str):
+        return False
+    low = line.lower()
+    # "Remove any irrelevant / non-relevant …" collapses breadth to subjective JD-fit.
+    if re.search(r"\b(remove|strip)\s+(any|all)\s+", line, re.I) and (
+        "irrelevant" in low
+        or "non-relevant" in low
+        or "non relevant" in low
+        or re.search(r"overly\s+generic", line, re.I)
+    ):
+        return True
+    if re.search(r"\b(trim|keep)\s+to\s+only\b", line, re.I):
+        return True
+    return False
+
+
+def soften_skills_strategy_blanket_trim_line(line):
+    if not skills_strategy_trim_line_signals_blanket_prune(line):
+        return line
+    return (
+        "Trim last sparingly—only duplicates, narrative avoid, or clearly different‑realm fluff; "
+        "keep same‑role‑family breadth (demote trailing, do not slash for JD keyword fit)."
+    )
 
 
 def skills_strategy_line_too_prescriptive(line):
@@ -938,7 +965,7 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
         summary_goal = " ".join(sg_words[:32]).rstrip(",;:")
     out["summaryGoal"] = summary_goal
 
-    sk_raw = [strip_resume_cliche_phrases(x) for x in str_list("skillsStrategy")]
+    sk_raw = [soften_skills_strategy_blanket_trim_line(strip_resume_cliche_phrases(x)) for x in str_list("skillsStrategy")]
     sk_raw = [
         x
         for x in sk_raw
