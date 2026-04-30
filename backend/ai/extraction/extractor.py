@@ -2,9 +2,8 @@
 
 # ===== imports ===== #
 import re
-
-from dataclasses import dataclass, field
 from collections import defaultdict
+from dataclasses import dataclass, field
 
 # --- local imports.
 from .profiles import get_extraction_profile
@@ -98,18 +97,23 @@ def canonicalize_phrase_key(phrase):
 
 # --- split slash-joined tool lists (e.g. node.js/express) into parts unless the full token is a known idiom (ci/cd, ml/ai, …). --- #
 def iter_slashed_token_pieces(raw):
+    # initialize the token.
     t = (raw or "").rstrip(".,;:").lower()
     if not t:
         return
+    # if the token does not contain a slash, yield the token.
     if "/" not in t:
         yield t
         return
+    # if the token is a known idiom, yield the token.
     if t in globalPhraseCanonical:
         yield t
         return
+    # if the token is a known idiom with a space, yield the token.
     if t.replace("/", " ") in globalPhraseCanonical:
         yield t
         return
+    # iterate over the parts of the token.
     for part in t.split("/"):
         part = part.strip()
         if part:
@@ -129,10 +133,11 @@ def merge_part_of_phrase_hits(termSources, phraseCounts, scale):
 
         # for each raw token in the phrase.
         for raw in re.findall(r"[a-z][a-z0-9+.#/-]{0,}", phrase.lower()):
+            # iterate over the parts of the token.
             for piece in iter_slashed_token_pieces(raw):
                 t = canonicalize_token(piece)
 
-                # if the token is empty, stop word, or weak token, continue.
+                # if the token is empty, a stop word, or a weak token, continue.
                 if not t or t in globalStopWords or t in globalWeakTokens:
                     continue
 
@@ -148,17 +153,24 @@ def merge_part_of_phrase_hits(termSources, phraseCounts, scale):
 
 # --- update the aggregate counts (for my own personal debugging).--- #
 def update_aggregate_counts(rankedTerms, limit=10):
+    # set the path to the aggregate terms file.
     aggPath = Path(__file__).resolve().parent.parent / "debug_out" / "aggregate_terms.json"
 
+    # if the aggregate terms file exists, load the data.
     if aggPath.exists():
+        # load the data from the file.
         data = json.loads(aggPath.read_text(encoding="utf-8"))
     else:
+        # initialize the data.
         data = {}
 
+    # iterate over the ranked terms. (limit to the top N terms.)
     for item in rankedTerms[:limit]:
-        term = item["term"]
+        # get the term.
+        term = item["term"].lower()
         data[term] = data.get(term, 0) + 1
 
+    # save the data to the file.
     aggPath.parent.mkdir(parents=True, exist_ok=True)
     aggPath.write_text(json.dumps(dict(sorted(data.items(), key=lambda kv: (-kv[1], kv[0]))), indent=2) + "\n", encoding="utf-8")
 
@@ -271,20 +283,30 @@ def extract_stack_terms(bodyLines, company=""):
     concreteCounts = {}
     capabilityCounts = {}
 
+    # iterate over the body lines.
     for line in bodyLines:
+        # normalize the line.
         low = line.lower().strip()
 
+        # if the line does not look like a stack line, continue.
         if not looks_like_stack_line(low):
             continue
 
+        # iterate over the tokens in the line.
         for token in re.findall(r"[a-z0-9+#.-]{2,}", low):
+            # canonicalize the token.
             term = canonicalize_token(token.strip())
             if not term:
                 continue
+
+            # if the token is a company term, continue.
             if str(company or "").strip() and (str(company).lower() in (term or "") or (term in str(company).lower())): continue
 
+            # if the token is a concrete stack term, update the concrete counts.
             if term in concreteStackTerms:
                 concreteCounts[term] = concreteCounts.get(term, 0.0) + 1.0
+            
+            # if the token is a role capability stack term, update the capability counts.
             elif term in roleCapabilityStackTerms:
                 capabilityCounts[term] = capabilityCounts.get(term, 0.0) + 1.0
     
@@ -387,25 +409,38 @@ def score_terms(termSources, boostWords, weakTokens, umbrellaWeak=None):
     return sorted(scored, key=lambda item: (-item["score"], -item["frequency"], item["term"]))
  
 
+# --- get the relevant JD lines. --- #
+# input -> body lines, keywords.
+# output -> relevant lines.
 def get_relevant_jd_lines(bodyLines, keywords):
+    # initialize the relevant line hits.
 
+    # get the keywords.
     keywords = [keyword["term"] for keyword in keywords]
 
+    # initialize the relevant line hits.
     relevantLineHits = {}
 
+    # iterate over the body lines.
     for idx, line in enumerate(bodyLines):
         
+        # iterate over the keywords.
         for keyword in keywords:
 
+            # set the pattern.
             pattern = r"(?<![a-z0-9])" + re.escape(keyword) + r"(?![a-z0-9])"
-            
+
+            # if the line matches the keyword, update the relevant line hits.
             if re.search(pattern, line):
                 relevantLineHits[idx] = relevantLineHits.get(idx, 0) + 1
 
+    # sort the relevant line hits by hits (desc) and index (asc).
     sortedLinesByHits = sorted(relevantLineHits.items(), key=lambda item: (-item[1], item[0]))
 
+    # initialize the relevant lines.
     relevantLines = []
 
+    # add top 10 relevant lines to the relevant lines list.
     for idx, hits in sortedLinesByHits[:10]:
         relevantLines.append(bodyLines[idx])
     
@@ -525,15 +560,18 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
         debug["bodyTokenCounts"] = bodyTokenCounts
         debug["downweightedTokenCounts"] = downweightedTokenCounts
 
+    # if the company is not empty, filter out the term sources that contain the company name.
     if str(company or "").strip(): res.termSources = {k: v for k, v in res.termSources.items() if not (str(company).lower() in (k or "") or (k in str(company).lower()))}
 
-    # thin JD: metadata / location-only body should not let generic body tokens win over title+phrases.
-    body_len = sum(len(x) for x in res.bodyLines)
-    if len(res.bodyLines) < 3 or body_len < 200:
-        for _term, sm in res.termSources.items():
+    # if JD is too short, dampen the body tokens.
+    bodyLength = sum(len(x) for x in res.bodyLines)
+    if len(res.bodyLines) < 3 or bodyLength < 200:
+        # iterate over the term sources.
+        for term, sourceMap in res.termSources.items():
+            # iterate over the body and downweighted tokens.
             for k in ("bodyToken", "downweightedToken"):
-                if k in sm and sm[k]:
-                    sm[k] = sm[k] * 0.3
+                if k in sourceMap and sourceMap[k]:
+                    sourceMap[k] = sourceMap[k] * 0.3
         if wanna_debug:
             debug["thinBodyDampen"] = True
     else:
@@ -555,10 +593,12 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
         out.write_text(json.dumps(debug, indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
     
     if wanna_count:
-        update_aggregate_counts(rankedTerms, 30)
+        update_aggregate_counts(rankedTerms, 20)
     
+    # 10. get the relevant JD lines.
     relevantLines = get_relevant_jd_lines(res.bodyLines, rankedTerms[:numKeywords])
 
+    # 11. return the results.
     return {
         "keywords": rankedTerms[:numKeywords],
         "activeDomains": res.profile["activeDomains"],

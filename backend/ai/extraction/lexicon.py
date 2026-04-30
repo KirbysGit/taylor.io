@@ -121,32 +121,20 @@ globalStopWords = {
     "any", "but", "not", "often", "one", "other", "others", "plus", "responsible", "such", "using", "want", "what", "worked", "year",
     "eagerness",
     "full",
-    # junk fragment from compounds like real-world / real usage—should not surface as a keyword
     "real",
-    # overfire in low-signal sales / entry JDs
     "success", "entry", "level",
-    # filler / junk as standalone “keywords”
     "their", "able",
-    # sentence glue: almost never a skill keyword by itself
     "across", "all", "can", "based", "after", "who", "working",
-    # generic requirement / instruction verbs (not skills as standalone terms)
     "accept", "demonstrate", "show", "exhibit", "ensuring",
-    # thin layout / CTA noise in creator and short JDs
     "page", "make", "out",
-    # HR / struct boilerplate in government and service postings
     "date", "minimum",
-    # junk split from "r&d" style abbreviations; prefer phrase "r&d" in research_development
     "r",
-    # req/glue and compound fragments (side-by-side, per diem boilerplate, etc.)
     "must", "per", "acceptable", "side",
-    # English "go" (careers CTA) is not the Go language; do not let it rank
     "go", "available",
-    # schedule / intensifier noise (daily standups, “highly motivated”, etc.)
     "daily", "highly", "active",
-    # verb from “answer phones / email”—not a skill keyword
     "answer",
-    # aggregate: extra glue / comp / question words that should not compete as keywords
     "before", "how", "sure", "time",
+    "bout", "faster", "premium", "https", ".com"
 }
 
 # --- a set of global weak tokens, aka words that are relevant to the job description but are not strong enough to be considered a boost word. --- #
@@ -221,7 +209,6 @@ globalPhrases = [
     "api-first architectures", "event-driven services", "serverless infrastructure", "booking synchronization", "property technology",
     "ai systems", "agent logic", "feedback loops", "evaluation frameworks", "large language models", "labeling systems",
     "data integrity", "audit readiness", "food safety", "regulatory inspections",
-    # series aggregate: phrase anchors so umbrella tokens do not win (also in domains; global = always in phrase pass)
     "distributed systems", "resource allocation", "job sites", "schedule conflicts", "punch list", "material delays", "subcontractors",
     "data engineering", "data science", "data warehousing", "etl pipelines", "elt pipelines",
     "raw material", "formula records", "technical documentation", "safety data sheets", "regulatory information", "data management",
@@ -231,13 +218,10 @@ globalPhrases = [
     "traceability", "labeling systems", "inventory control",
     "wastewater treatment", "treatment plant", "plant operator", "mechanical equipment", "mechanical processes", "environmental utilities", "water resources control board",
     "content creator", "social media", "short videos", "video editing", "social media handles", "tiktok trends", "brand page", "short-form video", "talking-style video",
-    # leadership / executive / nonprofit-ops: prefer phrases over split vice / president / execution / management.
     "vice president", "executive leadership", "people management", "strategic priorities", "operational excellence",
     "organizational capacity", "cross-functional oversight",
-    # field / biomedical / imaging (anchor phrases, no separate domain)
     "field service engineer", "diagnostic imaging equipment", "ultrasound systems", "preventative maintenance", "system calibrations",
     "medical devices", "clinical teams",
-    # hr / front office (keeps “human resources” and mail/call work from decomposing into junk tokens)
     "human resources", "front office", "phone calls", "administrative tasks", "office supplies", "incoming and outgoing mail",
     "appointments and meetings",
     "stakeholder management", "cross functional collaboration", "end-to-end ownership", "process improvement", "risk mitigation",

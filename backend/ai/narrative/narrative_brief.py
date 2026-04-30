@@ -37,7 +37,6 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
         "secondaryStory": [],
         "summaryGoal": "",
         "skillsStrategy": [],
-        # --- categoryStrategy: optional tactics for broad/fluffy skill-like groupings *if* the resume has them ("Focus Areas" is one possible label—never assumed). Use [] when N/A. --- #
         "categoryStrategy": [],
         "sectionStrategy": {},
         "heroProjects": [],
