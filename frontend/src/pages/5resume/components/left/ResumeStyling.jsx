@@ -226,6 +226,11 @@ const ResumeStyling = ({
 
 	const [customizeOpen, setCustomizeOpen] = useState(() => showStyleTuners)
 
+	// Whole panel (template + format) can tuck away so the left column focuses on resume fields.
+	const [stylingPanelOpen, setStylingPanelOpen] = useState(
+		() => typeof localStorage !== 'undefined' && localStorage.getItem('resumeEditorStylingCollapsed') !== '1',
+	)
+
 	useEffect(() => {
 		const m = templateStyling[template] || {}
 		const a = m.allowedControls ?? []
@@ -237,14 +242,75 @@ const ResumeStyling = ({
 		setCustomizeOpen(hasLive)
 	}, [template, templateStyling])
 
+	const templateDisplayName = meta.displayName || template
+
+	const toggleStylingPanel = () => {
+		setStylingPanelOpen((prev) => {
+			const next = !prev
+			try {
+				localStorage.setItem('resumeEditorStylingCollapsed', next ? '0' : '1')
+			} catch {
+				//
+			}
+			return next
+		})
+	}
+
 	return (
 		<div className="@container/resume-style mb-5 overflow-hidden rounded-2xl border border-slate-200/75 bg-gradient-to-b from-white via-white to-slate-50/50 shadow-md shadow-slate-200/45 ring-1 ring-black/[0.03]">
+			<button
+				type="button"
+				id="resume-styling-panel-toggle"
+				aria-expanded={stylingPanelOpen}
+				aria-controls="resume-styling-panel-body"
+				onClick={toggleStylingPanel}
+				className={[
+					'flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/40 focus-visible:ring-inset rounded-t-[0.9375rem]',
+					!stylingPanelOpen ? 'rounded-b-[0.9375rem]' : '',
+				].join(' ')}
+			>
+				<span className="min-w-0 flex-1">
+					<span className="flex items-center gap-2">
+						<span className="text-sm font-semibold tracking-tight text-slate-800">Resume styling</span>
+						<span className="rounded-full bg-slate-100/95 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+							Template &amp; format
+						</span>
+					</span>
+					{!stylingPanelOpen ? (
+						<p className="mt-1 truncate text-[11px] text-slate-500" title={`${templateDisplayName} (${sectionTab})`}>
+							{templateDisplayName}
+							<span className="text-slate-400"> · </span>
+							{sectionTab === 'format' ? 'Format' : 'Template'}
+						</p>
+					) : null}
+				</span>
+				<span className="flex shrink-0 items-center gap-1.5">
+					<span className="text-[11px] font-medium text-slate-400">{stylingPanelOpen ? 'Hide' : 'Show'}</span>
+					<svg
+						className={`h-4 w-4 text-slate-400 transition-transform duration-200 motion-reduce:transition-none ${
+							stylingPanelOpen ? 'rotate-180' : ''
+						}`}
+						viewBox="0 0 16 16"
+						fill="currentColor"
+						aria-hidden
+					>
+						<path d="M4.47 6.97a.75.75 0 0 1 1.06 0L8 9.44l2.47-2.47a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 0 1 0-1.06z" />
+					</svg>
+				</span>
+			</button>
+
 			<div
 				className="h-px w-full bg-gradient-to-r from-brand-pink/80 via-brand-pink-light/90 to-transparent"
 				aria-hidden
 			/>
 
-			<StylingTabStrip value={sectionTab} onChange={setSectionTab} />
+			<div
+				id="resume-styling-panel-body"
+				className="grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none motion-reduce:duration-150"
+				style={{ gridTemplateRows: stylingPanelOpen ? '1fr' : '0fr' }}
+			>
+				<div className="min-h-0 overflow-hidden">
+					<StylingTabStrip value={sectionTab} onChange={setSectionTab} />
 
 			{sectionTab === 'format' && onStylePreferenceChange && (
 				<div
@@ -472,6 +538,8 @@ const ResumeStyling = ({
 					)}
 				</>
 			)}
+				</div>
+			</div>
 		</div>
 	)
 }

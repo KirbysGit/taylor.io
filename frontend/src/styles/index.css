@@ -347,8 +347,9 @@ textarea:focus {
 	outline: none;
 }
 
-/* Landing page scrollbar styling */
+/* Landing page scrollbar styling — stable gutter keeps width steady when scrollbars show/hide */
 .landing-scrollbar {
+	scrollbar-gutter: stable;
 	scrollbar-width: thin;
 	scrollbar-color: rgb(214, 86, 86) rgb(252, 250, 240);
 }
@@ -416,8 +417,10 @@ textarea:focus {
 	border-radius: 10px;
 }
 
-/* Custom scrollbar styling for Info page */
+/* Custom scrollbar styling for Info page + app-shell scroll surfaces (templates, home, resume, etc.).
+   Stable gutter avoids horizontal shift when scrollbar appears after load or between routes. */
 .info-scrollbar {
+	scrollbar-gutter: stable;
 	/* Firefox scrollbar styling */
 	scrollbar-width: auto;
 	scrollbar-color: rgb(214, 86, 86) rgb(252, 250, 240);
@@ -502,4 +505,83 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
 .animate-slide-in-right {
 	animation: slide-in-right 0.3s ease-out;
+}
+
+/*
+ * App-shell scrollers: `scrollbar-gutter: stable` avoids *most* width jump when a scrollbar
+ * appears, but `overflow-y: auto` can still leave overlay scrollbars (macOS) toggling with no
+ * reserved track, and some engines only commit the gutter after overflow is known. For full-
+ * height shells, `overflow-y: scroll` reserves a classic track so the content width stops
+ * “breathing” between short (no overflow) and long pages. Scoped to min/h-screen + info-
+ * scrollbar so nested panels (e.g. small max-h lists) keep `auto`.
+ */
+.min-h-screen.info-scrollbar.overflow-y-auto,
+.h-screen.info-scrollbar.overflow-y-auto {
+	overflow-y: scroll;
+}
+
+/* Home dashboard — optional full-viewport photo (public/home-dashboard-bg.jpg) under soft mesh */
+.home-page-atmosphere {
+	pointer-events: none;
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	overflow: hidden;
+}
+.home-page-atmosphere__photo {
+	position: absolute;
+	inset: 0;
+	background-color: rgb(252, 250, 240);
+	background-image: url('/home-dashboard.png');
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+.home-page-atmosphere__mesh {
+	position: absolute;
+	inset: 0;
+	/* Translucent cream so the photo reads through until you ship an asset — still tints empty state */
+	background:
+		radial-gradient(ellipse 120% 70% at 50% -30%, rgba(214, 86, 86, 0.16) 0%, transparent 52%),
+		radial-gradient(ellipse 80% 55% at 100% 55%, rgba(190, 70, 70, 0.09) 0%, transparent 48%),
+		radial-gradient(ellipse 65% 45% at 0% 85%, rgba(238, 155, 155, 0.12) 0%, transparent 42%),
+		linear-gradient(180deg, rgba(252, 250, 240, 0.87) 0%, rgba(250, 246, 238, 0.8) 42%, rgba(252, 250, 240, 0.9) 100%);
+}
+.home-page-atmosphere__orb {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(64px);
+	opacity: 0.45;
+	will-change: transform;
+	animation: home-atmosphere-drift 42s ease-in-out infinite alternate;
+}
+.home-page-atmosphere__orb--a {
+	width: min(72vw, 56rem);
+	height: min(72vw, 56rem);
+	left: -18%;
+	top: 8%;
+	background: rgba(214, 86, 86, 0.22);
+	animation-delay: -6s;
+	animation-duration: 38s;
+}
+.home-page-atmosphere__orb--b {
+	width: min(58vw, 44rem);
+	height: min(58vw, 44rem);
+	right: -14%;
+	bottom: 2%;
+	background: rgba(190, 70, 70, 0.14);
+	animation-duration: 48s;
+}
+@keyframes home-atmosphere-drift {
+	0% {
+		transform: translate(0%, 0%) scale(1);
+	}
+	100% {
+		transform: translate(3%, -2%) scale(1.06);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.home-page-atmosphere__orb {
+		animation: none;
+	}
 }

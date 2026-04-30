@@ -1,57 +1,53 @@
 === PRE-PIPELINE (RAW EXTRACTED TEXT) ===
 
-
-Alyssa Farlow
-www.linkedin.com/in/alyssafarlow | alyssa.farlow3@gmail.com | 954-881-9422
-
+Colin Kirby
+kirbycolin26@gmail.com | github.com/KirbysGit | linkedin.com/in/colinwkirby/ | https://colinkirby.dev
 Education
-University of Central Florida                                                                  	      Orlando, FL 
-Bachelor of Science in Mechanical Engineering 	          May 2028
-Minor in Criminal Justice
-Major GPA: 3.8
-	
-Honors: Florida Bright Futures Academic Scholar, Cambridge AICE Diploma
-
+University of Central Florida (GPA 3.78 / 4.0) August 2021 – May 2025
+Bachelor of Science in Computer Engineering Orlando, FL
+Honors & Awards: Dean’s List 2021, President’s Honor Roll 2023 – 2025, Pegasus Gold Scholarship
+Clubs & Extracurriculars: AI @ UCF, Knight Hacks, SHPE @ UCF
+Relevant Coursework: Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design
+Experience
+Software Engineering Intern May 2024 – June 2025
+BitGo | Python, Django, React, PostgreSQL, AWS EC2 Remote
+• Built and maintained backend services and REST APIs in Python/Django supporting secure internal workflows for
+financial and compliance teams.
+• Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service
+patterns and data modeling.
+• Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and
+operational metrics.
+• Optimized Python data-processing pipelines and PostgreSQL queries, improving system scalability and reducing
+latency by ~40%.
+Projects
+Centi – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev
+• Built and deployed a full-stack finance app that automates account aggregation, transaction tracking, and spending
+insights across a unified dashboard.
+• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and
+normalized data storage.
+• Developed responsive React dashboards and authentication flows for account management, transaction review, and
+financial analytics.
+• Implemented authentication and secure data handling (OAuth/JWT), ensuring protected access to financial data and
+user account workflows.
+Taylor.io – Resume Builder & Parser | React, FastAPI, PostgreSQL, OpenAI API, Tailwind CSS
+• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.
+• Implemented backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.
+• Created a live editing and preview experience in React, enabling users to customize resume content in real time through
+a clean, guided interface.
+• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and
+editing workflows.
+Tizirsso Racing – Portfolio & Sponsorship Website | Next.js, React, Framer | https://tizianorosso.com
+• Built a custom motorsport portfolio site translating brand identity and racing history into a polished, mobile-first
+experience.
+• Developed interactive UI sections including an animated hero, editorial about page, career timeline, team history,
+championship highlights, and image galleries with lightbox support.
+SecureScape – Smart Security System | Python, Flutter, Arduino C++, TensorFlow Lite
+• Developed the Flutter mobile app with core controls including alarm toggling, lighting, photo capture, and recording
+access.
+• Built the Python backend and communication layer for device coordination, enabling reliable messaging and near real-
+time alerts (<3.5s).
 Skills
-Microsoft Office: Word, PowerPoint, Excel
-Coding Languages: Python, C
-Hardware and Systems: Motor Control, Sensors, Circuit Integration
-Interpersonal: Conflict Resolution, Leadership, Public Speaking, Collaboration, Communication, Adaptability
-Certifications: Entrepreneurship and Small Business
-
-Academic Projects
-R/C Derby											    In Progress
-Design and assemble the chassis and drivetrain system for a competitive remote-control car
-Conduct performance evaluations to optimize mechanical efficiency and electronic control systems, implementing modifications based on testing data resulting in ~15% higher efficiency
-Integrate and wire electrical components including motor, ESC, battery system, and remote receiver
-
-Great Navel Orange Race								  Jan. 2025 – Apr. 2025
-Designed and constructed the hull of an autonomous boat for a race against 600 other groups
-Developed and debugged the navigation system in Arduino in a real-time setting using a closed loop system to optimize steering, speed regulation, and course correction
-Delegated project tasks amongst members in a multidisciplinary team to finalize a competition-ready system
-
-Work Experience
-Integrity C4, LLC	                     Orlando, FL
-Intern	         Nov. 2025 – Present
-Assist a private investigation firm specializing in cyber and financial fraud in a fast-paced environment
-Organize case materials, conduct research, and assist with investigative tasks
-Maintain strict confidentiality and adhere to non-disclosure agreements with sensitive information
-
-Bar Louie	                     Orlando, FL
-Hostess	         Sep. 2025 – Present
-Greet and welcome guests in a friendly manner ensuring a positive first impression
-Organize reservations, waitlists, and seating arrangements to maximize efficiency 
-Handle guest inquiries, concerns, or complaints with professionalism and focusing on problem solving
-
-Camp Adventure	               Cooper City, FL
-Camp Counselor	      Jun. 2022 – Aug. 2024
-Supervised and ensured the safety of groups of up to 20 campers in a rapid-moving environment
-Resolved conflicts and behavioral concerns using strong communication and leadership
-Collaborated with staff to plan and execute engaging activities and events
-
-Campus Involvement
-Knight Shadow | Job Shadow Program Participant
-NASA Deep Space Logistics 	                  Dec. 2024
-Whiting-Turner | Wharton-Smith	           	      Dec. 2025	       
-Selected as a participant in University’s competitive matched single-day shadow program
-Gained understanding of position, career path, and organization of each company	    	       
+Languages : Python, Java, JavaScript, SQL
+Frameworks : Django, FastAPI, React, Node.js, PyTorch, TensorFlow Lite
+Data Tools : PostgreSQL, MySQL, MongoDB, Pandas, NumPy, AWS (EC2), ETL Pipelines
+Focus Areas : Backend Development, Automation Systems, AI-Driven Workflows, Data Pipelines, REST API Design

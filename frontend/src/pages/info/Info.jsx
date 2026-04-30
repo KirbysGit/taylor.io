@@ -615,10 +615,14 @@ function Info() {
 	}
 
 	if (isLoading) {
+		// Match the loaded layout’s scroll shell (info-scrollbar + 100vh) so scrollbar/gutter math doesn’t change when fetch completes — intermittent horizontal nudge mainly came from that swap.
 		return (
-			<div className="min-h-screen flex flex-col bg-cream">
+			<div
+				className="min-h-screen flex flex-col bg-cream info-scrollbar overflow-y-auto"
+				style={{ height: '100vh' }}
+			>
 				<TopNav user={user} onLogout={handleLogout} />
-				<main className="flex-1 py-12 bg-cream flex items-center justify-center">
+				<main className="flex min-h-0 flex-1 flex-col items-center justify-center bg-cream py-12">
 					<p className="text-gray-600">Loading...</p>
 				</main>
 			</div>

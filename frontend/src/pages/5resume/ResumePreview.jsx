@@ -6,10 +6,10 @@ import { useNavigate, useLocation } from 'react-router-dom'
 
 // --- api imports.
 import { generateResumePDF, generateResumeWord } from '@/api/services/resume'
-import { upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, updateSectionLabels } from '@/api/services/profile'
+import { upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, getMyProfile, updateSectionLabels } from '@/api/services/profile'
 
 // --- main ui component imports.
-import TopNav from '@/components/TopNav'
+import { ChevronLeft, NavHome, NavLogout } from '@/components/icons'
 import LeftPanel from './components/left/LeftPanel'
 import RightPanel from './components/right/RightPanel'
 
@@ -17,8 +17,19 @@ import RightPanel from './components/right/RightPanel'
 import { validateResumeData } from './utils/resumeValidation'
 import { applyVisibilityFilters, downloadBlob, normalizeSectionOrder } from './utils/resumeDataTransform'
 import { snapshotResumeBaseline, defaultSectionVisibility, createEmptyResumeData } from './utils/resumePreviewHelpers'
+import { BRAND_NAME, resolveLogo } from '@/utils/logoMap'
 import { normalizeTemplateSlug, DEFAULT_STYLE_PREFERENCES, defaultSectionLabels } from './utils/resumePreviewConstants'
-import { normalizeEducationForBackend, normalizeExperienceForBackend, normalizeProjectForBackend, normalizeSkillForBackend } from '@/pages/utils/DataFormatting'
+import {
+	normalizeEducationForBackend,
+	normalizeExperienceForBackend,
+	normalizeProjectForBackend,
+	normalizeSkillForBackend,
+} from '@/pages/utils/DataFormatting'
+import {
+	mergeEducationForChooseProfileSave,
+	mergeExperienceForChooseProfileSave,
+	mergeProjectForChooseProfileSave,
+} from './utils/resumeChooseMerge'
 
 // --- hooks.
 import { useDebouncedPreviews } from './hooks/useDebouncedPreviews'
@@ -62,6 +73,9 @@ function ResumePreview() {
 	const [tailorLayoutPreview, setTailorLayoutPreview] = useState(null)
 	const tailorSnapshotRef = useRef(null)
 
+	// Full GET /profile/me payload for "choose from profile" — merge on save so bulk writes don’t drop unselected rows.
+	const chooseFullProfileRef = useRef(null)
+
 	const [isSaving, setIsSaving] = useState(false)
 
 	// section order & labels state (order from profile/saved resume/tailor via bootstrap + handlers; default when absent).
@@ -92,6 +106,7 @@ function ResumePreview() {
 		setResumeData,
 		setSectionOrder,
 		setSectionLabels,
+		chooseFullProfileRef,
 	})
 
 	// this fetches templates data & sets our initial state.
@@ -423,16 +438,27 @@ function ResumePreview() {
 				tagline: (header.tagline ?? '').trim(),
 			})
 
-			// save education (bulk replace).
-			const educationToSave = resumeData.education.map(normalizeEducationForBackend)
+			const locState = location.state || {}
+			const chooseSnapshot = chooseFullProfileRef.current
+			const mergeChoose =
+				locState.createMode === 'choose' && chooseSnapshot &&
+				(locState.selectedEducationIds || locState.selectedExperienceIds || locState.selectedProjectIds)
+
+			// Bulk endpoints replace collections; choose-flow editor only holds selected rows unless we merge in the rest unchanged.
+			let educationToSave = resumeData.education.map(normalizeEducationForBackend)
+			let experienceToSave = resumeData.experience.map(normalizeExperienceForBackend)
+			let projectsToSave = resumeData.projects.map(normalizeProjectForBackend)
+
+			if (mergeChoose) {
+				educationToSave = mergeEducationForChooseProfileSave(resumeData.education, chooseSnapshot.education)
+				experienceToSave = mergeExperienceForChooseProfileSave(resumeData.experience, chooseSnapshot.experiences)
+				projectsToSave = mergeProjectForChooseProfileSave(resumeData.projects, chooseSnapshot.projects)
+			}
+
 			await setupEducation(educationToSave)
 
-			// save experiences (bulk replace).
-			const experienceToSave = resumeData.experience.map(normalizeExperienceForBackend)
 			await setupExperiences(experienceToSave)
 
-			// save projects (bulk replace).
-			const projectsToSave = resumeData.projects.map(normalizeProjectForBackend)
 			await setupProjects(projectsToSave)
 
 			// save skills (bulk replace) - include both visible and hidden (full pool to profile)
@@ -456,6 +482,17 @@ function ResumePreview() {
 			// set the baseline data.
 			setBaselineData(snapshotResumeBaseline(resumeData))
 
+			// Refresh choose-flow snapshot so the next save still merges against up-to-date ids and untouched rows.
+			if (mergeChoose) {
+				try {
+					const refreshed = await getMyProfile()
+					const data = refreshed.data || refreshed
+					if (data) chooseFullProfileRef.current = structuredClone(data)
+				} catch {
+					// non-fatal — next save still uses previous snapshot for unselected rows
+				}
+			}
+
 			// set the show save banner to false.
 			setShowSaveBanner(false)
 
@@ -470,18 +507,74 @@ function ResumePreview() {
 		}
 	}
 
-	return (
-		<div className="h-screen flex flex-col bg-white overflow-hidden">
-			<TopNav
-				user={user}
-				onLogout={() => {
-					localStorage.removeItem('token')
-					localStorage.removeItem('user')
-					navigate('/')
-				}}
-			/>
+	const handleLogout = () => {
+		localStorage.removeItem('token')
+		localStorage.removeItem('user')
+		navigate('/')
+	}
 
-			<main className="flex-1 flex overflow-hidden min-h-0">
+	return (
+		<div className="flex h-screen flex-col overflow-hidden bg-white">
+			{/* Compact bar mirrors TopNav pink strip; Home is centered inside the same max-w-6xl rail as segmented nav */}
+			{/* Home is centered within the same max-w-6xl strip as TopNav so it doesn’t shift vs Styles | Home | Info */}
+			<header className="relative z-[2] shrink-0 border-b border-black/[0.06] bg-brand-pink text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]">
+				<div className="relative mx-auto w-full max-w-6xl px-4 py-1.5 sm:px-6 sm:py-2.5 md:px-8">
+					<div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-6">
+						<button
+							type="button"
+							onClick={() => navigate('/home')}
+							className="relative z-[3] max-w-fit shrink rounded-lg px-0.5 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-pink"
+							aria-label={`${BRAND_NAME} — Home`}
+						>
+							<img
+								src={resolveLogo('navbar')}
+								alt={BRAND_NAME}
+								decoding="async"
+								fetchPriority="high"
+								className="h-8 w-auto max-w-[min(42vw,11rem)] object-contain object-left opacity-[0.98] sm:h-9 md:max-w-[12rem]"
+							/>
+						</button>
+
+						<div className="relative z-[3] flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2">
+							<button
+								type="button"
+								onClick={() => navigate('/resume/create')}
+								className="inline-flex max-w-[min(52vw,14rem)] shrink-0 items-center gap-1 rounded-full border border-white/22 bg-transparent px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:border-white/38 hover:bg-white/[0.1] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-pink motion-reduce:active:scale-100 sm:gap-1.5 sm:px-3 sm:py-2"
+								title="Choose from profile, Taylor.io Assist, or start fresh"
+							>
+								<ChevronLeft className="h-[1rem] w-[1rem] shrink-0 opacity-92" aria-hidden />
+								<span className="truncate sm:hidden">Setup</span>
+								<span className="hidden truncate sm:inline">Resume setup</span>
+							</button>
+							<button
+								type="button"
+								onClick={handleLogout}
+								aria-label="Log out"
+								className="inline-flex shrink-0 items-center gap-1 rounded-full border border-white/25 bg-white/[0.07] px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-white shadow-sm transition-[transform,background-color,border-color] duration-150 ease-out hover:border-white/40 hover:bg-white/15 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-pink motion-reduce:active:scale-100 sm:gap-1.5 sm:px-3 sm:tracking-[0.12em]"
+							>
+								<NavLogout className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+								<span className="hidden sm:inline">Log out</span>
+							</button>
+						</div>
+					</div>
+
+					<nav
+						aria-label="Preview shortcuts"
+						className="pointer-events-none absolute inset-0 flex items-center justify-center"
+					>
+						<button
+							type="button"
+							onClick={() => navigate('/home')}
+							className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/[0.1] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition-[background-color,transform,border-color] duration-150 ease-out hover:border-white/40 hover:bg-white/15 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-pink motion-reduce:active:scale-100 sm:gap-2 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.14em]"
+						>
+							<NavHome className="h-[1.0625rem] w-[1.0625rem] shrink-0 sm:h-[1.125rem] sm:w-[1.125rem]" />
+							Home
+						</button>
+					</nav>
+				</div>
+			</header>
+
+			<main className="flex min-h-0 flex-1 overflow-hidden">
 				<LeftPanel
 					width={leftPanelWidth}
 					user={user}

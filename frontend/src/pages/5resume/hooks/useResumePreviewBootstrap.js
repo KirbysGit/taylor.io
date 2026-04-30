@@ -17,6 +17,7 @@ export function useResumePreviewBootstrap({
 	setResumeData,
 	setSectionOrder,
 	setSectionLabels,
+	chooseFullProfileRef,
 }) {
 
 	// we need to know if we've fetched the profile yet.
@@ -47,7 +48,16 @@ export function useResumePreviewBootstrap({
 				const response = await getMyProfile()
 				const responseData = response.data
 				const state = location.state || {}
-				
+
+				// Preserve full profile lists so "Save to profile" can merge edits onto every row, not wipe unselected items.
+				if (
+					chooseFullProfileRef &&
+					state.createMode === 'choose' &&
+					(state.selectedEducationIds || state.selectedExperienceIds || state.selectedProjectIds)
+				) {
+					chooseFullProfileRef.current = structuredClone(responseData)
+				}
+
 				// initialize the resume data.
 				let initialized
 				if (state.createMode === 'choose' && (state.selectedEducationIds || state.selectedExperienceIds || state.selectedProjectIds)) {
