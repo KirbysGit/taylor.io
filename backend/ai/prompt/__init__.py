@@ -8,6 +8,7 @@ from .prompt_builder import (
     skillsFitSignals,
     tailor_ab_experiment_enabled,
 )
+from .system_prompts import PASS_A_SYSTEM, PASS_B_SYSTEM, narrative_system_prompt
 
 __all__ = [
     "build_prompt",
@@ -18,4 +19,7 @@ __all__ = [
     "top_keyword_terms",
     "skillsFitSignals",
     "tailor_ab_experiment_enabled",
+    "PASS_A_SYSTEM",
+    "PASS_B_SYSTEM",
+    "narrative_system_prompt",
 ]

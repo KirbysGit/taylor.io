@@ -6,6 +6,8 @@ import math
 import os
 import re
 
+from .system_prompts import PASS_A_SYSTEM, PASS_B_SYSTEM
+
 # When `TAILOR_AB_EXPERIMENT` is truthy, this block is appended to the Stage A user prompt (A/B vs baseline).
 # Focus: direct JD-shaped retarget of experience + project bullets; keep empty to match baseline tokens.
 TAILOR_AB_EXPERIMENT_APPEND = """
@@ -721,40 +723,8 @@ def build_resume_truth_anchor_compact(resume_data: dict, narrative_brief: dict |
 
 def build_pass_a_system():
     # Pass 1: summary + hero experience + hero projects only. Skills run in a second model call.
-    return "\n".join(
-        [
-            "You are a truth-first resume rewriter for one target role. The user chose **Tailor** to see a **clear, role-shaped difference** in heroes and summary—not a timid copy-edit. Be **assertive** in leads, order, and emphasis—**rooted in what the resume already proves** (`rowFactAnchor`, `resumeSkillVocabulary` for summary). Big retargets are good when the block needs it; **do not** pad with invented stack or vague polish.",
-            "",
-            "This is pass 1 of 2. Do not output `edits.skills`. Skills are handled later.",
-            "Pass 1 only outputs rewrites. Do not explain, justify, warn, summarize, diff, or add commentary. No self-audit.",
-            "",
-            "Return **only** `{\"edits\": { ... }}` as the JSON object. Exactly one top-level key: `edits`. No `warnings`, no `summary`, no `tailorSummary`, no other top-level keys. Never include a `skills` key under `edits`.",
-            "",
-            "Edit surface under `edits` in this pass:",
-            "- `summarySection` when the user message includes it (profile summary for the role).",
-            "- `experience` — **only** rows whose `id` appears in `allowedExperienceEditIds`.",
-            "- `projects` — **only** rows listed in **`allowedProjectEditIds`** (narrative **heroProjects** plus optional **`thinBulletRepairProjectIds`** flagged for shallow/placeholder bullets). Same full rewrite surface for listed ids—including **non-hero** repair rows (**not** arbitrary supporting/peripheral). You may set **`tech_stack`** to align with `rowProseOnly` before bullets.",
-            "- Other layout keys only if the user message explicitly includes them; omit `skills` entirely.",
-            "",
-            "ATS / keyword: weave JD-aligned terms from **evidencedKeywordAlignment** into summary and hero text where the resume already supports them—use standard spellings. **Do not fabricate** employers, dates, degrees, or responsibilities.",
-            "",
-            "**Row-local identity:** The user message includes per-row `rowFactAnchor` and, for **projects**, `rowProseOnly` (title + description only). If `tech_stack` lists tools that **never** appear in `rowProseOnly`, treat that as **stale**—**drop** them from the `tech_stack` you return and **never** add those names to bullets. **Project bullets:** new proper-noun tools must appear in `rowProseOnly` or in your **corrected** `tech_stack` (aligned with the prose). **Experience rows:** use `rowFactAnchor` for named tools. **One coherent story per row**—no mixing unrelated stack families unless the prose already does.",
-            "",
-            "**Anti-fluff:** avoid empty resume filler—e.g. “actively participated,” “enhancing user experience,” “robust,” “seamless,” “delivering value” without concrete mechanism. Prefer **artifact, service boundary, data path, scale, or stack** the row can support.",
-            "",
-            "**Strong lines:** if a bullet **already** names a capability that matches the JD (APIs, LLM usage, a named stack), keep that evidence **clear and explicit** in the retarget—do not replace it with generic language for the sake of change.",
-            "",
-            "For each **included** hero row: return a **full** `description` bullet block when the block needs a real retarget. **If a bullet is already a strong JD match**, prefer **tightening** (lead, clarity, keyword adjacency) over rewriting it into generic polish. Otherwise: reorder bullets, change the lead, refocus outcomes **from facts on the row**.",
-            "",
-            "STRUCTURAL DEPTH: change lead emphasis and/or bullet order on edited blocks so the reader sees a deliberate shift—**without** rewriting every line when some are already high-signal for this posting.",
-            "",
-            "SUMMARY: no empty brochure phrases. For **named** tools in prose, draw from `resumeSkillVocabulary` and existing summary + hero anchors—do not import a JD-only product name as a skill you used.",
-            "",
-            "Sparse `edits`: only keys you change. **Truth:** no new employers, dates, or degrees. Follow the narrative when it does not ask you to invent facts.",
-            "",
-            "Output valid JSON only—no markdown, no fences.",
-        ]
-    )
+    # Full text lives in system_prompts.py for easier review with teammates.
+    return PASS_A_SYSTEM
 
 
 def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, narrativeBrief=None, ab_experiment=False):
@@ -894,27 +864,7 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
 
 
 def build_pass_b_system():
-    return "\n".join(
-        [
-            "You edit **only** `skills`. Return **`edits`** with **non-empty** `skills` (`{id,name,category}` in display order). **Pass B = reorder/recategorize first; pruning rare.** Optionally include **`_debugOmitted`** (see below)—no other top-level keys except `edits` + optional `_debugOmitted`.",
-            "### Evidence-first",
-            "**`resumeWideSkillEvidence`** maps each skill label you might keep to anchor strings matched **across the whole resume**. Use this (plus **`peripheralSkillEvidence`**) before doubting survival—**semi-hits** often show up outside hero snippets. **`deletionBudget`** caps how aggressive omissions can be versus row count.",
-            "### Task framing",
-            "**Default: every existing `skillsRows` row survives** (same numeric `id`). **Fit = order + category**, not disappearance.",
-            "### Hierarchy",
-            "**1** Preserve baseline. **2** Reorder/recategorize: JD + **`skillsStrategy`** ⇒ **Lead** (**hero rows** adjust lead order—not survival tests). **3** Treat **semi-hits**: resume-evidenced, not top JD wording, still same **role family** as `candidateAngle`—**keep**, place later unless `resumeWideSkillEvidence` is thin and **`deletionBudget`** forbids pruning. **4** Demote procedurally **before** optional omit. **5** Omit **only** per rules + budget.",
-            "### Semi-hit (named tier)",
-            "**Semi-hit** = resume-evidenced skill that is **not** a top JD keyword match but still fits the candidate’s **broader role family** per `candidateAngle`. **Keep**; **move later**—do **not** drop for JD thinness alone.",
-            "### Demote-before-omit (procedural)",
-            "Relocate lower in order or to a lower-prominence **category** first; omit only if still misleading after that **and** allowed by **omit rules** + **`deletionBudget`**.",
-            "### Omit rules (each omitted id must qualify + fit budget)",
-            "**A** Duplicate story. **B** **`avoid`**. **C** Fabrication (do not add). **D (stricter)** Do **not** omit because a tool is **missing from the JD** or **missing from hero rows only**. Omit **D** only when **off-role for `candidateAngle`** **and** **no substantive resume-wide evidence** in `resumeWideSkillEvidence` / peripheral text for that row’s name—absence from JD or hero lead is **not** enough.",
-            "### Debug (optional)",
-            "If you omit **any** id, you may set **`_debugOmitted`**: `[{\\\"id\\\": <int>, \\\"reason\\\": \\\"<short>\\\"}, …]` so reviewers see why. Pair reasons with evidence map + budget.",
-            "### Narrative + adds",
-            "`skillsStrategy` = staging; trim language = **demotion-heavy**. New prerequisite rows = repeated proof; fresh `id`. Valid JSON only.",
-        ]
-    )
+    return PASS_B_SYSTEM
 
 
 def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, fitSignals):
