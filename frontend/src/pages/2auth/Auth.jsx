@@ -8,6 +8,10 @@
 // google sign in
 // sign in with linkedin
 
+// dude i haven't had time to do shit, i got to dip for work rn but i need a commit for today to try to get a streak.
+
+// trying to focus clean up of login modals.
+
 // imports.
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
