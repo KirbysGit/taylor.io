@@ -301,7 +301,7 @@
 		transform: translateY(0);
 	}
 	50% {
-		transform: translateY(-8px);
+		transform: translateY(-5px);
 	}
 }
 
@@ -326,11 +326,194 @@
 	animation: landing-float 7s ease-in-out infinite;
 }
 
+@keyframes landing-pipeline-bubble-float {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-3px);
+	}
+}
+
+.landing-pipeline-ico-badge svg {
+	width: 1.25rem;
+	height: 1.25rem;
+}
+
+/* Left column bubbles — upright glass shards; tiny drift reads alive without carnival motion */
+.landing-pipeline-bubble {
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+	border: 1px solid rgb(255 255 255 / 0.34);
+	background: rgb(255 255 255 / 0.72);
+	backdrop-filter: blur(12px);
+	box-shadow:
+		0 2px 14px rgb(24 24 27 / 0.06),
+		inset 0 1px 0 rgb(255 255 255 / 0.48);
+	animation: landing-pipeline-bubble-float 10.5s ease-in-out infinite;
+	transform-origin: center center;
+	will-change: transform;
+}
+
+.landing-pipeline-bubble-wash {
+	background: rgb(255 255 255 / 0.6);
+	box-shadow:
+		0 2px 12px rgb(24 24 27 / 0.05),
+		inset 0 1px 0 rgb(255 255 255 / 0.38);
+	border-color: rgb(255 255 255 / 0.28);
+}
+
+.landing-pipeline-bubble-wash-deep {
+	background: rgb(254 253 251 / 0.92);
+	box-shadow:
+		0 2px 12px rgb(24 24 27 / 0.057),
+		inset 0 1px 0 rgb(255 255 255 / 0.65);
+	border-color: rgb(245 243 239 / 0.88);
+}
+
+.landing-pipeline-bubble-ease-d1 {
+	animation-duration: 10.5s;
+	animation-delay: 0s;
+}
+
+.landing-pipeline-bubble-ease-d2 {
+	animation-duration: 9.85s;
+	animation-delay: -1.85s;
+}
+
+.landing-pipeline-bubble-ease-d3 {
+	animation-duration: 11.25s;
+	animation-delay: -3.95s;
+}
+
+.landing-pipeline-bubble-ease-d4 {
+	animation-duration: 9.5s;
+	animation-delay: -2.9s;
+}
+
+.landing-pipeline-bubble-ease-d5 {
+	animation-duration: 10.85s;
+	animation-delay: -5.6s;
+}
+
+@keyframes landing-pipeline-swoosh-breathe {
+	0%, 100% {
+		stroke-opacity: 0.12;
+	}
+	50% {
+		stroke-opacity: 0.34;
+	}
+}
+
+.landing-pipeline-swoosh {
+	animation: landing-pipeline-swoosh-breathe 11s ease-in-out infinite;
+}
+
+.landing-pipeline-swoosh-reverse {
+	animation: landing-pipeline-swoosh-breathe 13s ease-in-out infinite;
+	animation-delay: -6.5s;
+}
+
+@keyframes landing-pipeline-dash-shift {
+	from {
+		stroke-dashoffset: 92;
+	}
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
+@keyframes landing-pipeline-dot-shift {
+	from {
+		stroke-dashoffset: 105;
+	}
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
+.landing-pipeline-dot-trail {
+	stroke-dasharray: 54 72;
+	animation: landing-pipeline-dot-shift 13s linear infinite;
+}
+
+.landing-pipeline-dash {
+	fill: none;
+	stroke-dasharray: 92;
+	stroke-dashoffset: 92;
+	animation: landing-pipeline-dash-shift 5.5s ease-in-out infinite;
+}
+
+@keyframes landing-pipeline-spark-twinkle {
+	0%, 88%, 100% {
+		opacity: 0.22;
+		transform: scale(0.84);
+	}
+	90%, 93% {
+		opacity: 0.94;
+		transform: scale(1.06);
+	}
+}
+
+.landing-pipeline-spark-a {
+	animation: landing-pipeline-spark-twinkle 11s ease-in-out infinite;
+}
+
+.landing-pipeline-spark-b {
+	animation: landing-pipeline-spark-twinkle 11s ease-in-out infinite;
+	animation-delay: -3.85s;
+}
+
+.landing-pipeline-spark-c {
+	animation: landing-pipeline-spark-twinkle 11s ease-in-out infinite;
+	animation-delay: -6.95s;
+}
+
+@keyframes landing-pipeline-glow-soft {
+	0%, 100% {
+		opacity: 0.75;
+		transform: scale(0.995);
+	}
+	50% {
+		opacity: 0.93;
+		transform: scale(1.02);
+	}
+}
+
+/* Gentle outer bloom — Stripe-style restraint, still reads “finished output” */
+.landing-pipeline-output-glow {
+	box-shadow:
+		0 0 48px rgb(252 237 239 / 0.45),
+		0 0 96px rgb(235 173 173 / 0.22);
+	animation: landing-pipeline-glow-soft 9s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.landing-hero-orb,
 	.landing-hero-orb-delayed,
-	.landing-preview-float {
+	.landing-preview-float,
+	.landing-pipeline-bubble,
+	.landing-pipeline-bubble-ease-d1,
+	.landing-pipeline-bubble-ease-d2,
+	.landing-pipeline-bubble-ease-d3,
+	.landing-pipeline-bubble-ease-d4,
+	.landing-pipeline-bubble-ease-d5,
+	.landing-pipeline-swoosh,
+	.landing-pipeline-swoosh-reverse,
+	.landing-pipeline-dash,
+	.landing-pipeline-dot-trail,
+	.landing-pipeline-spark-a,
+	.landing-pipeline-spark-b,
+	.landing-pipeline-spark-c,
+	.landing-pipeline-output-glow {
 		animation: none;
+	}
+
+	.landing-pipeline-dash,
+	.landing-pipeline-dot-trail {
+		stroke-dashoffset: 0;
+		stroke-dasharray: unset;
 	}
 }
 
