@@ -326,12 +326,129 @@
 	animation: landing-float 7s ease-in-out infinite;
 }
 
-@keyframes landing-pipeline-bubble-float {
+@keyframes landing-floating-graphic-drift {
 	0%, 100% {
 		transform: translateY(0);
 	}
 	50% {
-		transform: translateY(-3px);
+		transform: translateY(-2px);
+	}
+}
+
+@keyframes resume-shine-glimmer {
+	0%, 100% {
+		opacity: 0.67;
+		transform: scale(1.05) rotate(0deg);
+	}
+	50% {
+		opacity: 0.94;
+		transform: scale(1.1) rotate(8deg);
+	}
+}
+
+/* Generate-step + hero résumé — soft gold fill/glow (`--subtle`); `--tilt-safe` uses opacity-only glimmer so rotations stay intact. */
+@keyframes resume-shine-glimmer-subtle {
+	0%, 100% {
+		opacity: 0.9;
+		transform: scale(1.01);
+	}
+	50% {
+		opacity: 0.98;
+		transform: scale(1.04);
+	}
+}
+
+/* Opacity-only glimmer so Tailwind/CSS `transform` tilts stay visible (scale keyframes would replace them). */
+@keyframes resume-shine-glimmer-tilt-safe {
+	0%, 100% {
+		opacity: 0.9;
+	}
+	50% {
+		opacity: 0.98;
+	}
+}
+
+.resume-shine--subtle.resume-shine {
+	animation-name: resume-shine-glimmer-subtle;
+	color: #c9a43a;
+	filter:
+		drop-shadow(0 0 1px rgba(55, 42, 18, 0.28))
+		drop-shadow(0 0 6px rgba(255, 210, 130, 0.45))
+		drop-shadow(0 0 2px rgba(190, 140, 40, 0.28));
+}
+
+.resume-shine--subtle.resume-shine--tilt-safe.resume-shine {
+	animation-name: resume-shine-glimmer-tilt-safe;
+}
+
+.resume-shine--subtle.resume-shine:not(.resume-shine--dot) {
+	background: radial-gradient(
+		circle at 34% 30%,
+		#fffbf0 0%,
+		#ffe9a8 35%,
+		#e8c255 70%,
+		#c6a03a 100%
+	);
+}
+
+/* Bottom-left: slightly deeper fill on the cushion, still soft; silhouette matches TR so the pair feels consistent. */
+.resume-shine--subtle.resume-shine-tight-bl1:not(.resume-shine--dot),
+.resume-shine--subtle.resume-shine-tight-bl2:not(.resume-shine--dot),
+.resume-shine--subtle.resume-shine-tight-bl3:not(.resume-shine--dot) {
+	background: radial-gradient(
+		circle at 36% 32%,
+		#fff6e0 0%,
+		#ffd978 32%,
+		#deb24a 68%,
+		#b89238 100%
+	);
+}
+
+.resume-shine-tight-tr1 {
+	top: 1.2%;
+	right: -5.5%;
+	animation-delay: -0.35s;
+}
+
+.resume-shine-tight-tr2 {
+	top: 9%;
+	right: 5.8%;
+	animation-delay: -1.15s;
+}
+
+.resume-shine-tight-tr3 {
+	top: 0.4%;
+	right: 12%;
+	animation-delay: -1.95s;
+}
+
+/* Tucked into the outer corner + shifted down so the cluster clears the Skills rails (was riding too high into the section). */
+.resume-shine-tight-bl1 {
+	bottom: 0%;
+	left: -5%;
+	animation-delay: -0.8s;
+}
+
+.resume-shine-tight-bl2 {
+	bottom: 8.4%;
+	left: 3.8%;
+	animation-delay: -1.6s;
+}
+
+.resume-shine-tight-bl3 {
+	bottom: -2%;
+	left: 9%;
+	animation-delay: -2.35s;
+}
+
+@keyframes resume-shine-dot-glimmer {
+	0%, 100% {
+		opacity: 0.42;
+		transform: scale(0.9);
+	}
+	52% {
+		opacity: 0.96;
+		transform: scale(1.26);
 	}
 }
 
@@ -340,180 +457,376 @@
 	height: 1.25rem;
 }
 
-/* Left column bubbles — upright glass shards; tiny drift reads alive without carnival motion */
-.landing-pipeline-bubble {
-	display: flex;
-	align-items: center;
-	flex-wrap: nowrap;
-	border: 1px solid rgb(255 255 255 / 0.34);
-	background: rgb(255 255 255 / 0.72);
-	backdrop-filter: blur(12px);
-	box-shadow:
-		0 2px 14px rgb(24 24 27 / 0.06),
-		inset 0 1px 0 rgb(255 255 255 / 0.48);
-	animation: landing-pipeline-bubble-float 10.5s ease-in-out infinite;
-	transform-origin: center center;
-	will-change: transform;
+/* Résumé mock — bullet dots sit beside PhCapsule rows; color comes from Tailwind bg on the same element */
+.landing-resume-dot {
+	display: block;
+	width: 5px;
+	height: 5px;
+	border-radius: 9999px;
+	flex-shrink: 0;
 }
 
-.landing-pipeline-bubble-wash {
-	background: rgb(255 255 255 / 0.6);
-	box-shadow:
-		0 2px 12px rgb(24 24 27 / 0.05),
-		inset 0 1px 0 rgb(255 255 255 / 0.38);
-	border-color: rgb(255 255 255 / 0.28);
+/* Clean polished shine accents around resume (non-magical). */
+.resume-shine {
+	position: absolute;
+	display: block;
+	color: #ffe8a3;
+	filter:
+		drop-shadow(0 0 9px rgba(255, 214, 120, 0.88))
+		drop-shadow(0 0 2px rgba(214, 167, 44, 0.92));
+	animation: resume-shine-glimmer 4.1s ease-in-out infinite;
 }
 
-.landing-pipeline-bubble-wash-deep {
-	background: rgb(254 253 251 / 0.92);
-	box-shadow:
-		0 2px 12px rgb(24 24 27 / 0.057),
-		inset 0 1px 0 rgb(255 255 255 / 0.65);
-	border-color: rgb(245 243 239 / 0.88);
+.resume-shine:not(.resume-shine--dot) {
+	background: rgba(255, 232, 163, 0.76);
+	box-sizing: border-box;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='black' d='M50 0Q57 26 100 50Q57 74 50 100Q43 74 0 50Q43 26 50 0Z'/%3E%3C/svg%3E")
+		center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='black' d='M50 0Q57 26 100 50Q57 74 50 100Q43 74 0 50Q43 26 50 0Z'/%3E%3C/svg%3E")
+		center / contain no-repeat;
 }
 
-.landing-pipeline-bubble-ease-d1 {
-	animation-duration: 10.5s;
-	animation-delay: 0s;
+.resume-shine--large {
+	width: 36px;
+	height: 36px;
 }
 
-.landing-pipeline-bubble-ease-d2 {
-	animation-duration: 9.85s;
-	animation-delay: -1.85s;
+.resume-shine--medium {
+	width: 26px;
+	height: 26px;
 }
 
-.landing-pipeline-bubble-ease-d3 {
-	animation-duration: 11.25s;
-	animation-delay: -3.95s;
+.resume-shine--small {
+	width: 18px;
+	height: 18px;
 }
 
-.landing-pipeline-bubble-ease-d4 {
-	animation-duration: 9.5s;
-	animation-delay: -2.9s;
+/* Top-right cluster */
+.resume-shine--tr1 {
+	top: 1.8%;
+	right: -6.2%;
+	animation-delay: -0.35s;
 }
 
-.landing-pipeline-bubble-ease-d5 {
-	animation-duration: 10.85s;
-	animation-delay: -5.6s;
+.resume-shine--tr2 {
+	top: 9.4%;
+	right: 6.4%;
+	transform: rotate(16deg);
+	animation-delay: -1.15s;
 }
 
-@keyframes landing-pipeline-swoosh-breathe {
-	0%, 100% {
-		stroke-opacity: 0.12;
-	}
-	50% {
-		stroke-opacity: 0.34;
-	}
+.resume-shine--tr3 {
+	top: 0.9%;
+	right: 11.4%;
+	transform: rotate(-12deg);
+	animation-delay: -1.95s;
 }
 
-.landing-pipeline-swoosh {
-	animation: landing-pipeline-swoosh-breathe 11s ease-in-out infinite;
+.resume-shine--tr4 {
+	top: 17.8%;
+	right: -2.5%;
+	transform: rotate(20deg);
+	animation-delay: -2.65s;
 }
 
-.landing-pipeline-swoosh-reverse {
-	animation: landing-pipeline-swoosh-breathe 13s ease-in-out infinite;
-	animation-delay: -6.5s;
+/* Bottom-left cluster */
+.resume-shine--bl1 {
+	bottom: 1.1%;
+	left: -6%;
+	animation-delay: -0.8s;
 }
 
-@keyframes landing-pipeline-dash-shift {
-	from {
-		stroke-dashoffset: 92;
-	}
-	to {
-		stroke-dashoffset: 0;
-	}
+.resume-shine--bl2 {
+	bottom: 9.8%;
+	left: 2.3%;
+	transform: rotate(-16deg);
+	animation-delay: -1.6s;
 }
 
-@keyframes landing-pipeline-dot-shift {
-	from {
-		stroke-dashoffset: 105;
-	}
-	to {
-		stroke-dashoffset: 0;
-	}
+.resume-shine--bl3 {
+	bottom: 0.2%;
+	left: 9.4%;
+	transform: rotate(12deg);
+	animation-delay: -2.35s;
 }
 
-.landing-pipeline-dot-trail {
-	stroke-dasharray: 54 72;
-	animation: landing-pipeline-dot-shift 13s linear infinite;
+.resume-shine--bl4 {
+	bottom: 17.2%;
+	left: -2.6%;
+	transform: rotate(-20deg);
+	animation-delay: -3.05s;
 }
 
-.landing-pipeline-dash {
-	fill: none;
-	stroke-dasharray: 92;
-	stroke-dashoffset: 92;
-	animation: landing-pipeline-dash-shift 5.5s ease-in-out infinite;
+/* Floating cloud: 2 anchors, 3 medium supports, 2 small cards, 2 chips (9 blocks total). */
+.floating-data-graphic-wrap {
+	width: min(100%, 520px);
+	margin-inline: auto;
+	overflow: visible;
 }
 
-@keyframes landing-pipeline-spark-twinkle {
-	0%, 88%, 100% {
-		opacity: 0.22;
+@media (max-width: 539px) {
+	.floating-data-graphic-wrap {
 		transform: scale(0.84);
-	}
-	90%, 93% {
-		opacity: 0.94;
-		transform: scale(1.06);
+		transform-origin: top center;
 	}
 }
 
-.landing-pipeline-spark-a {
-	animation: landing-pipeline-spark-twinkle 11s ease-in-out infinite;
+.floating-data-graphic {
+	position: relative;
+	width: 520px;
+	height: 632px;
+	margin-inline: auto;
 }
 
-.landing-pipeline-spark-b {
-	animation: landing-pipeline-spark-twinkle 11s ease-in-out infinite;
-	animation-delay: -3.85s;
+.floating-data-graphic .floating-data-card,
+.floating-data-graphic .floating-data-chip {
+	position: absolute;
+	isolation: isolate;
+	will-change: transform;
+	animation: landing-floating-graphic-drift 11.2s ease-in-out infinite;
 }
 
-.landing-pipeline-spark-c {
-	animation: landing-pipeline-spark-twinkle 11s ease-in-out infinite;
-	animation-delay: -6.95s;
+.floating-data-graphic .floating-data-card {
+	border-radius: 18px;
+	background: rgba(255, 235, 235, 0.72);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	box-shadow: 0 14px 35px rgba(120, 40, 40, 0.12);
+	z-index: 1;
 }
 
-@keyframes landing-pipeline-glow-soft {
-	0%, 100% {
-		opacity: 0.75;
-		transform: scale(0.995);
-	}
-	50% {
-		opacity: 0.93;
-		transform: scale(1.02);
-	}
+.floating-data-card-inner {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	height: 100%;
+	box-sizing: border-box;
+	padding: 18px;
 }
 
-/* Gentle outer bloom — Stripe-style restraint, still reads “finished output” */
-.landing-pipeline-output-glow {
-	box-shadow:
-		0 0 48px rgb(252 237 239 / 0.45),
-		0 0 96px rgb(235 173 173 / 0.22);
-	animation: landing-pipeline-glow-soft 9s ease-in-out infinite;
+.floating-data-icon-box {
+	width: 44px;
+	height: 44px;
+	border-radius: 12px;
+	flex-shrink: 0;
+	display: grid;
+	place-items: center;
+}
+
+.floating-data-icon-box--violet {
+	background: #f3e8ff;
+	color: #7c3aed;
+}
+
+.floating-data-icon-box--sky {
+	background: #e0f2fe;
+	color: #0284c7;
+}
+
+.floating-data-icon-box--teal {
+	background: #d1fae5;
+	color: #047857;
+}
+
+.floating-data-icon-box--amber {
+	background: #fef3c7;
+	color: #c2410c;
+}
+
+.floating-data-icon-box--slate {
+	background: #f1f5f9;
+	color: #64748b;
+}
+
+.floating-data-icon-box--rose {
+	background: #ffe4e6;
+	color: rgb(214, 86, 86);
+}
+
+.floating-data-icon-box svg {
+	width: 1.125rem;
+	height: 1.125rem;
+}
+
+.floating-data-line-group {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding-top: 4px;
+	min-width: 0;
+	flex: 1;
+	align-self: stretch;
+}
+
+.floating-data-line {
+	display: block;
+	height: 6px;
+	border-radius: 999px;
+	background: rgba(120, 100, 110, 0.18);
+	max-width: 100%;
+}
+
+.floating-data-meta-row {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding-top: 2px;
+}
+
+.floating-data-meta-dots {
+	gap: 4px;
+}
+
+.floating-data-meta-dots > span {
+	width: 3px;
+	height: 3px;
+}
+
+.floating-data-meta-line {
+	display: block;
+	height: 5px;
+	border-radius: 999px;
+	background: rgba(120, 100, 110, 0.2);
+}
+
+/* Top narrower */
+.floating-data-graphic .card.medium-education {
+	width: 206px;
+	height: 82px;
+	left: 90px;
+	top: 52px;
+	animation-delay: -0.2s;
+}
+
+.floating-data-graphic .chip.chip-upper-right {
+	left: 340px;
+	top: 52px;
+	width: 104px;
+	height: 46px;
+	min-height: 0;
+	padding-inline: 12px;
+	animation-delay: -0.65s;
+}
+
+/* Upper-middle */
+.floating-data-graphic .card.anchor-profile {
+	width: 252px;
+	height: 104px;
+	left: 126px;
+	top: 146px;
+	animation-delay: -0.95s;
+}
+
+.floating-data-graphic .card.medium-experience {
+	width: 188px;
+	height: 92px;
+	left: 314px;
+	top: 226px;
+	animation-delay: -1.55s;
+}
+
+/* Middle is widest / densest */
+.floating-data-graphic .card.small-skills {
+	width: 176px;
+	height: 82px;
+	left: 80px;
+	top: 286px;
+	animation-delay: -2.2s;
+}
+
+.floating-data-graphic .chip.chip-mid-meta {
+	left: 276px;
+	top: 336px;
+	min-height: 44px;
+	padding: 9px 12px;
+	animation-delay: -2.65s;
+}
+
+.floating-data-graphic .card.medium-projects {
+	width: 228px;
+	height: 96px;
+	left: 220px;
+	top: 388px;
+	animation-delay: -3.1s;
+}
+
+/* Bottom tapers slightly */
+.floating-data-graphic .card.small-awards {
+	width: 172px;
+	height: 80px;
+	left: 52px;
+	top: 444px;
+	animation-delay: -3.65s;
+}
+
+.floating-data-graphic .card.anchor-summary {
+	width: 286px;
+	height: 108px;
+	left: 142px;
+	top: 506px;
+	animation-delay: -4.45s;
+}
+
+.floating-data-graphic .chip {
+	border-radius: 9999px;
+	background: rgba(255, 235, 235, 0.8);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	box-shadow: 0 9px 22px rgba(120, 40, 40, 0.1);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	box-sizing: border-box;
+	height: fit-content;
+	padding: 7px 11px;
+	z-index: 3;
+}
+
+.floating-data-chip-line {
+	display: block;
+	flex-shrink: 0;
+	height: 5px;
+	border-radius: 999px;
+	background: rgba(120, 100, 110, 0.18);
+}
+
+.floating-data-chip-line--pill {
+	width: 50px;
+}
+
+.floating-data-chip-line--tiny {
+	width: 38px;
+}
+
+.floating-data-chip-ico {
+	width: 13px;
+	height: 13px;
+}
+
+.floating-data-chip-ico--sky {
+	color: #0284c7;
+	opacity: 0.92;
+}
+
+.floating-data-chip-ico--violet {
+	color: #7c3aed;
+	opacity: 0.92;
+}
+
+.landing-pipeline-ico-badge-sm svg {
+	width: 0.95rem;
+	height: 0.95rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
 	.landing-hero-orb,
 	.landing-hero-orb-delayed,
 	.landing-preview-float,
-	.landing-pipeline-bubble,
-	.landing-pipeline-bubble-ease-d1,
-	.landing-pipeline-bubble-ease-d2,
-	.landing-pipeline-bubble-ease-d3,
-	.landing-pipeline-bubble-ease-d4,
-	.landing-pipeline-bubble-ease-d5,
-	.landing-pipeline-swoosh,
-	.landing-pipeline-swoosh-reverse,
-	.landing-pipeline-dash,
-	.landing-pipeline-dot-trail,
-	.landing-pipeline-spark-a,
-	.landing-pipeline-spark-b,
-	.landing-pipeline-spark-c,
-	.landing-pipeline-output-glow {
+	.floating-data-graphic .floating-data-card,
+	.floating-data-graphic .floating-data-chip,
+	.resume-shine {
 		animation: none;
-	}
-
-	.landing-pipeline-dash,
-	.landing-pipeline-dot-trail {
-		stroke-dashoffset: 0;
-		stroke-dasharray: unset;
 	}
 }
 
