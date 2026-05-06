@@ -163,7 +163,7 @@ function TopNav({ user, onLogout, onBeforeNavigate }) {
 	const email = resolveNavbarEmail(user)
 
 	return (
-		<header className="border-b border-black/[0.06] bg-brand-pink text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]">
+		<header className="sticky top-0 z-50 shrink-0 border-b border-black/[0.06] bg-brand-pink text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]">
 			<div className="mx-auto grid w-full max-w-6xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 px-4 py-2 sm:gap-x-4 sm:px-6 sm:py-2.5 md:px-8 md:gap-x-6">
 				{/* Left — no `useLocation`; memo skips when only pathname moves */}
 				<TopNavBrand />

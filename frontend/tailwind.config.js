@@ -18,6 +18,8 @@ export default {
         'brand-pink-lighter': 'rgb(250, 205, 205)',
         'cream': 'rgb(252, 250, 240)',
         'cream-darker': 'rgb(245, 243, 235)',
+        /** Landing band between cream blocks — near-white with a whisper of warmth so cards pop without another full cream field. */
+        'section-wash': 'rgb(254, 252, 250)',
         'white-bright': 'rgb(255, 255, 255)',
       },
       fontFamily: {

@@ -335,6 +335,23 @@
 	}
 }
 
+/* How it works — dashed traces “run” along the curve toward the hub / next card. */
+@keyframes how-it-works-step-trace-dash {
+	to {
+		stroke-dashoffset: -36;
+	}
+}
+
+.how-it-works-step-trace {
+	animation: how-it-works-step-trace-dash 2.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.how-it-works-step-trace {
+		animation: none;
+	}
+}
+
 @keyframes resume-shine-glimmer {
 	0%, 100% {
 		opacity: 0.67;

@@ -10,7 +10,11 @@ export default function LandingHeader() {
 			<div className="mx-auto flex max-w-[min(1400px,98vw)] items-center justify-between gap-4 px-4 py-2.5 md:px-6 md:py-3 xl:px-8 2xl:px-10">
 				<button
 					type="button"
-					onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+					onClick={() => {
+						const root = document.getElementById('landing-scroll-root')
+						if (root) root.scrollTo({ top: 0, behavior: 'smooth' })
+						else window.scrollTo({ top: 0, behavior: 'smooth' })
+					}}
 					className="shrink-0 rounded-lg px-0.5 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-pink"
 					aria-label={`${BRAND_NAME} — top of page`}
 				>
