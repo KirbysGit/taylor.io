@@ -13,7 +13,7 @@ const growthEvents = [
 		icon: ShowChartIcon,
 		tone: 'text-brand-pink-dark border-brand-pink/45',
 		well: 'bg-brand-pink-lighter/45',
-		desktopPos: 'left-[72px] top-0',
+		desktopPos: 'left-[72px] top-[24px]',
 	},
 	{
 		label: 'New Role',
@@ -22,7 +22,7 @@ const growthEvents = [
 		icon: WorkIcon,
 		tone: 'text-violet-600 border-violet-300/65',
 		well: 'bg-violet-100/70',
-		desktopPos: 'left-[156px] top-[104px]',
+		desktopPos: 'left-[156px] top-[128px]',
 	},
 	{
 		label: 'New Project',
@@ -31,7 +31,7 @@ const growthEvents = [
 		icon: FolderSpecialIcon,
 		tone: 'text-teal-600 border-teal-300/60',
 		well: 'bg-teal-100/70',
-		desktopPos: 'left-[54px] top-[208px]',
+		desktopPos: 'left-[54px] top-[232px]',
 	},
 	{
 		label: 'New Skill',
@@ -40,38 +40,38 @@ const growthEvents = [
 		icon: faStar,
 		tone: 'text-sky-600 border-sky-300/65',
 		well: 'bg-sky-100/75',
-		desktopPos: 'left-[118px] top-[312px]',
+		desktopPos: 'left-[118px] top-[336px]',
 	},
 ]
 
 const resumeVersions = [
 	{
 		title: 'Résumé v1',
-		subtitle: 'Earlier version',
+		subtitle: 'Fresh grad foundation',
 		border: 'border-brand-pink/35',
 		accent: 'bg-brand-pink',
 		accentSoft: 'bg-brand-pink-lighter/35',
-		layer: 'z-10 left-0 top-[92px] rotate-[-1.5deg]',
+		layer: 'z-10 left-0 top-[92px]',
 		label: 'left-0',
 		stage: 'rough',
 	},
 	{
 		title: 'Résumé v2',
-		subtitle: 'More experience',
+		subtitle: 'Growing with real wins',
 		border: 'border-violet-300/70',
 		accent: 'bg-violet-500',
 		accentSoft: 'bg-violet-100/75',
-		layer: 'z-20 left-[150px] top-[46px] rotate-[0.5deg]',
+		layer: 'z-20 left-[150px] top-[46px]',
 		label: 'left-[150px]',
 		stage: 'cleaner',
 	},
 	{
 		title: 'Résumé v3',
-		subtitle: 'Latest and strongest',
+		subtitle: 'Clear, focused story',
 		border: 'border-sky-300/80',
 		accent: 'bg-teal-500',
 		accentSoft: 'bg-sky-100/80',
-		layer: 'z-30 left-[300px] top-0 rotate-[1.5deg]',
+		layer: 'z-30 left-[300px] top-0',
 		label: 'left-[300px]',
 		stage: 'polished',
 	},
@@ -130,20 +130,21 @@ function DividerRule() {
 	return (
 		<div
 			aria-hidden
-			className="pointer-events-none absolute right-[-44px] top-0 hidden h-[430px] items-center lg:flex"
+			className="pointer-events-none hidden h-full min-h-[430px] items-stretch justify-center lg:flex"
 		>
-			<div className="h-[82%] w-px bg-gradient-to-b from-transparent via-gray-300/70 to-transparent" />
+			<div className="w-px bg-gradient-to-b from-gray-200/10 via-gray-300 to-gray-200/10" />
 		</div>
 	)
 }
 
 function VisualLabel({ children, tone = 'pink', className = '' }) {
+	const lineTone = tone === 'sky' ? 'bg-sky-300/[0.72]' : 'bg-brand-pink/[0.38]'
+	const textTone = tone === 'sky' ? 'text-sky-700/80' : 'text-brand-pink'
 	return (
-		<div className={`flex h-8 items-center gap-2 ${className}`}>
-			<p className={`text-[11px] font-bold uppercase tracking-[0.16em] ${tone === 'sky' ? 'text-sky-700/80' : 'text-brand-pink'}`}>
-				{children}
-			</p>
-			<div className={`h-px w-14 ${tone === 'sky' ? 'bg-sky-200/80' : 'bg-brand-pink/25'}`} aria-hidden />
+		<div className={`flex w-full items-center gap-3 ${className}`}>
+			<div className={`h-px min-w-8 flex-1 ${lineTone}`} aria-hidden />
+			<p className={`shrink-0 whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.16em] ${textTone}`}>{children}</p>
+			<div className={`h-px min-w-8 flex-1 ${lineTone}`} aria-hidden />
 		</div>
 	)
 }
@@ -152,21 +153,18 @@ function GrowthEventsStage() {
 	return (
 		<div className="relative lg:min-h-[470px]">
 			<MobileGrowthEvents />
-			<div className="relative hidden h-[470px] w-[360px] lg:block">
-				<VisualLabel className="absolute left-12 top-0">You add updates</VisualLabel>
-				<div className="absolute inset-x-0 top-12 h-[430px]">
-					{growthEvents.map((event, index) => (
-						<GrowthBubble key={event.label} event={event} index={index} />
-					))}
-					<DividerRule />
-				</div>
+			<div className="relative hidden h-[430px] w-[360px] lg:block">
+				{growthEvents.map((event, index) => (
+					<GrowthBubble key={event.label} event={event} index={index} />
+				))}
 			</div>
 		</div>
 	)
 }
 
 function MiniLine({ width = '100%', className = '' }) {
-	return <span className={`block h-1.5 rounded-full bg-gray-300/68 ${className}`} style={{ width }} aria-hidden />
+	// Use bracket opacity so Tailwind always generates the class (e.g. /68 isn’t a default step).
+	return <span className={`block h-1.5 rounded-full bg-gray-300/[0.68] ${className}`} style={{ width }} aria-hidden />
 }
 
 function MiniBullet({ width = '90%', accent = 'bg-gray-400/80', muted = false }) {
@@ -215,7 +213,7 @@ function MiniSkills({ version }) {
 				{rows.map((parts) => (
 					<div key={parts.join('-')} className="flex min-w-0 items-center gap-1.5">
 						{parts.map((width, index) => (
-							<MiniLine key={`${width}-${index}`} width={width} className="shrink-0 bg-gray-300/58" />
+							<MiniLine key={`${width}-${index}`} width={width} className="shrink-0 bg-gray-300/[0.58]" />
 						))}
 					</div>
 				))}
@@ -230,9 +228,9 @@ function RoughResumeBody({ version }) {
 			<div className="flex items-start gap-2.5">
 				<div className={`size-8 rounded-full ${version.accent} opacity-75`} />
 				<div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
-					<MiniLine width="72%" className={version.accent} />
-					<MiniLine width="94%" className="bg-gray-300/54" />
-					<MiniLine width="58%" className="bg-gray-300/42" />
+					<MiniLine width="104%" className={version.accent} />
+					<MiniLine width="96%" className="bg-gray-300/[0.58]" />
+					<MiniLine width="84%" className="bg-gray-300/[0.48]" />
 				</div>
 			</div>
 			<div className={`rounded-xl p-2 ${version.accentSoft}`}>
@@ -241,8 +239,9 @@ function RoughResumeBody({ version }) {
 					<line x1="3" y1="42" x2="129" y2="42" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4 5" opacity="0.5" />
 				</svg>
 			</div>
-			<MiniSection accent={version.accent} titleWidth="3rem" rows={['100%', '54%', '92%']} />
-			<MiniSection accent={version.accent} titleWidth="3.6rem" rows={['82%', '48%', '88%']} />
+			{/* Messy: fewer “organized” sections, but lines still span most of the width. */}
+			<MiniSection accent={version.accent} titleWidth="3rem" rows={['98%', '92%', '86%']} />
+			<MiniSection accent={version.accent} titleWidth="3.6rem" rows={['94%', '88%', '82%']} />
 			<MiniSkills version={version} />
 		</div>
 	)
@@ -254,21 +253,32 @@ function CleanerResumeBody({ version }) {
 			<div className="flex items-start gap-2.5">
 				<div className={`size-8 rounded-full ${version.accent}`} />
 				<div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
-					<MiniLine width="78%" className={version.accent} />
-					<MiniLine width="92%" className="bg-gray-300/62" />
-					<MiniLine width="70%" className="bg-gray-300/48" />
+					<MiniLine width="90%" className={version.accent} />
+					<MiniLine width="97%" className="bg-gray-300/66" />
+					<MiniLine width="82%" className="bg-gray-300/[0.54]" />
 				</div>
 			</div>
+			{/* Cleaner: more structure + a small “progress” chart block. */}
 			<div className={`rounded-xl p-2.5 ${version.accentSoft}`}>
 				<div className="space-y-1.5">
-					<MiniLine width="62%" className="bg-white/92" />
-					<MiniLine width="91%" className="bg-white/78" />
-					<MiniLine width="74%" className="bg-white/66" />
+					<MiniLine width="78%" className="bg-white/92" />
+					
+				</div>
+				<div className="mt-2.5 rounded-lg bg-white/65 p-2">
+					<div className="flex items-end justify-between gap-1.5">
+						{[6, 10, 8, 14, 11, 16].map((h, idx) => (
+							<span
+								key={`${h}-${idx}`}
+								aria-hidden
+								className="w-[14%] rounded-[6px] bg-violet-500/70"
+								style={{ height: `${h}px` }}
+							/>
+						))}
+					</div>
 				</div>
 			</div>
-			<MiniSection accent={version.accent} titleWidth="3.4rem" rows={['94%', '82%', '72%']} />
-			<MiniSection accent={version.accent} titleWidth="3rem" rows={['88%', '76%']} />
-			<MiniSection accent={version.accent} titleWidth="3.25rem" rows={['84%', '68%']} />
+			<MiniSection accent={version.accent} titleWidth="3.4rem" rows={['96%', '88%', '80%']} />
+			<MiniSection accent={version.accent} titleWidth="3.2rem" rows={['94%', '86%', '74%']} />
 			<MiniSkills version={version} />
 		</div>
 	)
@@ -280,21 +290,22 @@ function PolishedResumeBody({ version }) {
 			<div className="flex items-start gap-2.5">
 				<div className={`size-8 rounded-full ${version.accent}`} />
 				<div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
-					<MiniLine width="84%" className={version.accent} />
-					<MiniLine width="96%" className="bg-gray-300/70" />
-					<MiniLine width="66%" className="bg-gray-300/54" />
+					<MiniLine width="92%" className={version.accent} />
+					<MiniLine width="98%" className="bg-gray-300/74" />
+					<MiniLine width="86%" className="bg-gray-300/[0.58]" />
 				</div>
 			</div>
 			<div className={`rounded-xl p-2.5 ${version.accentSoft}`}>
 				<div className="space-y-1.5">
-					<MiniLine width="58%" className="bg-white/95" />
-					<MiniLine width="94%" className="bg-white/82" />
-					<MiniLine width="82%" className="bg-white/72" />
+					<MiniLine width="74%" className="bg-white/95" />
+					<MiniLine width="97%" className="bg-white/82" />
+					<MiniLine width="90%" className="bg-white/72" />
 				</div>
 			</div>
 			<MiniSection accent="bg-teal-500" titleWidth="3.5rem" rows={['96%', '88%', '78%']} />
 			<MiniSection accent="bg-sky-500" titleWidth="3.15rem" rows={['90%', '82%', '72%']} />
-			<MiniSection accent="bg-violet-500" titleWidth="3.25rem" rows={['84%', '76%']} />
+			<MiniSection accent="bg-violet-500" titleWidth="3.25rem" rows={['88%', '80%', '74%']} />
+			<MiniSection accent={version.accent} titleWidth="3.1rem" rows={['92%', '84%']} />
 			<MiniSkills version={version} />
 		</div>
 	)
@@ -319,8 +330,7 @@ function ResumeCard({ version }) {
 
 function ResumeStack() {
 	return (
-		<div className="min-w-0 lg:translate-x-8 xl:translate-x-12">
-			<VisualLabel tone="sky" className="mb-5 hidden lg:flex">Taylor.io keeps versions current</VisualLabel>
+		<div className="ml-4 min-w-0">
 			<div className="relative h-[315px] w-full max-w-[540px] overflow-visible min-[430px]:h-[372px] sm:mx-auto sm:h-[410px]">
 				<div className="absolute -right-8 -top-10 h-64 w-64 rounded-full bg-sky-100/60 blur-3xl" aria-hidden />
 				<div className="absolute left-0 top-12 h-72 w-72 rounded-full bg-brand-pink-lighter/28 blur-3xl" aria-hidden />
@@ -331,13 +341,17 @@ function ResumeStack() {
 				</div>
 			</div>
 
-			<div className="relative mt-3 hidden h-[72px] max-w-[540px] sm:mx-auto sm:block">
-				<div className="absolute left-0 right-0 top-3 border-t border-dashed border-gray-300/90" aria-hidden />
+			<div className="relative mt-1 hidden h-[96px] max-w-[540px] sm:mx-auto sm:block">
+				<div className=" border-2 border-grey-600  absolute left-[90px] right-[90px] top-[16px] h-3.5px" aria-hidden />
 				{resumeVersions.map((version) => (
 					<div key={`${version.title}-label`} className={`absolute top-0 w-[216px] text-center ${version.label}`}>
-						<div className={`mx-auto size-4 rounded-full border-4 border-cream ${version.accent}`} />
-						<p className="mt-4 text-[0.98rem] font-bold tracking-tight text-gray-900">{version.title}</p>
-						<p className="mt-0.5 text-[13px] leading-relaxed text-gray-600">{version.subtitle}</p>
+						<div className="mx-auto flex h-9 w-12 items-center justify-center">
+							<div className={`h-2 w-9 rounded-full ${version.accent}`} />
+						</div>
+						<div className="mx-auto w-fit min-w-[8.75rem] px-3 py-2">
+							<p className="text-[0.95rem] font-bold tracking-tight text-gray-900">{version.title}</p>
+							<p className="mt-0.5 text-[12px] font-medium leading-snug text-gray-500">{version.subtitle}</p>
+						</div>
 					</div>
 				))}
 			</div>
@@ -359,7 +373,7 @@ export default function LandingGrowWithYou() {
 			<div className="pointer-events-none absolute bottom-20 left-[43rem] hidden text-sky-300/90 lg:block" aria-hidden>+</div>
 
 			<div className="relative mx-auto max-w-[min(1420px,94vw)] px-3 sm:px-4 md:px-5">
-				<div className="grid items-center gap-12 lg:grid-cols-[minmax(330px,0.82fr)_minmax(280px,0.72fr)_minmax(500px,1.12fr)] lg:gap-8 xl:gap-12">
+				<div className="grid items-center gap-12 lg:grid-cols-[minmax(330px,0.82fr)_minmax(0,1.84fr)] lg:gap-10 xl:gap-14">
 					<div className="max-w-xl self-center">
 						<p className="text-[12px] font-bold uppercase tracking-[0.18em] text-brand-pink">Built for long-term growth</p>
 						<h2
@@ -378,9 +392,19 @@ export default function LandingGrowWithYou() {
 						</div>
 					</div>
 
-					<GrowthEventsStage />
+					<div className="min-w-0">
+						<div className="mb-5 hidden grid-cols-[360px_1px_minmax(500px,540px)] items-center gap-x-8 lg:grid xl:gap-x-10">
+							<VisualLabel>You add updates</VisualLabel>
+							<div aria-hidden />
+							<VisualLabel tone="sky">Taylor.io keeps versions current</VisualLabel>
+						</div>
 
-					<ResumeStack />
+						<div className="grid min-w-0 items-start gap-12 lg:grid-cols-[360px_1px_minmax(500px,540px)] lg:gap-x-8 xl:gap-x-10">
+							<GrowthEventsStage />
+							<DividerRule />
+							<ResumeStack />
+						</div>
+					</div>
 				</div>
 			</div>
 
