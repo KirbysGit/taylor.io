@@ -4,6 +4,7 @@ import LandingCta from './components/LandingCta'
 import LandingFooter from './components/LandingFooter'
 import LandingHeader from './components/LandingHeader'
 import LandingHero from './components/LandingHero'
+import LandingGrowWithYou from './components/LandingGrowWithYou'
 import LandingHowItHelps from './components/LandingHowItHelps'
 import LandingHowItWorks from './components/LandingHowItWorks'
 import LandingOneProfileManyResumes from './components/LandingOneProfileManyResumes'
@@ -30,6 +31,7 @@ export default function Landing() {
 				<LandingHowItHelps />
 				<LandingHowItWorks />
 				<LandingOneProfileManyResumes />
+				<LandingGrowWithYou />
 				<LandingCta />
 			</main>
 

@@ -67,7 +67,7 @@ export default function LandingHowItWorks() {
 			{/* No outer master card — section uses main bg-cream like the diagram. */}
 			<div className="mx-auto max-w-[min(1280px,94vw)] px-3 sm:px-4 md:px-5">
 				<div className="mx-auto mb-10 max-w-xl text-center md:mb-14">
-					<p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-pink">How it works</p>
+					<p className="text-[12px] font-bold uppercase tracking-[0.18em] text-brand-pink">How it works</p>
 					<h2 className="mt-3 text-balance text-2xl font-bold tracking-tight text-gray-900 md:mt-3.5 md:text-3xl">
 						Four steps to a résumé you&apos;ll send
 					</h2>

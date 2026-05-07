@@ -106,7 +106,7 @@ export default function LandingHowItHelps() {
 				<div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:items-center lg:gap-12 xl:gap-14">
 					<div className="flex flex-col items-start text-left lg:col-span-5">
 						<div className="w-full max-w-xl">
-							<p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-pink sm:text-[0.8125rem] sm:tracking-[0.13em]">
+							<p className="text-[12px] font-bold uppercase tracking-[0.17em] text-brand-pink sm:text-[0.875rem] sm:tracking-[0.14em]">
 								Built for the job search
 							</p>
 							<h2
