@@ -367,10 +367,6 @@ export default function LandingGrowWithYou() {
 			className="relative overflow-hidden border-b border-gray-200/70 border-t border-brand-pink/20 bg-gradient-to-b from-brand-pink-lighter/45 via-section-wash to-cream py-20 md:py-24 lg:py-28"
 		>
 			<div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/55 to-transparent" aria-hidden />
-			<div className="pointer-events-none absolute bottom-10 left-8 hidden h-px w-[46rem] rotate-[-3deg] border-t border-dashed border-gray-300/70 lg:block" aria-hidden />
-			<div className="pointer-events-none absolute bottom-12 left-24 hidden text-brand-pink-light/75 lg:block" aria-hidden>+</div>
-			<div className="pointer-events-none absolute bottom-16 left-[25rem] hidden text-violet-300/80 lg:block" aria-hidden>+</div>
-			<div className="pointer-events-none absolute bottom-20 left-[43rem] hidden text-sky-300/90 lg:block" aria-hidden>+</div>
 
 			<div className="relative mx-auto max-w-[min(1420px,94vw)] px-3 sm:px-4 md:px-5">
 				<div className="grid items-center gap-12 lg:grid-cols-[minmax(330px,0.82fr)_minmax(0,1.84fr)] lg:gap-10 xl:gap-14">

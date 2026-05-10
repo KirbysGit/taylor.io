@@ -105,3 +105,18 @@ idea stack :
 
 - with ai, make company mandatory input
     - weaken company name input
+
+
+==== STYLING ====
+
+Rounded shapes everywhere (no sharp corners)
+Flat colors, minimal shading
+Soft depth (very light shadows or layering)
+Limited palette
+brand pink (primary)
+white / cream
+2–3 soft accent colors (purple, teal, light blue)
+Abstracted UI, not real UI
+Human presence optional, but simplified
+
+Stripe + Linear + Notion illustrations, but warmer
