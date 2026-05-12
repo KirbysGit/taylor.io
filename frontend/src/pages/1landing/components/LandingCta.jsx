@@ -1,47 +1,58 @@
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined'
 import {
-	faArrowRight,
-	faCalendarCheck,
-	faCheck,
+	faBookmark,
+	faCircleCheck,
 	faCommentDots,
 	faEye,
 	faFileLines,
-	faShieldHalved,
+	faPenToSquare,
 	faStar,
-	faWandMagicSparkles,
-} from '@fortawesome/free-solid-svg-icons'
+} from '@fortawesome/free-regular-svg-icons'
+import { faArrowRight, faCheck, faShoePrints } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useNavigate } from 'react-router-dom'
 
 const outcomeCards = [
 	{
+		title: 'Strong fit',
+		body: "You're a strong match for this role.",
+		icon: faStar,
+		className: 'left-[-5%] top-[42%]',
+		tone: 'text-teal-700 bg-teal-100 border-teal-200/80',
+		dot: 'bg-teal-600',
+	},
+	{
 		title: 'New message',
-		body: 'Someone replied to your application',
+		body: 'You have a new reply on your application.',
 		icon: faCommentDots,
-		className: 'left-[0%] top-[6%]',
+		className: 'right-[2%] top-[10%]',
 		tone: 'text-violet-600 bg-violet-100 border-violet-200/80',
 		dot: 'bg-violet-500',
 	},
 	{
 		title: 'Next steps',
-		body: "You've advanced to the next round",
-		icon: faWandMagicSparkles,
-		className: 'right-[0%] top-[10%]',
+		body: "You're moving on to the next round.",
+		iconType: 'fa',
+		icon: faShoePrints,
+		iconClassName: '-rotate-90',
+		className: 'right-[-5%] top-[42%]',
 		tone: 'text-teal-700 bg-teal-100 border-teal-200/80',
 		dot: 'bg-teal-600',
 	},
 	{
 		title: 'Profile viewed',
-		body: 'Your profile was viewed today',
+		body: 'Your profile was viewed today.',
 		icon: faEye,
-		className: 'left-[0%] top-[42%]',
+		className: 'left-[0%] top-[6.25%]',
 		tone: 'text-sky-700 bg-sky-100 border-sky-200/80',
 		dot: 'bg-sky-500',
 	},
 	{
 		title: 'Interview',
-		body: 'Interview scheduled for next week',
-		icon: faCalendarCheck,
-		className: 'right-[0%] top-[42%]',
+		body: 'Your interview is booked for next week.',
+		iconType: 'mui',
+		muiIcon: CalendarMonthOutlinedIcon,
+		className: 'right-[1%] bottom-[12%]',
 		tone: 'text-brand-pink-dark bg-brand-pink-lighter/70 border-brand-pink-light/45',
 		dot: 'bg-brand-pink',
 	},
@@ -49,62 +60,113 @@ const outcomeCards = [
 		title: 'Your résumé',
 		body: 'Tailored for the role',
 		icon: faFileLines,
-		className: 'left-[1%] bottom-[4%]',
+		className: 'left-[-2%] bottom-[3%]',
 		tone: 'text-brand-pink bg-brand-pink-lighter/65 border-brand-pink-light/45',
 		dot: 'bg-brand-pink-light',
 		wide: true,
 	},
-	{
-		title: 'Strong fit',
-		body: 'Great match for this role',
-		icon: faStar,
-		className: 'right-[1%] bottom-[12%]',
-		tone: 'text-teal-700 bg-teal-100 border-teal-200/80',
-		dot: 'bg-teal-600',
-	},
 ]
 
 const trustItems = [
-	{ label: 'Free to try', icon: faShieldHalved },
-	{ label: 'Edit before export', icon: faWandMagicSparkles },
-	{ label: 'Drafts stay private', icon: faCheck },
+	{ label: 'Free to try', icon: faBookmark },
+	{ label: 'Edit before export', icon: faPenToSquare },
+	{ label: 'Drafts stay private', icon: faCircleCheck },
 ]
 
-function OutcomeCard({ card, index }) {
+function OutcomeCardIcon({ card }) {
+	if (card.iconType === 'mui' && card.muiIcon) {
+		const MuiIcon = card.muiIcon
+		return <MuiIcon className="size-6" sx={{ fontSize: '1.5rem' }} inheritViewBox />
+	}
+	return (
+		<FontAwesomeIcon
+			icon={card.icon}
+			className={['size-6', card.iconClassName].filter(Boolean).join(' ')}
+		/>
+	)
+}
+
+function ResumeOutcomeCard({ card }) {
+	const rows = [
+		{ dot: 'bg-brand-pink-light', width: '82%' },
+		{ dot: 'bg-gray-400/70', width: '94%' },
+		{ dot: 'bg-sky-300', width: '76%' },
+		{ dot: 'bg-gray-300/90', width: '88%' },
+	]
+
 	return (
 		<div
 			className={[
-				'absolute z-20 hidden rounded-2xl border bg-white/92 px-4 py-3 text-left shadow-[0_18px_42px_-28px_rgba(17,24,39,0.42)] ring-1 ring-white/80 backdrop-blur-sm sm:block',
-				card.wide ? 'w-[13.25rem]' : 'w-[12.25rem]',
+				'absolute z-20 hidden w-[15.25rem] rounded-2xl bg-white px-4 py-3.5 text-left shadow-[0_22px_52px_-24px_rgba(17,24,39,0.5)] ring-1 ring-white/85 backdrop-blur-sm transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_30px_64px_-24px_rgba(17,24,39,0.58)] sm:block',
 				card.className,
 			].join(' ')}
-			style={{
-				animation: `cta-outcome-float ${7.5 + index * 0.45}s ease-in-out infinite`,
-				animationDelay: `${index * -0.5}s`,
-			}}
+			aria-hidden
+		>
+			<div className="flex items-start gap-3">
+				{/* Plain circular clip so object-cover fills edge-to-edge; gradients/inset shadows read as “empty” bands. */}
+				<div className="relative size-12 shrink-0 overflow-hidden rounded-full border-2 border-brand-pink-lighter bg-white ring-1 ring-black/[0.04]">
+					<img
+						src="/cta-resume-picture.png"
+						alt=""
+						className="absolute inset-0 size-full scale-[1.38] object-cover object-center"
+						loading="lazy"
+						decoding="async"
+						onError={(event) => {
+							event.currentTarget.style.display = 'none'
+						}}
+					/>
+				</div>
+				<div className="min-w-0 pr-1 pt-1">
+					<p className="text-[0.95rem] font-bold leading-tight text-gray-900">{card.title}</p>
+					<p className="mt-0.5 text-[12px] font-medium leading-snug text-gray-500">{card.body}</p>
+				</div>
+			</div>
+
+			<div className="mt-4 space-y-2">
+				{rows.map((row, index) => (
+					<div key={`${row.width}-${index}`} className="flex items-center gap-2">
+						<span className={`size-1.5 shrink-0 rounded-full ${row.dot}`} />
+						<div className="h-1.5 rounded-full bg-gray-300/[0.62]" style={{ width: row.width }} />
+					</div>
+				))}
+			</div>
+
+			<div className="mt-4 flex gap-2">
+				<div className="h-2 w-24 rounded-full bg-violet-300/75" />
+				<div className="h-2 w-16 rounded-full bg-teal-300/75" />
+			</div>
+
+			<div className="absolute -bottom-5 -right-5 flex size-16 items-center justify-center rounded-full border-[8px] border-brand-pink-lighter/80 bg-brand-pink text-white shadow-[0_22px_42px_-22px_rgba(214,86,86,0.82)]">
+				<FontAwesomeIcon icon={faCheck} className="size-7" />
+			</div>
+		</div>
+	)
+}
+
+function OutcomeCard({ card }) {
+	if (card.wide) {
+		return <ResumeOutcomeCard card={card} />
+	}
+
+	return (
+		<div
+			className={[
+				'absolute z-20 hidden rounded-2xl bg-white px-4 py-2.5 text-left shadow-[0_20px_46px_-24px_rgba(17,24,39,0.48)] ring-1 ring-white/85 backdrop-blur-sm transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_26px_58px_-24px_rgba(17,24,39,0.55)] sm:block',
+				'w-[15.25rem]',
+				card.className,
+			].join(' ')}
 			aria-hidden
 		>
 			<span className={`absolute right-3 top-3 size-2 rounded-full ${card.dot}`} />
-			<div className="flex items-start gap-3">
-				<div className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full border ${card.tone}`}>
-					<FontAwesomeIcon icon={card.icon} className="size-5" />
+			<div className="flex items-center gap-3">
+				<div className={`inline-flex size-12 shrink-0 items-center justify-center rounded-full border-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] ${card.tone}`}>
+					<OutcomeCardIcon card={card} />
 				</div>
-				<div className="min-w-0 pt-0.5">
-					<p className="text-[0.92rem] font-bold leading-tight text-gray-900">{card.title}</p>
-					<p className="mt-1 text-[12px] font-medium leading-relaxed text-gray-500">{card.body}</p>
+				<div className="min-w-0 pr-2">
+					<p className="text-[0.95rem] font-bold leading-tight text-gray-900">{card.title}</p>
+					<p className="mt-0.5 text-[12px] font-medium leading-snug text-gray-500">{card.body}</p>
 				</div>
 			</div>
-			{card.wide ? (
-				<div className="mt-3 space-y-1.5">
-					<div className="h-1.5 w-[74%] rounded-full bg-gray-300/70" />
-					<div className="h-1.5 w-[88%] rounded-full bg-gray-300/62" />
-					<div className="h-1.5 w-[58%] rounded-full bg-gray-300/54" />
-					<div className="mt-3 flex gap-2">
-						<div className="h-2 w-20 rounded-full bg-violet-300/75" />
-						<div className="h-2 w-16 rounded-full bg-teal-300/75" />
-					</div>
-				</div>
-			) : null}
 		</div>
 	)
 }
@@ -113,11 +175,11 @@ function CharacterAnchor() {
 	return (
 		<div className="pointer-events-none absolute inset-x-[18%] bottom-0 z-10 hidden h-[74%] sm:block" aria-hidden>
 			{/* Soft wash behind the figure so the cutout reads on cream without a “card”. */}
-			<div className="absolute bottom-0 left-1/2 h-[78%] w-[88%] max-w-[280px] -translate-x-1/2 rounded-t-[6rem] bg-gradient-to-b from-brand-pink-lighter/30 via-white/35 to-transparent" />
+			<div className="absolute bottom-0 left-1/2 h-[98%] w-[88%] max-w-[500px] -translate-x-1/2 rounded-t-[6rem] bg-gradient-to-b from-brand-pink-lighter/30 via-white/35 to-transparent" />
 			<img
 				src="/cta-person.png"
 				alt=""
-				className="absolute bottom-[-10%] left-1/2 h-[min(92%, 20rem)] w-auto max-w-[min(94%,440px)] -translate-x-1/2 object-contain object-bottom"
+				className="absolute bottom-[-10%] left-1/2 h-[min(89%, 20rem)] w-auto max-w-[min(86%,440px)] -translate-x-[47.5%] object-contain object-bottom"
 				loading="lazy"
 				decoding="async"
 			/>
@@ -158,10 +220,6 @@ function CtaVisualStage() {
 			{outcomeCards.map((card, index) => (
 				<OutcomeCard key={card.title} card={card} index={index} />
 			))}
-
-			<div className="absolute bottom-[9%] left-1/2 z-30 flex size-20 -translate-x-1/2 items-center justify-center rounded-full border-[10px] border-brand-pink-lighter/75 bg-brand-pink text-white shadow-[0_24px_46px_-22px_rgba(214,86,86,0.75)]" aria-hidden>
-				<FontAwesomeIcon icon={faCheck} className="size-8" />
-			</div>
 
 			<span className="absolute left-[4%] top-[28%] text-3xl font-bold text-violet-300/80" aria-hidden>+</span>
 			<span className="absolute right-[4%] top-[32%] text-3xl font-bold text-teal-300/80" aria-hidden>+</span>
@@ -223,19 +281,6 @@ export default function LandingCta() {
 				</div>
 			</div>
 
-			<style>{`
-				@keyframes cta-outcome-float {
-					0%, 100% { transform: translate3d(0, 0, 0); }
-					45% { transform: translate3d(0, -7px, 0); }
-					72% { transform: translate3d(0, 3px, 0); }
-				}
-
-				@media (prefers-reduced-motion: reduce) {
-					[style*="cta-outcome-float"] {
-						animation: none !important;
-					}
-				}
-			`}</style>
 		</section>
 	)
 }
