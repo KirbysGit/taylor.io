@@ -24,7 +24,7 @@ function SavedProfileMock() {
 			<div className="flex items-start justify-between gap-4">
 				<div className="flex min-w-0 items-start gap-3">
 					<span className={`mt-0.5 inline-flex h-20 w-20 shrink-0 aspect-square items-center justify-center rounded-full ${pinkWell.box}`}>
-						<img src="/alex.png" alt="" className="h-full w-full rounded-full object-cover" />
+						<img src="/opmr-picture.png" alt="" className="h-full w-full overflow-hidden translate-y-[2.5%] scale-[1.075] rounded-full object-cover" />
 					</span>
 					<div className="min-w-0">
 						<div className="text-lg font-semibold tracking-tight text-brand-pink">Alex's saved profile</div>
@@ -118,7 +118,7 @@ const profileFlowSteps = [
 	{
 		icon: faFileLines,
 		title: "1. Save Alex's profile",
-		description: 'Keep her wins, projects, and impact organized in one place.',
+		description: 'Keep his wins, projects, and impact organized in one place.',
 		well: 'bg-brand-pink-lighter/60',
 		iconColor: 'text-brand-pink',
 	},
@@ -379,12 +379,12 @@ export default function LandingOneProfileManyResumes() {
 							</h2>
 							<div>
 							<p className="max-w-[42rem] pt-2.5 text-[1.02rem] leading-relaxed text-gray-600 md:text-[1.06rem]">
-								Here's a case with <span className="font-semibold text-gray-900">Alex</span>. She wants to grow
+								Here's a case with <span className="font-semibold text-gray-900">Alex</span>. He wants to grow
 								into <span className="font-semibold text-gray-900">product design</span> and brings a strong
 								background in <span className="font-semibold text-gray-900">operations management</span>,
 								hands-on project execution, and <span className="font-semibold text-gray-900">analytics</span>,
 								so <span className="font-semibold text-brand-pink-dark">Taylor.io</span> can shape the right
-								version for each role she wants next.
+								version for each role he wants next.
 							</p>
 						</div>
 						</div>

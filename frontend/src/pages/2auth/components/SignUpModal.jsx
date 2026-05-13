@@ -1,6 +1,6 @@
 import { useState, useEffect, useId } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
+import { faEnvelope, faEye, faEyeSlash, faLock, faShieldHalved, faWandSparkles } from '@fortawesome/free-solid-svg-icons'
 import { RequiredAsterisk, Checkmark, XIcon } from '@/components/icons'
 import { registerUser } from '@/api/services/auth'
 import { AuthModalDocPreview } from './AuthModalDocPreview'
@@ -178,24 +178,24 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 
 	return (
 		<div
-			className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm animate-fade-in"
+			className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-4 pt-24 animate-fade-in sm:p-5 sm:pt-20"
 			role="presentation"
 			onClick={onClose}
 		>
 			<div
-				className="animate-fade-in grid max-h-[min(92vh,calc(100vh-2rem))] w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-200/90 bg-white-bright shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] sm:max-w-lg md:max-w-4xl md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.1fr)]"
+				className="auth-card animate-fade-in w-full max-w-[29rem] overflow-hidden rounded-[1.45rem] border border-brand-pink/18 bg-white/88 shadow-[0_28px_80px_-24px_rgba(120,40,40,0.34)] backdrop-blur-xl"
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="signup-modal-title"
 				aria-describedby={describedBy}
 				onClick={(e) => e.stopPropagation()}
 			>
-				<div className="landing-hero-mesh relative hidden flex-col justify-between px-8 py-10 text-white md:flex md:min-h-0">
+				<div className="hidden">
 					<div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/10" />
 					<div className="landing-hero-orb pointer-events-none absolute -left-16 top-0 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
 					<div className="relative">
 						<p className="text-xs font-semibold uppercase tracking-widest text-white/80">taylor.io</p>
-						<h2 id="signup-modal-title" className="mt-4 text-2xl font-bold leading-snug tracking-tight">
+						<h2 className="mt-4 text-2xl font-bold leading-snug tracking-tight">
 							Create your account
 						</h2>
 						<p className="mt-3 max-w-[260px] text-sm font-light leading-relaxed text-white/90">
@@ -205,32 +205,47 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 					<AuthModalDocPreview />
 				</div>
 
-				<div className="relative flex max-h-[min(92vh,calc(100vh-2rem))] flex-col overflow-y-auto p-6 sm:p-8">
+				<div className="relative flex flex-col overflow-visible px-5 py-5 sm:px-7 sm:py-6">
 					<button
 						type="button"
 						onClick={onClose}
-						className="absolute right-3 top-3 z-10 rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 sm:right-4 sm:top-4"
+						className="absolute right-4 top-4 z-10 rounded-full p-2 text-gray-400 transition hover:bg-brand-pink-lighter/70 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 						aria-label="Close"
 					>
 						<XIcon className="h-5 w-5" />
 					</button>
 
-					<div className="md:hidden">
-						<p className="text-center text-xs font-semibold uppercase tracking-widest text-brand-pink">taylor.io</p>
-					</div>
-
-					<div className="mb-5 mt-2 text-center md:mt-0 md:text-left">
-						<h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl md:hidden">Sign up</h2>
-						<p className="mt-2 text-sm text-gray-600 md:hidden">
-							Fill in your details below. All fields are required.
+					<div className="mb-4 mt-2 text-center">
+						<p className="text-[0.62rem] font-black uppercase tracking-[0.24em] text-brand-pink">Your story starts here</p>
+						<h2 id="signup-modal-title" className="mx-auto mt-2 max-w-[23rem] font-serif text-[2rem] font-black leading-[0.98] tracking-tight text-gray-950 sm:text-[2.35rem]">
+							Start your first tailored r&eacute;sum&eacute;.
+						</h2>
+						<div className="mx-auto mt-1.5 h-1 w-28 -rotate-2 rounded-full bg-brand-pink" />
+						<p className="mx-auto mt-3 max-w-[22rem] text-sm leading-relaxed text-gray-600">
+							Save your experience, choose the role, and generate a r&eacute;sum&eacute; that fits.
 						</p>
-						<div className="mx-auto mt-3 h-0.5 max-w-[5rem] rounded-full bg-brand-pink md:hidden" />
 					</div>
 
-					<form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4" noValidate>
+					<button
+						type="button"
+						disabled
+						className="mb-3 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white/92 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-[0_8px_18px_rgba(24,24,27,0.08)] disabled:cursor-not-allowed disabled:opacity-70"
+						title="Google sign-in coming soon"
+					>
+						<span className="text-lg font-black text-[#4285f4]">G</span>
+						Continue with Google
+					</button>
+
+					<div className="mb-3 flex items-center gap-4 text-xs text-gray-400">
+						<span className="h-px flex-1 bg-gray-200" />
+						<span>or</span>
+						<span className="h-px flex-1 bg-gray-200" />
+					</div>
+
+					<form onSubmit={handleSubmit} className="space-y-2.5" noValidate>
 						<div className="flex gap-3">
 							<div className="min-w-0 flex-1">
-								<label htmlFor="signup-first-name" className="label">
+								<label htmlFor="signup-first-name" className="auth-compact-label label">
 									First name <RequiredAsterisk />
 								</label>
 								<div className="relative">
@@ -240,7 +255,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 										name="first_name"
 										value={formData.first_name}
 										onChange={handleChange}
-										className={`input ${successStates.first_name ? 'input-success' : ''}`}
+									className={`auth-compact-input input ${successStates.first_name ? 'input-success' : ''}`}
 										placeholder="Jordan"
 										autoComplete="given-name"
 										required
@@ -253,7 +268,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 								</div>
 							</div>
 							<div className="min-w-0 flex-1">
-								<label htmlFor="signup-last-name" className="label">
+								<label htmlFor="signup-last-name" className="auth-compact-label label">
 									Last name <RequiredAsterisk />
 								</label>
 								<div className="relative">
@@ -263,7 +278,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 										name="last_name"
 										value={formData.last_name}
 										onChange={handleChange}
-										className={`input ${successStates.last_name ? 'input-success' : ''}`}
+									className={`auth-compact-input input ${successStates.last_name ? 'input-success' : ''}`}
 										placeholder="Lee"
 										autoComplete="family-name"
 										required
@@ -278,7 +293,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 						</div>
 
 						<div>
-							<label htmlFor="signup-email" className="label">
+							<label htmlFor="signup-email" className="auth-compact-label label">
 								Email <RequiredAsterisk />
 							</label>
 							<div className="relative">
@@ -288,7 +303,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 									name="email"
 									value={formData.email}
 									onChange={handleChange}
-									className={`input ${successStates.email ? 'input-success' : ''}`}
+									className={`auth-compact-input input pl-10 ${successStates.email ? 'input-success' : ''}`}
 									placeholder="you@example.com"
 									autoComplete="email"
 									required
@@ -300,6 +315,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 										<Checkmark className="h-3 w-3 text-white" />
 									</div>
 								)}
+								<FontAwesomeIcon icon={faEnvelope} className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
 							</div>
 						</div>
 
@@ -310,7 +326,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 						)}
 
 						<div>
-							<label htmlFor="signup-password" className="label">
+							<label htmlFor="signup-password" className="auth-compact-label label">
 								Password <RequiredAsterisk />
 							</label>
 							<div className="relative">
@@ -321,7 +337,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 									value={formData.password}
 									onChange={handleChange}
 									onFocus={() => setShowPasswordRequirements(true)}
-									className={`input pr-11 ${successStates.password ? 'input-success' : ''}`}
+									className={`auth-compact-input input pl-10 pr-11 ${successStates.password ? 'input-success' : ''}`}
 									placeholder="Create a strong password"
 									autoComplete="new-password"
 									required
@@ -331,6 +347,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 										<Checkmark className="h-3 w-3 text-white" />
 									</div>
 								)}
+								<FontAwesomeIcon icon={faLock} className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
 								<button
 									type="button"
 									onClick={() => setShowPassword((p) => !p)}
@@ -381,7 +398,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 						</div>
 
 						<div>
-							<label htmlFor="signup-confirm-password" className="label">
+							<label htmlFor="signup-confirm-password" className="auth-compact-label label">
 								Confirm password <RequiredAsterisk />
 							</label>
 							<div className="relative">
@@ -392,7 +409,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 									value={formData.confirmPassword}
 									onChange={handleChange}
 									onFocus={() => setShowConfirmPasswordMatch(true)}
-									className={`input pr-11 ${successStates.confirmPassword ? 'input-success' : ''}`}
+									className={`auth-compact-input input pl-10 pr-11 ${successStates.confirmPassword ? 'input-success' : ''}`}
 									placeholder="Repeat password"
 									autoComplete="new-password"
 									required
@@ -402,6 +419,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 										<Checkmark className="h-3 w-3 text-white" />
 									</div>
 								)}
+								<FontAwesomeIcon icon={faShieldHalved} className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
 								<button
 									type="button"
 									onClick={() => setShowConfirmPassword((p) => !p)}
@@ -437,21 +455,28 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 						<button
 							type="submit"
 							disabled={isLoading || !isFormValid}
-							className="w-full rounded-xl bg-brand-pink py-3.5 text-sm font-semibold text-white shadow-md transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:text-base"
+							className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-pink py-2.5 text-sm font-bold text-white shadow-[0_12px_24px_rgba(214,86,86,0.28)] transition hover:-translate-y-0.5 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
 						>
+							<FontAwesomeIcon icon={faWandSparkles} className="size-4" />
 							{isLoading ? 'Creating account…' : 'Create account'}
 						</button>
 					</form>
 
-					<div className="mt-6 border-t border-gray-100 pt-6 text-center">
+					<div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[0.72rem] font-medium text-gray-500">
+						<span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-brand-pink" /> Free to try</span>
+						<span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-violet-400" /> No credit card required</span>
+						<span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-cyan-400" /> Drafts stay private</span>
+					</div>
+
+					<div className="-mx-5 mt-4 border-t border-gray-100 px-5 pt-3.5 text-center sm:-mx-7 sm:px-7">
 						<p className="text-sm text-gray-600">
 							Already have an account?{' '}
 							<button
 								type="button"
 								onClick={onSwitchToLogin}
-								className="font-semibold text-brand-pink underline decoration-brand-pink/40 underline-offset-2 transition hover:opacity-90 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+								className="font-bold text-brand-pink transition hover:opacity-90 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 							>
-								Sign in
+								Sign in →
 							</button>
 						</p>
 					</div>

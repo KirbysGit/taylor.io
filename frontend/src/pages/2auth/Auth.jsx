@@ -1,38 +1,17 @@
-// pages/Auth.jsx
-
-// authentication page containing login and signup modals.
-
-// add background features that show on the side.
-// still need to brainstorm, maybe like user reviews, demo videos, etc.
-
-// google sign in
-// sign in with linkedin
-
-// dude i haven't had time to do shit, i got to dip for work rn but i need a commit for today to try to get a streak.
-
-// trying to focus clean up of login modals.
-
-// imports.
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
-// components.
 import LoginModal from './components/LoginModal'
 import SignUpModal from './components/SignUpModal'
 
-// ----------- main component -----------
 function Auth() {
-
-	// navigate hook.
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
-    const mode = searchParams.get('mode') || 'login'
+    const mode = searchParams.get('mode') || 'signup'
     
-	// states.
-    const [showLogin, setShowLogin] = useState(mode === 'login')			// state for showing login modal.
-    const [showSignUp, setShowSignUp] = useState(mode === 'signup')			// state for showing sign up modal.
+    const [showLogin, setShowLogin] = useState(mode === 'login')
+    const [showSignUp, setShowSignUp] = useState(mode === 'signup')
 
-	// effect to change modal based on set mode.
     useEffect(() => {
 		if (mode === 'signup') {
 			setShowLogin(false)
@@ -43,55 +22,47 @@ function Auth() {
 		}
     }, [mode])
 
-	// ------------------ functions ------------------
-
-	// close modal and navigate to home.
     const handleClose = () => {
       	navigate('/')
     }
 
-	// switches to sign up modal.
     const switchToSignUp = () => {
 		setShowLogin(false)
 		setShowSignUp(true)
     }
 
-	// switches to login modal.
     const switchToLogin = () => {
 		setShowSignUp(false)
 		setShowLogin(true)
     }
 
-	// handles if sign up is successful.
     const handleSignUpSuccess = (user) => {
-		// switch to login modal after successful signup.
 		setShowSignUp(false)
 		setShowLogin(true)
 		navigate('/auth?mode=login')
     }
 
-	// handles if login is successful.
     const handleLoginSuccess = (user) => {
-		// navigate to home - ProtectedRoute will handle setup completion check and redirect if needed.
 		navigate('/home')
     }
 
     return (
-		<div 
-			className="min-h-screen flex items-center justify-center bg-cream relative"
-			style={{
-				backgroundImage: 'url(/auth-background.png)', // add your image to public folder
-				backgroundSize: 'cover',
-				backgroundPosition: 'center',
-				backgroundRepeat: 'no-repeat',
-			}}
-		>
-			{/* cream overlay for better contrast */}
-			<div className="absolute inset-0 bg-cream/80"></div>
+		<div className="auth-page-shell relative min-h-screen overflow-hidden bg-[#fff8ef]">
+			<div className="auth-resume-pattern absolute inset-0 opacity-[0.48]" aria-hidden />
+			<div className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-brand-pink/20 blur-3xl" aria-hidden />
+			<div className="pointer-events-none absolute -right-20 top-0 h-80 w-80 rounded-full bg-brand-pink/24 blur-3xl" aria-hidden />
+			<div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.88),transparent_58%)]" aria-hidden />
 			
-			{/* modals container */}
+			<button
+				type="button"
+				onClick={() => navigate('/')}
+				className="absolute left-5 top-5 z-[60] inline-flex items-center rounded-full border border-brand-pink/25 bg-gradient-to-br from-brand-pink-lighter via-white/95 to-brand-pink-lighter/55 px-5 py-3 shadow-[0_14px_38px_rgba(214,86,86,0.22)] ring-1 ring-white/70 backdrop-blur-md transition hover:-translate-y-0.5 hover:border-brand-pink/35 hover:shadow-[0_18px_44px_rgba(214,86,86,0.28)] sm:left-8 sm:top-8"
+				aria-label="Go to taylor.io home"
+			>
+				<img src="/lg_tr_logo.png" alt="taylor.io" className="h-9 w-auto object-contain" />
+			</button>
+			
 			<div className="relative z-10">
-				{/* login modal */}
 				<LoginModal
 					isOpen={showLogin}
 					onClose={handleClose}
@@ -111,6 +82,5 @@ function Auth() {
     )
 }
 
-// export.
 export default Auth
 
