@@ -1,108 +1,577 @@
-// pages/4home/Home.jsx — dashboard: atmosphere full width; welcome + floating quick cards + saved resumes as separate bands
+// pages/4home/Home.jsx -- dashboard shell with side navigation, primary resume action, and profile health cards
 
-import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import TopNav from '@/components/TopNav'
-import { listSavedResumes, deleteSavedResume } from '@/api/services/profile'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+	faArrowRight,
+	faBriefcase,
+	faCheck,
+	faChevronLeft,
+	faChevronRight,
+	faClockRotateLeft,
+	faFileAlt,
+	faGear,
+	faGraduationCap,
+	faHome,
+	faLayerGroup,
+	faPenToSquare,
+	faPlus,
+	faRocket,
+	faShieldHalved,
+	faStar,
+	faTrash,
+	faUser,
+	faWandMagicSparkles,
+} from '@fortawesome/free-solid-svg-icons'
+import { resolveLogo } from '@/utils/logoMap'
+import { getMyProfile, listSavedResumes, deleteSavedResume } from '@/api/services/profile'
 
-const quickCardAccents = {
-	slate: {
-		orbA: 'bg-slate-500/[0.14]',
-		orbB: 'bg-sky-400/[0.1]',
-		topWash: 'from-slate-500/[0.14]',
-		iconSurface:
-			'bg-slate-500/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.55)] ring-1 ring-slate-400/20',
-	},
-	pink: {
-		orbA: 'bg-brand-pink/[0.2]',
-		orbB: 'bg-rose-300/[0.12]',
-		topWash: 'from-brand-pink/[0.2]',
-		iconSurface:
-			'bg-brand-pink/[0.22] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.45)] ring-1 ring-brand-pink/30',
-	},
-	violet: {
-		orbA: 'bg-violet-500/[0.14]',
-		orbB: 'bg-fuchsia-400/[0.09]',
-		topWash: 'from-violet-500/[0.13]',
-		iconSurface:
-			'bg-violet-500/[0.1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5)] ring-1 ring-violet-400/25',
-	},
-}
+const navItems = [
+	{ label: 'Dashboard', to: '/home', icon: faHome },
+	{ label: 'Profile', to: '/info', icon: faUser },
+	{ label: 'Resumes', to: '/resumes', icon: faFileAlt },
+	{ label: 'Templates', to: '/templates', icon: faLayerGroup },
+	{ label: 'Settings', to: null, icon: faGear },
+]
 
-/** Distinct tinted washes per action so tiles feel crafted, not three copies of one style */
-function QuickActionCard({
-	onClick,
-	title,
-	description,
-	icon,
-	accent = 'pink',
-	primary = false,
-}) {
-	const tone = primary ? quickCardAccents.pink : quickCardAccents[accent] || quickCardAccents.pink
+const dataRows = [
+	{
+		key: 'experiences',
+		label: 'Experience',
+		icon: faBriefcase,
+		bg: 'bg-sky-100',
+		tone: 'text-sky-700',
+		empty: 'Add roles',
+	},
+	{
+		key: 'education',
+		label: 'Education',
+		icon: faGraduationCap,
+		bg: 'bg-emerald-100',
+		tone: 'text-emerald-700',
+		empty: 'Add school',
+	},
+	{
+		key: 'projects',
+		label: 'Projects',
+		icon: faRocket,
+		bg: 'bg-violet-100',
+		tone: 'text-violet-700',
+		empty: 'Add projects',
+	},
+	{
+		key: 'skills',
+		label: 'Skills',
+		icon: faWandMagicSparkles,
+		bg: 'bg-cyan-100',
+		tone: 'text-cyan-700',
+		empty: 'Add skills',
+	},
+	{
+		key: 'summary',
+		label: 'Summary',
+		icon: faStar,
+		bg: 'bg-amber-100',
+		tone: 'text-amber-700',
+		empty: 'Add summary',
+	},
+]
+
+const templateSwatches = [
+	{ toneClass: 'bg-violet-500', bars: ['w-12', 'w-8', 'w-14'] },
+	{ toneClass: 'bg-sky-500', bars: ['w-14', 'w-10', 'w-16'] },
+	{ toneClass: 'bg-emerald-500', bars: ['w-10', 'w-16', 'w-12'] },
+	{ toneClass: 'bg-rose-500', bars: ['w-12', 'w-14', 'w-9'] },
+]
+
+function DashboardSidebar({ collapsed, onToggle, onLogout }) {
+	const navigate = useNavigate()
+	const location = useLocation()
+
+	const handleNavigate = (item) => {
+		if (!item.to) {
+			toast('Settings are coming soon')
+			return
+		}
+		navigate(item.to)
+	}
 
 	return (
-		<button
-			type="button"
-			onClick={onClick}
+		<aside
 			className={[
-				'group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200/60 bg-white/45 px-5 py-8 text-center shadow-[0_14px_44px_-20px_rgba(45,30,38,0.22)] backdrop-blur-md ring-1 ring-white/80',
-				'transition-[background-color,transform,box-shadow,border-color] duration-300 motion-reduce:transition-none',
-				'hover:bg-white/[0.62] hover:shadow-[0_20px_50px_-18px_rgba(214,86,86,0.22)] hover:ring-white',
-				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cream',
-				primary
-					? 'shadow-[0_14px_48px_-16px_rgba(214,86,86,0.28)] ring-2 ring-brand-pink/[0.28] hover:ring-brand-pink/45'
-					: 'hover:border-brand-pink/28',
-				'motion-safe:active:scale-[0.99]',
-				'motion-reduce:active:scale-100',
+				'relative z-20 hidden min-h-screen shrink-0 border-r border-white/16 bg-[#9f3a40] px-4 py-5 text-white shadow-[16px_0_48px_-34px_rgba(80,12,18,0.62)] transition-[width] duration-300 lg:flex lg:flex-col',
+				collapsed ? 'w-[5.75rem]' : 'w-64',
 			].join(' ')}
 		>
-			<span
-				className={`pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${tone.topWash} to-transparent opacity-90`}
-				aria-hidden
-			/>
-			{/* Highlights the curved top edge so tiles stay visually distinct */}
-			<span
-				className="pointer-events-none absolute inset-x-4 top-[1px] h-px bg-gradient-to-r from-transparent via-white/90 to-transparent opacity-75"
-				aria-hidden
-			/>
-			<span
-				className={`pointer-events-none absolute -right-10 top-[-2.75rem] h-[11rem] w-[11rem] rounded-full blur-3xl ${tone.orbA} motion-reduce:hidden`}
-				aria-hidden
-			/>
-			<span
-				className={`pointer-events-none absolute -bottom-10 -left-8 h-[7.5rem] w-[7.5rem] rounded-full blur-2xl ${tone.orbB} opacity-95 motion-reduce:hidden`}
-				aria-hidden
-			/>
+			<div className="relative flex items-center justify-center">
+				<button
+					type="button"
+					onClick={() => navigate('/home')}
+					className="flex min-w-0 items-center justify-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#7c252b]"
+					aria-label="taylor.io dashboard"
+				>
+					<img
+						src={collapsed ? '/favorite.png' : resolveLogo('navbar')}
+						alt="taylor.io"
+						className={collapsed ? 'size-11 rounded-2xl object-contain object-center shadow-sm' : 'h-15 w-auto max-w-[11rem] object-contain object-center'}
+					/>
+				</button>
+			</div>
 
-			<span className="relative z-[1] flex h-full flex-col items-center">
-				{primary ? (
-					<span className="mb-4 inline-flex rounded-full bg-brand-pink px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white shadow-[0_6px_16px_-6px_rgba(214,86,86,0.65)]">
-						Start here
-					</span>
+			<nav className="mt-10 space-y-2" aria-label="Dashboard">
+				{navItems.map((item) => {
+					const active = item.to && location.pathname === item.to
+					return (
+						<button
+							key={item.label}
+							type="button"
+							onClick={() => handleNavigate(item)}
+							title={collapsed ? item.label : undefined}
+							className={[
+								'group relative flex w-full items-center rounded-2xl px-3 py-2.5 text-sm font-bold transition-[background-color,color,box-shadow,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#9f3a40]',
+								collapsed ? 'justify-center' : 'justify-start gap-3',
+								active
+									? 'bg-white text-brand-pink-dark shadow-[0_14px_30px_-18px_rgba(255,255,255,0.72)]'
+									: 'text-white/76 hover:translate-x-0.5 hover:bg-white/10 hover:text-white',
+							].join(' ')}
+						>
+							<span
+								className={[
+									'flex size-8 shrink-0 items-center justify-center rounded-xl transition-[background-color,color,transform]',
+									active ? 'bg-brand-pink/[0.12] text-brand-pink-dark' : 'bg-white/[0.08] text-white/82 group-hover:bg-white/14 group-hover:text-white',
+								].join(' ')}
+							>
+								<FontAwesomeIcon icon={item.icon} className="size-4" />
+							</span>
+							{collapsed ? null : <span>{item.label}</span>}
+							{active && !collapsed ? (
+								<span className="ml-auto h-5 w-1 rounded-full bg-brand-pink" aria-hidden />
+							) : null}
+						</button>
+					)
+				})}
+			</nav>
+
+			<button
+					type="button"
+					onClick={onToggle}
+					className="absolute -right-4 top-1/2 z-30 inline-flex size-8 shrink-0 -translate-y-1/2 items-center justify-center rounded-full border border-brand-pink/18 bg-white text-brand-pink-dark shadow-[0_8px_18px_-12px_rgba(80,12,18,0.55)] transition hover:-right-4 hover:border-brand-pink/35 hover:bg-brand-pink-lighter hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#9f3a40]"
+					aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+				>
+					<FontAwesomeIcon icon={collapsed ? faChevronRight : faChevronLeft} className="size-3.5" />
+			</button>
+
+			<div className="mt-auto rounded-3xl border border-white/14 bg-white/[0.08] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+				{collapsed ? (
+					<div className="mx-auto flex size-10 items-center justify-center rounded-2xl bg-white/14 text-white shadow-sm">
+						<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
+					</div>
 				) : (
-					<span className="mb-4 inline-flex h-[1.375rem] items-center opacity-0" aria-hidden />
+					<>
+						<div className="mb-4 flex size-10 items-center justify-center rounded-2xl bg-white/14 text-white shadow-sm">
+							<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
+						</div>
+						<p className="text-sm font-black leading-snug text-white">Tailored to you, built to stand out.</p>
+						<p className="mt-2 text-xs leading-relaxed text-white/70">Keep your profile current and every version gets easier.</p>
+					</>
 				)}
-				<div
-					className={`-rotate-2 mb-5 flex h-14 w-14 items-center justify-center rounded-2xl transition-[transform] duration-300 [-webkit-tap-highlight-color:transparent] motion-reduce:transition-none motion-safe:group-hover:scale-[1.06] motion-safe:group-hover:rotate-0 motion-reduce:group-hover:rotate-[-2deg] ${tone.iconSurface}`}
-				>
-					{icon}
+			</div>
+			<button
+				type="button"
+				onClick={onLogout}
+				title={collapsed ? 'Log out' : undefined}
+				className={[
+					'mt-3 flex w-full items-center rounded-2xl border border-white/10 bg-white/[0.055] px-3 py-2.5 text-sm font-bold text-white/72 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#9f3a40]',
+					collapsed ? 'justify-center' : 'justify-start gap-3',
+				].join(' ')}
+			>
+				<FontAwesomeIcon icon={faArrowRight} className={collapsed ? 'size-4 rotate-180' : 'size-4 rotate-180'} />
+				{collapsed ? null : <span>Log out</span>}
+			</button>
+		</aside>
+	)
+}
+
+function MobileNav({ onLogout }) {
+	const navigate = useNavigate()
+
+	return (
+		<header className="sticky top-0 z-30 border-b border-brand-pink/12 bg-white/82 px-4 py-3 backdrop-blur-xl lg:hidden">
+			<div className="flex items-center justify-between gap-3">
+				<button type="button" onClick={() => navigate('/home')} className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink">
+					<img src={resolveLogo('navbar')} alt="taylor.io" className="h-9 w-auto" />
+				</button>
+				<div className="flex items-center gap-1.5">
+					{navItems.slice(0, 4).map((item) => (
+						<button
+							key={item.label}
+							type="button"
+							onClick={() => navigate(item.to)}
+							aria-label={item.label}
+							className="inline-flex size-10 items-center justify-center rounded-xl text-gray-600 transition hover:bg-brand-pink/[0.08] hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+						>
+							<FontAwesomeIcon icon={item.icon} className="size-4" />
+						</button>
+					))}
+					<button
+						type="button"
+						onClick={onLogout}
+						aria-label="Log out"
+						className="rounded-xl px-2.5 py-2 text-xs font-bold text-brand-pink-dark transition hover:bg-brand-pink/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+					>
+						Out
+					</button>
 				</div>
-				<h3
-					className={`mb-2 text-lg tracking-tight text-gray-900 sm:text-xl ${primary ? 'font-bold' : 'font-semibold'}`}
+			</div>
+		</header>
+	)
+}
+
+function DashboardCard({ className = '', children }) {
+	return (
+		<section className={`rounded-[1.35rem] border border-brand-pink/13 bg-white/78 shadow-[0_18px_48px_-34px_rgba(80,42,42,0.42)] ring-1 ring-white/80 backdrop-blur-md ${className}`}>
+			{children}
+		</section>
+	)
+}
+
+function PrimaryResumeCard({ onCreate, onChooseProfile }) {
+	return (
+		<DashboardCard className="relative overflow-hidden bg-brand-pink/[0.08] px-5 pb-5 pt-6 sm:px-7 sm:pb-6 sm:pt-7">
+			<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.95),transparent_24%),linear-gradient(135deg,rgba(214,86,86,0.12),rgba(255,255,255,0.55)_48%,rgba(250,205,205,0.35))]" aria-hidden />
+			<div className="pointer-events-none absolute -right-14 top-8 hidden h-72 w-80 opacity-95 md:block" aria-hidden>
+				<div className="absolute left-4 top-0 h-12 w-44 rounded-2xl bg-white/80 shadow-[0_14px_34px_-20px_rgba(45,30,38,0.3)] ring-1 ring-brand-pink/12">
+					<div className="ml-4 mt-4 h-3 w-16 rounded-full bg-amber-400/80" />
+					<div className="ml-24 mt-[-0.55rem] h-2 w-12 rounded-full bg-gray-300/55" />
+				</div>
+				<div className="absolute left-0 top-16 h-14 w-52 rounded-2xl bg-white/82 shadow-[0_14px_34px_-20px_rgba(45,30,38,0.3)] ring-1 ring-brand-pink/12">
+					<div className="ml-4 mt-4 size-5 rounded-full bg-violet-500/85" />
+					<div className="ml-14 mt-[-1.1rem] h-2 w-24 rounded-full bg-gray-300/60" />
+					<div className="ml-14 mt-2 h-2 w-16 rounded-full bg-gray-300/45" />
+				</div>
+				<div className="absolute left-8 top-36 h-14 w-52 rounded-2xl bg-white/82 shadow-[0_14px_34px_-20px_rgba(45,30,38,0.3)] ring-1 ring-brand-pink/12">
+					<div className="ml-4 mt-4 size-5 rounded-lg bg-sky-500/85" />
+					<div className="ml-14 mt-[-1.1rem] h-2 w-28 rounded-full bg-gray-300/60" />
+					<div className="ml-14 mt-2 h-2 w-20 rounded-full bg-gray-300/45" />
+				</div>
+				<div className="absolute left-2 top-56 h-12 w-44 rounded-2xl bg-white/78 shadow-[0_14px_34px_-20px_rgba(45,30,38,0.3)] ring-1 ring-brand-pink/12">
+					<div className="ml-4 mt-4 size-4 rounded-full bg-brand-pink/90" />
+					<div className="ml-12 mt-[-0.85rem] h-2 w-20 rounded-full bg-gray-300/55" />
+				</div>
+			</div>
+
+			<div className="relative z-[1] max-w-[28rem]">
+				<p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-[0.68rem] font-black uppercase tracking-[0.16em] text-brand-pink-dark shadow-sm ring-1 ring-brand-pink/12">
+					<FontAwesomeIcon icon={faWandMagicSparkles} className="size-3" />
+					Start here
+				</p>
+				<h2 className="text-3xl font-black tracking-tight text-gray-950 sm:text-[2.35rem]">Build a r&eacute;sum&eacute; for a role</h2>
+				<p className="mt-4 max-w-md text-base leading-relaxed text-gray-700">
+					Paste a job description or use your saved career profile to generate a focused version faster.
+				</p>
+
+				<div className="mt-6 flex flex-wrap gap-3">
+					<button
+						type="button"
+						onClick={onCreate}
+						className="inline-flex items-center gap-2 rounded-xl border border-brand-pink/20 bg-white/88 px-4 py-3 text-sm font-bold text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/35 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+					>
+						<FontAwesomeIcon icon={faPenToSquare} className="size-4" />
+						Paste job description
+					</button>
+					<button
+						type="button"
+						onClick={onChooseProfile}
+						className="inline-flex items-center gap-2 rounded-xl border border-brand-pink/20 bg-white/88 px-4 py-3 text-sm font-bold text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/35 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+					>
+						<FontAwesomeIcon icon={faUser} className="size-4" />
+						Use saved profile
+					</button>
+				</div>
+
+				<button
+					type="button"
+					onClick={onCreate}
+					className="mt-6 inline-flex min-h-[3.15rem] items-center justify-center gap-3 rounded-xl bg-brand-pink px-7 py-3 text-sm font-black text-white shadow-[0_16px_32px_-14px_rgba(214,86,86,0.75)] transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 				>
-					{title}
-				</h3>
-				<p className="mx-auto max-w-[17rem] text-sm leading-relaxed text-gray-600 [text-wrap:pretty]">{description}</p>
-			</span>
-		</button>
+					Generate tailored r&eacute;sum&eacute;
+					<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
+				</button>
+			</div>
+		</DashboardCard>
+	)
+}
+
+function CareerDataCard({ profile, isLoading, onOpenProfile }) {
+	const counts = useMemo(() => {
+		const summaryPresent = Boolean(profile?.summary?.summary?.trim())
+		return {
+			experiences: profile?.experiences?.length || 0,
+			education: profile?.education?.length || 0,
+			projects: profile?.projects?.length || 0,
+			skills: profile?.skills?.length || 0,
+			summary: summaryPresent ? 1 : 0,
+		}
+	}, [profile])
+
+	return (
+		<DashboardCard className="p-6">
+			<div className="flex items-start justify-between gap-4">
+				<div>
+					<h2 className="text-xl font-black tracking-tight text-gray-950">Your career data</h2>
+					<p className="mt-1 text-sm text-gray-500">The pieces Taylor uses to build better versions.</p>
+				</div>
+				<span className="inline-flex size-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+					<FontAwesomeIcon icon={faShieldHalved} className="size-4" />
+				</span>
+			</div>
+
+			<div className="mt-5 divide-y divide-gray-200/70">
+				{dataRows.map((row) => {
+					const count = counts[row.key]
+					const ready = count > 0
+					return (
+						<div key={row.key} className="flex items-center gap-3 py-3">
+							<span className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${row.bg} ${row.tone}`}>
+								<FontAwesomeIcon icon={row.icon} className="size-4" />
+							</span>
+							<div className="min-w-0 flex-1">
+								<p className="font-bold text-gray-900">{row.label}</p>
+								<p className="text-xs text-gray-500">{isLoading ? 'Checking...' : ready ? `${count} saved` : row.empty}</p>
+							</div>
+							<span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${ready ? 'bg-emerald-50 text-emerald-700' : 'bg-brand-pink/[0.08] text-brand-pink-dark'}`}>
+								{ready ? <FontAwesomeIcon icon={faCheck} className="size-3" /> : <FontAwesomeIcon icon={faPlus} className="size-3" />}
+								{ready ? 'Updated' : 'Add'}
+							</span>
+						</div>
+					)
+				})}
+			</div>
+
+			<button
+				type="button"
+				onClick={onOpenProfile}
+				className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-brand-pink-dark transition hover:text-brand-pink focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+			>
+				Improve profile
+				<FontAwesomeIcon icon={faArrowRight} className="size-3.5" />
+			</button>
+		</DashboardCard>
+	)
+}
+
+function ResumeMiniPreview({ tone = 'brand' }) {
+	const toneClass = {
+		brand: 'bg-brand-pink',
+		sky: 'bg-sky-500',
+		emerald: 'bg-emerald-500',
+		violet: 'bg-violet-500',
+		rose: 'bg-rose-500',
+	}[tone] || 'bg-brand-pink'
+
+	return (
+		<div className="h-32 rounded-xl border border-gray-200/80 bg-white p-3 shadow-sm">
+			<div className="flex gap-3">
+				<div className={`${toneClass}/10 flex h-24 w-8 shrink-0 flex-col items-center gap-2 rounded-lg pt-2`}>
+					<span className={`size-3 rounded-full ${toneClass}`} />
+					<span className={`h-2 w-4 rounded-full ${toneClass}/70`} />
+					<span className={`h-2 w-3 rounded-full ${toneClass}/50`} />
+				</div>
+				<div className="min-w-0 flex-1 pt-1">
+					<span className={`block h-2.5 w-16 rounded-full ${toneClass}`} />
+					<span className="mt-2 block h-2 w-24 rounded-full bg-gray-300/70" />
+					<span className="mt-1.5 block h-2 w-20 rounded-full bg-gray-300/55" />
+					<div className="mt-4 space-y-1.5">
+						<span className="block h-1.5 w-full rounded-full bg-gray-300/65" />
+						<span className="block h-1.5 w-[82%] rounded-full bg-gray-300/55" />
+						<span className="block h-1.5 w-[68%] rounded-full bg-gray-300/45" />
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+function SavedResumeCard({ resume, index, onLoad, onDelete, formatDate }) {
+	const statuses = [
+		{ label: 'Draft', className: 'bg-amber-100 text-amber-800' },
+		{ label: 'Ready', className: 'bg-emerald-100 text-emerald-800' },
+		{ label: 'Saved', className: 'bg-violet-100 text-violet-800' },
+	]
+	const status = statuses[index % statuses.length]
+	const tones = ['brand', 'sky', 'emerald', 'violet']
+
+	return (
+		<li className="rounded-2xl border border-gray-200/75 bg-white/82 p-4 shadow-[0_14px_34px_-28px_rgba(45,30,38,0.34)] transition hover:-translate-y-0.5 hover:border-brand-pink/24 hover:shadow-[0_18px_42px_-28px_rgba(214,86,86,0.28)]">
+			<ResumeMiniPreview tone={tones[index % tones.length]} />
+			<div className="mt-4">
+				<h3 className="line-clamp-2 min-h-[2.6rem] font-black leading-snug text-gray-950">{resume.name || `Resume ${index + 1}`}</h3>
+				<div className="mt-3 flex items-center justify-between gap-2">
+					<span className={`rounded-lg px-2.5 py-1 text-xs font-bold ${status.className}`}>{status.label}</span>
+					<span className="text-xs text-gray-500">{formatDate(resume.created_at)}</span>
+				</div>
+			</div>
+			<div className="mt-4 grid grid-cols-2 gap-2 border-t border-gray-100 pt-3">
+				<button
+					type="button"
+					onClick={() => onLoad(resume.id)}
+					className="inline-flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-bold text-gray-700 transition hover:bg-brand-pink/[0.08] hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+				>
+					<FontAwesomeIcon icon={faPenToSquare} className="size-3.5" />
+					Open
+				</button>
+				<button
+					type="button"
+					onClick={(event) => onDelete(resume.id, event)}
+					className="inline-flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-bold text-gray-500 transition hover:bg-red-50 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+				>
+					<FontAwesomeIcon icon={faTrash} className="size-3.5" />
+					Delete
+				</button>
+			</div>
+		</li>
+	)
+}
+
+function SavedResumesSection({ savedResumes, onCreate, onViewAll, onLoad, onDelete, formatDate }) {
+	const items = savedResumes.items || []
+
+	return (
+		<DashboardCard className="p-6">
+			<div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<div>
+					<h2 className="text-xl font-black tracking-tight text-gray-950">Saved r&eacute;sum&eacute; versions</h2>
+					<p className="mt-1 text-sm text-gray-500">{items.length} of {savedResumes.max ?? 3} save slots used</p>
+				</div>
+				<button
+					type="button"
+					onClick={onViewAll}
+					className="inline-flex items-center gap-2 text-sm font-bold text-brand-pink-dark transition hover:text-brand-pink focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+				>
+					Create or load
+					<FontAwesomeIcon icon={faArrowRight} className="size-3.5" />
+				</button>
+			</div>
+
+			{items.length === 0 ? (
+				<div className="rounded-2xl border border-dashed border-brand-pink/24 bg-brand-pink/[0.04] px-5 py-10 text-center">
+					<div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-white text-brand-pink shadow-sm">
+						<FontAwesomeIcon icon={faFileAlt} className="size-5" />
+					</div>
+					<p className="font-black text-gray-950">No saved versions yet</p>
+					<p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-gray-600">Create a tailored preview, save it, and it will show up here as a reusable version.</p>
+					<button
+						type="button"
+						onClick={onCreate}
+						className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-pink px-5 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+					>
+						Start a r&eacute;sum&eacute;
+						<FontAwesomeIcon icon={faArrowRight} className="size-3.5" />
+					</button>
+				</div>
+			) : (
+				<ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+					{items.slice(0, 3).map((resume, index) => (
+						<SavedResumeCard
+							key={resume.id}
+							resume={resume}
+							index={index}
+							onLoad={onLoad}
+							onDelete={onDelete}
+							formatDate={formatDate}
+						/>
+					))}
+				</ul>
+			)}
+		</DashboardCard>
+	)
+}
+
+function TemplatePanel({ onBrowse }) {
+	return (
+		<DashboardCard className="p-6">
+			<h2 className="text-xl font-black tracking-tight text-gray-950">Style your r&eacute;sum&eacute;</h2>
+			<p className="mt-1 text-sm text-gray-500">Choose a layout direction before you polish the details.</p>
+			<div className="mt-5 grid grid-cols-4 gap-3">
+				{templateSwatches.map((template, index) => (
+					<div key={`${template.toneClass}-${index}`} className="rounded-xl border border-gray-200/80 bg-white p-2 shadow-sm">
+						<div className={`mb-2 h-1.5 rounded-full ${template.toneClass}`} />
+						<div className="space-y-1.5">
+							{template.bars.map((bar, barIndex) => (
+								<span key={barIndex} className={`block h-1.5 rounded-full bg-gray-300/60 ${bar}`} />
+							))}
+						</div>
+					</div>
+				))}
+			</div>
+			<button
+				type="button"
+				onClick={onBrowse}
+				className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-pink px-4 py-3 text-sm font-black text-white shadow-[0_12px_28px_-18px_rgba(214,86,86,0.72)] transition hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+			>
+				Browse templates
+				<FontAwesomeIcon icon={faArrowRight} className="size-3.5" />
+			</button>
+		</DashboardCard>
+	)
+}
+
+function ActivityPanel({ savedResumes, profile }) {
+	const recentResume = savedResumes.items?.[0]
+	const activities = [
+		recentResume ? `Saved "${recentResume.name}"` : 'Created your first dashboard',
+		profile?.user?.attached_resume_filename ? `Attached ${profile.user.attached_resume_filename}` : 'Profile ready for tailoring',
+		`${profile?.projects?.length || 0} projects available for versions`,
+	]
+
+	return (
+		<DashboardCard className="p-6">
+			<h2 className="text-xl font-black tracking-tight text-gray-950">Recent activity</h2>
+			<div className="mt-5 divide-y divide-gray-200/70">
+				{activities.map((item, index) => (
+					<div key={item} className="flex items-center gap-3 py-3">
+						<span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-pink/[0.08] text-brand-pink-dark">
+							<FontAwesomeIcon icon={index === 0 ? faClockRotateLeft : faCheck} className="size-4" />
+						</span>
+						<p className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-800">{item}</p>
+					</div>
+				))}
+			</div>
+		</DashboardCard>
+	)
+}
+
+function ProfileNudge({ onOpenProfile }) {
+	return (
+		<DashboardCard className="flex flex-col gap-4 bg-violet-50/70 p-5 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex items-start gap-4">
+				<span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-white text-violet-600 shadow-sm">
+					<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
+				</span>
+				<div>
+					<p className="font-black text-gray-950">Want better results?</p>
+					<p className="mt-1 text-sm text-gray-600">Add more projects, skills, and achievements to strengthen each version.</p>
+				</div>
+			</div>
+			<button
+				type="button"
+				onClick={onOpenProfile}
+				className="inline-flex shrink-0 items-center justify-center rounded-xl border border-violet-200 bg-white px-5 py-2.5 text-sm font-black text-violet-700 shadow-sm transition hover:border-violet-300 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+			>
+				Improve profile
+			</button>
+		</DashboardCard>
 	)
 }
 
 function Home() {
 	const navigate = useNavigate()
 	const [user, setUser] = useState(null)
+	const [profile, setProfile] = useState(null)
 	const [isLoading, setIsLoading] = useState(true)
+	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 	const [savedResumes, setSavedResumes] = useState({ items: [], max: 3 })
 
 	const fetchSavedResumes = useCallback(async () => {
@@ -116,7 +585,7 @@ function Home() {
 	}, [])
 
 	useEffect(() => {
-		const fetchProfile = async () => {
+		const fetchDashboard = async () => {
 			const token = localStorage.getItem('token')
 			const userData = localStorage.getItem('user')
 
@@ -126,7 +595,17 @@ function Home() {
 			}
 
 			try {
-				setUser(JSON.parse(userData))
+				const storedUser = JSON.parse(userData)
+				setUser(storedUser)
+
+				try {
+					const response = await getMyProfile()
+					const profileData = response.data || response
+					setProfile(profileData)
+					if (profileData?.user) setUser(profileData.user)
+				} catch {
+					setProfile(null)
+				}
 			} catch {
 				navigate('/auth')
 				return
@@ -135,16 +614,12 @@ function Home() {
 			}
 		}
 
-		fetchProfile()
+		fetchDashboard()
 	}, [navigate])
 
 	useEffect(() => {
 		if (user) fetchSavedResumes()
 	}, [user, fetchSavedResumes])
-
-	const handleGenerateResume = () => {
-		navigate('/resume/create')
-	}
 
 	const handleLogout = () => {
 		localStorage.removeItem('token')
@@ -156,8 +631,8 @@ function Home() {
 		navigate('/resume/preview', { state: { loadSavedId: id } })
 	}
 
-	const handleDeleteSaved = async (id, e) => {
-		e?.stopPropagation()
+	const handleDeleteSaved = async (id, event) => {
+		event?.stopPropagation()
 		try {
 			await deleteSavedResume(id)
 			fetchSavedResumes()
@@ -168,188 +643,79 @@ function Home() {
 	}
 
 	const formatDate = (dateStr) => {
-		if (!dateStr) return ''
+		if (!dateStr) return 'Recently'
 		try {
 			const d = new Date(dateStr)
-			return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+			return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 		} catch {
-			return dateStr
+			return 'Recently'
 		}
 	}
 
-	const greetingName = user?.first_name?.trim() || null
-	const maxSlots = savedResumes.max
-	const usedSlots = savedResumes.items.length
-	const remainingSlots = Math.max(0, maxSlots - usedSlots)
+	const greetingName = user?.first_name?.trim() || profile?.user?.first_name?.trim() || null
 
 	return (
-		<div
-			className="relative flex min-h-screen flex-col bg-cream info-scrollbar overflow-y-auto"
-			style={{ height: '100vh' }}
-		>
-			{/* Full viewport — washes wide screens; content stays in max-w column below. Photo URL lives in CSS; drop asset at frontend/public/home-dashboard-bg.jpg */}
-			<div className="home-page-atmosphere" aria-hidden="true">
-				<div className="home-page-atmosphere__photo" />
-				<div className="home-page-atmosphere__mesh" />
-				<div className="home-page-atmosphere__orb home-page-atmosphere__orb--a" />
-				<div className="home-page-atmosphere__orb home-page-atmosphere__orb--b" />
-			</div>
+		<div className="info-scrollbar relative h-screen overflow-hidden bg-[#fff8ef] text-gray-950">
+			<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_10%,rgba(250,205,205,0.58),transparent_28%),radial-gradient(circle_at_20%_92%,rgba(214,86,86,0.15),transparent_32%)]" aria-hidden />
+			<div className="relative z-[1] flex h-screen min-h-0">
+				<DashboardSidebar
+					collapsed={isSidebarCollapsed}
+					onToggle={() => setIsSidebarCollapsed((value) => !value)}
+					onLogout={handleLogout}
+				/>
 
-			<div className="relative z-[1] flex min-h-0 flex-1 flex-col">
-				<TopNav user={user} onLogout={handleLogout} />
+				<div className="flex min-h-0 min-w-0 flex-1 flex-col">
+					<MobileNav onLogout={handleLogout} />
 
-				<main className="flex-1 pb-14 pt-8 sm:pb-20 md:pt-12">
-					<div className="mx-auto max-w-6xl px-5 sm:px-8">
-						<section className="relative">
-							{isLoading ? (
-								<div className="space-y-5 md:space-y-6">
-										<div className="mx-auto max-w-lg space-y-3 text-center">
-										<div className="mx-auto h-10 max-w-[18rem] animate-pulse rounded-xl bg-brand-pink/10" />
-										<div className="mx-auto h-5 max-w-3xl animate-pulse rounded-lg bg-gray-300/35" />
-									</div>
-									<div className="mx-auto h-3 w-28 animate-pulse rounded bg-gray-300/30" aria-hidden />
-									<div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-										<div className="h-56 animate-pulse rounded-2xl border border-gray-200/40 bg-gray-200/35" />
-										<div className="h-56 animate-pulse rounded-2xl border border-brand-pink/25 bg-brand-pink/[0.06]" />
-										<div className="h-56 animate-pulse rounded-2xl border border-gray-200/40 bg-gray-200/35" />
-									</div>
+					<main className="info-scrollbar min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-5 sm:px-5 lg:px-5 lg:py-7 xl:px-6">
+						<div className="mx-auto max-w-7xl">
+							<header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+								<div>
+									<p className="text-xs font-black uppercase tracking-[0.2em] text-brand-pink-dark">Dashboard</p>
+									<h1 className="mt-2 text-3xl font-black tracking-tight text-gray-950 sm:text-4xl">
+										{isLoading ? 'Welcome back' : greetingName ? `Welcome back, ${greetingName}` : 'Welcome back'}
+									</h1>
+									<p className="mt-2 text-base text-gray-600">Ready to tailor your next r&eacute;sum&eacute;?</p>
 								</div>
-							) : (
-								<div className="space-y-5 md:space-y-6">
-									<div className="text-center">
-										<h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl md:text-[2.125rem]">
-											{greetingName ? `Welcome back, ${greetingName}` : 'Welcome back'}
-										</h1>
-										<p className="mx-auto mt-2 max-w-3xl px-2 py-2 text-[0.975rem] leading-relaxed text-gray-600 sm:text-lg">
-											Choose what&apos;s next — update your profile, tailor a preview, or browse templates.
-										</p>
-									</div>
+								<button
+									type="button"
+									onClick={() => navigate('/resume/create')}
+									className="inline-flex min-h-[3.15rem] items-center justify-center gap-2 rounded-xl bg-brand-pink px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(214,86,86,0.8)] transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+								>
+									<FontAwesomeIcon icon={faPlus} className="size-4" />
+									Create new r&eacute;sum&eacute;
+								</button>
+							</header>
 
-									<p className="text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">
-										Quick actions
-									</p>
-
-									<div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:items-stretch">
-										<QuickActionCard
-											accent="slate"
-											onClick={() => navigate('/info')}
-											title="Update info"
-											description="Edit contact, education, experience, and the rest of your saved profile."
-											icon={
-												<svg className="h-8 w-8 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.85} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-												</svg>
-											}
-										/>
-										<QuickActionCard
-											onClick={handleGenerateResume}
-											primary
-											title="Generate preview"
-											description="Pick a path — from your profile data, Assist, or a fresh canvas — then preview before export."
-											icon={
-												<svg className="h-8 w-8 text-brand-pink-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.85} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.85} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-												</svg>
-											}
-										/>
-										<QuickActionCard
-											accent="violet"
-											onClick={() => navigate('/templates')}
-											title="Browse templates"
-											description="Explore layout families and find a visual style that matches your goal."
-											icon={
-												<svg className="h-8 w-8 text-violet-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.85} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
-												</svg>
-											}
-										/>
-									</div>
+							<div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(21rem,0.95fr)]">
+								<div className="space-y-6">
+									<PrimaryResumeCard
+										onCreate={() => navigate('/resume/create/tailor')}
+										onChooseProfile={() => navigate('/resume/create/choose')}
+									/>
+									<SavedResumesSection
+										savedResumes={savedResumes}
+										onCreate={() => navigate('/resume/create')}
+										onViewAll={() => navigate('/resumes')}
+										onLoad={handleLoadSaved}
+										onDelete={handleDeleteSaved}
+										formatDate={formatDate}
+									/>
+									<ProfileNudge onOpenProfile={() => navigate('/info')} />
 								</div>
-							)}
-						</section>
-
-						<section className="relative mt-12 sm:mt-14">
-							<div
-								className="pointer-events-none absolute left-1/2 top-0 h-px w-[min(120%,24rem)] -translate-x-1/2 bg-gradient-to-r from-transparent via-gray-400/35 to-transparent"
-								aria-hidden="true"
-							/>
-
-							<div className="pt-10 sm:pt-12">
-								<div className="mb-10 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-									<div>
-										<h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-[1.65rem]">Saved resumes</h2>
-										<p className="mt-1.5 text-sm text-gray-600">
-											{usedSlots} of {maxSlots} slots used
-											{remainingSlots > 0 ? (
-												<>
-													{' · '}
-													<span className="text-gray-700">Room for {remainingSlots} more save{remainingSlots === 1 ? '' : 's'}.</span>
-												</>
-											) : null}
-										</p>
-									</div>
+								<div className="space-y-6">
+									<CareerDataCard
+										profile={profile}
+										isLoading={isLoading}
+										onOpenProfile={() => navigate('/info')}
+									/>
+									<TemplatePanel onBrowse={() => navigate('/templates')} />
+									<ActivityPanel savedResumes={savedResumes} profile={profile} />
 								</div>
-
-								{savedResumes.items.length === 0 ? (
-									<div className="rounded-3xl border border-dashed border-gray-300/60 bg-white/35 px-6 py-12 text-center shadow-inner backdrop-blur-[2px] sm:py-14">
-										<svg className="mx-auto mb-5 h-14 w-14 text-brand-pink/35" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.35} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-										</svg>
-										<p className="text-base font-medium text-gray-800">No saved previews yet</p>
-										<p className="mx-auto mt-2 max-w-md text-sm text-gray-600">Save from the resume editor to reopen them here — your slots stay yours.</p>
-										<button
-											type="button"
-											onClick={handleGenerateResume}
-											className="mt-7 inline-flex rounded-full border border-brand-pink/35 bg-brand-pink px-6 py-2.5 text-sm font-semibold text-white shadow-[0_8px_24px_-12px_rgba(214,86,86,0.55)] transition hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
-										>
-											Start a preview
-										</button>
-									</div>
-								) : (
-									<ul className="space-y-2.5">
-										{savedResumes.items.map((resume, i) => (
-											<li
-												key={resume.id}
-												className={`flex flex-col gap-3 rounded-2xl border border-gray-200/70 px-5 py-4 transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${
-													i % 2 === 0 ? 'bg-white/55 backdrop-blur-[1px]' : 'bg-white/35 backdrop-blur-[1px]'
-												}`}
-											>
-												<div className="flex min-w-0 items-start gap-3">
-													<div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-pink/15 to-brand-pink/[0.05] ring-1 ring-brand-pink/20">
-														<svg className="h-5 w-5 text-brand-pink-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-														</svg>
-													</div>
-													<div className="min-w-0">
-														<h3 className="truncate font-semibold text-gray-900">{resume.name}</h3>
-														<p className="text-sm text-gray-500">Saved {formatDate(resume.created_at)}</p>
-													</div>
-												</div>
-												<div className="flex shrink-0 items-center gap-2 sm:justify-end">
-													<button
-														type="button"
-														onClick={() => handleLoadSaved(resume.id)}
-														className="rounded-xl bg-brand-pink px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
-													>
-														Load
-													</button>
-													<button
-														type="button"
-														onClick={(e) => handleDeleteSaved(resume.id, e)}
-														className="rounded-xl px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-red-50 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
-													>
-														Delete
-													</button>
-												</div>
-											</li>
-										))}
-									</ul>
-								)}
 							</div>
-						</section>
-					</div>
-				</main>
+						</div>
+					</main>
+				</div>
 			</div>
 		</div>
 	)

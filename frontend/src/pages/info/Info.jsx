@@ -1,6 +1,21 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+	faBriefcase,
+	faCheck,
+	faChevronRight,
+	faClockRotateLeft,
+	faEye,
+	faFileAlt,
+	faGraduationCap,
+	faLayerGroup,
+	faPlus,
+	faStar,
+	faUser,
+	faWandMagicSparkles,
+} from '@fortawesome/free-solid-svg-icons'
 import {
 	getMyProfile,
 	upsertContact,
@@ -14,7 +29,7 @@ import {
 } from '@/api/services/profile'
 import { parseResumeMerge } from '@/api/services/resume'
 import { mergeParsedData } from './utils/mergeParsedData'
-import TopNav from '@/components/TopNav'
+import DashboardShell from '@/components/DashboardShell'
 import ContactSection from './components/ContactSection'
 import EducationSection from './components/EducationSection'
 import ExperienceSection from './components/ExperienceSection'
@@ -47,6 +62,65 @@ const DEBOUNCE_MS = 2000
 // deep equality via JSON (simple; handles our data shapes)
 const snap = (x) => JSON.stringify(x)
 const isEqual = (a, b) => snap(a) === snap(b)
+
+function InfoCard({ className = '', children }) {
+	return (
+		<section className={`rounded-[1.35rem] border border-brand-pink/13 bg-white/78 shadow-[0_18px_48px_-34px_rgba(80,42,42,0.42)] ring-1 ring-white/80 backdrop-blur-md ${className}`}>
+			{children}
+		</section>
+	)
+}
+
+function CompletionRing({ value }) {
+	const radius = 35
+	const circumference = 2 * Math.PI * radius
+	const offset = circumference - (Math.min(100, Math.max(0, value)) / 100) * circumference
+
+	return (
+		<div className="relative size-24 shrink-0">
+			<svg className="size-24 -rotate-90" viewBox="0 0 88 88" aria-hidden="true">
+				<circle cx="44" cy="44" r={radius} fill="none" stroke="rgba(214,86,86,0.14)" strokeWidth="8" />
+				<circle
+					cx="44"
+					cy="44"
+					r={radius}
+					fill="none"
+					stroke="rgb(214,86,86)"
+					strokeLinecap="round"
+					strokeWidth="8"
+					strokeDasharray={circumference}
+					strokeDashoffset={offset}
+				/>
+			</svg>
+			<span className="absolute inset-0 flex items-center justify-center text-xl font-black text-gray-950">{value}%</span>
+		</div>
+	)
+}
+
+function OverviewRow({ item, onClick }) {
+	const complete = item.count > 0
+	const statusText = complete ? item.status : 'Add more'
+
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			className="group flex w-full items-center gap-4 rounded-[1.15rem] border border-brand-pink/10 bg-white/82 p-4 text-left shadow-[0_14px_34px_-30px_rgba(45,30,38,0.34)] transition hover:-translate-y-0.5 hover:border-brand-pink/24 hover:shadow-[0_18px_42px_-30px_rgba(214,86,86,0.32)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+		>
+			<span className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${item.bg} ${item.tone}`}>
+				<FontAwesomeIcon icon={item.icon} className="size-5" />
+			</span>
+			<span className="min-w-0 flex-1">
+				<span className="block text-lg font-black tracking-tight text-gray-950">{item.title}</span>
+				<span className="mt-0.5 block text-sm leading-relaxed text-gray-600">{item.description}</span>
+			</span>
+			<span className={`hidden rounded-full px-3 py-1.5 text-xs font-bold sm:inline-flex ${complete ? 'bg-emerald-50 text-emerald-700' : 'bg-brand-pink/[0.08] text-brand-pink-dark'}`}>
+				{statusText}
+			</span>
+			<FontAwesomeIcon icon={faChevronRight} className="size-4 shrink-0 text-gray-400 transition group-hover:translate-x-0.5 group-hover:text-brand-pink-dark" />
+		</button>
+	)
+}
 
 function Info() {
 	const navigate = useNavigate()
@@ -614,25 +688,96 @@ function Info() {
 		}
 	}
 
+	const profileItems = [
+		{
+			id: 'experience-section',
+			title: 'Work experience',
+			description: 'Add your past roles, achievements, and key impact.',
+			count: experiences.length,
+			status: experiences.length > 0 ? `${experiences.length} saved` : 'Add roles',
+			icon: faBriefcase,
+			bg: 'bg-sky-100',
+			tone: 'text-sky-700',
+		},
+		{
+			id: 'education-section',
+			title: 'Education',
+			description: 'Add your schools, degrees, and relevant coursework.',
+			count: education.length,
+			status: education.length > 0 ? `${education.length} saved` : 'Add school',
+			icon: faGraduationCap,
+			bg: 'bg-emerald-100',
+			tone: 'text-emerald-700',
+		},
+		{
+			id: 'projects-section',
+			title: 'Projects',
+			description: 'Showcase projects that highlight your skills.',
+			count: projects.length,
+			status: projects.length > 0 ? `${projects.length} added` : 'Add projects',
+			icon: faLayerGroup,
+			bg: 'bg-violet-100',
+			tone: 'text-violet-700',
+		},
+		{
+			id: 'skills-section',
+			title: 'Skills',
+			description: 'Add your technical, soft, and tool expertise.',
+			count: skills.length,
+			status: skills.length > 0 ? `${skills.length} added` : 'Add skills',
+			icon: faWandMagicSparkles,
+			bg: 'bg-cyan-100',
+			tone: 'text-cyan-700',
+		},
+		{
+			id: 'summary-section',
+			title: 'Summary',
+			description: 'Write the profile summary Taylor can tailor from.',
+			count: summary.trim() ? 1 : 0,
+			status: summary.trim() ? 'Complete' : 'Add summary',
+			icon: faStar,
+			bg: 'bg-amber-100',
+			tone: 'text-amber-700',
+		},
+		{
+			id: 'contact-section',
+			title: 'Personal info',
+			description: 'Name, headline, location, links, and contact info.',
+			count: Object.values(contact).some((value) => String(value || '').trim()) ? 1 : 0,
+			status: Object.values(contact).some((value) => String(value || '').trim()) ? 'Complete' : 'Add contact',
+			icon: faUser,
+			bg: 'bg-rose-100',
+			tone: 'text-rose-700',
+		},
+	]
+	const completeCount = profileItems.filter((item) => item.count > 0).length
+	const completeness = Math.round((completeCount / profileItems.length) * 100)
+	const missingItem = profileItems.find((item) => item.count === 0)
+	const summaryStats = [
+		{ label: 'Experiences', value: experiences.length, icon: faBriefcase },
+		{ label: 'Projects', value: projects.length, icon: faLayerGroup },
+		{ label: 'Skills', value: skills.length, icon: faWandMagicSparkles },
+		{ label: 'Education', value: education.length, icon: faGraduationCap },
+		{ label: 'Resume', value: user?.attached_resume_filename ? 1 : 0, icon: faFileAlt },
+	]
+	const autoSaveLabel = savingSection ? 'Saving...' : isDirty() ? 'Autosave pending' : 'Up to date'
+
 	if (isLoading) {
-		// Match the loaded layout’s scroll shell (info-scrollbar + 100vh) so scrollbar/gutter math doesn’t change when fetch completes — intermittent horizontal nudge mainly came from that swap.
 		return (
-			<div
-				className="min-h-screen flex flex-col bg-cream info-scrollbar overflow-y-auto"
-				style={{ height: '100vh' }}
-			>
-				<TopNav user={user} onLogout={handleLogout} />
-				<main className="flex min-h-0 flex-1 flex-col items-center justify-center bg-cream py-12">
-					<p className="text-gray-600">Loading...</p>
-				</main>
-			</div>
+			<DashboardShell onLogout={handleLogout}>
+				<div className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center">
+					<div className="rounded-[1.35rem] border border-brand-pink/13 bg-white/78 px-6 py-5 text-gray-600 shadow-[0_18px_48px_-34px_rgba(80,42,42,0.42)]">
+						<span className="mr-3 inline-block size-3 animate-pulse rounded-full bg-brand-pink/50" aria-hidden />
+						Loading your profile...
+					</div>
+				</div>
+			</DashboardShell>
 		)
 	}
 
 	return (
-		<div className="min-h-screen flex flex-col bg-cream info-scrollbar overflow-y-auto" style={{ height: '100vh' }}>
-			<TopNav
-				user={user}
+		<>
+			<DashboardShell
 				onLogout={handleLogout}
 				onBeforeNavigate={async () => {
 					if (isDirty()) {
@@ -640,177 +785,118 @@ function Info() {
 						toast.success('Your changes have been saved.')
 					}
 				}}
-			/>
-
-			<main className="flex-1 py-8 bg-cream">
-				<div className="max-w-7xl mx-auto px-6 flex gap-8">
-					{/* Sidebar Navigation */}
-					<aside className="w-48 flex-shrink-0 sticky top-24 self-start space-y-3">
-						<nav className="bg-white-bright rounded-xl p-4 border-2 border-gray-200 shadow-sm">
-							<h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Quick Navigation</h3>
-							<ul className="space-y-2">
-								<li>
-									<button
-										onClick={() => scrollToSection('contact-section')}
-										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
-									>
-										Contact
-									</button>
-								</li>
-								<li>
-									<button
-										onClick={() => scrollToSection('education-section')}
-										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
-									>
-										Education
-									</button>
-								</li>
-								<li>
-									<button
-										onClick={() => scrollToSection('experience-section')}
-										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
-									>
-										Experience
-									</button>
-								</li>
-								<li>
-									<button
-										onClick={() => scrollToSection('projects-section')}
-										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
-									>
-										Projects
-									</button>
-								</li>
-								<li>
-									<button
-										onClick={() => scrollToSection('skills-section')}
-										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
-									>
-										Skills
-									</button>
-								</li>
-								<li>
-									<button
-										onClick={() => scrollToSection('summary-section')}
-										className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-pink hover:text-white rounded-lg transition-colors"
-									>
-										Summary
-									</button>
-								</li>
-							</ul>
-						</nav>
-						{/* Save status indicator */}
-						<div className="bg-white-bright rounded-xl p-3 border-2 border-gray-200 shadow-sm">
-							{savingSection ? (
-								<div className="flex items-center gap-2 text-sm text-brand-pink">
-									<svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-										<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-										<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-									</svg>
-									<span>Saving...</span>
-								</div>
-							) : isDirty() ? (
-								<div className="flex items-center gap-2 text-sm text-amber-600">
-									<svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-									</svg>
-									<span>Unsaved changes</span>
-								</div>
-							) : (
-								<div className="flex items-center gap-2 text-sm text-green-600">
-									<svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-									</svg>
-									<span>Up to date</span>
-								</div>
-							)}
-						</div>
-					</aside>
-
-					{/* Main Content */}
-					<div className="flex-1 max-w-4xl space-y-8">
-						{/* Header */}
+			>
+				<div className="mx-auto max-w-7xl">
+					<header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 						<div>
-							<h1 className="text-3xl font-bold text-gray-900 mb-2">Your Information</h1>
-							<p className="text-gray-600">Review and update your profile details. Changes auto-save after a short delay, or when you leave the page.</p>
+							<p className="text-xs font-black uppercase tracking-[0.2em] text-brand-pink-dark">Information</p>
+							<h1 className="mt-2 text-3xl font-black tracking-tight text-gray-950 sm:text-4xl">Your information</h1>
+							<p className="mt-2 max-w-2xl text-base leading-relaxed text-gray-600">
+								Manage your profile. We&apos;ll use this to build tailored r&eacute;sum&eacute;s for any role.
+							</p>
 						</div>
+						<button
+							type="button"
+							onClick={() => scrollToSection('summary-section')}
+							className="inline-flex min-h-[3.15rem] items-center justify-center gap-2 rounded-xl border border-brand-pink/16 bg-white/82 px-5 py-3 text-sm font-black text-gray-900 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/28 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+						>
+							<FontAwesomeIcon icon={faEye} className="size-4" />
+							Preview profile
+						</button>
+					</header>
 
-						{/* Attached Resume Banner or Upload Zone */}
-						{user?.attached_resume_filename ? (
-							<div className="flex items-center justify-between p-4 bg-brand-pink/10 border-2 border-brand-pink/30 rounded-xl">
-								<div className="flex items-center gap-3">
-									<svg className="w-6 h-6 text-brand-pink flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-									</svg>
-									<div>
-										<p className="font-semibold text-gray-900">Attached Resume</p>
-										<p className="text-sm text-gray-600">{user.attached_resume_filename}</p>
-									</div>
-								</div>
-								<button
-									type="button"
-									onClick={handleDetachResumeClick}
-									className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-								>
-									Remove
-								</button>
-							</div>
-						) : (
-							<div
-								className={`p-6 rounded-xl border-2 border-dashed transition-all ${
-									isParsingResume ? 'border-brand-pink bg-brand-pink/5' : 'border-gray-300 hover:border-brand-pink/50 bg-gray-50/50'
-								}`}
-								onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-								onDrop={(e) => {
-									e.preventDefault()
-									const file = e.dataTransfer?.files?.[0]
-									if (file && !isParsingResume) handleResumeUpload(file)
-								}}
-							>
-								<p className="text-base text-gray-600 mb-4">
-									Upload a resume to quickly add education, experience, projects, and skills. Duplicates are skipped.
+					<InfoCard className="mb-6 overflow-hidden bg-brand-pink/[0.07] p-5 sm:p-6">
+						<div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
+							<div className="pointer-events-none absolute -right-8 -top-8 size-36 rounded-full bg-brand-pink/[0.08] blur-2xl" aria-hidden />
+							<CompletionRing value={completeness} />
+							<div className="relative z-[1] min-w-0 flex-1">
+								<h2 className="text-xl font-black tracking-tight text-gray-950">Profile completeness</h2>
+								<p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">
+									{completeness >= 85
+										? 'Great job. A complete profile helps us create better, more tailored resumes.'
+										: 'Add a little more profile data and Taylor can create stronger role-specific versions.'}
 								</p>
-								<input
-									type="file"
-									accept=".pdf,.docx,.doc"
-									onChange={handleResumeFileInput}
-									className="hidden"
-									id="info-resume-upload"
-									disabled={isParsingResume}
-								/>
-								<label
-									htmlFor="info-resume-upload"
-									className={`inline-flex items-center gap-2 px-6 py-3 border-2 font-semibold rounded-lg cursor-pointer transition-all ${
-										isParsingResume
-											? 'border-brand-pink bg-brand-pink/10 text-brand-pink'
-											: 'border-brand-pink text-brand-pink hover:bg-brand-pink hover:text-white'
-									}`}
-								>
-									{isParsingResume ? (
-										<>
-											<span className="flex gap-1">
-												<span className="w-2 h-2 bg-brand-pink rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-												<span className="w-2 h-2 bg-brand-pink rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-												<span className="w-2 h-2 bg-brand-pink rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+							</div>
+							<button
+								type="button"
+								onClick={() => scrollToSection(missingItem?.id || 'contact-section')}
+								className="relative z-[1] inline-flex items-center justify-center gap-2 rounded-xl border border-brand-pink/22 bg-white/82 px-5 py-3 text-sm font-black text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/36 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+							>
+								{missingItem ? 'See what is missing' : 'Review profile'}
+								<FontAwesomeIcon icon={faChevronRight} className="size-3.5" />
+							</button>
+						</div>
+					</InfoCard>
+
+					<div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(20rem,0.75fr)]">
+						<div className="space-y-4">
+							{profileItems.map((item) => (
+								<OverviewRow key={item.id} item={item} onClick={() => scrollToSection(item.id)} />
+							))}
+
+							<InfoCard className="p-5">
+								{user?.attached_resume_filename ? (
+									<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+										<div className="flex items-center gap-3">
+											<span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-brand-pink/[0.1] text-brand-pink-dark">
+												<FontAwesomeIcon icon={faFileAlt} className="size-5" />
 											</span>
-											Parsing...
-										</>
-									) : (
-										<>
-											<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-											</svg>
-											Upload Resume (PDF or DOCX)
-										</>
-									)}
-								</label>
-								{parseResumeError && (
-									<div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-										{parseResumeError}
+											<div>
+												<p className="font-black text-gray-950">Attached r&eacute;sum&eacute;</p>
+												<p className="text-sm text-gray-600">{user.attached_resume_filename}</p>
+											</div>
+										</div>
+										<button
+											type="button"
+											onClick={handleDetachResumeClick}
+											className="rounded-xl px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+										>
+											Remove
+										</button>
+									</div>
+								) : (
+									<div
+										className={`rounded-2xl border border-dashed p-5 transition-all ${
+											isParsingResume ? 'border-brand-pink bg-brand-pink/5' : 'border-brand-pink/24 bg-brand-pink/[0.03] hover:border-brand-pink/40'
+										}`}
+										onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+										onDrop={(e) => {
+											e.preventDefault()
+											const file = e.dataTransfer?.files?.[0]
+											if (file && !isParsingResume) handleResumeUpload(file)
+										}}
+									>
+										<p className="font-black text-gray-950">Upload an existing r&eacute;sum&eacute;</p>
+										<p className="mt-1 text-sm leading-relaxed text-gray-600">
+											Quickly add education, experience, projects, and skills. Duplicates are skipped.
+										</p>
+										<input
+											type="file"
+											accept=".pdf,.docx,.doc"
+											onChange={handleResumeFileInput}
+											className="hidden"
+											id="info-resume-upload"
+											disabled={isParsingResume}
+										/>
+										<label
+											htmlFor="info-resume-upload"
+											className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-brand-pink px-5 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-brand-pink-dark"
+										>
+											{isParsingResume ? 'Parsing...' : 'Upload PDF or DOCX'}
+										</label>
+										{parseResumeError && (
+											<div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+												{parseResumeError}
+											</div>
+										)}
 									</div>
 								)}
+							</InfoCard>
+
+							<div className="pt-2">
+								<h2 className="text-xl font-black tracking-tight text-gray-950">Edit profile details</h2>
+								<p className="mt-1 text-sm text-gray-600">Open any section above, or keep editing directly below.</p>
 							</div>
-						)}
 
 						{/* Contact Section */}
 						<div id="contact-section">
@@ -864,8 +950,49 @@ function Info() {
 							<SummarySection summary={summary} onUpdate={handleSummaryUpdate} />
 						</div>
 					</div>
+						<aside className="space-y-6 xl:sticky xl:top-6">
+							<InfoCard className="p-6">
+								<h2 className="text-xl font-black tracking-tight text-gray-950">Profile summary</h2>
+								<div className="mt-5 divide-y divide-gray-200/70">
+									{summaryStats.map((stat) => (
+										<div key={stat.label} className="flex items-center gap-3 py-3">
+											<span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-pink/[0.08] text-brand-pink-dark">
+												<FontAwesomeIcon icon={stat.icon} className="size-4" />
+											</span>
+											<span className="min-w-0 flex-1 text-sm font-semibold text-gray-700">{stat.label}</span>
+											<span className="text-sm font-black text-gray-950">{stat.value}</span>
+										</div>
+									))}
+								</div>
+							</InfoCard>
+
+							<InfoCard className="p-6">
+								<div className="flex items-start gap-3">
+									<span className={`flex size-10 shrink-0 items-center justify-center rounded-2xl ${savingSection ? 'bg-brand-pink/[0.1] text-brand-pink-dark' : isDirty() ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+										<FontAwesomeIcon icon={savingSection ? faClockRotateLeft : isDirty() ? faPlus : faCheck} className="size-4" />
+									</span>
+									<div>
+										<p className="font-black text-gray-950">{autoSaveLabel}</p>
+										<p className="mt-1 text-sm leading-relaxed text-gray-600">
+											Changes save automatically after a short pause, and before dashboard navigation when possible.
+										</p>
+									</div>
+								</div>
+							</InfoCard>
+
+							<InfoCard className="bg-brand-pink/[0.08] p-6">
+								<p className="flex items-center gap-2 text-sm font-black text-brand-pink-dark">
+									<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
+									Tip
+								</p>
+								<p className="mt-3 text-sm leading-relaxed text-gray-700">
+									The more complete your profile, the better your tailored r&eacute;sum&eacute;s.
+								</p>
+							</InfoCard>
+						</aside>
+					</div>
 				</div>
-			</main>
+			</DashboardShell>
 
 			{/* Detach Resume Modal */}
 			{showDetachModal && (
@@ -906,7 +1033,7 @@ function Info() {
 					</div>
 				</div>
 			)}
-		</div>
+		</>
 	)
 }
 

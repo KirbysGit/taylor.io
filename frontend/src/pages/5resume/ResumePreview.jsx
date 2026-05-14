@@ -9,7 +9,7 @@ import { generateResumePDF, generateResumeWord } from '@/api/services/resume'
 import { upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, getMyProfile, updateSectionLabels } from '@/api/services/profile'
 
 // --- main ui component imports.
-import { ChevronLeft, NavHome, NavLogout } from '@/components/icons'
+import { ChevronLeft, NavLogout } from '@/components/icons'
 import LeftPanel from './components/left/LeftPanel'
 import RightPanel from './components/right/RightPanel'
 
@@ -514,16 +514,16 @@ function ResumePreview() {
 	}
 
 	return (
-		<div className="flex h-screen flex-col overflow-hidden bg-white">
+		<div className="flex h-screen flex-col overflow-hidden bg-[#fff8ef]">
 			{/* Compact bar mirrors TopNav pink strip; Home is centered inside the same max-w-6xl rail as segmented nav */}
 			{/* Home is centered within the same max-w-6xl strip as TopNav so it doesn’t shift vs Styles | Home | Info */}
-			<header className="relative z-[2] shrink-0 border-b border-black/[0.06] bg-brand-pink text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]">
-				<div className="relative mx-auto w-full max-w-6xl px-4 py-1.5 sm:px-6 sm:py-2.5 md:px-8">
-					<div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-6">
+			<header className="relative z-[5] shrink-0 border-b border-brand-pink/12 bg-white/88 shadow-[0_10px_30px_-28px_rgba(80,42,42,0.45)] backdrop-blur-xl">
+				<div className="mx-auto w-full px-3 py-2 sm:px-4 lg:px-5">
+					<div className="flex min-h-[3.1rem] items-center justify-between gap-3">
 						<button
 							type="button"
-							onClick={() => navigate('/home')}
-							className="relative z-[3] max-w-fit shrink rounded-lg px-0.5 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-pink"
+							onClick={() => navigate('/resumes')}
+							className="flex shrink-0 items-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 							aria-label={`${BRAND_NAME} — Home`}
 						>
 							<img
@@ -531,50 +531,63 @@ function ResumePreview() {
 								alt={BRAND_NAME}
 								decoding="async"
 								fetchPriority="high"
-								className="h-8 w-auto max-w-[min(42vw,11rem)] object-contain object-left opacity-[0.98] sm:h-9 md:max-w-[12rem]"
+								className="h-9 w-auto max-w-[min(40vw,10.5rem)] object-contain object-left opacity-[0.98]"
 							/>
 						</button>
 
-						<div className="relative z-[3] flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2">
+						<div className="hidden min-w-0 flex-1 items-center gap-2 md:flex">
+							<span className="h-6 w-px bg-brand-pink/14" aria-hidden />
+							<button
+								type="button"
+								onClick={() => navigate('/resumes')}
+								className="rounded-lg px-2 py-1 text-sm font-bold text-gray-500 transition hover:bg-brand-pink/[0.06] hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+							>
+								Resumes
+							</button>
+							<span className="text-gray-300" aria-hidden>/</span>
+							<span className="truncate rounded-lg bg-brand-pink/[0.08] px-2 py-1 text-sm font-black text-brand-pink-dark">
+								Editor
+							</span>
+							{tailorIntent ? (
+								<span className="ml-1 hidden truncate rounded-full bg-violet-50 px-3 py-1 text-xs font-bold text-violet-700 ring-1 ring-violet-200 xl:inline-flex">
+									Tailoring for {tailorIntent.jobTitle || 'target role'}
+								</span>
+							) : null}
+						</div>
+
+						<div className="flex min-w-0 shrink items-center justify-end gap-1.5 sm:gap-2">
 							<button
 								type="button"
 								onClick={() => navigate('/resume/create')}
-								className="inline-flex max-w-[min(52vw,14rem)] shrink-0 items-center gap-1 rounded-full border border-white/22 bg-transparent px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:border-white/38 hover:bg-white/[0.1] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-pink motion-reduce:active:scale-100 sm:gap-1.5 sm:px-3 sm:py-2"
+								className="inline-flex max-w-[min(48vw,12rem)] shrink-0 items-center gap-1.5 rounded-xl border border-brand-pink/16 bg-white px-3 py-2 text-xs font-black text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/30 hover:bg-brand-pink/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 								title="Choose from profile, Taylor.io Assist, or start fresh"
 							>
-								<ChevronLeft className="h-[1rem] w-[1rem] shrink-0 opacity-92" aria-hidden />
+								<ChevronLeft className="size-4 shrink-0 opacity-80" aria-hidden />
 								<span className="truncate sm:hidden">Setup</span>
-								<span className="hidden truncate sm:inline">Resume setup</span>
+								<span className="hidden truncate sm:inline">Build options</span>
+							</button>
+							<button
+								type="button"
+								onClick={() => navigate('/resumes')}
+								className="hidden shrink-0 items-center rounded-xl border border-brand-pink/16 bg-white px-3 py-2 text-xs font-black text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/30 hover:bg-brand-pink/[0.045] hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 sm:inline-flex"
+							>
+								Resumes
 							</button>
 							<button
 								type="button"
 								onClick={handleLogout}
 								aria-label="Log out"
-								className="inline-flex shrink-0 items-center gap-1 rounded-full border border-white/25 bg-white/[0.07] px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-white shadow-sm transition-[transform,background-color,border-color] duration-150 ease-out hover:border-white/40 hover:bg-white/15 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-pink motion-reduce:active:scale-100 sm:gap-1.5 sm:px-3 sm:tracking-[0.12em]"
+								className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-pink/12 bg-white px-3 py-2 text-xs font-black text-gray-500 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/24 hover:bg-brand-pink/[0.045] hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 							>
-								<NavLogout className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+								<NavLogout className="size-4 shrink-0" />
 								<span className="hidden sm:inline">Log out</span>
 							</button>
 						</div>
 					</div>
-
-					<nav
-						aria-label="Preview shortcuts"
-						className="pointer-events-none absolute inset-0 flex items-center justify-center"
-					>
-						<button
-							type="button"
-							onClick={() => navigate('/home')}
-							className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/[0.1] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition-[background-color,transform,border-color] duration-150 ease-out hover:border-white/40 hover:bg-white/15 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-pink motion-reduce:active:scale-100 sm:gap-2 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.14em]"
-						>
-							<NavHome className="h-[1.0625rem] w-[1.0625rem] shrink-0 sm:h-[1.125rem] sm:w-[1.125rem]" />
-							Home
-						</button>
-					</nav>
 				</div>
 			</header>
 
-			<main className="flex min-h-0 flex-1 overflow-hidden">
+			<main className="flex min-h-0 flex-1 overflow-hidden bg-[#fff8ef]">
 				<LeftPanel
 					width={leftPanelWidth}
 					user={user}
@@ -620,7 +633,7 @@ function ResumePreview() {
 					onMouseDown={handleMouseDown}
 					onDoubleClick={handleDoubleClick}
 					title="Drag to resize • Double-click to reset"
-					className={`w-1 bg-gray-300 hover:bg-brand-pink cursor-col-resize transition-colors ${isResizing ? 'bg-brand-pink' : ''}`}
+					className={`w-1 cursor-col-resize bg-brand-pink/12 transition-colors hover:bg-brand-pink ${isResizing ? 'bg-brand-pink' : ''}`}
 				/>
 				
 				<RightPanel
@@ -661,4 +674,3 @@ function ResumePreview() {
 }
 
 export default ResumePreview
-

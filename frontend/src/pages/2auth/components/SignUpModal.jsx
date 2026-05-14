@@ -1,6 +1,6 @@
 import { useState, useEffect, useId } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEnvelope, faEye, faEyeSlash, faLock, faShieldHalved, faWandSparkles } from '@fortawesome/free-solid-svg-icons'
+import { faCreditCard, faEnvelope, faEye, faEyeSlash, faGift, faLock, faShieldHalved, faWandSparkles } from '@fortawesome/free-solid-svg-icons'
 import { RequiredAsterisk, Checkmark, XIcon } from '@/components/icons'
 import { registerUser } from '@/api/services/auth'
 import { AuthModalDocPreview } from './AuthModalDocPreview'
@@ -176,11 +176,11 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 		.filter(Boolean)
 		.join(' ') || undefined
 
+	// Tap-outside does not dismiss; only the X or home control leaves auth (avoids accidental navigate to /).
 	return (
 		<div
 			className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-4 pt-24 animate-fade-in sm:p-5 sm:pt-20"
 			role="presentation"
-			onClick={onClose}
 		>
 			<div
 				className="auth-card animate-fade-in w-full max-w-[29rem] overflow-hidden rounded-[1.45rem] border border-brand-pink/18 bg-white/88 shadow-[0_28px_80px_-24px_rgba(120,40,40,0.34)] backdrop-blur-xl"
@@ -206,22 +206,28 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 				</div>
 
 				<div className="relative flex flex-col overflow-visible px-5 py-5 sm:px-7 sm:py-6">
-					<button
-						type="button"
-						onClick={onClose}
-						className="absolute right-4 top-4 z-10 rounded-full p-2 text-gray-400 transition hover:bg-brand-pink-lighter/70 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
-						aria-label="Close"
-					>
-						<XIcon className="h-5 w-5" />
-					</button>
 
 					<div className="mb-4 mt-2 text-center">
 						<p className="text-[0.62rem] font-black uppercase tracking-[0.24em] text-brand-pink">Your story starts here</p>
-						<h2 id="signup-modal-title" className="mx-auto mt-2 max-w-[23rem] font-serif text-[2rem] font-black leading-[0.98] tracking-tight text-gray-950 sm:text-[2.35rem]">
-							Start your first tailored r&eacute;sum&eacute;.
+						<h2 id="signup-modal-title" className="mx-auto mt-2 max-w-[23rem] pb-3 font-serif text-[2rem] font-black leading-[0.98] tracking-tight text-gray-950 sm:text-[2.35rem]">
+							Start your first tailored{' '}
+							<span className="relative inline-block text-inherit">
+								r&eacute;sum&eacute;
+								{/* em-based size ties stroke to the heading so it grows with sm: text-[2.35rem] instead of locking to 9–10px. */}
+								<img
+									src="/underline.svg"
+									alt=""
+									width={1242}
+									height={109}
+									decoding="async"
+									draggable={false}
+									className="pointer-events-none absolute left-1/2 top-full z-0 mt-[-0.05em] h-[0.4em] w-auto min-h-[11px] -translate-x-1/2 object-contain object-center select-none sm:h-[0.44em] sm:min-h-[12px]"
+									aria-hidden
+								/>
+							</span>
+							.
 						</h2>
-						<div className="mx-auto mt-1.5 h-1 w-28 -rotate-2 rounded-full bg-brand-pink" />
-						<p className="mx-auto mt-3 max-w-[22rem] text-sm leading-relaxed text-gray-600">
+						<p className="mx-auto mt-1.5 max-w-[22rem] text-sm leading-relaxed text-gray-600">
 							Save your experience, choose the role, and generate a r&eacute;sum&eacute; that fits.
 						</p>
 					</div>
@@ -463,9 +469,18 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 					</form>
 
 					<div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[0.72rem] font-medium text-gray-500">
-						<span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-brand-pink" /> Free to try</span>
-						<span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-violet-400" /> No credit card required</span>
-						<span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-cyan-400" /> Drafts stay private</span>
+						<span className="inline-flex items-center gap-1.5">
+							<FontAwesomeIcon icon={faGift} className="size-3 text-brand-pink" />
+							Free to try
+						</span>
+						<span className="inline-flex items-center gap-1.5">
+							<FontAwesomeIcon icon={faCreditCard} className="size-3 text-violet-500" />
+							No credit card required
+						</span>
+						<span className="inline-flex items-center gap-1.5">
+							<FontAwesomeIcon icon={faLock} className="size-3 text-cyan-600" />
+							Drafts stay private
+						</span>
 					</div>
 
 					<div className="-mx-5 mt-4 border-t border-gray-100 px-5 pt-3.5 text-center sm:-mx-7 sm:px-7">
@@ -474,7 +489,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 							<button
 								type="button"
 								onClick={onSwitchToLogin}
-								className="font-bold text-brand-pink transition hover:opacity-90 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+								className="font-bold text-brand-pink decoration-brand-pink/45 underline-offset-2 transition hover:underline hover:opacity-90 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 							>
 								Sign in →
 							</button>
