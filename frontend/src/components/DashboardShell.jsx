@@ -15,6 +15,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { resolveLogo } from '@/utils/logoMap'
 
+export const appLogoClasses = {
+	sidebarExpanded: 'h-12 w-auto max-w-[11rem] object-contain object-center',
+	sidebarCollapsed: 'size-11 rounded-2xl object-contain object-center shadow-sm',
+	mobile: 'h-9 w-auto',
+	editor: 'h-9 w-auto max-w-[min(40vw,10.5rem)] object-contain object-left opacity-[0.98]',
+}
+
 const navItems = [
 	{ label: 'Dashboard', to: '/home', icon: faHome },
 	{ label: 'Profile', to: '/info', icon: faUser },
@@ -59,7 +66,7 @@ function DashboardSidebar({ collapsed, onToggle, onLogout, onBeforeNavigate }) {
 					<img
 						src={collapsed ? '/favorite.png' : resolveLogo('navbar')}
 						alt="taylor.io"
-						className={collapsed ? 'size-11 rounded-2xl object-contain object-center shadow-sm' : 'h-12 w-auto max-w-[11rem] object-contain object-center'}
+						className={collapsed ? appLogoClasses.sidebarCollapsed : appLogoClasses.sidebarExpanded}
 					/>
 				</button>
 			</div>
@@ -151,7 +158,7 @@ function MobileNav({ onLogout, onBeforeNavigate }) {
 		<header className="sticky top-0 z-30 border-b border-brand-pink/12 bg-white/82 px-4 py-3 backdrop-blur-xl lg:hidden">
 			<div className="flex items-center justify-between gap-3">
 				<button type="button" onClick={() => handleNavigate('/home')} className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink">
-					<img src={resolveLogo('navbar')} alt="taylor.io" className="h-9 w-auto" />
+					<img src={resolveLogo('navbar')} alt="taylor.io" className={appLogoClasses.mobile} />
 				</button>
 				<div className="flex items-center gap-1.5">
 					{navItems.slice(0, 4).map((item) => (

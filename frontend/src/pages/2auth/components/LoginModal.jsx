@@ -73,7 +73,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 
 	return (
 		<div
-			className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-4 pt-24 animate-fade-in sm:p-5 sm:pt-20"
+			className="auth-modal-overlay fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-4 pt-24 animate-fade-in sm:p-5 sm:pt-20"
 			role="presentation"
 		>
 			<div
@@ -84,7 +84,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 				aria-describedby={error ? errorId : undefined}
 				onClick={(e) => e.stopPropagation()}
 			>
-				<div className="relative flex flex-col overflow-visible px-5 py-5 sm:px-7 sm:py-6">
+				<div className="auth-modal-content relative flex flex-col overflow-visible px-5 py-5 sm:px-7 sm:py-6">
 					<button
 						type="button"
 						onClick={onClose}
@@ -94,7 +94,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 						<XIcon className="h-5 w-5" />
 					</button>
 
-					<div className="mb-5 mt-2 text-center">
+					<div className="auth-modal-hero mb-5 mt-2 text-center">
 						<p className="text-[0.62rem] font-black uppercase tracking-[0.24em] text-brand-pink">Welcome back</p>
 						<h2 id="login-modal-title" className="mx-auto mt-2 max-w-[23rem] font-serif text-[2rem] font-black leading-[0.98] tracking-tight text-gray-950 sm:text-[2.35rem]">
 							Continue your growth.
@@ -107,20 +107,20 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 					<button
 						type="button"
 						disabled
-						className="mb-3 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white/92 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-[0_8px_18px_rgba(24,24,27,0.08)] disabled:cursor-not-allowed disabled:opacity-70"
+						className="auth-oauth-button mb-3 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white/92 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-[0_8px_18px_rgba(24,24,27,0.08)] disabled:cursor-not-allowed disabled:opacity-70"
 						title="Google sign-in coming soon"
 					>
 						<span className="text-lg font-black text-[#4285f4]">G</span>
 						Continue with Google
 					</button>
 
-					<div className="mb-3 flex items-center gap-4 text-xs text-gray-400">
+					<div className="auth-oauth-divider mb-3 flex items-center gap-4 text-xs text-gray-400">
 						<span className="h-px flex-1 bg-gray-200" />
 						<span>or</span>
 						<span className="h-px flex-1 bg-gray-200" />
 					</div>
 
-					<form onSubmit={handleSubmit} className="space-y-2.5" noValidate>
+					<form onSubmit={handleSubmit} className="auth-form space-y-2.5" noValidate>
 						<div>
 							<label htmlFor="login-email" className="auth-compact-label label">
 								Email
@@ -201,7 +201,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 						</button>
 					</form>
 
-					<div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[0.72rem] font-medium text-gray-500">
+					<div className="auth-trust-line mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[0.72rem] font-medium text-gray-500">
 						<span className="inline-flex items-center gap-1.5">
 							<FontAwesomeIcon icon={faLock} className="size-3 text-cyan-600" />
 							Drafts stay private
@@ -212,7 +212,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 						</span>
 					</div>
 
-					<div className="-mx-5 mt-4 border-t border-gray-100 px-5 pt-3.5 text-center sm:-mx-7 sm:px-7">
+					<div className="auth-switch-row -mx-5 mt-4 border-t border-gray-100 px-5 pt-3.5 text-center sm:-mx-7 sm:px-7">
 						<p className="text-sm text-gray-600">
 							Don&apos;t have an account?{' '}
 							<button
