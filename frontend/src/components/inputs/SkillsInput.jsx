@@ -378,24 +378,24 @@ const SkillsInput = ({
 	return (
 		<>
 			{/* Header with Add Category */}
-			<div className="flex items-start justify-between gap-4 mb-4">
+			<div className="profileInputHeader">
 				<div>
-					<h3 className="text-sm font-semibold text-gray-900">Your Skills</h3>
-					<p className="text-xs text-gray-500 mt-0.5">
+					<h3 className="profileInputHeaderTitle">Your Skills</h3>
+					<p className="profileInputHeaderText">
 					Add skills and organize by category. Use the circle on each section to choose where new entries go; drag pills to reorder or move.
 				</p>
 				</div>
 				<button
 					type="button"
 					onClick={handleAddCategory}
-					className="px-3 py-1.5 text-sm font-medium border border-brand-pink text-brand-pink rounded-lg hover:bg-brand-pink hover:text-white transition-all flex-shrink-0"
+					className="profileAddButton"
 				>
 					+ Add Category
 				</button>
 			</div>
 
 			{/* Add Skill Input */}
-			<div className="mb-3">
+			<div className="mb-4 rounded-2xl border border-brand-pink/12 bg-[#fff8ef]/45 p-4">
 				<label className="label">Add a skill</label>
 				<form onSubmit={handleAddSkill} className="flex gap-2">
 					<input

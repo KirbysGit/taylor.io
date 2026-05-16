@@ -14,7 +14,6 @@ import {
 	faPenToSquare,
 	faPlus,
 	faRocket,
-	faShieldHalved,
 	faStar,
 	faTrash,
 	faUser,
@@ -28,41 +27,31 @@ const dataRows = [
 		key: 'experiences',
 		label: 'Experience',
 		icon: faBriefcase,
-		bg: 'bg-sky-100',
-		tone: 'text-sky-700',
-		empty: 'Add roles',
+		empty: 'No roles yet',
 	},
 	{
 		key: 'education',
 		label: 'Education',
 		icon: faGraduationCap,
-		bg: 'bg-emerald-100',
-		tone: 'text-emerald-700',
-		empty: 'Add school',
+		empty: 'No school yet',
 	},
 	{
 		key: 'projects',
 		label: 'Projects',
 		icon: faRocket,
-		bg: 'bg-violet-100',
-		tone: 'text-violet-700',
-		empty: 'Add projects',
+		empty: 'No projects yet',
 	},
 	{
 		key: 'skills',
 		label: 'Skills',
 		icon: faWandMagicSparkles,
-		bg: 'bg-cyan-100',
-		tone: 'text-cyan-700',
-		empty: 'Add skills',
+		empty: 'No skills yet',
 	},
 	{
 		key: 'summary',
 		label: 'Summary',
 		icon: faStar,
-		bg: 'bg-amber-100',
-		tone: 'text-amber-700',
-		empty: 'Add summary',
+		empty: 'No summary yet',
 	},
 ]
 
@@ -75,74 +64,95 @@ const templateSwatches = [
 
 function DashboardCard({ className = '', children }) {
 	return (
-		<section className={`rounded-[1.35rem] border border-brand-pink/13 bg-white/78 shadow-[0_18px_48px_-34px_rgba(80,42,42,0.42)] ring-1 ring-white/80 backdrop-blur-md ${className}`}>
+		<section className={`rounded-[1.35rem] border border-brand-pink/20 bg-white shadow-[0_18px_42px_-26px_rgba(80,42,42,0.46)] ring-1 ring-white ${className}`}>
 			{children}
 		</section>
 	)
 }
 
-function PrimaryResumeCard({ onCreate, onChooseProfile }) {
+function StartOptionButton({ icon, label, description, badge, onClick, featured = false }) {
 	return (
-		<DashboardCard className="relative overflow-hidden bg-brand-pink/[0.08] px-5 pb-5 pt-6 sm:px-7 sm:pb-6 sm:pt-7">
-			<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.95),transparent_24%),linear-gradient(135deg,rgba(214,86,86,0.12),rgba(255,255,255,0.55)_48%,rgba(250,205,205,0.35))]" aria-hidden />
-			<div className="pointer-events-none absolute -right-14 top-8 hidden h-72 w-80 opacity-95 md:block" aria-hidden>
-				<div className="absolute left-4 top-0 h-12 w-44 rounded-2xl bg-white/80 shadow-[0_14px_34px_-20px_rgba(45,30,38,0.3)] ring-1 ring-brand-pink/12">
-					<div className="ml-4 mt-4 h-3 w-16 rounded-full bg-amber-400/80" />
-					<div className="ml-24 mt-[-0.55rem] h-2 w-12 rounded-full bg-gray-300/55" />
-				</div>
-				<div className="absolute left-0 top-16 h-14 w-52 rounded-2xl bg-white/82 shadow-[0_14px_34px_-20px_rgba(45,30,38,0.3)] ring-1 ring-brand-pink/12">
-					<div className="ml-4 mt-4 size-5 rounded-full bg-violet-500/85" />
-					<div className="ml-14 mt-[-1.1rem] h-2 w-24 rounded-full bg-gray-300/60" />
-					<div className="ml-14 mt-2 h-2 w-16 rounded-full bg-gray-300/45" />
-				</div>
-				<div className="absolute left-8 top-36 h-14 w-52 rounded-2xl bg-white/82 shadow-[0_14px_34px_-20px_rgba(45,30,38,0.3)] ring-1 ring-brand-pink/12">
-					<div className="ml-4 mt-4 size-5 rounded-lg bg-sky-500/85" />
-					<div className="ml-14 mt-[-1.1rem] h-2 w-28 rounded-full bg-gray-300/60" />
-					<div className="ml-14 mt-2 h-2 w-20 rounded-full bg-gray-300/45" />
-				</div>
-				<div className="absolute left-2 top-56 h-12 w-44 rounded-2xl bg-white/78 shadow-[0_14px_34px_-20px_rgba(45,30,38,0.3)] ring-1 ring-brand-pink/12">
-					<div className="ml-4 mt-4 size-4 rounded-full bg-brand-pink/90" />
-					<div className="ml-12 mt-[-0.85rem] h-2 w-20 rounded-full bg-gray-300/55" />
-				</div>
+		<button
+			type="button"
+			onClick={onClick}
+			className={[
+				'group relative flex h-full min-h-[9.25rem] flex-col overflow-hidden rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2',
+				featured
+					? 'border-brand-pink/36 bg-white shadow-[0_18px_42px_-28px_rgba(214,86,86,0.55)] hover:border-brand-pink/70 hover:shadow-[0_22px_48px_-28px_rgba(214,86,86,0.45)]'
+					: 'border-gray-200/90 bg-white shadow-[0_12px_34px_-28px_rgba(45,30,38,0.38)] hover:border-brand-pink/55 hover:shadow-[0_18px_42px_-28px_rgba(214,86,86,0.34)]',
+			].join(' ')}
+		>
+			{featured ? (
+				<span className="pointer-events-none absolute -right-8 -top-8 size-28 rounded-full bg-brand-pink/[0.09] blur-xl" aria-hidden />
+			) : null}
+			<div className="relative z-[1] flex items-start justify-between gap-3">
+				<span
+					className={[
+						'flex size-11 shrink-0 items-center justify-center rounded-2xl shadow-sm transition group-hover:scale-[1.03]',
+						featured ? 'bg-brand-pink text-white' : 'bg-brand-pink/[0.08] text-brand-pink-dark',
+					].join(' ')}
+				>
+					<FontAwesomeIcon icon={icon} className="size-4" />
+				</span>
+				{badge ? (
+					<span className="rounded-full bg-brand-pink/[0.08] px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.12em] text-brand-pink-dark ring-1 ring-brand-pink/12">
+						{badge}
+					</span>
+				) : null}
 			</div>
+			<h3 className="relative z-[1] mt-4 text-base font-black tracking-tight text-gray-950">{label}</h3>
+			<p className="relative z-[1] mt-1.5 flex-1 text-sm leading-relaxed text-gray-600">{description}</p>
+			<span className="relative z-[1] mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-brand-pink-dark">
+				Start
+				<FontAwesomeIcon icon={faArrowRight} className="size-3 transition group-hover:translate-x-0.5" />
+			</span>
+		</button>
+	)
+}
 
-			<div className="relative z-[1] max-w-[28rem]">
+function PrimaryResumeCard({ onCreate, onChooseProfile, onStartFresh }) {
+	const startOptions = [
+		{
+			label: 'Tailor to a role',
+			description: 'Paste a job description and let Taylor shape the strongest version.',
+			icon: faWandMagicSparkles,
+			badge: 'Best start',
+			onClick: onCreate,
+			featured: true,
+		},
+		{
+			label: 'Use saved profile',
+			description: 'Choose the career data you already saved and assemble a focused draft.',
+			icon: faUser,
+			onClick: onChooseProfile,
+		},
+		{
+			label: 'Start fresh',
+			description: 'Open a blank editor when you want complete manual control.',
+			icon: faPlus,
+			onClick: onStartFresh,
+		},
+	]
+
+	return (
+		<DashboardCard className="relative overflow-hidden border-brand-pink/22 bg-white px-5 pb-5 pt-6 shadow-[0_24px_62px_-34px_rgba(80,42,42,0.58)] sm:px-7 sm:pb-6 sm:pt-7">
+			<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_86%_12%,rgba(255,255,255,0.98),transparent_24%),linear-gradient(135deg,rgba(214,86,86,0.08),rgba(255,255,255,0.82)_48%,rgba(250,205,205,0.18))]" aria-hidden />
+
+			<div className="relative z-[1]">
 				<p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-[0.68rem] font-black uppercase tracking-[0.16em] text-brand-pink-dark shadow-sm ring-1 ring-brand-pink/12">
 					<FontAwesomeIcon icon={faWandMagicSparkles} className="size-3" />
 					Start here
 				</p>
 				<h2 className="text-3xl font-black tracking-tight text-gray-950 sm:text-[2.35rem]">Build a r&eacute;sum&eacute; for a role</h2>
 				<p className="mt-4 max-w-md text-base leading-relaxed text-gray-700">
-					Paste a job description or use your saved career profile to generate a focused version faster.
+					Pick the path that matches what you need right now. Taylor will bring you into the editor from there.
 				</p>
 
-				<div className="mt-6 flex flex-wrap gap-3">
-					<button
-						type="button"
-						onClick={onCreate}
-						className="inline-flex items-center gap-2 rounded-xl border border-brand-pink/20 bg-white/88 px-4 py-3 text-sm font-bold text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/35 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
-					>
-						<FontAwesomeIcon icon={faPenToSquare} className="size-4" />
-						Paste job description
-					</button>
-					<button
-						type="button"
-						onClick={onChooseProfile}
-						className="inline-flex items-center gap-2 rounded-xl border border-brand-pink/20 bg-white/88 px-4 py-3 text-sm font-bold text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/35 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
-					>
-						<FontAwesomeIcon icon={faUser} className="size-4" />
-						Use saved profile
-					</button>
+				<div className="mt-6 grid gap-3 sm:grid-cols-3 lg:gap-4">
+					{startOptions.map((option) => (
+						<StartOptionButton key={option.label} {...option} />
+					))}
 				</div>
-
-				<button
-					type="button"
-					onClick={onCreate}
-					className="mt-6 inline-flex min-h-[3.15rem] items-center justify-center gap-3 rounded-xl bg-brand-pink px-7 py-3 text-sm font-black text-white shadow-[0_16px_32px_-14px_rgba(214,86,86,0.75)] transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
-				>
-					Generate tailored r&eacute;sum&eacute;
-					<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
-				</button>
 			</div>
 		</DashboardCard>
 	)
@@ -159,16 +169,18 @@ function CareerDataCard({ profile, isLoading, onOpenProfile }) {
 			summary: summaryPresent ? 1 : 0,
 		}
 	}, [profile])
+	const readyCount = dataRows.filter((row) => counts[row.key] > 0).length
+	const totalCount = dataRows.length
 
 	return (
 		<DashboardCard className="p-6">
 			<div className="flex items-start justify-between gap-4">
 				<div>
 					<h2 className="text-xl font-black tracking-tight text-gray-950">Your career data</h2>
-					<p className="mt-1 text-sm text-gray-500">The pieces Taylor uses to build better versions.</p>
+					<p className="mt-1 text-sm text-gray-500">Profile sections Taylor can use for better r&eacute;sum&eacute;s.</p>
 				</div>
-				<span className="inline-flex size-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
-					<FontAwesomeIcon icon={faShieldHalved} className="size-4" />
+				<span className="inline-flex shrink-0 rounded-full bg-brand-pink/[0.08] px-3 py-1.5 text-xs font-black text-brand-pink-dark ring-1 ring-brand-pink/12">
+					{isLoading ? 'Checking' : `${readyCount}/${totalCount} ready`}
 				</span>
 			</div>
 
@@ -178,16 +190,20 @@ function CareerDataCard({ profile, isLoading, onOpenProfile }) {
 					const ready = count > 0
 					return (
 						<div key={row.key} className="flex items-center gap-3 py-3">
-							<span className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${row.bg} ${row.tone}`}>
-								<FontAwesomeIcon icon={row.icon} className="size-4" />
+							<span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-pink/60 via-brand-pink-lighter to-brand-pink/18 p-px shadow-[0_8px_18px_-14px_rgba(214,86,86,0.65)]">
+								<span className="flex size-full items-center justify-center rounded-[0.68rem] bg-white text-brand-pink-dark">
+									<FontAwesomeIcon icon={row.icon} className="size-4" />
+								</span>
 							</span>
 							<div className="min-w-0 flex-1">
 								<p className="font-bold text-gray-900">{row.label}</p>
 								<p className="text-xs text-gray-500">{isLoading ? 'Checking...' : ready ? `${count} saved` : row.empty}</p>
 							</div>
-							<span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${ready ? 'bg-emerald-50 text-emerald-700' : 'bg-brand-pink/[0.08] text-brand-pink-dark'}`}>
-								{ready ? <FontAwesomeIcon icon={faCheck} className="size-3" /> : <FontAwesomeIcon icon={faPlus} className="size-3" />}
-								{ready ? 'Updated' : 'Add'}
+							<span className="inline-flex rounded-full bg-gradient-to-r from-brand-pink/45 via-brand-pink-lighter to-brand-pink/18 p-px shadow-sm">
+								<span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-brand-pink-dark">
+									{ready ? <FontAwesomeIcon icon={faCheck} className="size-3" /> : <FontAwesomeIcon icon={faPlus} className="size-3" />}
+									{ready ? 'Ready' : 'Missing'}
+								</span>
 							</span>
 						</div>
 					)
@@ -197,9 +213,9 @@ function CareerDataCard({ profile, isLoading, onOpenProfile }) {
 			<button
 				type="button"
 				onClick={onOpenProfile}
-				className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-brand-pink-dark transition hover:text-brand-pink focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+				className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-brand-pink/18 bg-brand-pink/[0.055] px-4 py-2.5 text-sm font-black text-brand-pink-dark transition hover:border-brand-pink/35 hover:bg-brand-pink/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
 			>
-				Improve profile
+				Review profile data
 				<FontAwesomeIcon icon={faArrowRight} className="size-3.5" />
 			</button>
 		</DashboardCard>
@@ -504,17 +520,28 @@ function Home() {
 					<div>
 						<p className="text-xs font-black uppercase tracking-[0.2em] text-brand-pink-dark">Dashboard</p>
 						<h1 className="mt-2 text-3xl font-black tracking-tight text-gray-950 sm:text-4xl">
-							{isLoading ? 'Welcome back' : greetingName ? `Welcome back, ${greetingName}` : 'Welcome back'}
+							{isLoading ? (
+								'Welcome back'
+							) : greetingName ? (
+								<>
+									Welcome back,{' '}
+									<span className="bg-gradient-to-r from-brand-pink to-red-600 bg-clip-text text-[1.14em] font-black leading-none text-transparent sm:text-[1.16em]">
+										{greetingName}
+									</span>
+								</>
+							) : (
+								'Welcome back'
+							)}
 						</h1>
 						<p className="mt-2 text-base text-gray-600">Ready to tailor your next r&eacute;sum&eacute;?</p>
 					</div>
 					<button
 						type="button"
-						onClick={() => navigate('/resume/create')}
-						className="inline-flex min-h-[3.15rem] items-center justify-center gap-2 rounded-xl bg-brand-pink px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(214,86,86,0.8)] transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+						onClick={() => navigate('/setup')}
+						className="inline-flex w-fit items-center gap-2 rounded-xl border border-brand-pink/20 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/45 hover:bg-brand-pink/[0.055] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
 					>
-						<FontAwesomeIcon icon={faPlus} className="size-4" />
-						Create new r&eacute;sum&eacute;
+						<FontAwesomeIcon icon={faWandMagicSparkles} className="size-3.5" />
+						Dev setup
 					</button>
 				</header>
 
@@ -523,6 +550,7 @@ function Home() {
 						<PrimaryResumeCard
 							onCreate={() => navigate('/resume/create/tailor')}
 							onChooseProfile={() => navigate('/resume/create/choose')}
+							onStartFresh={() => navigate('/resume/preview', { state: { createMode: 'startFresh' } })}
 						/>
 						<SavedResumesSection
 							savedResumes={savedResumes}

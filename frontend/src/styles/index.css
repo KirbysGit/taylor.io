@@ -27,24 +27,25 @@
 /* custom component classes */
 @layer components {
 	.label {
-		@apply block text-[0.875rem] font-[500] text-gray-700 mb-1;
+		@apply mb-1.5 block text-[0.78rem] font-black uppercase tracking-[0.08em] text-gray-600;
 	}
 
 	.input {
 		/* Form controls don’t always inherit body text; lock to theme sans so fields match the rest of the app. */
-		@apply w-full rounded-lg bg-white px-3 py-2 font-sans font-normal text-gray-900;
-		border: 2px solid rgba(209, 213, 219, 0.75); /* border-gray-300 equivalent */
-		transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+		@apply w-full rounded-xl bg-white px-3.5 py-2.5 font-sans font-medium text-gray-900 shadow-sm;
+		border: 1px solid rgba(214, 86, 86, 0.16);
+		transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
 	}
 	
 	.input:hover {
-		border-color: rgb(238, 155, 155); /* border-brand-pink-light */
+		border-color: rgba(214, 86, 86, 0.34);
+		background-color: rgba(255, 255, 255, 0.98);
 		outline: none;
 	}
 	
 	.input:focus {
 		border-color: rgb(214, 86, 86); /* border-brand-pink */
-		box-shadow: 0 0 0 3px rgba(214, 86, 86, 0.1);
+		box-shadow: 0 0 0 4px rgba(214, 86, 86, 0.1), 0 12px 28px -22px rgba(80, 42, 42, 0.5);
 		outline: none;
 	}
 	
@@ -78,7 +79,7 @@
 	}
 
 	.input:disabled {
-		@apply bg-gray-100 text-gray-500 opacity-60;
+		@apply bg-gray-100 text-gray-500 opacity-70;
 	}
 
 	.labelInputPair {
@@ -87,6 +88,50 @@
 
 	.labelInputPairHoriz {
 		@apply flex flex-1 flex-row items-center;
+	}
+
+	.profileInputHeader {
+		@apply mb-4 flex flex-col gap-3 rounded-2xl border border-brand-pink/10 bg-[#fff8ef]/55 p-4 sm:flex-row sm:items-start sm:justify-between;
+	}
+
+	.profileInputHeaderTitle {
+		@apply text-sm font-black text-gray-950;
+	}
+
+	.profileInputHeaderText {
+		@apply mt-0.5 text-xs leading-relaxed text-gray-500;
+	}
+
+	.profileAddButton {
+		@apply inline-flex shrink-0 items-center justify-center rounded-xl border border-brand-pink/20 bg-white px-3.5 py-2 text-sm font-black text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/50 hover:bg-brand-pink/[0.055] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2;
+	}
+
+	.profileEntryCard {
+		@apply min-w-0 overflow-hidden rounded-2xl border border-brand-pink/20 bg-white shadow-[0_14px_34px_-28px_rgba(80,42,42,0.5)] transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-pink/30 hover:shadow-[0_20px_42px_-30px_rgba(214,86,86,0.42)];
+	}
+
+	.profileEntryCardExpanded {
+		@apply border-brand-pink/30 shadow-[0_20px_46px_-32px_rgba(214,86,86,0.5)];
+	}
+
+	.profileEntryBar {
+		@apply flex items-center gap-2 rounded-2xl px-4 py-3 transition-colors hover:bg-brand-pink/[0.035];
+	}
+
+	.profileEntryPanel {
+		@apply space-y-4 border-t border-brand-pink/10 bg-[#fff8ef]/30 px-4 pb-4 pt-4;
+	}
+
+	.profileIconButton {
+		@apply shrink-0 rounded-xl p-2 text-gray-500 transition hover:bg-brand-pink/[0.07] hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink;
+	}
+
+	.profileDangerButton {
+		@apply shrink-0 rounded-xl p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400;
+	}
+
+	.profileEmptyState {
+		@apply rounded-2xl border border-dashed border-brand-pink/20 bg-[#fff8ef]/45 px-5 py-9 text-center text-sm text-gray-500;
 	}
 
 	/* horizontal label for use in labelInputPairHoriz */
@@ -105,7 +150,7 @@
 	}
 
 	.smallDivider {
-		@apply h-[3px] bg-brand-pink opacity-80 w-full rounded-full;
+		@apply h-px w-full rounded-full bg-brand-pink/20;
 	}
 
 	.errorMessage {
@@ -126,12 +171,12 @@
 
 	/* collapsible card container */
 	.collapsibleCard {
-		@apply bg-white border border-gray-300 rounded-lg overflow-hidden transition-all duration-300 hover:border-brand-pink/50 shadow-sm;
+		@apply overflow-hidden rounded-2xl border border-brand-pink/20 bg-white shadow-[0_12px_30px_-24px_rgba(80,42,42,0.48)] transition-all duration-300 hover:border-brand-pink/30 hover:shadow-[0_18px_38px_-28px_rgba(214,86,86,0.4)];
 	}
 
 	/* collapsible card header */
 	.collapsibleCardHeader {
-		@apply w-full px-5 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors;
+		@apply flex w-full items-center justify-between px-5 py-3.5 transition-colors hover:bg-brand-pink/[0.035];
 	}
 
 	/* expandable content container */
@@ -151,7 +196,7 @@
 
 	/* expandable content inner */
 	.expandableContentInner {
-		@apply px-5 pb-5 pt-4 space-y-4 border-t border-gray-200;
+		@apply space-y-4 border-t border-brand-pink/10 px-5 pb-5 pt-4;
 	}
 
 	/* remove button with progressive underline */
@@ -173,7 +218,7 @@
 	}
 
 	.currentLabel.active {
-		@apply text-brand-pink;
+		@apply text-brand-pink-dark;
 		text-decoration: underline;
 		text-decoration-color: rgb(214, 86, 86);
 		text-underline-offset: 4px;
@@ -185,11 +230,11 @@
 
 	/* skill pill styling */
 	.skillPill {
-		@apply inline-flex items-center gap-2 px-3 py-1.5 bg-brand-pink/10 border border-brand-pink/30 text-brand-pink rounded-full text-sm font-medium cursor-move transition-all;
+		@apply inline-flex cursor-move items-center gap-2 rounded-full border border-brand-pink/20 bg-white px-3 py-1.5 text-sm font-bold text-brand-pink-dark shadow-sm transition-all;
 	}
 
 	.skillPill:hover {
-		@apply bg-brand-pink/20 border-brand-pink/50 shadow-sm;
+		@apply border-brand-pink/50 bg-brand-pink/[0.055] shadow-sm;
 		transform: translateY(-1px);
 	}
 

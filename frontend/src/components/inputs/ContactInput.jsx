@@ -5,7 +5,8 @@ import TaglinePreview from './TaglinePreview'
 // Contact Input Component - Just the form fields, no headers
 const ContactInput = ({ contact, onUpdate }) => {
 	return (
-		<div className="space-y-4">
+		<div className="space-y-5">
+			<div className="grid gap-4 md:grid-cols-2">
 			<div>
 				<label className="label">Email</label>
 				<input
@@ -26,6 +27,8 @@ const ContactInput = ({ contact, onUpdate }) => {
 					placeholder="(123) 456-7890"
 				/>
 			</div>
+			</div>
+			<div className="grid gap-4 md:grid-cols-3">
 			<div>
 				<label className="label">GitHub</label>
 				<input
@@ -56,6 +59,7 @@ const ContactInput = ({ contact, onUpdate }) => {
 					placeholder="https://yourwebsite.com"
 				/>
 			</div>
+			</div>
 			<div>
 				<label className="label">Location</label>
 				<input
@@ -67,7 +71,7 @@ const ContactInput = ({ contact, onUpdate }) => {
 				/>
 			</div>
 
-			<div className="animate-slide-tagline border-t border-gray-200 pt-5 mt-1">
+			<div className="animate-slide-tagline mt-1 rounded-2xl border border-brand-pink/12 bg-[#fff8ef]/45 p-4">
 				<label className="label">Professional Tagline</label>
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-0 items-stretch">
 					<TaglineMiniEditor

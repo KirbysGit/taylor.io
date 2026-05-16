@@ -309,7 +309,7 @@ function AccountSetup() {
 	return (
 		<div className="h-screen bg-cream overflow-y-auto info-scrollbar">
 			<div className="min-h-full flex items-center justify-center py-12 px-4">
-				<div className="w-full max-w-2xl">
+				<div className={`w-full ${currentStep === 0 ? 'max-w-5xl' : 'max-w-2xl'}`}>
 					{/* Subtle Progress Bar - Top */}
 					<div className="mb-6">
 						<div className="w-full bg-gray-200/50 rounded-full h-1.5 overflow-hidden">
@@ -331,7 +331,7 @@ function AccountSetup() {
 					{/* Main Content Card - Centered and Focused */}
 					<div
 						key={currentStep}
-						className="bg-white-bright rounded-2xl shadow-xl p-6 md:p-8 animate-fadeIn"
+						className={`bg-white-bright rounded-2xl shadow-xl animate-fadeIn ${currentStep === 0 ? 'p-6 md:p-10' : 'p-6 md:p-8'}`}
 					>
 						{renderStepContent()}
 					</div>
@@ -383,4 +383,3 @@ function AccountSetup() {
 
 // export.
 export default AccountSetup
-

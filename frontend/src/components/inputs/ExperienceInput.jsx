@@ -283,14 +283,14 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 	}
 
 	const headerSection = (
-		<div className="flex items-start justify-between gap-4 mb-4">
+		<div className="profileInputHeader">
 			<div>
-				<h3 className="text-sm font-semibold text-gray-900">Your Experience Entries</h3>
-				<p className="text-xs text-gray-500 mt-0.5">Add, edit, or reorder your work history. Click the pencil to expand.</p>
+				<h3 className="profileInputHeaderTitle">Your Experience Entries</h3>
+				<p className="profileInputHeaderText">Add, edit, or reorder your work history. Click the pencil to expand.</p>
 			</div>
 			<button
 				onClick={handleAddNew}
-				className="px-3 py-1.5 text-sm font-medium border border-brand-pink text-brand-pink rounded-lg hover:bg-brand-pink hover:text-white transition-all flex-shrink-0"
+				className="profileAddButton"
 			>
 				+ Add Experience
 			</button>
@@ -320,10 +320,10 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 									onDragOver={isDraggable ? (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverEntryIndex(index) } : undefined}
 									onDragLeave={isDraggable ? () => setDragOverEntryIndex(null) : undefined}
 									onDrop={isDraggable ? (e) => { e.preventDefault(); if (draggedEntryIndex != null) { handleReorder(draggedEntryIndex, index); setDraggedEntryIndex(null); setDragOverEntryIndex(null) } } : undefined}
-									className={`min-w-0 rounded-xl border-l-4 border-brand-pink bg-white shadow transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${isExpanded ? 'rounded-t-xl' : ''} ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'ring-2 ring-brand-pink ring-dashed ring-offset-1 bg-brand-pink/5' : ''}`}
+									className={`profileEntryCard ${isExpanded ? 'profileEntryCardExpanded' : ''} ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'ring-2 ring-brand-pink ring-dashed ring-offset-1 bg-brand-pink/5' : ''}`}
 								>
 									{/* Card bar - grip, label, pencil, trash */}
-									<div className={`flex items-center gap-2 py-2.5 rounded-xl transition-colors ${isDraggable ? 'pl-3 pr-2' : 'pl-5 pr-2'} hover:bg-gray-50/50`}>
+									<div className={`profileEntryBar ${isDraggable ? 'pl-3' : 'pl-5'}`}>
 										{isDraggable ? (
 											<div
 												draggable
@@ -354,9 +354,7 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 												if (Date.now() - lastDragEndRef.current < 150) return
 												toggleExpanded(index)
 											}}
-											className={`flex-shrink-0 p-2 rounded-md transition-colors ${
-												isExpanded ? 'bg-brand-pink/10 text-brand-pink hover:bg-brand-pink/20' : 'text-gray-500 hover:text-brand-pink hover:bg-gray-100'
-											}`}
+											className={`profileIconButton ${isExpanded ? 'bg-brand-pink/10 text-brand-pink-dark' : ''}`}
 											aria-expanded={isExpanded}
 											title={isExpanded ? 'Collapse' : 'Expand to edit'}
 										>
@@ -368,7 +366,7 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 												e.stopPropagation()
 												onRemove(index)
 											}}
-											className="flex-shrink-0 p-2 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+											className="profileDangerButton"
 											aria-label="Remove"
 											title="Remove"
 										>
@@ -378,7 +376,7 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 
 									{/* Expandable Content */}
 									<AnimatedExpand expanded={isExpanded}>
-										<div className="pt-4 pb-4 px-4 border-t border-gray-200 space-y-4">
+										<div className="profileEntryPanel">
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
 										<div>
 											<label className="label">Job Title</label>
@@ -581,8 +579,8 @@ const ExperienceInput = ({ experiences, onAdd, onRemove, onUpdate, onReorder }) 
 			) : (
 				<div>
 					{headerSection}
-					<div className="text-center py-10 border border-dashed border-gray-200 rounded-lg">
-						<p className="text-gray-500 text-base">No experience yet. Click &quot;+ Add Experience&quot; above to get started.</p>
+					<div className="profileEmptyState">
+						<p>No experience yet. Click &quot;+ Add Experience&quot; above to get started.</p>
 					</div>
 				</div>
 			)}
