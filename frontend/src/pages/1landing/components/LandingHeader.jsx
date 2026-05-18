@@ -29,14 +29,14 @@ export default function LandingHeader() {
 				<nav className="flex items-center gap-2 sm:gap-2.5" aria-label="Account">
 					<button
 						type="button"
-						onClick={() => navigate('/auth')}
+						onClick={() => navigate('/auth?mode=login')}
 						className="rounded-full px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-white/92 transition hover:bg-white/[0.1] hover:text-white sm:text-[13px] sm:normal-case sm:tracking-normal sm:font-medium"
 					>
 						Sign in
 					</button>
 					<button
 						type="button"
-						onClick={() => navigate('/auth')}
+						onClick={() => navigate('/auth?mode=signup')}
 						className="rounded-full border border-white/25 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-brand-pink shadow-sm transition hover:border-white/45 hover:bg-cream hover:shadow md:text-[13px] md:normal-case md:tracking-normal"
 					>
 						Get started

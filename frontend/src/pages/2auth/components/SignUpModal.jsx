@@ -179,11 +179,11 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 	// Tap-outside does not dismiss; only the X or home control leaves auth (avoids accidental navigate to /).
 	return (
 		<div
-			className="auth-modal-overlay fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-4 pt-24 animate-fade-in sm:p-5 sm:pt-20"
+			className="auth-modal-overlay fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pt-20 animate-fade-in sm:p-5 sm:pt-16 lg:pt-14"
 			role="presentation"
 		>
 			<div
-				className="auth-card animate-fade-in w-full max-w-[29rem] overflow-hidden rounded-[1.45rem] border border-brand-pink/18 bg-white/88 shadow-[0_28px_80px_-24px_rgba(120,40,40,0.34)] backdrop-blur-xl"
+				className="auth-card animate-fade-in w-full max-w-[31rem] overflow-hidden rounded-[1.45rem] border border-brand-pink/18 bg-white/88 shadow-[0_28px_80px_-24px_rgba(120,40,40,0.34)] backdrop-blur-xl"
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="signup-modal-title"
@@ -205,7 +205,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 					<AuthModalDocPreview />
 				</div>
 
-				<div className="auth-modal-content relative flex flex-col overflow-visible px-5 py-5 sm:px-7 sm:py-6">
+				<div className="auth-modal-content relative flex flex-col overflow-visible px-5 py-5 sm:px-8 sm:py-7">
 
 					<div className="auth-modal-hero mb-4 mt-2 text-center">
 						<p className="text-[0.62rem] font-black uppercase tracking-[0.24em] text-brand-pink">Your story starts here</p>
@@ -232,23 +232,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 						</p>
 					</div>
 
-					<button
-						type="button"
-						disabled
-						className="auth-oauth-button mb-3 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white/92 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-[0_8px_18px_rgba(24,24,27,0.08)] disabled:cursor-not-allowed disabled:opacity-70"
-						title="Google sign-in coming soon"
-					>
-						<span className="text-lg font-black text-[#4285f4]">G</span>
-						Continue with Google
-					</button>
-
-					<div className="auth-oauth-divider mb-3 flex items-center gap-4 text-xs text-gray-400">
-						<span className="h-px flex-1 bg-gray-200" />
-						<span>or</span>
-						<span className="h-px flex-1 bg-gray-200" />
-					</div>
-
-					<form onSubmit={handleSubmit} className="auth-form space-y-2.5" noValidate>
+					<form onSubmit={handleSubmit} className="auth-form space-y-3.5" noValidate>
 						<div className="flex gap-3">
 							<div className="min-w-0 flex-1">
 								<label htmlFor="signup-first-name" className="auth-compact-label label">
@@ -461,12 +445,26 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 						<button
 							type="submit"
 							disabled={isLoading || !isFormValid}
-							className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-pink py-2.5 text-sm font-bold text-white shadow-[0_12px_24px_rgba(214,86,86,0.28)] transition hover:-translate-y-0.5 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+							className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-pink py-3 text-sm font-bold text-white shadow-[0_12px_24px_rgba(214,86,86,0.28)] transition hover:-translate-y-0.5 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
 						>
 							<FontAwesomeIcon icon={faWandSparkles} className="size-4" />
 							{isLoading ? 'Creating account…' : 'Create account'}
 						</button>
 					</form>
+
+					<div className="auth-google-secondary mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-gray-500">
+						<span className="h-px w-12 bg-gray-200" />
+						<button
+							type="button"
+							disabled
+							className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-gray-600 shadow-sm disabled:cursor-not-allowed disabled:opacity-75"
+							title="Google sign-up coming soon"
+						>
+							<span className="text-sm font-black text-[#4285f4]">G</span>
+							Google
+						</button>
+						<span className="h-px w-12 bg-gray-200" />
+					</div>
 
 					<div className="auth-trust-line mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[0.72rem] font-medium text-gray-500">
 						<span className="inline-flex items-center gap-1.5">
@@ -491,7 +489,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 								onClick={onSwitchToLogin}
 								className="font-bold text-brand-pink decoration-brand-pink/45 underline-offset-2 transition hover:underline hover:opacity-90 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 							>
-								Sign in →
+								Sign in
 							</button>
 						</p>
 					</div>

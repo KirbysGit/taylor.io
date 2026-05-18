@@ -29,11 +29,13 @@ function Auth() {
     const switchToSignUp = () => {
 		setShowLogin(false)
 		setShowSignUp(true)
+		navigate('/auth?mode=signup', { replace: true })
     }
 
     const switchToLogin = () => {
 		setShowSignUp(false)
 		setShowLogin(true)
+		navigate('/auth?mode=login', { replace: true })
     }
 
     const handleSignUpSuccess = (user) => {

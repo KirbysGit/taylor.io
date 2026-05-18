@@ -471,8 +471,8 @@
 
 @media (max-height: 820px) {
 	.auth-modal-overlay {
-		padding-top: 4.75rem !important;
-		padding-bottom: 0.75rem !important;
+		padding-top: 3.75rem !important;
+		padding-bottom: 1rem !important;
 	}
 
 	.auth-home-pill {
@@ -484,17 +484,17 @@
 	}
 
 	.auth-card {
-		max-width: 27.5rem;
+		max-width: 31rem;
 	}
 
 	.auth-modal-content {
-		padding-top: 1rem !important;
-		padding-bottom: 0.9rem !important;
+		padding-top: 1.25rem !important;
+		padding-bottom: 1.15rem !important;
 	}
 
 	.auth-modal-hero {
 		margin-top: 0 !important;
-		margin-bottom: 0.7rem !important;
+		margin-bottom: 0.9rem !important;
 	}
 
 	.auth-modal-hero h2 {
@@ -520,24 +520,25 @@
 	}
 
 	.auth-form {
-		gap: 0.45rem !important;
+		gap: 0.7rem !important;
 	}
 
-	.auth-form.space-y-2\.5 > :not([hidden]) ~ :not([hidden]) {
-		margin-top: 0.45rem !important;
+	.auth-form.space-y-2\.5 > :not([hidden]) ~ :not([hidden]),
+	.auth-form.space-y-3\.5 > :not([hidden]) ~ :not([hidden]) {
+		margin-top: 0.7rem !important;
 	}
 
 	.auth-compact-label.label {
-		margin-bottom: 0.16rem;
-		font-size: 0.68rem;
+		margin-bottom: 0.22rem;
+		font-size: 0.72rem;
 	}
 
 	.auth-compact-input.input {
-		border-radius: 0.72rem;
-		padding-top: 0.42rem;
-		padding-bottom: 0.42rem;
-		font-size: 0.86rem;
-		line-height: 1.25;
+		border-radius: 0.78rem;
+		padding-top: 0.5rem;
+		padding-bottom: 0.5rem;
+		font-size: 0.9rem;
+		line-height: 1.35;
 	}
 
 	.auth-trust-line {
@@ -555,7 +556,7 @@
 @media (max-height: 720px) {
 	.auth-modal-overlay {
 		align-items: flex-start !important;
-		padding-top: 4.1rem !important;
+		padding-top: 3.1rem !important;
 	}
 
 	.auth-home-pill {
@@ -568,30 +569,27 @@
 	}
 
 	.auth-card {
-		max-width: 26.25rem;
+		max-width: 30rem;
 	}
 
 	.auth-modal-content {
-		padding-left: 1rem !important;
-		padding-right: 1rem !important;
-		padding-top: 0.8rem !important;
-		padding-bottom: 0.7rem !important;
+		padding-left: 1.25rem !important;
+		padding-right: 1.25rem !important;
+		padding-top: 1rem !important;
+		padding-bottom: 0.95rem !important;
 	}
 
-	.auth-modal-hero p:first-child,
-	.auth-oauth-button,
-	.auth-oauth-divider,
-	.auth-trust-line {
+	.auth-modal-hero p:first-child {
 		display: none !important;
 	}
 
 	.auth-modal-hero h2 {
-		font-size: clamp(1.45rem, 7vh, 1.75rem) !important;
-		padding-bottom: 0.25rem !important;
+		font-size: clamp(1.6rem, 7vh, 1.95rem) !important;
+		padding-bottom: 0.35rem !important;
 	}
 
 	.auth-modal-hero p:last-child {
-		font-size: 0.76rem !important;
+		font-size: 0.82rem !important;
 	}
 
 	.passwordRequirements {
@@ -600,8 +598,9 @@
 		font-size: 0.76rem !important;
 	}
 
-	.auth-form.space-y-2\.5 > :not([hidden]) ~ :not([hidden]) {
-		margin-top: 0.34rem !important;
+	.auth-form.space-y-2\.5 > :not([hidden]) ~ :not([hidden]),
+	.auth-form.space-y-3\.5 > :not([hidden]) ~ :not([hidden]) {
+		margin-top: 0.55rem !important;
 	}
 
 	.auth-switch-row p {
@@ -611,8 +610,8 @@
 
 @media (max-height: 650px) {
 	.auth-modal-overlay {
-		padding-top: 3.55rem !important;
-		padding-bottom: 0.4rem !important;
+		padding-top: 2.6rem !important;
+		padding-bottom: 0.75rem !important;
 	}
 
 	.auth-home-pill img {
@@ -624,8 +623,8 @@
 	}
 
 	.auth-modal-content {
-		padding-top: 0.6rem !important;
-		padding-bottom: 0.55rem !important;
+		padding-top: 0.85rem !important;
+		padding-bottom: 0.75rem !important;
 	}
 
 	.auth-modal-hero {
@@ -633,7 +632,7 @@
 	}
 
 	.auth-modal-hero h2 {
-		font-size: 1.35rem !important;
+		font-size: 1.55rem !important;
 	}
 
 	.auth-modal-hero p:last-child {
@@ -641,13 +640,14 @@
 	}
 
 	.auth-compact-input.input {
-		padding-top: 0.34rem;
-		padding-bottom: 0.34rem;
-		font-size: 0.82rem;
+		padding-top: 0.44rem;
+		padding-bottom: 0.44rem;
+		font-size: 0.86rem;
 	}
 
-	.auth-form.space-y-2\.5 > :not([hidden]) ~ :not([hidden]) {
-		margin-top: 0.26rem !important;
+	.auth-form.space-y-2\.5 > :not([hidden]) ~ :not([hidden]),
+	.auth-form.space-y-3\.5 > :not([hidden]) ~ :not([hidden]) {
+		margin-top: 0.42rem !important;
 	}
 
 	.auth-switch-row {

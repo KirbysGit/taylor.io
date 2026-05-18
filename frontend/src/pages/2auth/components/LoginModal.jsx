@@ -14,8 +14,10 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 		rememberMe: false,
 	})
 	const [error, setError] = useState('')
+	const [fieldErrors, setFieldErrors] = useState({})
 	const [isLoading, setIsLoading] = useState(false)
 	const [showPassword, setShowPassword] = useState(false)
+	const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
 	useEffect(() => {
 		if (!isOpen) return
@@ -34,6 +36,23 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		setError('')
+		const nextErrors = {}
+
+		if (!formData.email.trim()) {
+			nextErrors.email = 'Enter your email address.'
+		} else if (!emailRegex.test(formData.email.trim())) {
+			nextErrors.email = 'Enter a valid email address.'
+		}
+
+		if (!formData.password.trim()) {
+			nextErrors.password = 'Enter your password.'
+		}
+
+		if (Object.keys(nextErrors).length > 0) {
+			setFieldErrors(nextErrors)
+			return
+		}
+
 		setIsLoading(true)
 
 		try {
@@ -67,24 +86,38 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 			...prev,
 			[name]: type === 'checkbox' ? checked : value,
 		}))
+		setError('')
+		setFieldErrors((prev) => {
+			if (!prev[name]) return prev
+			const next = { ...prev }
+			delete next[name]
+			return next
+		})
 	}
 
 	if (!isOpen) return null
+	const emailErrorId = `${formId}-email-error`
+	const passwordErrorId = `${formId}-password-error`
+	const describedBy = [
+		error ? errorId : null,
+		fieldErrors.email ? emailErrorId : null,
+		fieldErrors.password ? passwordErrorId : null,
+	].filter(Boolean).join(' ') || undefined
 
 	return (
 		<div
-			className="auth-modal-overlay fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-4 pt-24 animate-fade-in sm:p-5 sm:pt-20"
+			className="auth-modal-overlay fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pt-20 animate-fade-in sm:p-5 sm:pt-16 lg:pt-14"
 			role="presentation"
 		>
 			<div
-				className="auth-card animate-fade-in w-full max-w-[29rem] overflow-hidden rounded-[1.45rem] border border-brand-pink/18 bg-white/88 shadow-[0_28px_80px_-24px_rgba(120,40,40,0.34)] backdrop-blur-xl"
+				className="auth-card animate-fade-in w-full max-w-[31rem] overflow-hidden rounded-[1.45rem] border border-brand-pink/18 bg-white/88 shadow-[0_28px_80px_-24px_rgba(120,40,40,0.34)] backdrop-blur-xl"
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="login-modal-title"
-				aria-describedby={error ? errorId : undefined}
+				aria-describedby={describedBy}
 				onClick={(e) => e.stopPropagation()}
 			>
-				<div className="auth-modal-content relative flex flex-col overflow-visible px-5 py-5 sm:px-7 sm:py-6">
+				<div className="auth-modal-content relative flex flex-col overflow-visible px-5 py-5 sm:px-8 sm:py-7">
 					<button
 						type="button"
 						onClick={onClose}
@@ -120,7 +153,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 						<span className="h-px flex-1 bg-gray-200" />
 					</div>
 
-					<form onSubmit={handleSubmit} className="auth-form space-y-2.5" noValidate>
+					<form onSubmit={handleSubmit} className="auth-form space-y-3.5" noValidate>
 						<div>
 							<label htmlFor="login-email" className="auth-compact-label label">
 								Email
@@ -136,9 +169,16 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 									placeholder="you@example.com"
 									autoComplete="email"
 									required
+									aria-invalid={fieldErrors.email ? 'true' : undefined}
+									aria-describedby={fieldErrors.email ? emailErrorId : undefined}
 								/>
 								<FontAwesomeIcon icon={faEnvelope} className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
 							</div>
+							{fieldErrors.email && (
+								<div id={emailErrorId} className="errorMessage mt-2" role="alert">
+									{fieldErrors.email}
+								</div>
+							)}
 						</div>
 
 						<div>
@@ -156,6 +196,8 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 									placeholder="Password"
 									autoComplete="current-password"
 									required
+									aria-invalid={fieldErrors.password ? 'true' : undefined}
+									aria-describedby={fieldErrors.password ? passwordErrorId : undefined}
 								/>
 								<FontAwesomeIcon icon={faLock} className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
 								<button
@@ -167,6 +209,11 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 									<FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="h-4 w-4" />
 								</button>
 							</div>
+							{fieldErrors.password && (
+								<div id={passwordErrorId} className="errorMessage mt-2" role="alert">
+									{fieldErrors.password}
+								</div>
+							)}
 						</div>
 
 						<div className="flex flex-wrap items-center justify-between gap-3">
@@ -194,7 +241,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 						<button
 							type="submit"
 							disabled={isLoading}
-							className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-pink py-2.5 text-sm font-bold text-white shadow-[0_12px_24px_rgba(214,86,86,0.28)] transition hover:-translate-y-0.5 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+							className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-pink py-3 text-sm font-bold text-white shadow-[0_12px_24px_rgba(214,86,86,0.28)] transition hover:-translate-y-0.5 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
 						>
 							{isLoading ? 'Signing in...' : 'Sign in'}
 							<FontAwesomeIcon icon={faArrowRight} className="size-4" />
