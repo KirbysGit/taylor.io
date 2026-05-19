@@ -1,0 +1,105 @@
+{
+  "candidateAngle": "Backend developer focused on Python and FastAPI for scalable services and data-driven applications.",
+  "primaryStory": [
+    "Built backend services and REST APIs with Python and Django for financial workflows",
+    "Developed FastAPI applications with PostgreSQL for data processing and integrations",
+    "Created responsive React dashboards for operational visibility and user interaction",
+    "Implemented automated data pipelines for real-time analytics and reporting"
+  ],
+  "secondaryStory": [
+    "Experience with AI-driven workflows and integrations using OpenAI API"
+  ],
+  "summaryGoal": "Highlight backend development experience with Python and FastAPI; emphasize data processing and integration skills while showcasing relevant projects and technologies.",
+  "skillsStrategy": [
+    "Categories: Languages, Frameworks, Data Tools, Focus Areas",
+    "Lead: Python, FastAPI, SQL, Django",
+    "Supporting: PostgreSQL, React, ETL Pipelines, REST API Design",
+    "Trim last: remove less relevant skills like Java and JavaScript"
+  ],
+  "categoryStrategy": [],
+  "sectionStrategy": {
+    "summary": "Showcase backend development and data processing expertise",
+    "experience": "Highlight hero experience with a focus on backend services and integrations",
+    "projects": "Emphasize hero projects demonstrating relevant technologies and outcomes",
+    "skills": "Present skills in order of relevance to the role",
+    "education": "Light—credentials frozen; trim highlights only if they sharpen scan."
+  },
+  "layoutStrategy": [
+    "Show summary to position candidate effectively",
+    "Prioritize experience and projects for visibility",
+    "Maintain skills section for breadth"
+  ],
+  "layoutSectionOrder": [
+    "header",
+    "summary",
+    "experience",
+    "projects",
+    "skills",
+    "education"
+  ],
+  "layoutSectionVisibility": {
+    "skills": true,
+    "summary": true,
+    "experience": true,
+    "projects": true,
+    "education": true
+  },
+  "layoutRationale": [
+    "Summary provides a strong introduction to the candidate's focus and skills",
+    "Experience and projects demonstrate relevant capabilities and achievements",
+    "Skills section supports the technical requirements of the role"
+  ],
+  "keepExperience": [
+    5
+  ],
+  "dropExperience": [
+    7
+  ],
+  "rewriteExperience": [
+    5
+  ],
+  "keepProjects": [
+    10,
+    20,
+    9
+  ],
+  "dropProjects": [
+    12,
+    17,
+    18
+  ],
+  "rewriteProjects": [
+    10,
+    20
+  ],
+  "repairProjects": [],
+  "maybeProjects": [],
+  "selectionRationale": [
+    "Selected experience and projects directly align with Python Developer role",
+    "Focused on backend development and data processing, which are key for the position"
+  ],
+  "heroProjects": [
+    10,
+    20
+  ],
+  "supportingProjects": [
+    9
+  ],
+  "peripheralProjects": [
+    12,
+    17,
+    18
+  ],
+  "heroExperience": [
+    5
+  ],
+  "rewriteGoals": [
+    "Land BitGo: emphasize backend services and architecture contributions",
+    "Land Taylor.io: highlight FastAPI and PostgreSQL integrations for resume parsing",
+    "Land SentimentTrader: focus on real-time analytics and data pipeline design"
+  ],
+  "avoid": [
+    "No unsupported claims about cross-functional collaboration without evidence",
+    "Avoid mentioning backend frameworks not evidenced in the resume"
+  ]
+}

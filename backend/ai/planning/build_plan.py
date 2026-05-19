@@ -2,7 +2,105 @@ import json
 
 import re
 from collections import defaultdict
+from ..processing.alias_map import canonicalize_term, get_term_aliases
 from ..shared.text_utils import normalize_term
+
+
+_BROAD_ROW_TERMS = {
+    "backend",
+    "developer",
+    "engineering",
+    "architecture",
+    "system",
+    "systems",
+    "design",
+    "development",
+    "collaboration",
+}
+
+
+def _match_aliases_for_term(term):
+    normalized = normalize_term(term)
+    if not normalized:
+        return set()
+    aliases = set(get_term_aliases(normalized) or set())
+    aliases.add(normalized)
+    canonical = canonicalize_term(normalized)
+    if canonical:
+        aliases.add(canonical)
+
+    # SQL evidence is often expressed through concrete stores on resumes.
+    # This keeps selection generic to the JD term while recognizing truthful row evidence.
+    if canonical == "sql" or normalized == "sql":
+        aliases.update({"postgres", "postgresql", "mysql", "sqlite", "sql queries"})
+
+    expanded = set()
+    for alias in aliases:
+        a = normalize_term(alias)
+        if not a:
+            continue
+        expanded.add(a)
+        if a.endswith("s") and len(a) > 4:
+            expanded.add(a[:-1])
+        elif len(a) > 3:
+            expanded.add(a + "s")
+    return expanded
+
+
+def _term_in_text(term, text):
+    if not term or not text:
+        return False
+    for alias in _match_aliases_for_term(term):
+        if re.search(r"(?<![a-z0-9])" + re.escape(alias) + r"(?![a-z0-9])", text):
+            return True
+    return False
+
+
+def _keyword_weight(entry, idx):
+    if isinstance(entry, dict):
+        raw = entry.get("score")
+        try:
+            score = float(raw)
+        except (TypeError, ValueError):
+            score = 1.0
+        term = normalize_term(entry.get("term") or "")
+    else:
+        score = 1.0
+        term = normalize_term(entry or "")
+    score = max(1.0, min(score, 8.0))
+    position_boost = max(0.0, 1.2 - (idx * 0.05))
+    specificity = 1.0
+    if " " in term or any(ch in term for ch in (".", "+", "#", "/")):
+        specificity += 0.2
+    if term in _BROAD_ROW_TERMS:
+        specificity *= 0.65
+    return round((score + position_boost) * specificity, 3)
+
+
+def _keyword_entries(keywords, resumeHits):
+    out = []
+    seen = set()
+    for idx, entry in enumerate(keywords or []):
+        if not isinstance(entry, dict):
+            continue
+        term = normalize_term(entry.get("term") or "")
+        if not term:
+            continue
+        canonical = canonicalize_term(term)
+        if canonical in seen:
+            continue
+        seen.add(canonical)
+        out.append({"term": canonical, "weight": _keyword_weight(entry, idx), "source": "keyword"})
+    for hit in resumeHits or []:
+        term = normalize_term(hit)
+        if not term:
+            continue
+        canonical = canonicalize_term(term)
+        if canonical in seen:
+            continue
+        seen.add(canonical)
+        out.append({"term": canonical, "weight": 1.0, "source": "resume_hit"})
+    return out
 
 # --- buckets for our resume sections. --- #
 def build_relevant_resume_sections(resumeData):
@@ -72,7 +170,7 @@ def build_relevant_resume_sections(resumeData):
     return sections
 
 # --- determine hits for resume sections. --- #
-def score_resume_sections(resumeSections, resumeHits):
+def score_resume_sections(resumeSections, resumeHits, keywords=None):
 
     # initialize our section scores.
     sectionScores = {
@@ -85,6 +183,8 @@ def score_resume_sections(resumeSections, resumeHits):
     # if the resume sections are not a dictionary, return the section scores.
     if not isinstance(resumeSections, dict):
         return sectionScores
+
+    weighted_terms = _keyword_entries(keywords or [], resumeHits)
 
     # iterate over the resume sections.
     for section, rows in resumeSections.items():
@@ -101,20 +201,18 @@ def score_resume_sections(resumeSections, resumeHits):
             searchText = row.get("searchText", "")
 
             # initialize our matched terms.
-            matchedTerms = set()
+            matchedTerms = []
+            weightedScore = 0.0
 
-            # iterate over resume hits.
-            for hit in resumeHits:
-                
-                pattern = r"(?<![a-z0-9])" + re.escape(hit) + r"(?![a-z0-9])"
-
-                # checking if the hit is in the search text.
-                if re.search(pattern, searchText):
-                    
-                    # if it is, add it to our matched terms.
-                    matchedTerms.add(hit)
+            # Score against ranked JD terms, not only resume-wide hits.
+            for item in weighted_terms:
+                term = item.get("term")
+                if _term_in_text(term, searchText):
+                    matchedTerms.append(term)
+                    weightedScore += float(item.get("weight") or 1.0)
 
             # calculate the number of hits for the row.
+            matchedTerms = list(dict.fromkeys(matchedTerms))
             rowHits = len(matchedTerms)
 
             # if the row has no hits, continue.
@@ -128,12 +226,13 @@ def score_resume_sections(resumeSections, resumeHits):
             sectionScores[section]["rows"].append({
                 "id": rowId,
                 "hits": rowHits,
-                "matchedTerms": list(matchedTerms),
+                "score": round(weightedScore, 3),
+                "matchedTerms": matchedTerms,
                 "cleanedFields": row.get("cleanedFields", {}),
             })
 
-        # sort the section rows by # of hits.
-        sectionScores[section]["rows"].sort(key=lambda row: (-row["hits"], row["id"]))
+        # sort the section rows by weighted evidence first, then hit count.
+        sectionScores[section]["rows"].sort(key=lambda row: (-(row.get("score") or 0), -row["hits"], row["id"]))
 
     return sectionScores
 
@@ -221,11 +320,12 @@ def list_rows_per_section(sectionScores, resumeSections):
             buckets[section].append({
                 "id": row.get("id", -1),
                 "hits": row.get("hits", 0),
+                "score": row.get("score", 0),
                 "matchedTerms": row.get("matchedTerms", []),
             })
 
-        # sort the rows by hits and id.
-        buckets[section].sort(key=lambda x: (-x["hits"], x["id"]))
+        # sort the rows by weighted score, hits, and id.
+        buckets[section].sort(key=lambda x: (-(x.get("score") or 0), -x["hits"], x["id"]))
 
     return buckets
 
@@ -276,7 +376,7 @@ def build_tailor_plan(resumeData, tailorContext):
     resumeSections = build_relevant_resume_sections(resumeData)
 
     # score each section based on the number of hits per section.
-    sectionScores = score_resume_sections(resumeSections=resumeSections, resumeHits=resumeHits)
+    sectionScores = score_resume_sections(resumeSections=resumeSections, resumeHits=resumeHits, keywords=keywords)
 
     # rank the sections by the number of hits.
     sectionScoresRanked = list_scored_sections(sectionScores)
@@ -344,6 +444,7 @@ def hero_rank_hints_for_narrative(rowsPerSectionRanked, resumeData, max_exp=6, m
             {
                 "id": rid,
                 "jdKeywordHits": int(row.get("hits") or 0),
+                "jdEvidenceScore": row.get("score", 0),
                 "matchedTerms": [str(t) for t in terms[:10]],
                 "label": _label_experience_row(rid, resumeData),
             }
@@ -364,12 +465,13 @@ def hero_rank_hints_for_narrative(rowsPerSectionRanked, resumeData, max_exp=6, m
             {
                 "id": rid,
                 "jdKeywordHits": int(row.get("hits") or 0),
+                "jdEvidenceScore": row.get("score", 0),
                 "matchedTerms": [str(t) for t in terms[:10]],
                 "label": _label_project_row(rid, resumeData),
             }
         )
     return {
-        "howToUse": "Higher jdKeywordHits = more JD/resume term overlap. Choose heroExperience and heroProjects from these lists by default, in order, when they fit target_role; only skip a higher hit row for a reason in avoid or clear evidence on another row.",
+        "howToUse": "Higher jdEvidenceScore = stronger weighted JD/resume overlap; jdKeywordHits is the unique-term count. Choose heroExperience and heroProjects from these lists by default, in order, when they fit target_role; only skip a higher evidence row for a clear row-fit reason.",
         "experience": out_exp,
         "projects": out_proj,
     }

@@ -19,5 +19,9 @@
     "Technical",
     "Portfolio"
   ],
-  "intent": "Project-heavy technical"
+  "intent": "Project-heavy technical",
+  "previewImage": "preview.png",
+  "previewSnippets": {
+    "full": "previews/full.png"
+  }
 }

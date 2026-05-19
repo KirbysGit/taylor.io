@@ -1,0 +1,309 @@
+{
+  "system_prompt": "Return JSON only. No markdown, no text outside the object.\nYou are writing a sharp editorial plan for the next pass—not a keyword summary, not a rewrite of the resume here.\nThe plan must drive where the story lands: summary opening, **narrative hero** experience/project emphasis, project tiers, skills regrouping, and per-section intensity. Downstream stage A rewrites **heroes + summary + skills** first—so heroes must be the right rows. Success = a **clearly retargeted** resume for this posting: the reader should feel a **deliberate shift** in emphasis and ordering versus a generic base—not a polish pass.\n\n**Information hierarchy (critical):** **`candidateAngle` = one professional lane + lead** for this posting (who they are at a glance). **`primaryStory` / `secondaryStory` = resume-native pillars**—what the body of the resume already proves (projects, experience, skills)—including credible tools and work shapes **not** repeated verbatim in the JD (e.g. Django, PostgreSQL, React dashboards, ETL, automation, LLM/API work when evidenced). **`primaryJDTerms`** tune **scan order and foregrounding**, not the exclusive vocabulary of the brief—do **not** shrink the story to a JD extract.\n\nATS and scan alignment (evidence only): name where (summary, which hero rows, skills order) to foreground **resume-proven** phrasing; **when** it overlaps JD terms or resumeHits, surface it for scan—otherwise still keep **breadth nouns** the resume can defend. Natural phrasing beats keyword stuffing; **do not** plan invented stack or credentials from resumeGaps.\n\nEditorial questions the plan must answer:\nSelection plan v2: classify rows by **draft outcome**, not just emphasis. `keepExperience` / `dropExperience`, `keepProjects` / `dropProjects` / `maybeProjects` decide what appears in the tailored draft. `rewriteExperience`, `rewriteProjects`, and `repairProjects` decide what Stage A rewrites. In one-page or concise mode, drop low-fit/off-lane rows before compressing strong evidence for this posting. A row is low-fit only relative to the current JD and resume evidence, not because of a fixed job family.\nWhat **lane** does `candidateAngle` establish (one thread)? Which **resume-backed** pillars belong in `primaryStory` (including semi-hit stack the JD never names)? Which rows carry the hero story? How should the summary open so it reflects **evidence first**, JD emphasis second? For skills: which categories fit the **archetype**, what **Leads** among **evidenced** tools (JD ranks priority when both true), what **Supporting breadth** stays honest for that lane, what **trims last** only for noise/off-archetype? What must never be implied?\n\ncandidateAngle: one sentence, max ~28 words—**lane + lead** for this job (what kind of builder/engineer), not a comma list of JD keywords. State the **professional lane** (e.g. backend product, data-heavy APIs, full-stack delivery) and **one** concrete work shape you will foreground; you may name **one or two** anchor tools **only if** the resume proves them. **Do not** pack the sentence with every primaryJDTerm. Not meta about evidence. Must not contradict avoid. Ban fluff: well-suited, versatile, passionate, detail-oriented, strong communication, highly motivated, results-driven, self-starter, dynamic, adept at, proven track record, and similar.\nprimaryStory: **2–4 short phrases**—each must be defensible from **resume JSON + evidenceRows** (titles, bullets, tech_stack, skills). At least **half** the phrases should reflect **strong resume-native threads** (stacks, systems, delivery shapes) even when the JD does not name them literally. **Do not** make every phrase a thin restatement of primaryJDTerms. Not topic buckets or brochure generalities. No user-centric product-strategy phrasing unless the resume explicitly supports it.\nsecondaryStory: 0–3 phrases only if additive—resume-backed nuance (e.g. internal tooling, ETL/ops, dashboard/UI layer, automation) that **rounds** the lane without inventing a second career. No healthcare/clinical framing unless resume proves it.\nrewriteGoals: 2–6 row-local **landing instructions** (one per hero row when possible; combine only if you must). **heroExperience and heroProjects ids only**—not supportingProjects. Per hero row: lead signal, foregrounding, **the impression for this role**—bold, still from that row’s facts. Do not *introduce* tool names in your goal text that the row’s own description/title/tech do not support (retarget the **identity** the row already has). Prefer Make/Land/Use. No new facts.\n\nOne job archetype: **candidateAngle** and **summaryGoal** must express the **same single lane** for this posting—but `primaryStory` should still carry **multiple resume-grounded pillars** (breadth within that lane). Pick the thread that best fits **`target_role` + strongest evidence**; **JD informs how loudly to lead each proven thread**, not which evidenced stacks disappear from the plan.\n\nsummaryGoal: one sentence, max ~32 words—how the **resume summary** should read: open from **resume-proven** work (concrete nouns from experience/projects/skills). Align with the **lane** in `candidateAngle` without copying it verbatim; must not contradict avoid. Include **scan** placement for this posting **when** a JD term is genuinely evidenced—**and** leave room to mention **other evidenced** strengths (dashboards, ETL, adjacent frameworks) when the resume supports them. Ban brochure phrasing like `scalable solutions`, `reliable applications`, `impactful solutions`, `robust data processing`, and `efficient applications`.\n**skillsStrategy:** required—**2–6 short strings** for pass B. Each string = one actionable directive (not prose filler). Follow this **decision order** (numbers are for you only—do not prefix lines with 1/2/3 in JSON):\n**(1) Categories / alignment:** which `category` labels fit this **role archetype** (from `candidateAngle`) **and** the resume’s real buckets (prefer labels already on the resume). JD shapes **scan**, not a new taxonomy.\n**(2) Lead (recruiter + ATS headline):** what sits **first** among **resume-evidenced** skills—**prioritize** JD-aligned hits **when** the resume proves them; **do not** pretend the JD is the only toolkit.\n**(3) Supporting / peripheral:** skills **below Lead** in scan—resume-backed **and** plausible for the **role family**; **JD-adjacent** tools that match the JD’s **work shape** belong here too (e.g. viz/UI/data-viz stack when the posting stresses charts or product surfaces—even if Python leads). **The JD headline is not the full keep/drop roster.** Same rule as React when the JD spotlights backend only—**demote**, don’t discard without trim criteria.\n**(4) Trim last:** **rare**—only rows clearly **noise** or **wrong for this role archetype** (hobby fluff, wildly off-topic, or duplicate story-telling). Prefer **Lead → Supporting** first: keep strong lines that show **credible senior breadth**—the JD is **not** a keyword membership test. **Do not** phrase this as generic “remove non-relevant / irrelevant skills” (that invites JD-only stripping)—name **realm** (off-archetype) or **duplicate** when you trim. **Named trim examples are one-offs, not a quota.**\n**Profile strength > JD keyword strip:** the JD sets **priority and headline**, **not** the exclusive skill membership. Do **not** plan a block that reads like a copy-paste of JD terms; **meaningful rearrangement** and variety matter.\n**Role archetype vs JD:** **`candidateAngle`** names the **lane**; **`primaryStory`** carries **resume-native breadth within that lane**. **primaryJDTerms** help decide **what leads** when evidenced—they must **not** erase other proven tools from the plan.\n**categoryStrategy** (bucket-level; optional): use this for **merge / rename / collapse** of vague skill-like groupings (“Focus Areas” etc.)—**not** duplicate the whole ordering job of skillsStrategy; pass B respects both. `[]` when N/A.\n**Operations:** **Reorder and regroup** first. **Retain** plausible archetype skills (including non-JD-keyword lines) unless they clearly don’t belong; **demote** before delete. **Trim** only obvious clutter—do not cut to shorten or to mirror JD wording. Conservative prerequisites only with repeated evidence. Do not collapse to exact JD keywords only.\nsectionStrategy: short values for summary, experience, projects, skills (required); education if needed. For **projects**: mention that `tech_stack` should stay **coherent** with the project’s true story (no unrelated ML/framework labels) where relevant; stage A can correct `tech_stack` + `description` together. experience/projects: stage A rewrites **hero** rows; supportingProjects are context-only **unless** downstream **thin-bullet repair** opens a non-hero id in code. **Each value** = brief grounded in **resume facts** first, **posting emphasis** second.\n\nLayout is part of tailoring, but subordinate to content. Use `layoutStrategy`, `layoutSectionOrder`, `layoutSectionVisibility`, and `layoutRationale` to decide section shape. Summary visibility should be role-driven: hide it when it repeats obvious evidence in a tight direct-fit draft; show it when it helps reposition the candidate, clarify a transition, or foreground a role-specific thesis.\n\nProjects (tiers—still required):\nReview every project row in resume JSON. Classify each project id exactly once across heroProjects, supportingProjects, peripheralProjects.\nUse **planRankedRows** (from build_tailor_plan) as the default **priority order** for Tier 1: higher `jdEvidenceScore` first when the row fits the job archetype; `jdKeywordHits` is only the unique-term count. You may bump a lower-ranked project ahead only when that row is clearly the better story for the current JD and resume evidence.\nTier 1 heroProjects (max 4 ids): strongest role fit—downstream stage A **always** full bullet-block rewrites these ids (entire `description`, role-shaped); plan landing accordingly.\nTier 2 supportingProjects: few ids only—**context/reference for stage A** (full rows may appear in the focused prompt); **not** rewritten in stage A **by default** (thin-bullet repair may add a non-hero id upstream). Classify role-adjacent rows you want the model to see without elevating to hero.\nTier 3 peripheralProjects: remaining ids—**preserve**; not stage A targets.\nrewriteGoals must drive **Tier 1 hero** rows only (heroExperience + heroProjects)—one landing instruction per hero row when possible.\n\nConsistency: `avoid` lines are **only** for real mismatch risks (unsupported domain, invented stack)—not a long list of anxieties. Keep candidateAngle and summaryGoal aligned with those few lines.\nEvidence-first: infer angle, summaryGoal, skillsStrategy, sectionStrategy, and tier ids from **planRankedRows** and evidenceRows. JD tunes **emphasis**, not a new invented career.\nresumeGaps: do not plan to **claim** those terms as experience; you may still plan to **foreground** overlapping true skills on the resume.\n\nDo not plan a positioning that requires stack, industry, or platform **not evidenced** on the resume—but **do** plan aggressive retargeting of what *is* evidenced toward this JD.\n\nHard limits (keep the brief short):\ncandidateAngle: exactly one sentence, max ~28 words.\nprimaryStory: 2–4 phrases.\nsecondaryStory: 0–3 phrases.\nrewriteGoals: 2–6 strings; **hero rows only**; each must be doable without new facts (one per hero row when you have 4+ hero projects or multiple hero experience rows).\nsummaryGoal: one sentence, max ~32 words.\nskillsStrategy: 2–6 short strings; categoryStrategy: 0–3 or [].\nsectionStrategy: include at least summary, experience, projects, skills; education if non-trivial.\nheroExperience: at most 2 numeric ids; heroProjects: at most 4—from the resume JSON only. Prefer ids that appear in planRankedRows in default order when they match the job archetype.\nsupportingProjects + peripheralProjects: every other project id on the resume (partition with heroProjects; no id in more than one list).\navoid: **1–4** short guardrails—**only** high-stakes risks: e.g. unsupported industry/domain claim, or inventing a JD stack item. Skip long lists of micro-bans. Skills regrouping for the JD is encouraged; do not use `avoid` to freeze the skills section.\n\nExample (illustrative; ids and names are placeholders):\n{\"candidateAngle\":\"Backend engineer centered on APIs and data-backed services—lane is productized backends, not a JD term dump.\",\"primaryStory\":[\"Python services and ORM-backed persistence (e.g. Django/Postgres) named on shipped rows\",\"dashboards and API-backed UI consumers where resume shows React or similar\",\"ETL/data preparation and automation scripts tied to analytics projects\",\"LLM or API integrations only where project prose proves them\"],\"secondaryStory\":[\"internal tooling and operational visibility when rows support it\"],\"summaryGoal\":\"Open from resume-proven backend + data stack; weave JD-aligned terms only when evidenced; leave room for adjacent frameworks the body proves.\",\"skillsStrategy\":[\"Categories: match resume buckets + archetype lane; JD shapes scan not taxonomy.\",\"Lead: evidenced tools JD rewards first when true; keep resume-native heroes next.\",\"Supporting: Django, Postgres, React/dashboard, ETL, OpenAI-style APIs when body-backed—even thin in JD.\",\"Trim last sparingly—off-realm or duplicate only.\",\"Breadth reads like a person, not a posting extract.\",\"Prerequisites: repeated evidence only.\"],\"categoryStrategy\":[],\"sectionStrategy\":{\"summary\":\"summaryGoal; evidence-first nouns + posting scan where true\",\"experience\":\"Hero ids; lane-shaped leads from row anchors\",\"projects\":\"Hero ids full rewrite; supporting reference unless thin repair\",\"skills\":\"Archetype order; preserve evidenced breadth\",\"education\":\"Light\"},\"heroExperience\":[1],\"heroProjects\":[1,2],\"supportingProjects\":[3],\"peripheralProjects\":[4,5],\"rewriteGoals\":[\"Land BitGo: backend/services + data path from row facts\",\"Land Centi: integrations + persistence the prose names\"],\"avoid\":[\"No domain claims without resume proof\"]}",
+  "user_prompt": "Selection plan v2: classify rows by outcome, not just emphasis. Use `keepExperience` / `dropExperience` / `rewriteExperience` and `keepProjects` / `dropProjects` / `rewriteProjects` / `repairProjects` / `maybeProjects`. Dropped rows are omitted from the tailored draft; maybe rows are space-available.\nFor one-page or concise mode, make real selection decisions: drop low-fit rows for this role's lane when stronger evidence exists; drop weaker rows before over-compressing the strongest evidence for the posting.\nEvery experience id should appear in exactly one of `keepExperience` or `dropExperience`. Every project id should appear in exactly one of `keepProjects`, `dropProjects`, or `maybeProjects`. `rewriteExperience`, `rewriteProjects`, and `repairProjects` are action lists drawn from kept/maybe rows.\nProduce one editorial plan JSON. Downstream success = a **visibly retargeted** resume for this role: different leads, order, and emphasis—not a light edit.\n**`candidateAngle`:** one sentence—**professional lane + lead** for this posting; **not** a comma-packed echo of JD keywords. **`primaryStory`:** **2–4 pillars from resume JSON + evidenceRows** (frameworks, data/automation, integrations, UI surfaces the body proves); **≥ half** the phrases should be **resume-native** strengths the JD might never name. JD terms tune **scan and order** when evidenced—they are **not** the only admissible toolkit.\nsummaryGoal must guide the summary rewrite (opening, technical lead, **scan-friendly** phrasing where true)—do not copy-paste candidateAngle.\nskillsStrategy: **2–6 strings** — categories/alignment → Lead → Supporting → trim last **sparingly**. Default: **selected and ordered toolkit** for this archetype+posting—not a JD keyword extract. **Supporting** = honest breadth (plausible for the role family even without verbatim JD terms). **Trim last** only for obvious noise or mismatch—not “missing from JD.” Demote before delete; **few** trims.\nsectionStrategy: stage A rewrites hero experience + hero projects; values **resume-grounded** first, **posting emphasis** second. For skills: one line on **ordered toolkit + breadth**.\nlayoutStrategy: **0–4 short strings** for resume structure only. Content is primary; layout is secondary. Decide whether Summary should be shown for this role, and whether section order should change for scan priority. Use only existing sections: summary, experience, projects, skills, education. Do not hide evidence-bearing sections just to save space.\nlayoutSectionOrder: optional full display order using existing section keys, normally starting with header. Put the most persuasive sections for this posting earlier; education can move down when less relevant, or up when credentials are the strongest proof.\nlayoutSectionVisibility: optional object with booleans for summary, education, experience, projects, skills. Hide summary when it would be redundant for a direct evidence-heavy draft; show it when it helps reposition the candidate, explain a pivot, or foreground a role-specific profile. Do not hide experience/projects/skills unless absent or clearly empty.\nlayoutRationale: optional short concrete reasons for any order/visibility changes.\nrewriteGoals: **hero rows only**—bold, specific landing instructions (Make/Land/Use or equivalent). No new facts; stay inside each row’s bullets.\ncategoryStrategy: **[]** unless a fluffy/broad skill-like bucket needs merge, rename, or collapse—**bucket tactics** here; ordering lives in skillsStrategy.\nRequired: candidateAngle, primaryStory, summaryGoal, skillsStrategy, sectionStrategy, heroExperience, full project tier partition, rewriteGoals, avoid. Include layout fields when structure should change. secondaryStory optional; omit filler.\nkeep `avoid` short (1–4 lines) and only for real fabrication or unsupported-domain risk; do not use `avoid` to discourage big true rewrites.\nProjects: every id exactly once—heroProjects (max 4), supportingProjects (few; **reference for stage A by default—no full rewrites there** unless upstream **thin-bullet repair** opens an id), peripheralProjects (default for remaining). Do not park every non-hero project in supporting.\nPick **heroProjects** and **heroExperience** primarily from **planRankedRows** order when ids fit the archetype; `jdEvidenceScore` is the main rank signal and `jdKeywordHits` is the unique-term count. Deprioritizing a higher-evidence row is allowed only for a clear, evidence-backed reason in avoid or row fit.\nsectionStrategy: align with hero ids; narrative plans how those hero rows should land for this role.\nJD terms are emphasis hints only—not license for unsupported stack or domain.\n\ntarget_role: Python Developer\ncompany: ESB Technologies\n\n### Tailoring preferences\n- focus: technical - Foreground depth, stack, architecture, and implementation details that appear on the row.\n- tone: concise - Use tight, high-signal bullets with fewer filler clauses.\n- length_target: one_page - Bias toward one-page-friendly output: fewer repeated ideas, tighter bullets, and selective emphasis. Do not hard-trim facts blindly.\n- rewrite_freedom: balanced - Make a clear role-shaped rewrite without needless churn.\n- custom_instructions: none\nUse these preferences to shape the editorial plan, but never plan unsupported claims. Custom instructions are subordinate to resume evidence and avoid rules.\n\nplanRankedRows (weighted JD evidence scores—**default** hero order; deprioritize higher evidence only when **evidence + row story** clearly favor another id):\n{\n  \"howToUse\": \"Higher jdEvidenceScore = stronger weighted JD/resume overlap; jdKeywordHits is the unique-term count. Choose heroExperience and heroProjects from these lists by default, in order, when they fit target_role; only skip a higher evidence row for a clear row-fit reason.\",\n  \"experience\": [\n    {\n      \"id\": 5,\n      \"jdKeywordHits\": 5,\n      \"jdEvidenceScore\": 24.645,\n      \"matchedTerms\": [\n        \"python\",\n        \"sql\",\n        \"backend\",\n        \"architecture\",\n        \"backend services\"\n      ],\n      \"label\": \"BitGo — Software Engineering Intern\"\n    }\n  ],\n  \"projects\": [\n    {\n      \"id\": 10,\n      \"jdKeywordHits\": 4,\n      \"jdEvidenceScore\": 20.06,\n      \"matchedTerms\": [\n        \"fastapi\",\n        \"sql\",\n        \"backend\",\n        \"backend services\"\n      ],\n      \"label\": \"Taylor.io – Resume Builder & Parser\"\n    },\n    {\n      \"id\": 20,\n      \"jdKeywordHits\": 3,\n      \"jdEvidenceScore\": 16.835,\n      \"matchedTerms\": [\n        \"python\",\n        \"sql\",\n        \"architecture\"\n      ],\n      \"label\": \"SentimentTrader -  Real-Time Stock Sentiment Pipeline\"\n    },\n    {\n      \"id\": 9,\n      \"jdKeywordHits\": 2,\n      \"jdEvidenceScore\": 12.25,\n      \"matchedTerms\": [\n        \"fastapi\",\n        \"sql\"\n      ],\n      \"label\": \"Centi – Personal Finance App\"\n    },\n    {\n      \"id\": 12,\n      \"jdKeywordHits\": 2,\n      \"jdEvidenceScore\": 11.45,\n      \"matchedTerms\": [\n        \"python\",\n        \"backend\"\n      ],\n      \"label\": \"SecureScape – Smart Security System\"\n    },\n    {\n      \"id\": 17,\n      \"jdKeywordHits\": 1,\n      \"jdEvidenceScore\": 8.2,\n      \"matchedTerms\": [\n        \"python\"\n      ],\n      \"label\": \"ShelfVision - Dense Shelf Object Detection\"\n    }\n  ]\n}\n\nevidenceRows (strongest matching rows—primary input):\n[\"BitGo — Software Engineering Intern (Python, Django, React, PostgreSQL, AWS EC2)\", \"Taylor.io – Resume Builder & Parser (React, FastAPI, PostgreSQL, OpenAI API, Tailwind CSS)\", \"SentimentTrader -  Real-Time Stock Sentiment Pipeline (Python, SQL, FinBERT, XGBoost)\", \"Centi – Personal Finance App (FastAPI, React, PostgreSQL, Plaid API)\"]\n\nresumeGaps (JD terms not evidenced—use in avoid and caution):\n[\"cross functional collaboration\", \"developer\", \"backend frameworks\", \"performance optimization\", \"reporting\", \"sql queries\"]\n\nprimaryJDTerms (emphasis hints only):\n[\"python\", \"fastapi\", \"sql\", \"cross functional collaboration\", \"backend\", \"developer\", \"architecture\", \"backend frameworks\"]\nsecondaryJDTerms:\n[\"engineering\", \"backend services\", \"performance optimization\", \"reporting\", \"sql queries\"]\nresumeHits (canonical hits—supporting only):\n[\"python\", \"fastapi\", \"sql\", \"backend\", \"architecture\", \"backend services\"]\n\njob_description (trimmed; main tailor pass uses **excerpts** + this brief—not full JD body):\nAbout the job\nJob Title: Python Developer\nEmployment Type: Full-time\nJob Description:\n\nWe are looking for enthusiastic team players to join our growing team as Python Developers. If you're passionate about backend development and eager to build scalable applications from the ground up, we’d love to hear from you!\nKey Responsibilities:\n\nAssist in developing backend services using Python and FastAPI\nSupport in writing SQL queries for data access and reporting\nWork closely with senior developers and cross-functional teams on integrations\nParticipate in design discussions and gain exposure to system architecture\nFollow best practices for coding, testing, and performance optimization\nRequired Skills:\n\n2 to 4 years experience working with Python programming\nStrong knowledge of SQL\nFastAPI and backend frameworks\nNice to Have:\n\nSystem integration concepts\nExposure to AI/LLM technologies\n\nJob search faster with Premium\n\nresume JSON:\n{\n  \"header\": {\n    \"first_name\": \"Colin\",\n    \"last_name\": \"Kirby\",\n    \"email\": \"kirbycolin26@gmail.com\",\n    \"phone\": \"407-876-8172\",\n    \"location\": \"Orlando, FL\",\n    \"linkedin\": \"https://linkedin.com/in/colinwkirby/\",\n    \"github\": \"https://github.com/KirbysGit\",\n    \"portfolio\": \"https://colinkirby.dev\",\n    \"tagline\": \"**Software Engineer** | _Product_ * _Design_ * _Development_\",\n    \"visibility\": {\n      \"showEmail\": true,\n      \"showPhone\": true,\n      \"showLocation\": true,\n      \"showLinkedin\": true,\n      \"showGithub\": true,\n      \"showPortfolio\": true,\n      \"showTagline\": false\n    },\n    \"contactOrder\": [\n      \"email\",\n      \"phone\",\n      \"location\",\n      \"linkedin\",\n      \"github\",\n      \"portfolio\"\n    ]\n  },\n  \"education\": [\n    {\n      \"id\": 3,\n      \"school\": \"University of Central Florida\",\n      \"degree\": \"Bachelor of Science\",\n      \"discipline\": \"Computer Engineering\",\n      \"location\": \"Orlando, FL\",\n      \"start_date\": \"2021-08-01\",\n      \"end_date\": \"2025-05-01\",\n      \"current\": false,\n      \"gpa\": \"3.78 / 4.0\",\n      \"minor\": \"Finance\",\n      \"subsections\": {\n        \"Honors & Awards\": \"Dean’s List 2021, President’s Honor Roll 2023 – 2025, Pegasus Gold Scholarship\",\n        \"Clubs & Extracurriculars\": \"AI @ UCF, Knight Hacks, SHPE @ UCF\",\n        \"Relevant Coursework\": \"Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design \"\n      }\n    }\n  ],\n  \"experience\": [\n    {\n      \"id\": 5,\n      \"title\": \"Software Engineering Intern\",\n      \"company\": \"BitGo\",\n      \"description\": \"• Built and maintained backend services and REST APIs in Python/Django supporting secure internal workflows for financial and compliance teams.\\n• Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.\\n• Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and operational metrics.\\n• Optimized Python data-processing pipelines and PostgreSQL queries, improving system scalability and reducing latency by ~40%.\",\n      \"start_date\": \"2024-05-01\",\n      \"end_date\": \"2025-06-01\",\n      \"current\": false,\n      \"location\": \"Remote\",\n      \"skills\": \"Python, Django, React, PostgreSQL, AWS EC2\"\n    },\n    {\n      \"id\": 7,\n      \"title\": \"Server\",\n      \"company\": \"Bar Louie\",\n      \"description\": \"• Adapting to high-pressure situations and thriving under stress.\\n• Effective communication with guests, kitchen, and bar teams.\\n• Working seamlessly in fast-paced collaborative environments.\",\n      \"start_date\": \"2023-10-01\",\n      \"end_date\": \"\",\n      \"current\": false,\n      \"location\": \"Orlando, FL\",\n      \"skills\": \"\"\n    }\n  ],\n  \"projects\": [\n    {\n      \"id\": 9,\n      \"title\": \"Centi – Personal Finance App\",\n      \"description\": \"• Built and deployed a full-stack finance application that automates account aggregation, transaction tracking, and spending insights across a unified dashboard.\\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and normalized data storage.\\n• Developed responsive React dashboards and authentication flows for account management, transaction review, and financial analytics.\\n• Implemented authentication and secure data handling (OAuth/JWT), ensuring protected access to financial data and user account workflows.\\n• Made it secure n stuff.\",\n      \"tech_stack\": [\n        \"FastAPI\",\n        \"React\",\n        \"PostgreSQL\",\n        \"Plaid API\"\n      ],\n      \"url\": \"https://centi.dev\"\n    },\n    {\n      \"id\": 10,\n      \"title\": \"Taylor.io – Resume Builder & Parser\",\n      \"description\": \"• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.\\n• Implemented backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\\n• Created a live editing and preview experience in React, enabling users to customize resume content in real time through  a clean, guided interface.\\n• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and  editing workflows.\",\n      \"tech_stack\": [\n        \"React\",\n        \"FastAPI\",\n        \"PostgreSQL\",\n        \"OpenAI API\",\n        \"Tailwind CSS\"\n      ],\n      \"url\": \"\"\n    },\n    {\n      \"id\": 12,\n      \"title\": \"SecureScape – Smart Security System\",\n      \"description\": \"• Developed the Flutter mobile app with core controls including alarm toggling, lighting, photo capture, and recording  access.\\n• Built the Python backend and communication layer for device coordination, enabling reliable messaging and near real time alerts (<3.5s).\",\n      \"tech_stack\": [\n        \"Python\",\n        \"Flutter\",\n        \"Arduino C++\",\n        \"TensorFlow Lite\"\n      ],\n      \"url\": \"\"\n    },\n    {\n      \"id\": 17,\n      \"title\": \"ShelfVision - Dense Shelf Object Detection\",\n      \"description\": \"• Detects products in crowded retail shelf photos using ResNet-50 and FPN features.\\n• Handles overlapping items with smart anchor matching and IoU-based detection algorithms.\\n• Benchmarked on SKU-110K dataset with comprehensive metrics and YOLOv5 comparisons.\",\n      \"tech_stack\": [\n        \"Python\",\n        \"PyTorch\",\n        \"OpenCV\",\n        \"scikit-learn\",\n        \"NumPy\"\n      ],\n      \"url\": \"\"\n    },\n    {\n      \"id\": 18,\n      \"title\": \"Tizirsso Racing – Portfolio & Sponsorship Website\",\n      \"description\": \"• Built a custom motorsport portfolio site translating brand identity and racing history into a polished, mobile-first  experience.\\n• Developed interactive UI sections including an animated hero, editorial about page, career timeline, team history,  championship highlights, and image galleries with lightbox support.\",\n      \"tech_stack\": [],\n      \"url\": \"https://tizianorosso.com/\"\n    },\n    {\n      \"id\": 20,\n      \"title\": \"SentimentTrader -  Real-Time Stock Sentiment Pipeline\",\n      \"description\": \"• Designed and implemented an end-to-end production-style ML data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.\\n• Applied NLP models (FinBERT) and feature engineering to build 40+ predictive features per ticker; trained XGBoost models achieving 55–70% ROC-AUC.\\n• Built modular components for data ingestion, transformation, model inference, and distributed-style batching, aligned with message-driven architectures.\\n• Automated end-to-end data collection, preprocessing, and model inference workflows, enabling scalable real-time analytics.\",\n      \"tech_stack\": [\n        \"Python\",\n        \"SQL\",\n        \"FinBERT\",\n        \"XGBoost\"\n      ],\n      \"url\": \"\"\n    }\n  ],\n  \"skills\": [\n    {\n      \"id\": 41,\n      \"name\": \"Python\",\n      \"category\": \"Languages\"\n    },\n    {\n      \"id\": 42,\n      \"name\": \"Java\",\n      \"category\": \"Languages\"\n    },\n    {\n      \"id\": 43,\n      \"name\": \"JavaScript\",\n      \"category\": \"Languages\"\n    },\n    {\n      \"id\": 44,\n      \"name\": \"SQL\",\n      \"category\": \"Languages\"\n    },\n    {\n      \"id\": 45,\n      \"name\": \"Django\",\n      \"category\": \"Frameworks\"\n    },\n    {\n      \"id\": 46,\n      \"name\": \"FastAPI\",\n      \"category\": \"Frameworks\"\n    },\n    {\n      \"id\": 47,\n      \"name\": \"React\",\n      \"category\": \"Frameworks\"\n    },\n    {\n      \"id\": 48,\n      \"name\": \"Node.js\",\n      \"category\": \"Frameworks\"\n    },\n    {\n      \"id\": 49,\n      \"name\": \"PyTorch\",\n      \"category\": \"Frameworks\"\n    },\n    {\n      \"id\": 50,\n      \"name\": \"TensorFlow Lite\",\n      \"category\": \"Frameworks\"\n    },\n    {\n      \"id\": 51,\n      \"name\": \"PostgreSQL\",\n      \"category\": \"Data Tools\"\n    },\n    {\n      \"id\": 52,\n      \"name\": \"MySQL\",\n      \"category\": \"Data Tools\"\n    },\n    {\n      \"id\": 53,\n      \"name\": \"MongoDB\",\n      \"category\": \"Data Tools\"\n    },\n    {\n      \"id\": 54,\n      \"name\": \"Pandas\",\n      \"category\": \"Data Tools\"\n    },\n    {\n      \"id\": 55,\n      \"name\": \"NumPy\",\n      \"category\": \"Data Tools\"\n    },\n    {\n      \"id\": 56,\n      \"name\": \"AWS (EC2)\",\n      \"category\": \"Data Tools\"\n    },\n    {\n      \"id\": 57,\n      \"name\": \"ETL Pipelines\",\n      \"category\": \"Data Tools\"\n    },\n    {\n      \"id\": 58,\n      \"name\": \"Backend Development\",\n      \"category\": \"Focus Areas\"\n    },\n    {\n      \"id\": 59,\n      \"name\": \"Automation Systems\",\n      \"category\": \"Focus Areas\"\n    },\n    {\n      \"id\": 60,\n      \"name\": \"AI-Driven Workflows\",\n      \"category\": \"Focus Areas\"\n    },\n    {\n      \"id\": 61,\n      \"name\": \"Data Pipelines\",\n      \"category\": \"Focus Areas\"\n    },\n    {\n      \"id\": 62,\n      \"name\": \"REST API Design\",\n      \"category\": \"Focus Areas\"\n    }\n  ],\n  \"hiddenSkills\": [],\n  \"summary\": {\n    \"summary\": \"Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications.\"\n  },\n  \"sectionVisibility\": {\n    \"summary\": false,\n    \"education\": true,\n    \"experience\": true,\n    \"projects\": true,\n    \"skills\": true\n  },\n  \"sectionOrder\": [\n    \"header\",\n    \"summary\",\n    \"education\",\n    \"experience\",\n    \"projects\",\n    \"skills\"\n  ],\n  \"sectionLabels\": {\n    \"summary\": \"Professional Summary\",\n    \"education\": \"Education\",\n    \"experience\": \"Experience\",\n    \"projects\": \"Projects\",\n    \"skills\": \"Skills\"\n  }\n}\n\nReturn exactly this shape:\n{\"candidateAngle\":\"\",\"primaryStory\":[],\"secondaryStory\":[],\"summaryGoal\":\"\",\"skillsStrategy\":[],\"categoryStrategy\":[],\"sectionStrategy\":{},\"layoutStrategy\":[],\"layoutSectionOrder\":[],\"layoutSectionVisibility\":{},\"layoutRationale\":[],\"keepExperience\":[],\"dropExperience\":[],\"rewriteExperience\":[],\"keepProjects\":[],\"dropProjects\":[],\"rewriteProjects\":[],\"repairProjects\":[],\"maybeProjects\":[],\"selectionRationale\":[],\"heroProjects\":[],\"supportingProjects\":[],\"peripheralProjects\":[],\"heroExperience\":[],\"rewriteGoals\":[],\"avoid\":[]}",
+  "planRankedRows_input": {
+    "howToUse": "Higher jdEvidenceScore = stronger weighted JD/resume overlap; jdKeywordHits is the unique-term count. Choose heroExperience and heroProjects from these lists by default, in order, when they fit target_role; only skip a higher evidence row for a clear row-fit reason.",
+    "experience": [
+      {
+        "id": 5,
+        "jdKeywordHits": 5,
+        "jdEvidenceScore": 24.645,
+        "matchedTerms": [
+          "python",
+          "sql",
+          "backend",
+          "architecture",
+          "backend services"
+        ],
+        "label": "BitGo — Software Engineering Intern"
+      }
+    ],
+    "projects": [
+      {
+        "id": 10,
+        "jdKeywordHits": 4,
+        "jdEvidenceScore": 20.06,
+        "matchedTerms": [
+          "fastapi",
+          "sql",
+          "backend",
+          "backend services"
+        ],
+        "label": "Taylor.io – Resume Builder & Parser"
+      },
+      {
+        "id": 20,
+        "jdKeywordHits": 3,
+        "jdEvidenceScore": 16.835,
+        "matchedTerms": [
+          "python",
+          "sql",
+          "architecture"
+        ],
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline"
+      },
+      {
+        "id": 9,
+        "jdKeywordHits": 2,
+        "jdEvidenceScore": 12.25,
+        "matchedTerms": [
+          "fastapi",
+          "sql"
+        ],
+        "label": "Centi – Personal Finance App"
+      },
+      {
+        "id": 12,
+        "jdKeywordHits": 2,
+        "jdEvidenceScore": 11.45,
+        "matchedTerms": [
+          "python",
+          "backend"
+        ],
+        "label": "SecureScape – Smart Security System"
+      },
+      {
+        "id": 17,
+        "jdKeywordHits": 1,
+        "jdEvidenceScore": 8.2,
+        "matchedTerms": [
+          "python"
+        ],
+        "label": "ShelfVision - Dense Shelf Object Detection"
+      }
+    ]
+  },
+  "completion_text": "{\"candidateAngle\":\"Backend developer focused on Python and FastAPI for scalable services and data-driven applications.\",\"primaryStory\":[\"Built backend services and REST APIs with Python and Django for financial workflows\",\"Developed FastAPI applications with PostgreSQL for data processing and integrations\",\"Created responsive React dashboards for operational visibility and user interaction\",\"Implemented automated data pipelines for real-time analytics and reporting\"],\"secondaryStory\":[\"Experience with AI-driven workflows and integrations using OpenAI API\"],\"summaryGoal\":\"Highlight backend development experience with Python and FastAPI; emphasize data processing and integration skills while showcasing relevant projects and technologies.\",\"skillsStrategy\":[\"Categories: Languages, Frameworks, Data Tools, Focus Areas\",\"Lead: Python, FastAPI, SQL, Django\",\"Supporting: PostgreSQL, React, ETL Pipelines, REST API Design\",\"Trim last: remove less relevant skills like Java and JavaScript\"],\"categoryStrategy\":[],\"sectionStrategy\":{\"summary\":\"Showcase backend development and data processing expertise\",\"experience\":\"Highlight hero experience with a focus on backend services and integrations\",\"projects\":\"Emphasize hero projects demonstrating relevant technologies and outcomes\",\"skills\":\"Present skills in order of relevance to the role\"},\"layoutStrategy\":[\"Show summary to position candidate effectively\",\"Prioritize experience and projects for visibility\",\"Maintain skills section for breadth\"],\"layoutSectionOrder\":[\"header\",\"summary\",\"experience\",\"projects\",\"skills\",\"education\"],\"layoutSectionVisibility\":{\"summary\":true,\"education\":true,\"experience\":true,\"projects\":true,\"skills\":true},\"layoutRationale\":[\"Summary provides a strong introduction to the candidate's focus and skills\",\"Experience and projects demonstrate relevant capabilities and achievements\",\"Skills section supports the technical requirements of the role\"],\"keepExperience\":[5],\"dropExperience\":[7],\"rewriteExperience\":[5],\"keepProjects\":[10,20,9],\"dropProjects\":[12,17,18],\"rewriteProjects\":[10,20],\"repairProjects\":[],\"maybeProjects\":[9],\"selectionRationale\":[\"Selected experience and projects directly align with Python Developer role\",\"Focused on backend development and data processing, which are key for the position\"],\"heroProjects\":[10,20],\"supportingProjects\":[9],\"peripheralProjects\":[],\"heroExperience\":[5],\"rewriteGoals\":[\"Land BitGo: emphasize backend services and architecture contributions\",\"Land Taylor.io: highlight FastAPI and PostgreSQL integrations for resume parsing\",\"Land SentimentTrader: focus on real-time analytics and data pipeline design\"],\"avoid\":[\"No unsupported claims about cross-functional collaboration without evidence\",\"Avoid mentioning backend frameworks not evidenced in the resume\"]}",
+  "model_raw": {
+    "candidateAngle": "Backend developer focused on Python and FastAPI for scalable services and data-driven applications.",
+    "primaryStory": [
+      "Built backend services and REST APIs with Python and Django for financial workflows",
+      "Developed FastAPI applications with PostgreSQL for data processing and integrations",
+      "Created responsive React dashboards for operational visibility and user interaction",
+      "Implemented automated data pipelines for real-time analytics and reporting"
+    ],
+    "secondaryStory": [
+      "Experience with AI-driven workflows and integrations using OpenAI API"
+    ],
+    "summaryGoal": "Highlight backend development experience with Python and FastAPI; emphasize data processing and integration skills while showcasing relevant projects and technologies.",
+    "skillsStrategy": [
+      "Categories: Languages, Frameworks, Data Tools, Focus Areas",
+      "Lead: Python, FastAPI, SQL, Django",
+      "Supporting: PostgreSQL, React, ETL Pipelines, REST API Design",
+      "Trim last: remove less relevant skills like Java and JavaScript"
+    ],
+    "categoryStrategy": [],
+    "sectionStrategy": {
+      "summary": "Showcase backend development and data processing expertise",
+      "experience": "Highlight hero experience with a focus on backend services and integrations",
+      "projects": "Emphasize hero projects demonstrating relevant technologies and outcomes",
+      "skills": "Present skills in order of relevance to the role"
+    },
+    "layoutStrategy": [
+      "Show summary to position candidate effectively",
+      "Prioritize experience and projects for visibility",
+      "Maintain skills section for breadth"
+    ],
+    "layoutSectionOrder": [
+      "header",
+      "summary",
+      "experience",
+      "projects",
+      "skills",
+      "education"
+    ],
+    "layoutSectionVisibility": {
+      "summary": true,
+      "education": true,
+      "experience": true,
+      "projects": true,
+      "skills": true
+    },
+    "layoutRationale": [
+      "Summary provides a strong introduction to the candidate's focus and skills",
+      "Experience and projects demonstrate relevant capabilities and achievements",
+      "Skills section supports the technical requirements of the role"
+    ],
+    "keepExperience": [
+      5
+    ],
+    "dropExperience": [
+      7
+    ],
+    "rewriteExperience": [
+      5
+    ],
+    "keepProjects": [
+      10,
+      20,
+      9
+    ],
+    "dropProjects": [
+      12,
+      17,
+      18
+    ],
+    "rewriteProjects": [
+      10,
+      20
+    ],
+    "repairProjects": [],
+    "maybeProjects": [
+      9
+    ],
+    "selectionRationale": [
+      "Selected experience and projects directly align with Python Developer role",
+      "Focused on backend development and data processing, which are key for the position"
+    ],
+    "heroProjects": [
+      10,
+      20
+    ],
+    "supportingProjects": [
+      9
+    ],
+    "peripheralProjects": [],
+    "heroExperience": [
+      5
+    ],
+    "rewriteGoals": [
+      "Land BitGo: emphasize backend services and architecture contributions",
+      "Land Taylor.io: highlight FastAPI and PostgreSQL integrations for resume parsing",
+      "Land SentimentTrader: focus on real-time analytics and data pipeline design"
+    ],
+    "avoid": [
+      "No unsupported claims about cross-functional collaboration without evidence",
+      "Avoid mentioning backend frameworks not evidenced in the resume"
+    ]
+  },
+  "normalized": {
+    "candidateAngle": "Backend developer focused on Python and FastAPI for scalable services and data-driven applications.",
+    "primaryStory": [
+      "Built backend services and REST APIs with Python and Django for financial workflows",
+      "Developed FastAPI applications with PostgreSQL for data processing and integrations",
+      "Created responsive React dashboards for operational visibility and user interaction",
+      "Implemented automated data pipelines for real-time analytics and reporting"
+    ],
+    "secondaryStory": [
+      "Experience with AI-driven workflows and integrations using OpenAI API"
+    ],
+    "summaryGoal": "Highlight backend development experience with Python and FastAPI; emphasize data processing and integration skills while showcasing relevant projects and technologies.",
+    "skillsStrategy": [
+      "Categories: Languages, Frameworks, Data Tools, Focus Areas",
+      "Lead: Python, FastAPI, SQL, Django",
+      "Supporting: PostgreSQL, React, ETL Pipelines, REST API Design",
+      "Trim last: remove less relevant skills like Java and JavaScript"
+    ],
+    "categoryStrategy": [],
+    "sectionStrategy": {
+      "summary": "Showcase backend development and data processing expertise",
+      "experience": "Highlight hero experience with a focus on backend services and integrations",
+      "projects": "Emphasize hero projects demonstrating relevant technologies and outcomes",
+      "skills": "Present skills in order of relevance to the role",
+      "education": "Light—credentials frozen; trim highlights only if they sharpen scan."
+    },
+    "layoutStrategy": [
+      "Show summary to position candidate effectively",
+      "Prioritize experience and projects for visibility",
+      "Maintain skills section for breadth"
+    ],
+    "layoutSectionOrder": [
+      "header",
+      "summary",
+      "experience",
+      "projects",
+      "skills",
+      "education"
+    ],
+    "layoutSectionVisibility": {
+      "skills": true,
+      "summary": true,
+      "experience": true,
+      "projects": true,
+      "education": true
+    },
+    "layoutRationale": [
+      "Summary provides a strong introduction to the candidate's focus and skills",
+      "Experience and projects demonstrate relevant capabilities and achievements",
+      "Skills section supports the technical requirements of the role"
+    ],
+    "keepExperience": [
+      5
+    ],
+    "dropExperience": [
+      7
+    ],
+    "rewriteExperience": [
+      5
+    ],
+    "keepProjects": [
+      10,
+      20,
+      9
+    ],
+    "dropProjects": [
+      12,
+      17,
+      18
+    ],
+    "rewriteProjects": [
+      10,
+      20
+    ],
+    "repairProjects": [],
+    "maybeProjects": [],
+    "selectionRationale": [
+      "Selected experience and projects directly align with Python Developer role",
+      "Focused on backend development and data processing, which are key for the position"
+    ],
+    "heroProjects": [
+      10,
+      20
+    ],
+    "supportingProjects": [
+      9
+    ],
+    "peripheralProjects": [
+      12,
+      17,
+      18
+    ],
+    "heroExperience": [
+      5
+    ],
+    "rewriteGoals": [
+      "Land BitGo: emphasize backend services and architecture contributions",
+      "Land Taylor.io: highlight FastAPI and PostgreSQL integrations for resume parsing",
+      "Land SentimentTrader: focus on real-time analytics and data pipeline design"
+    ],
+    "avoid": [
+      "No unsupported claims about cross-functional collaboration without evidence",
+      "Avoid mentioning backend frameworks not evidenced in the resume"
+    ]
+  },
+  "llm_usage": {
+    "completion_tokens": 505,
+    "prompt_tokens": 7680,
+    "total_tokens": 8185,
+    "prompt_tokens_details": {
+      "cached_tokens": 7040,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "llm_tokens_compact": {
+    "input": 7680,
+    "output": 505,
+    "total": 8185
+  },
+  "char_meta": {
+    "system_chars": 14008,
+    "user_chars": 19259,
+    "completion_chars": 2801
+  }
+}

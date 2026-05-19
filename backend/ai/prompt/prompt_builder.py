@@ -300,6 +300,46 @@ def _skill_name_vocabulary(skills_rows) -> list:
     return out
 
 
+def compact_narrative_for_prompt(narrative_brief: dict | None) -> dict:
+    """Small downstream contract: target story + action ids, without dumping legacy narrative noise."""
+    nb = narrative_brief if isinstance(narrative_brief, dict) else {}
+    target_story = nb.get("targetStory") if isinstance(nb.get("targetStory"), dict) else {}
+    if not target_story:
+        target_story = {
+            "roleLane": nb.get("candidateAngle") or "",
+            "readerTakeaway": nb.get("summaryGoal") or "",
+            "proofExperienceIds": _narrative_id_list(nb, "rewriteExperience") or _narrative_id_list(nb, "heroExperience"),
+            "proofProjectIds": _narrative_id_list(nb, "rewriteProjects") or _narrative_id_list(nb, "heroProjects"),
+            "deEmphasizeExperienceIds": _narrative_id_list(nb, "dropExperience"),
+            "deEmphasizeProjectIds": _narrative_id_list(nb, "dropProjects"),
+            "evidenceThemes": list(nb.get("primaryStory") or [])[:4],
+        }
+    return {
+        "targetStory": copy.deepcopy(target_story),
+        "summaryGoal": nb.get("summaryGoal") or "",
+        "rewriteGoals": list(nb.get("rewriteGoals") or [])[:6],
+        "skillsStrategy": list(nb.get("skillsStrategy") or [])[:6],
+        "categoryStrategy": list(nb.get("categoryStrategy") or [])[:3],
+        "sectionStrategy": copy.deepcopy(nb.get("sectionStrategy") or {}),
+        "layout": {
+            "strategy": list(nb.get("layoutStrategy") or [])[:4],
+            "sectionOrder": list(nb.get("layoutSectionOrder") or []),
+            "sectionVisibility": copy.deepcopy(nb.get("layoutSectionVisibility") or {}),
+            "rationale": list(nb.get("layoutRationale") or [])[:4],
+        },
+        "selection": {
+            "keepExperience": _narrative_id_list(nb, "keepExperience"),
+            "dropExperience": _narrative_id_list(nb, "dropExperience"),
+            "rewriteExperience": _narrative_id_list(nb, "rewriteExperience"),
+            "keepProjects": _narrative_id_list(nb, "keepProjects"),
+            "dropProjects": _narrative_id_list(nb, "dropProjects"),
+            "rewriteProjects": _narrative_id_list(nb, "rewriteProjects"),
+            "repairProjects": _narrative_id_list(nb, "repairProjects"),
+        },
+        "avoid": list(nb.get("avoid") or [])[:4],
+    }
+
+
 def _experience_evidence_label(row):
     # --- Compact label where a skill name matched an experience blob. --- #
     if not isinstance(row, dict):
@@ -583,7 +623,7 @@ def pass_b_deletion_budget(n_skill_rows):
     }
 
 
-def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None) -> dict:
+def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None, style_preferences: dict | None = None) -> dict:
     """
     Slim JSON placed first in the stage-A user prompt: the rows the model should actually rewrite.
     Full resume still appended later as a truth anchor.
@@ -602,6 +642,13 @@ def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None)
     maybe_proj_ids = _narrative_id_list(nb, "maybeProjects")
     support_proj_ids = _narrative_id_list(nb, "supportingProjects")
     peripheral_proj_ids = _narrative_id_list(nb, "peripheralProjects")
+
+    prefs = style_preferences if isinstance(style_preferences, dict) else {}
+    if prefs.get("length_target") == "one_page":
+        action_keep = set(keep_proj_ids) | set(rewrite_proj_ids) | set(repair_proj_ids) | set(hero_proj_ids)
+        for mid in maybe_proj_ids:
+            if mid not in action_keep and mid not in drop_proj_ids:
+                drop_proj_ids.append(mid)
 
     exp_rows = rd.get("experience") if isinstance(rd.get("experience"), list) else []
     proj_rows = rd.get("projects") if isinstance(rd.get("projects"), list) else []
@@ -687,6 +734,14 @@ def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None)
         "heroProjectRows": hero_proj_filled,
         "supportingProjectRows_referenceOnly": _supporting_projects_slim(proj_rows, support_proj_ids),
         "skillsRows": copy.deepcopy(skills_rows),
+        "layoutPlan": {
+            "layoutStrategy": copy.deepcopy(nb.get("layoutStrategy") or []),
+            "sectionOrder": copy.deepcopy(nb.get("layoutSectionOrder") or []),
+            "sectionVisibility": copy.deepcopy(nb.get("layoutSectionVisibility") or {}),
+            "layoutRationale": copy.deepcopy(nb.get("layoutRationale") or []),
+            "currentSectionOrder": copy.deepcopy(rd.get("sectionOrder") or []),
+            "currentSectionVisibility": copy.deepcopy(rd.get("sectionVisibility") or {}),
+        },
     }
 
 
@@ -765,8 +820,8 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
     roleLabel = (targetRole or "").strip() or "this role"
 
     nb = narrativeBrief if isinstance(narrativeBrief, dict) else {}
-    narrative_json = json.dumps(nb, ensure_ascii=False, indent=2)
-    rewrite_focus = build_stage_a_rewrite_focus(resumeData, nb)
+    narrative_json = json.dumps(compact_narrative_for_prompt(nb), ensure_ascii=False, indent=2)
+    rewrite_focus = build_stage_a_rewrite_focus(resumeData, nb, payload.get("style_preferences"))
     hero_exp = rewrite_focus.get("allowedExperienceEditIds") or []
     allowed_proj_edit = rewrite_focus.get("allowedProjectEditIds") or []
     thin_repairs = rewrite_focus.get("thinBulletRepairProjectIds") or []
@@ -792,6 +847,11 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
         out_shape["removedExperienceIds"] = drop_exp
     if drop_proj:
         out_shape["removedProjectIds"] = drop_proj
+    layout_plan = rewrite_focus.get("layoutPlan") if isinstance(rewrite_focus.get("layoutPlan"), dict) else {}
+    if layout_plan.get("sectionOrder"):
+        out_shape["sectionOrder"] = layout_plan.get("sectionOrder")
+    if layout_plan.get("sectionVisibility"):
+        out_shape["sectionVisibility"] = layout_plan.get("sectionVisibility")
     output_contract = {"edits": out_shape}
 
     tc = tailorContext if isinstance(tailorContext, dict) else {}
@@ -814,6 +874,7 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
         "",
         "### Task",
         "Selection is part of this pass: include `removedExperienceIds` and/or `removedProjectIds` exactly when `dropExperienceIds` / `dropProjectIds` are present in the focused rewrite surface. Do not keep low-fit rows just because they existed in the original resume.",
+        "Layout is also part of tailoring, but secondary to content. If `layoutPlan.sectionOrder` or `layoutPlan.sectionVisibility` is populated, include those exact sanitized values in `edits` unless they would hide evidence-bearing sections.",
         "Return **only** `edits` with `summarySection` and/or `experience` and/or `projects` as needed. **Never** put `skills` in `edits` here—pass 2 will handle skills.",
         "Set `edits.summarySection` so the professional summary fits this target role. Use the narrative’s `summaryGoal` / `rewriteGoals` and real evidence on the resume.",
     ]
@@ -831,9 +892,13 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
         lines.append(
             "Include `edits.projects`: one object per `allowedProjectEditIds`. For each, you may set **`tech_stack`** first (Strings only) so labels match the project’s real work—**remove** names that only appeared in a bloated or wrong `tech_stack` and never in `rowProseOnly` for that id; then set **`description`** to match. **Do not** edit project ids outside `allowedProjectEditIds`. Narrative **heroes** drive role-shaped retargets; **`thinBulletRepairProjectIds`** (if present) are **quality passes** for placeholder/empty bullets on non-hero rows—replace vague lines with concrete, evidence-safe claims from `rowProseOnly` only; full JD retarget is optional there but **no** ghost tools."
         )
+    if has_exp or has_proj:
+        lines.append(
+            "**Rewrite strength requirement:** for every returned experience/project row, change the first bullet and the bullet order or grouping. Reuse true facts and metrics, but do not return synonym-level edits."
+        )
     if drop_proj:
         lines.append(
-            "`dropProjectIds` are intentional omissions for this tailored draft. Output them as `edits.removedProjectIds`; in one-page mode, remove low-fit/off-lane projects before weakening strong backend/data/API bullets."
+            "`dropProjectIds` are intentional omissions for this tailored draft. Output them as `edits.removedProjectIds`; in one-page mode, remove low-fit/off-lane projects before weakening the strongest evidence for this posting."
         )
     if thin_repairs:
         lines.append(
@@ -912,8 +977,8 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
         "jdKeywordPriority": ats_jd_top,
     }
     nb = narrativeBrief if isinstance(narrativeBrief, dict) else {}
-    narrative_json = json.dumps(nb, ensure_ascii=False, indent=2)
-    skills_focus = build_stage_a_rewrite_focus(resumeData, nb)
+    narrative_json = json.dumps(compact_narrative_for_prompt(nb), ensure_ascii=False, indent=2)
+    skills_focus = build_stage_a_rewrite_focus(resumeData, nb, payload.get("style_preferences"))
     n_skill = len([r for r in (skills_focus.get("skillsRows") or []) if isinstance(r, dict)])
     peripheral_ids = _narrative_id_list(nb, "peripheralProjects")
     pass_b_bundle = dict(skills_focus)

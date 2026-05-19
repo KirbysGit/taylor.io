@@ -1,11 +1,11 @@
 {
   "displayName": "Classic Serif",
   "family": "Classic single-column",
-  "variantLabel": "Serif · Georgia",
+  "variantLabel": "Serif \u00b7 Georgia",
   "layoutProfile": "classic_single_column",
-  "shortDescription": "Single-column serif layout—margins, type scale, and font presets stay in sync for preview, PDF, and Word.",
-  "previewImage": "classic.png",
-  "description": "Single-column, Georgia-forward layout. Fully token-driven for PDF and Word—intended as the most themeable resume: margins, type scale, fonts, and spacing presets map to resume_tokens.json (and word_* tweaks for DOCX parity).",
+  "shortDescription": "Single-column serif layout\u2014margins, type scale, and font presets stay in sync for preview, PDF, and Word.",
+  "previewImage": "preview.png",
+  "description": "Single-column, Georgia-forward layout. Fully token-driven for PDF and Word\u2014intended as the most themeable resume: margins, type scale, fonts, and spacing presets map to resume_tokens.json (and word_* tweaks for DOCX parity).",
   "stylingMode": "themeable",
   "allowedControls": [
     "marginPreset",
@@ -14,5 +14,8 @@
     "lineSpacingPreset"
   ],
   "layoutLocked": false,
-  "capabilitiesVersion": 1
+  "capabilitiesVersion": 1,
+  "previewSnippets": {
+    "full": "previews/full.png"
+  }
 }

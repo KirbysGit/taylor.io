@@ -1,0 +1,188 @@
+{
+  "header": {
+    "first_name": "Tony",
+    "last_name": "Stark",
+    "email": "tony@starkindustries.example",
+    "phone": "(212) 555-1970",
+    "location": "Malibu, CA",
+    "linkedin": "https://linkedin.com/in/tony-stark",
+    "github": "https://github.com/stark-labs",
+    "portfolio": "https://starkindustries.example",
+    "tagline": "**Founder & Principal Engineer** | _Clean Energy_ * _Robotics_ * _Advanced Systems_",
+    "visibility": {
+      "showEmail": true,
+      "showPhone": true,
+      "showLocation": true,
+      "showLinkedin": true,
+      "showGithub": true,
+      "showPortfolio": true,
+      "showTagline": true
+    },
+    "contactOrder": [
+      "email",
+      "phone",
+      "location",
+      "linkedin",
+      "github",
+      "portfolio"
+    ]
+  },
+  "summary": {
+    "summary": "Product-minded engineer and executive with deep experience building clean-energy systems, autonomous robotics, safety-critical platforms, and applied AI tools. Known for translating ambitious technical ideas into working prototypes, scalable production programs, and cross-functional teams that can move quickly without losing sight of reliability, ethics, or user impact."
+  },
+  "experience": [
+    {
+      "id": 1,
+      "title": "Founder & Chief Technology Officer",
+      "company": "Stark Industries",
+      "skills": "Clean Energy, Robotics, Product Strategy",
+      "location": "New York, NY",
+      "start_date": "2008-05-01",
+      "end_date": "",
+      "current": true,
+      "description": "\u2022 Led a multidisciplinary engineering organization across energy storage, autonomous systems, materials research, and human-machine interfaces.\n\u2022 Shifted the company portfolio toward clean-energy infrastructure and civilian technology while maintaining strict internal safety reviews.\n\u2022 Built rapid prototyping workflows that reduced concept-to-field validation cycles from months to weeks."
+    },
+    {
+      "id": 2,
+      "title": "Principal Systems Architect",
+      "company": "Stark Advanced Research Division",
+      "skills": "Embedded Systems, Simulation, AI Safety",
+      "location": "Malibu, CA",
+      "start_date": "2003-09-01",
+      "end_date": "2008-04-01",
+      "current": false,
+      "description": "\u2022 Designed integrated hardware and software platforms for high-risk environments, emphasizing redundancy, diagnostics, and operator feedback.\n\u2022 Partnered with manufacturing, legal, and field teams to convert prototype lessons into documented engineering standards.\n\u2022 Mentored senior engineers on architecture reviews, test planning, and failure-mode analysis."
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "title": "Arc Reactor Energy Platform",
+      "tech_stack": [
+        "Power Electronics",
+        "Thermal Modeling",
+        "Materials Science",
+        "Control Systems"
+      ],
+      "url": "https://starkindustries.example/arc",
+      "description": "\u2022 Developed a compact clean-energy platform for high-output applications with strict reliability and containment targets.\n\u2022 Coordinated simulation, materials testing, and hardware validation to improve energy density while reducing maintenance complexity."
+    },
+    {
+      "id": 2,
+      "title": "JARVIS Operations Assistant",
+      "tech_stack": [
+        "Natural Language Interfaces",
+        "Computer Vision",
+        "Knowledge Graphs",
+        "Automation"
+      ],
+      "url": "https://starkindustries.example/jarvis",
+      "description": "\u2022 Built an AI-assisted operations layer for scheduling, design review, lab monitoring, and real-time decision support.\n\u2022 Added explainable alerts and human approval gates for actions that touched safety, finance, or external communications."
+    },
+    {
+      "id": 3,
+      "title": "Autonomous Lab Fabrication System",
+      "tech_stack": [
+        "Robotics",
+        "CAD/CAM",
+        "Sensor Fusion",
+        "Python"
+      ],
+      "url": "https://github.com/stark-labs/fabrication",
+      "description": "\u2022 Created a robotics-assisted fabrication workflow that translated design changes into repeatable lab builds.\n\u2022 Improved prototype traceability by logging material batches, machine settings, inspection notes, and operator approvals."
+    }
+  ],
+  "education": [
+    {
+      "id": 1,
+      "school": "Massachusetts Institute of Technology",
+      "degree": "Bachelor of Science",
+      "discipline": "Electrical Engineering and Computer Science",
+      "minor": "Mechanical Engineering",
+      "location": "Cambridge, MA",
+      "start_date": "1987-09-01",
+      "end_date": "1991-06-01",
+      "current": false,
+      "gpa": "3.9 / 4.0",
+      "subsections": {
+        "Research Focus": "Power systems, autonomous control, human-computer interaction, and advanced manufacturing.",
+        "Honors": "Undergraduate research fellow, robotics laboratory contributor, early prototype showcase finalist."
+      }
+    }
+  ],
+  "skills": [
+    {
+      "id": 1,
+      "category": "Engineering",
+      "name": "Systems Architecture"
+    },
+    {
+      "id": 2,
+      "category": "Engineering",
+      "name": "Embedded Control"
+    },
+    {
+      "id": 3,
+      "category": "Engineering",
+      "name": "Power Electronics"
+    },
+    {
+      "id": 4,
+      "category": "Software",
+      "name": "Python"
+    },
+    {
+      "id": 5,
+      "category": "Software",
+      "name": "Simulation Pipelines"
+    },
+    {
+      "id": 6,
+      "category": "Software",
+      "name": "AI-Assisted Automation"
+    },
+    {
+      "id": 7,
+      "category": "Leadership",
+      "name": "Technical Strategy"
+    },
+    {
+      "id": 8,
+      "category": "Leadership",
+      "name": "Cross-Functional Delivery"
+    },
+    {
+      "id": 9,
+      "category": "Leadership",
+      "name": "Safety Review"
+    }
+  ],
+  "skillsCategoryOrder": [
+    "Engineering",
+    "Software",
+    "Leadership"
+  ],
+  "sectionLabels": {
+    "summary": "Professional Summary",
+    "experience": "Experience",
+    "projects": "Selected Projects",
+    "education": "Education",
+    "skills": "Skills"
+  },
+  "sectionVisibility": {
+    "header": true,
+    "summary": true,
+    "experience": true,
+    "projects": true,
+    "education": true,
+    "skills": true
+  },
+  "sectionOrder": [
+    "header",
+    "summary",
+    "experience",
+    "projects",
+    "education",
+    "skills"
+  ]
+}

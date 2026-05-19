@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import logging
 import os
@@ -7,6 +8,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 from typing import Any, Dict, List
+import re
 
 from dotenv import load_dotenv
 
@@ -31,6 +33,7 @@ from .prompt import (
 from .openai import ai_chat_completion, completion_usage_to_dict, get_openai_model, usage_tokens_compact
 from .post_processing import parse_chat_json, parse_pass_b_completion
 from .post_processing.resume_diff import apply_sparse_resume_edits, assemble_tailor_result
+from .processing.alias_map import get_term_aliases
 
 # schemas.
 from .schemas import JobTailorSuggestRequest, JobTailorSuggestResponse
@@ -373,6 +376,406 @@ def editsDropSkills(stage):
     return s
 
 
+def _row_id(row):
+    if not isinstance(row, dict):
+        return None
+    rid = row.get("id")
+    if isinstance(rid, float) and rid == int(rid):
+        return int(rid)
+    return rid if isinstance(rid, int) else rid
+
+
+def _row_text(row):
+    if not isinstance(row, dict):
+        return ""
+    parts = []
+    for key in ("title", "description", "tech_stack", "skills", "company"):
+        value = row.get(key)
+        if isinstance(value, list):
+            parts.extend(str(x) for x in value if str(x).strip())
+        elif isinstance(value, str) and value.strip():
+            parts.append(value)
+    return " ".join(parts).lower()
+
+
+def _split_role_terms(value):
+    if not isinstance(value, str):
+        return []
+    chunks = re.findall(r"[a-zA-Z][a-zA-Z0-9+#./-]{2,}", value.lower())
+    stop = {
+        "the",
+        "and",
+        "for",
+        "with",
+        "from",
+        "role",
+        "job",
+        "developer",
+        "manager",
+        "specialist",
+        "associate",
+        "coordinator",
+        "engineer",
+        "analyst",
+    }
+    return [c for c in chunks if c not in stop]
+
+
+def _priority_selection_terms(tailor_context, payload=None, limit=24):
+    weighted = []
+    tc = tailor_context if isinstance(tailor_context, dict) else {}
+    payload = payload if isinstance(payload, dict) else {}
+
+    for idx, entry in enumerate(tc.get("keywords") or []):
+        if not isinstance(entry, dict):
+            continue
+        term = str(entry.get("term") or "").strip().lower()
+        if term:
+            weighted.append({"term": term, "weight": max(2.0, 5.0 - (idx * 0.2)), "source": "jd_keyword"})
+    for hit in tc.get("resumeHits") or []:
+        term = str(hit or "").strip().lower()
+        if term:
+            weighted.append({"term": term, "weight": 3.5, "source": "resume_hit"})
+    for domain in tc.get("activeDomains") or []:
+        term = str(domain or "").strip().lower()
+        if term:
+            weighted.append({"term": term, "weight": 1.5, "source": "active_domain"})
+    for term in _split_role_terms(str(payload.get("target_role") or tc.get("targetRole") or "")):
+        weighted.append({"term": term, "weight": 1.25, "source": "target_role"})
+
+    out = []
+    seen = set()
+    for item in weighted:
+        term = item["term"]
+        key = term.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(item)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _term_in_text(term, text):
+    if not term or not text:
+        return False
+    aliases = set(get_term_aliases(term) or set())
+    normalized = str(term or "").strip().lower()
+    if normalized == "sql":
+        aliases.update({"postgres", "postgresql", "mysql", "sqlite", "sql queries"})
+    expanded = set()
+    for alias in aliases or {term}:
+        a = str(alias or "").strip().lower()
+        if not a:
+            continue
+        expanded.add(a)
+        if a.endswith("s") and len(a) > 4:
+            expanded.add(a[:-1])
+        elif len(a) > 3:
+            expanded.add(a + "s")
+    for a in expanded:
+        if re.search(r"(?<![a-z0-9])" + re.escape(a) + r"(?![a-z0-9])", text):
+            return True
+    return False
+
+
+def _project_fit_score(row, priority_terms):
+    text = _row_text(row)
+    if not text:
+        return {"score": 0.0, "matchedTerms": [], "evidenceDensity": "none"}
+    score = 0.0
+    matched = []
+    for item in priority_terms:
+        term = item.get("term") if isinstance(item, dict) else str(item or "")
+        weight = float(item.get("weight") or 1.0) if isinstance(item, dict) else 1.0
+        if _term_in_text(term, text):
+            score += weight
+            matched.append(term)
+    unique_matched = []
+    seen = set()
+    for term in matched:
+        key = term.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        unique_matched.append(term)
+    if score >= 8 or len(unique_matched) >= 4:
+        density = "high"
+    elif score >= 4 or len(unique_matched) >= 2:
+        density = "medium"
+    elif score > 0:
+        density = "low"
+    else:
+        density = "none"
+    return {"score": round(score, 3), "matchedTerms": unique_matched[:8], "evidenceDensity": density}
+
+
+def _int_id_list(value):
+    out = []
+    if not isinstance(value, list):
+        return out
+    for item in value:
+        if isinstance(item, int):
+            out.append(item)
+        elif isinstance(item, float) and item == int(item):
+            out.append(int(item))
+        elif isinstance(item, str) and item.strip().lstrip("-").isdigit():
+            out.append(int(item.strip()))
+    return list(dict.fromkeys(out))
+
+
+def _project_scores_from_plan(section_details):
+    rows = (((section_details or {}).get("rowsPerSectionRanked") or {}).get("projects") or [])
+    out = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        rid = row.get("id")
+        if isinstance(rid, float) and rid == int(rid):
+            rid = int(rid)
+        if not isinstance(rid, int):
+            continue
+        try:
+            score = float(row.get("score") or row.get("jdEvidenceScore") or row.get("hits") or 0)
+        except (TypeError, ValueError):
+            score = 0.0
+        out[rid] = {
+            "score": score,
+            "hits": int(row.get("hits") or 0),
+            "matchedTerms": row.get("matchedTerms") if isinstance(row.get("matchedTerms"), list) else [],
+        }
+    return out
+
+
+def _project_title_by_id(resume_data):
+    out = {}
+    for row in (resume_data or {}).get("projects") or []:
+        if not isinstance(row, dict):
+            continue
+        rid = _row_id(row)
+        if isinstance(rid, int):
+            out[rid] = str(row.get("title") or f"Project {rid}").strip() or f"Project {rid}"
+    return out
+
+
+def repair_narrative_project_selection(narrative_brief, resume_data, section_details, payload):
+    """
+    Deterministic guard before Pass A: if one-page mode + weighted project rank says
+    a dropped project is stronger than a kept/maybe row, make selection explicit before
+    the rewrite model ever runs.
+    """
+    if not isinstance(narrative_brief, dict) or not isinstance(resume_data, dict):
+        return narrative_brief, None
+    prefs = (payload or {}).get("style_preferences") if isinstance(payload, dict) else {}
+    one_page = isinstance(prefs, dict) and prefs.get("length_target") == "one_page"
+    if not one_page:
+        return narrative_brief, None
+
+    projects = [r for r in (resume_data.get("projects") or []) if isinstance(r, dict)]
+    valid_ids = [_row_id(r) for r in projects if isinstance(_row_id(r), int)]
+    valid_ids = [x for x in valid_ids if isinstance(x, int)]
+    if len(valid_ids) <= 1:
+        return narrative_brief, None
+
+    plan_scores = _project_scores_from_plan(section_details)
+    priority_terms = _priority_selection_terms({}, payload)
+    by_id = {_row_id(row): row for row in projects}
+    scored = {}
+    for pid in valid_ids:
+        plan = plan_scores.get(pid) or {}
+        if plan:
+            scored[pid] = {
+                "score": round(float(plan.get("score") or 0), 3),
+                "hits": int(plan.get("hits") or 0),
+                "matchedTerms": list(plan.get("matchedTerms") or []),
+                "source": "plan",
+            }
+        else:
+            fit = _project_fit_score(by_id.get(pid), priority_terms)
+            scored[pid] = {
+                "score": float(fit.get("score") or 0),
+                "hits": len(fit.get("matchedTerms") or []),
+                "matchedTerms": list(fit.get("matchedTerms") or []),
+                "source": "fallback",
+            }
+
+    ranked_ids = sorted(
+        valid_ids,
+        key=lambda pid: (-(scored.get(pid, {}).get("score") or 0), -(scored.get(pid, {}).get("hits") or 0), valid_ids.index(pid)),
+    )
+    existing_keep = _int_id_list(narrative_brief.get("keepProjects"))
+    existing_drop = _int_id_list(narrative_brief.get("dropProjects"))
+    existing_maybe = _int_id_list(narrative_brief.get("maybeProjects"))
+    keep_target = max(len(existing_keep), min(3, len(valid_ids)))
+    if not existing_keep and len(valid_ids) >= 4:
+        keep_target = 3
+    keep_target = min(4, max(1, keep_target))
+
+    selected = []
+    for pid in ranked_ids:
+        score = scored.get(pid, {}).get("score") or 0
+        hits = scored.get(pid, {}).get("hits") or 0
+        if score <= 0 and hits <= 0 and len(selected) >= max(1, len(existing_keep)):
+            continue
+        selected.append(pid)
+        if len(selected) >= keep_target:
+            break
+    if not selected:
+        return narrative_brief, None
+
+    selected_set = set(selected)
+    old_kept_set = set(existing_keep)
+    promoted = [pid for pid in selected if pid in set(existing_drop) | set(existing_maybe)]
+    demoted = [pid for pid in existing_keep if pid not in selected_set]
+    maybe_dropped = [pid for pid in existing_maybe if pid not in selected_set]
+    if not promoted and not demoted and not maybe_dropped:
+        return narrative_brief, None
+
+    updated = copy.deepcopy(narrative_brief)
+    updated["keepProjects"] = selected
+    updated["dropProjects"] = [pid for pid in valid_ids if pid not in selected_set]
+    updated["maybeProjects"] = []
+    updated["heroProjects"] = selected[:4]
+    updated["rewriteProjects"] = selected[:4]
+    updated["supportingProjects"] = []
+    updated["peripheralProjects"] = [pid for pid in valid_ids if pid not in selected_set]
+
+    titles = _project_title_by_id(resume_data)
+    rationale = list(updated.get("selectionRationale") or [])
+    for pid in promoted[:3]:
+        terms = ", ".join((scored.get(pid) or {}).get("matchedTerms") or [])
+        label = titles.get(pid, f"Project {pid}")
+        if terms:
+            rationale.append(f"Selection guard kept {label} because it carries stronger weighted evidence for this posting ({terms}).")
+        else:
+            rationale.append(f"Selection guard kept {label} because it ranked above a previously kept project for this posting.")
+    for pid in demoted[:3]:
+        label = titles.get(pid, f"Project {pid}")
+        rationale.append(f"Selection guard moved {label} out of the one-page draft because stronger project evidence ranked ahead of it.")
+    for pid in maybe_dropped[:3]:
+        label = titles.get(pid, f"Project {pid}")
+        rationale.append(f"Selection guard dropped maybe project {label} for one-page focus.")
+    updated["selectionRationale"] = list(dict.fromkeys([x for x in rationale if isinstance(x, str) and x.strip()]))[:8]
+
+    debug_payload = {
+        "onePageSelectionGuard": True,
+        "keepTarget": keep_target,
+        "oldKeepProjects": existing_keep,
+        "oldDropProjects": existing_drop,
+        "oldMaybeProjects": existing_maybe,
+        "newKeepProjects": updated["keepProjects"],
+        "newDropProjects": updated["dropProjects"],
+        "promotedProjectIds": promoted,
+        "demotedProjectIds": demoted,
+        "maybeDroppedProjectIds": maybe_dropped,
+        "projectScores": {
+            str(pid): {
+                **(scored.get(pid) or {}),
+                "title": titles.get(pid, f"Project {pid}"),
+            }
+            for pid in ranked_ids
+        },
+    }
+    return updated, debug_payload
+
+
+def _append_stage_warning(stage, warning):
+    if not warning:
+        return stage
+    out = dict(stage) if isinstance(stage, dict) else {}
+    warnings = out.get("warnings")
+    if not isinstance(warnings, list):
+        warnings = []
+    if warning not in warnings:
+        warnings.append(warning)
+    out["warnings"] = warnings
+    return out
+
+
+def protect_high_fit_project_drops(stage, resume_data, tailor_context, payload=None):
+    """Keep rows with strong current-JD evidence unless kept rows clearly cover the same story better."""
+    if not isinstance(stage, dict) or not isinstance(stage.get("edits"), dict):
+        return stage
+    edits = dict(stage.get("edits") or {})
+    drop_ids = edits.get("removedProjectIds")
+    if not isinstance(drop_ids, list) or not drop_ids:
+        return stage
+    projects = resume_data.get("projects") if isinstance(resume_data, dict) else []
+    by_id = {_row_id(row): row for row in projects or [] if isinstance(row, dict)}
+    priority_terms = _priority_selection_terms(tailor_context, payload)
+    all_ids = [_row_id(row) for row in projects or [] if isinstance(row, dict)]
+    drop_set = {x for x in drop_ids}
+    kept_ids = [pid for pid in all_ids if pid not in drop_set]
+    scored = {pid: _project_fit_score(by_id.get(pid), priority_terms) for pid in all_ids}
+    kept_scores = [scored.get(pid, {}).get("score", 0) for pid in kept_ids]
+    best_kept = max(kept_scores or [0])
+    protected = []
+    for pid in drop_ids:
+        fit = scored.get(pid, {})
+        score = float(fit.get("score") or 0)
+        density = fit.get("evidenceDensity")
+        # Strong current-JD evidence should not disappear unless several kept projects are materially stronger.
+        if (density in ("medium", "high") or score >= 4) and not (len(kept_ids) >= 3 and best_kept >= score + 3):
+            protected.append(pid)
+    if not protected:
+        return stage
+    protected_set = set(protected)
+    edits["removedProjectIds"] = [pid for pid in drop_ids if pid not in protected_set]
+
+    prefs = (payload or {}).get("style_preferences") if isinstance(payload, dict) else {}
+    one_page = isinstance(prefs, dict) and prefs.get("length_target") == "one_page"
+    replacement_removed = []
+    edited_ids = {
+        _row_id(row)
+        for row in edits.get("projects") or []
+        if isinstance(row, dict) and _row_id(row) is not None
+    }
+    if one_page and protected:
+        current_kept = [pid for pid in all_ids if pid not in set(edits.get("removedProjectIds") or [])]
+        for pid in protected:
+            p_score = float(scored.get(pid, {}).get("score") or 0)
+            candidates = [
+                kid
+                for kid in current_kept
+                if kid != pid and kid not in protected_set and kid not in edited_ids
+            ]
+            if len(current_kept) <= 3 or not candidates:
+                continue
+            weakest = min(candidates, key=lambda kid: float(scored.get(kid, {}).get("score") or 0))
+            weakest_score = float(scored.get(weakest, {}).get("score") or 0)
+            if p_score >= weakest_score + 3 and weakest_score <= 2:
+                replacement_removed.append(weakest)
+                current_kept = [x for x in current_kept if x != weakest]
+        if replacement_removed:
+            existing = list(edits.get("removedProjectIds") or [])
+            for rid in replacement_removed:
+                if rid not in existing:
+                    existing.append(rid)
+            edits["removedProjectIds"] = existing
+
+    if not edits["removedProjectIds"]:
+        edits.pop("removedProjectIds", None)
+    out = dict(stage)
+    out["edits"] = edits
+    details = []
+    for pid in protected:
+        title = str((by_id.get(pid) or {}).get("title") or pid).strip()
+        matched = ", ".join((scored.get(pid) or {}).get("matchedTerms") or [])
+        details.append(f"{title} ({matched})" if matched else title)
+    out = _append_stage_warning(
+        out,
+        "Selection guard kept high-fit project(s) for this JD: " + ", ".join(details[:4]) + ".",
+    )
+    if replacement_removed:
+        names = [str((by_id.get(pid) or {}).get("title") or pid).strip() for pid in replacement_removed]
+        out = _append_stage_warning(
+            out,
+            "Selection guard removed weaker project(s) to preserve one-page focus: " + ", ".join(names[:4]) + ".",
+        )
+    return out
+
+
 def countSkillRows(resume):
     rows = (resume or {}).get("skills") if isinstance(resume, dict) else None
     if not isinstance(rows, list):
@@ -390,7 +793,319 @@ def passBOnlySkills(stage):
     e = (stage or {}).get("edits")
     if "skills" not in e:
         return None
-    return {"edits": {"skills": e["skills"]}}
+    out = {"edits": {"skills": e["skills"]}}
+    if isinstance(stage.get("warnings"), list):
+        out["warnings"] = stage.get("warnings")
+    return out
+
+
+def _skill_deletion_budget(n_skill_rows):
+    if n_skill_rows <= 0:
+        return {"minSurvivorsTarget": 0, "maxOmissionsBudget": 0}
+    if n_skill_rows >= 20:
+        min_pct = 0.75
+    elif n_skill_rows >= 12:
+        min_pct = 0.82
+    else:
+        min_pct = 0.88
+    min_survivors = max(1, int((n_skill_rows * min_pct) + 0.9999))
+    max_omit = min(5, max(0, n_skill_rows - min_survivors))
+    if n_skill_rows < 14:
+        max_omit = min(max_omit, 3)
+    return {"minSurvivorsTarget": max(min_survivors, n_skill_rows - max_omit), "maxOmissionsBudget": max_omit}
+
+
+def enforce_pass_b_skill_budget(stage, resume_mid):
+    if not isinstance(stage, dict) or not isinstance(stage.get("edits"), dict):
+        return stage
+    skills = (stage.get("edits") or {}).get("skills")
+    original = resume_mid.get("skills") if isinstance(resume_mid, dict) else []
+    if not isinstance(skills, list) or not isinstance(original, list):
+        return stage
+    original_rows = [r for r in original if isinstance(r, dict) and r.get("id") is not None]
+    budget = _skill_deletion_budget(len(original_rows))
+    min_survivors = int(budget.get("minSurvivorsTarget") or 0)
+    if len(skills) >= min_survivors:
+        return stage
+    seen = {r.get("id") for r in skills if isinstance(r, dict)}
+    repaired = list(skills)
+    for row in original_rows:
+        rid = row.get("id")
+        if rid in seen:
+            continue
+        repaired.append(row)
+        seen.add(rid)
+        if len(repaired) >= min_survivors:
+            break
+    out = dict(stage)
+    edits = dict(stage.get("edits") or {})
+    edits["skills"] = repaired
+    out["edits"] = edits
+    return _append_stage_warning(
+        out,
+        f"Skills guard restored {len(repaired) - len(skills)} skill row(s) because Pass B exceeded the deletion budget.",
+    )
+
+
+def _rows_by_id(rows):
+    out = {}
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        rid = _row_id(row)
+        if isinstance(rid, int):
+            out[rid] = row
+    return out
+
+
+def _rewrite_repair_targets(diff_audit, max_rows=4):
+    quality = (diff_audit or {}).get("quality") or {}
+    rw = quality.get("rewrite_quality") or {}
+    targets = {"experience": [], "projects": []}
+
+    for item in rw.get("minor_rewrite_rows") or []:
+        if not isinstance(item, dict):
+            continue
+        section = item.get("section")
+        rid = item.get("id")
+        if section in targets and isinstance(rid, int) and rid not in targets[section]:
+            targets[section].append(rid)
+
+    for item in rw.get("filler_phrase_hits") or []:
+        if not isinstance(item, dict):
+            continue
+        section = item.get("section")
+        rid = item.get("id")
+        if section in targets and isinstance(rid, int) and rid not in targets[section]:
+            targets[section].append(rid)
+
+    for item in rw.get("missing_rewrite_rows") or []:
+        if not isinstance(item, dict):
+            continue
+        section = item.get("section")
+        rid = item.get("id")
+        if section in targets and isinstance(rid, int) and rid not in targets[section]:
+            targets[section].append(rid)
+
+    flat = []
+    for section in ("experience", "projects"):
+        for rid in targets[section]:
+            flat.append((section, rid))
+    flat = flat[:max_rows]
+    return flat
+
+
+def _repair_row_bundle(section, rid, original_resume, current_resume):
+    before_rows = _rows_by_id((original_resume or {}).get(section) or [])
+    after_rows = _rows_by_id((current_resume or {}).get(section) or [])
+    before = before_rows.get(rid)
+    after = after_rows.get(rid)
+    if not isinstance(before, dict) or not isinstance(after, dict):
+        return None
+    keys = ["id", "title", "company", "skills", "tech_stack", "description"]
+    return {
+        "section": section,
+        "id": rid,
+        "original": {k: before.get(k) for k in keys if k in before},
+        "weakRewrite": {k: after.get(k) for k in keys if k in after},
+    }
+
+
+def build_rewrite_repair_prompt(original_resume, current_resume, diff_audit, narrative_brief, tailor_context, relevant_jd_lines):
+    targets = _rewrite_repair_targets(diff_audit)
+    bundles = []
+    for section, rid in targets:
+        bundle = _repair_row_bundle(section, rid, original_resume, current_resume)
+        if bundle:
+            bundles.append(bundle)
+    if not bundles:
+        return None, None
+
+    rw = (((diff_audit or {}).get("quality") or {}).get("rewrite_quality") or {})
+    system = "\n".join(
+        [
+            "Return JSON only. You are repairing weak resume tailoring output.",
+            "Rewrite only the listed rows. Do not edit skills, removals, dates, employers, schools, or unrelated rows.",
+            "Every repaired row must change the first bullet and bullet order/grouping versus weakRewrite.",
+            "Remove filler phrases such as robust, enhanced, enhancing, seamless, efficient data handling, and best practices.",
+            "Preserve true numbers, tools, employers, project names, and claims from original/weakRewrite. No invented facts.",
+            "Output exactly {\"edits\":{\"experience\":[...],\"projects\":[...]}} with only sections you repair.",
+        ]
+    )
+    payload = {
+        "targetRole": (tailor_context or {}).get("targetRole"),
+        "narrative": {
+            "candidateAngle": (narrative_brief or {}).get("candidateAngle"),
+            "primaryStory": (narrative_brief or {}).get("primaryStory"),
+            "rewriteGoals": (narrative_brief or {}).get("rewriteGoals"),
+            "avoid": (narrative_brief or {}).get("avoid"),
+        },
+        "jdPriorityTerms": [
+            str((entry or {}).get("term") or "")
+            for entry in ((tailor_context or {}).get("keywords") or [])[:12]
+            if isinstance(entry, dict) and str(entry.get("term") or "").strip()
+        ],
+        "resumeLiteralHits": list((tailor_context or {}).get("resumeHits") or [])[:20],
+        "audit": {
+            "minorRewriteRows": rw.get("minor_rewrite_rows") or [],
+            "fillerPhraseHits": rw.get("filler_phrase_hits") or [],
+        },
+        "rowsToRepair": bundles,
+        "jdExcerpts": relevant_jd_lines,
+        "outputShape": {
+            "edits": {
+                "experience": [{"id": 0, "description": "full repaired bullet block"}],
+                "projects": [{"id": 0, "tech_stack": ["optional"], "description": "full repaired bullet block"}],
+            }
+        },
+    }
+    user = json.dumps(payload, ensure_ascii=False, indent=2)
+    return system, user
+
+
+def _merge_section_rows(existing_rows, repair_rows):
+    if not isinstance(repair_rows, list):
+        return existing_rows if isinstance(existing_rows, list) else []
+    out = []
+    by_id = {}
+    for row in existing_rows or []:
+        if isinstance(row, dict) and row.get("id") is not None:
+            by_id[row.get("id")] = len(out)
+        out.append(copy.deepcopy(row))
+    for row in repair_rows:
+        if not isinstance(row, dict) or row.get("id") is None:
+            continue
+        rid = row.get("id")
+        if rid in by_id:
+            merged = dict(out[by_id[rid]]) if isinstance(out[by_id[rid]], dict) else {}
+            merged.update(copy.deepcopy(row))
+            out[by_id[rid]] = merged
+        else:
+            by_id[rid] = len(out)
+            out.append(copy.deepcopy(row))
+    return out
+
+
+def merge_rewrite_repair(base_stage, repair_stage):
+    if not isinstance(repair_stage, dict) or not isinstance(repair_stage.get("edits"), dict):
+        return base_stage
+    out = copy.deepcopy(base_stage) if isinstance(base_stage, dict) else {"edits": {}}
+    edits = out.setdefault("edits", {})
+    repair_edits = repair_stage.get("edits") or {}
+    for section in ("experience", "projects"):
+        if isinstance(repair_edits.get(section), list):
+            edits[section] = _merge_section_rows(edits.get(section), repair_edits.get(section))
+    warnings = out.get("warnings") if isinstance(out.get("warnings"), list) else []
+    repaired_ids = []
+    for section in ("experience", "projects"):
+        for row in repair_edits.get(section) or []:
+            if isinstance(row, dict) and row.get("id") is not None:
+                repaired_ids.append(f"{section}:{row.get('id')}")
+    if repaired_ids:
+        msg = "Rewrite repair pass strengthened weak tailored rows: " + ", ".join(repaired_ids[:6]) + "."
+        if msg not in warnings:
+            warnings.append(msg)
+    if warnings:
+        out["warnings"] = warnings
+    return out
+
+
+def _normalize_section_order(value, current=None):
+    allowed = ["header", "summary", "experience", "projects", "skills", "education"]
+    source = value if isinstance(value, list) and value else current
+    if not isinstance(source, list):
+        source = []
+    out = []
+    for item in source:
+        key = str(item or "").strip().lower()
+        if key in allowed and key not in out:
+            out.append(key)
+    if not out:
+        out = ["header", "summary", "education", "experience", "projects", "skills"]
+    if "header" in out:
+        out = ["header"] + [x for x in out if x != "header"]
+    else:
+        out.insert(0, "header")
+    for key in allowed:
+        if key not in out:
+            out.append(key)
+    return out
+
+
+def _normalize_section_visibility(value, resume_data):
+    if not isinstance(value, dict):
+        return {}
+    current = (resume_data or {}).get("sectionVisibility") if isinstance(resume_data, dict) else {}
+    current = current if isinstance(current, dict) else {}
+    out = {}
+    for key in ("summary", "education", "experience", "projects", "skills"):
+        if key not in value:
+            continue
+        raw = value.get(key)
+        if isinstance(raw, bool):
+            out[key] = raw
+        elif isinstance(raw, str):
+            low = raw.strip().lower()
+            if low in ("true", "yes", "show", "visible", "1"):
+                out[key] = True
+            elif low in ("false", "no", "hide", "hidden", "0"):
+                out[key] = False
+    # Never let layout planning hide non-empty core evidence sections.
+    for key in ("education", "experience", "projects", "skills"):
+        rows = (resume_data or {}).get(key) if isinstance(resume_data, dict) else None
+        if isinstance(rows, list) and rows and out.get(key) is False:
+            out[key] = bool(current.get(key, True))
+    return out
+
+
+def inject_layout_edits(stage, narrative_brief, resume_data):
+    if not isinstance(stage, dict):
+        return stage
+    nb = narrative_brief if isinstance(narrative_brief, dict) else {}
+    order = _normalize_section_order(nb.get("layoutSectionOrder"), (resume_data or {}).get("sectionOrder") if isinstance(resume_data, dict) else None) if nb.get("layoutSectionOrder") else []
+    visibility = _normalize_section_visibility(nb.get("layoutSectionVisibility"), resume_data)
+    if not order and not visibility:
+        return stage
+    out = copy.deepcopy(stage)
+    edits = out.setdefault("edits", {})
+    if order:
+        edits["sectionOrder"] = order
+    if visibility:
+        current = (resume_data or {}).get("sectionVisibility") if isinstance(resume_data, dict) else {}
+        current = current if isinstance(current, dict) else {}
+        edits["sectionVisibility"] = {**current, **visibility}
+    return out
+
+
+def maybe_run_rewrite_repair(original_resume, combined_stage, diff_audit, narrative_brief, tailor_context, relevant_jd_lines):
+    flags = ((((diff_audit or {}).get("quality") or {}).get("flags")) or {})
+    if not (flags.get("minor_expected_rewrites") or flags.get("filler_phrase_hits") or flags.get("missing_expected_rewrites")):
+        return None, None, None
+    current_resume = apply_sparse_resume_edits(original_resume, combined_stage)
+    system, user = build_rewrite_repair_prompt(
+        original_resume,
+        current_resume,
+        diff_audit,
+        narrative_brief,
+        tailor_context,
+        relevant_jd_lines,
+    )
+    if not system or not user:
+        return None, None, None
+    text, usage = ai_chat_completion(system_prompt=system, user_prompt=user, max_tokens=4096)
+    parsed = parse_chat_json(text)
+    if not isinstance(parsed, dict) or not isinstance(parsed.get("edits"), dict):
+        return None, {"assistantText": text or "", "parseError": "missing edits"}, usage
+    # The repair pass is intentionally narrow.
+    edits = parsed.get("edits") or {}
+    parsed["edits"] = {
+        k: v
+        for k, v in edits.items()
+        if k in ("experience", "projects") and isinstance(v, list)
+    }
+    if not parsed["edits"]:
+        return None, {"assistantText": text or "", "parseError": "no repairable sections"}, usage
+    return parsed, {"assistantText": text or "", "parsed": parsed}, usage
 
 
 def mergePassEdits(out_a, out_b):
@@ -398,12 +1113,25 @@ def mergePassEdits(out_a, out_b):
     if not isinstance(ea, dict):
         ea = {}
     ea = {k: v for k, v in ea.items() if k != "skills"}
+    warnings = []
+    for part in (out_a, out_b):
+        ws = (part or {}).get("warnings") if isinstance(part, dict) else None
+        if isinstance(ws, list):
+            for w in ws:
+                if w and w not in warnings:
+                    warnings.append(w)
     if not out_b or not isinstance((out_b or {}).get("edits"), dict):
-        return {"edits": ea} if ea else (out_a or {"edits": {}})
+        merged = {"edits": ea} if ea else (out_a or {"edits": {}})
+        if warnings:
+            merged = {**merged, "warnings": warnings}
+        return merged
     sk = (out_b.get("edits") or {}).get("skills")
     if sk is not None:
         ea = {**ea, "skills": sk}
-    return {"edits": ea}
+    merged = {"edits": ea}
+    if warnings:
+        merged["warnings"] = warnings
+    return merged
 
 
 def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
@@ -436,6 +1164,10 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     narrative_brief, usage_narr, narrative_char_meta = request_narrative_brief(
         payload=payload, tailorContext=tailorContext, sectionDetails=sectionDetails
     )
+    narrative_selection_guard = None
+    narrative_brief, narrative_selection_guard = repair_narrative_project_selection(
+        narrative_brief, resumeData, sectionDetails, payload
+    )
 
     # pass 1: summary + hero experience + hero projects (no skills in edits).
     system_a, user_a = build_prompt(
@@ -450,6 +1182,8 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     if "edits" not in out1 or not isinstance(out1.get("edits"), dict):
         raise HTTPException(status_code=502, detail="Tailor pass 1 did not return valid JSON with an `edits` object.")
     out1 = editsDropSkills(out1)
+    out1 = inject_layout_edits(out1, narrative_brief, resumeData)
+    out1 = protect_high_fit_project_drops(out1, resumeData, tailorContext, payload)
     resume_mid = apply_sparse_resume_edits(resumeData, out1)
     out2_parsed = None
     usage_b = None
@@ -476,9 +1210,13 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
             system_prompt=system_b, user_prompt=user_b, max_tokens=8192
         )
         out2_parsed = parse_pass_b_completion(text_b)
+        out2_parsed = enforce_pass_b_skill_budget(out2_parsed, resume_mid)
     out2 = passBOnlySkills(out2_parsed) if out2_parsed is not None else None
     out = mergePassEdits(out1, out2)
     usage = usage_b if usage_b is not None else usage_a
+    usage_repair = None
+    rewrite_repair_debug = None
+    rewrite_repair_stage = None
     target_role_str = str((payload or {}).get("target_role") or "") if isinstance(payload, dict) else ""
 
     want_audit = debug or _env_truthy("TAILOR_AB_LOG")
@@ -495,6 +1233,28 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
             return_audit_debug=True,
             rows_per_section_ranked=(sectionDetails or {}).get("rowsPerSectionRanked") or {},
         )
+        rewrite_repair_stage, rewrite_repair_debug, usage_repair = maybe_run_rewrite_repair(
+            resumeData,
+            out,
+            diff_audit,
+            narrative_brief,
+            tailorContext,
+            relevantJDLines,
+        )
+        if rewrite_repair_stage is not None:
+            out = merge_rewrite_repair(out, rewrite_repair_stage)
+            final_out, diff_audit = assemble_tailor_result(
+                original_resume=resumeData,
+                stage_a=out,
+                narrative_brief=narrative_brief,
+                target_role=target_role_str,
+                company=str((payload or {}).get("company") or "") if isinstance(payload, dict) else "",
+                style_preferences=payload.get("style_preferences") if isinstance(payload, dict) else {},
+                strict_truth=bool(payload.get("strict_truth", True)) if isinstance(payload, dict) else True,
+                tailor_context=tailorContext,
+                return_audit_debug=True,
+                rows_per_section_ranked=(sectionDetails or {}).get("rowsPerSectionRanked") or {},
+            )
     else:
         final_out = assemble_tailor_result(
             original_resume=resumeData,
@@ -538,6 +1298,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         write_debug("job_tailor_latest_user.json", {"pass1": user_a, "pass2": user_b})
         write_debug("job_tailor_preferences.json", payload.get("style_preferences") or {})
         write_debug("job_tailor_narrative.json", narrative_brief)
+        write_debug("job_tailor_selection_guard.json", narrative_selection_guard or {"onePageSelectionGuard": False})
         write_debug("job_tailor_stage_a.json", out1)
         if out2_parsed is not None:
             write_debug("job_tailor_stage_b.json", out2_parsed)
@@ -551,7 +1312,10 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
             }
             if usage is not None:
                 diff_audit = {**diff_audit, "llm_usage_rewrite_pass": usageToJson(usage)}
+            if usage_repair is not None:
+                diff_audit = {**diff_audit, "llm_usage_repair_pass": usageToJson(usage_repair)}
             write_debug("job_tailor_diff_audit.json", diff_audit)
+        write_debug("job_tailor_rewrite_repair.json", rewrite_repair_debug or {"repairPass": "not_run"})
         text_meta = (diff_audit or {}).get("text") or {}
         rw_chars = text_meta.get("rewrite_note_chars")
         if rw_chars is None and diff_audit is not None:

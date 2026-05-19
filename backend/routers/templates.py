@@ -3,7 +3,7 @@
 import json
 import mimetypes
 import re
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException
@@ -17,6 +17,26 @@ TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 _VALID_STYLING_MODES = frozenset({"locked", "hybrid", "themeable"})
 _SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 _ASSET_NAME_RE = re.compile(r"^[a-zA-Z0-9][-a-zA-Z0-9._]*$")
+
+
+def safe_template_asset_path(folder_name, asset_path):
+    raw = str(asset_path or "").strip().replace("\\", "/")
+    if not raw or raw.startswith("/"):
+        return None
+    pure_path = PurePosixPath(raw)
+    if any(part in ("", ".", "..") for part in pure_path.parts):
+        return None
+    if any(not _ASSET_NAME_RE.match(part) for part in pure_path.parts):
+        return None
+    base_dir = (TEMPLATES_DIR / folder_name).resolve()
+    cand = (base_dir / Path(*pure_path.parts)).resolve()
+    try:
+        cand.relative_to(base_dir)
+    except ValueError:
+        return None
+    if not cand.is_file():
+        return None
+    return raw, cand
 
 
 def _default_styling_meta(folder_name: str) -> Dict[str, Any]:
@@ -122,18 +142,28 @@ def load_template_styling_meta(folder_name: str) -> Dict[str, Any]:
 
     pi = raw.get("previewImage")
     if isinstance(pi, str) and pi.strip():
-        fn = Path(pi.strip()).name
-        if _ASSET_NAME_RE.match(fn):
-            base_dir = (TEMPLATES_DIR / folder_name).resolve()
-            cand = (base_dir / fn).resolve()
-            try:
-                cand.relative_to(base_dir)
-            except ValueError:
-                pass
-            else:
-                if cand.is_file():
-                    out["previewImage"] = fn
-                    out["previewUrl"] = f"/api/templates/{folder_name}/asset/{fn}"
+        asset_info = safe_template_asset_path(folder_name, pi)
+        if asset_info:
+            asset_name, _ = asset_info
+            out["previewImage"] = asset_name
+            out["previewUrl"] = f"/api/templates/{folder_name}/asset/{asset_name}"
+
+    snippets = raw.get("previewSnippets")
+    if isinstance(snippets, dict):
+        safe_snippets = {}
+        for key, val in snippets.items():
+            if not isinstance(key, str) or not key.strip() or not isinstance(val, str):
+                continue
+            asset_info = safe_template_asset_path(folder_name, val)
+            if not asset_info:
+                continue
+            asset_name, _ = asset_info
+            safe_snippets[key.strip()[:80]] = {
+                "image": asset_name,
+                "url": f"/api/templates/{folder_name}/asset/{asset_name}",
+            }
+        if safe_snippets:
+            out["previewSnippets"] = safe_snippets
 
     out.setdefault("family", base["family"])
     out.setdefault("variantLabel", base["variantLabel"])
@@ -157,23 +187,14 @@ async def list_templates():
     return {"templates": names, "templateStyling": styling}
 
 
-@router.get("/{slug}/asset/{filename}")
-async def template_asset(slug: str, filename: str):
+@router.get("/{slug}/asset/{asset_path:path}")
+async def template_asset(slug: str, asset_path: str):
     """Serve a static gallery asset from templates/<slug>/ (e.g. card preview SVG/PNG)."""
     if not _SLUG_RE.match(slug or ""):
         raise HTTPException(status_code=404, detail="Not found")
-    fn = Path(filename).name
-    if not fn or not _ASSET_NAME_RE.match(fn):
+    asset_info = safe_template_asset_path(slug, asset_path)
+    if not asset_info:
         raise HTTPException(status_code=404, detail="Not found")
-    base = (TEMPLATES_DIR / slug).resolve()
-    if not base.is_dir():
-        raise HTTPException(status_code=404, detail="Not found")
-    path = (base / fn).resolve()
-    try:
-        path.relative_to(base)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="Not found")
-    if not path.is_file():
-        raise HTTPException(status_code=404, detail="Not found")
+    _, path = asset_info
     media_type, _ = mimetypes.guess_type(str(path))
     return FileResponse(path, media_type=media_type or "application/octet-stream")

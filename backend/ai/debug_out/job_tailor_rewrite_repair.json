@@ -1,0 +1,19 @@
+{
+  "assistantText": "{\n  \"edits\": {\n    \"experience\": [\n      {\n        \"id\": 5,\n        \"description\": \"• Maintained and developed backend services and REST APIs in Python/Django to support secure internal workflows for financial and compliance teams.\\n• Engaged in system design and architecture discussions, contributing to scalable service patterns and effective data modeling.\\n• Developed React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\\n• Improved Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency.\"\n      }\n    ],\n    \"projects\": [\n      {\n        \"id\": 20,\n        \"description\": \"• Created an ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance posts per run through a multi-stage ETL process.\\n• Employed NLP models (FinBERT) and feature engineering to generate over 40 predictive features per ticker, training XGBoost models with 55–70% ROC-AUC.\\n• Built modular components for data ingestion and transformation, supporting message-driven architectures.\\n• Streamlined workflows for data collection, preprocessing, and model inference, facilitating real-time analytics.\"\n      }\n    ]\n  }\n}",
+  "parsed": {
+    "edits": {
+      "experience": [
+        {
+          "id": 5,
+          "description": "• Maintained and developed backend services and REST APIs in Python/Django to support secure internal workflows for financial and compliance teams.\n• Engaged in system design and architecture discussions, contributing to scalable service patterns and effective data modeling.\n• Developed React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Improved Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
+        }
+      ],
+      "projects": [
+        {
+          "id": 20,
+          "description": "• Created an ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance posts per run through a multi-stage ETL process.\n• Employed NLP models (FinBERT) and feature engineering to generate over 40 predictive features per ticker, training XGBoost models with 55–70% ROC-AUC.\n• Built modular components for data ingestion and transformation, supporting message-driven architectures.\n• Streamlined workflows for data collection, preprocessing, and model inference, facilitating real-time analytics."
+        }
+      ]
+    }
+  }
+}

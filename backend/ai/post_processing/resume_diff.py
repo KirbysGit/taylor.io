@@ -529,6 +529,42 @@ def assemble_tailor_result(
     quality_audit = build_rewrite_quality_audit(o, updated, patch, narrative_brief, stage_a, target_role)
     if (quality_audit.get("flags") or {}).get("skills_expected_but_unchanged"):
         all_warnings.append(SKILLS_EXPECTED_BUT_UNCHANGED_WARNING)
+    rq = quality_audit.get("rewrite_quality") if isinstance(quality_audit, dict) else {}
+    if isinstance(rq, dict):
+        minor_rows = rq.get("minor_rewrite_rows") or []
+        missing_rows = rq.get("missing_rewrite_rows") or []
+        filler_hits = rq.get("filler_phrase_hits") or []
+        if minor_rows:
+            labels = [
+                f"{r.get('section')} id {r.get('id')}"
+                for r in minor_rows
+                if isinstance(r, dict)
+            ]
+            all_warnings.append(
+                "Rewrite audit: expected stronger rewrites for "
+                + ", ".join(labels[:6])
+                + "; output looked like minor wording changes."
+            )
+        if missing_rows:
+            labels = [
+                f"{r.get('section')} id {r.get('id')}"
+                for r in missing_rows
+                if isinstance(r, dict)
+            ]
+            all_warnings.append(
+                "Rewrite audit: narrative requested rewrites that did not appear in the patch: "
+                + ", ".join(labels[:6])
+                + "."
+            )
+        if filler_hits:
+            labels = []
+            for row in filler_hits[:4]:
+                if not isinstance(row, dict):
+                    continue
+                labels.append(
+                    f"{row.get('section')} id {row.get('id')} ({', '.join(row.get('phrases') or [])})"
+                )
+            all_warnings.append("Rewrite audit: filler phrasing survived in " + "; ".join(labels) + ".")
     tailor_explanation = build_tailor_explanation(
         patch=patch,
         narrative_brief=narrative_brief,

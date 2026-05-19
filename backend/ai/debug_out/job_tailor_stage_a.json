@@ -1,0 +1,58 @@
+{
+  "edits": {
+    "summarySection": {
+      "summary": "Backend developer specializing in Python and FastAPI for scalable services and data-driven applications. Proven expertise in building REST APIs, optimizing data processing, and implementing real-time analytics. Strong background in SQL and PostgreSQL for efficient data management and reporting."
+    },
+    "experience": [
+      {
+        "id": 5,
+        "description": "• Developed and maintained backend services and REST APIs using Python and Django, enhancing secure workflows for financial compliance.\n• Contributed to system architecture discussions, focusing on scalable service patterns and effective data modeling.\n• Created dynamic React dashboards integrated with Django APIs, providing real-time insights into backend data workflows.\n• Optimized data-processing pipelines and SQL queries in PostgreSQL, achieving a ~40% reduction in latency and improved system performance."
+      }
+    ],
+    "projects": [
+      {
+        "id": 10,
+        "tech_stack": [
+          "FastAPI",
+          "PostgreSQL",
+          "OpenAI API",
+          "React"
+        ],
+        "description": "• Engineered an AI-driven resume platform that automates the parsing of PDF/DOCX files into structured data using FastAPI and PostgreSQL.\n• Developed backend services for parsing, authentication, and export workflows, ensuring seamless user experience.\n• Implemented a live editing interface in React, allowing real-time customization of resume content.\n• Integrated OpenAI API for enhanced content generation and automated resume editing workflows."
+      },
+      {
+        "id": 20,
+        "tech_stack": [
+          "Python",
+          "SQL",
+          "FinBERT",
+          "XGBoost"
+        ],
+        "description": "• Designed a robust ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance posts per run through a multi-stage ETL process.\n• Utilized NLP models (FinBERT) and feature engineering to create over 40 predictive features per ticker, training XGBoost models with 55–70% ROC-AUC.\n• Developed modular components for data ingestion and transformation, aligning with message-driven architectures for scalability.\n• Automated end-to-end workflows for data collection, preprocessing, and model inference, enabling efficient real-time analytics."
+      }
+    ],
+    "removedExperienceIds": [
+      7
+    ],
+    "removedProjectIds": [
+      12,
+      17,
+      18
+    ],
+    "sectionOrder": [
+      "header",
+      "summary",
+      "experience",
+      "projects",
+      "skills",
+      "education"
+    ],
+    "sectionVisibility": {
+      "summary": true,
+      "education": true,
+      "experience": true,
+      "projects": true,
+      "skills": true
+    }
+  }
+}

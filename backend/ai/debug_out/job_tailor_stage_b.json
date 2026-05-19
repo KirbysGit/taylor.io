@@ -1,0 +1,94 @@
+{
+  "edits": {
+    "skills": [
+      {
+        "id": 41,
+        "name": "Python",
+        "category": "Languages"
+      },
+      {
+        "id": 46,
+        "name": "FastAPI",
+        "category": "Frameworks"
+      },
+      {
+        "id": 44,
+        "name": "SQL",
+        "category": "Languages"
+      },
+      {
+        "id": 45,
+        "name": "Django",
+        "category": "Frameworks"
+      },
+      {
+        "id": 51,
+        "name": "PostgreSQL",
+        "category": "Data Tools"
+      },
+      {
+        "id": 47,
+        "name": "React",
+        "category": "Frameworks"
+      },
+      {
+        "id": 57,
+        "name": "ETL Pipelines",
+        "category": "Data Tools"
+      },
+      {
+        "id": 58,
+        "name": "Backend Development",
+        "category": "Focus Areas"
+      },
+      {
+        "id": 62,
+        "name": "REST API Design",
+        "category": "Focus Areas"
+      },
+      {
+        "id": 60,
+        "name": "AI-Driven Workflows",
+        "category": "Focus Areas"
+      },
+      {
+        "id": 42,
+        "name": "Java",
+        "category": "Languages"
+      },
+      {
+        "id": 43,
+        "name": "JavaScript",
+        "category": "Languages"
+      },
+      {
+        "id": 48,
+        "name": "Node.js",
+        "category": "Frameworks"
+      },
+      {
+        "id": 49,
+        "name": "PyTorch",
+        "category": "Frameworks"
+      },
+      {
+        "id": 50,
+        "name": "TensorFlow Lite",
+        "category": "Frameworks"
+      },
+      {
+        "id": 52,
+        "name": "MySQL",
+        "category": "Data Tools"
+      },
+      {
+        "id": 53,
+        "name": "MongoDB",
+        "category": "Data Tools"
+      }
+    ]
+  },
+  "warnings": [
+    "Skills guard restored 7 skill row(s) because Pass B exceeded the deletion budget."
+  ]
+}

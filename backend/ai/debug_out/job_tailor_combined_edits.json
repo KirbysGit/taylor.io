@@ -1,0 +1,149 @@
+{
+  "edits": {
+    "summarySection": {
+      "summary": "Backend developer specializing in Python and FastAPI for scalable services and data-driven applications. Proven expertise in building REST APIs, optimizing data processing, and implementing real-time analytics. Strong background in SQL and PostgreSQL for efficient data management and reporting."
+    },
+    "experience": [
+      {
+        "id": 5,
+        "description": "• Maintained and developed backend services and REST APIs in Python/Django to support secure internal workflows for financial and compliance teams.\n• Engaged in system design and architecture discussions, contributing to scalable service patterns and effective data modeling.\n• Developed React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Improved Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
+      }
+    ],
+    "projects": [
+      {
+        "id": 10,
+        "tech_stack": [
+          "FastAPI",
+          "PostgreSQL",
+          "OpenAI API",
+          "React"
+        ],
+        "description": "• Engineered an AI-driven resume platform that automates the parsing of PDF/DOCX files into structured data using FastAPI and PostgreSQL.\n• Developed backend services for parsing, authentication, and export workflows, ensuring seamless user experience.\n• Implemented a live editing interface in React, allowing real-time customization of resume content.\n• Integrated OpenAI API for enhanced content generation and automated resume editing workflows."
+      },
+      {
+        "id": 20,
+        "tech_stack": [
+          "Python",
+          "SQL",
+          "FinBERT",
+          "XGBoost"
+        ],
+        "description": "• Created an ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance posts per run through a multi-stage ETL process.\n• Employed NLP models (FinBERT) and feature engineering to generate over 40 predictive features per ticker, training XGBoost models with 55–70% ROC-AUC.\n• Built modular components for data ingestion and transformation, supporting message-driven architectures.\n• Streamlined workflows for data collection, preprocessing, and model inference, facilitating real-time analytics."
+      }
+    ],
+    "removedExperienceIds": [
+      7
+    ],
+    "removedProjectIds": [
+      12,
+      17,
+      18
+    ],
+    "sectionOrder": [
+      "header",
+      "summary",
+      "experience",
+      "projects",
+      "skills",
+      "education"
+    ],
+    "sectionVisibility": {
+      "summary": true,
+      "education": true,
+      "experience": true,
+      "projects": true,
+      "skills": true
+    },
+    "skills": [
+      {
+        "id": 41,
+        "name": "Python",
+        "category": "Languages"
+      },
+      {
+        "id": 46,
+        "name": "FastAPI",
+        "category": "Frameworks"
+      },
+      {
+        "id": 44,
+        "name": "SQL",
+        "category": "Languages"
+      },
+      {
+        "id": 45,
+        "name": "Django",
+        "category": "Frameworks"
+      },
+      {
+        "id": 51,
+        "name": "PostgreSQL",
+        "category": "Data Tools"
+      },
+      {
+        "id": 47,
+        "name": "React",
+        "category": "Frameworks"
+      },
+      {
+        "id": 57,
+        "name": "ETL Pipelines",
+        "category": "Data Tools"
+      },
+      {
+        "id": 58,
+        "name": "Backend Development",
+        "category": "Focus Areas"
+      },
+      {
+        "id": 62,
+        "name": "REST API Design",
+        "category": "Focus Areas"
+      },
+      {
+        "id": 60,
+        "name": "AI-Driven Workflows",
+        "category": "Focus Areas"
+      },
+      {
+        "id": 42,
+        "name": "Java",
+        "category": "Languages"
+      },
+      {
+        "id": 43,
+        "name": "JavaScript",
+        "category": "Languages"
+      },
+      {
+        "id": 48,
+        "name": "Node.js",
+        "category": "Frameworks"
+      },
+      {
+        "id": 49,
+        "name": "PyTorch",
+        "category": "Frameworks"
+      },
+      {
+        "id": 50,
+        "name": "TensorFlow Lite",
+        "category": "Frameworks"
+      },
+      {
+        "id": 52,
+        "name": "MySQL",
+        "category": "Data Tools"
+      },
+      {
+        "id": 53,
+        "name": "MongoDB",
+        "category": "Data Tools"
+      }
+    ]
+  },
+  "warnings": [
+    "Skills guard restored 7 skill row(s) because Pass B exceeded the deletion budget.",
+    "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:20."
+  ]
+}

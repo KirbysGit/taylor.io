@@ -40,6 +40,51 @@ def _join_human(items):
     return ", ".join(items[:-1]) + f", and {items[-1]}"
 
 
+def _section_phrase(changed_sections):
+    friendly = {
+        "summary": "the summary",
+        "experience": "experience",
+        "projects": "projects",
+        "skills": "skills",
+        "education": "education",
+        "section order": "the section order",
+        "section visibility": "which sections show",
+        "header": "the header",
+        "contact layout": "contact layout",
+    }
+    items = [friendly.get(x, x) for x in changed_sections or []]
+    return _join_human(items)
+
+
+def _main_moves(changed_sections):
+    moves = []
+    changed = set(changed_sections or [])
+    if "projects" in changed:
+        moves.append("kept the projects that best prove the role fit")
+    if "experience" in changed:
+        moves.append("reframed your experience around the job's strongest signals")
+    if "summary" in changed:
+        moves.append("gave the summary a clearer role-specific angle")
+    if "skills" in changed:
+        moves.append("moved the most relevant skills higher")
+    if "section order" in changed or "section visibility" in changed:
+        moves.append("adjusted the layout so the strongest sections show up sooner")
+    return moves[:3]
+
+
+def _layout_phrase(patch):
+    if not isinstance(patch, dict):
+        return ""
+    bits = []
+    if "sectionOrder" in patch:
+        bits.append("section order")
+    if "sectionVisibility" in patch:
+        bits.append("summary/section visibility")
+    if not bits:
+        return ""
+    return _join_human(bits)
+
+
 def _keyword_terms_from_context(tailor_context, limit=3):
     tc = tailor_context if isinstance(tailor_context, dict) else {}
     terms = []
@@ -159,29 +204,27 @@ def build_tailor_explanation(
     sentences = []
     target_label = f"{role} at {co}" if co else role
     if jd_terms:
-        sentences.append(
-            f"We read the job description for {target_label} as prioritizing {_join_human(jd_terms)}."
-        )
+        sentences.append(f"I treated this as a {target_label} draft, with {_join_human(jd_terms)} as the main signals to make obvious.")
     else:
-        sentences.append(f"We used the job description to shape this draft for {target_label}.")
+        sentences.append(f"I used the job description to shape this draft for {target_label}.")
 
     if matched_terms:
         story_part = _join_human(primary_story) if primary_story else candidate_angle
         if story_part:
-            sentences.append(
-                f"Your profile already showed {_join_human(matched_terms)}, so Taylor shaped the draft around {story_part}."
-            )
+            sentences.append(f"You already had good proof for {_join_human(matched_terms)}, so I pulled that evidence forward and shaped the story around {story_part}.")
         else:
-            sentences.append(
-                f"Your profile already showed {_join_human(matched_terms)}, so Taylor kept the rewrite grounded in those signals."
-            )
+            sentences.append(f"You already had good proof for {_join_human(matched_terms)}, so I kept the rewrite grounded in those strengths.")
     else:
         sentences.append(
-            "We found fewer direct keyword matches in your saved profile, so Taylor kept the rewrite closer to your existing evidence."
+            "I found fewer direct keyword matches in your saved profile, so I kept the rewrite closer to your existing evidence instead of forcing claims that were not there."
         )
 
+    moves = _main_moves(changed_sections)
+    if moves:
+        sentences.append("The biggest help here: " + _join_human(moves) + ".")
+
     if changed_sections:
-        sentences.append(f"The draft changed {_join_human(changed_sections)} based on those signals.")
+        sentences.append(f"Under the hood, I changed {_section_phrase(changed_sections)} based on those signals.")
     else:
         sentences.append("No major structural changes were detected, so review the draft and adjust manually if you want a stronger shift.")
 
@@ -199,7 +242,7 @@ def build_tailor_explanation(
     elif prefs.get("tone") == "detailed":
         pref_notes.append("favored fuller phrasing")
     if pref_notes:
-        sentences.append("Because of your setup choices, Taylor " + _join_human(pref_notes) + ".")
+        sentences.append("I also followed your setup choices: " + _join_human(pref_notes) + ".")
 
     flags = qa.get("flags") if isinstance(qa.get("flags"), dict) else {}
     chips = _preference_chips(prefs, strict_truth) + _action_chips(changed_sections)
@@ -207,6 +250,8 @@ def build_tailor_explanation(
         chips.append(_chip("Some JD terms not evidenced", "caution"))
     if flags.get("skills_expected_but_unchanged") or flags.get("suspicious_protected_skill_removals"):
         chips.append(_chip("Review skills", "caution"))
+    if flags.get("minor_expected_rewrites") or flags.get("missing_expected_rewrites") or flags.get("filler_phrase_hits"):
+        chips.append(_chip("Review rewrite strength", "caution"))
 
     paragraph = " ".join(s for s in sentences if s).strip()
     return {
@@ -217,6 +262,8 @@ def build_tailor_explanation(
             "jobPriorityTerms": jd_terms,
             "resumeGaps": gaps,
             "changedSections": changed_sections,
+            "mainMoves": moves,
+            "layoutChanged": _layout_phrase(patch),
             "preferencesUsed": [
                 k
                 for k in ("length_target", "rewrite_freedom", "tone", "focus", "custom_instructions")
@@ -249,6 +296,20 @@ summaryGenericPhrases = (
     "fast-paced",
 )
 
+tailorFillerPhrases = (
+    "seamless",
+    "seamlessly",
+    "robust",
+    "enhanced",
+    "enhancing",
+    "efficient data handling",
+    "best practices",
+    "streamlining",
+    "streamlined",
+    "system responsiveness",
+    "ensuring efficient",
+)
+
 protectedSkillNameHints = (
     "fastapi",
     "flask",
@@ -279,6 +340,13 @@ def findGenericPhrasesInText(text):
         return []
     low = str(text).lower()
     return [p for p in summaryGenericPhrases if p in low]
+
+
+def findFillerPhrasesInText(text):
+    if not text or not str(text).strip():
+        return []
+    low = str(text).lower()
+    return [p for p in tailorFillerPhrases if p in low]
 
 
 def roleSuggestsBackendOrData(target_role):
@@ -342,44 +410,62 @@ def patchEntryIntensity(entry):
 
 
 def reasonForRow(section, rid, entry):
+    before = entry.get("before") if isinstance(entry.get("before"), dict) else {}
+    after = entry.get("after") if isinstance(entry.get("after"), dict) else {}
+    row = after or before
+    label = ""
+    if section == "experience":
+        company = _clean_text(row.get("company") if isinstance(row, dict) else "", limit=40)
+        title = _clean_text(row.get("title") if isinstance(row, dict) else "", limit=50)
+        label = f"{company} {title}".strip() or f"experience row {rid}"
+    elif section == "projects":
+        title = _clean_text(row.get("title") if isinstance(row, dict) else "", limit=70)
+        label = title or f"project {rid}"
+    elif section == "education":
+        school = _clean_text(row.get("school") if isinstance(row, dict) else "", limit=60)
+        label = school or f"education row {rid}"
+    elif section == "skills":
+        name = _clean_text(row.get("name") if isinstance(row, dict) else "", limit=60)
+        label = name or f"skill row {rid}"
+
     if entry.get("removed"):
         return {
-            "experience": f"Removed experience row (id {rid}) from the resume.",
-            "projects": f"Removed project (id {rid}) from the resume.",
-            "education": f"Removed education row (id {rid}).",
-            "skills": f"Removed skill row (id {rid}).",
+            "experience": f"Removed {label} because it was less relevant for this draft.",
+            "projects": f"Removed {label} because stronger project evidence fit this role better.",
+            "education": f"Removed {label}.",
+            "skills": f"Trimmed {label} from the visible skills list.",
         }[section]
     if entry.get("added"):
         return {
-            "experience": f"Added new experience row (id {rid}).",
-            "projects": f"Added new project (id {rid}).",
-            "education": f"Added education row (id {rid}).",
-            "skills": f"Added skill row (id {rid}).",
+            "experience": f"Added {label}.",
+            "projects": f"Added {label}.",
+            "education": f"Added {label}.",
+            "skills": f"Added {label} to the visible skills list.",
         }[section]
     i = patchEntryIntensity(entry)
     if section == "experience":
         if i == "minor":
-            return f"Experience (id {rid}): small wording or line-level tweak; scope unchanged."
+            return f"{label}: light wording pass; the core scope stayed the same."
         if i == "moderate":
-            return f"Experience (id {rid}): updated bullets and/or skills string for role fit."
-        return f"Experience (id {rid}): substantial reframing of scope, systems, and details toward the role."
+            return f"{label}: updated the bullets to foreground the role-relevant work."
+        return f"{label}: substantially reframed the scope, systems, and details toward the role."
     if section == "projects":
         if i == "minor":
-            return f"Project (id {rid}): light edit to one field (title, description, or stack)."
+            return f"{label}: light cleanup to the description or stack."
         if i == "moderate":
-            return f"Project (id {rid}): revised description and/or stack for clearer role alignment."
-        return f"Project (id {rid}): strong reframing of multiple bullets/fields to foreground systems, scope, and fit."
+            return f"{label}: revised the description and stack so the fit is easier to scan."
+        return f"{label}: strongly reframed the bullets to foreground scope, systems, and fit."
     if section == "education":
         if i == "minor":
-            return f"Education (id {rid}): small text tweak."
+            return f"{label}: small education text tweak."
         if i == "moderate":
-            return f"Education (id {rid}): updated subsections or details."
-        return f"Education (id {rid}): material rewrite of subsections or details."
+            return f"{label}: updated education details."
+        return f"{label}: materially rewrote education details."
     if i == "minor":
-        return f"Skill (id {rid}): label or category cleanup."
+        return f"{label}: label or category cleanup."
     if i == "moderate":
-        return f"Skill (id {rid}): renamed or re-categorized for scanability."
-    return f"Skill (id {rid}): material change to name or group for the target story."
+        return f"{label}: renamed or re-categorized for scanability."
+    return f"{label}: materially changed the skill label or group for the target story."
 
 
 def build_change_reasons_from_patch(patch, target_role=""):
@@ -430,10 +516,7 @@ def build_change_reasons_from_patch(patch, target_role=""):
         if "contactOrder" in patch:
             segs.append("contact order")
         out.append(
-            {
-                "section": "layout",
-                "reason": f"Updated resume structure ({', '.join(segs)}).",
-            }
+            {"section": "layout", "reason": f"Adjusted the resume layout ({', '.join(segs)}) so the strongest evidence is easier to find."}
         )
 
     for ex in patch.get("experience") or []:
@@ -738,8 +821,56 @@ def build_rewrite_quality_audit(original, updated, patch, narrative_brief, stage
         if eid_i in hei:
             hero_ex_edited.append(eid_i)
     hero_ex_untouched = [x for x in hei if x not in set(hero_ex_edited)]
+    rewrite_proj_ids = []
+    for x in nb.get("rewriteProjects") or []:
+        try:
+            rewrite_proj_ids.append(int(x))
+        except (TypeError, ValueError):
+            continue
+    rewrite_exp_ids = []
+    for x in nb.get("rewriteExperience") or []:
+        try:
+            rewrite_exp_ids.append(int(x))
+        except (TypeError, ValueError):
+            continue
+
+    minor_rewrite_rows = []
+    missing_rewrite_rows = []
+    for section, expected_ids in (("experience", rewrite_exp_ids), ("projects", rewrite_proj_ids)):
+        patched_by_id = {}
+        for row in p.get(section) or []:
+            if isinstance(row, dict) and row.get("id") is not None:
+                try:
+                    patched_by_id[int(row.get("id"))] = row
+                except (TypeError, ValueError):
+                    patched_by_id[row.get("id")] = row
+        for rid in expected_ids:
+            row = patched_by_id.get(rid)
+            if not row:
+                missing_rewrite_rows.append({"section": section, "id": rid})
+                continue
+            if row.get("removed") or row.get("added"):
+                continue
+            if patchEntryIntensity(row) == "minor":
+                minor_rewrite_rows.append({"section": section, "id": rid})
+
+    filler_hits = []
+    for section in ("experience", "projects"):
+        for row in p.get(section) or []:
+            if not isinstance(row, dict) or row.get("removed"):
+                continue
+            fc = row.get("fieldsChanged")
+            if not isinstance(fc, dict):
+                continue
+            for field, delta in fc.items():
+                if field not in ("description", "summary"):
+                    continue
+                hits = findFillerPhrasesInText((delta or {}).get("after"))
+                if hits:
+                    filler_hits.append({"section": section, "id": row.get("id"), "phrases": hits[:5]})
     after_summary = summaryInner(u)
     gen_found = findGenericPhrasesInText(after_summary)
+    summary_filler = findFillerPhrasesInText(after_summary)
     n_exp_ch = countRowsWithFieldChanges(p, "experience")
     n_pr_ch = countRowsWithFieldChanges(p, "projects")
     n_sk_ch = countSkillPatchActivity(p)
@@ -754,12 +885,23 @@ def build_rewrite_quality_audit(original, updated, patch, narrative_brief, stage
             "aggressive_skill_prune": aggressive,
             "suspicious_protected_skill_removals": susp,
             "summary_has_generic_phrase_hits": bool(gen_found and ("summary" in p)),
+            "filler_phrase_hits": bool(filler_hits or summary_filler),
             "skills_expected_but_unchanged": skills_expected_but_unchanged,
+            "minor_expected_rewrites": bool(minor_rewrite_rows),
+            "missing_expected_rewrites": bool(missing_rewrite_rows),
         },
         "summary": {
             "changed": "summary" in p,
             "after_preview": previewText(after_summary, 280),
             "generic_phrases_matched": gen_found,
+            "filler_phrases_matched": summary_filler,
+        },
+        "rewrite_quality": {
+            "expected_experience_rewrite_ids": rewrite_exp_ids,
+            "expected_project_rewrite_ids": rewrite_proj_ids,
+            "minor_rewrite_rows": minor_rewrite_rows,
+            "missing_rewrite_rows": missing_rewrite_rows,
+            "filler_phrase_hits": filler_hits,
         },
         "removals": {
             "removedSkillIds": re_sk,

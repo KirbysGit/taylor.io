@@ -35,12 +35,17 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
     # --- default shape when the model is skipped or returns garbage; main prompt still accepts this. --- #
     empty = {
         "candidateAngle": "",
+        "targetStory": {},
         "primaryStory": [],
         "secondaryStory": [],
         "summaryGoal": "",
         "skillsStrategy": [],
         "categoryStrategy": [],
         "sectionStrategy": {},
+        "layoutStrategy": [],
+        "layoutSectionOrder": [],
+        "layoutSectionVisibility": {},
+        "layoutRationale": [],
         "keepExperience": [],
         "dropExperience": [],
         "rewriteExperience": [],
@@ -110,19 +115,24 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
     user = "\n".join(
         [
             "Selection plan v2: classify rows by outcome, not just emphasis. Use `keepExperience` / `dropExperience` / `rewriteExperience` and `keepProjects` / `dropProjects` / `rewriteProjects` / `repairProjects` / `maybeProjects`. Dropped rows are omitted from the tailored draft; maybe rows are space-available.",
-            "For one-page or concise mode, make real selection decisions: drop non-technical service work for technical roles when stronger technical evidence exists; drop low-fit projects before over-compressing strong backend/data/API projects.",
+            "For one-page or concise mode, make real selection decisions: drop low-fit rows for this role's lane when stronger evidence exists; drop weaker rows before over-compressing the strongest evidence for the posting.",
             "Every experience id should appear in exactly one of `keepExperience` or `dropExperience`. Every project id should appear in exactly one of `keepProjects`, `dropProjects`, or `maybeProjects`. `rewriteExperience`, `rewriteProjects`, and `repairProjects` are action lists drawn from kept/maybe rows.",
             "Produce one editorial plan JSON. Downstream success = a **visibly retargeted** resume for this role: different leads, order, and emphasis—not a light edit.",
             "**`candidateAngle`:** one sentence—**professional lane + lead** for this posting; **not** a comma-packed echo of JD keywords. **`primaryStory`:** **2–4 pillars from resume JSON + evidenceRows** (frameworks, data/automation, integrations, UI surfaces the body proves); **≥ half** the phrases should be **resume-native** strengths the JD might never name. JD terms tune **scan and order** when evidenced—they are **not** the only admissible toolkit.",
+            "targetStory: one compact object that downstream passes should treat as the single source of positioning truth. Include `roleLane`, `readerTakeaway`, `proofExperienceIds`, `proofProjectIds`, `deEmphasizeExperienceIds`, `deEmphasizeProjectIds`, and `evidenceThemes`. Keep it shorter than the combined legacy story fields; do not duplicate long prose.",
             "summaryGoal must guide the summary rewrite (opening, technical lead, **scan-friendly** phrasing where true)—do not copy-paste candidateAngle.",
             "skillsStrategy: **2–6 strings** — categories/alignment → Lead → Supporting → trim last **sparingly**. Default: **selected and ordered toolkit** for this archetype+posting—not a JD keyword extract. **Supporting** = honest breadth (plausible for the role family even without verbatim JD terms). **Trim last** only for obvious noise or mismatch—not “missing from JD.” Demote before delete; **few** trims.",
             "sectionStrategy: stage A rewrites hero experience + hero projects; values **resume-grounded** first, **posting emphasis** second. For skills: one line on **ordered toolkit + breadth**.",
+            "layoutStrategy: **0–4 short strings** for resume structure only. Content is primary; layout is secondary. Decide whether Summary should be shown for this role, and whether section order should change for scan priority. Use only existing sections: summary, experience, projects, skills, education. Do not hide evidence-bearing sections just to save space.",
+            "layoutSectionOrder: optional full display order using existing section keys, normally starting with header. Put the most persuasive sections for this posting earlier; education can move down when less relevant, or up when credentials are the strongest proof.",
+            "layoutSectionVisibility: optional object with booleans for summary, education, experience, projects, skills. Hide summary when it would be redundant for a direct evidence-heavy draft; show it when it helps reposition the candidate, explain a pivot, or foreground a role-specific profile. Do not hide experience/projects/skills unless absent or clearly empty.",
+            "layoutRationale: optional short concrete reasons for any order/visibility changes.",
             "rewriteGoals: **hero rows only**—bold, specific landing instructions (Make/Land/Use or equivalent). No new facts; stay inside each row’s bullets.",
             "categoryStrategy: **[]** unless a fluffy/broad skill-like bucket needs merge, rename, or collapse—**bucket tactics** here; ordering lives in skillsStrategy.",
-            "Required: candidateAngle, primaryStory, summaryGoal, skillsStrategy, sectionStrategy, heroExperience, full project tier partition, rewriteGoals, avoid. secondaryStory optional; omit filler.",
+            "Required: targetStory, candidateAngle, primaryStory, summaryGoal, skillsStrategy, sectionStrategy, heroExperience, full project tier partition, rewriteGoals, avoid. Include layout fields when structure should change. secondaryStory optional; omit filler.",
             "keep `avoid` short (1–4 lines) and only for real fabrication or unsupported-domain risk; do not use `avoid` to discourage big true rewrites.",
             "Projects: every id exactly once—heroProjects (max 4), supportingProjects (few; **reference for stage A by default—no full rewrites there** unless upstream **thin-bullet repair** opens an id), peripheralProjects (default for remaining). Do not park every non-hero project in supporting.",
-            "Pick **heroProjects** and **heroExperience** primarily from **planRankedRows** order when ids fit the archetype; deprioritizing a higher `jdKeywordHits` row is allowed only for a clear, evidence-backed reason in avoid or row fit.",
+            "Pick **heroProjects** and **heroExperience** primarily from **planRankedRows** order when ids fit the archetype; `jdEvidenceScore` is the main rank signal and `jdKeywordHits` is the unique-term count. Deprioritizing a higher-evidence row is allowed only for a clear, evidence-backed reason in avoid or row fit.",
             "sectionStrategy: align with hero ids; narrative plans how those hero rows should land for this role.",
             "JD terms are emphasis hints only—not license for unsupported stack or domain.",
             "",
@@ -132,7 +142,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             prefs_block,
             "Use these preferences to shape the editorial plan, but never plan unsupported claims. Custom instructions are subordinate to resume evidence and avoid rules.",
             "",
-            "planRankedRows (JD hit scores—**default** hero order; deprioritize higher hits only when **evidence + row story** clearly favor another id):",
+            "planRankedRows (weighted JD evidence scores—**default** hero order; deprioritize higher evidence only when **evidence + row story** clearly favor another id):",
             json.dumps(plan_ranked_rows, ensure_ascii=False, indent=2),
             "",
             "evidenceRows (strongest matching rows—primary input):",
@@ -155,7 +165,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             json.dumps(resume_data, ensure_ascii=False, indent=2),
             "",
             "Return exactly this shape:",
-            '{"candidateAngle":"","primaryStory":[],"secondaryStory":[],"summaryGoal":"","skillsStrategy":[],"categoryStrategy":[],"sectionStrategy":{},"keepExperience":[],"dropExperience":[],"rewriteExperience":[],"keepProjects":[],"dropProjects":[],"rewriteProjects":[],"repairProjects":[],"maybeProjects":[],"selectionRationale":[],"heroProjects":[],"supportingProjects":[],"peripheralProjects":[],"heroExperience":[],"rewriteGoals":[],"avoid":[]}',
+            '{"targetStory":{"roleLane":"","readerTakeaway":"","proofExperienceIds":[],"proofProjectIds":[],"deEmphasizeExperienceIds":[],"deEmphasizeProjectIds":[],"evidenceThemes":[]},"candidateAngle":"","primaryStory":[],"secondaryStory":[],"summaryGoal":"","skillsStrategy":[],"categoryStrategy":[],"sectionStrategy":{},"layoutStrategy":[],"layoutSectionOrder":[],"layoutSectionVisibility":{},"layoutRationale":[],"keepExperience":[],"dropExperience":[],"rewriteExperience":[],"keepProjects":[],"dropProjects":[],"rewriteProjects":[],"repairProjects":[],"maybeProjects":[],"selectionRationale":[],"heroProjects":[],"supportingProjects":[],"peripheralProjects":[],"heroExperience":[],"rewriteGoals":[],"avoid":[]}',
         ]
     )
 
@@ -821,6 +831,107 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
                 ids.append(int(x.strip()))
         return dedupe_preserve_order(ids)
 
+    def normalize_layout_order(value):
+        allowed = ["header", "summary", "experience", "projects", "skills", "education"]
+        if not isinstance(value, list):
+            return []
+        out_order = []
+        for item in value:
+            key = str(item or "").strip().lower()
+            if key in allowed and key not in out_order:
+                out_order.append(key)
+        if not out_order:
+            return []
+        if "header" not in out_order:
+            out_order.insert(0, "header")
+        else:
+            out_order = ["header"] + [x for x in out_order if x != "header"]
+        for key in allowed:
+            if key not in out_order:
+                out_order.append(key)
+        return out_order
+
+    def normalize_layout_visibility(value):
+        allowed = {"summary", "education", "experience", "projects", "skills"}
+        if not isinstance(value, dict):
+            return {}
+        current = resume_data.get("sectionVisibility") if isinstance(resume_data, dict) else {}
+        current = current if isinstance(current, dict) else {}
+        out_vis = {}
+        for key in allowed:
+            if key not in value:
+                continue
+            raw_val = value.get(key)
+            if isinstance(raw_val, bool):
+                out_vis[key] = raw_val
+            elif isinstance(raw_val, str):
+                low = raw_val.strip().lower()
+                if low in ("true", "yes", "show", "visible", "1"):
+                    out_vis[key] = True
+                elif low in ("false", "no", "hide", "hidden", "0"):
+                    out_vis[key] = False
+        # Guard the core evidence sections from accidental hiding when they contain rows.
+        for key, section_name in (("experience", "experience"), ("projects", "projects"), ("skills", "skills"), ("education", "education")):
+            rows = resume_data.get(section_name) if isinstance(resume_data, dict) else None
+            if isinstance(rows, list) and rows and out_vis.get(key) is False:
+                out_vis[key] = bool(current.get(key, True))
+        return out_vis
+
+    def normalize_target_story(value):
+        ts = value if isinstance(value, dict) else {}
+
+        def short_str(key, fallback="", limit=140):
+            raw_v = ts.get(key)
+            text = raw_v if isinstance(raw_v, str) else fallback
+            text = strip_resume_cliche_phrases(str(text or "").strip())
+            words = text.split()
+            joined = " ".join(words)
+            if len(joined) > limit:
+                joined = joined[: max(0, limit - 1)].rstrip(",;: ") + "..."
+            return joined
+
+        def id_list(key, fallback):
+            raw_v = ts.get(key)
+            ids = []
+            if isinstance(raw_v, list):
+                for item in raw_v:
+                    if isinstance(item, int):
+                        ids.append(item)
+                    elif isinstance(item, float) and item == int(item):
+                        ids.append(int(item))
+                    elif isinstance(item, str) and item.strip().lstrip("-").isdigit():
+                        ids.append(int(item.strip()))
+            if not ids:
+                ids = list(fallback or [])
+            return dedupe_preserve_order(ids)[:6]
+
+        themes = []
+        raw_themes = ts.get("evidenceThemes")
+        if isinstance(raw_themes, list):
+            for item in raw_themes:
+                cleaned = strip_resume_cliche_phrases(str(item or "").strip())
+                cleaned = strip_brochure_phrases(cleaned)
+                if cleaned:
+                    themes.append(cleaned)
+        if not themes:
+            themes = list(out.get("primaryStory") or [])[:3]
+
+        role_lane = short_str("roleLane", fallback=out.get("candidateAngle") or "", limit=120)
+        reader_takeaway = short_str(
+            "readerTakeaway",
+            fallback=(out.get("summaryGoal") or out.get("candidateAngle") or ""),
+            limit=150,
+        )
+        return {
+            "roleLane": role_lane,
+            "readerTakeaway": reader_takeaway,
+            "proofExperienceIds": id_list("proofExperienceIds", out.get("rewriteExperience") or out.get("heroExperience")),
+            "proofProjectIds": id_list("proofProjectIds", out.get("rewriteProjects") or out.get("heroProjects")),
+            "deEmphasizeExperienceIds": id_list("deEmphasizeExperienceIds", out.get("dropExperience")),
+            "deEmphasizeProjectIds": id_list("deEmphasizeProjectIds", out.get("dropProjects")),
+            "evidenceThemes": dedupe_preserve_order(themes)[:4],
+        }
+
     # --- avoid first so angle/summaryGoal can stay consistent with guardrails we will pad if thin. --- #
     out["avoid"] = dedupe_preserve_order(str_list("avoid"))[:4]
     # --- pad only with hard safety rails—long default lists made downstream rewrites timid. --- #
@@ -892,6 +1003,10 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
         normalize_section_strategy_obj(raw.get("sectionStrategy"))
     )
     sharpen_section_strategy_experience(out["sectionStrategy"])
+    out["layoutStrategy"] = dedupe_preserve_order(str_list("layoutStrategy"))[:4]
+    out["layoutSectionOrder"] = normalize_layout_order(raw.get("layoutSectionOrder"))
+    out["layoutSectionVisibility"] = normalize_layout_visibility(raw.get("layoutSectionVisibility"))
+    out["layoutRationale"] = dedupe_preserve_order(str_list("layoutRationale"))[:4]
 
     valid_exp = collect_row_ids("experience", resume_data)
 
@@ -982,6 +1097,7 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
     out["rewriteProjects"] = dedupe_preserve_order(raw_rewrite_proj)[:maxHeroProjectsNarrative]
     out["repairProjects"] = dedupe_preserve_order(raw_repair_proj)[:2]
     out["selectionRationale"] = _dedupe_selection_rationale(str_list("selectionRationale"))
+    out["targetStory"] = normalize_target_story(raw.get("targetStory"))
 
     if not summary_goal.strip():
         if out["primaryStory"]:
@@ -1035,5 +1151,6 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
             if softened not in out["rewriteGoals"]:
                 out["rewriteGoals"].append(softened)
     out["rewriteGoals"] = [soften_rewrite_goal_scope(g) for g in out["rewriteGoals"][:6]]
+    out["targetStory"] = normalize_target_story(raw.get("targetStory"))
 
     return out

@@ -1,0 +1,577 @@
+{
+  "summary": "Tailoring log for: Python Developer.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- sectionOrder: structure or presentation updated.\n- sectionVisibility: structure or presentation updated.\n- Experience id 5: small text tweak (minor).\n- Experience id 7: removed from resume.\n- Project id 10: moderate description/stack revision.\n- Project id 12: removed from resume.\n- Project id 17: removed from resume.\n- Project id 18: removed from resume.\n- Project id 20: moderate description/stack revision.\n- Skills id 54: row removed.\n- Skills id 55: row removed.\n- Skills id 56: row removed.\n- Skills id 59: row removed.\n- Skills id 61: row removed.",
+  "tailorExplanation": {
+    "paragraph": "I treated this as a Python Developer at ESB Technologies draft, with python, fastapi, and sql as the main signals to make obvious. You already had good proof for python, fastapi, sql, and backend, so I pulled that evidence forward and shaped the story around Built backend services and REST APIs with Python and Django for financial workf..., Developed FastAPI applications with PostgreSQL for data processing and integrat..., and Created responsive React dashboards for operational visibility and user interac.... The biggest help here: kept the projects that best prove the role fit, reframed your experience around the job's strongest signals, and gave the summary a clearer role-specific angle. Under the hood, I changed the summary, experience, projects, skills, the section order, and which sections show based on those signals. I also followed your setup choices: kept the wording tighter for a one-page-friendly draft and favored concise phrasing.",
+    "chips": [
+      {
+        "label": "One-page target",
+        "tone": "neutral"
+      },
+      {
+        "label": "Concise tone",
+        "tone": "neutral"
+      },
+      {
+        "label": "Technical focus",
+        "tone": "neutral"
+      },
+      {
+        "label": "Strict truth",
+        "tone": "safe"
+      },
+      {
+        "label": "Summary updated",
+        "tone": "action"
+      },
+      {
+        "label": "Experience reframed",
+        "tone": "action"
+      },
+      {
+        "label": "Projects prioritized",
+        "tone": "action"
+      },
+      {
+        "label": "Skills reordered",
+        "tone": "action"
+      },
+      {
+        "label": "Some JD terms not evidenced",
+        "tone": "caution"
+      },
+      {
+        "label": "Review skills",
+        "tone": "caution"
+      }
+    ],
+    "evidence": {
+      "matchedTerms": [
+        "python",
+        "fastapi",
+        "sql",
+        "backend"
+      ],
+      "jobPriorityTerms": [
+        "python",
+        "fastapi",
+        "sql"
+      ],
+      "resumeGaps": [
+        "cross functional collaboration",
+        "developer",
+        "backend frameworks",
+        "performance optimization"
+      ],
+      "changedSections": [
+        "summary",
+        "experience",
+        "projects",
+        "skills",
+        "section order",
+        "section visibility"
+      ],
+      "mainMoves": [
+        "kept the projects that best prove the role fit",
+        "reframed your experience around the job's strongest signals",
+        "gave the summary a clearer role-specific angle"
+      ],
+      "layoutChanged": "section order and summary/section visibility",
+      "preferencesUsed": [
+        "length_target",
+        "tone",
+        "focus",
+        "strict_truth"
+      ]
+    }
+  },
+  "updatedResumeData": {
+    "header": {
+      "first_name": "Colin",
+      "last_name": "Kirby",
+      "email": "kirbycolin26@gmail.com",
+      "phone": "407-876-8172",
+      "location": "Orlando, FL",
+      "linkedin": "https://linkedin.com/in/colinwkirby/",
+      "github": "https://github.com/KirbysGit",
+      "portfolio": "https://colinkirby.dev",
+      "tagline": "**Software Engineer** | _Product_ * _Design_ * _Development_",
+      "visibility": {
+        "showEmail": true,
+        "showPhone": true,
+        "showLocation": true,
+        "showLinkedin": true,
+        "showGithub": true,
+        "showPortfolio": true,
+        "showTagline": false
+      },
+      "contactOrder": [
+        "email",
+        "phone",
+        "location",
+        "linkedin",
+        "github",
+        "portfolio"
+      ]
+    },
+    "education": [
+      {
+        "id": 3,
+        "school": "University of Central Florida",
+        "degree": "Bachelor of Science",
+        "discipline": "Computer Engineering",
+        "location": "Orlando, FL",
+        "start_date": "2021-08-01",
+        "end_date": "2025-05-01",
+        "current": false,
+        "gpa": "3.78 / 4.0",
+        "minor": "Finance",
+        "subsections": {
+          "Honors & Awards": "Dean’s List 2021, President’s Honor Roll 2023 – 2025, Pegasus Gold Scholarship",
+          "Clubs & Extracurriculars": "AI @ UCF, Knight Hacks, SHPE @ UCF",
+          "Relevant Coursework": "Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design "
+        }
+      }
+    ],
+    "experience": [
+      {
+        "id": 5,
+        "title": "Software Engineering Intern",
+        "company": "BitGo",
+        "description": "• Maintained and developed backend services and REST APIs in Python/Django to support secure internal workflows for financial and compliance teams.\n• Engaged in system design and architecture discussions, contributing to scalable service patterns and effective data modeling.\n• Developed React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Improved Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency.",
+        "start_date": "2024-05-01",
+        "end_date": "2025-06-01",
+        "current": false,
+        "location": "Remote",
+        "skills": "Python, Django, React, PostgreSQL, AWS EC2"
+      }
+    ],
+    "projects": [
+      {
+        "id": 9,
+        "title": "Centi – Personal Finance App",
+        "description": "• Built and deployed a full-stack finance application that automates account aggregation, transaction tracking, and spending insights across a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and normalized data storage.\n• Developed responsive React dashboards and authentication flows for account management, transaction review, and financial analytics.\n• Implemented authentication and secure data handling (OAuth/JWT), ensuring protected access to financial data and user account workflows.\n• Made it secure n stuff.",
+        "tech_stack": [
+          "FastAPI",
+          "React",
+          "PostgreSQL",
+          "Plaid API"
+        ],
+        "url": "https://centi.dev"
+      },
+      {
+        "id": 10,
+        "title": "Taylor.io – Resume Builder & Parser",
+        "description": "• Engineered an AI-driven resume platform that automates the parsing of PDF/DOCX files into structured data using FastAPI and PostgreSQL.\n• Developed backend services for parsing, authentication, and export workflows, ensuring seamless user experience.\n• Implemented a live editing interface in React, allowing real-time customization of resume content.\n• Integrated OpenAI API for enhanced content generation and automated resume editing workflows.",
+        "tech_stack": [
+          "FastAPI",
+          "PostgreSQL",
+          "OpenAI API",
+          "React"
+        ],
+        "url": ""
+      },
+      {
+        "id": 20,
+        "title": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "description": "• Created an ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance posts per run through a multi-stage ETL process.\n• Employed NLP models (FinBERT) and feature engineering to generate over 40 predictive features per ticker, training XGBoost models with 55–70% ROC-AUC.\n• Built modular components for data ingestion and transformation, supporting message-driven architectures.\n• Streamlined workflows for data collection, preprocessing, and model inference, facilitating real-time analytics.",
+        "tech_stack": [
+          "Python",
+          "SQL",
+          "FinBERT",
+          "XGBoost"
+        ],
+        "url": ""
+      }
+    ],
+    "skills": [
+      {
+        "id": 41,
+        "name": "Python",
+        "category": "Languages"
+      },
+      {
+        "id": 46,
+        "name": "FastAPI",
+        "category": "Frameworks"
+      },
+      {
+        "id": 44,
+        "name": "SQL",
+        "category": "Languages"
+      },
+      {
+        "id": 45,
+        "name": "Django",
+        "category": "Frameworks"
+      },
+      {
+        "id": 51,
+        "name": "PostgreSQL",
+        "category": "Data Tools"
+      },
+      {
+        "id": 47,
+        "name": "React",
+        "category": "Frameworks"
+      },
+      {
+        "id": 57,
+        "name": "ETL Pipelines",
+        "category": "Data Tools"
+      },
+      {
+        "id": 58,
+        "name": "Backend Development",
+        "category": "Focus Areas"
+      },
+      {
+        "id": 62,
+        "name": "REST API Design",
+        "category": "Focus Areas"
+      },
+      {
+        "id": 60,
+        "name": "AI-Driven Workflows",
+        "category": "Focus Areas"
+      },
+      {
+        "id": 42,
+        "name": "Java",
+        "category": "Languages"
+      },
+      {
+        "id": 43,
+        "name": "JavaScript",
+        "category": "Languages"
+      },
+      {
+        "id": 48,
+        "name": "Node.js",
+        "category": "Frameworks"
+      },
+      {
+        "id": 49,
+        "name": "PyTorch",
+        "category": "Frameworks"
+      },
+      {
+        "id": 50,
+        "name": "TensorFlow Lite",
+        "category": "Frameworks"
+      },
+      {
+        "id": 52,
+        "name": "MySQL",
+        "category": "Data Tools"
+      },
+      {
+        "id": 53,
+        "name": "MongoDB",
+        "category": "Data Tools"
+      }
+    ],
+    "hiddenSkills": [],
+    "summary": {
+      "summary": "Backend developer specializing in Python and FastAPI for scalable services and data-driven applications. Proven expertise in building REST APIs, optimizing data processing, and implementing real-time analytics. Strong background in SQL and PostgreSQL for efficient data management and reporting."
+    },
+    "sectionVisibility": {
+      "summary": true,
+      "education": true,
+      "experience": true,
+      "projects": true,
+      "skills": true
+    },
+    "sectionOrder": [
+      "header",
+      "summary",
+      "experience",
+      "projects",
+      "skills",
+      "education"
+    ],
+    "sectionLabels": {
+      "summary": "Professional Summary",
+      "education": "Education",
+      "experience": "Experience",
+      "projects": "Projects",
+      "skills": "Skills"
+    }
+  },
+  "patchDiff": {
+    "summary": {
+      "before": "Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications.",
+      "after": "Backend developer specializing in Python and FastAPI for scalable services and data-driven applications. Proven expertise in building REST APIs, optimizing data processing, and implementing real-time analytics. Strong background in SQL and PostgreSQL for efficient data management and reporting."
+    },
+    "sectionOrder": {
+      "before": [
+        "header",
+        "summary",
+        "education",
+        "experience",
+        "projects",
+        "skills"
+      ],
+      "after": [
+        "header",
+        "summary",
+        "experience",
+        "projects",
+        "skills",
+        "education"
+      ]
+    },
+    "sectionVisibility": {
+      "before": {
+        "summary": false,
+        "education": true,
+        "experience": true,
+        "projects": true,
+        "skills": true
+      },
+      "after": {
+        "summary": true,
+        "education": true,
+        "experience": true,
+        "projects": true,
+        "skills": true
+      }
+    },
+    "experience": [
+      {
+        "id": 5,
+        "fieldsChanged": {
+          "description": {
+            "before": "• Built and maintained backend services and REST APIs in Python/Django supporting secure internal workflows for financial and compliance teams.\n• Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.\n• Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, improving system scalability and reducing latency by ~40%.",
+            "after": "• Maintained and developed backend services and REST APIs in Python/Django to support secure internal workflows for financial and compliance teams.\n• Engaged in system design and architecture discussions, contributing to scalable service patterns and effective data modeling.\n• Developed React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Improved Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
+          }
+        }
+      },
+      {
+        "id": 7,
+        "removed": true,
+        "before": {
+          "id": 7,
+          "title": "Server",
+          "company": "Bar Louie",
+          "description": "• Adapting to high-pressure situations and thriving under stress.\n• Effective communication with guests, kitchen, and bar teams.\n• Working seamlessly in fast-paced collaborative environments.",
+          "start_date": "2023-10-01",
+          "end_date": "",
+          "current": false,
+          "location": "Orlando, FL",
+          "skills": ""
+        },
+        "after": null
+      }
+    ],
+    "projects": [
+      {
+        "id": 10,
+        "fieldsChanged": {
+          "description": {
+            "before": "• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.\n• Implemented backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\n• Created a live editing and preview experience in React, enabling users to customize resume content in real time through  a clean, guided interface.\n• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and  editing workflows.",
+            "after": "• Engineered an AI-driven resume platform that automates the parsing of PDF/DOCX files into structured data using FastAPI and PostgreSQL.\n• Developed backend services for parsing, authentication, and export workflows, ensuring seamless user experience.\n• Implemented a live editing interface in React, allowing real-time customization of resume content.\n• Integrated OpenAI API for enhanced content generation and automated resume editing workflows."
+          },
+          "tech_stack": {
+            "before": [
+              "React",
+              "FastAPI",
+              "PostgreSQL",
+              "OpenAI API",
+              "Tailwind CSS"
+            ],
+            "after": [
+              "FastAPI",
+              "PostgreSQL",
+              "OpenAI API",
+              "React"
+            ]
+          }
+        }
+      },
+      {
+        "id": 12,
+        "removed": true,
+        "before": {
+          "id": 12,
+          "title": "SecureScape – Smart Security System",
+          "description": "• Developed the Flutter mobile app with core controls including alarm toggling, lighting, photo capture, and recording  access.\n• Built the Python backend and communication layer for device coordination, enabling reliable messaging and near real time alerts (<3.5s).",
+          "tech_stack": [
+            "Python",
+            "Flutter",
+            "Arduino C++",
+            "TensorFlow Lite"
+          ],
+          "url": ""
+        },
+        "after": null
+      },
+      {
+        "id": 17,
+        "removed": true,
+        "before": {
+          "id": 17,
+          "title": "ShelfVision - Dense Shelf Object Detection",
+          "description": "• Detects products in crowded retail shelf photos using ResNet-50 and FPN features.\n• Handles overlapping items with smart anchor matching and IoU-based detection algorithms.\n• Benchmarked on SKU-110K dataset with comprehensive metrics and YOLOv5 comparisons.",
+          "tech_stack": [
+            "Python",
+            "PyTorch",
+            "OpenCV",
+            "scikit-learn",
+            "NumPy"
+          ],
+          "url": ""
+        },
+        "after": null
+      },
+      {
+        "id": 18,
+        "removed": true,
+        "before": {
+          "id": 18,
+          "title": "Tizirsso Racing – Portfolio & Sponsorship Website",
+          "description": "• Built a custom motorsport portfolio site translating brand identity and racing history into a polished, mobile-first  experience.\n• Developed interactive UI sections including an animated hero, editorial about page, career timeline, team history,  championship highlights, and image galleries with lightbox support.",
+          "tech_stack": [],
+          "url": "https://tizianorosso.com/"
+        },
+        "after": null
+      },
+      {
+        "id": 20,
+        "fieldsChanged": {
+          "description": {
+            "before": "• Designed and implemented an end-to-end production-style ML data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.\n• Applied NLP models (FinBERT) and feature engineering to build 40+ predictive features per ticker; trained XGBoost models achieving 55–70% ROC-AUC.\n• Built modular components for data ingestion, transformation, model inference, and distributed-style batching, aligned with message-driven architectures.\n• Automated end-to-end data collection, preprocessing, and model inference workflows, enabling scalable real-time analytics.",
+            "after": "• Created an ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance posts per run through a multi-stage ETL process.\n• Employed NLP models (FinBERT) and feature engineering to generate over 40 predictive features per ticker, training XGBoost models with 55–70% ROC-AUC.\n• Built modular components for data ingestion and transformation, supporting message-driven architectures.\n• Streamlined workflows for data collection, preprocessing, and model inference, facilitating real-time analytics."
+          }
+        }
+      }
+    ],
+    "skills": [
+      {
+        "id": 54,
+        "removed": true,
+        "before": {
+          "id": 54,
+          "name": "Pandas",
+          "category": "Data Tools"
+        },
+        "after": null
+      },
+      {
+        "id": 55,
+        "removed": true,
+        "before": {
+          "id": 55,
+          "name": "NumPy",
+          "category": "Data Tools"
+        },
+        "after": null
+      },
+      {
+        "id": 56,
+        "removed": true,
+        "before": {
+          "id": 56,
+          "name": "AWS (EC2)",
+          "category": "Data Tools"
+        },
+        "after": null
+      },
+      {
+        "id": 59,
+        "removed": true,
+        "before": {
+          "id": 59,
+          "name": "Automation Systems",
+          "category": "Focus Areas"
+        },
+        "after": null
+      },
+      {
+        "id": 61,
+        "removed": true,
+        "before": {
+          "id": 61,
+          "name": "Data Pipelines",
+          "category": "Focus Areas"
+        },
+        "after": null
+      }
+    ]
+  },
+  "changeReasons": [
+    {
+      "section": "summary",
+      "reason": "Repositioned the professional summary toward Python Developer using concrete, on-resume evidence where possible."
+    },
+    {
+      "section": "layout",
+      "reason": "Adjusted the resume layout (section order, section visibility) so the strongest evidence is easier to find."
+    },
+    {
+      "section": "experience",
+      "id": 5,
+      "reason": "experience row 5: light wording pass; the core scope stayed the same."
+    },
+    {
+      "section": "experience",
+      "id": 7,
+      "reason": "Removed Bar Louie Server because it was less relevant for this draft."
+    },
+    {
+      "section": "projects",
+      "id": 10,
+      "reason": "project 10: revised the description and stack so the fit is easier to scan."
+    },
+    {
+      "section": "projects",
+      "id": 12,
+      "reason": "Removed SecureScape – Smart Security System because stronger project evidence fit this role better."
+    },
+    {
+      "section": "projects",
+      "id": 17,
+      "reason": "Removed ShelfVision - Dense Shelf Object Detection because stronger project evidence fit this role better."
+    },
+    {
+      "section": "projects",
+      "id": 18,
+      "reason": "Removed Tizirsso Racing – Portfolio & Sponsorship Website because stronger project evidence fit this role better."
+    },
+    {
+      "section": "projects",
+      "id": 20,
+      "reason": "project 20: revised the description and stack so the fit is easier to scan."
+    },
+    {
+      "section": "skills",
+      "id": 54,
+      "reason": "Trimmed Pandas from the visible skills list."
+    },
+    {
+      "section": "skills",
+      "id": 55,
+      "reason": "Trimmed NumPy from the visible skills list."
+    },
+    {
+      "section": "skills",
+      "id": 56,
+      "reason": "Trimmed AWS (EC2) from the visible skills list."
+    },
+    {
+      "section": "skills",
+      "id": 59,
+      "reason": "Trimmed Automation Systems from the visible skills list."
+    },
+    {
+      "section": "skills",
+      "id": 61,
+      "reason": "Trimmed Data Pipelines from the visible skills list."
+    }
+  ],
+  "warnings": [
+    "Skills guard restored 7 skill row(s) because Pass B exceeded the deletion budget.",
+    "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:20.",
+    "Rewrite audit: expected stronger rewrites for experience id 5; output looked like minor wording changes.",
+    "Rewrite audit: filler phrasing survived in experience id 5 (enhancing); projects id 10 (seamless, enhanced); projects id 20 (streamlined)."
+  ]
+}
