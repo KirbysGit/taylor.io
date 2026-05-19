@@ -20,9 +20,14 @@ export function useSavedResumesSidecar({
 	resumeData,
 	template,
 	sectionOrder,
+	sectionLabels,
+	stylePreferences,
+	tailorIntent,
 	setResumeData,
 	setBaselineData,
 	setSectionOrder,
+	setSectionLabels,
+	setStylePreferences,
 	setTemplate,
 }) {
 	// --- states.
@@ -51,9 +56,12 @@ export function useSavedResumesSidecar({
 	}, [])
 
 	// this saves the resume for later.
-	const handleSaveForLater = useCallback(async () => {
+	const handleSaveForLater = useCallback(async (options = {}) => {
 		// get the name of the resume being saved.
-		const name = (saveResumeName || 'Untitled Resume').trim()
+		const fallbackName = tailorIntent?.jobTitle
+			? `${tailorIntent.jobTitle}${tailorIntent.company ? ` - ${tailorIntent.company}` : ''}`
+			: 'Untitled Resume'
+		const name = (options.name || saveResumeName || fallbackName).trim()
 
 		// if the name is empty, return.
 		if (!name) return
@@ -64,28 +72,51 @@ export function useSavedResumesSidecar({
 		// try to create the saved resume.
 		try {
 			// create the payload for the saved resume.
-			const payload = { ...resumeData, sectionOrder: resumeData.sectionOrder ?? sectionOrder }
+			const payload = {
+				...resumeData,
+				sectionOrder: resumeData.sectionOrder ?? sectionOrder,
+				sectionLabels,
+				stylePreferences,
+				tailorIntent: tailorIntent || null,
+			}
 
 			// try to create the saved resume.
 			await createSavedResume(name, payload, template)
 
 			// show success msg.
-			toast.success('Resume Saved! You can access it from Home.')
+			toast.success('Résumé version saved.')
 
 			// clear the save resume name.
 			setSaveResumeName('')
 
+			// make this saved version the clean baseline for the editor.
+			setBaselineData(snapshotResumeBaseline(resumeData))
+
 			// fetch the saved resumes.
-			fetchSavedResumes()
+			await fetchSavedResumes()
+
+			if (options.closePopover) setSavedResumesOpen(false)
+			return true
 		} catch (err) {
 			// if we run into an error, show a toast error.
 			const msg = err?.response?.data?.detail || err?.message || 'Failed to save'
 			toast.error(typeof msg === 'string' ? msg : msg[0]?.msg || 'Failed on saving...')
+			return false
 		} finally {
 			// set the saving resume flag to false.
 			setIsSavingResume(false)
 		}
-	}, [resumeData, template, sectionOrder, saveResumeName, fetchSavedResumes])
+	}, [
+		resumeData,
+		template,
+		sectionOrder,
+		sectionLabels,
+		stylePreferences,
+		tailorIntent,
+		saveResumeName,
+		setBaselineData,
+		fetchSavedResumes,
+	])
 
 	// this loads the saved resume into the state.
 	const loadSavedResumeIntoState = useCallback(
@@ -102,6 +133,8 @@ export function useSavedResumesSidecar({
 				setResumeData((prev) => ({ ...prev, ...merged }))
 				setBaselineData(snapshotResumeBaseline(merged))
 				setSectionOrder(merged.sectionOrder)
+				if (data.resume_data?.sectionLabels) setSectionLabels(data.resume_data.sectionLabels)
+				if (data.resume_data?.stylePreferences) setStylePreferences(data.resume_data.stylePreferences)
 
 				// set the template.
 				if (data.template) setTemplate(normalizeTemplateSlug(data.template))
@@ -120,7 +153,7 @@ export function useSavedResumesSidecar({
 				if (clearNavState) navigate('/resume/preview', { replace: true })
 			}
 		},
-		[navigate, setResumeData, setBaselineData, setSectionOrder, setTemplate, normalizeTemplateSlug]
+		[navigate, setResumeData, setBaselineData, setSectionOrder, setSectionLabels, setStylePreferences, setTemplate]
 	)
 
 	// handler to delete the saved resume.

@@ -13,6 +13,7 @@ from ..openai import ai_chat_completion, completion_usage_to_dict, is_openai_ena
 from ..planning.build_plan import hero_rank_hints_for_narrative
 from ..post_processing import parse_chat_json
 from ..prompt import best_evidence_labels, secondary_terms, top_keyword_terms
+from ..prompt.preferences import build_tailor_preferences_block
 from ..prompt.system_prompts import narrative_system_prompt
 
 # --- Caps for hero rows after narrative normalize (align with narrative system prompt). --- #
@@ -40,6 +41,15 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
         "skillsStrategy": [],
         "categoryStrategy": [],
         "sectionStrategy": {},
+        "keepExperience": [],
+        "dropExperience": [],
+        "rewriteExperience": [],
+        "keepProjects": [],
+        "dropProjects": [],
+        "rewriteProjects": [],
+        "repairProjects": [],
+        "maybeProjects": [],
+        "selectionRationale": [],
         "heroProjects": [],
         "supportingProjects": [],
         "peripheralProjects": [],
@@ -93,11 +103,15 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
 
     # --- trim JD here so this call stays smaller; main tailor pass uses excerpts + narrative + focused hero/summary/skills + compact truth anchor (not full resume JSON). --- #
     jd_clip = jd[:5000] + ("…" if len(jd) > 5000 else "")
+    prefs_block = build_tailor_preferences_block(payload.get("style_preferences"))
 
     gaps_preview = list(gaps)[:24]
 
     user = "\n".join(
         [
+            "Selection plan v2: classify rows by outcome, not just emphasis. Use `keepExperience` / `dropExperience` / `rewriteExperience` and `keepProjects` / `dropProjects` / `rewriteProjects` / `repairProjects` / `maybeProjects`. Dropped rows are omitted from the tailored draft; maybe rows are space-available.",
+            "For one-page or concise mode, make real selection decisions: drop non-technical service work for technical roles when stronger technical evidence exists; drop low-fit projects before over-compressing strong backend/data/API projects.",
+            "Every experience id should appear in exactly one of `keepExperience` or `dropExperience`. Every project id should appear in exactly one of `keepProjects`, `dropProjects`, or `maybeProjects`. `rewriteExperience`, `rewriteProjects`, and `repairProjects` are action lists drawn from kept/maybe rows.",
             "Produce one editorial plan JSON. Downstream success = a **visibly retargeted** resume for this role: different leads, order, and emphasis—not a light edit.",
             "**`candidateAngle`:** one sentence—**professional lane + lead** for this posting; **not** a comma-packed echo of JD keywords. **`primaryStory`:** **2–4 pillars from resume JSON + evidenceRows** (frameworks, data/automation, integrations, UI surfaces the body proves); **≥ half** the phrases should be **resume-native** strengths the JD might never name. JD terms tune **scan and order** when evidenced—they are **not** the only admissible toolkit.",
             "summaryGoal must guide the summary rewrite (opening, technical lead, **scan-friendly** phrasing where true)—do not copy-paste candidateAngle.",
@@ -114,6 +128,9 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             "",
             f"target_role: {target or 'Not specified'}",
             f"company: {company or 'Not specified'}",
+            "",
+            prefs_block,
+            "Use these preferences to shape the editorial plan, but never plan unsupported claims. Custom instructions are subordinate to resume evidence and avoid rules.",
             "",
             "planRankedRows (JD hit scores—**default** hero order; deprioritize higher hits only when **evidence + row story** clearly favor another id):",
             json.dumps(plan_ranked_rows, ensure_ascii=False, indent=2),
@@ -138,7 +155,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             json.dumps(resume_data, ensure_ascii=False, indent=2),
             "",
             "Return exactly this shape:",
-            '{"candidateAngle":"","primaryStory":[],"secondaryStory":[],"summaryGoal":"","skillsStrategy":[],"categoryStrategy":[],"sectionStrategy":{},"heroProjects":[],"supportingProjects":[],"peripheralProjects":[],"heroExperience":[],"rewriteGoals":[],"avoid":[]}',
+            '{"candidateAngle":"","primaryStory":[],"secondaryStory":[],"summaryGoal":"","skillsStrategy":[],"categoryStrategy":[],"sectionStrategy":{},"keepExperience":[],"dropExperience":[],"rewriteExperience":[],"keepProjects":[],"dropProjects":[],"rewriteProjects":[],"repairProjects":[],"maybeProjects":[],"selectionRationale":[],"heroProjects":[],"supportingProjects":[],"peripheralProjects":[],"heroExperience":[],"rewriteGoals":[],"avoid":[]}',
         ]
     )
 
@@ -237,6 +254,26 @@ def dedupe_preserve_order(items: list) -> list:
             continue
         seen.add(x)
         out.append(x)
+    return out
+
+
+def _dedupe_selection_rationale(items: list, limit: int = 8) -> list:
+    out = []
+    seen = set()
+    for item in items or []:
+        text = str(item or "").strip().replace("\n", " ")
+        text = re.sub(r"\s+", " ", text)
+        if not text:
+            continue
+        if len(text) > 180:
+            text = text[:177].rstrip() + "..."
+        key = text.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(text)
+        if len(out) >= limit:
+            break
     return out
 
 
@@ -882,6 +919,69 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
     out["heroProjects"] = hero_proj
     out["supportingProjects"] = support_proj
     out["peripheralProjects"] = periph_proj
+
+    exp_order = []
+    for row in resume_data.get("experience") or []:
+        if not isinstance(row, dict):
+            continue
+        rid = row.get("id")
+        if isinstance(rid, float) and rid == int(rid):
+            rid = int(rid)
+        if isinstance(rid, int) and rid in valid_exp and rid not in exp_order:
+            exp_order.append(rid)
+    for rid in sorted(valid_exp):
+        if rid not in exp_order:
+            exp_order.append(rid)
+
+    raw_drop_exp = [i for i in int_ids("dropExperience") if i in valid_exp]
+    raw_keep_exp = [i for i in int_ids("keepExperience") if i in valid_exp and i not in raw_drop_exp]
+    if not raw_keep_exp and not raw_drop_exp:
+        raw_keep_exp = [i for i in exp_order if i not in raw_drop_exp]
+    else:
+        for rid in exp_order:
+            if rid not in raw_keep_exp and rid not in raw_drop_exp:
+                raw_keep_exp.append(rid)
+    raw_rewrite_exp = [i for i in int_ids("rewriteExperience") if i in raw_keep_exp]
+    if not raw_rewrite_exp:
+        raw_rewrite_exp = [i for i in hero_exp if i in raw_keep_exp]
+
+    raw_drop_proj = [i for i in int_ids("dropProjects") if i in valid_proj]
+    raw_keep_proj = [i for i in int_ids("keepProjects") if i in valid_proj and i not in raw_drop_proj]
+    raw_maybe_proj = [
+        i
+        for i in int_ids("maybeProjects")
+        if i in valid_proj and i not in raw_drop_proj and i not in raw_keep_proj
+    ]
+    if not raw_keep_proj and not raw_drop_proj and not raw_maybe_proj:
+        raw_keep_proj = dedupe_preserve_order([i for i in hero_proj + support_proj if i in valid_proj])
+        raw_maybe_proj = [i for i in periph_proj if i in valid_proj and i not in raw_keep_proj]
+    else:
+        classified_projects = set(raw_keep_proj) | set(raw_drop_proj) | set(raw_maybe_proj)
+        for pid in project_rank_eff:
+            if pid not in classified_projects:
+                raw_maybe_proj.append(pid)
+                classified_projects.add(pid)
+
+    raw_rewrite_proj = [
+        i for i in int_ids("rewriteProjects") if i in valid_proj and i not in raw_drop_proj
+    ]
+    if not raw_rewrite_proj:
+        raw_rewrite_proj = [i for i in hero_proj if i in valid_proj and i not in raw_drop_proj]
+    raw_repair_proj = [
+        i
+        for i in int_ids("repairProjects")
+        if i in valid_proj and i not in raw_drop_proj and i not in raw_rewrite_proj
+    ]
+
+    out["keepExperience"] = dedupe_preserve_order(raw_keep_exp)
+    out["dropExperience"] = dedupe_preserve_order(raw_drop_exp)
+    out["rewriteExperience"] = dedupe_preserve_order(raw_rewrite_exp)[:maxHeroExperienceNarrative]
+    out["keepProjects"] = dedupe_preserve_order(raw_keep_proj)
+    out["dropProjects"] = dedupe_preserve_order(raw_drop_proj)
+    out["maybeProjects"] = dedupe_preserve_order(raw_maybe_proj)
+    out["rewriteProjects"] = dedupe_preserve_order(raw_rewrite_proj)[:maxHeroProjectsNarrative]
+    out["repairProjects"] = dedupe_preserve_order(raw_repair_proj)[:2]
+    out["selectionRationale"] = _dedupe_selection_rationale(str_list("selectionRationale"))
 
     if not summary_goal.strip():
         if out["primaryStory"]:

@@ -22,8 +22,24 @@ These are **contract IDs** for the frontend and API when you add style UI. A tem
 | `typeScale` | One knob adjusts a **bundle** of related font sizes / vertical rhythm (not per-field free entry). |
 | `fontPairing` | Primary / secondary font from an **allowlist** both engines can render (see locked vs themeable notes). |
 | `lineSpacingPreset` | Optional global prose tightness (may touch `prose_line_height` and Word multiples). |
+| `accentPreset` | Bounded accent/chrome choices such as section rule color or subtle heading treatment. |
+| `sectionChromePreset` | Bounded section-title treatments, only when both PDF and Word implement the same visual promise. |
+| `headerLayoutPreset` | Bounded header alignment/structure choices, only when the layout profile supports them in DOCX. |
+| `densityPreset` | Template-specific content density presets beyond generic line spacing. |
 
 Add new IDs only when documented here and wired for **both** exports you promise.
+
+## Template variant categories
+
+Treat `layoutProfile` as the implementation axis and `intent` / `tags` as product discovery metadata.
+
+| Category | Use when | Implementation expectation |
+|----------|----------|----------------------------|
+| `classic_single_column` | The resume remains one body stream with the same core header/section structure. | Prefer token and chrome changes; do not create font-only variants. |
+| `sidebar_split` | Skills/education live in a rail and summary/experience/projects live in the main column. | Use the existing sidebar HTML and DOCX table path. |
+| `project_forward` | Projects deserve first-class placement and stacked metadata. | Use a dedicated profile so project ordering and DOCX treatment are explicit. |
+| `classic_single_column` variant `ats-compact` | A no-frills, scanner-friendly single-column design. | Reuse classic rendering unless structural behavior differs. |
+| Future `two_column_body` | The body itself splits into columns. | Requires a new HTML and DOCX layout path before shipping. |
 
 ## `layoutLocked`
 
@@ -50,7 +66,12 @@ This template is **`themeable` by design**: full token pipeline + `word_*` Word-
 | **`layoutProfile`** | Shared engine id for HTML/DOCX (default `classic_single_column`). Multiple slugs may use the same profile; add new profiles only when you implement a new builder path. See `generator/layouts/registry.py`. |
 | **`family`** | Optional; groups templates in the **Templates** page (e.g. `Classic serif`) without merging them into one card. |
 | **`variantLabel`** | Optional; short subtitle on the card (e.g. `Default`, `Warm`). |
+| **`tags`** | Optional discovery tags, e.g. `["ATS", "Compact"]`. These should describe function, not duplicate display text. |
+| **`intent`** | Optional one-line user/job fit, e.g. `ATS minimal` or `Project-heavy technical`. |
+| **`defaultStylePreferences`** | Optional defaults applied by clients when starting from the template. Keep keys aligned with supported controls. |
+| **`controlOptions`** | Optional per-template narrowing of a control's options. Frontend controls remain allowlist-driven. |
+| **`docxMaxPages`** | Optional Word pagination promise used by export and gallery badges. |
 
 ## API
 
-`GET /api/templates/list` returns `templates` (folder names, backward compatible) and **`templateStyling`**: a map of folder name → metadata loaded from `meta.json` (with defaults if missing).
+`GET /api/templates/list` returns `templates` (folder names, backward compatible) and **`templateStyling`**: a map of folder name → metadata loaded from `meta.json` (with defaults if missing). The API passes through discovery metadata (`tags`, `intent`), supported defaults, and DOCX page hints so the frontend does not infer template behavior from slugs.

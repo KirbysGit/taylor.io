@@ -6,6 +6,7 @@ import math
 import os
 import re
 
+from .preferences import build_tailor_preferences_block, preference_guidance
 from .system_prompts import PASS_A_SYSTEM, PASS_B_SYSTEM
 
 # When `TAILOR_AB_EXPERIMENT` is truthy, this block is appended to the Stage A user prompt (A/B vs baseline).
@@ -591,35 +592,53 @@ def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None)
     nb = narrative_brief if isinstance(narrative_brief, dict) else {}
     hero_exp_ids = _narrative_id_list(nb, "heroExperience")
     hero_proj_ids = _narrative_id_list(nb, "heroProjects")
+    rewrite_exp_ids = _narrative_id_list(nb, "rewriteExperience") or hero_exp_ids
+    rewrite_proj_ids = _narrative_id_list(nb, "rewriteProjects") or hero_proj_ids
+    repair_proj_ids = _narrative_id_list(nb, "repairProjects")
+    drop_exp_ids = _narrative_id_list(nb, "dropExperience")
+    drop_proj_ids = _narrative_id_list(nb, "dropProjects")
+    keep_exp_ids = _narrative_id_list(nb, "keepExperience")
+    keep_proj_ids = _narrative_id_list(nb, "keepProjects")
+    maybe_proj_ids = _narrative_id_list(nb, "maybeProjects")
     support_proj_ids = _narrative_id_list(nb, "supportingProjects")
     peripheral_proj_ids = _narrative_id_list(nb, "peripheralProjects")
 
     exp_rows = rd.get("experience") if isinstance(rd.get("experience"), list) else []
     proj_rows = rd.get("projects") if isinstance(rd.get("projects"), list) else []
     skills_rows = rd.get("skills") if isinstance(rd.get("skills"), list) else []
+    rewrite_exp_ids = [i for i in rewrite_exp_ids if i not in drop_exp_ids]
 
     summary_block = rd.get("summary") if isinstance(rd.get("summary"), dict) else {}
 
     thin_repairs = _thin_bullet_project_repair_candidates(
         proj_rows,
-        hero_proj_ids,
+        rewrite_proj_ids or hero_proj_ids,
         support_proj_ids,
-        peripheral_proj_ids,
+        repair_proj_ids or peripheral_proj_ids,
         THIN_BULLET_PROJECT_MAX_ADD,
     )
     allowed_proj_ids = []
     seen_proj = set()
-    for hid in hero_proj_ids:
+    for hid in rewrite_proj_ids:
         if isinstance(hid, float) and hid == int(hid):
             hid = int(hid)
         if not isinstance(hid, int) or hid in seen_proj:
             continue
+        if hid in drop_proj_ids:
+            continue
         seen_proj.add(hid)
         allowed_proj_ids.append(hid)
+    for rid in repair_proj_ids:
+        if len(allowed_proj_ids) >= PASS_A_MAX_PROJECT_EDIT_IDS:
+            break
+        if not isinstance(rid, int) or rid in seen_proj or rid in drop_proj_ids:
+            continue
+        seen_proj.add(rid)
+        allowed_proj_ids.append(rid)
     for tid in thin_repairs:
         if len(allowed_proj_ids) >= PASS_A_MAX_PROJECT_EDIT_IDS:
             break
-        if tid in seen_proj:
+        if tid in seen_proj or tid in drop_proj_ids:
             continue
         seen_proj.add(tid)
         allowed_proj_ids.append(tid)
@@ -632,7 +651,7 @@ def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None)
     thin_only = [x for x in allowed_proj_ids if x not in narrative_hero_set]
 
     hero_exp_filled = []
-    for r in _rows_with_ids(exp_rows, hero_exp_ids):
+    for r in _rows_with_ids(exp_rows, rewrite_exp_ids):
         if not isinstance(r, dict):
             continue
         row = copy.deepcopy(r)
@@ -649,9 +668,17 @@ def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None)
         hero_proj_filled.append(row)
 
     return {
-        "allowedExperienceEditIds": hero_exp_ids,
+        "allowedExperienceEditIds": rewrite_exp_ids,
+        "legacyHeroExperienceIds": hero_exp_ids,
+        "allowedExperienceRewriteIds": rewrite_exp_ids,
+        "dropExperienceIds": drop_exp_ids,
+        "keepExperienceIds": keep_exp_ids,
         "allowedProjectEditIds": allowed_proj_ids,
+        "dropProjectIds": drop_proj_ids,
+        "keepProjectIds": keep_proj_ids,
+        "maybeProjectIds": maybe_proj_ids,
         "narrativeHeroProjectIds": hero_proj_ids,
+        "narrativeRewriteProjectIds": rewrite_proj_ids,
         "thinBulletRepairProjectIds": thin_only,
         "supportingProjectIds": support_proj_ids,
         "summarySection": copy.deepcopy(summary_block),
@@ -733,20 +760,18 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
     company = companyRaw if isinstance(companyRaw, str) else ""
     resumeRaw = payload.get("resume_data")
     resumeData = resumeRaw if isinstance(resumeRaw, dict) else {}
-    styleRaw = payload.get("style_preferences")
-    stylePreferences = styleRaw if isinstance(styleRaw, dict) else {}
-    focusRaw = stylePreferences.get("focus")
-    focus = focusRaw if isinstance(focusRaw, str) else "balanced"
-    toneRaw = stylePreferences.get("tone")
-    tone = toneRaw if isinstance(toneRaw, str) else "balanced"
+    prefs = preference_guidance(payload.get("style_preferences"))
+    prefs_block = build_tailor_preferences_block(prefs)
     roleLabel = (targetRole or "").strip() or "this role"
 
     nb = narrativeBrief if isinstance(narrativeBrief, dict) else {}
-    hero_exp = _narrative_id_list(nb, "heroExperience")
     narrative_json = json.dumps(nb, ensure_ascii=False, indent=2)
     rewrite_focus = build_stage_a_rewrite_focus(resumeData, nb)
+    hero_exp = rewrite_focus.get("allowedExperienceEditIds") or []
     allowed_proj_edit = rewrite_focus.get("allowedProjectEditIds") or []
     thin_repairs = rewrite_focus.get("thinBulletRepairProjectIds") or []
+    drop_exp = rewrite_focus.get("dropExperienceIds") or []
+    drop_proj = rewrite_focus.get("dropProjectIds") or []
     has_exp = len(hero_exp) > 0
     has_proj = len(allowed_proj_edit) > 0
     sm = resumeData.get("summary") if isinstance(resumeData.get("summary"), dict) else {}
@@ -763,21 +788,12 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
                 "description": "full bullet block",
             }
         ]
+    if drop_exp:
+        out_shape["removedExperienceIds"] = drop_exp
+    if drop_proj:
+        out_shape["removedProjectIds"] = drop_proj
     output_contract = {"edits": out_shape}
 
-    prefsOneLine = (
-        f"Prefs: focus={focus}, tone={tone}. "
-        "Ground every claim in the resume; the JD may **reorder emphasis and phrasing** only. "
-        + {
-            "impact": "Foreground measurable outcomes the resume already states.",
-            "technical": "Foreground depth and stack that appear on the row.",
-            "leadership": "Foreground scope and people/system ownership where the row supports it.",
-        }.get(focus, "Balance impact, depth, leadership.")
-        + " "
-        + {"concise": "Tight, high-signal bullets.", "detailed": "Richer detail where the row has substance."}.get(
-            tone, "Balanced length."
-        )
-    )
     tc = tailorContext if isinstance(tailorContext, dict) else {}
     ats_hits = list(tc.get("resumeHits") or [])[:24]
     ats_jd_top = top_keyword_terms(tc.get("keywords") or [], limit=12)
@@ -792,10 +808,12 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
         "## Pass 1 — profile summary and hero rows only (no skills in `edits`)",
         f"Target role: {roleLabel}",
         f"Company (context only): {company or 'Not specified'}",
-        prefsOneLine,
+        prefs_block,
+        "Ground every claim in the resume; the JD may **reorder emphasis and phrasing** only.",
         f"strict_truth (from request): {strict_truth}",
         "",
         "### Task",
+        "Selection is part of this pass: include `removedExperienceIds` and/or `removedProjectIds` exactly when `dropExperienceIds` / `dropProjectIds` are present in the focused rewrite surface. Do not keep low-fit rows just because they existed in the original resume.",
         "Return **only** `edits` with `summarySection` and/or `experience` and/or `projects` as needed. **Never** put `skills` in `edits` here—pass 2 will handle skills.",
         "Set `edits.summarySection` so the professional summary fits this target role. Use the narrative’s `summaryGoal` / `rewriteGoals` and real evidence on the resume.",
     ]
@@ -803,11 +821,19 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
         lines.append("If the summary is empty or very thin, add a strong opening that only states what the experience and projects on this resume can support.")
     else:
         lines.append("If a summary already exists, reframe for this role and keep the same factual roots; change focus, not made-up history.")
+    if drop_exp:
+        lines.append(
+            "`dropExperienceIds` are intentional omissions for this tailored draft. Output them as `edits.removedExperienceIds` unless removing them would leave the resume with no credible experience/project evidence."
+        )
     if has_exp:
         lines.append("Include `edits.experience`: one row object per `allowedExperienceEditIds`, each with a full `description` bullet block. **Make the retargeting obvious**—re-lead and reorder so this role’s reader sees why the job fits.")
     if has_proj:
         lines.append(
             "Include `edits.projects`: one object per `allowedProjectEditIds`. For each, you may set **`tech_stack`** first (Strings only) so labels match the project’s real work—**remove** names that only appeared in a bloated or wrong `tech_stack` and never in `rowProseOnly` for that id; then set **`description`** to match. **Do not** edit project ids outside `allowedProjectEditIds`. Narrative **heroes** drive role-shaped retargets; **`thinBulletRepairProjectIds`** (if present) are **quality passes** for placeholder/empty bullets on non-hero rows—replace vague lines with concrete, evidence-safe claims from `rowProseOnly` only; full JD retarget is optional there but **no** ghost tools."
+        )
+    if drop_proj:
+        lines.append(
+            "`dropProjectIds` are intentional omissions for this tailored draft. Output them as `edits.removedProjectIds`; in one-page mode, remove low-fit/off-lane projects before weakening strong backend/data/API bullets."
         )
     if thin_repairs:
         lines.append(
@@ -826,6 +852,9 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
             "Each `heroExperienceRows` / `heroProjectRows` object includes `rowFactAnchor` (and projects add **`rowProseOnly`**: title + **original** description). **Large, role-shaped `description` edits** are still the goal. For **new proper nouns** in hero **experience** bullets, they must already appear in that row’s `rowFactAnchor`. For **project** rows: if stale `tech_stack` disagrees with `rowProseOnly`, **fix `tech_stack` in the edit** and keep bullet names consistent with `rowProseOnly` and your corrected list—not ghost tools from the old `tech_stack`.",
             "Summary: for named tools, use `resumeSkillVocabulary` plus what appears in the existing summary or hero anchors—do not add a JD stack line as the candidate’s main toolkit unless it’s in that vocabulary/anchors.",
         ]
+    )
+    lines.append(
+        "Project tech stacks are user-provided evidence: preserve truthful differentiating tools by default. Shorten or reorder stack display for fit, but remove a tool only when it is contradicted by the project story or clearly misleading; if bullets mention a tool, keep it in that project stack."
     )
     if strict_truth:
         lines.append(
@@ -873,13 +902,8 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
     resumeRaw = payload.get("resume_data")
     resumeData = resumeRaw if isinstance(resumeRaw, dict) else {}
     roleLabel = (tailorContext.get("targetRole", "") or "").strip() or "this role"
-    styleRaw = payload.get("style_preferences")
-    stylePreferences = styleRaw if isinstance(styleRaw, dict) else {}
-    focusRaw = stylePreferences.get("focus")
-    focus = focusRaw if isinstance(focusRaw, str) else "balanced"
-    toneRaw = stylePreferences.get("tone")
-    tone = toneRaw if isinstance(toneRaw, str) else "balanced"
-    prefsOneLine = f"Target role: {roleLabel}. Company: {company or 'Not specified'}. Prefs: focus={focus}, tone={tone}."
+    prefs_block = build_tailor_preferences_block(payload.get("style_preferences"))
+    prefsOneLine = f"Target role: {roleLabel}. Company: {company or 'Not specified'}."
     tc = tailorContext if isinstance(tailorContext, dict) else {}
     ats_hits = list(tc.get("resumeHits") or [])[:24]
     ats_jd_top = top_keyword_terms(tc.get("keywords") or [], limit=12)
@@ -905,6 +929,7 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
         [
             "## Pass 2 — reorder + recategorize skills (evidence-informed)",
             prefsOneLine,
+            prefs_block,
             budget_line,
             "**Preserve first:** output **one row per surviving `skillsRows` id** by default. **Semi-hit** rows (resume-evidenced, not JD-top) ⇒ **keep**, order later. **Lead** flows from JD + **`skillsStrategy`** — **not** survivor filters.",
             "Return **`edits.skills`**; optional **`_debugOmitted`** if you omit any id.",

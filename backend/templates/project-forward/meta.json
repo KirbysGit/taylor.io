@@ -1,0 +1,23 @@
+{
+  "displayName": "Project Forward",
+  "family": "Technical portfolio",
+  "variantLabel": "Projects first",
+  "layoutProfile": "project_forward",
+  "shortDescription": "Promotes projects immediately after the summary and stacks project metadata for technical or portfolio-heavy resumes.",
+  "description": "A structural variant for candidates whose projects carry the story. The layout profile promotes projects after the summary and uses stacked project metadata in PDF and Word instead of inline pipe separators.",
+  "stylingMode": "hybrid",
+  "allowedControls": [
+    "marginPreset",
+    "typeScale",
+    "fontPairing",
+    "lineSpacingPreset"
+  ],
+  "layoutLocked": true,
+  "capabilitiesVersion": 1,
+  "tags": [
+    "Projects",
+    "Technical",
+    "Portfolio"
+  ],
+  "intent": "Project-heavy technical"
+}

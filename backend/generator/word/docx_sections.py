@@ -30,7 +30,7 @@ def _add_section_title(doc: Any, title: str, style: DocxStyleConfig) -> None:
     p.paragraph_format.space_before = Pt(style.section_title_space_before_pt)
     p.paragraph_format.space_after = Pt(style.section_title_space_after_pt)
     p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
-    _apply_section_title_bottom_border(p)
+    _apply_section_title_bottom_border(p, style)
 
 
 # --- Handle Normalize Section Order ---

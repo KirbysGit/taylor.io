@@ -9,11 +9,17 @@ import { apiRequest } from '../api'
  * @param {string=} payload.template_name
  * @param {string=} payload.target_role
  * @param {Object=} payload.style_preferences
+ * @param {string=} payload.style_preferences.focus
+ * @param {string=} payload.style_preferences.tone
+ * @param {string=} payload.style_preferences.length_target
+ * @param {string=} payload.style_preferences.rewrite_freedom
+ * @param {string=} payload.style_preferences.custom_instructions
  * @param {boolean=} payload.strict_truth
  */
-export async function tailorResume(payload) {
+export async function tailorResume(payload, options = {}) {
 	return apiRequest('/api/ai/job-tailor/tailor', {
 		method: 'POST',
 		body: JSON.stringify(payload),
+		signal: options.signal,
 	})
 }

@@ -8,6 +8,9 @@ import { mergeTailoredResumePayload } from '../utils/resumePreviewHelpers'
 import { normalizeSectionOrder } from '../utils/resumeDataTransform'
 
 // --- hook ---
+function isAbortError(error) {
+	return error?.name === 'AbortError'
+}
 
 export function useTailorJob({
 	tailorIntent,
@@ -49,6 +52,7 @@ export function useTailorJob({
 
 		// set the is cancelled flag.
 		let isCancelled = false
+		const controller = new AbortController()
 
 		// create the request resume data.
 		const requestResumeData = { ...resumeDataRef.current, sectionLabels: sectionLabelsRef.current }
@@ -63,18 +67,24 @@ export function useTailorJob({
 				setPreTailorSnapshot(null)
 
 				// try to tailor the resume.
-				const result = await tailorResume({
-					job_description: tailorIntent.jobDescription,
-					resume_data: requestResumeData,
-					template_name: requestTemplate,
-					target_role: tailorIntent.jobTitle,
-					company: tailorIntent.company,
-					style_preferences: {
-						focus: tailorIntent.focus,
-						tone: tailorIntent.tone,
+				const result = await tailorResume(
+					{
+						job_description: tailorIntent.jobDescription,
+						resume_data: requestResumeData,
+						template_name: requestTemplate,
+						target_role: tailorIntent.jobTitle,
+						company: tailorIntent.company,
+						style_preferences: {
+							focus: tailorIntent.focus,
+							tone: tailorIntent.tone,
+							length_target: tailorIntent.lengthTarget,
+							rewrite_freedom: tailorIntent.rewriteFreedom,
+							custom_instructions: tailorIntent.customInstructions,
+						},
+						strict_truth: Boolean(tailorIntent.strictTruth),
 					},
-					strict_truth: Boolean(tailorIntent.strictTruth),
-				})
+					{ signal: controller.signal }
+				)
 
 				// drop late completions (unmounted, newer effect run, or cleanup).
 				if (isCancelled || gen !== tailorGenerationRef.current) return
@@ -114,6 +124,7 @@ export function useTailorJob({
 				// show a success toast.
 				toast.success('Tailored draft loaded into the editor.')
 			} catch (error) {
+				if (isAbortError(error)) return
 				if (isCancelled || gen !== tailorGenerationRef.current) return
 				console.error('Tailor preview request failed:', error)
 				toast.error('Could not generate tailored resume yet.')
@@ -128,6 +139,7 @@ export function useTailorJob({
 		return () => {
 			// set the is cancelled flag.
 			isCancelled = true
+			controller.abort()
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- one tailor run when intent + baseline are ready; snapshot comes from refs above, not from listing resumeData here (that re-entry cancelled the merge).
 	}, [tailorIntent, hasSetBaseline])

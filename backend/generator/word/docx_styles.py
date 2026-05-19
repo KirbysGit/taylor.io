@@ -28,6 +28,7 @@ class DocxStyleConfig:
     resume_text_color_highlight_title: str = "rgba(15, 23, 42, 0.88)"
 
     # ---- Header ----
+    header_alignment: str = "center"
     # .name: 32pt, bold
     name_font_size_pt: int = 32
     name_space_after_pt: float = 0.0  # space after name (before contact line)
@@ -53,6 +54,9 @@ class DocxStyleConfig:
     section_title_space_before_pt: float = 2.0
     # Space below the title paragraph (divider is on the same paragraph); breathing room before body
     section_title_space_after_pt: float = 5.0
+    section_divider_visible: bool = True
+    section_divider_color: str = "#000000"
+    section_divider_width_pt: float = 0.25
 
     # .section-content padding-left: 10pt
     section_content_indent_pt: float = 10.0

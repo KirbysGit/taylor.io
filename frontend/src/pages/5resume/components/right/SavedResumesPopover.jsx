@@ -19,7 +19,7 @@ function SavedResumesPopover({
 				aria-expanded={savedResumesOpen}
 				aria-haspopup="dialog"
 			>
-				Saved ({savedResumes.items.length}/{savedResumes.max})
+				Versions ({savedResumes.items.length}/{savedResumes.max})
 			</button>
 
 			{savedResumesOpen && (
@@ -27,7 +27,7 @@ function SavedResumesPopover({
 					<div className="fixed inset-0 z-20" onClick={onCloseSavedResumes} aria-hidden="true" />
 					<div className="absolute right-0 top-full z-30 mt-2 w-80 rounded-xl border border-gray-200 bg-white text-gray-900 shadow-2xl ring-1 ring-black/5">
 						<div className="border-b border-gray-100 px-4 py-3">
-							<p className="text-sm font-semibold text-gray-900">Saved resumes</p>
+							<p className="text-sm font-semibold text-gray-900">Saved résumé versions</p>
 							<p className="mt-0.5 text-xs text-gray-500">
 								{savedResumes.items.length} of {savedResumes.max} slots used
 							</p>
@@ -35,7 +35,7 @@ function SavedResumesPopover({
 
 						<div className="border-b border-gray-100 px-4 py-3">
 							<label htmlFor="save-resume-name" className="mb-1 block text-xs font-medium text-gray-600">
-								Save current draft
+								Save current version
 							</label>
 							<input
 								id="save-resume-name"
@@ -51,7 +51,7 @@ function SavedResumesPopover({
 								disabled={isSavingResumeForLater || savedResumes.items.length >= savedResumes.max}
 								className="mt-2.5 w-full rounded-lg bg-brand-pink px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
 							>
-								{isSavingResumeForLater ? 'Saving...' : 'Save for later'}
+								{isSavingResumeForLater ? 'Saving...' : 'Save version'}
 							</button>
 							{savedResumes.items.length >= savedResumes.max && (
 								<p className="mt-1.5 text-xs text-gray-500">Limit reached. Delete one to save more.</p>
@@ -83,7 +83,7 @@ function SavedResumesPopover({
 								))}
 							</ul>
 						) : (
-							<p className="px-4 py-5 text-center text-sm text-gray-500">No saved resumes yet</p>
+							<p className="px-4 py-5 text-center text-sm text-gray-500">No saved versions yet</p>
 						)}
 					</div>
 				</>

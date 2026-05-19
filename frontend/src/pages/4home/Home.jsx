@@ -55,12 +55,7 @@ const dataRows = [
 	},
 ]
 
-const templateSwatches = [
-	{ toneClass: 'bg-violet-500', bars: ['w-12', 'w-8', 'w-14'] },
-	{ toneClass: 'bg-sky-500', bars: ['w-14', 'w-10', 'w-16'] },
-	{ toneClass: 'bg-emerald-500', bars: ['w-10', 'w-16', 'w-12'] },
-	{ toneClass: 'bg-rose-500', bars: ['w-12', 'w-14', 'w-9'] },
-]
+const templatePreviewTones = ['violet', 'sky', 'emerald', 'rose']
 
 function DashboardCard({ className = '', children }) {
 	return (
@@ -222,7 +217,7 @@ function CareerDataCard({ profile, isLoading, onOpenProfile }) {
 	)
 }
 
-function ResumeMiniPreview({ tone = 'brand' }) {
+function ResumeMiniPreview({ tone = 'brand', compact = false }) {
 	const toneClass = {
 		brand: 'bg-brand-pink',
 		sky: 'bg-sky-500',
@@ -232,21 +227,40 @@ function ResumeMiniPreview({ tone = 'brand' }) {
 	}[tone] || 'bg-brand-pink'
 
 	return (
-		<div className="h-32 rounded-xl border border-gray-200/80 bg-white p-3 shadow-sm">
-			<div className="flex gap-3">
-				<div className={`${toneClass}/10 flex h-24 w-8 shrink-0 flex-col items-center gap-2 rounded-lg pt-2`}>
-					<span className={`size-3 rounded-full ${toneClass}`} />
-					<span className={`h-2 w-4 rounded-full ${toneClass}/70`} />
-					<span className={`h-2 w-3 rounded-full ${toneClass}/50`} />
+		<div
+			className={[
+				'rounded-lg border border-gray-200/80 bg-white shadow-sm',
+				compact ? 'h-[4.75rem] p-2' : 'h-32 rounded-xl p-3',
+			].join(' ')}
+		>
+			<div className={['flex', compact ? 'gap-2' : 'gap-3'].join(' ')}>
+				<div
+					className={[
+						`${toneClass}/10 flex shrink-0 flex-col items-center rounded-md pt-1.5`,
+						compact ? 'h-14 w-6 gap-1' : 'h-24 w-8 gap-2 rounded-lg pt-2',
+					].join(' ')}
+				>
+					<span className={`rounded-full ${toneClass} ${compact ? 'size-2' : 'size-3'}`} />
+					<span className={`rounded-full ${toneClass}/70 ${compact ? 'h-1 w-3' : 'h-2 w-4'}`} />
+					{compact ? null : <span className={`h-2 w-3 rounded-full ${toneClass}/50`} />}
 				</div>
-				<div className="min-w-0 flex-1 pt-1">
-					<span className={`block h-2.5 w-16 rounded-full ${toneClass}`} />
-					<span className="mt-2 block h-2 w-24 rounded-full bg-gray-300/70" />
-					<span className="mt-1.5 block h-2 w-20 rounded-full bg-gray-300/55" />
-					<div className="mt-4 space-y-1.5">
-						<span className="block h-1.5 w-full rounded-full bg-gray-300/65" />
-						<span className="block h-1.5 w-[82%] rounded-full bg-gray-300/55" />
-						<span className="block h-1.5 w-[68%] rounded-full bg-gray-300/45" />
+				<div className="min-w-0 flex-1 pt-0.5">
+					<span className={`block rounded-full ${toneClass} ${compact ? 'h-1.5 w-10' : 'h-2.5 w-16'}`} />
+					<span
+						className={[
+							'block rounded-full bg-gray-300/70',
+							compact ? 'mt-1 h-1 w-14' : 'mt-2 h-2 w-24',
+						].join(' ')}
+					/>
+					<div className={['space-y-1', compact ? 'mt-1.5' : 'mt-4 space-y-1.5'].join(' ')}>
+						<span className={`block rounded-full bg-gray-300/65 ${compact ? 'h-1 w-full' : 'h-1.5 w-full'}`} />
+						<span
+							className={[
+								'block rounded-full bg-gray-300/55',
+								compact ? 'h-1 w-[78%]' : 'h-1.5 w-[82%]',
+							].join(' ')}
+						/>
+						{compact ? null : <span className="block h-1.5 w-[68%] rounded-full bg-gray-300/45" />}
 					</div>
 				</div>
 			</div>
@@ -295,12 +309,12 @@ function SavedResumeCard({ resume, index, onLoad, onDelete, formatDate }) {
 	)
 }
 
-function SavedResumesSection({ savedResumes, onCreate, onViewAll, onLoad, onDelete, formatDate }) {
+function SavedResumesSection({ savedResumes, onCreate, onViewAll, onLoad, onDelete, formatDate, className = '' }) {
 	const items = savedResumes.items || []
 
 	return (
-		<DashboardCard className="p-6">
-			<div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+		<DashboardCard className={`flex flex-col p-6 max-xl:flex-none xl:min-h-0 xl:flex-1 ${className}`.trim()}>
+			<div className="mb-5 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
 					<h2 className="text-xl font-black tracking-tight text-gray-950">Saved r&eacute;sum&eacute; versions</h2>
 					<p className="mt-1 text-sm text-gray-500">{items.length} of {savedResumes.max ?? 3} save slots used</p>
@@ -316,7 +330,7 @@ function SavedResumesSection({ savedResumes, onCreate, onViewAll, onLoad, onDele
 			</div>
 
 			{items.length === 0 ? (
-				<div className="rounded-2xl border border-dashed border-brand-pink/24 bg-brand-pink/[0.04] px-5 py-10 text-center">
+				<div className="flex flex-1 flex-col justify-center rounded-2xl border border-dashed border-brand-pink/24 bg-brand-pink/[0.04] px-5 py-10 text-center">
 					<div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-white text-brand-pink shadow-sm">
 						<FontAwesomeIcon icon={faFileAlt} className="size-5" />
 					</div>
@@ -332,7 +346,7 @@ function SavedResumesSection({ savedResumes, onCreate, onViewAll, onLoad, onDele
 					</button>
 				</div>
 			) : (
-				<ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+				<ul className="grid min-h-0 flex-1 content-start gap-4 sm:grid-cols-2 xl:grid-cols-3">
 					{items.slice(0, 3).map((resume, index) => (
 						<SavedResumeCard
 							key={resume.id}
@@ -351,25 +365,24 @@ function SavedResumesSection({ savedResumes, onCreate, onViewAll, onLoad, onDele
 
 function TemplatePanel({ onBrowse }) {
 	return (
-		<DashboardCard className="p-6">
-			<h2 className="text-xl font-black tracking-tight text-gray-950">Style your r&eacute;sum&eacute;</h2>
-			<p className="mt-1 text-sm text-gray-500">Choose a layout direction before you polish the details.</p>
-			<div className="mt-5 grid grid-cols-4 gap-3">
-				{templateSwatches.map((template, index) => (
-					<div key={`${template.toneClass}-${index}`} className="rounded-xl border border-gray-200/80 bg-white p-2 shadow-sm">
-						<div className={`mb-2 h-1.5 rounded-full ${template.toneClass}`} />
-						<div className="space-y-1.5">
-							{template.bars.map((bar, barIndex) => (
-								<span key={barIndex} className={`block h-1.5 rounded-full bg-gray-300/60 ${bar}`} />
-							))}
-						</div>
-					</div>
+		<DashboardCard className="flex flex-col p-6 max-xl:flex-none xl:min-h-0 xl:flex-1">
+			<div className="shrink-0">
+				<h2 className="text-xl font-black tracking-tight text-gray-950">Style your r&eacute;sum&eacute;</h2>
+				<p className="mt-1 text-sm text-gray-500">Choose a layout direction before you polish the details.</p>
+			</div>
+
+			<div className="mt-5 grid shrink-0 grid-cols-2 gap-2 sm:gap-3">
+				{templatePreviewTones.map((tone) => (
+					<ResumeMiniPreview key={tone} tone={tone} compact />
 				))}
 			</div>
+
+			<div className="hidden min-h-0 flex-1 xl:block" aria-hidden />
+
 			<button
 				type="button"
 				onClick={onBrowse}
-				className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-pink px-4 py-3 text-sm font-black text-white shadow-[0_12px_28px_-18px_rgba(214,86,86,0.72)] transition hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+				className="mt-5 inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-pink px-4 py-2.5 text-sm font-black text-white shadow-[0_12px_28px_-18px_rgba(214,86,86,0.72)] transition hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 			>
 				Browse templates
 				<FontAwesomeIcon icon={faArrowRight} className="size-3.5" />
@@ -545,13 +558,15 @@ function Home() {
 					</button>
 				</header>
 
-				<div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(21rem,0.95fr)]">
-					<div className="space-y-6">
-						<PrimaryResumeCard
-							onCreate={() => navigate('/resume/create/tailor')}
-							onChooseProfile={() => navigate('/resume/create/choose')}
-							onStartFresh={() => navigate('/resume/preview', { state: { createMode: 'startFresh' } })}
-						/>
+				<div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(21rem,0.95fr)] xl:items-stretch">
+					<div className="flex min-h-0 flex-col gap-6">
+						<div className="shrink-0">
+							<PrimaryResumeCard
+								onCreate={() => navigate('/resume/create/tailor')}
+								onChooseProfile={() => navigate('/resume/create/choose')}
+								onStartFresh={() => navigate('/resume/preview', { state: { createMode: 'startFresh' } })}
+							/>
+						</div>
 						<SavedResumesSection
 							savedResumes={savedResumes}
 							onCreate={() => navigate('/resume/create')}
@@ -560,16 +575,16 @@ function Home() {
 							onDelete={handleDeleteSaved}
 							formatDate={formatDate}
 						/>
-						<ProfileNudge onOpenProfile={() => navigate('/info')} />
 					</div>
-					<div className="space-y-6">
-						<CareerDataCard
-							profile={profile}
-							isLoading={isLoading}
-							onOpenProfile={() => navigate('/info')}
-						/>
+					<div className="flex min-h-0 flex-col gap-6">
+						<div className="shrink-0">
+							<CareerDataCard
+								profile={profile}
+								isLoading={isLoading}
+								onOpenProfile={() => navigate('/info')}
+							/>
+						</div>
 						<TemplatePanel onBrowse={() => navigate('/templates')} />
-						<ActivityPanel savedResumes={savedResumes} profile={profile} />
 					</div>
 				</div>
 			</div>

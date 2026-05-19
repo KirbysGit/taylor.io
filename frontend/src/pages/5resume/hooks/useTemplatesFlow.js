@@ -16,6 +16,7 @@ export function useTemplatesFlow({
 	setTemplateStyling,
 	setIsLoadingTemplates,
 	setTemplate,
+	setStylePreferences,
 }) {
 
 	// we need to know if we've fetched the templates yet.
@@ -60,16 +61,30 @@ export function useTemplatesFlow({
 			setTemplate(slug)
 		}
 
+		const prefs = location.state?.stylePreferences
+		if (prefs && typeof prefs === 'object' && setStylePreferences) {
+			setStylePreferences((prev) => ({ ...prev, ...prefs }))
+		}
+
 		// navigate to the preview page.
 		const next = { ...(location.state || {}) }
 
 		// delete the select template state.
 		delete next.selectTemplate
+		delete next.stylePreferences
 
 		// check if there is any state left to pass to the preview page.
 		const hasState = Object.keys(next).length > 0
 
 		// navigate to the preview page with the state if there is any state left, otherwise navigate to the preview page without the state.
 		navigate('/resume/preview', { replace: true, state: hasState ? next : undefined })
-	}, [location.state?.selectTemplate, isLoadingTemplates, availableTemplates, navigate, normalizeTemplateSlug, setTemplate])
+	}, [
+		location.state?.selectTemplate,
+		location.state?.stylePreferences,
+		isLoadingTemplates,
+		availableTemplates,
+		navigate,
+		setTemplate,
+		setStylePreferences,
+	])
 }

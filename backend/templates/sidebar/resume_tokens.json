@@ -32,6 +32,8 @@
   "font_stack_primary": "Georgia, \"Times New Roman\", serif",
   "font_stack_secondary": "\"Times New Roman\", serif",
 
+  "header_alignment": "center",
+
   "name_font_size_pt": 32,
   "name_space_after_pt": 0.0,
   "name_letter_spacing_pt": 0.45,
@@ -60,6 +62,10 @@
   "section_title_padding_bottom_pt": 0.0,
   "section_title_letter_spacing_pt": 0.5,
   "section_title_span_margin_bottom_pt": 0.75,
+  "section_divider_visible": true,
+  "section_divider_color": "#000000",
+  "section_divider_width_pt": 0.25,
+  "section_divider_opacity": 0.75,
   "divider_height_pt": 0.25,
   "divider_margin_top_pt": 1.5,
   "divider_margin_bottom_pt": 5.0,

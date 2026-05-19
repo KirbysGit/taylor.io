@@ -29,7 +29,7 @@ export async function parseResumeMerge(file) {
 	})
 }
 
-export async function generateResumePreview(template, resumeData, style = undefined) {
+export async function generateResumePreview(template, resumeData, style = undefined, options = {}) {
 
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
@@ -52,6 +52,7 @@ export async function generateResumePreview(template, resumeData, style = undefi
 		return await apiRequestText(url, {
 			method: 'POST',
 			body: JSON.stringify(payload),
+			signal: options.signal,
 		})
 	} catch (error) {
 		console.error('Error generating resume preview:', error)
@@ -59,7 +60,7 @@ export async function generateResumePreview(template, resumeData, style = undefi
 	}
 }
 
-export async function generateResumePDF(template, resumeData, style = undefined) {
+export async function generateResumePDF(template, resumeData, style = undefined, options = {}) {
 
 	// get token from localStorage.
 	const token = localStorage.getItem('token')
@@ -81,6 +82,7 @@ export async function generateResumePDF(template, resumeData, style = undefined)
 		return await apiRequestBlob(url, {
 			method: 'POST',
 			body: JSON.stringify(payload),
+			signal: options.signal,
 		})
 	} catch (error) {
 		console.error('Error generating resume PDF:', error)
@@ -88,7 +90,7 @@ export async function generateResumePDF(template, resumeData, style = undefined)
 	}
 }
 
-export async function generateResumeWord(template, resumeData, style = undefined) {
+export async function generateResumeWord(template, resumeData, style = undefined, options = {}) {
 	const url = `/api/resume/generator/docx`
 	const payload = {
 		template: template,
@@ -101,6 +103,7 @@ export async function generateResumeWord(template, resumeData, style = undefined
 		return await apiRequestBlob(url, {
 			method: 'POST',
 			body: JSON.stringify(payload),
+			signal: options.signal,
 		})
 	} catch (error) {
 		console.error('Error generating resume Word:', error)

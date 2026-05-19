@@ -3,6 +3,14 @@
 // Tab strip: Template (picker + template-specific tokens) vs Format (global output rules for all layouts).
 
 import { useEffect, useState } from 'react'
+import {
+	getPlannedTemplateControls,
+	getStyleControlOptions,
+	getVisibleTemplateStyleControls,
+	STYLE_CONTROL_LABELS,
+	STYLE_PREFERENCE_KEYS,
+	templateSupportsControl,
+} from '@/pages/5resume/utils/resumeStyleControls'
 
 const STYLING_SECTION_TABS = [
 	{ id: 'template', label: 'Template' },
@@ -161,38 +169,6 @@ function LinkFormatIcon({ className = 'w-3.5 h-3.5' }) {
 	)
 }
 
-const MARGIN_OPTIONS = [
-	{ id: 'balanced', label: 'Balanced' },
-	{ id: 'tight', label: 'Tight' },
-	{ id: 'spacious', label: 'Spacious' },
-]
-
-const LINE_SPACING_OPTIONS = [
-	{ id: 'standard', label: 'Standard' },
-	{ id: 'compact', label: 'Compact' },
-	{ id: 'relaxed', label: 'Relaxed' },
-]
-
-const TYPE_SCALE_OPTIONS = [
-	{ id: 'standard', label: 'Standard' },
-	{ id: 'compact', label: 'Smaller' },
-	{ id: 'large', label: 'Larger' },
-]
-
-const FONT_PAIRING_OPTIONS = [
-	{ id: 'serif_classic', label: 'Serif classic' },
-	{ id: 'calibri_modern', label: 'Calibri modern' },
-]
-
-/** Global: LinkedIn / GitHub / portfolio labels (backend still emits full href). */
-const CONTACT_URL_DISPLAY_OPTIONS = [
-	{ id: 'full', label: 'Full URL' },
-	{ id: 'strip_protocol', label: 'Hide https://' },
-]
-
-/** Control IDs listed in meta but not implemented yet — show under “Coming”. */
-const PLANNED_CONTROL_IDS = []
-
 const ResumeStyling = ({
 	template,
 	onTemplateChange,
@@ -205,18 +181,17 @@ const ResumeStyling = ({
 	const [sectionTab, setSectionTab] = useState('template')
 
 	const meta = templateStyling[template] || {}
-	const allowed = meta.allowedControls ?? []
 	const modeKey = modeForMeta(meta.stylingMode)
 	const mode = STYLING_MODES[modeKey]
 
-	const showMargins = allowed.includes('marginPreset')
-	const showLineSpacing = allowed.includes('lineSpacingPreset')
-	const showTypeScale = allowed.includes('typeScale')
-	const showFontPairing = allowed.includes('fontPairing')
-	const showStyleTuners =
-		showMargins || showLineSpacing || showTypeScale || showFontPairing
+	const visibleTemplateControls = getVisibleTemplateStyleControls(meta)
+	const showMargins = templateSupportsControl(meta, 'marginPreset')
+	const showLineSpacing = templateSupportsControl(meta, 'lineSpacingPreset')
+	const showTypeScale = templateSupportsControl(meta, 'typeScale')
+	const showFontPairing = templateSupportsControl(meta, 'fontPairing')
+	const showStyleTuners = visibleTemplateControls.length > 0
 
-	const upcomingLabels = PLANNED_CONTROL_IDS.filter((id) => allowed.includes(id))
+	const upcomingLabels = getPlannedTemplateControls(meta).map((controlId) => STYLE_CONTROL_LABELS[controlId] || controlId)
 
 	const hasStyleControls =
 		(showStyleTuners && onStylePreferenceChange) || upcomingLabels.length > 0
@@ -233,13 +208,7 @@ const ResumeStyling = ({
 
 	useEffect(() => {
 		const m = templateStyling[template] || {}
-		const a = m.allowedControls ?? []
-		const hasLive =
-			a.includes('marginPreset') ||
-			a.includes('lineSpacingPreset') ||
-			a.includes('typeScale') ||
-			a.includes('fontPairing')
-		setCustomizeOpen(hasLive)
+		setCustomizeOpen(getVisibleTemplateStyleControls(m).length > 0)
 	}, [template, templateStyling])
 
 	const templateDisplayName = meta.displayName || template
@@ -337,10 +306,10 @@ const ResumeStyling = ({
 							</div>
 						</div>
 						<SegmentedRow
-							label="URL text"
-							value={stylePreferences.contactUrlDisplay ?? 'full'}
-							options={CONTACT_URL_DISPLAY_OPTIONS}
-							onChange={(id) => onStylePreferenceChange('contactUrlDisplay', id)}
+							label={STYLE_CONTROL_LABELS.contactUrlDisplay}
+							value={stylePreferences[STYLE_PREFERENCE_KEYS.contactUrlDisplay] ?? 'full'}
+							options={getStyleControlOptions('contactUrlDisplay', meta)}
+							onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.contactUrlDisplay, id)}
 						/>
 					</div>
 				</div>
@@ -465,40 +434,40 @@ const ResumeStyling = ({
 												{showTypeScale && (
 													<div className="min-w-0">
 														<SegmentedRow
-															label="Type scale"
-															value={stylePreferences.typeScalePreset ?? 'standard'}
-															options={TYPE_SCALE_OPTIONS}
-															onChange={(id) => onStylePreferenceChange('typeScalePreset', id)}
+															label={STYLE_CONTROL_LABELS.typeScale}
+															value={stylePreferences[STYLE_PREFERENCE_KEYS.typeScale] ?? 'standard'}
+															options={getStyleControlOptions('typeScale', meta)}
+															onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.typeScale, id)}
 														/>
 													</div>
 												)}
 												{showFontPairing && (
 													<div className="min-w-0">
 														<SegmentedRow
-															label="Fonts"
-															value={stylePreferences.fontPairing ?? 'serif_classic'}
-															options={FONT_PAIRING_OPTIONS}
-															onChange={(id) => onStylePreferenceChange('fontPairing', id)}
+															label={STYLE_CONTROL_LABELS.fontPairing}
+															value={stylePreferences[STYLE_PREFERENCE_KEYS.fontPairing] ?? 'serif_classic'}
+															options={getStyleControlOptions('fontPairing', meta)}
+															onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.fontPairing, id)}
 														/>
 													</div>
 												)}
 												{showMargins && (
 													<div className="min-w-0">
 														<SegmentedRow
-															label="Page margins"
-															value={stylePreferences.marginPreset ?? 'balanced'}
-															options={MARGIN_OPTIONS}
-															onChange={(id) => onStylePreferenceChange('marginPreset', id)}
+															label={STYLE_CONTROL_LABELS.marginPreset}
+															value={stylePreferences[STYLE_PREFERENCE_KEYS.marginPreset] ?? 'balanced'}
+															options={getStyleControlOptions('marginPreset', meta)}
+															onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.marginPreset, id)}
 														/>
 													</div>
 												)}
 												{showLineSpacing && (
 													<div className="min-w-0">
 														<SegmentedRow
-															label="Line spacing"
-															value={stylePreferences.lineSpacingPreset ?? 'standard'}
-															options={LINE_SPACING_OPTIONS}
-															onChange={(id) => onStylePreferenceChange('lineSpacingPreset', id)}
+															label={STYLE_CONTROL_LABELS.lineSpacingPreset}
+															value={stylePreferences[STYLE_PREFERENCE_KEYS.lineSpacingPreset] ?? 'standard'}
+															options={getStyleControlOptions('lineSpacingPreset', meta)}
+															onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.lineSpacingPreset, id)}
 														/>
 													</div>
 												)}

@@ -410,7 +410,7 @@ def _add_section_title_sidebar_rail(
     )
     p.paragraph_format.space_after = Pt(style.section_title_space_after_pt * 0.85)
     p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
-    _apply_section_title_bottom_border(p)
+    _apply_section_title_bottom_border(p, style)
 
 # --- Handle Render Sidebar DOCX Education Rail Section ---
 def _render_docx_education_rail(

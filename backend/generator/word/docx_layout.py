@@ -9,7 +9,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt
 
-from .docx_run_style import _apply_run_resume_color, _set_line_spacing_multiple
+from .docx_run_style import _apply_run_resume_color, _hex_rgb_6_for_word, _set_line_spacing_multiple
 from .docx_styles import DocxStyleConfig
 
 
@@ -84,16 +84,22 @@ def _add_two_column_line(
 
 
 # --- Handle Section Title Bottom Border ---
-def _apply_section_title_bottom_border(p) -> None:
+def _apply_section_title_bottom_border(p, style=None) -> None:
     # Draw the divider on the title paragraph itself (no empty paragraph below).
     # Avoids an extra 'blank line' in Word that deletes with the rule and feels disconnected.
+    if style is not None and not getattr(style, "section_divider_visible", True):
+        return
 
     p_border = OxmlElement("w:pBdr")
     bottom = OxmlElement("w:bottom")
     bottom.set(qn("w:val"), "single")
-    bottom.set(qn("w:sz"), "2")  # ~0.25pt
+    width_pt = float(getattr(style, "section_divider_width_pt", 0.25) or 0.25)
+    bottom.set(qn("w:sz"), str(max(2, min(96, int(round(width_pt * 8))))))
     bottom.set(qn("w:space"), "1")
-    bottom.set(qn("w:color"), "000000")
+    color = _hex_rgb_6_for_word(
+        getattr(style, "section_divider_color", None) if style is not None else "#000000"
+    )
+    bottom.set(qn("w:color"), color or "000000")
     p_border.append(bottom)
     p._p.get_or_add_pPr().append(p_border)
 

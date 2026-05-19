@@ -31,6 +31,10 @@ def _default_styling_meta(folder_name: str) -> Dict[str, Any]:
         "layoutProfile": "classic_single_column",
         "family": "",
         "variantLabel": "",
+        "tags": [],
+        "intent": "",
+        "defaultStylePreferences": {},
+        "controlOptions": {},
     }
 
 
@@ -68,6 +72,42 @@ def load_template_styling_meta(folder_name: str) -> Dict[str, Any]:
         or base["layoutProfile"],
     }
 
+    tags = raw.get("tags")
+    if isinstance(tags, list):
+        out["tags"] = [
+            str(tag).strip()[:80]
+            for tag in tags
+            if tag is not None and str(tag).strip()
+        ][:8]
+
+    intent = raw.get("intent")
+    if isinstance(intent, str) and intent.strip():
+        out["intent"] = intent.strip()[:120]
+
+    defaults = raw.get("defaultStylePreferences")
+    if isinstance(defaults, dict):
+        out["defaultStylePreferences"] = {
+            str(k).strip(): v
+            for k, v in defaults.items()
+            if k is not None and str(k).strip()
+        }
+
+    control_options = raw.get("controlOptions")
+    if isinstance(control_options, dict):
+        out["controlOptions"] = {
+            str(k).strip(): v
+            for k, v in control_options.items()
+            if k is not None and str(k).strip()
+        }
+
+    docx_max_pages = raw.get("docxMaxPages")
+    if isinstance(docx_max_pages, int) and docx_max_pages >= 1:
+        out["docxMaxPages"] = docx_max_pages
+    elif isinstance(docx_max_pages, str) and docx_max_pages.strip().isdigit():
+        parsed_pages = int(docx_max_pages.strip())
+        if parsed_pages >= 1:
+            out["docxMaxPages"] = parsed_pages
+
     fam = raw.get("family")
     if isinstance(fam, str) and fam.strip():
         out["family"] = fam.strip()[:120]
@@ -97,6 +137,10 @@ def load_template_styling_meta(folder_name: str) -> Dict[str, Any]:
 
     out.setdefault("family", base["family"])
     out.setdefault("variantLabel", base["variantLabel"])
+    out.setdefault("tags", base["tags"])
+    out.setdefault("intent", base["intent"])
+    out.setdefault("defaultStylePreferences", base["defaultStylePreferences"])
+    out.setdefault("controlOptions", base["controlOptions"])
 
     return out
 

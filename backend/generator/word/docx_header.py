@@ -16,6 +16,15 @@ from .docx_run_style import _apply_run_resume_color, _set_line_spacing_multiple,
 from .docx_styles import DocxStyleConfig
 
 
+def paragraph_alignment_from_style(style):
+    raw = str(getattr(style, "header_alignment", "center") or "center").strip().lower()
+    if raw == "left":
+        return WD_ALIGN_PARAGRAPH.LEFT
+    if raw == "right":
+        return WD_ALIGN_PARAGRAPH.RIGHT
+    return WD_ALIGN_PARAGRAPH.CENTER
+
+
 # --- Handle Sidebar Rail Header ---
 def _add_sidebar_rail_header(
     cell: Any,
@@ -172,6 +181,7 @@ def _add_header(
     # Get header.
     header = resume_data.get("header", {})
     name = f"{header.get('first_name', '')} {header.get('last_name', '')}".strip()
+    alignment = paragraph_alignment_from_style(style)
     if name:
         p = document.add_paragraph()
         run = p.add_run(name)
@@ -180,7 +190,7 @@ def _add_header(
         run.font.name = style.font_primary
         _apply_run_resume_color(run, style, "resume_text_color_emphasis")
         _set_run_character_spacing(run, style.name_letter_spacing_pt or 0)
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.alignment = alignment
         p.paragraph_format.space_after = Pt(style.name_space_after_pt)
         p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
 
@@ -200,7 +210,7 @@ def _add_header(
                 run.italic = t_italic
                 run.font.underline = WD_UNDERLINE.SINGLE if t_underline else WD_UNDERLINE.NONE
                 _apply_run_resume_color(run, style, "resume_text_color_primary")
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.alignment = alignment
             p.paragraph_format.space_after = Pt(style.tagline_space_after_pt)
             _set_line_spacing_multiple(p, style.tagline_line_height)
 
@@ -239,7 +249,7 @@ def _add_header(
         run.font.name = style.font_primary  # Georgia (contact line), not Times New Roman
         _apply_run_resume_color(run, style, "resume_text_color_primary")
         _set_run_character_spacing(run, style.contact_span_letter_spacing_pt)
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.alignment = alignment
         space_before = (
             style.contact_space_before_after_tagline_pt
             if has_tagline

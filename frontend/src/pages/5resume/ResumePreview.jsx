@@ -6,10 +6,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 
 // --- api imports.
 import { generateResumePDF, generateResumeWord } from '@/api/services/resume'
-import { upsertContact, setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, getMyProfile, updateSectionLabels } from '@/api/services/profile'
 
 // --- main ui component imports.
-import EditorTopBar from '@/components/EditorTopBar'
 import LeftPanel from './components/left/LeftPanel'
 import RightPanel from './components/right/RightPanel'
 
@@ -18,17 +16,6 @@ import { validateResumeData } from './utils/resumeValidation'
 import { applyVisibilityFilters, downloadBlob, normalizeSectionOrder } from './utils/resumeDataTransform'
 import { snapshotResumeBaseline, defaultSectionVisibility, createEmptyResumeData } from './utils/resumePreviewHelpers'
 import { normalizeTemplateSlug, DEFAULT_STYLE_PREFERENCES, defaultSectionLabels } from './utils/resumePreviewConstants'
-import {
-	normalizeEducationForBackend,
-	normalizeExperienceForBackend,
-	normalizeProjectForBackend,
-	normalizeSkillForBackend,
-} from '@/pages/utils/DataFormatting'
-import {
-	mergeEducationForChooseProfileSave,
-	mergeExperienceForChooseProfileSave,
-	mergeProjectForChooseProfileSave,
-} from './utils/resumeChooseMerge'
 
 // --- hooks.
 import { useDebouncedPreviews } from './hooks/useDebouncedPreviews'
@@ -38,6 +25,10 @@ import { useResumePreviewBootstrap } from './hooks/useResumePreviewBootstrap'
 import { useTemplatesFlow } from './hooks/useTemplatesFlow'
 import { useTailorJob } from './hooks/useTailorJob'
 import { useSavedResumesSidecar } from './hooks/useSavedResumesSidecar'
+
+function isAbortError(error) {
+	return error?.name === 'AbortError'
+}
 
 // ----------- main component -----------
 function ResumePreview() {
@@ -64,6 +55,13 @@ function ResumePreview() {
 
 	// --- right panel state.
 	const [downloadStatus, setDownloadStatus] = useState(null)
+	const downloadControllerRef = useRef(null)
+
+	useEffect(() => {
+		return () => {
+			downloadControllerRef.current?.abort()
+		}
+	}, [])
 
 	// when a tailor run has finished, optionally preview the pre-tailor resume in the right panel only.
 	const [resumePreviewCompareMode, setResumePreviewCompareMode] = useState('tailored')
@@ -74,8 +72,6 @@ function ResumePreview() {
 
 	// Full GET /profile/me payload for "choose from profile" — merge on save so bulk writes don’t drop unselected rows.
 	const chooseFullProfileRef = useRef(null)
-
-	const [isSaving, setIsSaving] = useState(false)
 
 	// section order & labels state (order from profile/saved resume/tailor via bootstrap + handlers; default when absent).
 	const [sectionOrder, setSectionOrder] = useState(() => normalizeSectionOrder(null))
@@ -118,6 +114,7 @@ function ResumePreview() {
 		setTemplateStyling,
 		setIsLoadingTemplates,
 		setTemplate,
+		setStylePreferences,
 	})
 
 	// payload for downloads, save, and the live editor (always the current resume in state).
@@ -205,6 +202,8 @@ function ResumePreview() {
 		previewHtml,
 		isGeneratingPreview,
 		exactPdfBlobUrl,
+		exactPdfBlob,
+		isExactPdfFresh,
 		exactPdfRefreshing,
 		validationIssues,
 		refreshDraftNow,
@@ -237,9 +236,14 @@ function ResumePreview() {
 		resumeData,
 		template,
 		sectionOrder,
+		sectionLabels,
+		stylePreferences,
+		tailorIntent,
 		setResumeData,
 		setBaselineData,
 		setSectionOrder,
+		setSectionLabels,
+		setStylePreferences,
 		setTemplate,
 	})
 
@@ -263,13 +267,27 @@ function ResumePreview() {
 
 		// set the download status to loading.
 		setDownloadStatus({ type: isWord ? 'word' : 'pdf', phase: 'loading' })
+		downloadControllerRef.current?.abort()
+		const controller = new AbortController()
+		downloadControllerRef.current = controller
 
 		// try to generate the document.
 		try {
+			if (!isWord && exactPdfBlob && isExactPdfFresh) {
+				downloadBlob(exactPdfBlob, 'resume.pdf')
+				setDownloadStatus({ type: 'pdf', phase: 'success' })
+				window.setTimeout(() => setDownloadStatus(null), 1800)
+				return
+			}
+
 			// generate the document.
 			const blob = isWord
-				? await generateResumeWord(template, editorVisibleResumePayload, stylePreferences)
-				: await generateResumePDF(template, editorVisibleResumePayload, stylePreferences)
+				? await generateResumeWord(template, editorVisibleResumePayload, stylePreferences, {
+						signal: controller.signal,
+					})
+				: await generateResumePDF(template, editorVisibleResumePayload, stylePreferences, {
+						signal: controller.signal,
+					})
 
 			// download the document.
 			downloadBlob(blob, isWord ? 'resume.docx' : 'resume.pdf')
@@ -280,11 +298,16 @@ function ResumePreview() {
 			// set the download status to null after 2.2 seconds.
 			window.setTimeout(() => setDownloadStatus(null), 2200)
 		} catch (error) {
+			if (isAbortError(error)) return
 			// if we run into an error, show a toast error.
 			console.error('Download failed:', error)
 			toast.error(isWord ? 'Could not generate the Word document. Try again.' : 'Could not generate the PDF. Try again.')
 			setDownloadStatus({ type: isWord ? 'word' : 'pdf', phase: 'error' })
 			window.setTimeout(() => setDownloadStatus(null), 2400)
+		} finally {
+			if (downloadControllerRef.current === controller) {
+				downloadControllerRef.current = null
+			}
 		}
 	}
 
@@ -386,32 +409,17 @@ function ResumePreview() {
 
 	const handleSectionLabelChange = useCallback(
 		async (sectionKey, newLabel) => {
-			const previousLabel = sectionLabels[sectionKey]
 			const updatedLabels = { ...sectionLabels, [sectionKey]: newLabel }
 			setSectionLabels(updatedLabels)
 
-			// try to update the section labels.
-			try {
-				// try to update the section labels.
-				await updateSectionLabels(updatedLabels)
-
-				// if we have a preview html, refresh the draft preview.
-				if (previewHtml) {
-					// create the next payload.
-					const nextPayload = { ...applyVisibilityFilters(resumeData), sectionLabels: updatedLabels }
-					const nextKey = JSON.stringify({ template, previewData: nextPayload, stylePreferences })
-
-					// try to refresh the draft preview.
-					const ok = await refreshDraftNow({ visibleResumePayload: nextPayload, previewInputKey: nextKey })
-					if (!ok && validateResumeData(resumeData).length === 0) {
-						// if we failed to refresh the draft preview, show a toast error.
-						console.error('Failed to refresh preview after label change')
-					}
+			// Section labels are local to this resume version in the editor.
+			if (previewHtml) {
+				const nextPayload = { ...applyVisibilityFilters(resumeData), sectionLabels: updatedLabels }
+				const nextKey = JSON.stringify({ template, previewData: nextPayload, stylePreferences })
+				const ok = await refreshDraftNow({ visibleResumePayload: nextPayload, previewInputKey: nextKey })
+				if (!ok && validateResumeData(resumeData).length === 0) {
+					console.error('Failed to refresh preview after label change')
 				}
-			} catch (error) {
-				// if we run into an error, show a toast error.
-				console.error('Failed to update section label:', error)
-				setSectionLabels((prev) => ({ ...prev, [sectionKey]: previousLabel }))
 			}
 		},
 		[sectionLabels, previewHtml, resumeData, template, stylePreferences, refreshDraftNow]
@@ -419,6 +427,13 @@ function ResumePreview() {
 
 	// saves changes.
 	const handleSaveChanges = async () => {
+		const ok = await handleSaveForLater({ closePopover: true })
+		if (ok) {
+			setShowSaveBanner(false)
+		}
+		return Boolean(ok)
+		/*
+
 		// set the saving flag to true.
 		setIsSaving(true)
 
@@ -504,19 +519,12 @@ function ResumePreview() {
 		} finally {
 			setIsSaving(false)
 		}
-	}
-
-	const handleLogout = () => {
-		localStorage.removeItem('token')
-		localStorage.removeItem('user')
-		navigate('/')
+		*/
 	}
 
 	return (
-		<div className="flex h-screen flex-col overflow-hidden bg-[#fff8ef]">
-			<EditorTopBar tailorIntent={tailorIntent} onLogout={handleLogout} />
-
-			<main className="flex min-h-0 flex-1 overflow-hidden bg-[#fff8ef]">
+		<div className="flex h-screen overflow-hidden bg-[#f5f0f0]">
+			<main className="flex min-h-0 w-full flex-1 overflow-hidden">
 				<LeftPanel
 					width={leftPanelWidth}
 					user={user}
@@ -573,10 +581,11 @@ function ResumePreview() {
 					onRefreshPreview={handleRefreshPreview}
 					validationIssues={validationIssues}
 					exactPdfUrl={exactPdfBlobUrl}
+					isExactPdfFresh={isExactPdfFresh}
 					exactPdfRefreshing={exactPdfRefreshing}
 					showSaveBanner={showSaveBanner}
 					saveChangedSections={changeDescriptions}
-					isSavingResume={isSaving}
+					isSavingResume={isSavingResume}
 					onDiscardChanges={handleDiscardChanges}
 					onSaveChanges={handleSaveChanges}
 					savedResumes={savedResumes}

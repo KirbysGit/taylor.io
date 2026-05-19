@@ -144,14 +144,6 @@ export default function ResumesHub() {
 							Start a new version, reopen saved drafts, or continue shaping a resume for a specific role.
 						</p>
 					</div>
-					<button
-						type="button"
-						onClick={() => navigate('/resume/create')}
-						className="inline-flex min-h-[3.15rem] items-center justify-center gap-2 rounded-xl bg-brand-pink px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(214,86,86,0.8)] transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
-					>
-						<FontAwesomeIcon icon={faPlus} className="size-4" />
-						Create new resume
-					</button>
 				</header>
 
 				<section className="mb-6 grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,0.75fr)]">

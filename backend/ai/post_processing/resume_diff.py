@@ -12,6 +12,7 @@ from .resume_tailor_report import (
     build_change_reasons_from_patch,
     build_changelog_from_patch,
     build_rewrite_quality_audit,
+    build_tailor_explanation,
     collect_narrative_omission_warnings,
     mergeChangelog,
     patchRowCounts,
@@ -480,6 +481,10 @@ def assemble_tailor_result(
     stage_a: dict,
     narrative_brief: Optional[dict] = None,
     target_role: str = "",
+    company: str = "",
+    style_preferences: Optional[dict] = None,
+    strict_truth: bool = True,
+    tailor_context: Optional[dict] = None,
     return_audit_debug: bool = False,
     rows_per_section_ranked: Optional[dict] = None,
 ):
@@ -524,9 +529,20 @@ def assemble_tailor_result(
     quality_audit = build_rewrite_quality_audit(o, updated, patch, narrative_brief, stage_a, target_role)
     if (quality_audit.get("flags") or {}).get("skills_expected_but_unchanged"):
         all_warnings.append(SKILLS_EXPECTED_BUT_UNCHANGED_WARNING)
+    tailor_explanation = build_tailor_explanation(
+        patch=patch,
+        narrative_brief=narrative_brief,
+        target_role=target_role,
+        company=company,
+        style_preferences=style_preferences,
+        strict_truth=strict_truth,
+        tailor_context=tailor_context,
+        quality_audit=quality_audit,
+    )
 
     result = {
         "summary": gen_summary,
+        "tailorExplanation": tailor_explanation,
         "updatedResumeData": updated,
         "patchDiff": patch,
         "changeReasons": change_reasons,

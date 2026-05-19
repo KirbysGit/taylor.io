@@ -118,8 +118,18 @@ def build_project_entry(proj: Dict[str, Any], *, variant: str = "default") -> st
 
     description = format_description(proj.get("description", ""))
 
-    # If 'Sidebar' layout, no '|' separators. Info moved below title block. (Keeping it here while file is small... :) )
-    if variant == "sidebar_main":
+    # If a layout highlights projects, no pipe separators. Info moves below the title block.
+    if variant in ("sidebar_main", "project_forward"):
+        variant_class = (
+            "project-entry--project-forward"
+            if variant == "project_forward"
+            else "project-entry--sidebar-main"
+        )
+        title_class = (
+            "project-title--project-forward"
+            if variant == "project_forward"
+            else "project-title--sidebar-main"
+        )
         meta_parts: List[str] = []
         if tech_stack_str:
             meta_parts.append(f'<span class="project-tech">{tech_stack_str}</span>')
@@ -131,9 +141,9 @@ def build_project_entry(proj: Dict[str, Any], *, variant: str = "default") -> st
             else ""
         )
         return f'''
-    <div class="project-entry project-entry--sidebar-main">
+    <div class="project-entry {variant_class}">
         <div class="project-line">
-            <div class="project-title project-title--sidebar-main">
+            <div class="project-title {title_class}">
                 <span class="project-title-text">{title}</span>
                 {meta_row}
             </div>

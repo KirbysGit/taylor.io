@@ -1,21 +1,154 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
 	faArrowLeft,
 	faArrowRight,
 	faBriefcase,
-	faClockRotateLeft,
 	faFileLines,
+	faLightbulb,
 	faShieldHalved,
 	faTrash,
 	faWandMagicSparkles,
 } from '@fortawesome/free-solid-svg-icons'
 import DashboardShell from '@/components/DashboardShell'
+import ThemedSelect from '@/components/inputs/ThemedSelect'
+import { RequiredAsterisk, XIcon } from '@/components/icons'
+
+const TAILOR_FOCUS_OPTIONS = [
+	{ value: 'balanced', label: 'Balanced fit' },
+	{ value: 'impact', label: 'Measured impact' },
+	{ value: 'technical', label: 'Technical depth' },
+	{ value: 'leadership', label: 'Leadership' },
+]
+
+const TAILOR_TONE_OPTIONS = [
+	{ value: 'balanced', label: 'Balanced' },
+	{ value: 'concise', label: 'Concise' },
+	{ value: 'detailed', label: 'Detailed' },
+]
+
+const TAILOR_LENGTH_OPTIONS = [
+	{ value: 'balanced', label: 'Balanced length' },
+	{ value: 'one_page', label: 'Aim for one page' },
+	{ value: 'detailed', label: 'Allow more detail' },
+]
+
+const TAILOR_REWRITE_OPTIONS = [
+	{ value: 'balanced', label: 'Balanced rewrite' },
+	{ value: 'light', label: 'Light touch' },
+	{ value: 'strong', label: 'Strong retarget' },
+]
 
 const TAILOR_HISTORY_KEY = 'tailorIntentHistory'
+const TAILOR_DRAFT_KEY = 'tailorSetupDraft'
 const TAILOR_HISTORY_MAX = 50
+
+/** Bounds for tailor intent — keeps API payloads useful and within input maxLength. */
+const TAILOR_FIELD_LIMITS = {
+	jobTitle: { min: 2, max: 180 },
+	company: { min: 2, max: 180 },
+	jobDescription: { min: 40, max: 24000 },
+}
+
+const TAILOR_TIPS = [
+	'If you give us more context, we can help you tailor your profile much better.',
+	'Whenever you can, paste the full job description — not just the title. That extra detail really helps!',
+	'Use the job title and company exactly as they appear on the listing.',
+	'Requirements, responsibilities, and nice-to-haves all help us match your experience.',
+]
+
+const TAILOR_TIP_ROTATE_MS = 5500
+
+const DEFAULT_TAILOR_INTENT = {
+	jobTitle: '',
+	company: '',
+	jobDescription: '',
+	focus: 'balanced',
+	tone: 'balanced',
+	lengthTarget: 'balanced',
+	rewriteFreedom: 'balanced',
+	customInstructions: '',
+	strictTruth: true,
+}
+
+function normalizeTailorDraft(value) {
+	if (!value || typeof value !== 'object') return null
+	return {
+		jobTitle: typeof value.jobTitle === 'string' ? value.jobTitle : '',
+		company: typeof value.company === 'string' ? value.company : '',
+		jobDescription: typeof value.jobDescription === 'string' ? value.jobDescription : '',
+		focus: TAILOR_FOCUS_OPTIONS.some((o) => o.value === value.focus) ? value.focus : 'balanced',
+		tone: TAILOR_TONE_OPTIONS.some((o) => o.value === value.tone) ? value.tone : 'balanced',
+		lengthTarget: TAILOR_LENGTH_OPTIONS.some((o) => o.value === value.lengthTarget) ? value.lengthTarget : 'balanced',
+		rewriteFreedom: TAILOR_REWRITE_OPTIONS.some((o) => o.value === value.rewriteFreedom)
+			? value.rewriteFreedom
+			: 'balanced',
+		customInstructions: typeof value.customInstructions === 'string' ? value.customInstructions : '',
+		strictTruth: value.strictTruth !== false,
+	}
+}
+
+function loadTailorDraft() {
+	try {
+		const raw = localStorage.getItem(TAILOR_DRAFT_KEY)
+		if (!raw) return null
+		return normalizeTailorDraft(JSON.parse(raw))
+	} catch {
+		return null
+	}
+}
+
+function saveTailorDraft(entry) {
+	const draft = normalizeTailorDraft(entry)
+	if (!draft) return
+	localStorage.setItem(
+		TAILOR_DRAFT_KEY,
+		JSON.stringify({
+			...draft,
+			savedAt: new Date().toISOString(),
+		})
+	)
+}
+
+function validateTailorForm({ jobTitle, company, jobDescription }) {
+	const errors = {}
+	const title = jobTitle.trim()
+	const co = company.trim()
+	const jd = jobDescription.trim()
+	const { jobTitle: titleLimits, company: companyLimits, jobDescription: jdLimits } = TAILOR_FIELD_LIMITS
+
+	if (!title) {
+		errors.jobTitle = 'Job title is required.'
+	} else if (title.length < titleLimits.min) {
+		errors.jobTitle = `Job title must be at least ${titleLimits.min} characters.`
+	} else if (title.length > titleLimits.max) {
+		errors.jobTitle = `Job title must be ${titleLimits.max} characters or fewer.`
+	}
+
+	if (!co) {
+		errors.company = 'Company is required.'
+	} else if (co.length < companyLimits.min) {
+		errors.company = `Company must be at least ${companyLimits.min} characters.`
+	} else if (co.length > companyLimits.max) {
+		errors.company = `Company must be ${companyLimits.max} characters or fewer.`
+	}
+
+	if (!jd) {
+		errors.jobDescription = 'Job description is required.'
+	} else if (jd.length < jdLimits.min) {
+		errors.jobDescription = `Add more detail — at least ${jdLimits.min} characters (you have ${jd.length}).`
+	} else if (jd.length > jdLimits.max) {
+		errors.jobDescription = `Job description must be ${jdLimits.max} characters or fewer.`
+	}
+
+	return errors
+}
+
+function fieldErrorClass(hasError) {
+	return hasError ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' : ''
+}
 
 function fingerprintTailorIntent(i) {
 	return JSON.stringify({
@@ -24,6 +157,9 @@ function fingerprintTailorIntent(i) {
 		jobDescription: (i.jobDescription || '').trim(),
 		focus: i.focus,
 		tone: i.tone,
+		lengthTarget: i.lengthTarget,
+		rewriteFreedom: i.rewriteFreedom,
+		customInstructions: (i.customInstructions || '').trim(),
 		strictTruth: Boolean(i.strictTruth),
 	})
 }
@@ -56,6 +192,9 @@ function saveTailorHistoryEntry(entry) {
 			jobDescription: entry.jobDescription,
 			focus: entry.focus,
 			tone: entry.tone,
+			lengthTarget: entry.lengthTarget,
+			rewriteFreedom: entry.rewriteFreedom,
+			customInstructions: entry.customInstructions,
 			strictTruth: entry.strictTruth,
 		},
 		...filtered,
@@ -66,7 +205,14 @@ function saveTailorHistoryEntry(entry) {
 
 function SetupCard({ className = '', children }) {
 	return (
-		<section className={`rounded-[1.35rem] border border-brand-pink/13 bg-white/78 shadow-[0_18px_48px_-34px_rgba(80,42,42,0.42)] ring-1 ring-white/80 backdrop-blur-md ${className}`}>
+		<section
+			className={[
+				'rounded-[1.35rem] border border-brand-pink/24 bg-white',
+				'shadow-[0_4px_14px_-4px_rgba(60,32,32,0.22),0_22px_52px_-24px_rgba(80,42,42,0.52)]',
+				'ring-1 ring-gray-950/[0.06]',
+				className,
+			].join(' ')}
+		>
 			{children}
 		</section>
 	)
@@ -80,15 +226,155 @@ function StepPill({ number, children }) {
 	)
 }
 
+/** Rotating hints — dismissible for this page visit only (reappears on reload); collapses so sidebar content slides up. */
+function TailorTipCarousel() {
+	const [index, setIndex] = useState(0)
+	const [paused, setPaused] = useState(false)
+	const [dismissed, setDismissed] = useState(false)
+
+	useEffect(() => {
+		if (dismissed || paused || TAILOR_TIPS.length < 2) return undefined
+		const id = window.setInterval(() => {
+			setIndex((i) => (i + 1) % TAILOR_TIPS.length)
+		}, TAILOR_TIP_ROTATE_MS)
+		return () => window.clearInterval(id)
+	}, [paused, dismissed])
+
+	return (
+		<div
+			className={[
+				'grid transition-[grid-template-rows,opacity,margin-bottom] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none',
+				dismissed ? 'mb-0 grid-rows-[0fr] opacity-0' : 'mb-5 grid-rows-[1fr] opacity-100',
+			].join(' ')}
+		>
+			<div
+				className={['min-h-0 overflow-hidden', dismissed ? 'pointer-events-none' : ''].join(' ')}
+				onMouseEnter={() => setPaused(true)}
+				onMouseLeave={() => setPaused(false)}
+				onFocusCapture={() => setPaused(true)}
+				onBlurCapture={(e) => {
+					if (!e.currentTarget.contains(e.relatedTarget)) setPaused(false)
+				}}
+			>
+				<div
+					className="relative overflow-hidden rounded-2xl border border-brand-pink/28 bg-gradient-to-br from-brand-pink-lighter/75 via-white to-brand-pink/12 px-4 pb-4 pt-3.5 shadow-[0_12px_34px_-16px_rgba(214,86,86,0.38)] ring-1 ring-brand-pink/10"
+					role="region"
+					aria-roledescription="carousel"
+					aria-label="Tailoring tips"
+					aria-hidden={dismissed}
+				>
+					<div
+						className="pointer-events-none absolute -right-6 -top-8 size-24 rounded-full bg-brand-pink/20 blur-2xl"
+						aria-hidden
+					/>
+
+					<button
+						type="button"
+						onClick={() => setDismissed(true)}
+						className="absolute right-2 top-2 z-10 rounded-lg p-1.5 text-gray-400 transition hover:bg-white/70 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+						aria-label="Dismiss tips for now"
+					>
+						<XIcon className="size-4" />
+					</button>
+
+					<div className="relative flex flex-col items-center px-6 pt-1 text-center">
+						<span
+							className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-pink to-brand-pink-dark text-white shadow-sm shadow-brand-pink/25 ring-1 ring-white/60"
+							aria-hidden
+						>
+							<FontAwesomeIcon icon={faLightbulb} className="size-4" />
+						</span>
+						<p className="mt-2.5 text-xs font-bold text-brand-pink-dark">Quick tip</p>
+						<div
+							className="mt-2 flex w-full min-h-[3.5rem] items-center justify-center overflow-hidden"
+							aria-live="polite"
+						>
+								<div
+									className="flex w-full motion-reduce:transition-none transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+									style={{ transform: `translateX(-${index * 100}%)` }}
+								>
+									{TAILOR_TIPS.map((tip, tipIndex) => (
+										<p
+											key={tip}
+											className="flex w-full shrink-0 items-center justify-center px-1 text-sm leading-relaxed text-gray-700"
+											aria-hidden={tipIndex !== index}
+										>
+											{tip}
+										</p>
+									))}
+								</div>
+							</div>
+					</div>
+
+					<div className="mt-3 flex items-center justify-center gap-1.5" role="tablist" aria-label="Choose tip">
+						{TAILOR_TIPS.map((tip, tipIndex) => (
+							<button
+								key={tip}
+								type="button"
+								role="tab"
+								aria-selected={tipIndex === index}
+								aria-label={`Tip ${tipIndex + 1} of ${TAILOR_TIPS.length}`}
+								onClick={() => setIndex(tipIndex)}
+								className={[
+									'h-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2',
+									tipIndex === index ? 'w-5 bg-brand-pink' : 'w-1.5 bg-brand-pink/25 hover:bg-brand-pink/40',
+								].join(' ')}
+							/>
+						))}
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
+
 function ResumeTailorSetup() {
 	const navigate = useNavigate()
-	const [jobTitle, setJobTitle] = useState('')
-	const [company, setCompany] = useState('')
-	const [jobDescription, setJobDescription] = useState('')
-	const [focus, setFocus] = useState('balanced')
-	const [tone, setTone] = useState('balanced')
-	const [strictTruth, setStrictTruth] = useState(true)
+	const location = useLocation()
+	const [initialDraft] = useState(
+		() =>
+			location.state?.fromPreview
+				? normalizeTailorDraft(location.state?.tailorIntent) || loadTailorDraft() || DEFAULT_TAILOR_INTENT
+				: DEFAULT_TAILOR_INTENT
+	)
+	const [jobTitle, setJobTitle] = useState(initialDraft.jobTitle)
+	const [company, setCompany] = useState(initialDraft.company)
+	const [jobDescription, setJobDescription] = useState(initialDraft.jobDescription)
+	const [focus, setFocus] = useState(initialDraft.focus)
+	const [tone, setTone] = useState(initialDraft.tone)
+	const [lengthTarget, setLengthTarget] = useState(initialDraft.lengthTarget)
+	const [rewriteFreedom, setRewriteFreedom] = useState(initialDraft.rewriteFreedom)
+	const [customInstructions, setCustomInstructions] = useState(initialDraft.customInstructions)
+	const [strictTruth, setStrictTruth] = useState(initialDraft.strictTruth)
 	const [recentSetups, setRecentSetups] = useState(() => loadTailorHistory())
+	const [fieldErrors, setFieldErrors] = useState({})
+
+	useEffect(() => {
+		const id = window.setTimeout(() => {
+			saveTailorDraft({
+				jobTitle,
+				company,
+				jobDescription,
+				focus,
+				tone,
+				lengthTarget,
+				rewriteFreedom,
+				customInstructions,
+				strictTruth,
+			})
+		}, 250)
+
+		return () => window.clearTimeout(id)
+	}, [jobTitle, company, jobDescription, focus, tone, lengthTarget, rewriteFreedom, customInstructions, strictTruth])
+
+	const clearFieldError = (field) => {
+		setFieldErrors((prev) => {
+			if (!prev[field]) return prev
+			const next = { ...prev }
+			delete next[field]
+			return next
+		})
+	}
 
 	const handleLogout = () => {
 		localStorage.removeItem('token')
@@ -105,7 +391,12 @@ function ResumeTailorSetup() {
 		setJobDescription(entry.jobDescription || '')
 		setFocus(entry.focus || 'balanced')
 		setTone(entry.tone || 'balanced')
+		setLengthTarget(entry.lengthTarget || 'balanced')
+		setRewriteFreedom(entry.rewriteFreedom || 'balanced')
+		setCustomInstructions(entry.customInstructions || '')
 		setStrictTruth(entry.strictTruth !== false)
+		saveTailorDraft(entry)
+		setFieldErrors({})
 		toast.success('Loaded job setup')
 	}
 
@@ -115,15 +406,16 @@ function ResumeTailorSetup() {
 		toast.success('Cleared recent setups')
 	}
 
-	const handleContinue = () => {
-		if (!jobTitle.trim()) {
-			toast.error('Please enter a job title')
+	const handleContinue = (e) => {
+		e?.preventDefault?.()
+
+		const errors = validateTailorForm({ jobTitle, company, jobDescription })
+		if (Object.keys(errors).length > 0) {
+			setFieldErrors(errors)
+			toast.error(Object.values(errors)[0])
 			return
 		}
-		if (jobDescription.trim().length < 40) {
-			toast.error('Please add more job description detail (40+ chars)')
-			return
-		}
+		setFieldErrors({})
 
 		const tailorIntent = {
 			jobTitle: jobTitle.trim(),
@@ -131,10 +423,14 @@ function ResumeTailorSetup() {
 			jobDescription: jobDescription.trim(),
 			focus,
 			tone,
+			lengthTarget,
+			rewriteFreedom,
+			customInstructions: customInstructions.trim(),
 			strictTruth,
 		}
 
 		setRecentSetups(saveTailorHistoryEntry(tailorIntent))
+		saveTailorDraft(tailorIntent)
 
 		navigate('/resume/preview', {
 			state: {
@@ -163,17 +459,9 @@ function ResumeTailorSetup() {
 							Tell us the role and job description. Taylor uses your saved profile to build a stronger targeted draft.
 						</p>
 					</div>
-					<button
-						type="button"
-						onClick={handleContinue}
-						className="inline-flex min-h-[3.15rem] items-center justify-center gap-2 rounded-xl bg-brand-pink px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(214,86,86,0.8)] transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
-					>
-						Continue to preview
-						<FontAwesomeIcon icon={faArrowRight} className="size-3.5" />
-					</button>
 				</header>
 
-				<section className="relative mb-6 overflow-hidden rounded-[1.35rem] border border-brand-pink/20 bg-[#9f3a40] p-6 text-white shadow-[0_18px_48px_-34px_rgba(80,42,42,0.42)]">
+				<section className="relative mb-6 overflow-hidden rounded-[1.35rem] border border-brand-pink/28 bg-[#9f3a40] p-6 text-white shadow-[0_4px_14px_-4px_rgba(60,32,32,0.28),0_22px_52px_-24px_rgba(80,42,42,0.48)] ring-1 ring-[#9f3a40]/40">
 					<div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
 					<div className="relative z-[1] grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.75fr)] lg:items-end">
 						<div>
@@ -196,79 +484,171 @@ function ResumeTailorSetup() {
 
 				<div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.85fr)]">
 					<SetupCard className="p-5 sm:p-6">
-						<div className="mb-5 rounded-2xl border border-brand-pink/16 bg-brand-pink/[0.06] px-4 py-3 text-sm leading-relaxed text-gray-700">
-							<span className="font-black text-brand-pink-dark">Goal:</span> increase fit while staying grounded in your real background.
+						<div className="mb-5 border-b border-gray-100 pb-4">
+							<h2 className="text-lg font-black tracking-tight text-gray-950">Role details</h2>
+							<p className="mt-1 text-sm text-gray-600">
+								From your saved profile — tailored to this posting, then you review in preview.
+							</p>
 						</div>
 
+						<form onSubmit={handleContinue} noValidate>
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<div>
-								<label htmlFor="tailor-job-title" className="label">Job title</label>
+								<label htmlFor="tailor-job-title" className="label">
+									Job title <RequiredAsterisk />
+								</label>
 								<div className="relative">
 									<input
 										id="tailor-job-title"
 										value={jobTitle}
-										onChange={(e) => setJobTitle(e.target.value)}
-										className="input pl-10"
+										onChange={(e) => {
+											setJobTitle(e.target.value)
+											clearFieldError('jobTitle')
+										}}
+										className={`input pl-10 ${fieldErrorClass(Boolean(fieldErrors.jobTitle))}`}
 										placeholder="e.g. Backend Software Engineer"
-										maxLength={180}
+										maxLength={TAILOR_FIELD_LIMITS.jobTitle.max}
+										required
+										aria-invalid={fieldErrors.jobTitle ? 'true' : undefined}
+										aria-describedby={fieldErrors.jobTitle ? 'tailor-job-title-error' : undefined}
 									/>
 									<FontAwesomeIcon icon={faBriefcase} className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
 								</div>
+								{fieldErrors.jobTitle ? (
+									<p id="tailor-job-title-error" className="mt-1 text-xs font-medium text-red-600" role="alert">
+										{fieldErrors.jobTitle}
+									</p>
+								) : null}
 							</div>
 							<div>
-								<label htmlFor="tailor-company" className="label">Company (optional)</label>
+								<label htmlFor="tailor-company" className="label">
+									Company <RequiredAsterisk />
+								</label>
 								<input
 									id="tailor-company"
 									value={company}
-									onChange={(e) => setCompany(e.target.value)}
-									className="input"
+									onChange={(e) => {
+										setCompany(e.target.value)
+										clearFieldError('company')
+									}}
+									className={`input ${fieldErrorClass(Boolean(fieldErrors.company))}`}
 									placeholder="e.g. Stripe"
-									maxLength={180}
+									maxLength={TAILOR_FIELD_LIMITS.company.max}
+									required
+									aria-invalid={fieldErrors.company ? 'true' : undefined}
+									aria-describedby={fieldErrors.company ? 'tailor-company-error' : undefined}
 								/>
+								{fieldErrors.company ? (
+									<p id="tailor-company-error" className="mt-1 text-xs font-medium text-red-600" role="alert">
+										{fieldErrors.company}
+									</p>
+								) : null}
 							</div>
 						</div>
 
 						<div className="mt-5">
-							<label htmlFor="tailor-jd" className="label">Job description</label>
+							<label htmlFor="tailor-jd" className="label">
+								Job description <RequiredAsterisk />
+							</label>
 							<textarea
 								id="tailor-jd"
 								value={jobDescription}
-								onChange={(e) => setJobDescription(e.target.value)}
-								className="input min-h-[16rem] resize-y"
+								onChange={(e) => {
+									setJobDescription(e.target.value)
+									clearFieldError('jobDescription')
+								}}
+								className={`input min-h-[16rem] resize-y ${fieldErrorClass(Boolean(fieldErrors.jobDescription))}`}
 								placeholder="Paste the full role description, required skills, and responsibilities..."
-								maxLength={24000}
+								maxLength={TAILOR_FIELD_LIMITS.jobDescription.max}
+								required
+								aria-invalid={fieldErrors.jobDescription ? 'true' : undefined}
+								aria-describedby={
+									fieldErrors.jobDescription ? 'tailor-jd-error tailor-jd-hint' : 'tailor-jd-hint'
+								}
 							/>
-							<p className="mt-1 text-xs text-gray-500">{jobDescription.trim().length} / 24000 characters</p>
+							<p
+								id="tailor-jd-hint"
+								className={`mt-1 text-xs ${
+									fieldErrors.jobDescription
+										? 'font-medium text-red-600'
+										: jobDescription.trim().length < TAILOR_FIELD_LIMITS.jobDescription.min
+											? 'text-amber-700'
+											: 'text-gray-500'
+								}`}
+							>
+								{jobDescription.trim().length} / {TAILOR_FIELD_LIMITS.jobDescription.max} characters
+								{jobDescription.trim().length < TAILOR_FIELD_LIMITS.jobDescription.min
+									? ` · minimum ${TAILOR_FIELD_LIMITS.jobDescription.min}`
+									: ''}
+							</p>
+							{fieldErrors.jobDescription ? (
+								<p id="tailor-jd-error" className="mt-0.5 text-xs font-medium text-red-600" role="alert">
+									{fieldErrors.jobDescription}
+								</p>
+							) : null}
 						</div>
 
 						<div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
 							<div>
 								<label htmlFor="tailor-focus" className="label">What should we emphasize?</label>
-								<select
+								<ThemedSelect
 									id="tailor-focus"
 									value={focus}
-									onChange={(e) => setFocus(e.target.value)}
-									className="input"
-								>
-									<option value="balanced">Balanced fit</option>
-									<option value="impact">Measured impact</option>
-									<option value="technical">Technical depth</option>
-									<option value="leadership">Leadership</option>
-								</select>
+									onChange={setFocus}
+									options={TAILOR_FOCUS_OPTIONS}
+								/>
 							</div>
 							<div>
 								<label htmlFor="tailor-tone" className="label">Writing tone</label>
-								<select
+								<ThemedSelect
 									id="tailor-tone"
 									value={tone}
-									onChange={(e) => setTone(e.target.value)}
-									className="input"
-								>
-									<option value="balanced">Balanced</option>
-									<option value="concise">Concise</option>
-									<option value="detailed">Detailed</option>
-								</select>
+									onChange={setTone}
+									options={TAILOR_TONE_OPTIONS}
+								/>
 							</div>
+						</div>
+
+						<div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+							<div>
+								<label htmlFor="tailor-length-target" className="label">Length target</label>
+								<ThemedSelect
+									id="tailor-length-target"
+									value={lengthTarget}
+									onChange={setLengthTarget}
+									options={TAILOR_LENGTH_OPTIONS}
+								/>
+								<p className="mt-1 text-xs leading-relaxed text-gray-500">
+									One-page mode guides tighter writing, but final fit still depends on template and content.
+								</p>
+							</div>
+							<div>
+								<label htmlFor="tailor-rewrite-freedom" className="label">Rewrite strength</label>
+								<ThemedSelect
+									id="tailor-rewrite-freedom"
+									value={rewriteFreedom}
+									onChange={setRewriteFreedom}
+									options={TAILOR_REWRITE_OPTIONS}
+								/>
+								<p className="mt-1 text-xs leading-relaxed text-gray-500">
+									Strong retargets can reorder and re-lead bullets while staying grounded in your profile.
+								</p>
+							</div>
+						</div>
+
+						<div className="mt-5">
+							<label htmlFor="tailor-custom-instructions" className="label">Optional notes for Taylor</label>
+							<textarea
+								id="tailor-custom-instructions"
+								value={customInstructions}
+								onChange={(e) => setCustomInstructions(e.target.value)}
+								className="input min-h-[7rem] resize-y"
+								placeholder="Example: Emphasize backend APIs and data pipelines. Keep the tone direct and avoid overselling."
+								maxLength={420}
+							/>
+							<p className="mt-1 text-xs leading-relaxed text-gray-500">
+								{customInstructions.trim().length} / 420 characters. These notes guide emphasis, but Taylor still follows your saved facts.
+							</p>
 						</div>
 
 						<label className="mt-5 flex cursor-pointer select-none items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 px-4 py-3 text-sm text-gray-700">
@@ -286,17 +666,19 @@ function ResumeTailorSetup() {
 
 						<div className="mt-7 flex justify-end">
 							<button
-								type="button"
-								onClick={handleContinue}
+								type="submit"
 								className="inline-flex items-center gap-2 rounded-xl bg-brand-pink px-6 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(214,86,86,0.8)] transition hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 							>
 								Continue to tailored preview
 								<FontAwesomeIcon icon={faArrowRight} className="size-3.5" />
 							</button>
 						</div>
+						</form>
 					</SetupCard>
 
-					<aside className="space-y-6 xl:sticky xl:top-6">
+					<aside className="flex flex-col">
+						<TailorTipCarousel />
+						<div className="flex flex-col gap-5">
 						<SetupCard className="p-6">
 							<div className="flex items-start gap-3">
 								<span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-brand-pink/[0.1] text-brand-pink-dark">
@@ -328,7 +710,7 @@ function ResumeTailorSetup() {
 												<button
 													type="button"
 													onClick={() => applyRecentSetup(h.id)}
-													className="w-full rounded-2xl border border-gray-200/70 bg-white/78 px-3 py-3 text-left text-sm transition hover:border-brand-pink/24 hover:bg-brand-pink/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+													className="w-full rounded-2xl border border-gray-200/90 bg-white px-3 py-3 text-left text-sm shadow-[0_6px_18px_-14px_rgba(60,32,32,0.35)] transition hover:border-brand-pink/30 hover:bg-brand-pink/[0.04] hover:shadow-[0_10px_24px_-16px_rgba(214,86,86,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
 												>
 													<span className="block font-black leading-snug text-gray-950">{h.jobTitle || 'Untitled role'}</span>
 													<span className="mt-1 block truncate text-xs text-gray-500">{[h.company || null, when].filter(Boolean).join(' · ') || 'Saved setup'}</span>
@@ -364,16 +746,7 @@ function ResumeTailorSetup() {
 								</div>
 							</div>
 						</SetupCard>
-
-						<SetupCard className="bg-brand-pink/[0.08] p-6">
-							<p className="flex items-center gap-2 text-sm font-black text-brand-pink-dark">
-								<FontAwesomeIcon icon={faClockRotateLeft} className="size-4" />
-								Best results
-							</p>
-							<p className="mt-3 text-sm leading-relaxed text-gray-700">
-								Paste the full posting, not just the title. Requirements, responsibilities, and nice-to-haves all help.
-							</p>
-						</SetupCard>
+						</div>
 					</aside>
 				</div>
 			</div>

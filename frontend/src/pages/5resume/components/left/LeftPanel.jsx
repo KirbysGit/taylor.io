@@ -2,6 +2,7 @@
 // Left panel container: assist + styling + sections.
 
 import { useState } from 'react'
+import EditorChrome from '@/components/EditorChrome'
 import WelcomeMessage from './WelcomeMessage'
 import ResumeStyling from './ResumeStyling'
 import SimpleResumeSections from './SimpleResumeSections'
@@ -51,6 +52,8 @@ function LeftPanel({
 			style={{ width: `${width}px` }} 
 			className="flex-shrink-0 bg-white border-r border-gray-200 pl-8 pt-8 pb-8 pr-4 overflow-y-auto [scrollbar-gutter:stable]"
 		>
+			<EditorChrome />
+
 			<TailorAssistPanel
 				tailorIntent={tailorIntent}
 				aiTailorResult={aiTailorResult}

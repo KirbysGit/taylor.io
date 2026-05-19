@@ -12,6 +12,7 @@ Pass 1 only outputs rewrites. Do not explain, justify, warn, summarize, diff, or
 Return **only** `{"edits": { ... }}` as the JSON object. Exactly one top-level key: `edits`. No `warnings`, no `summary`, no `tailorSummary`, no other top-level keys. Never include a `skills` key under `edits`.
 
 Edit surface under `edits` in this pass:
+Selection is part of tailoring: output `removedExperienceIds` / `removedProjectIds` when the narrative selection plan marks rows for omission. For a focused technical draft, it is correct to remove low-fit service roles or off-lane projects when stronger evidence remains.
 - `summarySection` when the user message includes it (profile summary for the role).
 - `experience` — **only** rows whose `id` appears in `allowedExperienceEditIds`.
 - `projects` — **only** rows listed in **`allowedProjectEditIds`** (narrative **heroProjects** plus optional **`thinBulletRepairProjectIds`** flagged for shallow/placeholder bullets). Same full rewrite surface for listed ids—including **non-hero** repair rows (**not** arbitrary supporting/peripheral). You may set **`tech_stack`** to align with `rowProseOnly` before bullets.
@@ -30,6 +31,8 @@ For each **included** hero row: return a **full** `description` bullet block whe
 STRUCTURAL DEPTH: change lead emphasis and/or bullet order on edited blocks so the reader sees a deliberate shift—**without** rewriting every line when some are already high-signal for this posting.
 
 SUMMARY: no empty brochure phrases. For **named** tools in prose, draw from `resumeSkillVocabulary` and existing summary + hero anchors—do not import a JD-only product name as a skill you used.
+
+No synonym-only rewrites: if the before/after could be mistaken for the same bullet with verbs swapped, rewrite again. Tailoring should change the lead, order, and reader takeaway while preserving facts.
 
 Sparse `edits`: only keys you change. **Truth:** no new employers, dates, or degrees. Follow the narrative when it does not ask you to invent facts.
 
@@ -71,6 +74,7 @@ The plan must drive where the story lands: summary opening, **narrative hero** e
 ATS and scan alignment (evidence only): name where (summary, which hero rows, skills order) to foreground **resume-proven** phrasing; **when** it overlaps JD terms or resumeHits, surface it for scan—otherwise still keep **breadth nouns** the resume can defend. Natural phrasing beats keyword stuffing; **do not** plan invented stack or credentials from resumeGaps.
 
 Editorial questions the plan must answer:
+Selection plan v2: classify rows by **draft outcome**, not just emphasis. `keepExperience` / `dropExperience`, `keepProjects` / `dropProjects` / `maybeProjects` decide what appears in the tailored draft. `rewriteExperience`, `rewriteProjects`, and `repairProjects` decide what Stage A rewrites. In one-page or concise mode, drop low-fit/off-lane rows before compressing strong evidence. For technical roles, non-technical service roles and frontend/brand-only projects should usually be dropped when stronger technical rows remain.
 What **lane** does `candidateAngle` establish (one thread)? Which **resume-backed** pillars belong in `primaryStory` (including semi-hit stack the JD never names)? Which rows carry the hero story? How should the summary open so it reflects **evidence first**, JD emphasis second? For skills: which categories fit the **archetype**, what **Leads** among **evidenced** tools (JD ranks priority when both true), what **Supporting breadth** stays honest for that lane, what **trims last** only for noise/off-archetype? What must never be implied?
 
 candidateAngle: one sentence, max ~28 words—**lane + lead** for this job (what kind of builder/engineer), not a comma list of JD keywords. State the **professional lane** (e.g. backend product, data-heavy APIs, full-stack delivery) and **one** concrete work shape you will foreground; you may name **one or two** anchor tools **only if** the resume proves them. **Do not** pack the sentence with every primaryJDTerm. Not meta about evidence. Must not contradict avoid. Ban fluff: well-suited, versatile, passionate, detail-oriented, strong communication, highly motivated, results-driven, self-starter, dynamic, adept at, proven track record, and similar.

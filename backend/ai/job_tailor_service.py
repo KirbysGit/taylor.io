@@ -24,6 +24,7 @@ from .prompt import (
     build_pass_b_system,
     build_pass_b_user,
     build_prompt,
+    normalize_tailor_preferences,
     skillsFitSignals,
     tailor_ab_experiment_enabled,
 )
@@ -407,6 +408,7 @@ def mergePassEdits(out_a, out_b):
 
 def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     payload = JobTailorSuggestRequest.model_dump()
+    payload["style_preferences"] = normalize_tailor_preferences(payload.get("style_preferences"))
     _append_job_sample(payload)
 
     ext_result = extract_keywords(
@@ -486,6 +488,10 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
             stage_a=out,
             narrative_brief=narrative_brief,
             target_role=target_role_str,
+            company=str((payload or {}).get("company") or "") if isinstance(payload, dict) else "",
+            style_preferences=payload.get("style_preferences") if isinstance(payload, dict) else {},
+            strict_truth=bool(payload.get("strict_truth", True)) if isinstance(payload, dict) else True,
+            tailor_context=tailorContext,
             return_audit_debug=True,
             rows_per_section_ranked=(sectionDetails or {}).get("rowsPerSectionRanked") or {},
         )
@@ -495,6 +501,10 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
             stage_a=out,
             narrative_brief=narrative_brief,
             target_role=target_role_str,
+            company=str((payload or {}).get("company") or "") if isinstance(payload, dict) else "",
+            style_preferences=payload.get("style_preferences") if isinstance(payload, dict) else {},
+            strict_truth=bool(payload.get("strict_truth", True)) if isinstance(payload, dict) else True,
+            tailor_context=tailorContext,
             return_audit_debug=False,
             rows_per_section_ranked=(sectionDetails or {}).get("rowsPerSectionRanked") or {},
         )
@@ -526,6 +536,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
             )
         write_debug("job_tailor_latest_system.json", {"pass1": system_a, "pass2": system_b})
         write_debug("job_tailor_latest_user.json", {"pass1": user_a, "pass2": user_b})
+        write_debug("job_tailor_preferences.json", payload.get("style_preferences") or {})
         write_debug("job_tailor_narrative.json", narrative_brief)
         write_debug("job_tailor_stage_a.json", out1)
         if out2_parsed is not None:
@@ -601,6 +612,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     ch = (final_out.get("summary") or "").strip()
     return JobTailorSuggestResponse(
         summary=ch,
+        tailorExplanation=final_out.get("tailorExplanation") or {},
         updatedResumeData=final_out["updatedResumeData"],
         patchDiff=final_out["patchDiff"],
         changeReasons=final_out["changeReasons"],

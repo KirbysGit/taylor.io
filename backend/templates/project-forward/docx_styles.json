@@ -1,0 +1,11 @@
+{
+  "_comment": "Word-only tweaks for project-forward. Structural order comes from layoutProfile project_forward.",
+  "prose_line_height": 1.08,
+  "word_bullet_space_before_pt": 0.35,
+  "word_bullet_space_after_pt": 0.85,
+  "description_paragraph_space_pt": 1.2,
+  "description_block_space_before_pt": 0.55,
+  "project_title_space_before_pt": 0.75,
+  "project_line_space_pt": 1.15,
+  "summary_space_after_pt": 1.5
+}

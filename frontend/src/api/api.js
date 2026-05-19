@@ -23,6 +23,7 @@ async function apiRequestCore(endpoint, options = {}) {
         method: options.method || 'GET',
         credentials: 'include',
         cache: 'no-store', // prevent cached /me response (e.g. stale education list after refresh)
+        ...(options.signal && { signal: options.signal }),
         headers: {
             // only set Content-Type for non-FormData requests.
             ...(!isFormData && { 'Content-Type': 'application/json' }),

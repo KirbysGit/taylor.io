@@ -110,7 +110,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 			role="presentation"
 		>
 			<div
-				className="auth-card animate-fade-in w-full max-w-[31rem] overflow-hidden rounded-[1.45rem] border border-brand-pink/18 bg-white/88 shadow-[0_28px_80px_-24px_rgba(120,40,40,0.34)] backdrop-blur-xl"
+				className="auth-card info-scrollbar animate-fade-in w-full max-w-[31rem] overflow-y-auto overflow-x-hidden rounded-[1.45rem] border border-brand-pink/18 bg-white/88 shadow-[0_28px_80px_-24px_rgba(120,40,40,0.34)] backdrop-blur-xl"
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="login-modal-title"

@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from ..layouts.registry import DEFAULT_LAYOUT_PROFILE, load_layout_profile
+from ..layouts.registry import DEFAULT_LAYOUT_PROFILE, LAYOUT_PROJECT_FORWARD, load_layout_profile
 
 
 def _classic_single_column_engine(template_name: Optional[str]) -> bool:
-    return load_layout_profile(template_name) == DEFAULT_LAYOUT_PROFILE
+    return load_layout_profile(template_name) in {DEFAULT_LAYOUT_PROFILE, LAYOUT_PROJECT_FORWARD}
 
 # --- Classic (classic / legacy default) ---------------------------------
 

@@ -13,12 +13,18 @@ from playwright.sync_api import sync_playwright
 from .shared.styles import get_styles
 from .shared.resume_tokens import build_resume_tokens_css, load_resume_token_dict
 from .shared.style_presets import merge_resume_token_overrides
-from .layouts import LAYOUT_SIDEBAR_SPLIT, docx_export_template_slug, load_layout_profile
+from .layouts import (
+    LAYOUT_PROJECT_FORWARD,
+    LAYOUT_SIDEBAR_SPLIT,
+    docx_export_template_slug,
+    load_layout_profile,
+)
 from .layouts.common import raw_body_order as _raw_body_order
 from .layouts.sidebar_split import (
     sidebar_main_column_order as _sidebar_main_column_order,
     sidebar_rail_section_order as _sidebar_rail_section_order,
 )
+from .layouts.project_forward import project_forward_body_order
 from .shared.template_slug import normalize_template_slug, resolve_template_folder
 
 # HTML fragment generators (preview / pdf)
@@ -78,9 +84,11 @@ def build_sections_map(
     """Section key → HTML block (possibly empty string)."""
     titles = _section_titles(resume_data)
     sections_map: Dict[str, str] = {}
-    project_variant = (
-        "sidebar_main" if layout_profile == LAYOUT_SIDEBAR_SPLIT else "default"
-    )
+    project_variant = "default"
+    if layout_profile == LAYOUT_SIDEBAR_SPLIT:
+        project_variant = "sidebar_main"
+    elif layout_profile == LAYOUT_PROJECT_FORWARD:
+        project_variant = "project_forward"
 
     summary = resume_data.get("summary")
     if summary is not None:
@@ -115,8 +123,10 @@ def build_sections_map(
 
 
 # Builds body section order from resume data.
-def _body_section_order(resume_data: Dict[str, Any]) -> list:
+def _body_section_order(resume_data: Dict[str, Any], layout_profile: str | None = None) -> list:
     """Single-column flow: summary always first when present, then rest in order."""
+    if layout_profile == LAYOUT_PROJECT_FORWARD:
+        return project_forward_body_order(resume_data)
     body_order = list(_raw_body_order(resume_data))
     if "summary" in body_order:
         body_order = ["summary"] + [k for k in body_order if k != "summary"]
@@ -228,7 +238,7 @@ def fill_template(
         return html_content
 
     # If layout profile is not sidebar split, build body sections.
-    body_order = _body_section_order(resume_data)
+    body_order = _body_section_order(resume_data, layout_profile)
     sections_html = []
     for section_key in body_order:
         if section_key in sections_map and sections_map[section_key]:

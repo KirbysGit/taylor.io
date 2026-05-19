@@ -30,6 +30,7 @@ function RightPanel({
 	onRefreshPreview,
 	validationIssues = [],
 	exactPdfUrl = null,
+	isExactPdfFresh = false,
 	exactPdfRefreshing = false,
 	showSaveBanner = false,
 	saveChangedSections = [],
@@ -53,17 +54,29 @@ function RightPanel({
 	isTailorHtmlCompare = false,
 }) {
 	const [previewZoom, setPreviewZoom] = useState(PREVIEW_ZOOM.default)
+	const [previewMode, setPreviewMode] = useState('draft')
 
 	const hasValidationIssues = validationIssues.length > 0
 	const isDownloadBusy = downloadStatus?.phase === 'loading'
 	const downloadLabel =
 		downloadStatus?.type === 'word' ? 'Word document' : 'PDF'
 	const isDefaultZoom = previewZoom === PREVIEW_ZOOM.default
-	const showExact = Boolean(exactPdfUrl) && showExactPdfInCanvas
+	const canShowPrintLayout = Boolean(exactPdfUrl) && isExactPdfFresh && showExactPdfInCanvas
+	const showExact = previewMode === 'print' && canShowPrintLayout
 	const showPreviewRefreshOverlay =
 		!hasValidationIssues &&
 		Boolean(previewHtml) &&
-		(exactPdfRefreshing || isGeneratingPreview)
+		isGeneratingPreview
+	const printStatusText = exactPdfRefreshing
+		? 'Print syncing'
+		: isExactPdfFresh
+			? 'Print ready'
+			: 'Print pending'
+	const printStatusClass = exactPdfRefreshing
+		? 'border-amber-200 bg-amber-50 text-amber-800'
+		: isExactPdfFresh
+			? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+			: 'border-gray-200 bg-gray-50 text-gray-500'
 
 	// Layout size must match scaled visual size or horizontal scroll clips the left edge
 	// (flex justify-center + transform-only scale keeps layout at 850px wide).
@@ -165,6 +178,44 @@ function RightPanel({
 				aria-live="polite"
 			>
 				<div className="min-w-0 justify-self-start">
+					<div className="mb-1 flex flex-wrap items-center gap-2">
+						<div
+							className="inline-flex h-9 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+							role="group"
+							aria-label="Choose preview type"
+						>
+							<button
+								type="button"
+								onClick={() => setPreviewMode('draft')}
+								className={`px-3 text-xs font-black transition-colors ${
+									previewMode === 'draft'
+										? 'bg-brand-pink/12 text-brand-pink'
+										: 'text-gray-600 hover:bg-gray-50'
+								}`}
+							>
+								Fast preview
+							</button>
+							<span className="w-px shrink-0 self-stretch bg-gray-200" aria-hidden="true" />
+							<button
+								type="button"
+								onClick={() => setPreviewMode('print')}
+								disabled={!showExactPdfInCanvas}
+								className={`inline-flex items-center gap-1.5 px-3 text-xs font-black transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+									previewMode === 'print'
+										? 'bg-emerald-50 text-emerald-800'
+										: 'text-gray-600 hover:bg-gray-50'
+								}`}
+							>
+								{exactPdfRefreshing ? (
+									<FontAwesomeIcon icon={faSpinner} spin className="size-3" />
+								) : null}
+								Print layout
+							</button>
+						</div>
+						<span className={`inline-flex h-8 items-center rounded-full border px-2.5 text-[0.68rem] font-black uppercase tracking-[0.08em] ${printStatusClass}`}>
+							{printStatusText}
+						</span>
+					</div>
 					{isTailorHtmlCompare ? (
 						<p className="text-xs text-gray-600">
 							<span className="font-medium text-gray-800">Quick preview</span>
@@ -377,14 +428,14 @@ function RightPanel({
 									/>
 									<div className="min-w-0">
 										<p className="text-sm font-semibold text-gray-900">
-											{exactPdfRefreshing
-												? 'Updating print layout'
-												: 'Updating quick preview'}
+											{isGeneratingPreview
+												? 'Updating fast preview'
+												: 'Updating print layout'}
 										</p>
 										<p className="mt-0.5 text-xs text-gray-500">
-											{exactPdfRefreshing
-												? 'Aligning with PDF export…'
-												: 'Applying your latest edits…'}
+											{isGeneratingPreview
+												? 'Applying your latest edits...'
+												: 'Aligning with PDF export...'}
 										</p>
 									</div>
 								</div>

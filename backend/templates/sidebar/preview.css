@@ -283,8 +283,8 @@
 .divider {
     width: 100%;
     height: var(--rt-divider-height-pt);
-    background-color: #000;
-    opacity: 0.75;
+    background-color: var(--rt-section-divider-color);
+    opacity: var(--rt-section-divider-opacity);
     margin-bottom: var(--rt-divider-margin-bottom-pt);
     margin-top: var(--rt-divider-margin-top-pt);
 }

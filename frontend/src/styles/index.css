@@ -33,7 +33,7 @@
 	.input {
 		/* Form controls don’t always inherit body text; lock to theme sans so fields match the rest of the app. */
 		@apply w-full rounded-xl bg-white px-3.5 py-2.5 font-sans font-medium text-gray-900 shadow-sm;
-		border: 1px solid rgba(214, 86, 86, 0.16);
+		border: 2px solid rgba(214, 86, 86, 0.16);
 		transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
 	}
 	
@@ -441,6 +441,7 @@
 
 .auth-card {
 	position: relative;
+	max-height: calc(100vh - 5rem);
 }
 
 .auth-card::before {
@@ -485,6 +486,7 @@
 
 	.auth-card {
 		max-width: 31rem;
+		max-height: calc(100vh - 4.75rem);
 	}
 
 	.auth-modal-content {
@@ -570,6 +572,7 @@
 
 	.auth-card {
 		max-width: 30rem;
+		max-height: calc(100vh - 3.85rem);
 	}
 
 	.auth-modal-content {
@@ -620,6 +623,7 @@
 
 	.auth-card {
 		border-radius: 1rem !important;
+		max-height: calc(100vh - 3.35rem);
 	}
 
 	.auth-modal-content {

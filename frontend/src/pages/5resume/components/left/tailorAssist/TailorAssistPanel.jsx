@@ -1,4 +1,18 @@
 // Tailor flow: shows intent + status. Full resume merge happens in ResumePreview (no per-change patch UI yet).
+import { useState } from 'react'
+
+function labelize(value) {
+	return String(value || '')
+		.replace(/_/g, ' ')
+		.replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function chipClass(tone) {
+	if (tone === 'safe') return 'border-emerald-200 bg-emerald-50 text-emerald-800'
+	if (tone === 'action') return 'border-brand-pink/25 bg-brand-pink/[0.08] text-brand-pink-dark'
+	if (tone === 'caution') return 'border-amber-200 bg-amber-50 text-amber-800'
+	return 'border-gray-200 bg-gray-50 text-gray-700'
+}
 
 function TailorAssistPanel({
 	tailorIntent,
@@ -7,6 +21,7 @@ function TailorAssistPanel({
 	tailorLayoutPreview,
 	onShowTailorFinalLayout = () => {},
 }) {
+	const [detailsOpen, setDetailsOpen] = useState(false)
 	if (!tailorIntent) return null
 
 	const phaseLabelMap = {
@@ -16,7 +31,9 @@ function TailorAssistPanel({
 		error: 'Tailor run failed',
 	}
 	const phaseLabel = phaseLabelMap[aiTailorPhase] || 'Ready'
-	const tailorChangelog = aiTailorResult?.summary
+	const tailorExplanation = aiTailorResult?.tailorExplanation
+	const explanationParagraph = tailorExplanation?.paragraph || aiTailorResult?.summary
+	const explanationChips = Array.isArray(tailorExplanation?.chips) ? tailorExplanation.chips : []
 	const warnings = Array.isArray(aiTailorResult?.warnings) ? aiTailorResult.warnings : []
 	const changeReasons = Array.isArray(aiTailorResult?.changeReasons) ? aiTailorResult.changeReasons : []
 	const changeReasonLines = changeReasons
@@ -50,6 +67,12 @@ function TailorAssistPanel({
 				<span className="rounded bg-white/15 px-2 py-0.5 capitalize ring-1 ring-white/25">
 					Tone: {tailorIntent.tone || 'balanced'}
 				</span>
+				<span className="rounded bg-white/15 px-2 py-0.5 ring-1 ring-white/25">
+					Length: {labelize(tailorIntent.lengthTarget || 'balanced')}
+				</span>
+				<span className="rounded bg-white/15 px-2 py-0.5 ring-1 ring-white/25">
+					Rewrite: {labelize(tailorIntent.rewriteFreedom || 'balanced')}
+				</span>
 				{tailorIntent.strictTruth ? (
 					<span className="rounded bg-white/15 px-2 py-0.5 ring-1 ring-white/25">Strict truth</span>
 				) : null}
@@ -57,21 +80,42 @@ function TailorAssistPanel({
 
 			{aiTailorPhase === 'reviewing' ? (
 				<div className="relative mt-3 rounded-lg border border-white/25 bg-white/90 p-3 text-gray-800">
-					{tailorChangelog ? (
-						<p className="text-xs leading-relaxed text-gray-700">{tailorChangelog}</p>
+					{explanationParagraph ? (
+						<p className="text-xs leading-relaxed text-gray-700">{explanationParagraph}</p>
 					) : (
 						<p className="text-xs leading-relaxed text-gray-600">
 							Tailored resume content was applied to the editor. A short summary was not included in this response.
 						</p>
 					)}
+					{explanationChips.length > 0 ? (
+						<div className="mt-2 flex flex-wrap gap-1.5">
+							{explanationChips.map((chip, i) => (
+								<span
+									key={`${chip.label || 'chip'}-${i}`}
+									className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${chipClass(chip.tone)}`}
+								>
+									{chip.label}
+								</span>
+							))}
+						</div>
+					) : null}
 					{changeReasonLines.length > 0 ? (
 						<div className="mt-2 border-t border-gray-200/80 pt-2">
-							<p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">What changed</p>
-							<ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs leading-relaxed text-gray-700">
-								{changeReasonLines.map((line, i) => (
-									<li key={i}>{line}</li>
-								))}
-							</ul>
+							<button
+								type="button"
+								onClick={() => setDetailsOpen((v) => !v)}
+								className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 transition hover:text-brand-pink-dark"
+								aria-expanded={detailsOpen}
+							>
+								{detailsOpen ? 'Hide details' : 'Show details'}
+							</button>
+							{detailsOpen ? (
+								<ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs leading-relaxed text-gray-700">
+									{changeReasonLines.map((line, i) => (
+										<li key={i}>{line}</li>
+									))}
+								</ul>
+							) : null}
 						</div>
 					) : null}
 					{warnings.length > 0 ? (

@@ -16,6 +16,7 @@ import ResumeChoose from './pages/5resume/ResumeChoose'
 import ResumeTailorSetup from './pages/5resume/ResumeTailorSetup'
 import Info from './pages/info/Info'
 import TemplatesPage from './pages/templates/TemplatesPage'
+import Settings from './pages/settings/Settings'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // ----------- main component -----------
@@ -82,6 +83,14 @@ function App() {
               <TemplatesPage />
             </ProtectedRoute>
           } 
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute requireSetup={true}>
+              <Settings />
+            </ProtectedRoute>
+          }
         />
         <Route 
           path="/resumes" 

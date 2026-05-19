@@ -183,7 +183,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 			role="presentation"
 		>
 			<div
-				className="auth-card animate-fade-in w-full max-w-[31rem] overflow-hidden rounded-[1.45rem] border border-brand-pink/18 bg-white/88 shadow-[0_28px_80px_-24px_rgba(120,40,40,0.34)] backdrop-blur-xl"
+				className="auth-card info-scrollbar animate-fade-in w-full max-w-[31rem] overflow-y-auto overflow-x-hidden rounded-[1.45rem] border border-brand-pink/18 bg-white/88 shadow-[0_28px_80px_-24px_rgba(120,40,40,0.34)] backdrop-blur-xl"
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="signup-modal-title"
@@ -230,6 +230,22 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 						<p className="mx-auto mt-1.5 max-w-[22rem] text-sm leading-relaxed text-gray-600">
 							Save your experience, choose the role, and generate a r&eacute;sum&eacute; that fits.
 						</p>
+					</div>
+
+					<button
+						type="button"
+						disabled
+						className="auth-oauth-button mb-3 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white/92 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-[0_8px_18px_rgba(24,24,27,0.08)] disabled:cursor-not-allowed disabled:opacity-70"
+						title="Google sign-in coming soon"
+					>
+						<span className="text-lg font-black text-[#4285f4]">G</span>
+						Continue with Google
+					</button>
+
+					<div className="auth-oauth-divider mb-3 flex items-center gap-4 text-xs text-gray-400">
+						<span className="h-px flex-1 bg-gray-200" />
+						<span>or</span>
+						<span className="h-px flex-1 bg-gray-200" />
 					</div>
 
 					<form onSubmit={handleSubmit} className="auth-form space-y-3.5" noValidate>
@@ -451,20 +467,6 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 							{isLoading ? 'Creating account…' : 'Create account'}
 						</button>
 					</form>
-
-					<div className="auth-google-secondary mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-gray-500">
-						<span className="h-px w-12 bg-gray-200" />
-						<button
-							type="button"
-							disabled
-							className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-gray-600 shadow-sm disabled:cursor-not-allowed disabled:opacity-75"
-							title="Google sign-up coming soon"
-						>
-							<span className="text-sm font-black text-[#4285f4]">G</span>
-							Google
-						</button>
-						<span className="h-px w-12 bg-gray-200" />
-					</div>
 
 					<div className="auth-trust-line mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[0.72rem] font-medium text-gray-500">
 						<span className="inline-flex items-center gap-1.5">

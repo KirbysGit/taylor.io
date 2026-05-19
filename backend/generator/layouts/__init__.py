@@ -5,6 +5,7 @@ from __future__ import annotations
 from .common import defaultSectionBodyOrder, raw_body_order
 from .registry import (
     DEFAULT_LAYOUT_PROFILE,
+    LAYOUT_PROJECT_FORWARD,
     LAYOUT_SIDEBAR_SPLIT,
     SUPPORTED_DOCX_PROFILES,
     docx_export_template_slug,
@@ -16,6 +17,7 @@ from .registry import (
 __all__ = [
     "DEFAULT_LAYOUT_PROFILE",
     "defaultSectionBodyOrder",
+    "LAYOUT_PROJECT_FORWARD",
     "LAYOUT_SIDEBAR_SPLIT",
     "SUPPORTED_DOCX_PROFILES",
     "docx_export_template_slug",

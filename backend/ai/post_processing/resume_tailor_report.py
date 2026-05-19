@@ -4,6 +4,228 @@ from __future__ import annotations
 
 from .resume_patch_shared import asDict, listById, summaryInner
 
+
+def _clean_text(value, limit=120):
+    text = " ".join(str(value or "").strip().split())
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 1)].rstrip() + "..."
+
+
+def _dedupe_keep_order(items, limit=6):
+    out = []
+    seen = set()
+    for item in items or []:
+        text = _clean_text(item, limit=80)
+        if not text:
+            continue
+        key = text.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(text)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _join_human(items):
+    items = [x for x in items or [] if x]
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    if len(items) == 2:
+        return f"{items[0]} and {items[1]}"
+    return ", ".join(items[:-1]) + f", and {items[-1]}"
+
+
+def _keyword_terms_from_context(tailor_context, limit=3):
+    tc = tailor_context if isinstance(tailor_context, dict) else {}
+    terms = []
+    for entry in tc.get("keywords") or []:
+        if not isinstance(entry, dict):
+            continue
+        term = entry.get("term")
+        if isinstance(term, str) and term.strip():
+            terms.append(term)
+    return _dedupe_keep_order(terms, limit=limit)
+
+
+def _resume_hits_from_context(tailor_context, limit=4):
+    tc = tailor_context if isinstance(tailor_context, dict) else {}
+    return _dedupe_keep_order(tc.get("resumeHits") or [], limit=limit)
+
+
+def _resume_gaps_from_context(tailor_context, limit=4):
+    tc = tailor_context if isinstance(tailor_context, dict) else {}
+    return _dedupe_keep_order(tc.get("resumeGaps") or [], limit=limit)
+
+
+def _changed_sections_from_patch(patch):
+    if not isinstance(patch, dict) or not patch:
+        return []
+    labels = {
+        "summary": "summary",
+        "experience": "experience",
+        "projects": "projects",
+        "skills": "skills",
+        "education": "education",
+        "header": "header",
+        "sectionOrder": "section order",
+        "sectionVisibility": "section visibility",
+        "sectionLabels": "section labels",
+        "contactOrder": "contact layout",
+        "hiddenSkills": "hidden skills",
+    }
+    order = [
+        "summary",
+        "experience",
+        "projects",
+        "skills",
+        "education",
+        "header",
+        "sectionOrder",
+        "sectionVisibility",
+        "sectionLabels",
+        "contactOrder",
+        "hiddenSkills",
+    ]
+    return [labels[k] for k in order if k in patch]
+
+
+def _chip(label, tone="neutral"):
+    return {"label": label, "tone": tone}
+
+
+def _preference_chips(style_preferences, strict_truth):
+    prefs = style_preferences if isinstance(style_preferences, dict) else {}
+    chips = []
+    if prefs.get("length_target") == "one_page":
+        chips.append(_chip("One-page target"))
+    elif prefs.get("length_target") == "detailed":
+        chips.append(_chip("More detail"))
+    if prefs.get("rewrite_freedom") == "strong":
+        chips.append(_chip("Strong retarget"))
+    elif prefs.get("rewrite_freedom") == "light":
+        chips.append(_chip("Light rewrite"))
+    if prefs.get("tone") == "concise":
+        chips.append(_chip("Concise tone"))
+    elif prefs.get("tone") == "detailed":
+        chips.append(_chip("Detailed tone"))
+    if prefs.get("focus") and prefs.get("focus") != "balanced":
+        chips.append(_chip(f"{str(prefs.get('focus')).title()} focus"))
+    if strict_truth:
+        chips.append(_chip("Strict truth", "safe"))
+    if prefs.get("custom_instructions"):
+        chips.append(_chip("Custom notes"))
+    return chips
+
+
+def _action_chips(changed_sections):
+    labels = {
+        "summary": "Summary updated",
+        "experience": "Experience reframed",
+        "projects": "Projects prioritized",
+        "skills": "Skills reordered",
+        "education": "Education adjusted",
+    }
+    return [_chip(labels[s], "action") for s in changed_sections if s in labels]
+
+
+def build_tailor_explanation(
+    *,
+    patch,
+    narrative_brief,
+    target_role="",
+    company="",
+    style_preferences=None,
+    strict_truth=True,
+    tailor_context=None,
+    quality_audit=None,
+):
+    nb = narrative_brief if isinstance(narrative_brief, dict) else {}
+    prefs = style_preferences if isinstance(style_preferences, dict) else {}
+    qa = quality_audit if isinstance(quality_audit, dict) else {}
+    role = _clean_text(target_role, limit=80) or "this role"
+    co = _clean_text(company, limit=80)
+    jd_terms = _keyword_terms_from_context(tailor_context, limit=3)
+    matched_terms = _resume_hits_from_context(tailor_context, limit=4)
+    gaps = _resume_gaps_from_context(tailor_context, limit=4)
+    changed_sections = _changed_sections_from_patch(patch)
+    primary_story = _dedupe_keep_order(nb.get("primaryStory") or [], limit=3)
+    candidate_angle = _clean_text(nb.get("candidateAngle"), limit=160)
+
+    sentences = []
+    target_label = f"{role} at {co}" if co else role
+    if jd_terms:
+        sentences.append(
+            f"We read the job description for {target_label} as prioritizing {_join_human(jd_terms)}."
+        )
+    else:
+        sentences.append(f"We used the job description to shape this draft for {target_label}.")
+
+    if matched_terms:
+        story_part = _join_human(primary_story) if primary_story else candidate_angle
+        if story_part:
+            sentences.append(
+                f"Your profile already showed {_join_human(matched_terms)}, so Taylor shaped the draft around {story_part}."
+            )
+        else:
+            sentences.append(
+                f"Your profile already showed {_join_human(matched_terms)}, so Taylor kept the rewrite grounded in those signals."
+            )
+    else:
+        sentences.append(
+            "We found fewer direct keyword matches in your saved profile, so Taylor kept the rewrite closer to your existing evidence."
+        )
+
+    if changed_sections:
+        sentences.append(f"The draft changed {_join_human(changed_sections)} based on those signals.")
+    else:
+        sentences.append("No major structural changes were detected, so review the draft and adjust manually if you want a stronger shift.")
+
+    pref_notes = []
+    if prefs.get("length_target") == "one_page":
+        pref_notes.append("kept the wording tighter for a one-page-friendly draft")
+    elif prefs.get("length_target") == "detailed":
+        pref_notes.append("allowed more detail where the resume evidence supported it")
+    if prefs.get("rewrite_freedom") == "strong":
+        pref_notes.append("used a stronger retargeting pass")
+    elif prefs.get("rewrite_freedom") == "light":
+        pref_notes.append("used a lighter touch")
+    if prefs.get("tone") == "concise":
+        pref_notes.append("favored concise phrasing")
+    elif prefs.get("tone") == "detailed":
+        pref_notes.append("favored fuller phrasing")
+    if pref_notes:
+        sentences.append("Because of your setup choices, Taylor " + _join_human(pref_notes) + ".")
+
+    flags = qa.get("flags") if isinstance(qa.get("flags"), dict) else {}
+    chips = _preference_chips(prefs, strict_truth) + _action_chips(changed_sections)
+    if gaps:
+        chips.append(_chip("Some JD terms not evidenced", "caution"))
+    if flags.get("skills_expected_but_unchanged") or flags.get("suspicious_protected_skill_removals"):
+        chips.append(_chip("Review skills", "caution"))
+
+    paragraph = " ".join(s for s in sentences if s).strip()
+    return {
+        "paragraph": paragraph,
+        "chips": chips[:10],
+        "evidence": {
+            "matchedTerms": matched_terms,
+            "jobPriorityTerms": jd_terms,
+            "resumeGaps": gaps,
+            "changedSections": changed_sections,
+            "preferencesUsed": [
+                k
+                for k in ("length_target", "rewrite_freedom", "tone", "focus", "custom_instructions")
+                if prefs.get(k) and prefs.get(k) != "balanced"
+            ]
+            + (["strict_truth"] if strict_truth else []),
+        },
+    }
+
 # ===== constants (audit / summary heuristics only) ===== #
 
 summaryGenericPhrases = (

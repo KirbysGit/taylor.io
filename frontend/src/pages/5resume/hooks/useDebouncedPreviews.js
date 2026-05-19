@@ -8,7 +8,11 @@ import { validateResumeData } from '../utils/resumeValidation'
 
 // --- constants ---
 const draftPreviewDebounceMs = 450
-const exactPdfDebounceMs = 1000
+const exactPdfDebounceMs = 1800
+
+function isAbortError(error) {
+	return error?.name === 'AbortError'
+}
 
 // --- hook ---
 export function useDebouncedPreviews({
@@ -32,6 +36,8 @@ export function useDebouncedPreviews({
 
 	// state for the exact pdf blob url.
 	const [exactPdfBlobUrl, setExactPdfBlobUrl] = useState(null)
+	const [exactPdfBlob, setExactPdfBlob] = useState(null)
+	const [exactPdfInputKey, setExactPdfInputKey] = useState(null)
 
 	// state for the exact pdf refreshing flag.
 	const [exactPdfRefreshing, setExactPdfRefreshing] = useState(false)
@@ -40,6 +46,7 @@ export function useDebouncedPreviews({
 	const lastExactInputRef = useRef(null)	// to last exact input key.
 	const exactPdfRequestIdRef = useRef(0)	// to track the exact pdf request id.
 	const exactPdfBlobUrlRef = useRef(null)	// to track the exact pdf blob url.
+	const refreshControllerRef = useRef(null)
 
 	// state for the validation issues.
 	const [validationIssues, setValidationIssues] = useState([])
@@ -54,6 +61,7 @@ export function useDebouncedPreviews({
 	// upon unmount, revoke the memory of the exact pdf blob url.
 	useEffect(() => {
 		return () => {
+			refreshControllerRef.current?.abort()
 			const u = exactPdfBlobUrlRef.current
 			if (u) URL.revokeObjectURL(u)
 		}
@@ -69,6 +77,8 @@ export function useDebouncedPreviews({
 				if (prev) URL.revokeObjectURL(prev)
 				return null
 			})
+			setExactPdfBlob(null)
+			setExactPdfInputKey(null)
 			lastExactInputRef.current = null
 			setExactPdfRefreshing(false)
 			return
@@ -89,6 +99,8 @@ export function useDebouncedPreviews({
 				if (prev) URL.revokeObjectURL(prev)
 				return null
 			})
+			setExactPdfBlob(null)
+			setExactPdfInputKey(null)
 
 			// set the last exact input reference to null.
 			lastExactInputRef.current = null
@@ -111,11 +123,14 @@ export function useDebouncedPreviews({
 		const reqId = ++exactPdfRequestIdRef.current
 
 		// create a timer to generate the exact pdf.
+		const controller = new AbortController()
 		const timer = setTimeout(async () => {
 			// try to generate the exact pdf.
 			try {
 				// generate the exact pdf.
-				const blob = await generateResumePDF(template, visibleResumePayload, stylePreferences)
+				const blob = await generateResumePDF(template, visibleResumePayload, stylePreferences, {
+					signal: controller.signal,
+				})
 
 				// if the request id is not the current request id, return.
 				if (reqId !== exactPdfRequestIdRef.current) return
@@ -125,10 +140,13 @@ export function useDebouncedPreviews({
 					if (prev) URL.revokeObjectURL(prev)
 					return URL.createObjectURL(blob)
 				})
+				setExactPdfBlob(blob)
+				setExactPdfInputKey(previewInputKey)
 
 				// set the last exact input reference to the current input key.
 				lastExactInputRef.current = previewInputKey
 			} catch (error) {
+				if (isAbortError(error)) return
 				// if we run into an error, show a toast error.
 				console.error('Exact PDF preview failed:', error)
 				if (reqId === exactPdfRequestIdRef.current) {
@@ -136,14 +154,17 @@ export function useDebouncedPreviews({
 				}
 			} finally {
 				// if the request id is the current request id, set the exact pdf refreshing flag to false.
-				if (reqId === exactPdfRequestIdRef.current) {
+				if (!controller.signal.aborted && reqId === exactPdfRequestIdRef.current) {
 					setExactPdfRefreshing(false)
 				}
 			}
 		}, exactPdfDebounceMs)
 
 		// upon unmount, clear the timer.
-		return () => clearTimeout(timer)
+		return () => {
+			clearTimeout(timer)
+			controller.abort()
+		}
 	}, [
 		resumeData,
 		previewInputKey,
@@ -172,6 +193,8 @@ export function useDebouncedPreviews({
 				if (prev) URL.revokeObjectURL(prev)
 				return null
 			})
+			setExactPdfBlob(null)
+			setExactPdfInputKey(null)
 			lastExactInputRef.current = null
 			setExactPdfRefreshing(false)
 
@@ -192,23 +215,32 @@ export function useDebouncedPreviews({
 		setIsGeneratingPreview(true)
 
 		// create a timer to generate the preview.
+		const controller = new AbortController()
 		const timer = setTimeout(async () => {
 			// try to generate the preview.
 			try {
-				const htmlContent = await generateResumePreview(template, visibleResumePayload, stylePreferences)
+				const htmlContent = await generateResumePreview(template, visibleResumePayload, stylePreferences, {
+					signal: controller.signal,
+				})
 				setPreviewHtml(htmlContent)
 				lastPreviewInputRef.current = previewInputKey
 			} catch (error) {
+				if (isAbortError(error)) return
 				// if we run into an error, show a toast error.
 				console.error('Failed to generate preview: ', error)
 				toast.error("We're having an issue making the preview... Please try refreshing the page.")
 			} finally {
 				// if the request id is the current request id, set the generating preview flag to false.
-				setIsGeneratingPreview(false)
+				if (!controller.signal.aborted) {
+					setIsGeneratingPreview(false)
+				}
 			}
 		}, draftPreviewDebounceMs)
 
-		return () => clearTimeout(timer)
+		return () => {
+			clearTimeout(timer)
+			controller.abort()
+		}
 	}, [resumeData, previewInputKey, visibleResumePayload, template, stylePreferences])
 
 	// --- IMMEDIATE HTML PREVIEW REFRESH.
@@ -238,18 +270,29 @@ export function useDebouncedPreviews({
 
 			// set the generating preview flag to true.
 			setIsGeneratingPreview(true)
+			refreshControllerRef.current?.abort()
+			const controller = new AbortController()
+			refreshControllerRef.current = controller
 
 			// try to generate the preview.
 			try {
-				const htmlContent = await generateResumePreview(template, payload, stylePreferences)
+				const htmlContent = await generateResumePreview(template, payload, stylePreferences, {
+					signal: controller.signal,
+				})
 				setPreviewHtml(htmlContent)
 				lastPreviewInputRef.current = key
 				return true
 			} catch (error) {
+				if (isAbortError(error)) return false
 				console.error('Refresh preview failed:', error)
 				return false
 			} finally {
-				setIsGeneratingPreview(false)
+				if (refreshControllerRef.current === controller) {
+					refreshControllerRef.current = null
+				}
+				if (!controller.signal.aborted) {
+					setIsGeneratingPreview(false)
+				}
 			}
 		},
 		[resumeData, visibleResumePayload, template, stylePreferences]
@@ -262,6 +305,9 @@ export function useDebouncedPreviews({
 		isGeneratingPreview,
 		setIsGeneratingPreview,
 		exactPdfBlobUrl,
+		exactPdfBlob,
+		exactPdfInputKey,
+		isExactPdfFresh: exactPdfInputKey === previewInputKey,
 		exactPdfRefreshing,
 		validationIssues,
 		setValidationIssues,

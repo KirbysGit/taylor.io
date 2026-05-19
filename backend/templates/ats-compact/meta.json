@@ -1,0 +1,23 @@
+{
+  "displayName": "ATS Compact",
+  "family": "Classic single-column",
+  "variantLabel": "Compact · scanner-friendly",
+  "layoutProfile": "classic_single_column",
+  "shortDescription": "A no-frills single-column resume with left-aligned header, compact rhythm, and minimal section chrome for ATS-friendly exports.",
+  "description": "Compact ATS-oriented variant on the single-column engine. It keeps the same editable structure as Classic, but removes decorative dividers, tightens vertical rhythm, and uses a left-aligned header treatment that PDF and Word can both mirror.",
+  "stylingMode": "themeable",
+  "allowedControls": [
+    "marginPreset",
+    "typeScale",
+    "fontPairing",
+    "lineSpacingPreset"
+  ],
+  "layoutLocked": false,
+  "capabilitiesVersion": 1,
+  "tags": [
+    "ATS",
+    "Compact",
+    "Single-column"
+  ],
+  "intent": "ATS minimal"
+}

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
 	faArrowRight,
@@ -27,18 +26,33 @@ const navItems = [
 	{ label: 'Profile', to: '/info', icon: faUser },
 	{ label: 'Resumes', to: '/resumes', icon: faFileAlt },
 	{ label: 'Templates', to: '/templates', icon: faLayerGroup },
-	{ label: 'Settings', to: null, icon: faGear },
+	{ label: 'Settings', to: '/settings', icon: faGear },
 ]
+
+const SIDEBAR_COLLAPSED_KEY = 'dashboardSidebarCollapsed'
+
+function readSidebarCollapsed() {
+	try {
+		return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1'
+	} catch {
+		return false
+	}
+}
+
+function writeSidebarCollapsed(collapsed) {
+	try {
+		localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? '1' : '0')
+	} catch {
+		// ignore quota / private mode
+	}
+}
 
 function DashboardSidebar({ collapsed, onToggle, onLogout, onBeforeNavigate }) {
 	const navigate = useNavigate()
 	const location = useLocation()
 
 	const handleNavigate = async (item) => {
-		if (!item.to) {
-			toast('Settings are coming soon')
-			return
-		}
+		if (!item.to) return
 		if (item.to === location.pathname) return
 		if (onBeforeNavigate) await onBeforeNavigate(item.to)
 		navigate(item.to)
@@ -187,7 +201,15 @@ function MobileNav({ onLogout, onBeforeNavigate }) {
 }
 
 export default function DashboardShell({ children, onLogout, onBeforeNavigate }) {
-	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(readSidebarCollapsed)
+
+	const handleSidebarToggle = () => {
+		setIsSidebarCollapsed((value) => {
+			const next = !value
+			writeSidebarCollapsed(next)
+			return next
+		})
+	}
 
 	return (
 		<div className="info-scrollbar relative h-screen overflow-hidden bg-[#fff8ef] text-gray-950">
@@ -195,7 +217,7 @@ export default function DashboardShell({ children, onLogout, onBeforeNavigate })
 			<div className="relative z-[1] flex h-screen min-h-0">
 				<DashboardSidebar
 					collapsed={isSidebarCollapsed}
-					onToggle={() => setIsSidebarCollapsed((value) => !value)}
+					onToggle={handleSidebarToggle}
 					onLogout={onLogout}
 					onBeforeNavigate={onBeforeNavigate}
 				/>
