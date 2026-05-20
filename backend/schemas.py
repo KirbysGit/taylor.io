@@ -236,6 +236,12 @@ class SavedResumeCreate(BaseModel):
     template: Optional[str] = None
 
 
+class SavedResumeUpdate(BaseModel):
+    name: Optional[str] = None
+    status: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
 class SavedResumeResponse(BaseModel):
     id: int
     user_id: int
@@ -245,4 +251,3 @@ class SavedResumeResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
-

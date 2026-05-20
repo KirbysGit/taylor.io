@@ -41,10 +41,8 @@ function RightPanel({
 	savedResumesOpen,
 	onToggleSavedResumes,
 	onCloseSavedResumes,
-	saveResumeName,
-	onSaveResumeNameChange,
 	isSavingResumeForLater = false,
-	onSaveForLater,
+	onOpenSaveDraftModal,
 	onLoadSaved,
 	onDeleteSaved,
 	canCompareTailoredResume = false,
@@ -316,10 +314,8 @@ function RightPanel({
 							savedResumesOpen={savedResumesOpen}
 							onToggleSavedResumes={onToggleSavedResumes}
 							onCloseSavedResumes={onCloseSavedResumes}
-							saveResumeName={saveResumeName}
-							onSaveResumeNameChange={onSaveResumeNameChange}
 							isSavingResumeForLater={isSavingResumeForLater}
-							onSaveForLater={onSaveForLater}
+							onOpenSaveDraftModal={onOpenSaveDraftModal}
 							onLoadSaved={onLoadSaved}
 							onDeleteSaved={onDeleteSaved}
 						/>

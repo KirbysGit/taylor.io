@@ -1,7 +1,7 @@
 // components / left / LeftPanel.jsx
 // Left panel container: assist + styling + sections.
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import EditorChrome from '@/components/EditorChrome'
 import WelcomeMessage from './WelcomeMessage'
 import ResumeStyling from './ResumeStyling'
@@ -41,11 +41,38 @@ function LeftPanel({
 	onShowTailorFinalLayout,
 }) {
 	const [welcomeMessage, setWelcomeMessage] = useState(() => !localStorage.getItem('hasSeenResumeWelcome'))
+	const [tailorReviewMode, setTailorReviewMode] = useState('expanded')
+	const lastTailorResultRef = useRef(null)
 
 	const handleDismissWelcome = () => {
 		localStorage.setItem('hasSeenResumeWelcome', 'true')
 		setWelcomeMessage(false)
 	}
+
+	useEffect(() => {
+		if (!tailorIntent) {
+			lastTailorResultRef.current = null
+			setTailorReviewMode('expanded')
+			return
+		}
+		if (aiTailorPhase === 'requesting' || aiTailorPhase === 'error') {
+			setTailorReviewMode('expanded')
+			return
+		}
+		if (aiTailorPhase !== 'reviewing' || !aiTailorResult) return
+		if (lastTailorResultRef.current === aiTailorResult) return
+		lastTailorResultRef.current = aiTailorResult
+		setTailorReviewMode('expanded')
+	}, [tailorIntent, aiTailorPhase, aiTailorResult])
+
+	const tailorReviewOwnsPanel = Boolean(
+		tailorIntent &&
+		(
+			aiTailorPhase === 'requesting' ||
+			aiTailorPhase === 'error' ||
+			(aiTailorPhase === 'reviewing' && tailorReviewMode === 'expanded')
+		)
+	)
 
 	return (
 		<aside 
@@ -60,42 +87,49 @@ function LeftPanel({
 				aiTailorPhase={aiTailorPhase}
 				tailorLayoutPreview={tailorLayoutPreview}
 				onShowTailorFinalLayout={onShowTailorFinalLayout}
+				mode={tailorReviewMode}
+				onContinue={() => setTailorReviewMode('collapsed')}
+				onReopen={() => setTailorReviewMode('expanded')}
 			/>
 
-			{welcomeMessage && (
-				<WelcomeMessage
-					user={user}
-					onDismiss={handleDismissWelcome}
-				/>
-			)}
+			{!tailorReviewOwnsPanel ? (
+				<>
+					{welcomeMessage && !tailorIntent && (
+						<WelcomeMessage
+							user={user}
+							onDismiss={handleDismissWelcome}
+						/>
+					)}
 
-			<ResumeStyling
-				template={template}
-				onTemplateChange={onTemplateChange}
-				availableTemplates={availableTemplates}
-				templateStyling={templateStyling}
-				isLoadingTemplates={isLoadingTemplates}
-				stylePreferences={stylePreferences}
-				onStylePreferenceChange={onStylePreferenceChange}
-			/>
+					<ResumeStyling
+						template={template}
+						onTemplateChange={onTemplateChange}
+						availableTemplates={availableTemplates}
+						templateStyling={templateStyling}
+						isLoadingTemplates={isLoadingTemplates}
+						stylePreferences={stylePreferences}
+						onStylePreferenceChange={onStylePreferenceChange}
+					/>
 
-			<SimpleResumeSections
-					sectionOrder={sectionOrder}
-					onSectionOrderChange={onSectionOrderChange}
-					resumeData={resumeData}
-					onHeaderChange={onHeaderChange}
-					onEducationChange={onEducationChange}
-					onExperienceChange={onExperienceChange}
-					onProjectsChange={onProjectsChange}
-					onSkillsChange={onSkillsChange}
-					onHideSkill={onHideSkill}
-					onShowSkill={onShowSkill}
-					onSkillsCategoryOrderChange={onSkillsCategoryOrderChange}
-					onSummaryChange={onSummaryChange}
-					onVisibilityChange={onVisibilityChange}
-					sectionLabels={sectionLabels}
-					onSectionLabelChange={onSectionLabelChange}
-				/>
+					<SimpleResumeSections
+						sectionOrder={sectionOrder}
+						onSectionOrderChange={onSectionOrderChange}
+						resumeData={resumeData}
+						onHeaderChange={onHeaderChange}
+						onEducationChange={onEducationChange}
+						onExperienceChange={onExperienceChange}
+						onProjectsChange={onProjectsChange}
+						onSkillsChange={onSkillsChange}
+						onHideSkill={onHideSkill}
+						onShowSkill={onShowSkill}
+						onSkillsCategoryOrderChange={onSkillsCategoryOrderChange}
+						onSummaryChange={onSummaryChange}
+						onVisibilityChange={onVisibilityChange}
+						sectionLabels={sectionLabels}
+						onSectionLabelChange={onSectionLabelChange}
+					/>
+				</>
+			) : null}
 		</aside>
 	)
 }

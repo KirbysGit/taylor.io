@@ -1,0 +1,9 @@
+{
+  "_comment": "Word-only spacing nudges for Executive Summary. Shared chrome and type values live in resume_tokens.json.",
+  "prose_line_height": 1.1,
+  "word_bullet_space_before_pt": 0.3,
+  "word_bullet_space_after_pt": 0.8,
+  "description_paragraph_space_pt": 1.0,
+  "description_block_space_before_pt": 0.5,
+  "summary_space_after_pt": 1.75
+}

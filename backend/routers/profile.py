@@ -32,7 +32,7 @@ from schemas import (
     SectionLabelsUpdate,
     AttachResumeRequest,
     SummaryCreate, SummaryResponse,
-    SavedResumeCreate, SavedResumeResponse,
+    SavedResumeCreate, SavedResumeResponse, SavedResumeUpdate,
 )
 from resume_parser import parse_resume_file
 from .auth import get_current_user_from_token
@@ -794,6 +794,51 @@ async def get_saved_resume(
     return SavedResumeResponse.model_validate(saved)
 
 
+@router.patch("/saved-resumes/{saved_id}", response_model=SavedResumeResponse)
+async def update_saved_resume(
+    saved_id: int,
+    payload: SavedResumeUpdate,
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    """Update saved resume metadata without changing the resume snapshot."""
+    saved = db.query(SavedResume).filter(SavedResume.id == saved_id, SavedResume.user_id == current_user.id).first()
+    if not saved:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Saved resume not found")
+
+    if payload.name is not None:
+        saved.name = payload.name.strip() or saved.name
+
+    resume_data = dict(saved.resume_data or {})
+    metadata = dict(resume_data.get("saveMetadata") or {})
+
+    if payload.status is not None:
+        clean_status = payload.status.strip().lower().replace(" ", "_")
+        metadata["status"] = clean_status or "draft"
+
+    if payload.tags is not None:
+        seen = set()
+        clean_tags = []
+        for tag in payload.tags:
+            clean_tag = str(tag or "").strip().lstrip("#")[:28]
+            key = clean_tag.lower()
+            if not clean_tag or key in seen:
+                continue
+            seen.add(key)
+            clean_tags.append(clean_tag)
+            if len(clean_tags) >= 8:
+                break
+        metadata["tags"] = clean_tags
+
+    resume_data["saveMetadata"] = metadata
+    saved.resume_data = resume_data
+
+    db.add(saved)
+    db.commit()
+    db.refresh(saved)
+    return SavedResumeResponse.model_validate(saved)
+
+
 @router.delete("/saved-resumes/{saved_id}")
 async def delete_saved_resume(
     saved_id: int,
@@ -807,4 +852,3 @@ async def delete_saved_resume(
     db.delete(saved)
     db.commit()
     return {"ok": True}
-

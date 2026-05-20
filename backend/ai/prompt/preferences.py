@@ -15,7 +15,7 @@ DEFAULT_TAILOR_PREFERENCES = {
 ALLOWED_FOCUS = {"balanced", "impact", "technical", "leadership"}
 ALLOWED_TONE = {"balanced", "concise", "detailed"}
 ALLOWED_LENGTH_TARGET = {"one_page", "balanced", "detailed"}
-ALLOWED_REWRITE_FREEDOM = {"light", "balanced", "strong"}
+ALLOWED_REWRITE_FREEDOM = {"light", "balanced", "strong", "transform"}
 
 CUSTOM_INSTRUCTIONS_MAX_CHARS = 420
 
@@ -74,8 +74,9 @@ def preference_guidance(preferences: Any) -> dict:
     }
     freedom_guidance = {
         "light": "Make conservative edits: preserve much of the original structure and wording while improving fit.",
-        "strong": "Make assertive, visibly role-shaped edits: reorder, re-lead, and reframe aggressively inside the evidence.",
         "balanced": "Make a clear role-shaped rewrite without needless churn.",
+        "strong": "Make assertive, visibly role-shaped edits: reorder, re-lead, and reframe aggressively inside the evidence.",
+        "transform": "Use the most aggressive truthful tailoring: select rows, adjust layout, and fully recast kept bullets around the target story.",
     }
     return {
         **prefs,

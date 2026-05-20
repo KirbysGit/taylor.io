@@ -1,0 +1,9 @@
+{
+  "_comment": "Word-only spacing nudges for Modern Rule. Shared chrome and type values live in resume_tokens.json.",
+  "prose_line_height": 1.08,
+  "word_bullet_space_before_pt": 0.25,
+  "word_bullet_space_after_pt": 0.75,
+  "description_paragraph_space_pt": 0.9,
+  "description_block_space_before_pt": 0.4,
+  "summary_space_after_pt": 1.25
+}

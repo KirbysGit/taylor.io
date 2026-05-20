@@ -1,0 +1,152 @@
+{
+  "target_role": "Operations Coordinator",
+  "company": "Pacific Commercial Services, Inc",
+  "style_preferences": {
+    "focus": "balanced",
+    "tone": "balanced",
+    "length_target": "balanced",
+    "rewrite_freedom": "balanced",
+    "custom_instructions": ""
+  },
+  "strict_truth": true,
+  "model": "gpt-4o-mini",
+  "job_description_chars": 4136,
+  "resume_counts": {
+    "experience": 2,
+    "projects": 6,
+    "skills": 22,
+    "education": 1
+  },
+  "extracted_keywords": [
+    {
+      "term": "operations",
+      "score": 10.0,
+      "frequency": 6.0,
+      "sources": [
+        "bodyToken",
+        "titleToken"
+      ]
+    },
+    {
+      "term": "compliance",
+      "score": 9.3,
+      "frequency": 7.0,
+      "sources": [
+        "bodyToken",
+        "capabilityStack"
+      ]
+    },
+    {
+      "term": "scheduling",
+      "score": 7.0,
+      "frequency": 5.0,
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "resource",
+      "score": 6.0,
+      "frequency": 6.0,
+      "sources": [
+        "bodyToken",
+        "partOfPhrase"
+      ]
+    },
+    {
+      "term": "process improvement",
+      "score": 6.0,
+      "frequency": 1.0,
+      "sources": [
+        "knownPhrase"
+      ]
+    },
+    {
+      "term": "safety",
+      "score": 5.0,
+      "frequency": 5.0,
+      "sources": [
+        "bodyToken",
+        "partOfPhrase"
+      ]
+    },
+    {
+      "term": "resource allocation",
+      "score": 5.0,
+      "frequency": 3.0,
+      "sources": [
+        "knownPhrase"
+      ]
+    },
+    {
+      "term": "coordinator",
+      "score": 5.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "titleToken"
+      ]
+    },
+    {
+      "term": "metrics",
+      "score": 5.0,
+      "frequency": 1.0,
+      "sources": [
+        "knownPhrase"
+      ]
+    },
+    {
+      "term": "project",
+      "score": 4.0,
+      "frequency": 4.0,
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "efficiency",
+      "score": 4.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "partOfPhrase"
+      ]
+    },
+    {
+      "term": "execution",
+      "score": 3.7,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken"
+      ]
+    }
+  ],
+  "resume_hits": [
+    "compliance",
+    "metrics"
+  ],
+  "resume_gaps": [
+    "operations",
+    "scheduling",
+    "resource",
+    "process improvement",
+    "safety",
+    "resource allocation",
+    "coordinator",
+    "project",
+    "efficiency",
+    "execution"
+  ],
+  "relevant_jd_lines": [
+    "are you a master of logistics, a problem-solver under pressure, and someone who thrives in a fast-moving environment? we’re looking for a highly organized, strategic, and resourceful operations coordinator to take charge of scheduling, resource allocation, and workflow optimization for our field operations.",
+    "develop a deep understanding of job scopes and project requirements to assess how resource allocation impacts job timelines and overall execution.",
+    "serve as the key liaison for field supervisors, project managers, clients, and resource teams to facilitate efficient resource allocation and job execution.",
+    "analyze and track key performance metrics, ensuring compliance with safety, regulatory, and operational standards, and drive solutions to improve performance.",
+    "work with the safety manager and project manager to ensure that all work is performed in compliance with safety regulations, company policies, and industry standards.",
+    "scheduling & resource coordination",
+    "develop and maintain daily and long-term schedules dynamic scheduling for field personnel, equipment, and materials across various jobs, optimizing for efficiency, cost-effectiveness, and productivity.",
+    "collaborate closely with field teams, project managers, and clients to optimize job scheduling, proactively identify risks, resolve conflicts, and ensure timely completion of tasks.",
+    "leverage software tools (dispatching platforms, gps tracking, erp systems) to streamline scheduling, resource management, and real-time job monitoring.",
+    "highly organized and process oriented with a strong knowledge of operational efficiency and execution."
+  ]
+}

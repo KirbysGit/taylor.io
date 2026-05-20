@@ -22,7 +22,7 @@ maxHeroExperienceNarrative = 2
 
 # ===== debug ===== #
 # --- flip off in prod if you do not want extra debug_out writes from this module. --- #
-debug = True
+debug = False
 
 # --- same debug_out root as job_tailor_service (this file lives in ai/narrative/). --- #
 narrativeDebugOutBase = Path(__file__).resolve().parent.parent / "debug_out"
@@ -39,6 +39,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
         "primaryStory": [],
         "secondaryStory": [],
         "summaryGoal": "",
+        "summaryDecision": {},
         "skillsStrategy": [],
         "categoryStrategy": [],
         "sectionStrategy": {},
@@ -61,6 +62,11 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
         "heroExperience": [],
         "rewriteGoals": [],
         "avoid": [],
+        "alignmentMode": "",
+        "alignmentGuidance": "",
+        "directEvidence": [],
+        "transferableEvidence": [],
+        "unsupportedTerms": [],
     }
 
     # if openai is off, skip the second call—the main prompt still gets padded defaults via normalize.
@@ -76,6 +82,8 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             keyword_hints=primary_early,
             project_rank=proj_rank_early,
         )
+        alignment_context_early = tailorContext.get("alignmentContext") if isinstance(tailorContext.get("alignmentContext"), dict) else {}
+        normalized_skip = inject_alignment_context(normalized_skip, alignment_context_early)
         if debug:
             write_narrative_debug(
                 {
@@ -91,6 +99,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
     active_domains = tailorContext.get("activeDomains") or []
     hits = tailorContext.get("resumeHits") or []
     gaps = tailorContext.get("resumeGaps") or []
+    alignment_context = tailorContext.get("alignmentContext") if isinstance(tailorContext.get("alignmentContext"), dict) else {}
     rows_ranked = sectionDetails.get("rowsPerSectionRanked") or {}
     plan_ranked_rows = hero_rank_hints_for_narrative(rows_ranked, resume_data)
 
@@ -118,18 +127,22 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             "For one-page or concise mode, make real selection decisions: drop low-fit rows for this role's lane when stronger evidence exists; drop weaker rows before over-compressing the strongest evidence for the posting.",
             "Every experience id should appear in exactly one of `keepExperience` or `dropExperience`. Every project id should appear in exactly one of `keepProjects`, `dropProjects`, or `maybeProjects`. `rewriteExperience`, `rewriteProjects`, and `repairProjects` are action lists drawn from kept/maybe rows.",
             "Produce one editorial plan JSON. Downstream success = a **visibly retargeted** resume for this role: different leads, order, and emphasis—not a light edit.",
+            "**Match strength matters:** use `alignmentContext.mode` to choose tone. `direct` = assert direct fit. `adjacent` = bridge honestly from proven evidence. `stretch` = conservative transfer story; do not claim the target role background as already proven.",
+            "When alignment is `adjacent` or `stretch`, keep rows with transferable evidence even if they lack exact JD keywords, especially rows showing coordination, pressure, communication, compliance, metrics, workflow, reporting, or response.",
+            "For adjacent/stretch summaries, avoid opening as `<Target Role> with...` unless the resume directly proves that title. Open from the candidate's real background and bridge toward the target role.",
             "**`candidateAngle`:** one sentence—**professional lane + lead** for this posting; **not** a comma-packed echo of JD keywords. **`primaryStory`:** **2–4 pillars from resume JSON + evidenceRows** (frameworks, data/automation, integrations, UI surfaces the body proves); **≥ half** the phrases should be **resume-native** strengths the JD might never name. JD terms tune **scan and order** when evidenced—they are **not** the only admissible toolkit.",
             "targetStory: one compact object that downstream passes should treat as the single source of positioning truth. Include `roleLane`, `readerTakeaway`, `proofExperienceIds`, `proofProjectIds`, `deEmphasizeExperienceIds`, `deEmphasizeProjectIds`, and `evidenceThemes`. Keep it shorter than the combined legacy story fields; do not duplicate long prose.",
             "summaryGoal must guide the summary rewrite (opening, technical lead, **scan-friendly** phrasing where true)—do not copy-paste candidateAngle.",
+            "summaryDecision: required object `{action, confidence, reason, evidence}`. `action` is `show`, `hide`, or `keep`. Show when the summary earns space by repositioning the candidate, connecting scattered proof, explaining a pivot, or foregrounding a role-specific thesis. Hide when a tight direct-fit draft would repeat obvious proof already visible in experience/projects/skills. Keep when evidence is mixed or the resume setup should remain unchanged.",
             "skillsStrategy: **2–6 strings** — categories/alignment → Lead → Supporting → trim last **sparingly**. Default: **selected and ordered toolkit** for this archetype+posting—not a JD keyword extract. **Supporting** = honest breadth (plausible for the role family even without verbatim JD terms). **Trim last** only for obvious noise or mismatch—not “missing from JD.” Demote before delete; **few** trims.",
             "sectionStrategy: stage A rewrites hero experience + hero projects; values **resume-grounded** first, **posting emphasis** second. For skills: one line on **ordered toolkit + breadth**.",
             "layoutStrategy: **0–4 short strings** for resume structure only. Content is primary; layout is secondary. Decide whether Summary should be shown for this role, and whether section order should change for scan priority. Use only existing sections: summary, experience, projects, skills, education. Do not hide evidence-bearing sections just to save space.",
             "layoutSectionOrder: optional full display order using existing section keys, normally starting with header. Put the most persuasive sections for this posting earlier; education can move down when less relevant, or up when credentials are the strongest proof.",
-            "layoutSectionVisibility: optional object with booleans for summary, education, experience, projects, skills. Hide summary when it would be redundant for a direct evidence-heavy draft; show it when it helps reposition the candidate, explain a pivot, or foreground a role-specific profile. Do not hide experience/projects/skills unless absent or clearly empty.",
+            "layoutSectionVisibility: optional object with booleans for summary, education, experience, projects, skills. Follow `summaryDecision` for summary visibility when it makes a clear show/hide call. Do not hide experience/projects/skills unless absent or clearly empty.",
             "layoutRationale: optional short concrete reasons for any order/visibility changes.",
             "rewriteGoals: **hero rows only**—bold, specific landing instructions (Make/Land/Use or equivalent). No new facts; stay inside each row’s bullets.",
-            "categoryStrategy: **[]** unless a fluffy/broad skill-like bucket needs merge, rename, or collapse—**bucket tactics** here; ordering lives in skillsStrategy.",
-            "Required: targetStory, candidateAngle, primaryStory, summaryGoal, skillsStrategy, sectionStrategy, heroExperience, full project tier partition, rewriteGoals, avoid. Include layout fields when structure should change. secondaryStory optional; omit filler.",
+            "categoryStrategy: **[]** unless a fluffy/broad skill-like bucket needs merge, rename, or collapse—**bucket tactics** here; ordering lives in skillsStrategy. Treat categories like Focus Areas, Strengths, Competencies, and General Skills as flexible only when present; do not invent a flexible bucket for users who do not have one.",
+            "Required: targetStory, candidateAngle, primaryStory, summaryGoal, summaryDecision, skillsStrategy, sectionStrategy, heroExperience, full project tier partition, rewriteGoals, avoid. Include layout fields when structure should change. secondaryStory optional; omit filler.",
             "keep `avoid` short (1–4 lines) and only for real fabrication or unsupported-domain risk; do not use `avoid` to discourage big true rewrites.",
             "Projects: every id exactly once—heroProjects (max 4), supportingProjects (few; **reference for stage A by default—no full rewrites there** unless upstream **thin-bullet repair** opens an id), peripheralProjects (default for remaining). Do not park every non-hero project in supporting.",
             "Pick **heroProjects** and **heroExperience** primarily from **planRankedRows** order when ids fit the archetype; `jdEvidenceScore` is the main rank signal and `jdKeywordHits` is the unique-term count. Deprioritizing a higher-evidence row is allowed only for a clear, evidence-backed reason in avoid or row fit.",
@@ -151,6 +164,9 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             "resumeGaps (JD terms not evidenced—use in avoid and caution):",
             json.dumps(gaps_preview, ensure_ascii=False),
             "",
+            "alignmentContext (deterministic match-strength classifier):",
+            json.dumps(alignment_context, ensure_ascii=False, indent=2),
+            "",
             "primaryJDTerms (emphasis hints only):",
             json.dumps(primary, ensure_ascii=False),
             "secondaryJDTerms:",
@@ -165,7 +181,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             json.dumps(resume_data, ensure_ascii=False, indent=2),
             "",
             "Return exactly this shape:",
-            '{"targetStory":{"roleLane":"","readerTakeaway":"","proofExperienceIds":[],"proofProjectIds":[],"deEmphasizeExperienceIds":[],"deEmphasizeProjectIds":[],"evidenceThemes":[]},"candidateAngle":"","primaryStory":[],"secondaryStory":[],"summaryGoal":"","skillsStrategy":[],"categoryStrategy":[],"sectionStrategy":{},"layoutStrategy":[],"layoutSectionOrder":[],"layoutSectionVisibility":{},"layoutRationale":[],"keepExperience":[],"dropExperience":[],"rewriteExperience":[],"keepProjects":[],"dropProjects":[],"rewriteProjects":[],"repairProjects":[],"maybeProjects":[],"selectionRationale":[],"heroProjects":[],"supportingProjects":[],"peripheralProjects":[],"heroExperience":[],"rewriteGoals":[],"avoid":[]}',
+            '{"targetStory":{"roleLane":"","readerTakeaway":"","proofExperienceIds":[],"proofProjectIds":[],"deEmphasizeExperienceIds":[],"deEmphasizeProjectIds":[],"evidenceThemes":[]},"candidateAngle":"","primaryStory":[],"secondaryStory":[],"summaryGoal":"","summaryDecision":{"action":"keep","confidence":"low","reason":"","evidence":[]},"skillsStrategy":[],"categoryStrategy":[],"sectionStrategy":{},"layoutStrategy":[],"layoutSectionOrder":[],"layoutSectionVisibility":{},"layoutRationale":[],"keepExperience":[],"dropExperience":[],"rewriteExperience":[],"keepProjects":[],"dropProjects":[],"rewriteProjects":[],"repairProjects":[],"maybeProjects":[],"selectionRationale":[],"heroProjects":[],"supportingProjects":[],"peripheralProjects":[],"heroExperience":[],"rewriteGoals":[],"avoid":[],"alignmentMode":"","alignmentGuidance":"","directEvidence":[],"transferableEvidence":[],"unsupportedTerms":[]}',
         ]
     )
 
@@ -176,6 +192,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
     normalized = normalize_narrative_brief(
         raw, empty, resume_data, keyword_hints=primary, project_rank=project_rank
     )
+    normalized = inject_alignment_context(normalized, alignment_context)
 
     char_meta = {
         "system_chars": len(system) if isinstance(system, str) else 0,
@@ -203,6 +220,21 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
         )
 
     return normalized, usage_narrative, char_meta
+
+
+def inject_alignment_context(narrative: dict, alignment_context: dict) -> dict:
+    out = dict(narrative or {})
+    ac = alignment_context if isinstance(alignment_context, dict) else {}
+    mode = str(ac.get("mode") or "").strip().lower()
+    if mode:
+        out["alignmentMode"] = mode
+    guidance = str(ac.get("guidance") or "").strip()
+    if guidance:
+        out["alignmentGuidance"] = guidance
+    out["directEvidence"] = ac.get("directEvidence") if isinstance(ac.get("directEvidence"), list) else []
+    out["transferableEvidence"] = ac.get("transferableEvidence") if isinstance(ac.get("transferableEvidence"), list) else []
+    out["unsupportedTerms"] = ac.get("unsupportedTerms") if isinstance(ac.get("unsupportedTerms"), list) else []
+    return out
 
 
 # ===== debug io ===== #
@@ -932,6 +964,51 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
             "evidenceThemes": dedupe_preserve_order(themes)[:4],
         }
 
+    def normalize_summary_decision(value):
+        sd = value if isinstance(value, dict) else {}
+        raw_action = sd.get("action")
+        action = str(raw_action or "").strip().lower()
+        if action not in ("show", "hide", "keep"):
+            vis = out.get("layoutSectionVisibility") if isinstance(out.get("layoutSectionVisibility"), dict) else {}
+            if isinstance(vis.get("summary"), bool):
+                action = "show" if vis.get("summary") else "hide"
+            else:
+                action = "keep"
+
+        raw_confidence = sd.get("confidence")
+        confidence = str(raw_confidence or "").strip().lower()
+        if confidence not in ("high", "medium", "low"):
+            confidence = "medium" if action in ("show", "hide") else "low"
+
+        reason = str(sd.get("reason") or "").strip()
+        reason = strip_resume_cliche_phrases(strip_brochure_phrases(reason))
+        if len(reason) > 220:
+            reason = reason[:219].rstrip(",;: ") + "..."
+        if not reason:
+            if action == "show":
+                reason = "Summary earns space because it can connect role-specific evidence that is spread across the resume."
+            elif action == "hide":
+                reason = "Summary is less useful because the strongest proof is already visible in the main sections."
+            else:
+                reason = "No confident summary visibility change was needed from the available evidence."
+
+        evidence = []
+        raw_evidence = sd.get("evidence")
+        if isinstance(raw_evidence, list):
+            for item in raw_evidence:
+                cleaned = strip_resume_cliche_phrases(strip_brochure_phrases(str(item or "").strip()))
+                if cleaned:
+                    evidence.append(cleaned[:120])
+        if not evidence:
+            target_story = out.get("targetStory") if isinstance(out.get("targetStory"), dict) else {}
+            evidence = [str(x).strip()[:120] for x in (target_story.get("evidenceThemes") or []) if str(x).strip()]
+        return {
+            "action": action,
+            "confidence": confidence,
+            "reason": reason,
+            "evidence": dedupe_preserve_order(evidence)[:3],
+        }
+
     # --- avoid first so angle/summaryGoal can stay consistent with guardrails we will pad if thin. --- #
     out["avoid"] = dedupe_preserve_order(str_list("avoid"))[:4]
     # --- pad only with hard safety rails—long default lists made downstream rewrites timid. --- #
@@ -1152,5 +1229,13 @@ def normalize_narrative_brief(raw, empty, resume_data, keyword_hints=None, proje
                 out["rewriteGoals"].append(softened)
     out["rewriteGoals"] = [soften_rewrite_goal_scope(g) for g in out["rewriteGoals"][:6]]
     out["targetStory"] = normalize_target_story(raw.get("targetStory"))
+    out["summaryDecision"] = normalize_summary_decision(raw.get("summaryDecision"))
+    summary_action = (out.get("summaryDecision") or {}).get("action")
+    if summary_action in ("show", "hide") and "summary" not in out.get("layoutSectionVisibility", {}):
+        out["layoutSectionVisibility"]["summary"] = summary_action == "show"
+        reason = (out.get("summaryDecision") or {}).get("reason")
+        if reason and reason not in out["layoutRationale"]:
+            out["layoutRationale"].append(reason)
+            out["layoutRationale"] = out["layoutRationale"][:4]
 
     return out

@@ -7,13 +7,13 @@ from typing import Dict, Any
 import asyncio
 import sys
 from datetime import datetime
-from playwright.sync_api import sync_playwright
 
 # local imports.
 from .shared.styles import get_styles
 from .shared.resume_tokens import build_resume_tokens_css, load_resume_token_dict
 from .shared.style_presets import merge_resume_token_overrides
 from .layouts import (
+    LAYOUT_EARLY_CAREER,
     LAYOUT_PROJECT_FORWARD,
     LAYOUT_SIDEBAR_SPLIT,
     docx_export_template_slug,
@@ -25,6 +25,7 @@ from .layouts.sidebar_split import (
     sidebar_rail_section_order as _sidebar_rail_section_order,
 )
 from .layouts.project_forward import project_forward_body_order
+from .layouts.early_career import early_career_body_order
 from .shared.template_slug import normalize_template_slug, resolve_template_folder
 
 # HTML fragment generators (preview / pdf)
@@ -127,6 +128,8 @@ def _body_section_order(resume_data: Dict[str, Any], layout_profile: str | None 
     """Single-column flow: summary always first when present, then rest in order."""
     if layout_profile == LAYOUT_PROJECT_FORWARD:
         return project_forward_body_order(resume_data)
+    if layout_profile == LAYOUT_EARLY_CAREER:
+        return early_career_body_order(resume_data)
     body_order = list(_raw_body_order(resume_data))
     if "summary" in body_order:
         body_order = ["summary"] + [k for k in body_order if k != "summary"]
@@ -293,6 +296,8 @@ def convert_html_to_pdf_sync(
     template_name: str | None = None,
     style_preferences: Dict[str, Any] | None = None,
 ) -> bytes:
+    from playwright.sync_api import sync_playwright
+
     # On Windows, Playwright needs ProactorEventLoop for subprocess support (SelectorEventLoop raises NotImplementedError).
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())

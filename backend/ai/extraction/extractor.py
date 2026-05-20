@@ -2,6 +2,7 @@
 
 # ===== imports ===== #
 import re
+import os
 from collections import defaultdict
 from dataclasses import dataclass, field
 
@@ -455,8 +456,8 @@ def get_relevant_jd_lines(bodyLines, keywords):
 def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
 
     # debugging control.
-    wanna_debug = True
-    wanna_count = True
+    wanna_debug = (os.getenv("TAILOR_EXTRACT_DEBUG") or "").strip().lower() in ("1", "true", "yes", "on")
+    wanna_count = (os.getenv("TAILOR_AGGREGATE_TERMS") or "").strip().lower() in ("1", "true", "yes", "on")
     if wanna_debug:
         debug = {}
 

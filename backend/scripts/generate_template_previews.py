@@ -54,7 +54,31 @@ def parse_args():
         "--card-crop",
         type=float,
         default=0.56,
-        help="Top fraction of the resume page used for the card preview. Default: 0.56",
+        help="Deprecated: retained for compatibility. Card previews now use --card-width/--card-height/--card-zoom.",
+    )
+    parser.add_argument(
+        "--card-width",
+        type=int,
+        default=960,
+        help="Generated card preview width in browser CSS pixels. Default: 960",
+    )
+    parser.add_argument(
+        "--card-height",
+        type=int,
+        default=620,
+        help="Generated card preview height in browser CSS pixels. Default: 620",
+    )
+    parser.add_argument(
+        "--card-zoom",
+        type=float,
+        default=2.0,
+        help="Zoom applied to the resume before taking the card screenshot. Default: 2.0",
+    )
+    parser.add_argument(
+        "--card-align",
+        choices=["center", "left"],
+        default="center",
+        help="Horizontal focus for the zoomed card preview. Default: center",
     )
     parser.add_argument(
         "--scale",
@@ -148,23 +172,44 @@ def output_path_for_template(templateDir, outputRelativePath):
     return templateDir / Path(*PurePosixPath(outputRelativePath).parts)
 
 
-def screenshot_resume_card(page, outputPath, cardCrop):
-    resume = page.locator(".resume")
-    box = resume.bounding_box()
-    if not box:
-        raise RuntimeError("Could not locate .resume for screenshot.")
-    cropFraction = min(1.0, max(0.2, float(cardCrop)))
-    outputPath.parent.mkdir(parents=True, exist_ok=True)
-    page.screenshot(
-        path=str(outputPath),
-        clip={
-            "x": box["x"],
-            "y": box["y"],
-            "width": box["width"],
-            "height": box["height"] * cropFraction,
-        },
-        animations="disabled",
+def screenshot_resume_card(page, outputPath, cardWidth, cardHeight, cardZoom, cardAlign):
+    zoom = max(1.0, float(cardZoom))
+    alignLeft = cardAlign == "left"
+    transformOrigin = "top left" if alignLeft else "top center"
+    marginRule = "margin: 0 !important;" if alignLeft else "margin: 0 auto !important;"
+
+    page.set_viewport_size({"width": int(cardWidth), "height": int(cardHeight)})
+    page.add_style_tag(
+        content=f"""
+        html,
+        body {{
+            width: {int(cardWidth)}px !important;
+            height: {int(cardHeight)}px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            background: #f8fafc !important;
+        }}
+
+        .body-wrapper {{
+            display: block !important;
+            width: {int(cardWidth)}px !important;
+            height: {int(cardHeight)}px !important;
+            overflow: hidden !important;
+            background: #f8fafc !important;
+        }}
+
+        .resume {{
+            {marginRule}
+            transform: scale({zoom}) !important;
+            transform-origin: {transformOrigin} !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }}
+        """
     )
+    outputPath.parent.mkdir(parents=True, exist_ok=True)
+    page.screenshot(path=str(outputPath), animations="disabled")
 
 
 def render_template_preview(
@@ -174,6 +219,12 @@ def render_template_preview(
     outputRelativePath,
     fullOutputRelativePath,
     cardCrop,
+    cardWidth,
+    cardHeight,
+    cardZoom,
+    cardAlign,
+    fullViewportWidth,
+    fullViewportHeight,
     updateMeta,
 ):
     templateDir = templatesDir / templateSlug
@@ -182,9 +233,10 @@ def render_template_preview(
     fullOutputPath.parent.mkdir(parents=True, exist_ok=True)
 
     htmlContent = generate_resume(templateSlug, resumeData, style_preferences={})
+    page.set_viewport_size({"width": int(fullViewportWidth), "height": int(fullViewportHeight)})
     page.set_content(htmlContent, wait_until="networkidle")
     page.locator(".resume").screenshot(path=str(fullOutputPath), animations="disabled")
-    screenshot_resume_card(page, outputPath, cardCrop)
+    screenshot_resume_card(page, outputPath, cardWidth, cardHeight, cardZoom, cardAlign)
 
     metaUpdated = False
     if updateMeta:
@@ -233,6 +285,12 @@ def main():
                     outputRelativePath,
                     fullOutputRelativePath,
                     args.card_crop,
+                    args.card_width,
+                    args.card_height,
+                    args.card_zoom,
+                    args.card_align,
+                    args.width,
+                    args.height,
                     updateMeta=not args.no_update_meta,
                 )
                 results.append(result)

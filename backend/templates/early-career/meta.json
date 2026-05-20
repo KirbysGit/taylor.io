@@ -1,0 +1,23 @@
+{
+  "displayName": "Early Career",
+  "family": "Early-career single-column",
+  "variantLabel": "Education first",
+  "layoutProfile": "early_career",
+  "shortDescription": "A clean early-career layout that promotes education and projects before experience.",
+  "description": "Early Career is built for students, interns, new grads, and career switchers. It keeps the design simple while moving education and projects above experience in both PDF and Word exports.",
+  "stylingMode": "themeable",
+  "allowedControls": [
+    "marginPreset",
+    "typeScale",
+    "fontPairing",
+    "lineSpacingPreset"
+  ],
+  "layoutLocked": false,
+  "capabilitiesVersion": 1,
+  "tags": [
+    "Early career",
+    "Education-first",
+    "Projects"
+  ],
+  "intent": "Student and entry-level resumes"
+}

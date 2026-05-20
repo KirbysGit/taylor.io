@@ -1,0 +1,11 @@
+{
+  "_comment": "Word-only spacing nudges for Early Career. Structural order comes from layoutProfile early_career.",
+  "prose_line_height": 1.06,
+  "word_bullet_space_before_pt": 0.25,
+  "word_bullet_space_after_pt": 0.65,
+  "description_paragraph_space_pt": 0.85,
+  "description_block_space_before_pt": 0.35,
+  "project_line_space_pt": 0.8,
+  "summary_space_after_pt": 0.9,
+  "skill_line_space_pt": 0.8
+}

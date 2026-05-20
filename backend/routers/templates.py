@@ -7,7 +7,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 
 router = APIRouter(prefix="/api/templates", tags=["templates"])
 
@@ -185,6 +185,65 @@ async def list_templates():
     styling = {name: load_template_styling_meta(name) for name in names}
 
     return {"templates": names, "templateStyling": styling}
+
+
+@router.get("/{slug}/preview-html")
+async def template_preview_html(slug: str):
+    """Render the shared preview fixture through the actual template HTML."""
+    if not _SLUG_RE.match(slug or ""):
+        raise HTTPException(status_code=404, detail="Not found")
+    templateDir = (TEMPLATES_DIR / slug).resolve()
+    if not templateDir.is_dir():
+        raise HTTPException(status_code=404, detail="Not found")
+    fixturePath = TEMPLATES_DIR / "preview_fixture.json"
+    if not fixturePath.is_file():
+        raise HTTPException(status_code=404, detail="Preview fixture not found")
+    try:
+        with open(fixturePath, "r", encoding="utf-8") as f:
+            resumeData = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        raise HTTPException(status_code=500, detail="Could not load preview fixture")
+    if not isinstance(resumeData, dict):
+        raise HTTPException(status_code=500, detail="Preview fixture must be an object")
+
+    try:
+        try:
+            from generator.pipeline import generate_resume
+        except ModuleNotFoundError:
+            from backend.generator.pipeline import generate_resume
+
+        html = generate_resume(slug, resumeData, style_preferences={})
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Could not render preview: {exc}") from exc
+
+    preview_css = """
+<style>
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #fff !important;
+  }
+
+  .body-wrapper {
+    display: block !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    min-height: auto !important;
+    overflow: hidden !important;
+    background: #fff !important;
+  }
+
+  .resume {
+    margin: 0 auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+</style>
+"""
+    html = html.replace("</head>", f"{preview_css}</head>", 1)
+    return HTMLResponse(html)
 
 
 @router.get("/{slug}/asset/{asset_path:path}")

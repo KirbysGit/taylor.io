@@ -1,0 +1,337 @@
+{
+  "stage_a": {
+    "edits": {
+      "summarySection": {
+        "summary": "Operations Coordinator with a strong background in logistics, compliance, and metrics tracking. Proven ability to optimize resource allocation and improve processes through technical expertise in data management and operational efficiency."
+      },
+      "experience": [
+        {
+          "id": 5,
+          "description": "• Spearheaded the development and maintenance of backend services and REST APIs in Python/Django, ensuring secure workflows for financial and compliance teams.\n• Collaborated with cross-functional teams to design scalable service patterns and data models, enhancing operational efficiency.\n• Created React dashboards integrated with Django APIs, significantly improving visibility into operational metrics and backend data workflows.\n• Streamlined Python data-processing pipelines and optimized PostgreSQL queries, achieving a ~40% reduction in latency and enhancing system scalability."
+        }
+      ],
+      "projects": [
+        {
+          "id": 17,
+          "tech_stack": [
+            "Python",
+            "PyTorch",
+            "OpenCV",
+            "scikit-learn",
+            "NumPy"
+          ],
+          "description": "• Developed a product detection system for retail environments using advanced algorithms like ResNet-50 and FPN, optimizing logistics for inventory management.\n• Implemented smart anchor matching and IoU-based detection algorithms to effectively handle overlapping items, enhancing operational accuracy.\n• Conducted comprehensive benchmarking on the SKU-110K dataset, providing detailed metrics and comparisons with YOLOv5 to drive performance improvements."
+        }
+      ],
+      "removedExperienceIds": [
+        7
+      ],
+      "sectionOrder": [
+        "header",
+        "education",
+        "experience",
+        "projects",
+        "skills",
+        "summary"
+      ],
+      "sectionVisibility": {
+        "summary": true,
+        "education": true,
+        "experience": true,
+        "projects": true,
+        "skills": true
+      }
+    }
+  },
+  "stage_b": {
+    "edits": {
+      "skills": [
+        {
+          "id": 45,
+          "name": "Django",
+          "category": "Frameworks"
+        },
+        {
+          "id": 41,
+          "name": "Python",
+          "category": "Languages"
+        },
+        {
+          "id": 51,
+          "name": "PostgreSQL",
+          "category": "Data Tools"
+        },
+        {
+          "id": 56,
+          "name": "AWS (EC2)",
+          "category": "Data Tools"
+        },
+        {
+          "id": 58,
+          "name": "Backend Development",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 59,
+          "name": "Automation Systems",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 60,
+          "name": "AI-Driven Workflows",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 61,
+          "name": "Data Pipelines",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 62,
+          "name": "REST API Design",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 42,
+          "name": "Java",
+          "category": "Languages"
+        },
+        {
+          "id": 43,
+          "name": "JavaScript",
+          "category": "Languages"
+        },
+        {
+          "id": 44,
+          "name": "SQL",
+          "category": "Languages"
+        },
+        {
+          "id": 46,
+          "name": "FastAPI",
+          "category": "Frameworks"
+        },
+        {
+          "id": 47,
+          "name": "React",
+          "category": "Frameworks"
+        },
+        {
+          "id": 48,
+          "name": "Node.js",
+          "category": "Frameworks"
+        },
+        {
+          "id": 49,
+          "name": "PyTorch",
+          "category": "Frameworks"
+        },
+        {
+          "id": 50,
+          "name": "TensorFlow Lite",
+          "category": "Frameworks"
+        },
+        {
+          "id": 52,
+          "name": "MySQL",
+          "category": "Data Tools"
+        },
+        {
+          "id": 53,
+          "name": "MongoDB",
+          "category": "Data Tools"
+        },
+        {
+          "id": 54,
+          "name": "Pandas",
+          "category": "Data Tools"
+        },
+        {
+          "id": 55,
+          "name": "NumPy",
+          "category": "Data Tools"
+        },
+        {
+          "id": 57,
+          "name": "ETL Pipelines",
+          "category": "Data Tools"
+        }
+      ]
+    }
+  },
+  "rewrite_repair": {
+    "edits": {
+      "experience": [
+        {
+          "id": 5,
+          "description": "• Developed backend services and REST APIs in Python/Django to support secure workflows for financial and compliance teams.\n• Contributed to system design and architecture with senior engineers, focusing on scalable service patterns and data modeling.\n• Created React dashboards integrated with Django APIs, enhancing visibility into operational metrics and backend data workflows.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency and improving system scalability."
+        }
+      ],
+      "projects": [
+        {
+          "id": 17,
+          "description": "• Created a product detection system for retail environments using ResNet-50 and FPN features, improving logistics for inventory management.\n• Utilized smart anchor matching and IoU-based detection algorithms to accurately handle overlapping items, improving operational accuracy.\n• Conducted benchmarking on the SKU-110K dataset, providing detailed metrics and comparisons with YOLOv5 to inform performance enhancements."
+        }
+      ]
+    }
+  },
+  "combined": {
+    "edits": {
+      "summarySection": {
+        "summary": "Operations Coordinator with a strong background in logistics, compliance, and metrics tracking. Proven ability to optimize resource allocation and improve processes through technical expertise in data management and operational efficiency."
+      },
+      "experience": [
+        {
+          "id": 5,
+          "description": "• Developed backend services and REST APIs in Python/Django to support secure workflows for financial and compliance teams.\n• Contributed to system design and architecture with senior engineers, focusing on scalable service patterns and data modeling.\n• Created React dashboards integrated with Django APIs, enhancing visibility into operational metrics and backend data workflows.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency and improving system scalability."
+        }
+      ],
+      "projects": [
+        {
+          "id": 17,
+          "tech_stack": [
+            "Python",
+            "PyTorch",
+            "OpenCV",
+            "scikit-learn",
+            "NumPy"
+          ],
+          "description": "• Created a product detection system for retail environments using ResNet-50 and FPN features, improving logistics for inventory management.\n• Utilized smart anchor matching and IoU-based detection algorithms to accurately handle overlapping items, improving operational accuracy.\n• Conducted benchmarking on the SKU-110K dataset, providing detailed metrics and comparisons with YOLOv5 to inform performance enhancements."
+        }
+      ],
+      "removedExperienceIds": [
+        7
+      ],
+      "sectionOrder": [
+        "header",
+        "education",
+        "experience",
+        "projects",
+        "skills",
+        "summary"
+      ],
+      "sectionVisibility": {
+        "summary": true,
+        "education": true,
+        "experience": true,
+        "projects": true,
+        "skills": true
+      },
+      "skills": [
+        {
+          "id": 45,
+          "name": "Django",
+          "category": "Frameworks"
+        },
+        {
+          "id": 41,
+          "name": "Python",
+          "category": "Languages"
+        },
+        {
+          "id": 51,
+          "name": "PostgreSQL",
+          "category": "Data Tools"
+        },
+        {
+          "id": 56,
+          "name": "AWS (EC2)",
+          "category": "Data Tools"
+        },
+        {
+          "id": 58,
+          "name": "Backend Development",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 59,
+          "name": "Automation Systems",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 60,
+          "name": "AI-Driven Workflows",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 61,
+          "name": "Data Pipelines",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 62,
+          "name": "REST API Design",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 42,
+          "name": "Java",
+          "category": "Languages"
+        },
+        {
+          "id": 43,
+          "name": "JavaScript",
+          "category": "Languages"
+        },
+        {
+          "id": 44,
+          "name": "SQL",
+          "category": "Languages"
+        },
+        {
+          "id": 46,
+          "name": "FastAPI",
+          "category": "Frameworks"
+        },
+        {
+          "id": 47,
+          "name": "React",
+          "category": "Frameworks"
+        },
+        {
+          "id": 48,
+          "name": "Node.js",
+          "category": "Frameworks"
+        },
+        {
+          "id": 49,
+          "name": "PyTorch",
+          "category": "Frameworks"
+        },
+        {
+          "id": 50,
+          "name": "TensorFlow Lite",
+          "category": "Frameworks"
+        },
+        {
+          "id": 52,
+          "name": "MySQL",
+          "category": "Data Tools"
+        },
+        {
+          "id": 53,
+          "name": "MongoDB",
+          "category": "Data Tools"
+        },
+        {
+          "id": 54,
+          "name": "Pandas",
+          "category": "Data Tools"
+        },
+        {
+          "id": 55,
+          "name": "NumPy",
+          "category": "Data Tools"
+        },
+        {
+          "id": 57,
+          "name": "ETL Pipelines",
+          "category": "Data Tools"
+        }
+      ]
+    },
+    "warnings": [
+      "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:17."
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "displayName": "Executive Summary",
+  "family": "Executive single-column",
+  "variantLabel": "Summary-led",
+  "layoutProfile": "classic_single_column",
+  "shortDescription": "A restrained leadership template with a larger summary rhythm and warmer section treatment.",
+  "description": "Executive Summary emphasizes the opening narrative and keeps the rest of the resume formal, compact, and easy to scan. It works well for leadership, operations, consulting, and strategy resumes.",
+  "stylingMode": "themeable",
+  "allowedControls": [
+    "marginPreset",
+    "typeScale",
+    "fontPairing",
+    "lineSpacingPreset"
+  ],
+  "layoutLocked": false,
+  "capabilitiesVersion": 1,
+  "tags": [
+    "Executive",
+    "Summary-led",
+    "Formal"
+  ],
+  "intent": "Leadership narrative"
+}

@@ -132,6 +132,13 @@ export async function getSavedResume(id) {
 	return apiRequest(`/api/profile/saved-resumes/${id}`, { method: 'GET' })
 }
 
+export async function updateSavedResume(id, updates) {
+	return apiRequest(`/api/profile/saved-resumes/${id}`, {
+		method: 'PATCH',
+		body: JSON.stringify(updates),
+	})
+}
+
 export async function deleteSavedResume(id) {
 	return apiRequest(`/api/profile/saved-resumes/${id}`, { method: 'DELETE' })
 }

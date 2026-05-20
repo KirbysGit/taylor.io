@@ -1,0 +1,220 @@
+{
+  "section_details": {
+    "sectionScoresRanked": [
+      [
+        "experience",
+        2
+      ],
+      [
+        "projects",
+        1
+      ],
+      [
+        "education",
+        0
+      ],
+      [
+        "skills",
+        0
+      ]
+    ],
+    "rowsPerSectionRanked": {
+      "experience": [
+        {
+          "id": 5,
+          "hits": 2,
+          "score": 14.95,
+          "matchedTerms": [
+            "compliance",
+            "metrics"
+          ]
+        }
+      ],
+      "projects": [
+        {
+          "id": 17,
+          "hits": 1,
+          "score": 5.8,
+          "matchedTerms": [
+            "metrics"
+          ]
+        }
+      ],
+      "skills": {},
+      "education": []
+    },
+    "gapsPerSection": {
+      "experience": [
+        "operations",
+        "scheduling",
+        "resource",
+        "process improvement",
+        "safety",
+        "resource allocation",
+        "coordinator",
+        "project",
+        "efficiency",
+        "execution"
+      ],
+      "projects": [
+        "operations",
+        "scheduling",
+        "resource",
+        "process improvement",
+        "safety",
+        "resource allocation",
+        "coordinator",
+        "project",
+        "efficiency",
+        "execution"
+      ],
+      "skills": [
+        "operations",
+        "scheduling",
+        "resource",
+        "process improvement",
+        "safety",
+        "resource allocation",
+        "coordinator",
+        "project",
+        "efficiency",
+        "execution"
+      ],
+      "education": [
+        "operations",
+        "scheduling",
+        "resource",
+        "process improvement",
+        "safety",
+        "resource allocation",
+        "coordinator",
+        "project",
+        "efficiency",
+        "execution"
+      ]
+    }
+  },
+  "narrative": {
+    "candidateAngle": "Operations Coordinator focused on logistics and resource optimization, leveraging technical skills in data management and compliance.",
+    "targetStory": {
+      "roleLane": "Operations Coordinator",
+      "readerTakeaway": "Colin is a operations coordinator with a strong background in logistics, compliance, and process optimization, leveraging technical skills to enhance...",
+      "proofExperienceIds": [
+        5
+      ],
+      "proofProjectIds": [
+        17
+      ],
+      "deEmphasizeExperienceIds": [
+        7
+      ],
+      "deEmphasizeProjectIds": [],
+      "evidenceThemes": [
+        "logistics coordination",
+        "compliance",
+        "metrics tracking",
+        "process improvement"
+      ]
+    },
+    "primaryStory": [
+      "Experience in compliance and metrics tracking from BitGo internship",
+      "Logistics coordination and resource allocation demonstrated through project work",
+      "Process improvement through technology integration and data analysis"
+    ],
+    "secondaryStory": [
+      "Strong problem-solving skills under pressure from service industry experience"
+    ],
+    "summaryGoal": "Highlight operations coordination experience with a focus on compliance and metrics, integrating technical skills to optimize resource allocation and improve processes.",
+    "summaryDecision": {
+      "action": "keep",
+      "confidence": "medium",
+      "reason": "Summary connects technical skills to operational efficiency, providing context for the role.",
+      "evidence": [
+        "Experience in compliance and metrics tracking",
+        "Technical skills in data management and process improvement"
+      ]
+    },
+    "skillsStrategy": [
+      "Categories: Operations, Compliance, Logistics, Data Management",
+      "Lead: Compliance, Metrics, Resource Allocation, Process Improvement",
+      "Supporting: Python, Django, PostgreSQL, React, AWS",
+      "Trim last sparingly—remove any unrelated technical skills"
+    ],
+    "categoryStrategy": [],
+    "sectionStrategy": {
+      "summary": "Rewrite to emphasize operations coordination and technical skills",
+      "experience": "Highlight hero experience with a focus on logistics and compliance",
+      "projects": "Include relevant projects that demonstrate operational efficiency and resource management",
+      "skills": "Organize skills to reflect operational focus and technical proficiency",
+      "education": "Light—credentials frozen; trim highlights only if they sharpen scan."
+    },
+    "layoutStrategy": [],
+    "layoutSectionOrder": [
+      "header",
+      "education",
+      "experience",
+      "projects",
+      "skills",
+      "summary"
+    ],
+    "layoutSectionVisibility": {
+      "experience": true,
+      "skills": true,
+      "projects": true,
+      "summary": true,
+      "education": true
+    },
+    "layoutRationale": [
+      "Summary provides a cohesive narrative linking technical skills to operational efficiency"
+    ],
+    "keepExperience": [
+      5
+    ],
+    "dropExperience": [
+      7
+    ],
+    "rewriteExperience": [
+      5
+    ],
+    "keepProjects": [
+      17
+    ],
+    "dropProjects": [],
+    "rewriteProjects": [
+      17
+    ],
+    "repairProjects": [],
+    "maybeProjects": [
+      9,
+      10,
+      12,
+      18,
+      20
+    ],
+    "selectionRationale": [],
+    "heroProjects": [
+      17
+    ],
+    "supportingProjects": [],
+    "peripheralProjects": [
+      9,
+      10,
+      12,
+      18,
+      20
+    ],
+    "heroExperience": [
+      5
+    ],
+    "rewriteGoals": [
+      "Land BitGo: emphasize compliance and metrics tracking to align with operations coordination",
+      "Land ShelfVision: highlight logistics and resource allocation aspects of the project"
+    ],
+    "avoid": [
+      "No unsupported claims about operations experience without evidence"
+    ]
+  },
+  "selection_guard": {
+    "onePageSelectionGuard": false
+  }
+}

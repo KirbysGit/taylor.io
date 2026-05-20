@@ -17,5 +17,3 @@ pytest_cache/
 .vscode/
 
 .cursor/
-backend/ai/debug_out
-backend/ai/debug_out/

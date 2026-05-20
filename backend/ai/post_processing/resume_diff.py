@@ -574,6 +574,7 @@ def assemble_tailor_result(
         strict_truth=strict_truth,
         tailor_context=tailor_context,
         quality_audit=quality_audit,
+        updated_resume_data=updated,
     )
 
     result = {

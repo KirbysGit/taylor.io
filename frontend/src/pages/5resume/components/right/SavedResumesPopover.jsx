@@ -1,12 +1,33 @@
+function SavedResumeMeta({ resume }) {
+	const metadata = resume?.resume_data?.saveMetadata || {}
+	const tags = Array.isArray(metadata.tags) ? metadata.tags.filter(Boolean).slice(0, 2) : []
+	const status = metadata.status ? String(metadata.status).replace(/_/g, ' ') : ''
+
+	if (!status && tags.length === 0) return null
+
+	return (
+		<div className="mt-1 flex min-w-0 flex-wrap gap-1">
+			{status && (
+				<span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[0.65rem] font-bold capitalize text-gray-500">
+					{status}
+				</span>
+			)}
+			{tags.map((tag) => (
+				<span key={tag} className="rounded-full bg-brand-pink/10 px-1.5 py-0.5 text-[0.65rem] font-bold text-brand-pink">
+					{tag}
+				</span>
+			))}
+		</div>
+	)
+}
+
 function SavedResumesPopover({
 	savedResumes,
 	savedResumesOpen,
 	onToggleSavedResumes,
 	onCloseSavedResumes,
-	saveResumeName,
-	onSaveResumeNameChange,
 	isSavingResumeForLater,
-	onSaveForLater,
+	onOpenSaveDraftModal,
 	onLoadSaved,
 	onDeleteSaved,
 }) {
@@ -34,27 +55,19 @@ function SavedResumesPopover({
 						</div>
 
 						<div className="border-b border-gray-100 px-4 py-3">
-							<label htmlFor="save-resume-name" className="mb-1 block text-xs font-medium text-gray-600">
-								Save current version
-							</label>
-							<input
-								id="save-resume-name"
-								type="text"
-								value={saveResumeName}
-								onChange={(e) => onSaveResumeNameChange(e.target.value)}
-								placeholder="e.g. Product Manager - Stripe"
-								className="w-full rounded-lg border border-gray-200 px-2.5 py-2 text-sm focus:border-brand-pink focus:outline-none focus:ring-2 focus:ring-brand-pink/20"
-							/>
 							<button
 								type="button"
-								onClick={onSaveForLater}
+								onClick={onOpenSaveDraftModal}
 								disabled={isSavingResumeForLater || savedResumes.items.length >= savedResumes.max}
-								className="mt-2.5 w-full rounded-lg bg-brand-pink px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+								className="w-full rounded-lg bg-brand-pink px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
 							>
-								{isSavingResumeForLater ? 'Saving...' : 'Save version'}
+								{isSavingResumeForLater ? 'Saving...' : 'Save current draft'}
 							</button>
 							{savedResumes.items.length >= savedResumes.max && (
 								<p className="mt-1.5 text-xs text-gray-500">Limit reached. Delete one to save more.</p>
+							)}
+							{savedResumes.items.length < savedResumes.max && (
+								<p className="mt-1.5 text-xs text-gray-500">Name it, tag it, and keep your profile unchanged.</p>
 							)}
 						</div>
 
@@ -71,6 +84,7 @@ function SavedResumesPopover({
 											className="min-w-0 flex-1 text-left"
 										>
 											<p className="truncate text-sm font-medium text-gray-800">{s.name}</p>
+											<SavedResumeMeta resume={s} />
 										</button>
 										<button
 											type="button"

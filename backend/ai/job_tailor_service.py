@@ -18,7 +18,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 # in use.
 from .extraction import extract_keywords
 from .processing import build_tailor_context
-from .planning import build_tailor_plan
+from .planning import build_alignment_context, build_tailor_plan
 from .narrative import request_narrative_brief
 from fastapi import HTTPException
 
@@ -105,7 +105,7 @@ def _patch_text_preview_for_log(patch, max_field_chars=480):
                 if isinstance(b, (dict, list)) and isinstance(a, (dict, list)):
                     continue
                 if isinstance(b, (dict, list)) or isinstance(a, (dict, list)):
-                    one[fk] = {"before": None, "after": None, "note": "non-string field; see job_tailor_latest_model.json"}
+                    one[fk] = {"before": None, "after": None, "note": "non-string field; see tailor_05_result.json"}
                     continue
                 one[fk] = {
                     "before": _preview_trunc(b, max_field_chars),
@@ -121,7 +121,7 @@ def _patch_text_preview_for_log(patch, max_field_chars=480):
             out["skills"] = [
                 {
                     "id": "_orderOrFullReplace",
-                    "note": "skills reordered or full replace; see job_tailor_latest_model.json for full list",
+                    "note": "skills reordered or full replace; see tailor_05_result.json for full list",
                 }
             ]
         else:
@@ -140,7 +140,7 @@ def _patch_text_preview_for_log(patch, max_field_chars=480):
                     b, a = delta.get("before"), delta.get("after")
                     if isinstance(b, (dict, list)) or isinstance(a, (dict, list)):
                         one[fk] = {
-                            "note": "complex skill row delta; see job_tailor_latest_model.json",
+                            "note": "complex skill row delta; see tailor_05_result.json",
                         }
                         continue
                     one[fk] = {
@@ -160,11 +160,9 @@ def _env_truthy(name):
 
 
 def _token_log_enabled():
-    # --- Default: log each tailor run to debug_out/token_cost.jsonl. Set TAILOR_TOKEN_LOG=0 to disable. --- #
+    # Opt-in: keep debug_out focused on the five current run files by default.
     v = (os.getenv("TAILOR_TOKEN_LOG") or "").strip().lower()
-    if v in ("0", "false", "no", "off"):
-        return False
-    return True
+    return v in ("1", "true", "yes", "on")
 
 
 def _sum_usage_compacts(*parts) -> dict:
@@ -693,6 +691,62 @@ def _append_stage_warning(stage, warning):
     return out
 
 
+def protect_transferable_experience_for_bridge(narrative_brief):
+    """For adjacent/stretch pivots, keep one non-keyword experience row when it proves transferable work shape."""
+    if not isinstance(narrative_brief, dict):
+        return narrative_brief, None
+    mode = str(narrative_brief.get("alignmentMode") or "").strip().lower()
+    if mode not in ("adjacent", "stretch"):
+        return narrative_brief, None
+    dropped = _int_id_list(narrative_brief.get("dropExperience"))
+    if not dropped:
+        return narrative_brief, None
+    transferable = narrative_brief.get("transferableEvidence")
+    if not isinstance(transferable, list):
+        return narrative_brief, None
+
+    promoted = []
+    for item in transferable:
+        if not isinstance(item, dict) or item.get("section") != "experience":
+            continue
+        rid = item.get("id")
+        if isinstance(rid, float) and rid == int(rid):
+            rid = int(rid)
+        if rid not in dropped:
+            continue
+        themes = item.get("themes") if isinstance(item.get("themes"), list) else []
+        theme_text = " ".join(str((x or {}).get("theme") or "") for x in themes if isinstance(x, dict)).lower()
+        if any(key in theme_text for key in ("coordination", "communication", "pace", "response", "metrics", "compliance")):
+            promoted.append({"id": rid, "label": item.get("label") or f"experience {rid}", "themes": theme_text})
+        if promoted:
+            break
+    if not promoted:
+        return narrative_brief, None
+
+    updated = copy.deepcopy(narrative_brief)
+    promoted_ids = [x["id"] for x in promoted]
+    updated["dropExperience"] = [rid for rid in _int_id_list(updated.get("dropExperience")) if rid not in promoted_ids]
+    keep = _int_id_list(updated.get("keepExperience"))
+    for rid in promoted_ids:
+        if rid not in keep:
+            keep.append(rid)
+    updated["keepExperience"] = keep
+
+    rewrite = _int_id_list(updated.get("rewriteExperience"))
+    for rid in promoted_ids:
+        if rid not in rewrite and len(rewrite) < 2:
+            rewrite.append(rid)
+    updated["rewriteExperience"] = rewrite
+
+    rationale = list(updated.get("selectionRationale") or [])
+    for item in promoted:
+        rationale.append(
+            f"Bridge guard kept {item['label']} because this adjacent-role draft needs transferable coordination or pace evidence, not only exact keyword matches."
+        )
+    updated["selectionRationale"] = list(dict.fromkeys([x for x in rationale if isinstance(x, str) and x.strip()]))[:8]
+    return updated, {"bridgeExperienceGuard": True, "promotedExperienceIds": promoted_ids}
+
+
 def protect_high_fit_project_drops(stage, resume_data, tailor_context, payload=None):
     """Keep rows with strong current-JD evidence unless kept rows clearly cover the same story better."""
     if not isinstance(stage, dict) or not isinstance(stage.get("edits"), dict):
@@ -1064,6 +1118,10 @@ def inject_layout_edits(stage, narrative_brief, resume_data):
     nb = narrative_brief if isinstance(narrative_brief, dict) else {}
     order = _normalize_section_order(nb.get("layoutSectionOrder"), (resume_data or {}).get("sectionOrder") if isinstance(resume_data, dict) else None) if nb.get("layoutSectionOrder") else []
     visibility = _normalize_section_visibility(nb.get("layoutSectionVisibility"), resume_data)
+    summary_decision = nb.get("summaryDecision") if isinstance(nb.get("summaryDecision"), dict) else {}
+    summary_action = str(summary_decision.get("action") or "").strip().lower()
+    if summary_action in ("show", "hide") and "summary" not in visibility:
+        visibility["summary"] = summary_action == "show"
     if not order and not visibility:
         return stage
     out = copy.deepcopy(stage)
@@ -1159,6 +1217,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
 
     # get what we want to focus on per section and row.
     sectionDetails = build_tailor_plan(resumeData=resumeData, tailorContext=tailorContext)
+    tailorContext["alignmentContext"] = build_alignment_context(resumeData, tailorContext, sectionDetails)
 
     # narrative spine: one brief for both passes; not recomputed after pass 1.
     narrative_brief, usage_narr, narrative_char_meta = request_narrative_brief(
@@ -1168,6 +1227,8 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     narrative_brief, narrative_selection_guard = repair_narrative_project_selection(
         narrative_brief, resumeData, sectionDetails, payload
     )
+    narrative_bridge_guard = None
+    narrative_brief, narrative_bridge_guard = protect_transferable_experience_for_bridge(narrative_brief)
 
     # pass 1: summary + hero experience + hero projects (no skills in edits).
     system_a, user_a = build_prompt(
@@ -1278,32 +1339,66 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         def write_debug(name, obj):
             (base / name).write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
-        write_debug("job_tailor_pass_a_system.json", {"prompt": system_a})
-        write_debug("job_tailor_pass_a_user.json", {"prompt": user_a})
-        if system_b is not None:
-            write_debug("job_tailor_pass_b_system.json", {"prompt": system_b})
-        if user_b is not None:
-            write_debug("job_tailor_pass_b_user.json", {"prompt": user_b})
-        if system_b is not None:
-            write_debug(
-                "job_tailor_pass_b_completion.json",
-                {
-                    "assistantText": text_b if isinstance(text_b, str) else "",
-                    "parseNote": ""
-                    if (isinstance(text_b, str) and text_b.strip())
-                    else "empty_completion",
+        write_debug(
+            "tailor_01_input.json",
+            {
+                "target_role": payload.get("target_role"),
+                "company": payload.get("company"),
+                "style_preferences": payload.get("style_preferences") or {},
+                "strict_truth": bool(payload.get("strict_truth", True)),
+                "model": get_openai_model(),
+                "job_description_chars": len(str(payload.get("job_description") or "")),
+                "resume_counts": {
+                    "experience": len(resumeData.get("experience") or []) if isinstance(resumeData, dict) else 0,
+                    "projects": len(resumeData.get("projects") or []) if isinstance(resumeData, dict) else 0,
+                    "skills": len(resumeData.get("skills") or []) if isinstance(resumeData, dict) else 0,
+                    "education": len(resumeData.get("education") or []) if isinstance(resumeData, dict) else 0,
                 },
-            )
-        write_debug("job_tailor_latest_system.json", {"pass1": system_a, "pass2": system_b})
-        write_debug("job_tailor_latest_user.json", {"pass1": user_a, "pass2": user_b})
-        write_debug("job_tailor_preferences.json", payload.get("style_preferences") or {})
-        write_debug("job_tailor_narrative.json", narrative_brief)
-        write_debug("job_tailor_selection_guard.json", narrative_selection_guard or {"onePageSelectionGuard": False})
-        write_debug("job_tailor_stage_a.json", out1)
-        if out2_parsed is not None:
-            write_debug("job_tailor_stage_b.json", out2_parsed)
-        write_debug("job_tailor_combined_edits.json", out)
-        write_debug("job_tailor_latest_model.json", final_out)
+                "extracted_keywords": keywords,
+                "resume_hits": tailorContext.get("resumeHits"),
+                "resume_gaps": tailorContext.get("resumeGaps"),
+                "alignment_context": tailorContext.get("alignmentContext"),
+                "relevant_jd_lines": relevantJDLines,
+            },
+        )
+        write_debug(
+            "tailor_02_plan.json",
+            {
+                "section_details": sectionDetails,
+                "narrative": narrative_brief,
+                "selection_guard": narrative_selection_guard or {"onePageSelectionGuard": False},
+                "bridge_guard": narrative_bridge_guard or {"bridgeExperienceGuard": False},
+            },
+        )
+        write_debug(
+            "tailor_03_prompts.json",
+            {
+                "pass_a": {
+                    "system": system_a,
+                    "user": user_a,
+                    "assistant_text": text_a if isinstance(text_a, str) else "",
+                    "usage": usageToJson(usage_a),
+                },
+                "pass_b": None
+                if system_b is None and user_b is None
+                else {
+                    "system": system_b,
+                    "user": user_b,
+                    "assistant_text": text_b if isinstance(text_b, str) else "",
+                    "usage": usageToJson(usage_b),
+                },
+                "repair": rewrite_repair_debug,
+            },
+        )
+        write_debug(
+            "tailor_04_edits.json",
+            {
+                "stage_a": out1,
+                "stage_b": out2_parsed,
+                "rewrite_repair": rewrite_repair_stage,
+                "combined": out,
+            },
+        )
         if diff_audit is not None:
             diff_audit = {
                 **diff_audit,
@@ -1314,8 +1409,13 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
                 diff_audit = {**diff_audit, "llm_usage_rewrite_pass": usageToJson(usage)}
             if usage_repair is not None:
                 diff_audit = {**diff_audit, "llm_usage_repair_pass": usageToJson(usage_repair)}
-            write_debug("job_tailor_diff_audit.json", diff_audit)
-        write_debug("job_tailor_rewrite_repair.json", rewrite_repair_debug or {"repairPass": "not_run"})
+        write_debug(
+            "tailor_05_result.json",
+            {
+                "final": final_out,
+                "audit": diff_audit,
+            },
+        )
         text_meta = (diff_audit or {}).get("text") or {}
         rw_chars = text_meta.get("rewrite_note_chars")
         if rw_chars is None and diff_audit is not None:

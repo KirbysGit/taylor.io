@@ -1,8 +1,7 @@
 // components / left / ResumeStyling.jsx
+// Compact template shelf + selected-style controls.
 
-// Tab strip: Template (picker + template-specific tokens) vs Format (global output rules for all layouts).
-
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
 	getPlannedTemplateControls,
 	getStyleControlOptions,
@@ -12,25 +11,29 @@ import {
 	templateSupportsControl,
 } from '@/pages/5resume/utils/resumeStyleControls'
 
-const STYLING_SECTION_TABS = [
-	{ id: 'template', label: 'Template' },
-	{ id: 'format', label: 'Format' },
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const TEMPLATE_RECENT_KEY = 'resumeEditorRecentTemplates'
+const TEMPLATE_SHELF_TABS = [
+	{ id: 'popular', label: 'Popular' },
+	{ id: 'recent', label: 'Recent' },
+	{ id: 'favorites', label: 'Favorites' },
 ]
+const POPULAR_TEMPLATE_HINTS = ['classic', 'ats', 'compact', 'modern', 'project', 'sidebar']
 
 const STYLING_MODES = {
 	themeable: {
-		label: 'Themeable',
-		tagClass: 'bg-brand-pink/12 text-brand-pink border-brand-pink/20',
-		hint: 'Adjust type size, fonts, margins, and line spacing below. Preview, PDF update, and Word use the same token set.',
+		label: 'Flexible',
+		className: 'border-brand-pink/20 bg-brand-pink/[0.08] text-brand-pink-dark',
+		hint: 'These settings change the look only. Your resume content stays the same.',
 	},
 	hybrid: {
-		label: 'Hybrid',
-		tagClass: 'bg-sky-50 text-sky-800 border-sky-200/80',
-		hint: 'Layout is fixed; only the options below change how this template prints.',
+		label: 'Guided',
+		className: 'border-sky-200 bg-sky-50 text-sky-800',
+		hint: 'This template has a guided layout with a smaller set of safe adjustments.',
 	},
 	locked: {
 		label: 'Fixed',
-		tagClass: 'bg-gray-100 text-gray-600 border-gray-200',
+		className: 'border-slate-200 bg-slate-100 text-slate-600',
 		hint: 'This template keeps a curated look. Style options are limited.',
 	},
 }
@@ -39,58 +42,146 @@ function modeForMeta(stylingMode) {
 	return STYLING_MODES[stylingMode] ? stylingMode : 'themeable'
 }
 
-function ModeGlyph({ mode, className = 'w-3.5 h-3.5' }) {
-	const cn = `${className} shrink-0`
-	if (mode === 'themeable') {
-		return (
-			<svg className={cn} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
-				<path d="M8 1.5a.75.75 0 0 1 .75.75v1.25a.75.75 0 0 1-1.5 0V2.25A.75.75 0 0 1 8 1.5zM4.5 4.5a.75.75 0 0 1 0 1.06l-.88.88a.75.75 0 1 1-1.06-1.06l.88-.88a.75.75 0 0 1 1.06 0zM1.5 8a.75.75 0 0 1 .75-.75h1.25a.75.75 0 0 1 0 1.5H2.25A.75.75 0 0 1 1.5 8zm9.94 2.56a.75.75 0 1 0-1.06 1.06l.88.88a.75.75 0 1 0 1.06-1.06l-.88-.88zM8 12.25a.75.75 0 0 1 .75.75v1.25a.75.75 0 0 1-1.5 0V13a.75.75 0 0 1 .75-.75zm4.25-6.5a.75.75 0 0 1-.75-.75V4.25a.75.75 0 0 1 1.5 0V5a.75.75 0 0 1-.75.75z" />
-				<path d="M8 5.25A2.75 2.75 0 1 0 8 10.75 2.75 2.75 0 0 0 8 5.25z" opacity=".35" />
-			</svg>
-		)
+function readRecentTemplates() {
+	try {
+		const parsed = JSON.parse(localStorage.getItem(TEMPLATE_RECENT_KEY) || '[]')
+		return Array.isArray(parsed) ? parsed.filter(Boolean) : []
+	} catch {
+		return []
 	}
-	if (mode === 'hybrid') {
-		return (
-			<svg className={cn} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
-				<path d="M2 3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3zm0 6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V9zm7-6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V3zm0 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V7z" />
-			</svg>
-		)
-	}
-	return (
-		<svg className={cn} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
-			<path
-				fillRule="evenodd"
-				d="M11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm1 0a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"
-				clipRule="evenodd"
-			/>
-			<path d="M8 6.5a1.5 1.5 0 0 0-1.415 1H5.5a.5.5 0 0 0 0 1h1.085A1.5 1.5 0 1 0 8 6.5z" />
-		</svg>
-	)
 }
 
-function ModeTag({ mode, size = 'sm' }) {
-	const m = STYLING_MODES[mode]
-	const isSmall = size === 'sm'
+function recordRecentTemplate(slug) {
+	if (!slug) return
+	const next = [slug, ...readRecentTemplates().filter((item) => item !== slug)].slice(0, 6)
+	try {
+		localStorage.setItem(TEMPLATE_RECENT_KEY, JSON.stringify(next))
+	} catch {
+		//
+	}
+}
+
+function pickPopularTemplates(availableTemplates, templateStyling, limit = 6) {
+	const list = Array.isArray(availableTemplates) ? availableTemplates : []
+	const scored = list.map((slug, index) => {
+		const meta = templateStyling?.[slug] || {}
+		const hay = `${slug} ${meta.displayName || ''} ${meta.family || ''} ${meta.layoutProfile || ''} ${(meta.tags || []).join(' ')}`.toLowerCase()
+		let score = 0
+		POPULAR_TEMPLATE_HINTS.forEach((hint, i) => {
+			if (hay.includes(hint)) score += 20 - i
+		})
+		if (meta.docxMaxPages === 1) score += 4
+		if (meta.stylingMode === 'themeable') score += 3
+		return { slug, score, index }
+	})
+	return scored
+		.sort((a, b) => b.score - a.score || a.index - b.index)
+		.map((item) => item.slug)
+		.slice(0, limit)
+}
+
+function tagsForTemplate(slug, meta) {
+	const tags = []
+	if (meta?.docxMaxPages === 1) tags.push('One-page')
+	if (meta?.layoutProfile) tags.push(meta.layoutProfile)
+	if (meta?.family) tags.push(meta.family)
+	if (Array.isArray(meta?.tags)) tags.push(...meta.tags)
+	if (!tags.length) tags.push(slug)
+	return [...new Set(tags.map((tag) => String(tag).trim()).filter(Boolean))].slice(0, 2)
+}
+
+function ModeTag({ mode }) {
+	const shaped = STYLING_MODES[modeForMeta(mode)]
 	return (
-		<span
-			className={`inline-flex items-center gap-1 rounded-full border font-semibold tabular-nums backdrop-blur-[2px] ${
-				isSmall ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2 py-0.5'
-			} ${m.tagClass}`}
-		>
-			<ModeGlyph mode={mode} className={isSmall ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
-			{m.label}
+		<span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-bold ${shaped.className}`}>
+			{shaped.label}
 		</span>
 	)
 }
 
-function StylingTabStrip({ value, onChange }) {
+function TemplatePreview({ slug, meta }) {
+	const src = meta?.previewUrl ? `${API_BASE}${meta.previewUrl}` : null
+	const [imageOk, setImageOk] = useState(Boolean(src))
+
+	useEffect(() => {
+		setImageOk(Boolean(src))
+	}, [src])
+
+	if (src && imageOk) {
+		return (
+			<img
+				src={src}
+				alt=""
+				className="h-full w-full object-cover object-top"
+				loading="lazy"
+				decoding="async"
+				onError={() => setImageOk(false)}
+			/>
+		)
+	}
+
 	return (
-		<div
-			className="flex gap-1 border-b border-slate-200/80 bg-slate-50/90 px-3 py-2.5"
-			role="tablist"
-			aria-label="Resume styling sections"
+		<div className="flex h-full flex-col bg-gradient-to-b from-white to-slate-50 p-2">
+			<div className="mb-1.5 h-2 w-10 rounded bg-brand-pink/35" />
+			<div className="space-y-1">
+				<div className="h-1 rounded bg-slate-200" />
+				<div className="h-1 w-5/6 rounded bg-slate-200" />
+				<div className="h-1 w-2/3 rounded bg-slate-200" />
+			</div>
+			<div className="mt-2 grid flex-1 grid-cols-[0.32fr_1fr] gap-2">
+				<div className="space-y-1">
+					<div className="h-1 rounded bg-brand-pink/20" />
+					<div className="h-1 rounded bg-brand-pink/10" />
+					<div className="h-1 rounded bg-brand-pink/10" />
+				</div>
+				<div className="space-y-1">
+					<div className="h-1 rounded bg-slate-100" />
+					<div className="h-1 rounded bg-slate-100" />
+					<div className="h-1 w-3/4 rounded bg-slate-100" />
+				</div>
+			</div>
+		</div>
+	)
+}
+
+function TemplateCard({ slug, meta, selected, onSelect }) {
+	const tags = tagsForTemplate(slug, meta)
+	return (
+		<button
+			type="button"
+			onClick={onSelect}
+			className={`min-w-0 rounded-xl border bg-white p-2 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/35 ${
+				selected
+					? 'border-brand-pink shadow-md shadow-brand-pink/10 ring-1 ring-brand-pink/20'
+					: 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
+			}`}
 		>
-			{STYLING_SECTION_TABS.map((tab) => {
+			<div className="relative aspect-[1.04] overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+				<TemplatePreview slug={slug} meta={meta} />
+				{selected ? (
+					<span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full bg-brand-pink text-[10px] font-black text-white shadow">
+						✓
+					</span>
+				) : null}
+			</div>
+			<p className={`mt-2 truncate text-[11px] font-black ${selected ? 'text-brand-pink-dark' : 'text-slate-900'}`}>
+				{meta?.displayName || slug}
+			</p>
+			<div className="mt-1 flex flex-wrap gap-1">
+				{tags.map((tag) => (
+					<span key={tag} className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[9px] font-semibold text-slate-500">
+						{tag}
+					</span>
+				))}
+			</div>
+		</button>
+	)
+}
+
+function ShelfTabs({ value, onChange }) {
+	return (
+		<div className="mt-3 flex gap-2" role="tablist" aria-label="Template shelf">
+			{TEMPLATE_SHELF_TABS.map((tab) => {
 				const active = value === tab.id
 				return (
 					<button
@@ -98,12 +189,11 @@ function StylingTabStrip({ value, onChange }) {
 						type="button"
 						role="tab"
 						aria-selected={active}
-						id={`resume-styling-tab-${tab.id}`}
 						onClick={() => onChange(tab.id)}
-						className={`min-w-0 flex-1 rounded-lg px-2 py-2 text-center text-xs font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/40 focus-visible:ring-offset-2 ${
+						className={`rounded-full border px-3 py-1.5 text-[11px] font-bold transition ${
 							active
-								? 'bg-white text-brand-pink-dark shadow-sm shadow-slate-200/40 ring-1 ring-slate-200/80'
-								: 'text-slate-500 hover:bg-white/60 hover:text-slate-800'
+								? 'border-brand-pink bg-brand-pink text-white shadow-sm'
+								: 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
 						}`}
 					>
 						{tab.label}
@@ -114,22 +204,12 @@ function StylingTabStrip({ value, onChange }) {
 	)
 }
 
-/** Single-track segmented control — reads as one control, not loose chips. */
-function SegmentedRow({ label, value, options, onChange }) {
+function SegmentedControl({ label, value, options, onChange }) {
+	if (!options?.length) return null
 	return (
-		<div className="rounded-xl border border-slate-200/70 bg-white/95 p-3 shadow-sm shadow-slate-200/30 ring-1 ring-black/[0.02]">
-			<div className="mb-2.5 flex items-center gap-2">
-				<span
-					className="h-2 w-2 shrink-0 rounded-full bg-gradient-to-br from-brand-pink to-brand-pink-dark shadow-sm shadow-brand-pink/30"
-					aria-hidden
-				/>
-				<span className="text-xs font-semibold tracking-tight text-slate-700">{label}</span>
-			</div>
-			<div
-				className="flex w-full gap-0.5 rounded-[10px] bg-slate-100/90 p-1 ring-1 ring-inset ring-slate-200/50"
-				role="group"
-				aria-label={label}
-			>
+		<div>
+			<p className="mb-1.5 text-xs font-black text-slate-900">{label}</p>
+			<div className="grid grid-flow-col auto-cols-fr overflow-hidden rounded-lg border border-slate-200 bg-white">
 				{options.map((opt) => {
 					const active = value === opt.id
 					return (
@@ -137,10 +217,8 @@ function SegmentedRow({ label, value, options, onChange }) {
 							key={opt.id}
 							type="button"
 							onClick={() => onChange(opt.id)}
-							className={`min-w-0 flex-1 rounded-lg px-1.5 py-2 text-center text-[11px] font-semibold leading-tight transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-								active
-									? 'bg-white text-brand-pink-dark shadow-md shadow-slate-300/25 ring-1 ring-slate-200/90'
-									: 'text-slate-500 hover:bg-white/70 hover:text-slate-800'
+							className={`min-h-9 border-r border-slate-200 px-2 text-[11px] font-semibold last:border-r-0 transition ${
+								active ? 'bg-brand-pink/[0.10] text-brand-pink-dark' : 'text-slate-600 hover:bg-slate-50'
 							}`}
 						>
 							{opt.label}
@@ -149,23 +227,6 @@ function SegmentedRow({ label, value, options, onChange }) {
 				})}
 			</div>
 		</div>
-	)
-}
-
-function LookSpacingIcon({ className = 'w-3.5 h-3.5' }) {
-	return (
-		<svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
-			<path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 0-.5.5v1a.5.5 0 0 1-1 0v-1zm12 0A1.5 1.5 0 0 0 12.5 2h-1a.5.5 0 0 0 0 1h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 0 1 0v-1zM3.5 14h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 0-1 0v1A1.5 1.5 0 0 0 3.5 14zm9.5-1.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1 0-1h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 1 1 0zM8 4.75a.75.75 0 0 1 .75.75v5a.75.75 0 0 1-1.5 0v-5A.75.75 0 0 1 8 4.75zM5.25 8a.75.75 0 0 1 .75-.75h4a.75.75 0 0 1 0 1.5h-4A.75.75 0 0 1 5.25 8z" />
-		</svg>
-	)
-}
-
-function LinkFormatIcon({ className = 'w-3.5 h-3.5' }) {
-	return (
-		<svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
-			<path d="M6.879 7.121a3 3 0 0 1 4.243 0l.707.707a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 0 0-1.414 0L7.586 9.586a1 1 0 1 1-1.414-1.414l.707-.707zm2.242 1.758a1 1 0 0 1 1.414 0l.707.707a3 3 0 0 1-4.243 4.243l-1.415 1.414a1 1 0 1 1-1.414-1.414l1.414-1.415a1 1 0 0 0 0-1.414 1 1 0 0 1 1.414-1.414z" />
-			<path d="M9.121 6.879a3 3 0 0 0-4.243 0L3.465 8.293a1 1 0 1 0 1.414 1.414l1.415-1.415a1 1 0 0 1 1.414 0l.707.707a1 1 0 1 1-1.414 1.414l-.707-.707a3 3 0 1 1 4.242-4.243z" opacity=".45" />
-		</svg>
 	)
 }
 
@@ -178,40 +239,54 @@ const ResumeStyling = ({
 	stylePreferences = {},
 	onStylePreferenceChange,
 }) => {
-	const [sectionTab, setSectionTab] = useState('template')
+	const [templateShelfTab, setTemplateShelfTab] = useState('popular')
+	const [recentTemplates, setRecentTemplates] = useState(() => readRecentTemplates())
+	const [stylingPanelOpen, setStylingPanelOpen] = useState(
+		() => typeof localStorage !== 'undefined' && localStorage.getItem('resumeEditorStylingCollapsed') !== '1',
+	)
 
 	const meta = templateStyling[template] || {}
 	const modeKey = modeForMeta(meta.stylingMode)
 	const mode = STYLING_MODES[modeKey]
-
 	const visibleTemplateControls = getVisibleTemplateStyleControls(meta)
 	const showMargins = templateSupportsControl(meta, 'marginPreset')
 	const showLineSpacing = templateSupportsControl(meta, 'lineSpacingPreset')
 	const showTypeScale = templateSupportsControl(meta, 'typeScale')
 	const showFontPairing = templateSupportsControl(meta, 'fontPairing')
-	const showStyleTuners = visibleTemplateControls.length > 0
-
+	const showStyleTuners = visibleTemplateControls.length > 0 && onStylePreferenceChange
 	const upcomingLabels = getPlannedTemplateControls(meta).map((controlId) => STYLE_CONTROL_LABELS[controlId] || controlId)
-
-	const hasStyleControls =
-		(showStyleTuners && onStylePreferenceChange) || upcomingLabels.length > 0
-	const showCustomizeRow = hasStyleControls || meta.layoutLocked
-
-	const templateScroll = availableTemplates.length > 3
-
-	const [customizeOpen, setCustomizeOpen] = useState(() => showStyleTuners)
-
-	// Whole panel (template + format) can tuck away so the left column focuses on resume fields.
-	const [stylingPanelOpen, setStylingPanelOpen] = useState(
-		() => typeof localStorage !== 'undefined' && localStorage.getItem('resumeEditorStylingCollapsed') !== '1',
-	)
+	const selectedTemplateName = meta.displayName || template
 
 	useEffect(() => {
-		const m = templateStyling[template] || {}
-		setCustomizeOpen(getVisibleTemplateStyleControls(m).length > 0)
-	}, [template, templateStyling])
+		recordRecentTemplate(template)
+	}, [template])
 
-	const templateDisplayName = meta.displayName || template
+	const popularTemplates = useMemo(
+		() => pickPopularTemplates(availableTemplates, templateStyling, 6),
+		[availableTemplates, templateStyling],
+	)
+
+	const recentVisible = useMemo(() => {
+		const available = new Set(availableTemplates || [])
+		return recentTemplates.filter((slug) => available.has(slug)).slice(0, 6)
+	}, [availableTemplates, recentTemplates])
+
+	const shelfTemplates =
+		templateShelfTab === 'recent'
+			? recentVisible
+			: templateShelfTab === 'favorites'
+				? []
+				: popularTemplates
+
+	const handleShelfChange = (tabId) => {
+		if (tabId === 'recent') setRecentTemplates(readRecentTemplates())
+		setTemplateShelfTab(tabId)
+	}
+
+	const handleTemplateSelect = (slug) => {
+		recordRecentTemplate(slug)
+		onTemplateChange(slug)
+	}
 
 	const toggleStylingPanel = () => {
 		setStylingPanelOpen((prev) => {
@@ -226,290 +301,139 @@ const ResumeStyling = ({
 	}
 
 	return (
-		<div className="@container/resume-style mb-5 overflow-hidden rounded-2xl border border-slate-200/75 bg-gradient-to-b from-white via-white to-slate-50/50 shadow-md shadow-slate-200/45 ring-1 ring-black/[0.03]">
+		<section className="@container/resume-style mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 			<button
 				type="button"
-				id="resume-styling-panel-toggle"
 				aria-expanded={stylingPanelOpen}
-				aria-controls="resume-styling-panel-body"
 				onClick={toggleStylingPanel}
-				className={[
-					'flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/40 focus-visible:ring-inset rounded-t-[0.9375rem]',
-					!stylingPanelOpen ? 'rounded-b-[0.9375rem]' : '',
-				].join(' ')}
+				className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/35 focus-visible:ring-inset"
 			>
-				<span className="min-w-0 flex-1">
-					<span className="flex items-center gap-2">
-						<span className="text-sm font-semibold tracking-tight text-slate-800">Resume styling</span>
-						<span className="rounded-full bg-slate-100/95 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-							Template &amp; format
-						</span>
+				<span className="min-w-0">
+					<span className="block text-sm font-black text-slate-950">Resume styling</span>
+					<span className="mt-0.5 block text-[11px] leading-relaxed text-slate-500">
+						Pick a layout, then fine-tune the look.
 					</span>
 					{!stylingPanelOpen ? (
-						<p className="mt-1 truncate text-[11px] text-slate-500" title={`${templateDisplayName} (${sectionTab})`}>
-							{templateDisplayName}
-							<span className="text-slate-400"> · </span>
-							{sectionTab === 'format' ? 'Format' : 'Template'}
-						</p>
+						<span className="mt-1 block truncate text-[11px] font-semibold text-brand-pink-dark">{selectedTemplateName}</span>
 					) : null}
 				</span>
-				<span className="flex shrink-0 items-center gap-1.5">
-					<span className="text-[11px] font-medium text-slate-400">{stylingPanelOpen ? 'Hide' : 'Show'}</span>
-					<svg
-						className={`h-4 w-4 text-slate-400 transition-transform duration-200 motion-reduce:transition-none ${
-							stylingPanelOpen ? 'rotate-180' : ''
-						}`}
-						viewBox="0 0 16 16"
-						fill="currentColor"
-						aria-hidden
-					>
-						<path d="M4.47 6.97a.75.75 0 0 1 1.06 0L8 9.44l2.47-2.47a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 0 1 0-1.06z" />
-					</svg>
-				</span>
+				<span className="mt-0.5 shrink-0 text-[11px] font-bold text-slate-400">{stylingPanelOpen ? 'Hide' : 'Show'}</span>
 			</button>
 
-			<div
-				className="h-px w-full bg-gradient-to-r from-brand-pink/80 via-brand-pink-light/90 to-transparent"
-				aria-hidden
-			/>
-
-			<div
-				id="resume-styling-panel-body"
-				className="grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none motion-reduce:duration-150"
-				style={{ gridTemplateRows: stylingPanelOpen ? '1fr' : '0fr' }}
-			>
-				<div className="min-h-0 overflow-hidden">
-					<StylingTabStrip value={sectionTab} onChange={setSectionTab} />
-
-			{sectionTab === 'format' && onStylePreferenceChange && (
-				<div
-					className="border-b border-slate-100/90 bg-white/50 px-4 py-4"
-					role="tabpanel"
-					aria-labelledby="resume-styling-tab-format"
-				>
-					<div className="mb-3">
-						<h2 className="text-sm font-semibold tracking-tight text-slate-800">Format</h2>
-						<p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-							How text appears in preview, PDF, and Word—same choices for every template.
-						</p>
-					</div>
-					<div className="rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-50/80 via-white to-sky-50/40 p-3 shadow-inner shadow-slate-200/30">
-						<div className="mb-3 flex items-center gap-2 px-0.5">
-							<span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-800">
-								<LinkFormatIcon className="h-4 w-4" />
-							</span>
+			{stylingPanelOpen ? (
+				<div className="border-t border-slate-100 px-4 pb-4 pt-3">
+					<div>
+						<div className="flex items-center justify-between gap-2">
 							<div>
-								<p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-									Contact links
-								</p>
-								<p className="text-[10px] text-slate-400">LinkedIn, GitHub, portfolio line — links still work</p>
+								<h3 className="text-xs font-black uppercase tracking-wide text-slate-900">Template</h3>
+								<p className="mt-0.5 text-[11px] text-slate-500">Limited choices for this draft.</p>
 							</div>
+							<ModeTag mode={modeKey} />
 						</div>
-						<SegmentedRow
-							label={STYLE_CONTROL_LABELS.contactUrlDisplay}
-							value={stylePreferences[STYLE_PREFERENCE_KEYS.contactUrlDisplay] ?? 'full'}
-							options={getStyleControlOptions('contactUrlDisplay', meta)}
-							onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.contactUrlDisplay, id)}
-						/>
-					</div>
-				</div>
-			)}
 
-			{sectionTab === 'template' && (
-				<>
-					<div className="border-b border-slate-100/90 bg-white/40 px-4 py-4 backdrop-blur-[2px]">
-						<div className="flex items-baseline justify-between gap-2">
-							<h2 className="text-sm font-semibold tracking-tight text-slate-800">Templates</h2>
-							<span className="text-[10px] font-medium uppercase tracking-wider text-slate-400">Choose</span>
-						</div>
-						<p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-							Favorites &amp; recents will live here later—for now, select a layout.
-						</p>
+						<ShelfTabs value={templateShelfTab} onChange={handleShelfChange} />
+
 						{isLoadingTemplates ? (
-							<div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
-								<span className="h-3.5 w-3.5 animate-pulse rounded-full bg-slate-200" aria-hidden />
-								Loading…
+							<div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-xs font-semibold text-slate-500">
+								Loading templates...
+							</div>
+						) : templateShelfTab === 'favorites' && shelfTemplates.length === 0 ? (
+							<div className="mt-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-center">
+								<p className="text-xs font-bold text-slate-700">Favorites are coming soon.</p>
+								<p className="mt-1 text-[11px] text-slate-500">Popular templates are ready for now.</p>
+							</div>
+						) : templateShelfTab === 'recent' && shelfTemplates.length === 0 ? (
+							<div className="mt-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-center">
+								<p className="text-xs font-bold text-slate-700">No recent templates yet.</p>
+								<p className="mt-1 text-[11px] text-slate-500">Pick from Popular to start building this list.</p>
 							</div>
 						) : (
-							<div
-								className={
-									templateScroll
-										? 'mt-3 grid max-h-44 grid-cols-1 gap-2.5 overflow-y-auto pr-1 [scrollbar-gutter:stable]'
-										: 'mt-3 grid grid-cols-1 gap-2.5'
-								}
-							>
-								{availableTemplates.map((t) => {
-									const rowMeta = templateStyling[t] || {}
-									const rowMode = modeForMeta(rowMeta.stylingMode)
-									const label = rowMeta.displayName || t
-									const selected = template === t
-									return (
-										<button
-											key={t}
-											type="button"
-											onClick={() => onTemplateChange(t)}
-											className={`flex items-center justify-between gap-2 rounded-xl px-3 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/40 focus-visible:ring-offset-2 ${
-												selected
-													? 'border-2 border-brand-pink/90 bg-gradient-to-r from-brand-pink/[0.12] to-brand-pink/[0.06] shadow-md shadow-brand-pink/10'
-													: 'border border-slate-200/80 bg-white/90 shadow-sm hover:border-slate-300 hover:shadow-md'
-											}`}
-										>
-											<span
-												className={`min-w-0 truncate text-sm font-semibold ${
-													selected ? 'text-brand-pink-dark' : 'text-slate-800'
-												}`}
-											>
-												{label}
-											</span>
-											<ModeTag mode={rowMode} size="sm" />
-										</button>
-									)
-								})}
+							<div className="mt-3 grid max-h-[21rem] grid-cols-2 gap-2 overflow-y-auto pr-1 [scrollbar-gutter:stable] @md/resume-style:grid-cols-3">
+								{shelfTemplates.map((slug) => (
+									<TemplateCard
+										key={slug}
+										slug={slug}
+										meta={templateStyling[slug] || {}}
+										selected={template === slug}
+										onSelect={() => handleTemplateSelect(slug)}
+									/>
+								))}
 							</div>
 						)}
 					</div>
 
-					{!isLoadingTemplates && showCustomizeRow && (
-						<div className="p-4" role="tabpanel" aria-labelledby="resume-styling-tab-template">
-							<button
-								type="button"
-								onClick={() => setCustomizeOpen((o) => !o)}
-								className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink/35 focus-visible:ring-offset-2 ${
-									customizeOpen
-										? 'border-brand-pink/25 bg-gradient-to-r from-white to-brand-pink/[0.06] shadow-md'
-										: 'border-slate-200/80 bg-gradient-to-r from-white to-slate-50/90 hover:border-slate-300 hover:shadow-md'
-								}`}
-								aria-expanded={customizeOpen}
-							>
-								<span
-									className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors ${
-										customizeOpen
-											? 'border-brand-pink/30 bg-brand-pink/10 text-brand-pink-dark'
-											: 'border-slate-200/90 bg-white text-slate-600 group-hover:border-slate-300'
-									}`}
-								>
-									<ModeGlyph mode={modeKey} className="h-4 w-4" />
-								</span>
-								<div className="flex min-w-0 flex-wrap items-center gap-2">
-									<ModeTag mode={modeKey} size="md" />
-								</div>
-								<span className="min-w-0 flex-1 text-xs font-medium text-slate-500">Template style</span>
-								<svg
-									className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-hover:text-slate-600 ${
-										customizeOpen ? 'rotate-180' : ''
-									}`}
-									viewBox="0 0 16 16"
-									fill="currentColor"
-									aria-hidden
-								>
-									<path d="M4.47 6.97a.75.75 0 0 1 1.06 0L8 9.44l2.47-2.47a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 0 1 0-1.06z" />
-								</svg>
-							</button>
+					<div className="mt-4 border-t border-slate-200 pt-4">
+						<h3 className="text-xs font-black uppercase tracking-wide text-slate-900">Customize selected style</h3>
+						<p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">{mode.hint}</p>
 
-							{customizeOpen && (
-								<div className="mt-4 space-y-4">
-									<p className="rounded-xl border border-brand-pink/15 bg-gradient-to-br from-brand-pink/[0.06] to-transparent px-3 py-2.5 text-[11px] leading-relaxed text-slate-600">
-										{mode.hint}
-									</p>
-									{meta.layoutLocked ? (
-										<p className="rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-50/30 px-3 py-2.5 text-[11px] font-medium text-amber-950/80">
-											Layout is fixed; only the controls here affect PDF and Word output.
-										</p>
-									) : null}
-
-									{showStyleTuners && onStylePreferenceChange && (
-										<div className="rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-50/80 via-white to-brand-pink/[0.04] p-3 shadow-inner shadow-slate-200/30">
-											<div className="mb-3 flex items-center gap-2 px-0.5">
-												<span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-pink/10 text-brand-pink-dark">
-													<LookSpacingIcon className="h-4 w-4" />
-												</span>
-												<div>
-													<p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-														Look &amp; spacing
-													</p>
-													<p className="text-[10px] text-slate-400">This template only</p>
-												</div>
-											</div>
-											<div className="grid grid-cols-1 gap-3 @md/resume-style:grid-cols-2 @md/resume-style:gap-x-3 @md/resume-style:gap-y-4">
-												{showTypeScale && (
-													<div className="min-w-0">
-														<SegmentedRow
-															label={STYLE_CONTROL_LABELS.typeScale}
-															value={stylePreferences[STYLE_PREFERENCE_KEYS.typeScale] ?? 'standard'}
-															options={getStyleControlOptions('typeScale', meta)}
-															onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.typeScale, id)}
-														/>
-													</div>
-												)}
-												{showFontPairing && (
-													<div className="min-w-0">
-														<SegmentedRow
-															label={STYLE_CONTROL_LABELS.fontPairing}
-															value={stylePreferences[STYLE_PREFERENCE_KEYS.fontPairing] ?? 'serif_classic'}
-															options={getStyleControlOptions('fontPairing', meta)}
-															onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.fontPairing, id)}
-														/>
-													</div>
-												)}
-												{showMargins && (
-													<div className="min-w-0">
-														<SegmentedRow
-															label={STYLE_CONTROL_LABELS.marginPreset}
-															value={stylePreferences[STYLE_PREFERENCE_KEYS.marginPreset] ?? 'balanced'}
-															options={getStyleControlOptions('marginPreset', meta)}
-															onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.marginPreset, id)}
-														/>
-													</div>
-												)}
-												{showLineSpacing && (
-													<div className="min-w-0">
-														<SegmentedRow
-															label={STYLE_CONTROL_LABELS.lineSpacingPreset}
-															value={stylePreferences[STYLE_PREFERENCE_KEYS.lineSpacingPreset] ?? 'standard'}
-															options={getStyleControlOptions('lineSpacingPreset', meta)}
-															onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.lineSpacingPreset, id)}
-														/>
-													</div>
-												)}
-											</div>
-										</div>
-									)}
-
-									{upcomingLabels.length > 0 ? (
-										<div className="rounded-xl border border-dashed border-slate-300/80 bg-white/60 px-3 py-2.5">
-											<p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-												Coming for this template
-											</p>
-											<ul className="list-inside list-disc space-y-0.5 text-xs text-slate-500 marker:text-slate-300">
-												{upcomingLabels.map((text) => (
-													<li key={text}>{text}</li>
-												))}
-											</ul>
-										</div>
-									) : null}
-
-									{!hasStyleControls && !meta.layoutLocked && modeKey === 'locked' ? (
-										<p className="text-xs text-slate-500">No adjustable style options for this template.</p>
-									) : null}
-								</div>
-							)}
-						</div>
-					)}
-
-					{!isLoadingTemplates && !showCustomizeRow && (
-						<div className="px-4 pb-4 pt-0">
-							<p className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-600">
-								This template does not expose template-specific style tweaks in Tailor yet. Use the{' '}
-								<strong className="font-semibold text-slate-700">Format</strong> tab for options that apply to
-								all layouts.
+						{meta.layoutLocked ? (
+							<p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-medium text-amber-900">
+								This layout is mostly fixed, so only safe style controls are shown.
 							</p>
+						) : null}
+
+						<div className="mt-3 space-y-3">
+							{showStyleTuners ? (
+								<>
+									{showMargins ? (
+										<SegmentedControl
+											label={STYLE_CONTROL_LABELS.marginPreset}
+											value={stylePreferences[STYLE_PREFERENCE_KEYS.marginPreset] ?? 'balanced'}
+											options={getStyleControlOptions('marginPreset', meta, { shortLabels: true })}
+											onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.marginPreset, id)}
+										/>
+									) : null}
+									{showLineSpacing ? (
+										<SegmentedControl
+											label={STYLE_CONTROL_LABELS.lineSpacingPreset}
+											value={stylePreferences[STYLE_PREFERENCE_KEYS.lineSpacingPreset] ?? 'standard'}
+											options={getStyleControlOptions('lineSpacingPreset', meta, { shortLabels: true })}
+											onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.lineSpacingPreset, id)}
+										/>
+									) : null}
+									{showTypeScale ? (
+										<SegmentedControl
+											label={STYLE_CONTROL_LABELS.typeScale}
+											value={stylePreferences[STYLE_PREFERENCE_KEYS.typeScale] ?? 'standard'}
+											options={getStyleControlOptions('typeScale', meta, { shortLabels: true })}
+											onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.typeScale, id)}
+										/>
+									) : null}
+									{showFontPairing ? (
+										<SegmentedControl
+											label={STYLE_CONTROL_LABELS.fontPairing}
+											value={stylePreferences[STYLE_PREFERENCE_KEYS.fontPairing] ?? 'serif_classic'}
+											options={getStyleControlOptions('fontPairing', meta, { shortLabels: true })}
+											onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.fontPairing, id)}
+										/>
+									) : null}
+								</>
+							) : (
+								<p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] text-slate-600">
+									This template does not expose detailed style controls yet.
+								</p>
+							)}
+
+							{onStylePreferenceChange ? (
+								<SegmentedControl
+									label={STYLE_CONTROL_LABELS.contactUrlDisplay}
+									value={stylePreferences[STYLE_PREFERENCE_KEYS.contactUrlDisplay] ?? 'full'}
+									options={getStyleControlOptions('contactUrlDisplay', meta, { shortLabels: true })}
+									onChange={(id) => onStylePreferenceChange(STYLE_PREFERENCE_KEYS.contactUrlDisplay, id)}
+								/>
+							) : null}
 						</div>
-					)}
-				</>
-			)}
+
+						{upcomingLabels.length > 0 ? (
+							<div className="mt-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
+								<p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Coming next</p>
+								<p className="mt-1 text-[11px] text-slate-500">{upcomingLabels.join(', ')}</p>
+							</div>
+						) : null}
+					</div>
 				</div>
-			</div>
-		</div>
+			) : null}
+		</section>
 	)
 }
 

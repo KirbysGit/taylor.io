@@ -1,7 +1,7 @@
 // pages/templates/TemplatesPage.jsx
 // Clean template library — search, filters, grid/list, and a detail panel for the selected layout.
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -9,7 +9,6 @@ import {
 	faEye,
 	faMagnifyingGlass,
 	faStar,
-	faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import DashboardShell from '@/components/DashboardShell'
 import ThemedSelect from '@/components/inputs/ThemedSelect'
@@ -46,10 +45,70 @@ const MODE_CHIP = {
 	locked: 'Fixed',
 }
 
-/** Grid cards split ~50/50 preview vs copy; list/panel use fixed thumbs. */
-const CARD_MIN_H = 'min-h-[19rem] sm:min-h-[21rem]'
-const LIST_PREVIEW_H = 'h-[7.5rem]'
-const PANEL_PREVIEW_H = 'h-[7rem] w-[5.25rem]'
+/** Grid card preview band (width-fit); list thumb; panel stays full-page contain. */
+const CARD_PREVIEW_H = 'h-[9rem] sm:h-[12rem]'
+const LIST_PREVIEW_H = 'h-[7rem] sm:h-[7.5rem]'
+const PANEL_PREVIEW_H = 'h-[24rem]'
+
+/** Fixed copy slots so grid cards stay the same height regardless of blurb/tags. */
+const CARD_TITLE_MIN_H = 'min-h-[1.25rem]'
+const CARD_BLURB_MIN_H = 'min-h-[3.75rem]'
+const CARD_TAGS_MIN_H = 'min-h-[3.25rem]'
+
+/** Letter page at 96dpi — used until the iframe reports its laid-out size. */
+const PREVIEW_PAGE_FALLBACK_PX = { width: 816, height: 1056 }
+const PREVIEW_FRAME_INSET_PX = 10
+
+/** Card/list: scale to frame width (top-aligned, bottom may crop). Keep at 1.0 to guarantee full page width. */
+const PREVIEW_ZOOM_CARD = 1.15
+
+/**
+ * Panel baseline at PREVIEW_ZOOM_PANEL = 1.0 (pick how the page sits in the frame before zooming):
+ * - contain — whole letter page fits (smallest scale)
+ * - width   — page width matches frame width
+ * - height  — page height matches frame height
+ * - cover   — frame filled; top/bottom or sides crop at 1.0
+ */
+const PREVIEW_PANEL_SCALE_BASE = 'contain'
+
+/** Multiplier applied on top of PREVIEW_PANEL_SCALE_BASE. This is the knob you tune (e.g. 1.0, 1.15, 1.35). */
+const PREVIEW_ZOOM_PANEL = 1.125
+
+function previewPanelBaseScale(widthRatio, heightRatio, scaleBase) {
+	switch (scaleBase) {
+		case 'width':
+			return widthRatio
+		case 'height':
+			return heightRatio
+		case 'cover':
+			return Math.max(widthRatio, heightRatio)
+		case 'contain':
+		default:
+			return Math.min(widthRatio, heightRatio)
+	}
+}
+
+function previewFrameScale(
+	containerWidth,
+	containerHeight,
+	pageWidth,
+	pageHeight,
+	{ scaleMode = 'width-fit-top', zoomFactor = PREVIEW_ZOOM_CARD, scaleBase = 'contain' } = {},
+) {
+	const availW = Math.max(0, containerWidth - PREVIEW_FRAME_INSET_PX * 2)
+	const availH = Math.max(0, containerHeight - PREVIEW_FRAME_INSET_PX * 2)
+	if (!availW || !availH || !pageWidth || !pageHeight) return 0.2
+
+	const widthRatio = availW / pageWidth
+	const heightRatio = availH / pageHeight
+
+	if (scaleMode === 'manual') {
+		return previewPanelBaseScale(widthRatio, heightRatio, scaleBase) * zoomFactor
+	}
+
+	// width-fit-top: fill frame width; header stays visible, lower page clips if needed.
+	return widthRatio * zoomFactor
+}
 
 function templateTags(slug, meta) {
 	const tags = []
@@ -117,8 +176,9 @@ function FallbackMiniPreview({ className = '' }) {
 	)
 }
 
-function TemplatePreviewFrame({ meta, className = '' }) {
-	const src = meta?.previewUrl ? `${API_BASE}${meta.previewUrl}` : null
+function TemplatePreviewFrame({ meta, className = '', preferFull = false, fit = 'cover' }) {
+	const fullUrl = meta?.previewSnippets?.full?.url
+	const src = preferFull && fullUrl ? `${API_BASE}${fullUrl}` : meta?.previewUrl ? `${API_BASE}${meta.previewUrl}` : null
 	const [imgOk, setImgOk] = useState(!!src)
 
 	useEffect(() => {
@@ -136,11 +196,103 @@ function TemplatePreviewFrame({ meta, className = '' }) {
 			<img
 				src={src}
 				alt=""
-				className="h-full w-full object-cover object-top"
+				className={`h-full w-full object-top ${fit === 'contain' ? 'object-contain' : 'object-cover'}`}
 				loading="lazy"
 				decoding="async"
 				onError={() => setImgOk(false)}
 			/>
+		</div>
+	)
+}
+
+function TemplateLivePreviewFrame({
+	slug,
+	className = '',
+	iframeClassName = '',
+	scaleMode = 'width-fit-top',
+	zoomFactor = PREVIEW_ZOOM_CARD,
+	scaleBase = 'contain',
+}) {
+	const src = slug ? `${API_BASE}/api/templates/${slug}/preview-html` : null
+	const containerRef = useRef(null)
+	const iframeRef = useRef(null)
+	const [pageSize, setPageSize] = useState(PREVIEW_PAGE_FALLBACK_PX)
+	const [scale, setScale] = useState(0.2)
+	// Top-align in both modes so the header stays visible and the panel preview sits flush to the top of its frame.
+	const alignTop = true
+
+	// Recompute when the frame or tuning constants change (panel uses manual base × zoom).
+	const syncScale = useCallback(() => {
+		const container = containerRef.current
+		if (!container) return
+		const { width, height } = container.getBoundingClientRect()
+		setScale(
+			previewFrameScale(width, height, pageSize.width, pageSize.height, {
+				scaleMode,
+				zoomFactor,
+				scaleBase,
+			}),
+		)
+	}, [pageSize.height, pageSize.width, scaleBase, scaleMode, zoomFactor])
+
+	useEffect(() => {
+		const container = containerRef.current
+		if (!container) return
+		const observer = new ResizeObserver(() => syncScale())
+		observer.observe(container)
+		syncScale()
+		return () => observer.disconnect()
+	}, [syncScale])
+
+	useEffect(() => {
+		syncScale()
+	}, [slug, syncScale])
+
+	const onIframeLoad = useCallback(() => {
+		const iframe = iframeRef.current
+		if (!iframe) return
+		const width = iframe.offsetWidth
+		const height = iframe.offsetHeight
+		if (width > 0 && height > 0) {
+			setPageSize({ width, height })
+		}
+	}, [])
+
+	if (!src) {
+		return <FallbackMiniPreview className={className} />
+	}
+
+	const scaledWidth = pageSize.width * scale
+	const scaledHeight = pageSize.height * scale
+
+	return (
+		<div
+			ref={containerRef}
+			className={`relative flex justify-center overflow-hidden rounded-xl border border-slate-200/80 bg-slate-100 shadow-inner ${
+				alignTop ? 'items-start' : 'items-center'
+			} ${className}`}
+		>
+			<div
+				className="relative shrink-0 overflow-hidden bg-white"
+				style={{ width: scaledWidth, height: scaledHeight }}
+			>
+				<iframe
+					ref={iframeRef}
+					title={`${slug} template preview`}
+					src={src}
+					tabIndex={-1}
+					loading="lazy"
+					scrolling="no"
+					onLoad={onIframeLoad}
+					className={`pointer-events-none absolute left-0 top-0 border-0 bg-white ${iframeClassName}`}
+					style={{
+						width: '8.5in',
+						height: '11in',
+						transform: `scale(${scale})`,
+						transformOrigin: 'top left',
+					}}
+				/>
+			</div>
 		</div>
 	)
 }
@@ -159,8 +311,13 @@ function TemplateCard({ folder, meta, selected, viewMode, onSelect, onPreview, o
 					selected ? 'border-brand-pink ring-2 ring-brand-pink/25' : 'border-slate-200/90'
 				}`}
 			>
-				<button type="button" onClick={() => onSelect(folder)} className="relative w-[4.75rem] shrink-0 text-left sm:w-20">
-					<TemplatePreviewFrame meta={meta} className={`${LIST_PREVIEW_H} w-full rounded-lg`} />
+				<button type="button" onClick={() => onSelect(folder)} className="relative w-24 shrink-0 text-left sm:w-28">
+					<TemplateLivePreviewFrame
+						slug={folder}
+						scaleMode="width-fit-top"
+						zoomFactor={PREVIEW_ZOOM_CARD}
+						className={`${LIST_PREVIEW_H} w-full rounded-lg`}
+					/>
 					{selected ? (
 						<span className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-brand-pink text-white shadow">
 							<FontAwesomeIcon icon={faCheck} className="size-2.5" aria-hidden />
@@ -203,17 +360,22 @@ function TemplateCard({ folder, meta, selected, viewMode, onSelect, onPreview, o
 
 	return (
 		<article
-			className={`flex h-full ${CARD_MIN_H} flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:shadow-md ${
+			className={`flex h-full w-full flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:shadow-md ${
 				selected ? 'border-brand-pink ring-2 ring-brand-pink/25' : 'border-slate-200/90'
 			}`}
 		>
-			{/* Top half — résumé preview */}
+			{/* Résumé preview — fixed height so cards stay compact; copy block takes the rest. */}
 			<button
 				type="button"
 				onClick={() => onSelect(folder)}
-				className="relative flex min-h-0 flex-1 flex-col bg-slate-50/60 p-4 pb-3 text-left"
+				className="relative flex shrink-0 flex-col bg-slate-50/60 p-3 pb-2 text-left"
 			>
-				<TemplatePreviewFrame meta={meta} className="h-full min-h-0 w-full flex-1 rounded-xl border-slate-200/80" />
+				<TemplateLivePreviewFrame
+					slug={folder}
+					scaleMode="width-fit-top"
+					zoomFactor={PREVIEW_ZOOM_CARD}
+					className={`${CARD_PREVIEW_H} w-full rounded-xl border-slate-200/80`}
+				/>
 				{selected ? (
 					<span className="absolute right-5 top-5 flex size-6 items-center justify-center rounded-full bg-brand-pink text-white shadow-md">
 						<FontAwesomeIcon icon={faCheck} className="size-3" aria-hidden />
@@ -221,24 +383,25 @@ function TemplateCard({ folder, meta, selected, viewMode, onSelect, onPreview, o
 				) : null}
 			</button>
 
-			{/* Bottom half — title, blurb, tags, actions */}
+			{/* Copy block — fixed title/blurb/tag slots so every card in a row matches height. */}
 			<div className="flex min-h-0 flex-1 flex-col border-t border-slate-100 px-5 py-4">
-				<div className="flex min-h-0 flex-1 flex-col">
-					<h2 className="text-sm font-bold text-slate-900">{displayName}</h2>
-					{blurb ? (
-						<p className="mt-1.5 line-clamp-3 flex-1 text-sm leading-relaxed text-slate-600">{blurb}</p>
-					) : (
-						<div className="flex-1" />
-					)}
-					<div className="mt-2.5 flex flex-wrap gap-2">
-						{tags.map((t) => (
-							<span key={t} className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-								{t}
-							</span>
-						))}
-					</div>
+				<h2 className={`line-clamp-1 text-sm font-bold text-slate-900 ${CARD_TITLE_MIN_H}`}>{displayName}</h2>
+				<p
+					className={`mt-1.5 line-clamp-3 text-sm leading-relaxed text-slate-600 ${CARD_BLURB_MIN_H} ${
+						blurb ? '' : 'invisible'
+					}`}
+					aria-hidden={!blurb}
+				>
+					{blurb || '—'}
+				</p>
+				<div className={`mt-2.5 flex flex-wrap content-start gap-2 overflow-hidden ${CARD_TAGS_MIN_H}`}>
+					{tags.map((t) => (
+						<span key={t} className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+							{t}
+						</span>
+					))}
 				</div>
-				<div className="mt-3 flex shrink-0 gap-2.5 pt-1">
+				<div className="mt-auto flex shrink-0 gap-2.5 pt-3">
 					<button
 						type="button"
 						onClick={() => onPreview(folder)}
@@ -285,8 +448,34 @@ function PanelSegment({ label, value, options, onChange }) {
 	)
 }
 
-function SelectedTemplatePanel({ slug, meta, styleDraft, onStyleChange, onClose, onPreview, onUse }) {
-	if (!slug) return null
+function SelectedTemplatePlaceholder() {
+	return (
+		<aside className="flex min-h-[28rem] w-full shrink-0 flex-col rounded-2xl border border-dashed border-slate-200 bg-white/70 shadow-sm xl:sticky xl:top-6">
+			<div className="border-b border-slate-100 px-5 py-4">
+				<p className="text-sm font-semibold text-slate-800">Template preview</p>
+			</div>
+			<div className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
+				<div className="mb-4 flex h-28 w-20 flex-col rounded-xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-brand-pink/[0.04] p-3 shadow-inner">
+					<div className="mx-auto mb-2 h-2 w-10 rounded-full bg-brand-pink/30" />
+					<div className="mb-1.5 h-1 w-full rounded-full bg-slate-200" />
+					<div className="mb-1.5 h-1 w-10/12 rounded-full bg-slate-200" />
+					<div className="mb-3 h-1 w-8/12 rounded-full bg-slate-200" />
+					<div className="mt-auto space-y-1">
+						<div className="h-1 w-full rounded-full bg-slate-100" />
+						<div className="h-1 w-9/12 rounded-full bg-slate-100" />
+					</div>
+				</div>
+				<p className="text-sm font-semibold text-slate-800">Select a template</p>
+				<p className="mt-2 max-w-xs text-xs leading-relaxed text-slate-500">
+					Choose a card on the left to preview the full sample resume, adjust quick style options, or open it in the editor.
+				</p>
+			</div>
+		</aside>
+	)
+}
+
+function SelectedTemplatePanel({ slug, meta, styleDraft, onStyleChange, onPreview, onUse }) {
+	if (!slug) return <SelectedTemplatePlaceholder />
 	const displayName = meta?.displayName || slug
 	const visibleTemplateControls = getVisibleTemplateStyleControls(meta)
 	const showMargins = templateSupportsControl(meta, 'marginPreset')
@@ -297,22 +486,23 @@ function SelectedTemplatePanel({ slug, meta, styleDraft, onStyleChange, onClose,
 	const onePage = meta?.docxMaxPages === 1
 
 	return (
-		<aside className="flex w-full shrink-0 flex-col rounded-2xl border border-slate-200/90 bg-white shadow-sm lg:w-[min(100%,20rem)] xl:w-80">
+		<aside className="flex w-full shrink-0 flex-col rounded-2xl border border-slate-200/90 bg-white shadow-sm xl:sticky xl:top-6">
 			<div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
 				<p className="text-sm font-semibold text-slate-800">Selected template</p>
-				<button
-					type="button"
-					onClick={onClose}
-					className="flex size-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-					aria-label="Close panel"
-				>
-					<FontAwesomeIcon icon={faXmark} />
-				</button>
+				<span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+					Preview
+				</span>
 			</div>
 
-			<div className="flex-1 overflow-y-auto px-5 py-5">
-				<div className="flex gap-4">
-					<TemplatePreviewFrame meta={meta} className={`${PANEL_PREVIEW_H} shrink-0 rounded-lg`} />
+			<div className="flex-1 overflow-y-auto px-5 pb-5 pt-3">
+				<div className="space-y-4">
+					<TemplateLivePreviewFrame
+						slug={slug}
+						scaleMode="manual"
+						scaleBase={PREVIEW_PANEL_SCALE_BASE}
+						zoomFactor={PREVIEW_ZOOM_PANEL}
+						className={`${PANEL_PREVIEW_H} w-full shrink-0 rounded-xl bg-slate-50`}
+					/>
 					<div className="min-w-0">
 						<p className="text-sm font-bold text-slate-900">{displayName}</p>
 						{onePage ? (
@@ -432,9 +622,7 @@ function TemplatesPage() {
 				const list = Array.isArray(body.templates) ? body.templates : []
 				setTemplates(list)
 				setTemplateStyling(body.templateStyling || {})
-				if (list.length > 0) {
-					setSelectedSlug((prev) => (prev && list.includes(prev) ? prev : list[0]))
-				}
+				setSelectedSlug((prev) => (prev && list.includes(prev) ? prev : null))
 			} catch {
 				if (!cancelled) setError('Could not load templates.')
 			} finally {
@@ -488,8 +676,8 @@ function TemplatesPage() {
 
 	return (
 		<DashboardShell onLogout={handleLogout}>
-			<div className="mx-auto flex max-w-[90rem] flex-col gap-10 xl:flex-row xl:items-start xl:gap-12">
-				<div className="min-w-0 flex-1">
+			<div className="mx-auto flex max-w-[96rem] flex-col gap-8">
+				<div className="min-w-0">
 					<header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
 						<div>
 							<h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Templates</h1>
@@ -499,8 +687,8 @@ function TemplatesPage() {
 						</div>
 						<button
 							type="button"
-							onClick={() => goPreview(selectedSlug || templates[0])}
-							disabled={loading || templates.length === 0}
+							onClick={() => goPreview(selectedSlug)}
+							disabled={loading || !selectedSlug}
 							className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-brand-pink/50 bg-white px-4 py-2.5 text-sm font-semibold text-brand-pink-dark shadow-sm hover:bg-brand-pink/[0.04] disabled:opacity-50"
 						>
 							<FontAwesomeIcon icon={faEye} className="size-4" />
@@ -552,25 +740,29 @@ function TemplatesPage() {
 						</div>
 					</div>
 
-					<div className="mt-6 flex gap-2.5 overflow-x-auto pb-2 [scrollbar-width:thin]">
-						{FILTER_PILLS.map((pill) => {
-							const active = activeFilter === pill.id
-							return (
-								<button
-									key={pill.id}
-									type="button"
-									onClick={() => setActiveFilter(pill.id)}
-									className={`shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition ${
-										active
-											? 'border-brand-pink bg-brand-pink/10 text-brand-pink-dark'
-											: 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-									}`}
-								>
-									{pill.label}
-								</button>
-							)
-						})}
-					</div>
+				</div>
+
+				<div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,2.1fr)_minmax(18rem,22rem)] xl:items-start">
+					<div className="min-w-0">
+						<div className="flex gap-2.5 overflow-x-auto pb-2 [scrollbar-width:thin]">
+							{FILTER_PILLS.map((pill) => {
+								const active = activeFilter === pill.id
+								return (
+									<button
+										key={pill.id}
+										type="button"
+										onClick={() => setActiveFilter(pill.id)}
+										className={`shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition ${
+											active
+												? 'border-brand-pink bg-brand-pink/10 text-brand-pink-dark'
+												: 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+										}`}
+									>
+										{pill.label}
+									</button>
+								)
+							})}
+						</div>
 
 					{loading && (
 						<div className="mt-8 rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-600">
@@ -595,12 +787,12 @@ function TemplatesPage() {
 						<ul
 							className={`mt-10 ${
 								viewMode === 'grid'
-									? 'grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 sm:gap-7 xl:grid-cols-2 2xl:grid-cols-3 2xl:gap-8'
+									? 'grid grid-cols-1 items-stretch justify-start gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3'
 									: 'flex flex-col gap-5'
 							}`}
 						>
 							{filtered.map((folder) => (
-								<li key={folder} className={viewMode === 'grid' ? 'h-full' : undefined}>
+								<li key={folder} className={viewMode === 'grid' ? 'flex h-full min-h-0' : undefined}>
 									<TemplateCard
 										folder={folder}
 										meta={templateStyling[folder]}
@@ -616,17 +808,17 @@ function TemplatesPage() {
 					)}
 				</div>
 
-				{!loading && selectedSlug && (
+				<div className="min-w-0">
 					<SelectedTemplatePanel
 						slug={selectedSlug}
 						meta={selectedMeta}
 						styleDraft={styleDraft}
 						onStyleChange={onStyleChange}
-						onClose={() => setSelectedSlug(null)}
 						onPreview={goPreview}
 						onUse={goUse}
 					/>
-				)}
+				</div>
+			</div>
 			</div>
 		</DashboardShell>
 	)

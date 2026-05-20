@@ -78,6 +78,12 @@ export function useSavedResumesSidecar({
 				sectionLabels,
 				stylePreferences,
 				tailorIntent: tailorIntent || null,
+				saveMetadata: options.draftMeta
+					? {
+							...options.draftMeta,
+							savedAt: new Date().toISOString(),
+						}
+					: resumeData.saveMetadata || null,
 			}
 
 			// try to create the saved resume.

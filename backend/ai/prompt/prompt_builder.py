@@ -315,8 +315,11 @@ def compact_narrative_for_prompt(narrative_brief: dict | None) -> dict:
             "evidenceThemes": list(nb.get("primaryStory") or [])[:4],
         }
     return {
+        "alignmentMode": nb.get("alignmentMode") or "",
+        "alignmentGuidance": nb.get("alignmentGuidance") or "",
         "targetStory": copy.deepcopy(target_story),
         "summaryGoal": nb.get("summaryGoal") or "",
+        "summaryDecision": copy.deepcopy(nb.get("summaryDecision") or {}),
         "rewriteGoals": list(nb.get("rewriteGoals") or [])[:6],
         "skillsStrategy": list(nb.get("skillsStrategy") or [])[:6],
         "categoryStrategy": list(nb.get("categoryStrategy") or [])[:3],
@@ -336,6 +339,9 @@ def compact_narrative_for_prompt(narrative_brief: dict | None) -> dict:
             "rewriteProjects": _narrative_id_list(nb, "rewriteProjects"),
             "repairProjects": _narrative_id_list(nb, "repairProjects"),
         },
+        "directEvidence": list(nb.get("directEvidence") or [])[:6],
+        "transferableEvidence": list(nb.get("transferableEvidence") or [])[:8],
+        "unsupportedTerms": list(nb.get("unsupportedTerms") or [])[:8],
         "avoid": list(nb.get("avoid") or [])[:4],
     }
 
@@ -478,6 +484,92 @@ def build_peripheral_skill_evidence(resume_data, peripheral_ids):
             }
         )
     return out
+
+
+STABLE_SKILL_CATEGORY_LABELS = {
+    "languages",
+    "programming languages",
+    "frameworks",
+    "libraries",
+    "frameworks & libraries",
+    "frameworks and libraries",
+    "data tools",
+    "databases",
+    "cloud",
+    "cloud platforms",
+    "tools",
+    "platforms",
+    "certifications",
+}
+
+FLEXIBLE_SKILL_CATEGORY_FRAGMENTS = (
+    "focus",
+    "strength",
+    "competenc",
+    "area",
+    "professional skill",
+    "core skill",
+    "soft skill",
+    "additional",
+    "other",
+)
+
+
+def _skill_category_kind(category):
+    label = str(category or "").strip()
+    low = label.lower()
+    if not low:
+        return "uncategorized"
+    if low in STABLE_SKILL_CATEGORY_LABELS:
+        return "stable"
+    if any(fragment in low for fragment in FLEXIBLE_SKILL_CATEGORY_FRAGMENTS):
+        return "flexible"
+    return "stable"
+
+
+def build_skill_category_policy(skills_rows):
+    rows = skills_rows if isinstance(skills_rows, list) else []
+    by_category = {}
+    row_rename_allowed = []
+    row_rename_conservative = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        rid = _row_id_int(row)
+        category = str(row.get("category") or "").strip() or "Uncategorized"
+        entry = by_category.setdefault(category, {"category": category, "rowIds": [], "kind": _skill_category_kind(category)})
+        if isinstance(rid, int):
+            entry["rowIds"].append(rid)
+            if entry["kind"] == "flexible":
+                row_rename_allowed.append(rid)
+            elif entry["kind"] == "stable":
+                row_rename_conservative.append(rid)
+
+    stable = []
+    flexible = []
+    for entry in by_category.values():
+        shaped = {
+            "category": entry["category"],
+            "rowIds": entry["rowIds"],
+            "policy": (
+                "label may be renamed/regrouped if evidence-backed; row names may become role-shaped strengths without inventing new facts"
+                if entry["kind"] == "flexible"
+                else "preserve category label unless duplicate or clearly wrong; primarily reorder rows"
+            ),
+        }
+        if entry["kind"] == "flexible":
+            flexible.append(shaped)
+        elif entry["kind"] == "stable":
+            stable.append(shaped)
+
+    return {
+        "stableCategories": stable,
+        "flexibleCategories": flexible,
+        "categoryRenameAllowed": [x["category"] for x in flexible],
+        "rowRenameAllowedIds": row_rename_allowed,
+        "rowRenameConservativeIds": row_rename_conservative,
+        "note": "Stable buckets carry concrete tools; flexible buckets carry positioning language. If no flexibleCategories exist, do not invent one.",
+    }
 
 
 # --- Pass A: max extra project rows we open for thin-placeholder bullet repair (supporting/peripheral). --- #
@@ -739,6 +831,7 @@ def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None,
             "sectionOrder": copy.deepcopy(nb.get("layoutSectionOrder") or []),
             "sectionVisibility": copy.deepcopy(nb.get("layoutSectionVisibility") or {}),
             "layoutRationale": copy.deepcopy(nb.get("layoutRationale") or []),
+            "summaryDecision": copy.deepcopy(nb.get("summaryDecision") or {}),
             "currentSectionOrder": copy.deepcopy(rd.get("sectionOrder") or []),
             "currentSectionVisibility": copy.deepcopy(rd.get("sectionVisibility") or {}),
         },
@@ -863,6 +956,7 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
     }
     truth_anchor = build_resume_truth_anchor_compact(resumeData, nb)
     strict_truth = bool(payload.get("strict_truth", True))
+    alignment_mode = str(nb.get("alignmentMode") or "").strip().lower()
 
     lines = [
         "## Pass 1 — profile summary and hero rows only (no skills in `edits`)",
@@ -876,8 +970,17 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
         "Selection is part of this pass: include `removedExperienceIds` and/or `removedProjectIds` exactly when `dropExperienceIds` / `dropProjectIds` are present in the focused rewrite surface. Do not keep low-fit rows just because they existed in the original resume.",
         "Layout is also part of tailoring, but secondary to content. If `layoutPlan.sectionOrder` or `layoutPlan.sectionVisibility` is populated, include those exact sanitized values in `edits` unless they would hide evidence-bearing sections.",
         "Return **only** `edits` with `summarySection` and/or `experience` and/or `projects` as needed. **Never** put `skills` in `edits` here—pass 2 will handle skills.",
-        "Set `edits.summarySection` so the professional summary fits this target role. Use the narrative’s `summaryGoal` / `rewriteGoals` and real evidence on the resume.",
     ]
+    if alignment_mode in ("adjacent", "stretch"):
+        lines.extend(
+            [
+                f"Alignment mode is `{alignment_mode}`: this is not a clean direct-fit resume. Bridge from proven evidence to the job; do **not** claim unsupported target-role duties, industries, tools, scheduling ownership, or resource allocation.",
+                "Set `edits.summarySection` so it opens from the candidate's real background and transferable proof. Avoid saying they already are the target role unless the resume directly proves that title.",
+                "For rows, use transferable nouns only when the row supports them: compliance workflow, metrics visibility, automation, coordination, fast-paced communication, reporting, response, or operational dashboards.",
+            ]
+        )
+    else:
+        lines.append("Set `edits.summarySection` so the professional summary fits this target role. Use the narrative’s `summaryGoal` / `rewriteGoals` and real evidence on the resume.")
     if not has_summary_text:
         lines.append("If the summary is empty or very thin, add a strong opening that only states what the experience and projects on this resume can support.")
     else:
@@ -978,26 +1081,36 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
     }
     nb = narrativeBrief if isinstance(narrativeBrief, dict) else {}
     narrative_json = json.dumps(compact_narrative_for_prompt(nb), ensure_ascii=False, indent=2)
+    alignment_mode = str(nb.get("alignmentMode") or "").strip().lower()
     skills_focus = build_stage_a_rewrite_focus(resumeData, nb, payload.get("style_preferences"))
     n_skill = len([r for r in (skills_focus.get("skillsRows") or []) if isinstance(r, dict)])
     peripheral_ids = _narrative_id_list(nb, "peripheralProjects")
     pass_b_bundle = dict(skills_focus)
     pass_b_bundle["resumeWideSkillEvidence"] = build_resume_wide_skill_evidence(resumeData)
     pass_b_bundle["peripheralSkillEvidence"] = build_peripheral_skill_evidence(resumeData, peripheral_ids)
+    pass_b_bundle["skillCategoryPolicy"] = build_skill_category_policy(pass_b_bundle.get("skillsRows") or [])
     pass_b_bundle["deletionBudget"] = pass_b_deletion_budget(n_skill)
     budget = pass_b_bundle["deletionBudget"]
     budget_line = (
         f"**Deletion budget for this resume:** `{budget.get('skillsRowCount')}` skill rows → aim ≥ `{budget.get('minSurvivorsTarget')}` "
         f"survivors; **`maxOmissionsBudget` = `{budget.get('maxOmissionsBudget')}`** absent duplicate/`avoid`. Prefer demotion."
     )
+    alignment_line = ""
+    if alignment_mode in ("adjacent", "stretch"):
+        alignment_line = (
+            f"Alignment mode is `{alignment_mode}`: use flexible skill buckets as transfer-positioning space. "
+            "Prioritize evidenced bridge strengths, but do not invent target-role skills; demote exact-tool noise before deleting."
+        )
     return "\n".join(
         [
             "## Pass 2 — reorder + recategorize skills (evidence-informed)",
             prefsOneLine,
             prefs_block,
             budget_line,
+            alignment_line,
             "**Preserve first:** output **one row per surviving `skillsRows` id** by default. **Semi-hit** rows (resume-evidenced, not JD-top) ⇒ **keep**, order later. **Lead** flows from JD + **`skillsStrategy`** — **not** survivor filters.",
             "Return **`edits.skills`**; optional **`_debugOmitted`** if you omit any id.",
+            "Use **`skillCategoryPolicy`** to separate stable tool buckets from flexible positioning buckets. Stable buckets mostly keep their labels; flexible buckets may be renamed or reframed when the JD and resume evidence support it.",
             "",
             "### Fit checklist (category labels vs JD—not per-skill names)",
             json.dumps(fitSignals, ensure_ascii=False, indent=2),
@@ -1009,7 +1122,7 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
             json.dumps(evidenced_keyword_alignment, ensure_ascii=False, indent=2),
             "",
             "### Structured skill context (read before dropping anything)",
-            "Includes **`skillsRows`**, **`resumeWideSkillEvidence`**, **`peripheralSkillEvidence`**, **`deletionBudget`**, hero/supporting rows.",
+            "Includes **`skillsRows`**, **`resumeWideSkillEvidence`**, **`peripheralSkillEvidence`**, **`skillCategoryPolicy`**, **`deletionBudget`**, hero/supporting rows.",
             json.dumps(pass_b_bundle, ensure_ascii=False, indent=2),
             "",
             "### JD excerpts",

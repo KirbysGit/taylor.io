@@ -1,0 +1,23 @@
+{
+  "displayName": "Modern Rule",
+  "family": "Modern single-column",
+  "variantLabel": "Accent rule",
+  "layoutProfile": "classic_single_column",
+  "shortDescription": "A polished single-column resume with crisp blue section rules and modern Calibri-forward spacing.",
+  "description": "Modern Rule keeps the familiar one-column flow but gives the header and section dividers a sharper, contemporary treatment. It is a safe general-purpose template for business, product, and technical roles.",
+  "stylingMode": "themeable",
+  "allowedControls": [
+    "marginPreset",
+    "typeScale",
+    "fontPairing",
+    "lineSpacingPreset"
+  ],
+  "layoutLocked": false,
+  "capabilitiesVersion": 1,
+  "tags": [
+    "Modern",
+    "Single-column",
+    "General"
+  ],
+  "intent": "Polished general-purpose"
+}

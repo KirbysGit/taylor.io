@@ -10,6 +10,7 @@ import { generateResumePDF, generateResumeWord } from '@/api/services/resume'
 // --- main ui component imports.
 import LeftPanel from './components/left/LeftPanel'
 import RightPanel from './components/right/RightPanel'
+import SaveDraftModal from './components/right/SaveDraftModal'
 
 // --- utility imports.
 import { validateResumeData } from './utils/resumeValidation'
@@ -55,6 +56,7 @@ function ResumePreview() {
 
 	// --- right panel state.
 	const [downloadStatus, setDownloadStatus] = useState(null)
+	const [saveDraftModalOpen, setSaveDraftModalOpen] = useState(false)
 	const downloadControllerRef = useRef(null)
 
 	useEffect(() => {
@@ -225,7 +227,6 @@ function ResumePreview() {
 		setSavedResumesOpen,
 		isSavingResume,
 		saveResumeName,
-		setSaveResumeName,
 		handleSaveForLater,
 		loadSavedResumeIntoState,
 		handleDeleteSaved,
@@ -246,6 +247,29 @@ function ResumePreview() {
 		setStylePreferences,
 		setTemplate,
 	})
+
+	const defaultSaveDraftName = useMemo(() => {
+		if (saveResumeName?.trim()) return saveResumeName.trim()
+		if (tailorIntent?.jobTitle) {
+			return `${tailorIntent.jobTitle}${tailorIntent.company ? ` - ${tailorIntent.company}` : ''}`
+		}
+		const headerName = resumeData.header?.name || [resumeData.header?.firstName, resumeData.header?.lastName].filter(Boolean).join(' ')
+		return headerName ? `${headerName} Resume` : 'Resume Draft'
+	}, [resumeData.header, saveResumeName, tailorIntent])
+
+	const defaultSaveDraftTags = useMemo(
+		() => [
+			tailorIntent?.jobTitle,
+			tailorIntent?.company,
+			tailorIntent?.lengthPreference === 'one_page' ? 'One page' : null,
+		].filter(Boolean),
+		[tailorIntent]
+	)
+
+	const handleOpenSaveDraftModal = useCallback(() => {
+		setSavedResumesOpen(false)
+		setSaveDraftModalOpen(true)
+	}, [setSavedResumesOpen])
 
 	// ----- event handlers -----
 
@@ -425,10 +449,21 @@ function ResumePreview() {
 		[sectionLabels, previewHtml, resumeData, template, stylePreferences, refreshDraftNow]
 	)
 
-	// saves changes.
-	const handleSaveChanges = async () => {
-		const ok = await handleSaveForLater({ closePopover: true })
+	// saves a draft snapshot. Root profile updates will be a separate review flow.
+	const handleConfirmSaveDraft = async ({ name, status, tags }) => {
+		const ok = await handleSaveForLater({
+			name,
+			closePopover: true,
+			draftMeta: {
+				status,
+				tags,
+				changedSections: changeDescriptions,
+				targetRole: tailorIntent?.jobTitle || null,
+				targetCompany: tailorIntent?.company || null,
+			},
+		})
 		if (ok) {
+			setSaveDraftModalOpen(false)
 			setShowSaveBanner(false)
 		}
 		return Boolean(ok)
@@ -587,15 +622,13 @@ function ResumePreview() {
 					saveChangedSections={changeDescriptions}
 					isSavingResume={isSavingResume}
 					onDiscardChanges={handleDiscardChanges}
-					onSaveChanges={handleSaveChanges}
+					onSaveChanges={handleOpenSaveDraftModal}
 					savedResumes={savedResumes}
 					savedResumesOpen={savedResumesOpen}
 					onToggleSavedResumes={() => setSavedResumesOpen((v) => !v)}
 					onCloseSavedResumes={() => setSavedResumesOpen(false)}
-					saveResumeName={saveResumeName}
-					onSaveResumeNameChange={setSaveResumeName}
 					isSavingResumeForLater={isSavingResume}
-					onSaveForLater={handleSaveForLater}
+					onOpenSaveDraftModal={handleOpenSaveDraftModal}
 					onLoadSaved={loadSavedResumeIntoState}
 					onDeleteSaved={handleDeleteSaved}
 					canCompareTailoredResume={Boolean(preTailorSnapshot) && aiTailorPhase === 'reviewing'}
@@ -605,6 +638,16 @@ function ResumePreview() {
 					isTailorHtmlCompare={Boolean(
 						tailorIntent && tailorLayoutPreview === 'compare' && preTailorSnapshot
 					)}
+				/>
+				<SaveDraftModal
+					open={saveDraftModalOpen}
+					defaultName={defaultSaveDraftName}
+					defaultTags={defaultSaveDraftTags}
+					changedSections={changeDescriptions}
+					isSaving={isSavingResume}
+					savedResumes={savedResumes}
+					onClose={() => setSaveDraftModalOpen(false)}
+					onSave={handleConfirmSaveDraft}
 				/>
 			</main>
 		</div>

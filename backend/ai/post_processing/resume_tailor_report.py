@@ -40,6 +40,34 @@ def _join_human(items):
     return ", ".join(items[:-1]) + f", and {items[-1]}"
 
 
+def _display_term(term):
+    text = _clean_text(term, limit=60)
+    known = {
+        "api": "API",
+        "apis": "APIs",
+        "aws": "AWS",
+        "ec2": "EC2",
+        "etl": "ETL",
+        "fastapi": "FastAPI",
+        "javascript": "JavaScript",
+        "jwt": "JWT",
+        "mongodb": "MongoDB",
+        "mysql": "MySQL",
+        "nlp": "NLP",
+        "node.js": "Node.js",
+        "postgresql": "PostgreSQL",
+        "python": "Python",
+        "react": "React",
+        "rest": "REST",
+        "sql": "SQL",
+    }
+    return known.get(text.lower(), text)
+
+
+def _display_terms(terms):
+    return [_display_term(t) for t in terms or []]
+
+
 def _section_phrase(changed_sections):
     friendly = {
         "summary": "the summary",
@@ -54,6 +82,28 @@ def _section_phrase(changed_sections):
     }
     items = [friendly.get(x, x) for x in changed_sections or []]
     return _join_human(items)
+
+
+def _summary_is_hidden_for_draft(patch, narrative_brief):
+    if isinstance(patch, dict):
+        sv = patch.get("sectionVisibility")
+        if isinstance(sv, dict):
+            after = sv.get("after") if isinstance(sv.get("after"), dict) else sv
+            if isinstance(after, dict) and isinstance(after.get("summary"), bool):
+                return after.get("summary") is False
+    nb = narrative_brief if isinstance(narrative_brief, dict) else {}
+    vis = nb.get("layoutSectionVisibility") if isinstance(nb.get("layoutSectionVisibility"), dict) else {}
+    if isinstance(vis.get("summary"), bool):
+        return vis.get("summary") is False
+    sd = nb.get("summaryDecision") if isinstance(nb.get("summaryDecision"), dict) else {}
+    return str(sd.get("action") or "").strip().lower() == "hide"
+
+
+def _visible_changed_sections(patch, narrative_brief):
+    sections = _changed_sections_from_patch(patch)
+    if _summary_is_hidden_for_draft(patch, narrative_brief):
+        sections = [s for s in sections if s != "summary"]
+    return sections
 
 
 def _main_moves(changed_sections):
@@ -83,6 +133,173 @@ def _layout_phrase(patch):
     if not bits:
         return ""
     return _join_human(bits)
+
+
+def _patch_row_label(section, entry):
+    if not isinstance(entry, dict):
+        return ""
+    before = entry.get("before") if isinstance(entry.get("before"), dict) else {}
+    after = entry.get("after") if isinstance(entry.get("after"), dict) else {}
+    if not after and isinstance(entry.get("fieldsChanged"), dict):
+        fc = entry.get("fieldsChanged") or {}
+        after = {}
+        for key in ("title", "company", "name", "school"):
+            delta = fc.get(key)
+            if isinstance(delta, dict) and delta.get("after"):
+                after[key] = delta.get("after")
+    row = after or before
+    if section == "experience":
+        company = _clean_text(row.get("company") if isinstance(row, dict) else "", limit=40)
+        title = _clean_text(row.get("title") if isinstance(row, dict) else "", limit=50)
+        return f"{company} {title}".strip()
+    if section == "projects":
+        return _clean_text(row.get("title") if isinstance(row, dict) else "", limit=70)
+    if section == "skills":
+        return _clean_text(row.get("name") if isinstance(row, dict) else "", limit=60)
+    if section == "education":
+        return _clean_text(row.get("school") if isinstance(row, dict) else "", limit=60)
+    return ""
+
+
+def _row_label_from_resume(resume_data, section, rid):
+    if not isinstance(resume_data, dict) or rid is None:
+        return ""
+    rows = resume_data.get(section)
+    if not isinstance(rows, list):
+        return ""
+    for row in rows:
+        if not isinstance(row, dict) or row.get("id") != rid:
+            continue
+        if section == "experience":
+            return f"{_clean_text(row.get('company'), limit=40)} {_clean_text(row.get('title'), limit=50)}".strip()
+        if section == "projects":
+            return _clean_text(row.get("title"), limit=70)
+        if section == "skills":
+            return _clean_text(row.get("name"), limit=60)
+        if section == "education":
+            return _clean_text(row.get("school"), limit=60)
+    return ""
+
+
+def _labels_from_patch(patch, section, *, removed=False, limit=4, resume_data=None):
+    entries = (patch.get(section) or []) if isinstance(patch, dict) else []
+    labels = []
+    for entry in entries:
+        if not isinstance(entry, dict) or bool(entry.get("removed")) != removed:
+            continue
+        label = _patch_row_label(section, entry)
+        if not label and not removed:
+            label = _row_label_from_resume(resume_data, section, entry.get("id"))
+        if label:
+            labels.append(label)
+    return _dedupe_keep_order(labels, limit=limit)
+
+
+def _detail_items_from_patch(patch, narrative_brief, gaps, flags, target_label, updated_resume_data=None):
+    nb = narrative_brief if isinstance(narrative_brief, dict) else {}
+    target_story = nb.get("targetStory") if isinstance(nb.get("targetStory"), dict) else {}
+    groups = []
+
+    why_items = []
+    takeaway = _clean_text(target_story.get("readerTakeaway") if isinstance(target_story, dict) else "", limit=180)
+    if takeaway:
+        why_items.append(f"Target story: {takeaway}")
+    elif target_label:
+        why_items.append(f"Targeted the draft toward {target_label}.")
+    themes = target_story.get("evidenceThemes") if isinstance(target_story, dict) else []
+    themes = _dedupe_keep_order(themes or [], limit=3)
+    if themes:
+        why_items.append("Main evidence themes: " + _join_human(themes) + ".")
+    if why_items:
+        groups.append({"title": "Why it changed", "items": why_items})
+
+    alignment_mode = _clean_text(nb.get("alignmentMode"), limit=24).lower()
+    alignment_guidance = _clean_text(nb.get("alignmentGuidance"), limit=220)
+    transferable = nb.get("transferableEvidence") if isinstance(nb.get("transferableEvidence"), list) else []
+    if alignment_mode in ("adjacent", "stretch"):
+        items = []
+        if alignment_guidance:
+            items.append(alignment_guidance)
+        labels = []
+        for item in transferable:
+            if not isinstance(item, dict):
+                continue
+            label = _clean_text(item.get("label"), limit=70)
+            if label:
+                labels.append(label)
+            if len(labels) >= 3:
+                break
+        if labels:
+            items.append("Transferable evidence I considered: " + _join_human(_dedupe_keep_order(labels, limit=3)) + ".")
+        if items:
+            groups.append({"title": "Fit read", "items": items[:2]})
+
+    summary_decision = nb.get("summaryDecision") if isinstance(nb.get("summaryDecision"), dict) else {}
+    summary_action = _clean_text(summary_decision.get("action"), limit=20).lower()
+    summary_reason = _clean_text(summary_decision.get("reason"), limit=180)
+    summary_hidden = _summary_is_hidden_for_draft(patch, nb)
+    if summary_hidden and "summary" in (patch or {}):
+        item = "I kept the professional summary out of the visible draft because the stronger proof was already easier to scan in experience, projects, and skills."
+        groups.append({"title": "Summary choice", "items": [item]})
+    elif summary_action in ("show", "hide"):
+        verb = "showed" if summary_action == "show" else "hid"
+        item = f"I {verb} the professional summary because {summary_reason[0].lower() + summary_reason[1:] if summary_reason else 'that fit this draft better.'}"
+        groups.append({"title": "Summary choice", "items": [item]})
+
+    spotlight = []
+    for section in ("experience", "projects"):
+        entries = (patch.get(section) or []) if isinstance(patch, dict) else []
+        for entry in entries:
+            if not isinstance(entry, dict) or entry.get("removed"):
+                continue
+            label = _patch_row_label(section, entry)
+            if not label:
+                label = _row_label_from_resume(updated_resume_data, section, entry.get("id"))
+            if label:
+                spotlight.append(label)
+    spotlight = _dedupe_keep_order(spotlight, limit=5)
+    if spotlight:
+        groups.append({"title": "What I spotlighted", "items": spotlight})
+
+    removed = []
+    for section in ("experience", "projects", "skills", "education"):
+        entries = (patch.get(section) or []) if isinstance(patch, dict) else []
+        for entry in entries:
+            if not isinstance(entry, dict) or not entry.get("removed"):
+                continue
+            label = _patch_row_label(section, entry)
+            if label:
+                removed.append(label)
+    removed = _dedupe_keep_order(removed, limit=8)
+    if removed:
+        groups.append({"title": "What I trimmed", "items": removed})
+
+    category_strategy = _dedupe_keep_order(nb.get("categoryStrategy") or [], limit=3)
+    if category_strategy:
+        groups.append(
+            {
+                "title": "Skill groups",
+                "items": [
+                    "I treated broad skill buckets like Focus Areas as flexible positioning space: "
+                    + _join_human(category_strategy)
+                    + "."
+                ],
+            }
+        )
+
+    review = []
+    if gaps:
+        review.append("Some JD terms were not directly evidenced: " + _join_human(gaps[:4]) + ".")
+    if flags.get("suspicious_protected_skill_removals"):
+        review.append("Review the skills list; a few useful-but-lower-priority skills may have been trimmed.")
+    if flags.get("minor_expected_rewrites"):
+        review.append("A row may still be close to the original even after repair, so it is worth a quick read.")
+    if flags.get("filler_phrase_hits"):
+        review.append("Some generic phrasing may still be worth tightening.")
+    if review:
+        groups.append({"title": "Worth checking", "items": review[:4]})
+
+    return groups
 
 
 def _keyword_terms_from_context(tailor_context, limit=3):
@@ -188,36 +405,58 @@ def build_tailor_explanation(
     strict_truth=True,
     tailor_context=None,
     quality_audit=None,
+    updated_resume_data=None,
 ):
     nb = narrative_brief if isinstance(narrative_brief, dict) else {}
     prefs = style_preferences if isinstance(style_preferences, dict) else {}
     qa = quality_audit if isinstance(quality_audit, dict) else {}
     role = _clean_text(target_role, limit=80) or "this role"
     co = _clean_text(company, limit=80)
-    jd_terms = _keyword_terms_from_context(tailor_context, limit=3)
-    matched_terms = _resume_hits_from_context(tailor_context, limit=4)
+    jd_terms = _display_terms(_keyword_terms_from_context(tailor_context, limit=3))
+    matched_terms = _display_terms(_resume_hits_from_context(tailor_context, limit=4))
     gaps = _resume_gaps_from_context(tailor_context, limit=4)
-    changed_sections = _changed_sections_from_patch(patch)
+    changed_sections = _visible_changed_sections(patch, nb)
     primary_story = _dedupe_keep_order(nb.get("primaryStory") or [], limit=3)
     candidate_angle = _clean_text(nb.get("candidateAngle"), limit=160)
+    alignment_mode = _clean_text(nb.get("alignmentMode"), limit=24).lower()
+    alignment_guidance = _clean_text(nb.get("alignmentGuidance"), limit=220)
+    kept_projects = _labels_from_patch(patch, "projects", removed=False, limit=3, resume_data=updated_resume_data)
+    trimmed_experience = _labels_from_patch(patch, "experience", removed=True, limit=2)
+    trimmed_projects = _labels_from_patch(patch, "projects", removed=True, limit=3)
+    summary_hidden = _summary_is_hidden_for_draft(patch, nb)
 
     sentences = []
     target_label = f"{role} at {co}" if co else role
-    if jd_terms:
-        sentences.append(f"I treated this as a {target_label} draft, with {_join_human(jd_terms)} as the main signals to make obvious.")
+    if alignment_mode in ("adjacent", "stretch"):
+        bridge_word = "stretch" if alignment_mode == "stretch" else "adjacent"
+        sentences.append(
+            f"I treated this as an {bridge_word} match for {target_label}, so I focused on transferable proof instead of pretending every JD term was already in your background."
+        )
+    elif jd_terms:
+        sentences.append(f"I treated this as a {target_label} draft and made {_join_human(jd_terms)} easy to find.")
     else:
         sentences.append(f"I used the job description to shape this draft for {target_label}.")
 
-    if matched_terms:
-        story_part = _join_human(primary_story) if primary_story else candidate_angle
-        if story_part:
-            sentences.append(f"You already had good proof for {_join_human(matched_terms)}, so I pulled that evidence forward and shaped the story around {story_part}.")
+    if alignment_mode in ("adjacent", "stretch") and matched_terms:
+        sentences.append(f"The direct overlap I found was {_join_human(matched_terms)}; the rest of the draft bridges from nearby evidence like metrics, workflows, coordination, or operating pace where your resume supports it.")
+    elif matched_terms:
+        if kept_projects:
+            sentences.append(f"You already had the right raw material: {_join_human(matched_terms)}. I pushed that proof forward in {_join_human(kept_projects)}.")
+        elif primary_story or candidate_angle:
+            story_part = _join_human(primary_story) if primary_story else candidate_angle
+            sentences.append(f"You already had good proof for {_join_human(matched_terms)}, so I pulled that evidence forward instead of forcing unsupported claims.")
         else:
             sentences.append(f"You already had good proof for {_join_human(matched_terms)}, so I kept the rewrite grounded in those strengths.")
     else:
         sentences.append(
             "I found fewer direct keyword matches in your saved profile, so I kept the rewrite closer to your existing evidence instead of forcing claims that were not there."
         )
+
+    trimmed = _dedupe_keep_order(trimmed_experience + trimmed_projects, limit=4)
+    if trimmed:
+        sentences.append(f"I trimmed {_join_human(trimmed)} because they were weaker signals for this read.")
+    if summary_hidden and "summary" in (patch or {}):
+        sentences.append("I also kept the summary out of the visible draft so the strongest sections can do the talking.")
 
     moves = _main_moves(changed_sections)
     if moves:
@@ -246,6 +485,8 @@ def build_tailor_explanation(
 
     flags = qa.get("flags") if isinstance(qa.get("flags"), dict) else {}
     chips = _preference_chips(prefs, strict_truth) + _action_chips(changed_sections)
+    if alignment_mode in ("adjacent", "stretch"):
+        chips.append(_chip("Bridge fit", "caution"))
     if gaps:
         chips.append(_chip("Some JD terms not evidenced", "caution"))
     if flags.get("skills_expected_but_unchanged") or flags.get("suspicious_protected_skill_removals"):
@@ -257,7 +498,9 @@ def build_tailor_explanation(
     return {
         "paragraph": paragraph,
         "chips": chips[:10],
+        "details": _detail_items_from_patch(patch, nb, gaps, flags, target_label, updated_resume_data=updated_resume_data),
         "evidence": {
+            "alignmentMode": alignment_mode,
             "matchedTerms": matched_terms,
             "jobPriorityTerms": jd_terms,
             "resumeGaps": gaps,
