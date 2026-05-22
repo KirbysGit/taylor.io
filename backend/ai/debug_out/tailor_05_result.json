@@ -1,8 +1,8 @@
 {
   "final": {
-    "summary": "Tailoring log for: Operations Coordinator.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- sectionOrder: structure or presentation updated.\n- sectionVisibility: structure or presentation updated.\n- Experience id 5: small text tweak (minor).\n- Experience id 7: removed from resume.\n- Project id 17: moderate description/stack revision.\n- Skills: list structure or order changed.",
+    "summary": "Tailoring log for: Software Engineer.\n\n- Profile summary: revised (heuristic: generic-leaning phrasing present: proven track record of).\n- sectionOrder: structure or presentation updated.\n- sectionVisibility: structure or presentation updated.\n- Experience id 5: moderate update to bullets and/or line items.\n- Experience id 7: removed from resume.\n- Project id 9: moderate description/stack revision.\n- Project id 10: moderate description/stack revision.\n- Project id 12: removed from resume.\n- Project id 17: removed from resume.\n- Project id 18: removed from resume.\n- Project id 20: moderate description/stack revision.\n- Skills id 52: row removed.\n- Skills id 53: row removed.\n- Skills id 54: row removed.\n- Skills id 55: row removed.\n- Skills id 56: row removed.",
     "tailorExplanation": {
-      "paragraph": "I treated this as a Operations Coordinator at Pacific Commercial Services, Inc draft and made operations, compliance, and scheduling easy to find. You already had the right raw material: compliance and metrics. I pushed that proof forward in ShelfVision - Dense Shelf Object Detection. I trimmed Bar Louie Server because they were weaker signals for this read. The biggest help here: kept the projects that best prove the role fit, reframed your experience around the job's strongest signals, and gave the summary a clearer role-specific angle. Under the hood, I changed the summary, experience, projects, skills, the section order, and which sections show based on those signals.",
+      "paragraph": "I treated this as a Software Engineer at Curate Partners draft and made SQL, Python, and React easy to find. You already had the right raw material: SQL, Python, React, and data. I pushed that proof forward in Centi – Personal Finance App, Taylor.io – Resume Builder & Parser, and SentimentTrader - Real-Time Stock Sentiment Pipeline. I trimmed Bar Louie Server, SecureScape – Smart Security System, ShelfVision - Dense Shelf Object Detection, and Tizirsso Racing – Portfolio & Sponsorship Website because they were weaker signals for this read. The biggest help here: kept the projects that best prove the role fit, reframed your experience around the job's strongest signals, and gave the summary a clearer role-specific angle. Under the hood, I changed the summary, experience, projects, skills, the section order, and which sections show based on those signals.",
       "chips": [
         {
           "label": "Strict truth",
@@ -29,6 +29,10 @@
           "tone": "caution"
         },
         {
+          "label": "Review skills",
+          "tone": "caution"
+        },
+        {
           "label": "Review rewrite strength",
           "tone": "caution"
         }
@@ -37,47 +41,260 @@
         {
           "title": "Why it changed",
           "items": [
-            "Target story: Colin is a operations coordinator with a strong background in logistics, compliance, and process optimization, leveraging technical skills to enhance...",
-            "Main evidence themes: logistics coordination, compliance, and metrics tracking."
+            "Target story: Proven experience in building scalable backend services and data pipelines using Python and SQL, with a strong emphasis on automation and data integr...",
+            "Main evidence themes: workflow / automation, metrics / reporting, and compliance / standards."
           ]
         },
         {
           "title": "What I spotlighted",
           "items": [
             "BitGo Software Engineering Intern",
-            "ShelfVision - Dense Shelf Object Detection"
+            "Centi – Personal Finance App",
+            "Taylor.io – Resume Builder & Parser",
+            "SentimentTrader - Real-Time Stock Sentiment Pipeline"
           ]
         },
         {
           "title": "What I trimmed",
           "items": [
-            "Bar Louie Server"
+            "Bar Louie Server",
+            "SecureScape – Smart Security System",
+            "ShelfVision - Dense Shelf Object Detection",
+            "Tizirsso Racing – Portfolio & Sponsorship Website",
+            "MySQL",
+            "MongoDB",
+            "Pandas",
+            "NumPy"
           ]
         },
         {
           "title": "Worth checking",
           "items": [
-            "Some JD terms were not directly evidenced: operations, scheduling, resource, and process improvement.",
-            "A row may still be close to the original even after repair, so it is worth a quick read.",
+            "Some JD terms were not directly evidenced: data engineering, azure, frontend, and data analysis.",
+            "Review the skills list; a few useful-but-lower-priority skills may have been trimmed.",
             "Some generic phrasing may still be worth tightening."
           ]
         }
       ],
       "evidence": {
+        "alignmentMode": "direct",
+        "evidenceClassification": [
+          {
+            "section": "experience",
+            "id": 5,
+            "label": "BitGo Software Engineering Intern",
+            "terms": [
+              "sql",
+              "python",
+              "react",
+              "data",
+              "software",
+              "engineer"
+            ],
+            "evidenceType": "direct_role_evidence",
+            "claimStrength": "direct",
+            "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+          },
+          {
+            "section": "projects",
+            "id": 20,
+            "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+            "terms": [
+              "sql",
+              "python",
+              "data",
+              "machine learning"
+            ],
+            "evidenceType": "direct_role_evidence",
+            "claimStrength": "direct",
+            "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+          },
+          {
+            "section": "projects",
+            "id": 10,
+            "label": "Taylor.io – Resume Builder & Parser",
+            "terms": [
+              "sql",
+              "react",
+              "data",
+              "backend"
+            ],
+            "evidenceType": "direct_role_evidence",
+            "claimStrength": "direct",
+            "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+          },
+          {
+            "section": "projects",
+            "id": 9,
+            "label": "Centi – Personal Finance App",
+            "terms": [
+              "sql",
+              "react",
+              "data"
+            ],
+            "evidenceType": "direct_role_evidence",
+            "claimStrength": "direct",
+            "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+          },
+          {
+            "section": "education",
+            "id": 3,
+            "label": "University of Central Florida",
+            "terms": [
+              "data",
+              "software"
+            ],
+            "evidenceType": "direct_role_evidence",
+            "claimStrength": "direct",
+            "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+          },
+          {
+            "section": "projects",
+            "id": 12,
+            "label": "SecureScape – Smart Security System",
+            "terms": [
+              "python",
+              "backend"
+            ],
+            "evidenceType": "direct_role_evidence",
+            "claimStrength": "direct",
+            "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+          },
+          {
+            "section": "projects",
+            "id": 17,
+            "label": "ShelfVision - Dense Shelf Object Detection",
+            "terms": [
+              "python"
+            ],
+            "evidenceType": "direct_role_evidence",
+            "claimStrength": "direct",
+            "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+          },
+          {
+            "section": "skills",
+            "id": 51,
+            "label": "PostgreSQL",
+            "terms": [
+              "sql",
+              "data"
+            ],
+            "evidenceType": "direct_role_evidence",
+            "claimStrength": "direct",
+            "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+          }
+        ],
+        "jdSignalIntent": [
+          {
+            "term": "sql",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+              "build and maintain systems using python and sql"
+            ]
+          },
+          {
+            "term": "python",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+              "build and maintain systems using python and sql"
+            ]
+          },
+          {
+            "term": "react",
+            "intent": "candidate_requirement",
+            "priority": 2,
+            "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+            "linePreview": [
+              "handle light frontend work (react) if needed",
+              "some react / frontend experience"
+            ]
+          },
+          {
+            "term": "data",
+            "intent": "candidate_requirement",
+            "priority": 2,
+            "reason": "Candidate requirement: use as bridge/skills emphasis when supported by resume behavior.",
+            "linePreview": [
+              "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+              "perform data analysis and validation"
+            ]
+          },
+          {
+            "term": "data engineering",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+              "contribute to both data engineering and application development"
+            ]
+          },
+          {
+            "term": "azure",
+            "intent": "candidate_requirement",
+            "priority": 2,
+            "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+            "linePreview": []
+          },
+          {
+            "term": "frontend",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+              "handle light frontend work (react) if needed"
+            ]
+          },
+          {
+            "term": "software",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+              "ability to work across both data and software engineering tasks"
+            ]
+          },
+          {
+            "term": "data analysis",
+            "intent": "company_product_context",
+            "priority": 1,
+            "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+            "linePreview": [
+              "perform data analysis and validation"
+            ]
+          },
+          {
+            "term": "machine learning",
+            "intent": "candidate_requirement",
+            "priority": 2,
+            "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+            "linePreview": []
+          }
+        ],
         "matchedTerms": [
-          "compliance",
-          "metrics"
+          "SQL",
+          "Python",
+          "React",
+          "data"
         ],
         "jobPriorityTerms": [
-          "operations",
-          "compliance",
-          "scheduling"
+          "SQL",
+          "Python",
+          "React"
         ],
         "resumeGaps": [
-          "operations",
-          "scheduling",
-          "resource",
-          "process improvement"
+          "data engineering",
+          "azure",
+          "frontend",
+          "data analysis"
         ],
         "changedSections": [
           "summary",
@@ -131,18 +348,18 @@
         {
           "id": 3,
           "school": "University of Central Florida",
-          "degree": "Bachelor of Science",
+          "degree": "Bachelors of Science",
           "discipline": "Computer Engineering",
           "location": "Orlando, FL",
           "start_date": "2021-08-01",
           "end_date": "2025-05-01",
           "current": false,
-          "gpa": "3.78 / 4.0",
+          "gpa": "3.7 / 4.0",
           "minor": "Finance",
           "subsections": {
+            "Relevant Coursework": "Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design",
             "Honors & Awards": "Dean’s List 2021, President’s Honor Roll 2023 – 2025, Pegasus Gold Scholarship",
-            "Clubs & Extracurriculars": "AI @ UCF, Knight Hacks, SHPE @ UCF",
-            "Relevant Coursework": "Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design "
+            "Clubs & Extracurriculars": "AI @ UCF, Knight Hacks, SHPE @ UCF"
           }
         }
       ],
@@ -151,7 +368,7 @@
           "id": 5,
           "title": "Software Engineering Intern",
           "company": "BitGo",
-          "description": "• Developed backend services and REST APIs in Python/Django to support secure workflows for financial and compliance teams.\n• Contributed to system design and architecture with senior engineers, focusing on scalable service patterns and data modeling.\n• Created React dashboards integrated with Django APIs, enhancing visibility into operational metrics and backend data workflows.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency and improving system scalability.",
+          "description": "• Developed backend services and REST APIs in Python/Django to support secure workflows for financial and compliance teams.\n• Contributed to system design and architecture discussions with senior engineers, focusing on scalable service patterns and data modeling.\n• Created React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency.",
           "start_date": "2024-05-01",
           "end_date": "2025-06-01",
           "current": false,
@@ -163,7 +380,7 @@
         {
           "id": 9,
           "title": "Centi – Personal Finance App",
-          "description": "• Built and deployed a full-stack finance application that automates account aggregation, transaction tracking, and spending insights across a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and normalized data storage.\n• Developed responsive React dashboards and authentication flows for account management, transaction review, and financial analytics.\n• Implemented authentication and secure data handling (OAuth/JWT), ensuring protected access to financial data and user account workflows.\n• Made it secure n stuff.",
+          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, providing insights through a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Created responsive React dashboards for account management and financial analytics, improving user experience.\n• Implemented secure data handling practices (OAuth/JWT) to protect user financial data.",
           "tech_stack": [
             "FastAPI",
             "React",
@@ -175,7 +392,7 @@
         {
           "id": 10,
           "title": "Taylor.io – Resume Builder & Parser",
-          "description": "• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.\n• Implemented backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\n• Created a live editing and preview experience in React, enabling users to customize resume content in real time through  a clean, guided interface.\n• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and  editing workflows.",
+          "description": "• Developed an AI-powered resume platform that automates the parsing of PDF/DOCX files into structured profile data.\n• Built backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\n• Designed a real-time editing interface in React, allowing users to customize resume content.\n• Integrated OpenAI API for automated content generation, streamlining the resume extraction and editing process.",
           "tech_stack": [
             "React",
             "FastAPI",
@@ -186,41 +403,9 @@
           "url": ""
         },
         {
-          "id": 12,
-          "title": "SecureScape – Smart Security System",
-          "description": "• Developed the Flutter mobile app with core controls including alarm toggling, lighting, photo capture, and recording  access.\n• Built the Python backend and communication layer for device coordination, enabling reliable messaging and near real time alerts (<3.5s).",
-          "tech_stack": [
-            "Python",
-            "Flutter",
-            "Arduino C++",
-            "TensorFlow Lite"
-          ],
-          "url": ""
-        },
-        {
-          "id": 17,
-          "title": "ShelfVision - Dense Shelf Object Detection",
-          "description": "• Created a product detection system for retail environments using ResNet-50 and FPN features, improving logistics for inventory management.\n• Utilized smart anchor matching and IoU-based detection algorithms to accurately handle overlapping items, improving operational accuracy.\n• Conducted benchmarking on the SKU-110K dataset, providing detailed metrics and comparisons with YOLOv5 to inform performance enhancements.",
-          "tech_stack": [
-            "Python",
-            "PyTorch",
-            "OpenCV",
-            "scikit-learn",
-            "NumPy"
-          ],
-          "url": ""
-        },
-        {
-          "id": 18,
-          "title": "Tizirsso Racing – Portfolio & Sponsorship Website",
-          "description": "• Built a custom motorsport portfolio site translating brand identity and racing history into a polished, mobile-first  experience.\n• Developed interactive UI sections including an animated hero, editorial about page, career timeline, team history,  championship highlights, and image galleries with lightbox support.",
-          "tech_stack": [],
-          "url": "https://tizianorosso.com/"
-        },
-        {
           "id": 20,
           "title": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-          "description": "• Designed and implemented an end-to-end production-style ML data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.\n• Applied NLP models (FinBERT) and feature engineering to build 40+ predictive features per ticker; trained XGBoost models achieving 55–70% ROC-AUC.\n• Built modular components for data ingestion, transformation, model inference, and distributed-style batching, aligned with message-driven architectures.\n• Automated end-to-end data collection, preprocessing, and model inference workflows, enabling scalable real-time analytics.",
+          "description": "• Engineered a comprehensive ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance posts per run through multi-stage ETL.\n• Leveraged NLP models (FinBERT) and feature engineering to generate 40+ predictive features per ticker, training XGBoost models with 55–70% ROC-AUC.\n• Developed modular components for data ingestion, transformation, and model inference, aligned with message-driven architectures for scalability.\n• Automated data collection and preprocessing workflows, enabling efficient real-time analytics.",
           "tech_stack": [
             "Python",
             "SQL",
@@ -232,14 +417,29 @@
       ],
       "skills": [
         {
+          "id": 41,
+          "name": "Python",
+          "category": "Languages"
+        },
+        {
+          "id": 44,
+          "name": "SQL",
+          "category": "Languages"
+        },
+        {
+          "id": 47,
+          "name": "React",
+          "category": "Frameworks"
+        },
+        {
           "id": 45,
           "name": "Django",
           "category": "Frameworks"
         },
         {
-          "id": 41,
-          "name": "Python",
-          "category": "Languages"
+          "id": 46,
+          "name": "FastAPI",
+          "category": "Frameworks"
         },
         {
           "id": 51,
@@ -247,8 +447,8 @@
           "category": "Data Tools"
         },
         {
-          "id": 56,
-          "name": "AWS (EC2)",
+          "id": 57,
+          "name": "ETL Pipelines",
           "category": "Data Tools"
         },
         {
@@ -287,21 +487,6 @@
           "category": "Languages"
         },
         {
-          "id": 44,
-          "name": "SQL",
-          "category": "Languages"
-        },
-        {
-          "id": 46,
-          "name": "FastAPI",
-          "category": "Frameworks"
-        },
-        {
-          "id": 47,
-          "name": "React",
-          "category": "Frameworks"
-        },
-        {
           "id": 48,
           "name": "Node.js",
           "category": "Frameworks"
@@ -315,36 +500,11 @@
           "id": 50,
           "name": "TensorFlow Lite",
           "category": "Frameworks"
-        },
-        {
-          "id": 52,
-          "name": "MySQL",
-          "category": "Data Tools"
-        },
-        {
-          "id": 53,
-          "name": "MongoDB",
-          "category": "Data Tools"
-        },
-        {
-          "id": 54,
-          "name": "Pandas",
-          "category": "Data Tools"
-        },
-        {
-          "id": 55,
-          "name": "NumPy",
-          "category": "Data Tools"
-        },
-        {
-          "id": 57,
-          "name": "ETL Pipelines",
-          "category": "Data Tools"
         }
       ],
       "hiddenSkills": [],
       "summary": {
-        "summary": "Operations Coordinator with a strong background in logistics, compliance, and metrics tracking. Proven ability to optimize resource allocation and improve processes through technical expertise in data management and operational efficiency."
+        "summary": "Software Engineer with a strong focus on backend development and data engineering. Proficient in Python and SQL, with a proven track record of building scalable data pipelines and backend services. Experienced in integrating React for user interfaces and optimizing workflows for real-time data processing."
       },
       "sectionVisibility": {
         "summary": true,
@@ -372,7 +532,7 @@
     "patchDiff": {
       "summary": {
         "before": "Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications.",
-        "after": "Operations Coordinator with a strong background in logistics, compliance, and metrics tracking. Proven ability to optimize resource allocation and improve processes through technical expertise in data management and operational efficiency."
+        "after": "Software Engineer with a strong focus on backend development and data engineering. Proficient in Python and SQL, with a proven track record of building scalable data pipelines and backend services. Experienced in integrating React for user interfaces and optimizing workflows for real-time data processing."
       },
       "sectionOrder": {
         "before": [
@@ -414,7 +574,7 @@
           "fieldsChanged": {
             "description": {
               "before": "• Built and maintained backend services and REST APIs in Python/Django supporting secure internal workflows for financial and compliance teams.\n• Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.\n• Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, improving system scalability and reducing latency by ~40%.",
-              "after": "• Developed backend services and REST APIs in Python/Django to support secure workflows for financial and compliance teams.\n• Contributed to system design and architecture with senior engineers, focusing on scalable service patterns and data modeling.\n• Created React dashboards integrated with Django APIs, enhancing visibility into operational metrics and backend data workflows.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency and improving system scalability."
+              "after": "• Developed backend services and REST APIs in Python/Django to support secure workflows for financial and compliance teams.\n• Contributed to system design and architecture discussions with senior engineers, focusing on scalable service patterns and data modeling.\n• Created React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
             }
           }
         },
@@ -437,249 +597,137 @@
       ],
       "projects": [
         {
-          "id": 17,
+          "id": 9,
           "fieldsChanged": {
             "description": {
-              "before": "• Detects products in crowded retail shelf photos using ResNet-50 and FPN features.\n• Handles overlapping items with smart anchor matching and IoU-based detection algorithms.\n• Benchmarked on SKU-110K dataset with comprehensive metrics and YOLOv5 comparisons.",
-              "after": "• Created a product detection system for retail environments using ResNet-50 and FPN features, improving logistics for inventory management.\n• Utilized smart anchor matching and IoU-based detection algorithms to accurately handle overlapping items, improving operational accuracy.\n• Conducted benchmarking on the SKU-110K dataset, providing detailed metrics and comparisons with YOLOv5 to inform performance enhancements."
+              "before": "• Built and deployed a full-stack finance application that automates account aggregation, transaction tracking, and spending insights across a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and normalized data storage.\n• Developed responsive React dashboards and authentication flows for account management, transaction review, and financial analytics.\n• Implemented authentication and secure data handling (OAuth/JWT), ensuring protected access to financial data and user account workflows.\n• Made it secure n stuff.",
+              "after": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, providing insights through a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Created responsive React dashboards for account management and financial analytics, improving user experience.\n• Implemented secure data handling practices (OAuth/JWT) to protect user financial data."
+            }
+          }
+        },
+        {
+          "id": 10,
+          "fieldsChanged": {
+            "description": {
+              "before": "• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.\n• Implemented backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\n• Created a live editing and preview experience in React, enabling users to customize resume content in real time through  a clean, guided interface.\n• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and  editing workflows.",
+              "after": "• Developed an AI-powered resume platform that automates the parsing of PDF/DOCX files into structured profile data.\n• Built backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\n• Designed a real-time editing interface in React, allowing users to customize resume content.\n• Integrated OpenAI API for automated content generation, streamlining the resume extraction and editing process."
+            }
+          }
+        },
+        {
+          "id": 12,
+          "removed": true,
+          "before": {
+            "id": 12,
+            "title": "SecureScape – Smart Security System",
+            "description": "• Developed the Flutter mobile app with core controls including alarm toggling, lighting, photo capture, and recording  access.\n• Built the Python backend and communication layer for device coordination, enabling reliable messaging and near real time alerts (<3.5s).",
+            "tech_stack": [
+              "Python",
+              "Flutter",
+              "Arduino C++",
+              "TensorFlow Lite"
+            ],
+            "url": ""
+          },
+          "after": null
+        },
+        {
+          "id": 17,
+          "removed": true,
+          "before": {
+            "id": 17,
+            "title": "ShelfVision - Dense Shelf Object Detection",
+            "description": "• Detects products in crowded retail shelf photos using ResNet-50 and FPN features.\n• Handles overlapping items with smart anchor matching and IoU-based detection algorithms.\n• Benchmarked on SKU-110K dataset with comprehensive metrics and YOLOv5 comparisons.",
+            "tech_stack": [
+              "Python",
+              "PyTorch",
+              "OpenCV",
+              "scikit-learn",
+              "NumPy"
+            ],
+            "url": ""
+          },
+          "after": null
+        },
+        {
+          "id": 18,
+          "removed": true,
+          "before": {
+            "id": 18,
+            "title": "Tizirsso Racing – Portfolio & Sponsorship Website",
+            "description": "• Built a custom motorsport portfolio site translating brand identity and racing history into a polished, mobile-first  experience.\n• Developed interactive UI sections including an animated hero, editorial about page, career timeline, team history,  championship highlights, and image galleries with lightbox support.",
+            "tech_stack": [],
+            "url": "https://tizianorosso.com/"
+          },
+          "after": null
+        },
+        {
+          "id": 20,
+          "fieldsChanged": {
+            "description": {
+              "before": "• Designed and implemented an end-to-end production-style ML data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.\n• Applied NLP models (FinBERT) and feature engineering to build 40+ predictive features per ticker; trained XGBoost models achieving 55–70% ROC-AUC.\n• Built modular components for data ingestion, transformation, model inference, and distributed-style batching, aligned with message-driven architectures.\n• Automated end-to-end data collection, preprocessing, and model inference workflows, enabling scalable real-time analytics.",
+              "after": "• Engineered a comprehensive ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance posts per run through multi-stage ETL.\n• Leveraged NLP models (FinBERT) and feature engineering to generate 40+ predictive features per ticker, training XGBoost models with 55–70% ROC-AUC.\n• Developed modular components for data ingestion, transformation, and model inference, aligned with message-driven architectures for scalability.\n• Automated data collection and preprocessing workflows, enabling efficient real-time analytics."
             }
           }
         }
       ],
       "skills": [
         {
-          "id": "_orderOrFullReplace",
-          "before": [
-            {
-              "id": 41,
-              "name": "Python",
-              "category": "Languages"
-            },
-            {
-              "id": 42,
-              "name": "Java",
-              "category": "Languages"
-            },
-            {
-              "id": 43,
-              "name": "JavaScript",
-              "category": "Languages"
-            },
-            {
-              "id": 44,
-              "name": "SQL",
-              "category": "Languages"
-            },
-            {
-              "id": 45,
-              "name": "Django",
-              "category": "Frameworks"
-            },
-            {
-              "id": 46,
-              "name": "FastAPI",
-              "category": "Frameworks"
-            },
-            {
-              "id": 47,
-              "name": "React",
-              "category": "Frameworks"
-            },
-            {
-              "id": 48,
-              "name": "Node.js",
-              "category": "Frameworks"
-            },
-            {
-              "id": 49,
-              "name": "PyTorch",
-              "category": "Frameworks"
-            },
-            {
-              "id": 50,
-              "name": "TensorFlow Lite",
-              "category": "Frameworks"
-            },
-            {
-              "id": 51,
-              "name": "PostgreSQL",
-              "category": "Data Tools"
-            },
-            {
-              "id": 52,
-              "name": "MySQL",
-              "category": "Data Tools"
-            },
-            {
-              "id": 53,
-              "name": "MongoDB",
-              "category": "Data Tools"
-            },
-            {
-              "id": 54,
-              "name": "Pandas",
-              "category": "Data Tools"
-            },
-            {
-              "id": 55,
-              "name": "NumPy",
-              "category": "Data Tools"
-            },
-            {
-              "id": 56,
-              "name": "AWS (EC2)",
-              "category": "Data Tools"
-            },
-            {
-              "id": 57,
-              "name": "ETL Pipelines",
-              "category": "Data Tools"
-            },
-            {
-              "id": 58,
-              "name": "Backend Development",
-              "category": "Focus Areas"
-            },
-            {
-              "id": 59,
-              "name": "Automation Systems",
-              "category": "Focus Areas"
-            },
-            {
-              "id": 60,
-              "name": "AI-Driven Workflows",
-              "category": "Focus Areas"
-            },
-            {
-              "id": 61,
-              "name": "Data Pipelines",
-              "category": "Focus Areas"
-            },
-            {
-              "id": 62,
-              "name": "REST API Design",
-              "category": "Focus Areas"
-            }
-          ],
-          "after": [
-            {
-              "id": 45,
-              "name": "Django",
-              "category": "Frameworks"
-            },
-            {
-              "id": 41,
-              "name": "Python",
-              "category": "Languages"
-            },
-            {
-              "id": 51,
-              "name": "PostgreSQL",
-              "category": "Data Tools"
-            },
-            {
-              "id": 56,
-              "name": "AWS (EC2)",
-              "category": "Data Tools"
-            },
-            {
-              "id": 58,
-              "name": "Backend Development",
-              "category": "Focus Areas"
-            },
-            {
-              "id": 59,
-              "name": "Automation Systems",
-              "category": "Focus Areas"
-            },
-            {
-              "id": 60,
-              "name": "AI-Driven Workflows",
-              "category": "Focus Areas"
-            },
-            {
-              "id": 61,
-              "name": "Data Pipelines",
-              "category": "Focus Areas"
-            },
-            {
-              "id": 62,
-              "name": "REST API Design",
-              "category": "Focus Areas"
-            },
-            {
-              "id": 42,
-              "name": "Java",
-              "category": "Languages"
-            },
-            {
-              "id": 43,
-              "name": "JavaScript",
-              "category": "Languages"
-            },
-            {
-              "id": 44,
-              "name": "SQL",
-              "category": "Languages"
-            },
-            {
-              "id": 46,
-              "name": "FastAPI",
-              "category": "Frameworks"
-            },
-            {
-              "id": 47,
-              "name": "React",
-              "category": "Frameworks"
-            },
-            {
-              "id": 48,
-              "name": "Node.js",
-              "category": "Frameworks"
-            },
-            {
-              "id": 49,
-              "name": "PyTorch",
-              "category": "Frameworks"
-            },
-            {
-              "id": 50,
-              "name": "TensorFlow Lite",
-              "category": "Frameworks"
-            },
-            {
-              "id": 52,
-              "name": "MySQL",
-              "category": "Data Tools"
-            },
-            {
-              "id": 53,
-              "name": "MongoDB",
-              "category": "Data Tools"
-            },
-            {
-              "id": 54,
-              "name": "Pandas",
-              "category": "Data Tools"
-            },
-            {
-              "id": 55,
-              "name": "NumPy",
-              "category": "Data Tools"
-            },
-            {
-              "id": 57,
-              "name": "ETL Pipelines",
-              "category": "Data Tools"
-            }
-          ]
+          "id": 52,
+          "removed": true,
+          "before": {
+            "id": 52,
+            "name": "MySQL",
+            "category": "Data Tools"
+          },
+          "after": null
+        },
+        {
+          "id": 53,
+          "removed": true,
+          "before": {
+            "id": 53,
+            "name": "MongoDB",
+            "category": "Data Tools"
+          },
+          "after": null
+        },
+        {
+          "id": 54,
+          "removed": true,
+          "before": {
+            "id": 54,
+            "name": "Pandas",
+            "category": "Data Tools"
+          },
+          "after": null
+        },
+        {
+          "id": 55,
+          "removed": true,
+          "before": {
+            "id": 55,
+            "name": "NumPy",
+            "category": "Data Tools"
+          },
+          "after": null
+        },
+        {
+          "id": 56,
+          "removed": true,
+          "before": {
+            "id": 56,
+            "name": "AWS (EC2)",
+            "category": "Data Tools"
+          },
+          "after": null
         }
       ]
     },
     "changeReasons": [
       {
         "section": "summary",
-        "reason": "Repositioned the professional summary toward Operations Coordinator using concrete, on-resume evidence where possible."
+        "reason": "Profile summary updated for Software Engineer; audit flagged common generic phrasing in the new text (proven track record of)—tighten to concrete systems and evidence from the resume."
       },
       {
         "section": "layout",
@@ -688,7 +736,7 @@
       {
         "section": "experience",
         "id": 5,
-        "reason": "experience row 5: light wording pass; the core scope stayed the same."
+        "reason": "experience row 5: updated the bullets to foreground the role-relevant work."
       },
       {
         "section": "experience",
@@ -697,24 +745,70 @@
       },
       {
         "section": "projects",
+        "id": 9,
+        "reason": "project 9: revised the description and stack so the fit is easier to scan."
+      },
+      {
+        "section": "projects",
+        "id": 10,
+        "reason": "project 10: revised the description and stack so the fit is easier to scan."
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "reason": "Removed SecureScape – Smart Security System because stronger project evidence fit this role better."
+      },
+      {
+        "section": "projects",
         "id": 17,
-        "reason": "project 17: revised the description and stack so the fit is easier to scan."
+        "reason": "Removed ShelfVision - Dense Shelf Object Detection because stronger project evidence fit this role better."
+      },
+      {
+        "section": "projects",
+        "id": 18,
+        "reason": "Removed Tizirsso Racing – Portfolio & Sponsorship Website because stronger project evidence fit this role better."
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "reason": "project 20: revised the description and stack so the fit is easier to scan."
       },
       {
         "section": "skills",
-        "reason": "Regrouped or reordered skills to prioritize role-relevant items."
+        "id": 52,
+        "reason": "Trimmed MySQL from the visible skills list."
+      },
+      {
+        "section": "skills",
+        "id": 53,
+        "reason": "Trimmed MongoDB from the visible skills list."
+      },
+      {
+        "section": "skills",
+        "id": 54,
+        "reason": "Trimmed Pandas from the visible skills list."
+      },
+      {
+        "section": "skills",
+        "id": 55,
+        "reason": "Trimmed NumPy from the visible skills list."
+      },
+      {
+        "section": "skills",
+        "id": 56,
+        "reason": "Trimmed AWS (EC2) from the visible skills list."
       }
     ],
     "warnings": [
-      "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:17.",
-      "Rewrite audit: expected stronger rewrites for experience id 5; output looked like minor wording changes.",
-      "Rewrite audit: filler phrasing survived in experience id 5 (enhancing)."
+      "Skills guard restored 5 skill row(s) because Pass B exceeded the deletion budget.",
+      "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:9, projects:10.",
+      "Rewrite audit: filler phrasing survived in experience id 5 (enhancing); projects id 10 (streamlining)."
     ]
   },
   "audit": {
     "v": 1,
     "step": "diff_audit",
-    "target_role": "Operations Coordinator",
+    "target_role": "Software Engineer",
     "plan_hero_fit": {
       "segment": {
         "has_ranked_experience": true,
@@ -723,7 +817,7 @@
         "narrative_had_experience_heroes": true
       },
       "hero_slot_gap": {
-        "projects": 0,
+        "projects": 1,
         "experience": 0
       },
       "experience": {
@@ -740,14 +834,19 @@
       },
       "projects": {
         "k": 4,
-        "plan_len": 1,
+        "plan_len": 5,
         "top_k_ids": [
-          17
+          20,
+          10,
+          9,
+          12
         ],
         "hero_ids": [
-          17
+          9,
+          10,
+          20
         ],
-        "in_top_k": 1,
+        "in_top_k": 3,
         "ratio": 1.0
       },
       "inversion_pair_count": 0,
@@ -787,10 +886,13 @@
           62
         ],
         "after": [
-          45,
           41,
+          44,
+          47,
+          45,
+          46,
           51,
-          56,
+          57,
           58,
           59,
           60,
@@ -798,17 +900,9 @@
           62,
           42,
           43,
-          44,
-          46,
-          47,
           48,
           49,
-          50,
-          52,
-          53,
-          54,
-          55,
-          57
+          50
         ]
       }
     },
@@ -829,38 +923,41 @@
       ],
       "row_counts": {
         "experience": 2,
-        "projects": 1,
-        "skills": 1
+        "projects": 6,
+        "skills": 5
       }
     },
     "warnings": {
       "total": 3,
       "from_rewrite": [
-        "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:17."
+        "Skills guard restored 5 skill row(s) because Pass B exceeded the deletion budget.",
+        "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:9, projects:10."
       ],
       "narrative_omission": []
     },
-    "change_reasons_count": 6,
+    "change_reasons_count": 15,
     "text": {
       "rewrite_note_chars": 0,
       "rewrite_note_preview": "",
-      "merged_summary_preview": "Tailoring log for: Operations Coordinator.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- sectionOrder: structure or presentation updated.\n- sectionVisibility: structure or presentation updated.\n- Experience id 5: small text tweak (minor).\n- Experience id 7: removed from resume.\n- Project id 17: moderate description/stack revision.\n- Skills: list structure or order changed."
+      "merged_summary_preview": "Tailoring log for: Software Engineer.\n\n- Profile summary: revised (heuristic: generic-leaning phrasing present: proven track record of).\n- sectionOrder: structure or presentation updated.\n- sectionVisibility: structure or presentation updated.\n- Experience id 5: moderate update to bullets and/or line items.\n- Experience id 7: removed from resume.\n- Project id 9: moderate description/stack revision.\n- Project id 10: moderate description/stack revision.\n- Project id 12: removed from resume.\n- Pro…"
     },
     "quality": {
-      "target_role": "Operations Coordinator",
+      "target_role": "Software Engineer",
       "flags": {
         "aggressive_skill_prune": false,
-        "suspicious_protected_skill_removals": false,
-        "summary_has_generic_phrase_hits": false,
+        "suspicious_protected_skill_removals": true,
+        "summary_has_generic_phrase_hits": true,
         "filler_phrase_hits": true,
         "skills_expected_but_unchanged": false,
-        "minor_expected_rewrites": true,
+        "minor_expected_rewrites": false,
         "missing_expected_rewrites": false
       },
       "summary": {
         "changed": true,
-        "after_preview": "Operations Coordinator with a strong background in logistics, compliance, and metrics tracking. Proven ability to optimize resource allocation and improve processes through technical expertise in data management and operational efficiency.",
-        "generic_phrases_matched": [],
+        "after_preview": "Software Engineer with a strong focus on backend development and data engineering. Proficient in Python and SQL, with a proven track record of building scalable data pipelines and backend services. Experienced in integrating React for user interfaces and optimizing workflows for…",
+        "generic_phrases_matched": [
+          "proven track record of"
+        ],
         "filler_phrases_matched": []
       },
       "rewrite_quality": {
@@ -868,14 +965,11 @@
           5
         ],
         "expected_project_rewrite_ids": [
-          17
+          20,
+          10,
+          9
         ],
-        "minor_rewrite_rows": [
-          {
-            "section": "experience",
-            "id": 5
-          }
-        ],
+        "minor_rewrite_rows": [],
         "missing_rewrite_rows": [],
         "filler_phrase_hits": [
           {
@@ -884,26 +978,60 @@
             "phrases": [
               "enhancing"
             ]
+          },
+          {
+            "section": "projects",
+            "id": 10,
+            "phrases": [
+              "streamlining"
+            ]
           }
         ]
       },
       "removals": {
-        "removedSkillIds": [],
-        "removedProjectIds": [],
+        "removedSkillIds": [
+          52,
+          53,
+          54,
+          55,
+          56
+        ],
+        "removedProjectIds": [
+          12,
+          17,
+          18
+        ],
         "removedExperienceIds": [
           7
         ],
         "visible_skill_count_before": 22,
-        "removed_skill_count": 0,
-        "removal_ratio_skills": 0.0,
-        "protected_skill_removals": []
+        "removed_skill_count": 5,
+        "removal_ratio_skills": 0.227,
+        "protected_skill_removals": [
+          {
+            "id": 52,
+            "name": "MySQL"
+          },
+          {
+            "id": 53,
+            "name": "MongoDB"
+          },
+          {
+            "id": 56,
+            "name": "AWS (EC2)"
+          }
+        ]
       },
       "narrative_heroes": {
         "hero_project_ids": [
-          17
+          20,
+          10,
+          9
         ],
         "hero_project_ids_with_edits": [
-          17
+          9,
+          10,
+          20
         ],
         "hero_project_ids_not_in_patch": [],
         "only_one_hero_touched_while_several_listed": false,
@@ -917,24 +1045,28 @@
       },
       "stage_edits_removals": {
         "removedSkillIds": [],
-        "removedProjectIds": []
+        "removedProjectIds": [
+          12,
+          17,
+          18
+        ]
       },
       "rewrite_intensity": {
         "summary_changed": true,
         "experience_rows_touched": 1,
-        "project_rows_touched": 1,
-        "skill_rows_touched": 1,
+        "project_rows_touched": 3,
+        "skill_rows_touched": 5,
         "skills_section_changed": true,
-        "rows_removed_total": 1,
-        "hero_projects_edited_count": 1,
+        "rows_removed_total": 9,
+        "hero_projects_edited_count": 3,
         "hero_experience_edited_count": 1,
         "low_intensity_hint": false
       }
     },
     "llm_usage_pass1": {
-      "completion_tokens": 396,
-      "prompt_tokens": 5848,
-      "total_tokens": 6244,
+      "completion_tokens": 699,
+      "prompt_tokens": 9783,
+      "total_tokens": 10482,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0
@@ -947,9 +1079,9 @@
       }
     },
     "llm_usage_pass2": {
-      "completion_tokens": 618,
-      "prompt_tokens": 5604,
-      "total_tokens": 6222,
+      "completion_tokens": 348,
+      "prompt_tokens": 8751,
+      "total_tokens": 9099,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0
@@ -962,9 +1094,9 @@
       }
     },
     "llm_usage_rewrite_pass": {
-      "completion_tokens": 618,
-      "prompt_tokens": 5604,
-      "total_tokens": 6222,
+      "completion_tokens": 348,
+      "prompt_tokens": 8751,
+      "total_tokens": 9099,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0
@@ -977,9 +1109,9 @@
       }
     },
     "llm_usage_repair_pass": {
-      "completion_tokens": 221,
-      "prompt_tokens": 1467,
-      "total_tokens": 1688,
+      "completion_tokens": 382,
+      "prompt_tokens": 1756,
+      "total_tokens": 2138,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0

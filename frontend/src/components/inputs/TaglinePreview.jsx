@@ -10,14 +10,14 @@ const TaglinePreview = ({ value, className = '' }) => {
 
 	return (
 		<div
-			className={`rounded-lg border border-gray-200 bg-white px-3 py-2.5 flex flex-col justify-center text-center shadow-inner min-h-[5rem] ${className}`}
+			className={`flex min-h-[4.5rem] flex-col justify-center rounded-xl border border-slate-200/90 bg-slate-50/60 px-4 py-3 text-center ${className}`}
 			aria-live="polite"
 		>
 			{empty ? (
-				<p className="text-sm text-gray-400 italic m-0">Live preview</p>
+				<p className="m-0 text-sm italic text-slate-400">Your formatted line will show up here.</p>
 			) : (
 				<p
-					className="text-sm text-gray-900 m-0 leading-snug max-w-full break-words"
+					className="m-0 max-w-full break-words text-sm leading-snug text-slate-900"
 					style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
 				>
 					{runs.map(([text, bold, italic, underline], i) => {
@@ -25,7 +25,11 @@ const TaglinePreview = ({ value, className = '' }) => {
 						if (italic) el = <em className="italic">{el}</em>
 						if (bold) el = <strong className="font-bold">{el}</strong>
 						if (underline) el = <u className="underline underline-offset-2 decoration-1">{el}</u>
-						return <span key={i} className="inline">{el}</span>
+						return (
+							<span key={i} className="inline">
+								{el}
+							</span>
+						)
 					})}
 				</p>
 			)}

@@ -1,6 +1,6 @@
 {
-  "target_role": "Operations Coordinator",
-  "company": "Pacific Commercial Services, Inc",
+  "target_role": "Software Engineer",
+  "company": "Curate Partners",
   "style_preferences": {
     "focus": "balanced",
     "tone": "balanced",
@@ -10,7 +10,7 @@
   },
   "strict_truth": true,
   "model": "gpt-4o-mini",
-  "job_description_chars": 4136,
+  "job_description_chars": 1008,
   "resume_counts": {
     "experience": 2,
     "projects": 6,
@@ -19,68 +19,94 @@
   },
   "extracted_keywords": [
     {
-      "term": "operations",
-      "score": 10.0,
-      "frequency": 6.0,
+      "term": "sql",
+      "score": 9.5,
+      "frequency": 5.0,
       "sources": [
         "bodyToken",
-        "titleToken"
+        "concreteStack"
       ]
     },
     {
-      "term": "compliance",
-      "score": 9.3,
+      "term": "python",
+      "score": 8.5,
+      "frequency": 4.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ]
+    },
+    {
+      "term": "react",
+      "score": 8.5,
+      "frequency": 4.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ]
+    },
+    {
+      "term": "data",
+      "score": 7.0,
       "frequency": 7.0,
       "sources": [
         "bodyToken",
-        "capabilityStack"
+        "partOfPhrase"
       ]
     },
     {
-      "term": "scheduling",
-      "score": 7.0,
-      "frequency": 5.0,
+      "term": "data engineering",
+      "score": 6.0,
+      "frequency": 4.0,
+      "sources": [
+        "knownPhrase"
+      ]
+    },
+    {
+      "term": "azure",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ]
+    },
+    {
+      "term": "frontend",
+      "score": 5.0,
+      "frequency": 3.0,
       "sources": [
         "bodyToken"
       ]
     },
     {
-      "term": "resource",
-      "score": 6.0,
-      "frequency": 6.0,
+      "term": "software",
+      "score": 4.0,
+      "frequency": 3.0,
       "sources": [
         "bodyToken",
-        "partOfPhrase"
+        "titleToken"
       ]
     },
     {
-      "term": "process improvement",
-      "score": 6.0,
+      "term": "data analysis",
+      "score": 4.0,
       "frequency": 1.0,
       "sources": [
         "knownPhrase"
       ]
     },
     {
-      "term": "safety",
-      "score": 5.0,
-      "frequency": 5.0,
+      "term": "machine learning",
+      "score": 4.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "partOfPhrase"
+        "bodyToken"
       ]
     },
     {
-      "term": "resource allocation",
-      "score": 5.0,
-      "frequency": 3.0,
-      "sources": [
-        "knownPhrase"
-      ]
-    },
-    {
-      "term": "coordinator",
-      "score": 5.0,
+      "term": "engineer",
+      "score": 3.0,
       "frequency": 2.0,
       "sources": [
         "bodyToken",
@@ -88,65 +114,578 @@
       ]
     },
     {
-      "term": "metrics",
-      "score": 5.0,
+      "term": "backend",
+      "score": 3.0,
       "frequency": 1.0,
-      "sources": [
-        "knownPhrase"
-      ]
-    },
-    {
-      "term": "project",
-      "score": 4.0,
-      "frequency": 4.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "efficiency",
-      "score": 4.0,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "partOfPhrase"
-      ]
-    },
-    {
-      "term": "execution",
-      "score": 3.7,
-      "frequency": 3.0,
       "sources": [
         "bodyToken"
       ]
     }
   ],
   "resume_hits": [
-    "compliance",
-    "metrics"
+    "sql",
+    "python",
+    "react",
+    "data",
+    "software",
+    "machine learning",
+    "engineer",
+    "backend"
   ],
   "resume_gaps": [
-    "operations",
-    "scheduling",
-    "resource",
-    "process improvement",
-    "safety",
-    "resource allocation",
-    "coordinator",
-    "project",
-    "efficiency",
-    "execution"
+    "data engineering",
+    "azure",
+    "frontend",
+    "data analysis"
   ],
+  "alignment_context": {
+    "mode": "direct",
+    "coverage": 0.625,
+    "directEvidence": [
+      {
+        "section": "experience",
+        "id": 5,
+        "label": "BitGo Software Engineering Intern",
+        "terms": [
+          "sql",
+          "python",
+          "react",
+          "data",
+          "software",
+          "engineer"
+        ],
+        "score": 46.423
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "sql",
+          "python",
+          "data",
+          "machine learning"
+        ],
+        "score": 32.1
+      },
+      {
+        "section": "projects",
+        "id": 10,
+        "label": "Taylor.io – Resume Builder & Parser",
+        "terms": [
+          "sql",
+          "react",
+          "data",
+          "backend"
+        ],
+        "score": 28.723
+      },
+      {
+        "section": "projects",
+        "id": 9,
+        "label": "Centi – Personal Finance App",
+        "terms": [
+          "sql",
+          "react",
+          "data"
+        ],
+        "score": 26.35
+      },
+      {
+        "section": "education",
+        "id": 3,
+        "label": "University of Central Florida",
+        "terms": [
+          "data",
+          "software"
+        ],
+        "score": 12.9
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "label": "SecureScape – Smart Security System",
+        "terms": [
+          "python",
+          "backend"
+        ],
+        "score": 11.523
+      },
+      {
+        "section": "projects",
+        "id": 17,
+        "label": "ShelfVision - Dense Shelf Object Detection",
+        "terms": [
+          "python"
+        ],
+        "score": 9.15
+      },
+      {
+        "section": "skills",
+        "id": 51,
+        "label": "PostgreSQL",
+        "terms": [
+          "sql",
+          "data"
+        ],
+        "score": 2
+      }
+    ],
+    "transferableEvidence": [
+      {
+        "section": "experience",
+        "id": 5,
+        "label": "BitGo Software Engineering Intern",
+        "themes": [
+          {
+            "theme": "compliance / standards",
+            "terms": [
+              "compliance",
+              "secure"
+            ]
+          },
+          {
+            "theme": "metrics / reporting",
+            "terms": [
+              "dashboards",
+              "metrics",
+              "visibility"
+            ]
+          },
+          {
+            "theme": "workflow / automation",
+            "terms": [
+              "optimized",
+              "pipelines",
+              "processing",
+              "workflows"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "experience",
+        "id": 7,
+        "label": "Bar Louie Server",
+        "themes": [
+          {
+            "theme": "coordination / communication",
+            "terms": [
+              "bar",
+              "communication",
+              "guests",
+              "kitchen",
+              "teams"
+            ]
+          },
+          {
+            "theme": "pace / issue response",
+            "terms": [
+              "fast-paced",
+              "high-pressure",
+              "pressure"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 9,
+        "label": "Centi – Personal Finance App",
+        "themes": [
+          {
+            "theme": "compliance / standards",
+            "terms": [
+              "protected",
+              "secure"
+            ]
+          },
+          {
+            "theme": "metrics / reporting",
+            "terms": [
+              "analytics",
+              "dashboard",
+              "dashboards",
+              "tracking"
+            ]
+          },
+          {
+            "theme": "workflow / automation",
+            "terms": [
+              "processing",
+              "workflows"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 10,
+        "label": "Taylor.io – Resume Builder & Parser",
+        "themes": [
+          {
+            "theme": "workflow / automation",
+            "terms": [
+              "automated",
+              "workflows"
+            ]
+          },
+          {
+            "theme": "pace / issue response",
+            "terms": [
+              "real time"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "label": "SecureScape – Smart Security System",
+        "themes": [
+          {
+            "theme": "compliance / standards",
+            "terms": [
+              "security"
+            ]
+          },
+          {
+            "theme": "coordination / communication",
+            "terms": [
+              "communication"
+            ]
+          },
+          {
+            "theme": "pace / issue response",
+            "terms": [
+              "alerts",
+              "near real time",
+              "real time",
+              "reliable"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 17,
+        "label": "ShelfVision - Dense Shelf Object Detection",
+        "themes": [
+          {
+            "theme": "metrics / reporting",
+            "terms": [
+              "benchmarked",
+              "metrics"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 18,
+        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
+        "themes": [
+          {
+            "theme": "coordination / communication",
+            "terms": [
+              "team"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "themes": [
+          {
+            "theme": "metrics / reporting",
+            "terms": [
+              "analytics"
+            ]
+          },
+          {
+            "theme": "workflow / automation",
+            "terms": [
+              "automated",
+              "pipeline",
+              "processing",
+              "workflows"
+            ]
+          }
+        ]
+      }
+    ],
+    "evidenceClassification": [
+      {
+        "section": "experience",
+        "id": 5,
+        "label": "BitGo Software Engineering Intern",
+        "terms": [
+          "sql",
+          "python",
+          "react",
+          "data",
+          "software",
+          "engineer"
+        ],
+        "evidenceType": "direct_role_evidence",
+        "claimStrength": "direct",
+        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "sql",
+          "python",
+          "data",
+          "machine learning"
+        ],
+        "evidenceType": "direct_role_evidence",
+        "claimStrength": "direct",
+        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+      },
+      {
+        "section": "projects",
+        "id": 10,
+        "label": "Taylor.io – Resume Builder & Parser",
+        "terms": [
+          "sql",
+          "react",
+          "data",
+          "backend"
+        ],
+        "evidenceType": "direct_role_evidence",
+        "claimStrength": "direct",
+        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+      },
+      {
+        "section": "projects",
+        "id": 9,
+        "label": "Centi – Personal Finance App",
+        "terms": [
+          "sql",
+          "react",
+          "data"
+        ],
+        "evidenceType": "direct_role_evidence",
+        "claimStrength": "direct",
+        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+      },
+      {
+        "section": "education",
+        "id": 3,
+        "label": "University of Central Florida",
+        "terms": [
+          "data",
+          "software"
+        ],
+        "evidenceType": "direct_role_evidence",
+        "claimStrength": "direct",
+        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "label": "SecureScape – Smart Security System",
+        "terms": [
+          "python",
+          "backend"
+        ],
+        "evidenceType": "direct_role_evidence",
+        "claimStrength": "direct",
+        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+      },
+      {
+        "section": "projects",
+        "id": 17,
+        "label": "ShelfVision - Dense Shelf Object Detection",
+        "terms": [
+          "python"
+        ],
+        "evidenceType": "direct_role_evidence",
+        "claimStrength": "direct",
+        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+      },
+      {
+        "section": "skills",
+        "id": 51,
+        "label": "PostgreSQL",
+        "terms": [
+          "sql",
+          "data"
+        ],
+        "evidenceType": "direct_role_evidence",
+        "claimStrength": "direct",
+        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+      },
+      {
+        "section": "experience",
+        "id": 7,
+        "label": "Bar Louie Server",
+        "terms": [
+          "coordination / communication",
+          "pace / issue response"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 18,
+        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
+        "terms": [
+          "coordination / communication"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      }
+    ],
+    "jdSignalIntent": [
+      {
+        "term": "sql",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+          "build and maintain systems using python and sql"
+        ]
+      },
+      {
+        "term": "python",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+          "build and maintain systems using python and sql"
+        ]
+      },
+      {
+        "term": "react",
+        "intent": "candidate_requirement",
+        "priority": 2,
+        "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+        "linePreview": [
+          "handle light frontend work (react) if needed",
+          "some react / frontend experience"
+        ]
+      },
+      {
+        "term": "data",
+        "intent": "candidate_requirement",
+        "priority": 2,
+        "reason": "Candidate requirement: use as bridge/skills emphasis when supported by resume behavior.",
+        "linePreview": [
+          "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+          "perform data analysis and validation"
+        ]
+      },
+      {
+        "term": "data engineering",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+          "contribute to both data engineering and application development"
+        ]
+      },
+      {
+        "term": "azure",
+        "intent": "candidate_requirement",
+        "priority": 2,
+        "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+        "linePreview": []
+      },
+      {
+        "term": "frontend",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+          "handle light frontend work (react) if needed"
+        ]
+      },
+      {
+        "term": "software",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+          "ability to work across both data and software engineering tasks"
+        ]
+      },
+      {
+        "term": "data analysis",
+        "intent": "company_product_context",
+        "priority": 1,
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "perform data analysis and validation"
+        ]
+      },
+      {
+        "term": "machine learning",
+        "intent": "candidate_requirement",
+        "priority": 2,
+        "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+        "linePreview": []
+      },
+      {
+        "term": "engineer",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed."
+        ]
+      },
+      {
+        "term": "backend",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed."
+        ]
+      }
+    ],
+    "unsupportedTerms": [
+      "data engineering",
+      "azure",
+      "frontend",
+      "data analysis"
+    ],
+    "topJobTerms": [
+      "sql",
+      "python",
+      "react",
+      "data",
+      "data engineering",
+      "azure",
+      "frontend",
+      "software"
+    ],
+    "guidance": "Direct fit: lead with the role title and strongest JD-overlap evidence, while preserving resume-native breadth."
+  },
   "relevant_jd_lines": [
-    "are you a master of logistics, a problem-solver under pressure, and someone who thrives in a fast-moving environment? we’re looking for a highly organized, strategic, and resourceful operations coordinator to take charge of scheduling, resource allocation, and workflow optimization for our field operations.",
-    "develop a deep understanding of job scopes and project requirements to assess how resource allocation impacts job timelines and overall execution.",
-    "serve as the key liaison for field supervisors, project managers, clients, and resource teams to facilitate efficient resource allocation and job execution.",
-    "analyze and track key performance metrics, ensuring compliance with safety, regulatory, and operational standards, and drive solutions to improve performance.",
-    "work with the safety manager and project manager to ensure that all work is performed in compliance with safety regulations, company policies, and industry standards.",
-    "scheduling & resource coordination",
-    "develop and maintain daily and long-term schedules dynamic scheduling for field personnel, equipment, and materials across various jobs, optimizing for efficiency, cost-effectiveness, and productivity.",
-    "collaborate closely with field teams, project managers, and clients to optimize job scheduling, proactively identify risks, resolve conflicts, and ensure timely completion of tasks.",
-    "leverage software tools (dispatching platforms, gps tracking, erp systems) to streamline scheduling, resource management, and real-time job monitoring.",
-    "highly organized and process oriented with a strong knowledge of operational efficiency and execution."
+    "we’re looking for a software engineer with strong data engineering skills to support multiple ongoing projects. this role is primarily focused on data engineering (python/sql), with some backend and light frontend work as needed.",
+    "build and maintain systems using python and sql",
+    "perform data analysis and validation",
+    "contribute to both data engineering and application development",
+    "handle light frontend work (react) if needed",
+    "experience in data engineering or data-focused development",
+    "ability to work across both data and software engineering tasks",
+    "some react / frontend experience",
+    "design and optimize data pipelines and workflows",
+    "strong python"
   ]
 }

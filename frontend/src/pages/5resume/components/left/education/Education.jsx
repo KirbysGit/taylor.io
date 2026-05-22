@@ -1,11 +1,14 @@
 // Education.jsx - Uses shared EducationInput with resume-specific wrapper (visibility, section label)
 
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 import EducationInput from '@/components/inputs/EducationInput'
 import ResumeSectionWrapper from '../ResumeSectionWrapper'
 import { transformEducationForStep } from '@/pages/info/utils/dataTransform'
 
 const newId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`
+
+const EDUCATION_DESCRIPTION =
+	'Add schools, degrees, coursework, honors, and anything else that should be available when tailoring a résumé.'
 
 // Resume format (start_date, end_date) -> Input format (startDate, endDate, id, subsections)
 const toInputFormat = (educationData) => {
@@ -19,6 +22,17 @@ const toResumeFormat = (education) => {
 	return education
 }
 
+function EducationSectionHeader({ onAdd }) {
+	return (
+		<div className="mb-5 flex flex-col gap-4 border-b border-brand-pink/10 pb-5 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+			<p className="max-w-2xl text-sm leading-relaxed text-slate-600">{EDUCATION_DESCRIPTION}</p>
+			<button type="button" onClick={onAdd} className="profileAddButtonPrimary w-full shrink-0 sm:w-auto">
+				+ Add education
+			</button>
+		</div>
+	)
+}
+
 const Education = ({
 	educationData,
 	onEducationChange,
@@ -29,6 +43,7 @@ const Education = ({
 	/** When true, render only inputs (for compact bar + expand layout). */
 	bare = false,
 }) => {
+	const educationRef = useRef(null)
 	const education = useMemo(() => toInputFormat(educationData), [educationData])
 
 	const handleAdd = useCallback(
@@ -64,16 +79,26 @@ const Education = ({
 		[onEducationChange]
 	)
 
+	const triggerAddNew = useCallback(() => {
+		educationRef.current?.addNew()
+	}, [])
+
 	const input = (
-		<EducationInput
-			education={education}
-			onAdd={handleAdd}
-			onRemove={handleRemove}
-			onUpdate={handleUpdate}
-			onReorder={handleReorder}
-			showSubsections={true}
-			compact={bare}
-		/>
+		<>
+			{bare ? <EducationSectionHeader onAdd={triggerAddNew} /> : null}
+			<EducationInput
+				ref={educationRef}
+				education={education}
+				onAdd={handleAdd}
+				onRemove={handleRemove}
+				onUpdate={handleUpdate}
+				onReorder={handleReorder}
+				showSubsections
+				compact={bare}
+				hideHeader
+				showFooterTip={!bare}
+			/>
+		</>
 	)
 
 	if (bare) {
@@ -88,7 +113,12 @@ const Education = ({
 			defaultLabel="Education"
 			isVisible={isVisible}
 			onVisibilityChange={onVisibilityChange}
-			description="Your academic background"
+			description={EDUCATION_DESCRIPTION}
+			headerAction={
+				<button type="button" onClick={triggerAddNew} className="profileAddButtonPrimary w-full sm:w-auto">
+					+ Add education
+				</button>
+			}
 		>
 			{input}
 		</ResumeSectionWrapper>

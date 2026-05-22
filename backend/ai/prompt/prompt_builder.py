@@ -341,6 +341,9 @@ def compact_narrative_for_prompt(narrative_brief: dict | None) -> dict:
         },
         "directEvidence": list(nb.get("directEvidence") or [])[:6],
         "transferableEvidence": list(nb.get("transferableEvidence") or [])[:8],
+        "evidenceClassification": list(nb.get("evidenceClassification") or [])[:8],
+        "jdSignalIntent": list(nb.get("jdSignalIntent") or [])[:10],
+        "gapSupport": list(nb.get("gapSupport") or [])[:10],
         "unsupportedTerms": list(nb.get("unsupportedTerms") or [])[:8],
         "avoid": list(nb.get("avoid") or [])[:4],
     }
@@ -603,7 +606,9 @@ def _split_project_description_bullets(desc):
 _thin_placeholder_re = re.compile(
     r"(?i)\b(built\s+stuff|did\s+stuff|made\s+stuff|worked\s+on\s+stuff|various\s+stuff|just\s+stuff|"
     r"learned\s+a\s+lot|made\s+things|did\s+things|worked\s+on\s+things|etc\.?|"
-    r"different\s+things|some\s+stuff)\b|^stuff\.?$|^things\.?$"
+    r"different\s+things|some\s+stuff|and\s+stuff|n\s+stuff|and\s+things|"
+    r"made\s+it\s+\w+\s+(?:and|n)\s+stuff|made\s+it\s+\w+\s+(?:and|n)\s+things)\b|"
+    r"^stuff\.?$|^things\.?$"
 )
 
 
@@ -682,6 +687,76 @@ def _thin_bullet_project_repair_candidates(proj_rows, hero_proj_ids, support_pro
     return picks
 
 
+def project_quality_repair_ids_for_narrative(
+    resume_data,
+    narrative_brief,
+    style_preferences=None,
+    max_add=THIN_BULLET_PROJECT_MAX_ADD,
+):
+    """
+    Deterministically open non-hero projects that contain placeholder/thin bullets.
+
+    This is intentionally role-agnostic: if a row survives as kept/maybe/peripheral
+    content, bad resume writing should be cleaned up even when the row is not a
+    top JD-fit hero.
+    """
+    rd = resume_data if isinstance(resume_data, dict) else {}
+    nb = narrative_brief if isinstance(narrative_brief, dict) else {}
+    proj_rows = rd.get("projects") if isinstance(rd.get("projects"), list) else []
+    hero_proj_ids = _narrative_id_list(nb, "heroProjects")
+    rewrite_proj_ids = _narrative_id_list(nb, "rewriteProjects") or hero_proj_ids
+    repair_proj_ids = _narrative_id_list(nb, "repairProjects")
+    keep_proj_ids = _narrative_id_list(nb, "keepProjects")
+    support_proj_ids = _narrative_id_list(nb, "supportingProjects")
+    peripheral_proj_ids = _narrative_id_list(nb, "peripheralProjects")
+    maybe_proj_ids = _narrative_id_list(nb, "maybeProjects")
+    drop_proj_ids = set(_narrative_id_list(nb, "dropProjects"))
+    prefs = style_preferences if isinstance(style_preferences, dict) else {}
+    if prefs.get("length_target") == "one_page":
+        action_keep = set(_narrative_id_list(nb, "keepProjects")) | set(rewrite_proj_ids) | set(repair_proj_ids) | set(hero_proj_ids)
+        for mid in maybe_proj_ids:
+            if mid not in action_keep:
+                drop_proj_ids.add(mid)
+
+    candidate_ids = []
+    for source in (keep_proj_ids, support_proj_ids, repair_proj_ids, peripheral_proj_ids, maybe_proj_ids):
+        for pid in source or []:
+            if isinstance(pid, float) and pid == int(pid):
+                pid = int(pid)
+            if isinstance(pid, int) and pid not in candidate_ids:
+                candidate_ids.append(pid)
+
+    picks = _thin_bullet_project_repair_candidates(
+        proj_rows,
+        rewrite_proj_ids or hero_proj_ids,
+        candidate_ids,
+        [],
+        max_add,
+    )
+    return [pid for pid in picks if pid not in drop_proj_ids]
+
+
+def project_quality_repair_debug(resume_data, narrative_brief, style_preferences=None):
+    ids = project_quality_repair_ids_for_narrative(resume_data, narrative_brief, style_preferences)
+    titles = {}
+    for row in (resume_data or {}).get("projects") or []:
+        if not isinstance(row, dict):
+            continue
+        rid = _norm_project_id(row)
+        if isinstance(rid, int):
+            titles[rid] = str(row.get("title") or f"Project {rid}").strip() or f"Project {rid}"
+    return {
+        "weakBulletRepair": bool(ids),
+        "repairProjectIds": ids,
+        "repairProjectTitles": [titles.get(pid, f"Project {pid}") for pid in ids],
+        "reason": (
+            "Opened surviving project row(s) for cleanup because they contain placeholder or thin bullets."
+            if ids
+            else "No surviving project rows needed placeholder-bullet cleanup."
+        ),
+    }
+
+
 def pass_b_deletion_budget(n_skill_rows):
     # --- Soft caps surfaced in Prompt B — keeps pruning visibly rare vs row count. --- #
     try:
@@ -749,11 +824,10 @@ def build_stage_a_rewrite_focus(resume_data: dict, narrative_brief: dict | None,
 
     summary_block = rd.get("summary") if isinstance(rd.get("summary"), dict) else {}
 
-    thin_repairs = _thin_bullet_project_repair_candidates(
-        proj_rows,
-        rewrite_proj_ids or hero_proj_ids,
-        support_proj_ids,
-        repair_proj_ids or peripheral_proj_ids,
+    thin_repairs = project_quality_repair_ids_for_narrative(
+        rd,
+        nb,
+        prefs,
         THIN_BULLET_PROJECT_MAX_ADD,
     )
     allowed_proj_ids = []
@@ -975,6 +1049,9 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
         lines.extend(
             [
                 f"Alignment mode is `{alignment_mode}`: this is not a clean direct-fit resume. Bridge from proven evidence to the job; do **not** claim unsupported target-role duties, industries, tools, scheduling ownership, or resource allocation.",
+                "Use `evidenceClassification` from the narrative target as claim guidance: lead with `direct_role_evidence`, bridge with `transferable_behavior`, use `domain_tool_evidence` only as supporting context, and avoid making `weak_lexical_overlap` sound like direct experience.",
+                "Use `jdSignalIntent` from the narrative target as keyword priority: role responsibilities and candidate requirements should shape leads; company/product context is supporting color unless the resume directly proves that work.",
+                "Use `gapSupport`: `conceptual` gaps may support related phrasing, but only `direct` support should sound like exact experience and only `unsupported` terms should become warnings.",
                 "Set `edits.summarySection` so it opens from the candidate's real background and transferable proof. Avoid saying they already are the target role unless the resume directly proves that title.",
                 "For rows, use transferable nouns only when the row supports them: compliance workflow, metrics visibility, automation, coordination, fast-paced communication, reporting, response, or operational dashboards.",
             ]
@@ -1007,7 +1084,7 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
         lines.append(
             "**Thin-bullet repair ids** (non-hero, opened for rewrite): "
             + json.dumps(thin_repairs, ensure_ascii=False)
-            + " — treat like hero rows for **description** depth; keep facts inside anchors."
+            + " — treat like hero rows for **description** depth; remove casual placeholder bullets like `n stuff`, `things`, or `etc.` and replace them only with evidence already present in `rowProseOnly`."
         )
     if not has_exp and not has_proj:
         lines.append("There are no hero experience or project rows in this run—`edits` may be summary-only, or empty keys omitted.")
@@ -1099,7 +1176,10 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
     if alignment_mode in ("adjacent", "stretch"):
         alignment_line = (
             f"Alignment mode is `{alignment_mode}`: use flexible skill buckets as transfer-positioning space. "
-            "Prioritize evidenced bridge strengths, but do not invent target-role skills; demote exact-tool noise before deleting."
+            "Prioritize evidenced bridge strengths, but do not invent target-role skills; demote exact-tool noise before deleting. "
+            "If `evidenceClassification` marks a row as `domain_tool_evidence` or `weak_lexical_overlap`, do not promote that wording into a direct role skill. "
+            "Use `jdSignalIntent`: role responsibilities and candidate requirements lead; company/product context comes later. "
+            "Use `gapSupport` so conceptually supported terms can be reflected in flexible buckets without pretending they were exact resume terms."
         )
     return "\n".join(
         [

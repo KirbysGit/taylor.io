@@ -27,6 +27,8 @@ from .prompt import (
     build_pass_b_user,
     build_prompt,
     normalize_tailor_preferences,
+    project_quality_repair_debug,
+    project_quality_repair_ids_for_narrative,
     skillsFitSignals,
     tailor_ab_experiment_enabled,
 )
@@ -747,6 +749,125 @@ def protect_transferable_experience_for_bridge(narrative_brief):
     return updated, {"bridgeExperienceGuard": True, "promotedExperienceIds": promoted_ids}
 
 
+def focus_adjacent_project_selection_for_strong_retarget(narrative_brief, payload):
+    """
+    Strong adjacent/stretch retargets need visible selection, not just rewritten heroes.
+
+    Balanced length can still be focused: keep the best transferable project proof and
+    drop low-signal maybe projects so the final draft actually reads role-shaped.
+    """
+    if not isinstance(narrative_brief, dict):
+        return narrative_brief, None
+    prefs = (payload or {}).get("style_preferences") if isinstance(payload, dict) else {}
+    if not isinstance(prefs, dict):
+        return narrative_brief, None
+    mode = str(narrative_brief.get("alignmentMode") or "").strip().lower()
+    freedom = str(prefs.get("rewrite_freedom") or "").strip().lower()
+    length_target = str(prefs.get("length_target") or "").strip().lower()
+    if mode not in ("adjacent", "stretch") or freedom not in ("strong", "transform"):
+        return narrative_brief, None
+    if length_target == "detailed":
+        target_count = 4
+    else:
+        target_count = 3
+
+    existing_keep = _int_id_list(narrative_brief.get("keepProjects"))
+    existing_drop = _int_id_list(narrative_brief.get("dropProjects"))
+    existing_maybe = _int_id_list(narrative_brief.get("maybeProjects"))
+    visible = list(dict.fromkeys(existing_keep + existing_maybe))
+    if len(visible) <= target_count:
+        return narrative_brief, None
+
+    theme_weights = {
+        "compliance": 3.0,
+        "standards": 3.0,
+        "metrics": 3.0,
+        "reporting": 3.0,
+        "workflow": 2.5,
+        "automation": 2.5,
+        "coordination": 2.0,
+        "communication": 2.0,
+        "pace": 1.5,
+        "response": 1.5,
+    }
+    transfer = narrative_brief.get("transferableEvidence") if isinstance(narrative_brief.get("transferableEvidence"), list) else []
+    scored = {}
+    labels = {}
+    for item in transfer:
+        if not isinstance(item, dict) or item.get("section") != "projects":
+            continue
+        rid = item.get("id")
+        if isinstance(rid, float) and rid == int(rid):
+            rid = int(rid)
+        if not isinstance(rid, int):
+            continue
+        labels[rid] = str(item.get("label") or f"Project {rid}").strip() or f"Project {rid}"
+        themes = item.get("themes") if isinstance(item.get("themes"), list) else []
+        score = 0.0
+        matched = []
+        for theme in themes:
+            if not isinstance(theme, dict):
+                continue
+            text = str(theme.get("theme") or "").lower()
+            terms = " ".join(str(x or "") for x in (theme.get("terms") or [])).lower()
+            blob = f"{text} {terms}"
+            for key, weight in theme_weights.items():
+                if key in blob:
+                    score += weight
+                    matched.append(key)
+        scored[rid] = {"score": score, "matched": list(dict.fromkeys(matched))}
+
+    selected = []
+    for pid in existing_keep:
+        if pid in visible and pid not in selected:
+            selected.append(pid)
+    ranked_maybe = sorted(
+        [pid for pid in existing_maybe if pid not in selected],
+        key=lambda pid: (-(scored.get(pid, {}).get("score") or 0), visible.index(pid)),
+    )
+    for pid in ranked_maybe:
+        if len(selected) >= target_count:
+            break
+        if (scored.get(pid, {}).get("score") or 0) <= 0 and len(selected) >= max(1, len(existing_keep)):
+            continue
+        selected.append(pid)
+    if not selected or set(selected) == set(visible):
+        return narrative_brief, None
+
+    selected_set = set(selected)
+    newly_dropped = [pid for pid in visible if pid not in selected_set]
+    if not newly_dropped:
+        return narrative_brief, None
+
+    updated = copy.deepcopy(narrative_brief)
+    updated["keepProjects"] = selected
+    updated["maybeProjects"] = []
+    updated["dropProjects"] = list(dict.fromkeys(existing_drop + newly_dropped))
+    updated["rewriteProjects"] = [pid for pid in _int_id_list(updated.get("rewriteProjects")) if pid in selected_set]
+    updated["repairProjects"] = [pid for pid in _int_id_list(updated.get("repairProjects")) if pid in selected_set]
+    updated["heroProjects"] = [pid for pid in _int_id_list(updated.get("heroProjects")) if pid in selected_set]
+    updated["supportingProjects"] = [pid for pid in _int_id_list(updated.get("supportingProjects")) if pid in selected_set]
+    updated["peripheralProjects"] = newly_dropped
+
+    rationale = list(updated.get("selectionRationale") or [])
+    kept_names = [labels.get(pid, f"Project {pid}") for pid in selected if pid not in existing_keep]
+    dropped_names = [labels.get(pid, f"Project {pid}") for pid in newly_dropped]
+    if kept_names:
+        rationale.append("Strong retarget kept transferable project proof: " + ", ".join(kept_names[:3]) + ".")
+    if dropped_names:
+        rationale.append("Strong retarget moved lower-fit maybe projects out of this adjacent-role draft: " + ", ".join(dropped_names[:4]) + ".")
+    updated["selectionRationale"] = list(dict.fromkeys([x for x in rationale if isinstance(x, str) and x.strip()]))[:8]
+
+    return updated, {
+        "strongAdjacentProjectFocus": True,
+        "targetProjectCount": target_count,
+        "oldVisibleProjectIds": visible,
+        "newKeepProjectIds": selected,
+        "newDropProjectIds": updated["dropProjects"],
+        "projectScores": {str(pid): scored.get(pid, {"score": 0, "matched": []}) for pid in visible},
+    }
+
+
 def protect_high_fit_project_drops(stage, resume_data, tailor_context, payload=None):
     """Keep rows with strong current-JD evidence unless kept rows clearly cover the same story better."""
     if not isinstance(stage, dict) or not isinstance(stage.get("edits"), dict):
@@ -1040,6 +1161,96 @@ def _merge_section_rows(existing_rows, repair_rows):
     return out
 
 
+_PLACEHOLDER_PROJECT_BULLET_RE = re.compile(
+    r"(?i)\b(stuff|n\s+stuff|and\s+stuff|things|and\s+things|etc\.?|"
+    r"made\s+it\s+\w+\s+(?:and|n)\s+stuff|made\s+it\s+\w+\s+(?:and|n)\s+things)\b"
+)
+
+
+def _description_lines(desc):
+    if not isinstance(desc, str) or not desc.strip():
+        return []
+    lines = []
+    for raw in re.split(r"[\n\r]+", desc):
+        line = raw.strip()
+        if not line:
+            continue
+        text = re.sub(r"^[\-\*\u2022\u25cf\u25cb\d]+[\.\)\s]*", "", line).strip()
+        if text:
+            lines.append(text)
+    return lines
+
+
+def _remove_placeholder_project_bullets(desc):
+    lines = _description_lines(desc)
+    if not lines:
+        return None, []
+    kept = []
+    removed = []
+    for line in lines:
+        if _PLACEHOLDER_PROJECT_BULLET_RE.search(line):
+            removed.append(line)
+        else:
+            kept.append(line)
+    if not removed or not kept:
+        return None, []
+    return "\n".join(f"• {line}" for line in kept), removed
+
+
+def enforce_project_quality_repairs(stage, resume_data, narrative_brief, style_preferences=None):
+    """Fallback when the model ignores thin-bullet repair ids: never let obvious placeholder bullets survive."""
+    repair_ids = project_quality_repair_ids_for_narrative(resume_data, narrative_brief, style_preferences)
+    if not repair_ids or not isinstance(stage, dict):
+        return stage
+    projects = (resume_data or {}).get("projects") if isinstance(resume_data, dict) else []
+    by_id = _rows_by_id(projects)
+    out = copy.deepcopy(stage)
+    edits = out.setdefault("edits", {})
+    project_edits = edits.get("projects")
+    if not isinstance(project_edits, list):
+        project_edits = []
+    else:
+        project_edits = copy.deepcopy(project_edits)
+
+    edit_index = {}
+    for idx, row in enumerate(project_edits):
+        if isinstance(row, dict) and isinstance(row.get("id"), int):
+            edit_index[row.get("id")] = idx
+
+    repaired = []
+    for pid in repair_ids:
+        source_row = by_id.get(pid)
+        if not isinstance(source_row, dict):
+            continue
+        idx = edit_index.get(pid)
+        current_desc = ""
+        if idx is not None and isinstance(project_edits[idx], dict):
+            current_desc = project_edits[idx].get("description") or ""
+        if not current_desc:
+            current_desc = source_row.get("description") or ""
+        cleaned_desc, removed = _remove_placeholder_project_bullets(current_desc)
+        if not cleaned_desc and current_desc != source_row.get("description"):
+            cleaned_desc, removed = _remove_placeholder_project_bullets(source_row.get("description") or "")
+        if not cleaned_desc:
+            continue
+        if idx is None:
+            edit = {"id": pid, "description": cleaned_desc}
+            if isinstance(source_row.get("tech_stack"), list):
+                edit["tech_stack"] = copy.deepcopy(source_row.get("tech_stack"))
+            project_edits.append(edit)
+            edit_index[pid] = len(project_edits) - 1
+        else:
+            project_edits[idx] = {**project_edits[idx], "description": cleaned_desc}
+        repaired.append({"id": pid, "removed": removed[:3]})
+
+    if not repaired:
+        return stage
+    edits["projects"] = project_edits
+    repaired_ids = ", ".join(f"projects:{x['id']}" for x in repaired)
+    out = _append_stage_warning(out, f"Quality guard removed placeholder bullets from {repaired_ids}.")
+    return out
+
+
 def merge_rewrite_repair(base_stage, repair_stage):
     if not isinstance(repair_stage, dict) or not isinstance(repair_stage.get("edits"), dict):
         return base_stage
@@ -1217,7 +1428,13 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
 
     # get what we want to focus on per section and row.
     sectionDetails = build_tailor_plan(resumeData=resumeData, tailorContext=tailorContext)
-    tailorContext["alignmentContext"] = build_alignment_context(resumeData, tailorContext, sectionDetails)
+    tailorContext["alignmentContext"] = build_alignment_context(
+        resumeData,
+        tailorContext,
+        sectionDetails,
+        relevant_jd_lines=relevantJDLines,
+        target_role=payload.get("target_role") or "",
+    )
 
     # narrative spine: one brief for both passes; not recomputed after pass 1.
     narrative_brief, usage_narr, narrative_char_meta = request_narrative_brief(
@@ -1229,6 +1446,16 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     )
     narrative_bridge_guard = None
     narrative_brief, narrative_bridge_guard = protect_transferable_experience_for_bridge(narrative_brief)
+    narrative_retarget_guard = None
+    narrative_brief, narrative_retarget_guard = focus_adjacent_project_selection_for_strong_retarget(
+        narrative_brief,
+        payload,
+    )
+    narrative_quality_guard = project_quality_repair_debug(
+        resumeData,
+        narrative_brief,
+        payload.get("style_preferences") if isinstance(payload, dict) else {},
+    )
 
     # pass 1: summary + hero experience + hero projects (no skills in edits).
     system_a, user_a = build_prompt(
@@ -1243,6 +1470,12 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     if "edits" not in out1 or not isinstance(out1.get("edits"), dict):
         raise HTTPException(status_code=502, detail="Tailor pass 1 did not return valid JSON with an `edits` object.")
     out1 = editsDropSkills(out1)
+    out1 = enforce_project_quality_repairs(
+        out1,
+        resumeData,
+        narrative_brief,
+        payload.get("style_preferences") if isinstance(payload, dict) else {},
+    )
     out1 = inject_layout_edits(out1, narrative_brief, resumeData)
     out1 = protect_high_fit_project_drops(out1, resumeData, tailorContext, payload)
     resume_mid = apply_sparse_resume_edits(resumeData, out1)
@@ -1368,6 +1601,8 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
                 "narrative": narrative_brief,
                 "selection_guard": narrative_selection_guard or {"onePageSelectionGuard": False},
                 "bridge_guard": narrative_bridge_guard or {"bridgeExperienceGuard": False},
+                "retarget_guard": narrative_retarget_guard or {"strongAdjacentProjectFocus": False},
+                "quality_guard": narrative_quality_guard,
             },
         )
         write_debug(

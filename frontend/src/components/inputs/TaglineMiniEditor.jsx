@@ -1,16 +1,27 @@
 import React, { useRef, useLayoutEffect, useEffect } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBold, faItalic, faUnderline } from '@fortawesome/free-solid-svg-icons'
+import TaglinePreview from './TaglinePreview'
 
-/** Match preview panel height */
-const TAGLINE_BOX_MIN = 'min-h-[5rem]'
+/** Match preview panel height when stacked below the textarea */
+const TAGLINE_BOX_MIN = 'min-h-[4.5rem]'
 
-const TOOLBAR_BTN =
-	'px-2.5 py-1.5 text-xs rounded-md border border-gray-200 bg-white text-gray-800 hover:bg-gray-50 hover:border-brand-pink/40 disabled:opacity-50 shrink-0'
+const FORMAT_BTN =
+	'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-white hover:text-slate-900 disabled:opacity-40'
 
 /**
  * Tagline mini-markup: ==underline==, **bold**, _italic_, * → · on resume (matches backend).
- * Undo/redo stack for the textarea; Ctrl+Z / Ctrl+Y and Ctrl+Shift+Z supported.
+ * Undo/redo via keyboard only (Ctrl/Cmd+Z, Ctrl/Cmd+Y) so the bar stays approachable for non-technical users.
  */
-const TaglineMiniEditor = ({ value = '', onChange, id, className = '', placeholder, disabled = false }) => {
+const TaglineMiniEditor = ({
+	value = '',
+	onChange,
+	id,
+	className = '',
+	placeholder,
+	disabled = false,
+	showPreview = true,
+}) => {
 	const taRef = useRef(null)
 	const pendingSelRef = useRef(null)
 	const historyRef = useRef([value])
@@ -109,76 +120,8 @@ const TaglineMiniEditor = ({ value = '', onChange, id, className = '', placehold
 		}
 	}
 
-	const canUndo = indexRef.current > 0
-	const canRedo = indexRef.current < historyRef.current.length - 1
-
 	return (
-		<div className={`flex flex-col gap-2 min-h-0 ${className}`}>
-			<div className="flex flex-wrap items-center gap-1.5 min-h-[2.25rem]">
-				<button
-					type="button"
-					disabled={disabled}
-					onMouseDown={(e) => e.preventDefault()}
-					onClick={() => wrapBoth('**', '**')}
-					className={`${TOOLBAR_BTN} font-semibold`}
-					title="Bold"
-				>
-					B
-				</button>
-				<button
-					type="button"
-					disabled={disabled}
-					onMouseDown={(e) => e.preventDefault()}
-					onClick={() => wrapBoth('_', '_')}
-					className={`${TOOLBAR_BTN} italic`}
-					title="Italic"
-				>
-					I
-				</button>
-				<button
-					type="button"
-					disabled={disabled}
-					onMouseDown={(e) => e.preventDefault()}
-					onClick={() => wrapBoth('==', '==')}
-					className={`${TOOLBAR_BTN} underline`}
-					title="Underline"
-				>
-					U
-				</button>
-				<button
-					type="button"
-					disabled={disabled}
-					onMouseDown={(e) => e.preventDefault()}
-					onClick={insertStar}
-					className={TOOLBAR_BTN}
-					title="Separator (* → ·)"
-				>
-					·
-				</button>
-
-				<span className="flex-1 min-w-2" aria-hidden />
-
-				<button
-					type="button"
-					disabled={disabled || !canUndo}
-					onMouseDown={(e) => e.preventDefault()}
-					onClick={undo}
-					className={TOOLBAR_BTN}
-					title="Undo (Ctrl+Z)"
-				>
-					Undo
-				</button>
-				<button
-					type="button"
-					disabled={disabled || !canRedo}
-					onMouseDown={(e) => e.preventDefault()}
-					onClick={redo}
-					className={TOOLBAR_BTN}
-					title="Redo (Ctrl+Y or Ctrl+Shift+Z)"
-				>
-					Redo
-				</button>
-			</div>
+		<div className={`flex min-h-0 flex-col gap-3 ${className}`}>
 			<textarea
 				ref={taRef}
 				id={id}
@@ -187,10 +130,72 @@ const TaglineMiniEditor = ({ value = '', onChange, id, className = '', placehold
 				onKeyDown={handleTextareaKeyDown}
 				disabled={disabled}
 				rows={3}
-				className={`input w-full ${TAGLINE_BOX_MIN} text-sm resize-y flex-1`}
+				className={`input w-full ${TAGLINE_BOX_MIN} resize-y text-sm`}
 				placeholder={placeholder}
 				spellCheck
 			/>
+
+			<div className="rounded-xl border border-slate-200/90 bg-slate-50/80 px-2 py-1.5">
+				<p className="px-1 pb-1 text-[11px] leading-snug text-slate-500">
+					Highlight words in your line, then pick a style.
+				</p>
+				<div className="flex flex-wrap items-center gap-0.5" role="toolbar" aria-label="Tagline formatting">
+					<button
+						type="button"
+						disabled={disabled}
+						onMouseDown={(e) => e.preventDefault()}
+						onClick={() => wrapBoth('**', '**')}
+						className={FORMAT_BTN}
+						title="Bold"
+					>
+						<FontAwesomeIcon icon={faBold} className="size-3" aria-hidden />
+						<span>Bold</span>
+					</button>
+					<button
+						type="button"
+						disabled={disabled}
+						onMouseDown={(e) => e.preventDefault()}
+						onClick={() => wrapBoth('_', '_')}
+						className={FORMAT_BTN}
+						title="Italic"
+					>
+						<FontAwesomeIcon icon={faItalic} className="size-3" aria-hidden />
+						<span>Italic</span>
+					</button>
+					<button
+						type="button"
+						disabled={disabled}
+						onMouseDown={(e) => e.preventDefault()}
+						onClick={() => wrapBoth('==', '==')}
+						className={FORMAT_BTN}
+						title="Underline"
+					>
+						<FontAwesomeIcon icon={faUnderline} className="size-3" aria-hidden />
+						<span>Underline</span>
+					</button>
+					<span className="mx-0.5 h-4 w-px shrink-0 bg-slate-200" aria-hidden />
+					<button
+						type="button"
+						disabled={disabled}
+						onMouseDown={(e) => e.preventDefault()}
+						onClick={insertStar}
+						className={FORMAT_BTN}
+						title="Add a dot between phrases (shows as · on your résumé)"
+					>
+						<span className="text-sm leading-none" aria-hidden>
+							·
+						</span>
+						<span>Separator</span>
+					</button>
+				</div>
+			</div>
+
+			{showPreview ? (
+				<div>
+					<p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">On your résumé</p>
+					<TaglinePreview value={value} />
+				</div>
+			) : null}
 		</div>
 	)
 }

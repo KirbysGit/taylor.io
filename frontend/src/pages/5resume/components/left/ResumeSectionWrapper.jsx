@@ -16,15 +16,17 @@ function ResumeSectionWrapper({
 	isVisible = true,
 	onVisibilityChange,
 	description,
+	/** Top-right action when expanded (e.g. + Add education), aligned with description. */
+	headerAction = null,
 	children,
 }) {
 	const [isExpanded, setIsExpanded] = useState(true)
 
 	return (
-		<div className="flex flex-col mb-4 border-[2px] border-brand-pink-light rounded-md p-4">
+		<div className="mb-4 flex flex-col rounded-md border-2 border-brand-pink-light p-4">
 			<div
 				onClick={() => setIsExpanded(!isExpanded)}
-				className="flex items-center gap-3 w-full transition-colors cursor-pointer"
+				className="flex w-full cursor-pointer items-center gap-3 transition-colors"
 			>
 				<SectionTitleEditor
 					sectionKey={sectionKey}
@@ -32,7 +34,7 @@ function ResumeSectionWrapper({
 					onLabelChange={onSectionLabelChange}
 					defaultLabel={defaultLabel}
 				/>
-				<div className="flex-1 h-[3px] rounded bg-gray-300" />
+				<div className="h-[3px] flex-1 rounded bg-gray-300" />
 				{onVisibilityChange && (
 					<button
 						type="button"
@@ -40,25 +42,36 @@ function ResumeSectionWrapper({
 							e.stopPropagation()
 							onVisibilityChange(!isVisible)
 						}}
-						className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-						aria-label={isVisible ? `Hide ${sectionLabel || defaultLabel} in preview` : `Show ${sectionLabel || defaultLabel} in preview`}
+						className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
+						aria-label={
+							isVisible
+								? `Hide ${sectionLabel || defaultLabel} in preview`
+								: `Show ${sectionLabel || defaultLabel} in preview`
+						}
 						title={isVisible ? 'Hide from preview' : 'Show in preview'}
 					>
-						<FontAwesomeIcon icon={isVisible ? faEye : faEyeSlash} className="w-4 h-4 text-gray-600" />
+						<FontAwesomeIcon icon={isVisible ? faEye : faEyeSlash} className="size-4 text-gray-600" />
 					</button>
 				)}
-				<div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+				<div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200">
 					{isExpanded ? (
-						<ChevronUp className="w-4 h-4 text-gray-600" />
+						<ChevronUp className="size-4 text-gray-600" />
 					) : (
-						<ChevronDown className="w-4 h-4 text-gray-600" />
+						<ChevronDown className="size-4 text-gray-600" />
 					)}
 				</div>
 			</div>
 			{isExpanded && (
 				<div className="mt-4">
-					{description && (
-						<p className="text-[0.875rem] text-gray-500 mb-4">{description}</p>
+					{(description || headerAction) && (
+						<div className="mb-5 flex flex-col gap-4 border-b border-brand-pink/10 pb-5 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+							{description ? (
+								<p className="max-w-2xl text-sm leading-relaxed text-slate-600">{description}</p>
+							) : (
+								<div className="flex-1" />
+							)}
+							{headerAction ? <div className="shrink-0">{headerAction}</div> : null}
+						</div>
 					)}
 					{children}
 				</div>

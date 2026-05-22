@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGripVertical, faEyeSlash, faEye, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faGripVertical, faEyeSlash, faEye, faChevronDown, faChevronUp, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { XIcon, Pencil } from '@/components/icons';
+import {
+	SKILL_CATEGORY_ADD_CHIP_CLASS,
+	SKILL_CATEGORY_CHIP_CLASS,
+	SKILL_CATEGORY_PRESETS,
+	iconForSkillCategory,
+} from './skillsUtils';
 
 function NewSkillTargetRadio({ selected, className = '' }) {
 	return (
@@ -31,7 +37,7 @@ const SkillsInput = ({
 	const [skillInput, setSkillInput] = useState('');
 	// Where new skills go from the input: 'all' (uncategorized) or a category name
 	const [newSkillTarget, setNewSkillTarget] = useState('all');
-	const [categories, setCategories] = useState(['Tools']);
+	const [categories, setCategories] = useState([]);
 	const [draggedSkill, setDraggedSkill] = useState(null);
 	const [dragOverCategory, setDragOverCategory] = useState(null);
 	const [dragOverAllSkills, setDragOverAllSkills] = useState(false);
@@ -58,32 +64,18 @@ const SkillsInput = ({
 		setDragOverPillId(null);
 	};
 
-	const SKILLS_REMOVED_DEFAULTS_KEY = 'tailor_skillsRemovedDefaults';
-
-	// initialize/sync categories from skills when skills prop changes (e.g. when data loads from backend)
-	// preserves user-defined category order; only appends new categories from skills
+	// Sync category list from saved skills; preserve user order and append any new category names from data.
 	useEffect(() => {
 		const fromSkills = new Set();
-		skills.forEach(skill => {
+		skills.forEach((skill) => {
 			if (skill.category && skill.category.trim()) {
 				fromSkills.add(skill.category.trim());
 			}
 		});
-		// Add Tools as default only when there are no categories and user hasn't removed it
-		if (fromSkills.size === 0) {
-			try {
-				const removed = JSON.parse(localStorage.getItem(SKILLS_REMOVED_DEFAULTS_KEY) || '[]');
-				if (!removed.includes('Tools')) {
-					fromSkills.add('Tools');
-				}
-			} catch (_) {
-				fromSkills.add('Tools');
-			}
-		}
 		if (fromSkills.size > 0) {
-			setCategories(prev => {
-				const kept = prev.filter(c => fromSkills.has(c));
-				const added = [...fromSkills].filter(c => !prev.includes(c));
+			setCategories((prev) => {
+				const kept = prev.filter((c) => fromSkills.has(c));
+				const added = [...fromSkills].filter((c) => !prev.includes(c));
 				return prev.length === 0 ? [...fromSkills] : [...kept, ...added];
 			});
 		}
@@ -298,25 +290,24 @@ const SkillsInput = ({
 			}
 		});
 
-		// persist removed default (e.g. Tools) so it doesn't reappear on remount
-		if (categoryName === 'Tools') {
-			try {
-				const removed = JSON.parse(localStorage.getItem(SKILLS_REMOVED_DEFAULTS_KEY) || '[]');
-				if (!removed.includes('Tools')) {
-					removed.push('Tools');
-					localStorage.setItem(SKILLS_REMOVED_DEFAULTS_KEY, JSON.stringify(removed));
-				}
-			} catch (_) {}
-		}
 	};
 
 	// handle add new category
 	const handleAddCategory = () => {
 		const newCategory = 'New Category';
-		setCategories(prev => [...prev, newCategory]);
+		setCategories((prev) => [...prev, newCategory]);
 		setEditingCategory(newCategory);
 		setEditingCategoryValue(newCategory);
 	};
+
+	const handleAddPresetCategory = (presetId) => {
+		setCategories((prev) => (prev.includes(presetId) ? prev : [...prev, presetId]));
+		setNewSkillTarget(presetId);
+		inputRef.current?.focus();
+	};
+
+	const chipBase =
+		'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition';
 
 	// category reorder (only via grip handle)
 	const handleCategoryDragStart = (e, categoryName) => {
@@ -382,16 +373,10 @@ const SkillsInput = ({
 				<div>
 					<h3 className="profileInputHeaderTitle">Your Skills</h3>
 					<p className="profileInputHeaderText">
-					Add skills and organize by category. Use the circle on each section to choose where new entries go; drag pills to reorder or move.
-				</p>
+						Add skills and group them by category. Use the suggested chips for languages, soft skills, and more — or
+						create your own.
+					</p>
 				</div>
-				<button
-					type="button"
-					onClick={handleAddCategory}
-					className="profileAddButton"
-				>
-					+ Add Category
-				</button>
 			</div>
 
 			{/* Add Skill Input */}
@@ -414,10 +399,41 @@ const SkillsInput = ({
 					/>
 				</form>
 				<p id="skills-add-hint" className="text-xs text-gray-500 mt-1">
-					Select a section below (circle){' '}
-					<span className="text-gray-700 font-medium">All Skills</span> or a category — new skills are added there. Default is{' '}
-					<span className="text-gray-700 font-medium">All Skills</span>. Press Enter to add; drag pills to reorder or move between sections.
+					Pick a category below (or{' '}
+					<span className="font-medium text-gray-700">All Skills</span>), type a skill, and press Enter. Drag pills to
+					reorder or move between sections.
 				</p>
+			</div>
+
+			<div className="mb-5">
+				<p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500">Suggested categories</p>
+				<div className="flex flex-wrap gap-2">
+					{SKILL_CATEGORY_PRESETS.map((preset) => {
+						const icon = iconForSkillCategory(preset.id)
+						const active = categories.includes(preset.id)
+						return (
+							<button
+								key={preset.id}
+								type="button"
+								onClick={() => handleAddPresetCategory(preset.id)}
+								className={`${chipBase} ${SKILL_CATEGORY_CHIP_CLASS} ${active ? 'ring-2 ring-brand-pink/40 ring-offset-1' : ''}`}
+								title={active ? `Add skills to ${preset.label}` : `Add ${preset.label} section`}
+							>
+								{icon ? <FontAwesomeIcon icon={icon} className="size-3 opacity-80" aria-hidden /> : null}
+								{preset.label}
+							</button>
+						)
+					})}
+					<button
+						type="button"
+						onClick={handleAddCategory}
+						className={`${chipBase} ${SKILL_CATEGORY_ADD_CHIP_CLASS}`}
+						title="Create a custom category"
+					>
+						<FontAwesomeIcon icon={faPlus} className="size-3" aria-hidden />
+						<span className="sr-only sm:not-sr-only">Custom</span>
+					</button>
+				</div>
 			</div>
 
 			{/* Skills Display */}
@@ -596,6 +612,7 @@ const SkillsInput = ({
 					const isEditing = editingCategory === category;
 					
 					const isNewSkillTargetHere = newSkillTarget === category;
+					const categoryIcon = iconForSkillCategory(category);
 
 					return (
 						<div
@@ -655,6 +672,14 @@ const SkillsInput = ({
 												className="flex items-center gap-3 text-left min-w-0 flex-1 rounded-lg -my-1 py-1 px-1 pr-2 hover:bg-gray-50/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 											>
 												<NewSkillTargetRadio selected={isNewSkillTargetHere} />
+												{categoryIcon ? (
+													<span
+														className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-pink/10 text-brand-pink-dark"
+														aria-hidden
+													>
+														<FontAwesomeIcon icon={categoryIcon} className="size-3.5" />
+													</span>
+												) : null}
 												<span className="font-semibold text-gray-900 truncate">{category}</span>
 												<span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0">
 													{categorySkills.length}

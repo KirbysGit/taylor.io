@@ -1,20 +1,36 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import EducationInput from '@/components/inputs/EducationInput'
 import ProfileSectionCard from './ProfileSectionCard'
 
-const EducationSection = ({ education, onAdd, onRemove, onUpdate, onSubsectionUpdate }) => {
+const EducationSection = ({ education, onAdd, onRemove, onUpdate }) => {
+	const educationRef = useRef(null)
+
+	const addButton = (
+		<button
+			type="button"
+			onClick={() => educationRef.current?.addNew()}
+			className="profileAddButtonPrimary w-full sm:w-auto"
+		>
+			+ Add education
+		</button>
+	)
+
 	return (
 		<ProfileSectionCard
 			title="Education"
-			description="Schools, degrees, coursework, honors, and academic highlights."
+			description="Add schools, degrees, coursework, honors, and anything else that should be available when tailoring a résumé."
+			headerAction={addButton}
+			hideEyebrow
+			showAutoSaveBadge={false}
 		>
-			<EducationInput 
-				education={education} 
-				onAdd={onAdd} 
-				onRemove={onRemove} 
+			<EducationInput
+				ref={educationRef}
+				education={education}
+				onAdd={onAdd}
+				onRemove={onRemove}
 				onUpdate={onUpdate}
-				showSubsections={true}
-				onSubsectionUpdate={onSubsectionUpdate}
+				showSubsections
+				hideHeader
 			/>
 		</ProfileSectionCard>
 	)

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { showThemedActionToast } from '@/components/notifications/ThemedToaster'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
 	faBriefcase,
@@ -58,10 +59,37 @@ import {
 
 const newId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`
 const DEBOUNCE_MS = 2000
+const UNDO_TOAST_MS = 9000
 
 // deep equality via JSON (simple; handles our data shapes)
 const snap = (x) => JSON.stringify(x)
 const isEqual = (a, b) => snap(a) === snap(b)
+
+function insertRestoredItem(list, item, index) {
+	const id = item?.id
+	if (id != null && list.some((existing) => String(existing?.id) === String(id))) {
+		return list
+	}
+	const next = [...list]
+	next.splice(Math.min(Math.max(index, 0), next.length), 0, item)
+	return next
+}
+
+function educationLabel(edu) {
+	return edu?.school || edu?.degree || 'Education entry'
+}
+
+function experienceLabel(exp) {
+	return [exp?.title, exp?.company].filter(Boolean).join(' at ') || 'Experience entry'
+}
+
+function projectLabel(project) {
+	return project?.title || 'Project entry'
+}
+
+function skillLabel(skill) {
+	return skill?.name || 'Skill'
+}
 
 function InfoCard({ className = '', children }) {
 	return (
@@ -254,6 +282,17 @@ function Info() {
 		navigate('/')
 	}
 
+	const showRemoveUndoToast = ({ title, detail, onUndo }) => {
+		showThemedActionToast({
+			variant: 'custom',
+			title,
+			detail,
+			actionLabel: 'Undo',
+			onAction: onUndo,
+			duration: UNDO_TOAST_MS,
+		})
+	}
+
 	// debounced auto-save: schedule save for section after DEBOUNCE_MS
 	const scheduleDebouncedSave = (section) => {
 		const refs = debounceRefs.current
@@ -343,8 +382,18 @@ function Info() {
 	}
 
 	const handleEducationRemove = (index) => {
+		const removed = education[index]
+		if (!removed) return
 		setEducation(prev => prev.filter((_, i) => i !== index))
 		scheduleDebouncedSave('education')
+		showRemoveUndoToast({
+			title: 'Education removed',
+			detail: `${educationLabel(removed)} was removed from your profile.`,
+			onUndo: () => {
+				setEducation(prev => insertRestoredItem(prev, removed, index))
+				scheduleDebouncedSave('education')
+			},
+		})
 	}
 
 	const handleEducationUpdate = (index, updatedEdu) => {
@@ -408,8 +457,18 @@ function Info() {
 	}
 
 	const handleExperienceRemove = (index) => {
+		const removed = experiences[index]
+		if (!removed) return
 		setExperiences(prev => prev.filter((_, i) => i !== index))
 		scheduleDebouncedSave('experiences')
+		showRemoveUndoToast({
+			title: 'Experience removed',
+			detail: `${experienceLabel(removed)} was removed from your profile.`,
+			onUndo: () => {
+				setExperiences(prev => insertRestoredItem(prev, removed, index))
+				scheduleDebouncedSave('experiences')
+			},
+		})
 	}
 
 	const handleExperienceUpdate = (index, updatedExp) => {
@@ -446,8 +505,18 @@ function Info() {
 	}
 
 	const handleProjectRemove = (index) => {
+		const removed = projects[index]
+		if (!removed) return
 		setProjects(prev => prev.filter((_, i) => i !== index))
 		scheduleDebouncedSave('projects')
+		showRemoveUndoToast({
+			title: 'Project removed',
+			detail: `${projectLabel(removed)} was removed from your profile.`,
+			onUndo: () => {
+				setProjects(prev => insertRestoredItem(prev, removed, index))
+				scheduleDebouncedSave('projects')
+			},
+		})
 	}
 
 	const handleProjectUpdate = (index, updatedProj) => {
@@ -484,8 +553,18 @@ function Info() {
 	}
 
 	const handleSkillRemove = (index) => {
+		const removed = skills[index]
+		if (!removed) return
 		setSkills(prev => prev.filter((_, i) => i !== index))
 		scheduleDebouncedSave('skills')
+		showRemoveUndoToast({
+			title: 'Skill removed',
+			detail: `${skillLabel(removed)} was removed from your profile.`,
+			onUndo: () => {
+				setSkills(prev => insertRestoredItem(prev, removed, index))
+				scheduleDebouncedSave('skills')
+			},
+		})
 	}
 
 	const handleSkillUpdate = (index, updatedSkill) => {

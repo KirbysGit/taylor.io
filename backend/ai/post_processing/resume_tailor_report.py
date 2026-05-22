@@ -287,6 +287,18 @@ def _detail_items_from_patch(patch, narrative_brief, gaps, flags, target_label, 
             }
         )
 
+    gap_support = nb.get("gapSupport") if isinstance(nb.get("gapSupport"), list) else []
+    conceptual = []
+    for item in gap_support:
+        if not isinstance(item, dict) or item.get("status") != "conceptual":
+            continue
+        term = _clean_text(item.get("term"), limit=60)
+        evidence = _dedupe_keep_order(item.get("supportingEvidence") or [], limit=3)
+        if term and evidence:
+            conceptual.append(f"{term}: related evidence includes {_join_human(evidence)}.")
+    if conceptual:
+        groups.append({"title": "Related evidence", "items": conceptual[:3]})
+
     review = []
     if gaps:
         review.append("Some JD terms were not directly evidenced: " + _join_human(gaps[:4]) + ".")
@@ -321,6 +333,9 @@ def _resume_hits_from_context(tailor_context, limit=4):
 
 def _resume_gaps_from_context(tailor_context, limit=4):
     tc = tailor_context if isinstance(tailor_context, dict) else {}
+    ac = tc.get("alignmentContext") if isinstance(tc.get("alignmentContext"), dict) else {}
+    if isinstance(ac.get("unsupportedTerms"), list):
+        return _dedupe_keep_order(ac.get("unsupportedTerms") or [], limit=limit)
     return _dedupe_keep_order(tc.get("resumeGaps") or [], limit=limit)
 
 
@@ -424,6 +439,59 @@ def build_tailor_explanation(
     trimmed_experience = _labels_from_patch(patch, "experience", removed=True, limit=2)
     trimmed_projects = _labels_from_patch(patch, "projects", removed=True, limit=3)
     summary_hidden = _summary_is_hidden_for_draft(patch, nb)
+    evidence_classes = nb.get("evidenceClassification") if isinstance(nb.get("evidenceClassification"), list) else []
+    jd_signal_intent = nb.get("jdSignalIntent") if isinstance(nb.get("jdSignalIntent"), list) else []
+    gap_support = nb.get("gapSupport") if isinstance(nb.get("gapSupport"), list) else []
+    direct_class_terms = _dedupe_keep_order(
+        [
+            str(term).strip()
+            for item in evidence_classes
+            if isinstance(item, dict) and item.get("evidenceType") == "direct_role_evidence"
+            for term in (item.get("terms") or [])
+            if str(term).strip()
+        ],
+        limit=4,
+    )
+    bridge_class_labels = _dedupe_keep_order(
+        [
+            _clean_text(item.get("label"), limit=80)
+            for item in evidence_classes
+            if isinstance(item, dict) and item.get("evidenceType") == "transferable_behavior"
+        ],
+        limit=3,
+    )
+    domain_class_labels = _dedupe_keep_order(
+        [
+            _clean_text(item.get("label"), limit=80)
+            for item in evidence_classes
+            if isinstance(item, dict) and item.get("evidenceType") == "domain_tool_evidence"
+        ],
+        limit=2,
+    )
+    role_signal_terms = _dedupe_keep_order(
+        [
+            str(item.get("term") or "").strip()
+            for item in jd_signal_intent
+            if isinstance(item, dict) and item.get("intent") in ("role_responsibility", "candidate_requirement")
+        ],
+        limit=4,
+    )
+    context_signal_terms = _dedupe_keep_order(
+        [
+            str(item.get("term") or "").strip()
+            for item in jd_signal_intent
+            if isinstance(item, dict) and item.get("intent") in ("company_product_context", "background_or_benefit")
+        ],
+        limit=3,
+    )
+    conceptual_gap_terms = _dedupe_keep_order(
+        [
+            str(item.get("term") or "").strip()
+            for item in gap_support
+            if isinstance(item, dict) and item.get("status") == "conceptual"
+        ],
+        limit=4,
+    )
 
     sentences = []
     target_label = f"{role} at {co}" if co else role
@@ -437,8 +505,23 @@ def build_tailor_explanation(
     else:
         sentences.append(f"I used the job description to shape this draft for {target_label}.")
 
-    if alignment_mode in ("adjacent", "stretch") and matched_terms:
-        sentences.append(f"The direct overlap I found was {_join_human(matched_terms)}; the rest of the draft bridges from nearby evidence like metrics, workflows, coordination, or operating pace where your resume supports it.")
+    if alignment_mode in ("adjacent", "stretch"):
+        if direct_class_terms:
+            sentences.append(f"The strongest direct overlap I found was {_join_human(_display_terms(direct_class_terms))}; the rest of the draft bridges from nearby evidence where your resume supports it.")
+        elif bridge_class_labels:
+            sentences.append(f"The strongest bridge evidence I found was {_join_human(bridge_class_labels)}; I used exact keyword matches more carefully when the resume context was different from the job context.")
+        elif matched_terms:
+            sentences.append(f"The direct overlap I found was {_join_human(matched_terms)}; the rest of the draft bridges from nearby evidence like metrics, workflows, coordination, or operating pace where your resume supports it.")
+        if domain_class_labels:
+            sentences.append(f"I treated {_join_human(domain_class_labels)} as supporting proof, not direct ownership of the target role.")
+        if role_signal_terms and context_signal_terms:
+            sentences.append(
+                f"I prioritized role signals like {_join_human(_display_terms(role_signal_terms))} over company/product context like {_join_human(_display_terms(context_signal_terms))}."
+            )
+        if conceptual_gap_terms:
+            sentences.append(
+                f"A few terms were not named exactly, but related resume evidence supports {_join_human(_display_terms(conceptual_gap_terms))}."
+            )
     elif matched_terms:
         if kept_projects:
             sentences.append(f"You already had the right raw material: {_join_human(matched_terms)}. I pushed that proof forward in {_join_human(kept_projects)}.")
@@ -501,6 +584,9 @@ def build_tailor_explanation(
         "details": _detail_items_from_patch(patch, nb, gaps, flags, target_label, updated_resume_data=updated_resume_data),
         "evidence": {
             "alignmentMode": alignment_mode,
+            "evidenceClassification": evidence_classes[:8],
+            "jdSignalIntent": jd_signal_intent[:10],
+            "gapSupport": gap_support[:10],
             "matchedTerms": matched_terms,
             "jobPriorityTerms": jd_terms,
             "resumeGaps": gaps,

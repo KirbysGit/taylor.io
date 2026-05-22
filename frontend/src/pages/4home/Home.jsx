@@ -11,6 +11,13 @@ import {
 	faClockRotateLeft,
 	faFileAlt,
 	faGraduationCap,
+	faBell,
+	faBug,
+	faCircleInfo,
+	faCircleNotch,
+	faCircleCheck,
+	faCircleXmark,
+	faTriangleExclamation,
 	faPenToSquare,
 	faPlus,
 	faRocket,
@@ -18,6 +25,7 @@ import {
 	faTrash,
 	faUser,
 	faWandMagicSparkles,
+	faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import DashboardShell from '@/components/DashboardShell'
 import { getMyProfile, listSavedResumes, deleteSavedResume } from '@/api/services/profile'
@@ -62,6 +70,131 @@ function DashboardCard({ className = '', children }) {
 		<section className={`rounded-[1.35rem] border border-brand-pink/20 bg-white shadow-[0_18px_42px_-26px_rgba(80,42,42,0.46)] ring-1 ring-white ${className}`}>
 			{children}
 		</section>
+	)
+}
+
+function DevToolButton({ icon, label, tone = 'neutral', onClick }) {
+	const toneClass =
+		tone === 'success'
+			? 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300 hover:bg-emerald-100/70'
+			: tone === 'error'
+				? 'border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100/70'
+				: tone === 'warning'
+					? 'border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-300 hover:bg-amber-100/70'
+					: tone === 'loading'
+						? 'border-violet-200 bg-violet-50 text-violet-800 hover:border-violet-300 hover:bg-violet-100/70'
+						: 'border-sky-200 bg-sky-50 text-sky-800 hover:border-sky-300 hover:bg-sky-100/70'
+
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-black transition ${toneClass}`}
+		>
+			<FontAwesomeIcon icon={icon} className="size-3.5 shrink-0" />
+			<span className="truncate">{label}</span>
+		</button>
+	)
+}
+
+function DashboardDevDock({ onOpenSetup }) {
+	const [open, setOpen] = useState(false)
+
+	const triggerLoadingToast = () => {
+		const id = toast.loading('Tailoring in progress - Reviewing your fit for Product Manager at Stripe...')
+		window.setTimeout(() => {
+			toast.success('Tailored draft ready - Your first version is ready to review.', { id })
+		}, 2200)
+	}
+
+	return (
+		<div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3">
+			{open ? (
+				<div className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-brand-pink/20 bg-white/96 shadow-[0_22px_60px_-28px_rgba(60,32,32,0.55)] ring-1 ring-black/[0.05] backdrop-blur-md">
+					<div className="flex items-start justify-between gap-3 border-b border-brand-pink/10 bg-gradient-to-r from-brand-pink/[0.08] to-white px-4 py-3">
+						<div>
+							<p className="text-xs font-black uppercase tracking-[0.16em] text-brand-pink-dark">Dev tools</p>
+							<p className="mt-1 text-xs leading-relaxed text-gray-500">Local helpers for testing flows.</p>
+						</div>
+						<button
+							type="button"
+							onClick={() => setOpen(false)}
+							className="flex size-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-white hover:text-gray-700"
+							aria-label="Close dev tools"
+						>
+							<FontAwesomeIcon icon={faXmark} className="size-4" />
+						</button>
+					</div>
+
+					<div className="space-y-4 p-4">
+						<div>
+							<p className="mb-2 text-[0.68rem] font-black uppercase tracking-[0.14em] text-gray-400">
+								Notifications
+							</p>
+							<div className="grid grid-cols-2 gap-2">
+								<DevToolButton
+									icon={faCircleCheck}
+									label="Résumé saved"
+									tone="success"
+									onClick={() => toast.success('Résumé saved - Your latest changes were saved as a version.')}
+								/>
+								<DevToolButton
+									icon={faCircleInfo}
+									label="Template applied"
+									onClick={() => toast('Template applied - Clean Sidebar is now active for this résumé.')}
+								/>
+								<DevToolButton
+									icon={faCircleNotch}
+									label="Tailoring"
+									tone="loading"
+									onClick={triggerLoadingToast}
+								/>
+								<DevToolButton
+									icon={faTriangleExclamation}
+									label="Worth review"
+									tone="warning"
+									onClick={() => toast.custom('Worth reviewing - 2 job description terms were not directly evidenced.')}
+								/>
+								<DevToolButton
+									icon={faCircleXmark}
+									label="Export error"
+									tone="error"
+									onClick={() => toast.error("Couldn't export PDF - Try again in a moment or switch to Print Layout.")}
+								/>
+								<DevToolButton
+									icon={faCircleCheck}
+									label="Profile updated"
+									tone="success"
+									onClick={() => toast.success('Profile updated - Your project details are ready to use in future résumés.')}
+								/>
+							</div>
+						</div>
+
+						<div>
+							<p className="mb-2 text-[0.68rem] font-black uppercase tracking-[0.14em] text-gray-400">
+								Navigation
+							</p>
+							<DevToolButton
+								icon={faWandMagicSparkles}
+								label="Open account setup"
+								tone="warning"
+								onClick={onOpenSetup}
+							/>
+						</div>
+					</div>
+				</div>
+			) : null}
+
+			<button
+				type="button"
+				onClick={() => setOpen((value) => !value)}
+				className="inline-flex size-12 items-center justify-center rounded-full bg-[#9f3a40] text-white shadow-[0_18px_44px_-18px_rgba(60,12,18,0.7)] ring-1 ring-white/30 transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+				aria-label={open ? 'Close dev tools' : 'Open dev tools'}
+				aria-expanded={open}
+			>
+				<FontAwesomeIcon icon={open ? faXmark : faBug} className="size-5" />
+			</button>
+		</div>
 	)
 }
 
@@ -548,14 +681,6 @@ function Home() {
 						</h1>
 						<p className="mt-2 text-base text-gray-600">Ready to tailor your next r&eacute;sum&eacute;?</p>
 					</div>
-					<button
-						type="button"
-						onClick={() => navigate('/setup')}
-						className="inline-flex w-fit items-center gap-2 rounded-xl border border-brand-pink/20 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/45 hover:bg-brand-pink/[0.055] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
-					>
-						<FontAwesomeIcon icon={faWandMagicSparkles} className="size-3.5" />
-						Dev setup
-					</button>
 				</header>
 
 				<div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(21rem,0.95fr)] xl:items-stretch">
@@ -587,6 +712,7 @@ function Home() {
 						<TemplatePanel onBrowse={() => navigate('/templates')} />
 					</div>
 				</div>
+				<DashboardDevDock onOpenSetup={() => navigate('/setup')} />
 			</div>
 		</DashboardShell>
 	)

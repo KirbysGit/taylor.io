@@ -6,7 +6,7 @@ const SkillsSection = ({ skills, onAdd, onRemove, onUpdate, onReorder, onCategor
 	return (
 		<ProfileSectionCard
 			title="Skills"
-			description="Organize your skills into categories. Drag pills to reorder."
+			description="Add skills, group them with suggested categories (languages, soft skills, and more), and drag pills to reorder."
 		>
 			<SkillsInput 
 				skills={skills} 

@@ -4,6 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes toast-countdown {
+	from {
+		stroke-dashoffset: 0;
+	}
+	to {
+		stroke-dashoffset: 72.3;
+	}
+}
+
+.toast-countdown-ring {
+	stroke-dasharray: 72.3;
+	stroke-dashoffset: 0;
+	animation: toast-countdown var(--toast-duration, 3600ms) linear forwards;
+}
+
 
 /* global font and layout constraints */
 @layer base {
@@ -104,6 +119,10 @@
 
 	.profileAddButton {
 		@apply inline-flex shrink-0 items-center justify-center rounded-xl border border-brand-pink/20 bg-white px-3.5 py-2 text-sm font-black text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/50 hover:bg-brand-pink/[0.055] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2;
+	}
+
+	.profileAddButtonPrimary {
+		@apply inline-flex shrink-0 items-center justify-center rounded-xl bg-brand-pink px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_-14px_rgba(214,86,86,0.65)] transition hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2;
 	}
 
 	.profileEntryCard {

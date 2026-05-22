@@ -67,11 +67,13 @@ const Experience = ({
 			onRemove={handleRemove}
 			onUpdate={handleUpdate}
 			onReorder={handleReorder}
+			compact={bare}
+			hideHeader
 		/>
 	)
 
 	if (bare) {
-		return <div className="p-4">{input}</div>
+		return input
 	}
 
 	return (
