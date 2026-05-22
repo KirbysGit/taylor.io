@@ -7,6 +7,7 @@ const SummarySection = ({ summary, onUpdate }) => {
 		<ProfileSectionCard
 			title="Professional Summary"
 			description="A short, reusable overview Taylor can adapt for each résumé."
+			hideEyebrow
 		>
 			<SummaryInput summary={summary} onUpdate={onUpdate} />
 		</ProfileSectionCard>

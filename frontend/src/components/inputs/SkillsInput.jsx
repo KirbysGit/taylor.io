@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGripVertical, faEyeSlash, faEye, faChevronDown, faChevronUp, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { XIcon, Pencil } from '@/components/icons';
@@ -22,18 +22,21 @@ function NewSkillTargetRadio({ selected, className = '' }) {
 	);
 }
 
-// Skills Input Component - Just the form fields and logic, no headers
-const SkillsInput = ({
-	skills,
-	hiddenSkills = [],
-	onAdd,
-	onRemove,
-	onUpdate,
-	onReorder,
-	onCategoryOrderChange,
-	onHide,
-	onShowSkill,
-}) => {
+// Skills Input Component - form fields and logic; section chrome lives in parent cards.
+const SkillsInput = forwardRef(function SkillsInput(
+	{
+		skills,
+		hiddenSkills = [],
+		onAdd,
+		onRemove,
+		onUpdate,
+		onReorder,
+		onCategoryOrderChange,
+		onHide,
+		onShowSkill,
+	},
+	ref,
+) {
 	const [skillInput, setSkillInput] = useState('');
 	// Where new skills go from the input: 'all' (uncategorized) or a category name
 	const [newSkillTarget, setNewSkillTarget] = useState('all');
@@ -300,6 +303,10 @@ const SkillsInput = ({
 		setEditingCategoryValue(newCategory);
 	};
 
+	useImperativeHandle(ref, () => ({
+		addCategory: handleAddCategory,
+	}));
+
 	const handleAddPresetCategory = (presetId) => {
 		setCategories((prev) => (prev.includes(presetId) ? prev : [...prev, presetId]));
 		setNewSkillTarget(presetId);
@@ -368,17 +375,6 @@ const SkillsInput = ({
 
 	return (
 		<>
-			{/* Header with Add Category */}
-			<div className="profileInputHeader">
-				<div>
-					<h3 className="profileInputHeaderTitle">Your Skills</h3>
-					<p className="profileInputHeaderText">
-						Add skills and group them by category. Use the suggested chips for languages, soft skills, and more — or
-						create your own.
-					</p>
-				</div>
-			</div>
-
 			{/* Add Skill Input */}
 			<div className="mb-4 rounded-2xl border border-brand-pink/12 bg-[#fff8ef]/45 p-4">
 				<label className="label">Add a skill</label>
@@ -762,6 +758,6 @@ const SkillsInput = ({
 			</div>
 		</>
 	);
-};
+});
 
 export default SkillsInput

@@ -9,12 +9,13 @@ import {
 	faChevronRight,
 	faClockRotateLeft,
 	faEye,
+	faEnvelope,
 	faFileAlt,
 	faGraduationCap,
 	faLayerGroup,
+	faLock,
 	faPlus,
 	faStar,
-	faUser,
 	faWandMagicSparkles,
 } from '@fortawesome/free-solid-svg-icons'
 import {
@@ -93,7 +94,7 @@ function skillLabel(skill) {
 
 function InfoCard({ className = '', children }) {
 	return (
-		<section className={`rounded-[1.35rem] border border-brand-pink/13 bg-white/78 shadow-[0_18px_48px_-34px_rgba(80,42,42,0.42)] ring-1 ring-white/80 backdrop-blur-md ${className}`}>
+		<section className={`rounded-[1.35rem] border border-brand-pink/16 bg-white shadow-[0_18px_48px_-34px_rgba(80,42,42,0.42)] ring-1 ring-white/90 ${className}`}>
 			{children}
 		</section>
 	)
@@ -127,22 +128,23 @@ function CompletionRing({ value }) {
 
 function OverviewRow({ item, onClick }) {
 	const complete = item.count > 0
-	const statusText = complete ? item.status : 'Add more'
+	const statusText = complete ? item.status : item.emptyStatus
 
 	return (
 		<button
 			type="button"
 			onClick={onClick}
-			className="group flex w-full items-center gap-4 rounded-[1.15rem] border border-brand-pink/10 bg-white/82 p-4 text-left shadow-[0_14px_34px_-30px_rgba(45,30,38,0.34)] transition hover:-translate-y-0.5 hover:border-brand-pink/24 hover:shadow-[0_18px_42px_-30px_rgba(214,86,86,0.32)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+			className="group flex w-full items-center gap-4 border-b border-gray-200/72 bg-white px-4 py-5 text-left transition last:border-b-0 hover:bg-brand-pink/[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-inset"
 		>
-			<span className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${item.bg} ${item.tone}`}>
+			<span className={`flex size-14 shrink-0 items-center justify-center rounded-2xl ${item.bg} ${item.tone}`}>
 				<FontAwesomeIcon icon={item.icon} className="size-5" />
 			</span>
 			<span className="min-w-0 flex-1">
 				<span className="block text-lg font-black tracking-tight text-gray-950">{item.title}</span>
 				<span className="mt-0.5 block text-sm leading-relaxed text-gray-600">{item.description}</span>
 			</span>
-			<span className={`hidden rounded-full px-3 py-1.5 text-xs font-bold sm:inline-flex ${complete ? 'bg-emerald-50 text-emerald-700' : 'bg-brand-pink/[0.08] text-brand-pink-dark'}`}>
+			<span className={`hidden min-w-[5.7rem] justify-center rounded-full px-3 py-1.5 text-xs font-black sm:inline-flex ${complete ? 'bg-emerald-50 text-emerald-700' : 'bg-brand-pink/[0.08] text-brand-pink-dark'}`}>
+				{complete && <FontAwesomeIcon icon={faCheck} className="mr-1.5 size-3" />}
 				{statusText}
 			</span>
 			<FontAwesomeIcon icon={faChevronRight} className="size-4 shrink-0 text-gray-400 transition group-hover:translate-x-0.5 group-hover:text-brand-pink-dark" />
@@ -743,11 +745,11 @@ function Info() {
 		const hash = (location.hash || '').replace('#', '').trim()
 		if (!hash) return
 		const t = setTimeout(() => {
-			const scrollContainer = document.querySelector('.info-scrollbar')
+			const scrollContainer = document.querySelector('main.info-scrollbar')
 			const element = document.getElementById(hash)
 			if (scrollContainer && element) {
 				const offset = 100
-				const elementPosition = element.getBoundingClientRect().top
+				const elementPosition = element.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top
 				const offsetPosition = elementPosition + scrollContainer.scrollTop - offset
 				scrollContainer.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' })
 			}
@@ -757,11 +759,11 @@ function Info() {
 
 	// Scroll to section handler (scrolls the .info-scrollbar div, not the window)
 	const scrollToSection = (sectionId) => {
-		const scrollContainer = document.querySelector('.info-scrollbar')
+		const scrollContainer = document.querySelector('main.info-scrollbar')
 		const element = document.getElementById(sectionId)
 		if (scrollContainer && element) {
 			const offset = 100 // offset for sticky header/nav
-			const elementPosition = element.getBoundingClientRect().top
+			const elementPosition = element.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top
 			const offsetPosition = elementPosition + scrollContainer.scrollTop - offset
 			scrollContainer.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' })
 		}
@@ -769,31 +771,45 @@ function Info() {
 
 	const profileItems = [
 		{
-			id: 'experience-section',
-			title: 'Work experience',
-			description: 'Add your past roles, achievements, and key impact.',
-			count: experiences.length,
-			status: experiences.length > 0 ? `${experiences.length} saved` : 'Add roles',
-			icon: faBriefcase,
-			bg: 'bg-sky-100',
-			tone: 'text-sky-700',
+			id: 'contact-section',
+			title: 'Contact information',
+			description: 'Email, phone, location, links, and headline.',
+			count: Object.values(contact).some((value) => String(value || '').trim()) ? 1 : 0,
+			status: Object.values(contact).some((value) => String(value || '').trim()) ? 'Complete' : 'Add contact',
+			emptyStatus: 'Add contact',
+			icon: faEnvelope,
+			bg: 'bg-amber-100',
+			tone: 'text-amber-700',
 		},
 		{
 			id: 'education-section',
 			title: 'Education',
-			description: 'Add your schools, degrees, and relevant coursework.',
+			description: 'Degrees, coursework, honors, and school details.',
 			count: education.length,
 			status: education.length > 0 ? `${education.length} saved` : 'Add school',
+			emptyStatus: 'Add school',
 			icon: faGraduationCap,
 			bg: 'bg-emerald-100',
 			tone: 'text-emerald-700',
 		},
 		{
+			id: 'experience-section',
+			title: 'Work experience',
+			description: 'Roles, achievements, and impact Taylor can reuse.',
+			count: experiences.length,
+			status: experiences.length > 0 ? `${experiences.length} saved` : 'Add roles',
+			emptyStatus: 'Add roles',
+			icon: faBriefcase,
+			bg: 'bg-brand-pink/[0.1]',
+			tone: 'text-brand-pink-dark',
+		},
+		{
 			id: 'projects-section',
 			title: 'Projects',
-			description: 'Showcase projects that highlight your skills.',
+			description: 'Save the projects you want Taylor to reuse.',
 			count: projects.length,
-			status: projects.length > 0 ? `${projects.length} added` : 'Add projects',
+			status: projects.length > 0 ? `${projects.length} saved` : 'Add projects',
+			emptyStatus: 'Add projects',
 			icon: faLayerGroup,
 			bg: 'bg-violet-100',
 			tone: 'text-violet-700',
@@ -801,12 +817,13 @@ function Info() {
 		{
 			id: 'skills-section',
 			title: 'Skills',
-			description: 'Add your technical, soft, and tool expertise.',
+			description: 'Tools, technologies, strengths, and focus areas.',
 			count: skills.length,
-			status: skills.length > 0 ? `${skills.length} added` : 'Add skills',
+			status: skills.length > 0 ? `${skills.length} saved` : 'Add skills',
+			emptyStatus: 'Add skills',
 			icon: faWandMagicSparkles,
-			bg: 'bg-cyan-100',
-			tone: 'text-cyan-700',
+			bg: 'bg-sky-100',
+			tone: 'text-sky-700',
 		},
 		{
 			id: 'summary-section',
@@ -814,17 +831,8 @@ function Info() {
 			description: 'Write the profile summary Taylor can tailor from.',
 			count: summary.trim() ? 1 : 0,
 			status: summary.trim() ? 'Complete' : 'Add summary',
+			emptyStatus: 'Add summary',
 			icon: faStar,
-			bg: 'bg-amber-100',
-			tone: 'text-amber-700',
-		},
-		{
-			id: 'contact-section',
-			title: 'Personal info',
-			description: 'Name, headline, location, links, and contact info.',
-			count: Object.values(contact).some((value) => String(value || '').trim()) ? 1 : 0,
-			status: Object.values(contact).some((value) => String(value || '').trim()) ? 'Complete' : 'Add contact',
-			icon: faUser,
 			bg: 'bg-rose-100',
 			tone: 'text-rose-700',
 		},
@@ -833,11 +841,11 @@ function Info() {
 	const completeness = Math.round((completeCount / profileItems.length) * 100)
 	const missingItem = profileItems.find((item) => item.count === 0)
 	const summaryStats = [
-		{ label: 'Experiences', value: experiences.length, icon: faBriefcase },
-		{ label: 'Projects', value: projects.length, icon: faLayerGroup },
-		{ label: 'Skills', value: skills.length, icon: faWandMagicSparkles },
-		{ label: 'Education', value: education.length, icon: faGraduationCap },
-		{ label: 'Resume', value: user?.attached_resume_filename ? 1 : 0, icon: faFileAlt },
+		{ label: 'Work experiences', detail: 'Roles, achievements, impact', value: experiences.length, icon: faBriefcase, bg: 'bg-brand-pink/[0.1]', tone: 'text-brand-pink-dark' },
+		{ label: 'Projects', detail: 'Key work and outcomes', value: projects.length, icon: faLayerGroup, bg: 'bg-violet-100', tone: 'text-violet-700' },
+		{ label: 'Skills', detail: 'Tools, technologies, strengths', value: skills.length, icon: faWandMagicSparkles, bg: 'bg-sky-100', tone: 'text-sky-700' },
+		{ label: 'Education', detail: 'Degrees, coursework, honors', value: education.length, icon: faGraduationCap, bg: 'bg-emerald-100', tone: 'text-emerald-700' },
+		{ label: 'Contact information', detail: 'Email, phone, location, links', value: Object.values(contact).some((value) => String(value || '').trim()) ? 'complete' : 0, icon: faEnvelope, bg: 'bg-amber-100', tone: 'text-amber-700' },
 	]
 	const autoSaveLabel = savingSection ? 'Saving...' : isDirty() ? 'Autosave pending' : 'Up to date'
 
@@ -871,48 +879,180 @@ function Info() {
 							<p className="text-xs font-black uppercase tracking-[0.2em] text-brand-pink-dark">Information</p>
 							<h1 className="mt-2 text-3xl font-black tracking-tight text-gray-950 sm:text-4xl">Your information</h1>
 							<p className="mt-2 max-w-2xl text-base leading-relaxed text-gray-600">
-								Manage your profile. We&apos;ll use this to build tailored r&eacute;sum&eacute;s for any role.
+								Keep your career data organized so Taylor can shape the right r&eacute;sum&eacute; for each role.
 							</p>
 						</div>
 						<button
 							type="button"
-							onClick={() => scrollToSection('summary-section')}
-							className="inline-flex min-h-[3.15rem] items-center justify-center gap-2 rounded-xl border border-brand-pink/16 bg-white/82 px-5 py-3 text-sm font-black text-gray-900 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/28 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+							onClick={() => navigate('/resume/preview')}
+							className="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-brand-pink/18 bg-white px-5 py-3 text-sm font-black text-gray-950 shadow-[0_14px_30px_-24px_rgba(80,42,42,0.45)] transition hover:-translate-y-0.5 hover:border-brand-pink/34 hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 						>
-							<FontAwesomeIcon icon={faEye} className="size-4" />
+							<FontAwesomeIcon icon={faEye} className="size-4 text-gray-950" />
 							Preview profile
 						</button>
 					</header>
 
-					<InfoCard className="mb-6 overflow-hidden bg-brand-pink/[0.07] p-5 sm:p-6">
-						<div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
-							<div className="pointer-events-none absolute -right-8 -top-8 size-36 rounded-full bg-brand-pink/[0.08] blur-2xl" aria-hidden />
-							<CompletionRing value={completeness} />
-							<div className="relative z-[1] min-w-0 flex-1">
-								<h2 className="text-xl font-black tracking-tight text-gray-950">Profile completeness</h2>
-								<p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">
-									{completeness >= 85
-										? 'Great job. A complete profile helps us create better, more tailored resumes.'
-										: 'Add a little more profile data and Taylor can create stronger role-specific versions.'}
-								</p>
-							</div>
-							<button
-								type="button"
-								onClick={() => scrollToSection(missingItem?.id || 'contact-section')}
-								className="relative z-[1] inline-flex items-center justify-center gap-2 rounded-xl border border-brand-pink/22 bg-white/82 px-5 py-3 text-sm font-black text-brand-pink-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/36 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
-							>
-								{missingItem ? 'See what is missing' : 'Review profile'}
-								<FontAwesomeIcon icon={faChevronRight} className="size-3.5" />
-							</button>
-						</div>
-					</InfoCard>
-
 					<div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(20rem,0.75fr)]">
-						<div className="space-y-4">
+						<div className="space-y-6">
+						<InfoCard className="overflow-hidden bg-brand-pink/[0.055] p-5 sm:p-6">
+								<div className="relative flex flex-col gap-5 lg:flex-row lg:items-center">
+									<div className="pointer-events-none absolute -right-8 -top-8 size-36 rounded-full bg-brand-pink/[0.08] blur-2xl" aria-hidden />
+									<CompletionRing value={completeness} />
+									<div className="relative z-[1] min-w-0 flex-1">
+										<h2 className="text-xl font-black tracking-tight text-gray-950">
+											{completeness >= 85 ? 'Your profile is ready' : 'Your profile is getting there'}
+											<FontAwesomeIcon icon={faWandMagicSparkles} className="ml-2 size-4 text-brand-pink" aria-hidden />
+										</h2>
+										<p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">
+											{completeness >= 85
+												? 'Taylor has enough detail to build tailored, high-impact r\u00e9sum\u00e9 versions.'
+												: 'Add a little more profile data and Taylor can create stronger role-specific versions.'}
+										</p>
+									</div>
+									<div className="relative z-[1] flex flex-col gap-3 sm:flex-row lg:flex-col 2xl:flex-row">
+										<button
+											type="button"
+											onClick={() => navigate('/resume/create')}
+											className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-pink px-5 py-3 text-sm font-black text-white shadow-[0_16px_32px_-16px_rgba(214,86,86,0.8)] transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+										>
+											<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
+											Create r&eacute;sum&eacute;
+										</button>
+										<button
+											type="button"
+											onClick={() => scrollToSection(missingItem?.id || 'contact-section')}
+											className="inline-flex items-center justify-center gap-2 rounded-xl border border-brand-pink/22 bg-white px-5 py-3 text-sm font-black text-gray-950 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-pink/36 hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+										>
+											Review details
+										</button>
+									</div>
+								</div>
+							</InfoCard>
+
+						<InfoCard className="overflow-hidden">
 							{profileItems.map((item) => (
 								<OverviewRow key={item.id} item={item} onClick={() => scrollToSection(item.id)} />
 							))}
+						</InfoCard>
+						</div>
 
+						<InfoCard className="overflow-hidden p-6">
+							<div className="flex items-start gap-4">
+								<span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+									<FontAwesomeIcon icon={faWandMagicSparkles} className="size-5" />
+								</span>
+								<div>
+									<h2 className="text-xl font-black tracking-tight text-gray-950">Ready to tailor</h2>
+									<p className="mt-1 text-sm leading-relaxed text-gray-600">
+										Your profile has enough detail to create focused r&eacute;sum&eacute; versions.
+									</p>
+								</div>
+							</div>
+							<div className="my-6 h-px bg-brand-pink/12" />
+							<p className="text-[0.7rem] font-black uppercase tracking-[0.16em] text-gray-500">Taylor can use:</p>
+							<div className="mt-4 divide-y divide-gray-200/70">
+								{summaryStats.map((stat) => (
+									<div key={stat.label} className="flex items-center gap-3 py-3">
+										<span className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ${stat.bg} ${stat.tone}`}>
+											<FontAwesomeIcon icon={stat.icon} className="size-4" />
+										</span>
+										<span className="min-w-0 flex-1">
+											<span className="block text-sm font-black text-gray-950">{stat.label}</span>
+											<span className="mt-0.5 block text-xs leading-relaxed text-gray-500">{stat.detail}</span>
+										</span>
+										<span className={`text-sm font-black ${stat.value === 'complete' ? 'text-emerald-700' : 'text-gray-950'}`}>
+											{stat.value === 'complete' ? <FontAwesomeIcon icon={faCheck} className="size-4" /> : stat.value}
+										</span>
+									</div>
+								))}
+							</div>
+
+							<div className="mt-5 rounded-2xl border border-brand-pink/12 bg-brand-pink/[0.06] p-4">
+								<div className="flex items-start gap-3">
+									<span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-pink-dark shadow-sm">
+										<FontAwesomeIcon icon={faStar} className="size-4" />
+									</span>
+									<div>
+										<p className="font-black text-gray-950">Best next step</p>
+										<p className="mt-1 text-sm leading-relaxed text-gray-600">
+											Add measurable results to your top projects and experiences to make your r&eacute;sum&eacute; stand out.
+										</p>
+									</div>
+								</div>
+							</div>
+
+							<button
+								type="button"
+								onClick={() => navigate('/resume/create')}
+								className="mt-5 inline-flex min-h-[3.15rem] w-full items-center justify-center gap-3 rounded-xl bg-brand-pink px-5 py-3 text-sm font-black text-white shadow-[0_18px_34px_-17px_rgba(214,86,86,0.84)] transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+							>
+								<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
+								Create r&eacute;sum&eacute;
+								<FontAwesomeIcon icon={faChevronRight} className="size-3.5" />
+							</button>
+							<p className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-gray-500">
+								<FontAwesomeIcon icon={faLock} className="size-3" />
+								Your data is private and secure
+							</p>
+						</InfoCard>
+					</div>
+
+					<div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(20rem,0.75fr)]">
+						<div className="space-y-4">
+
+						{/* Contact Section */}
+						<div id="contact-section">
+							<ContactSection contact={contact} onUpdate={handleContactUpdate} />
+						</div>
+
+						{/* Education Section */}
+						<div id="education-section">
+							<EducationSection
+								education={education}
+								onAdd={handleEducationAdd}
+								onRemove={handleEducationRemove}
+								onUpdate={handleEducationUpdate}
+								onSubsectionUpdate={handleSubsectionUpdate}
+							/>
+						</div>
+
+						{/* Experience Section */}
+						<div id="experience-section">
+							<ExperienceSection
+								experiences={experiences}
+								onAdd={handleExperienceAdd}
+								onRemove={handleExperienceRemove}
+								onUpdate={handleExperienceUpdate}
+							/>
+						</div>
+
+						{/* Projects Section */}
+						<div id="projects-section">
+							<ProjectsSection
+								projects={projects}
+								onAdd={handleProjectAdd}
+								onRemove={handleProjectRemove}
+								onUpdate={handleProjectUpdate}
+							/>
+						</div>
+
+						{/* Skills Section */}
+						<div id="skills-section">
+							<SkillsSection
+								skills={skills}
+								onAdd={handleSkillAdd}
+								onRemove={handleSkillRemove}
+								onUpdate={handleSkillUpdate}
+								onReorder={handleSkillReorder}
+							/>
+						</div>
+
+						{/* Summary Section */}
+						<div id="summary-section">
+							<SummarySection summary={summary} onUpdate={handleSummaryUpdate} />
+						</div>
+
+							<div id="resume-upload-section">
 							<InfoCard className="p-5">
 								{user?.attached_resume_filename ? (
 									<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -971,103 +1111,22 @@ function Info() {
 									</div>
 								)}
 							</InfoCard>
-
-							<div className="pt-2">
-								<h2 className="text-xl font-black tracking-tight text-gray-950">Edit profile details</h2>
-								<p className="mt-1 text-sm text-gray-600">Open any section above, or keep editing directly below.</p>
 							</div>
-
-						{/* Contact Section */}
-						<div id="contact-section">
-							<ContactSection contact={contact} onUpdate={handleContactUpdate} />
-						</div>
-
-						{/* Education Section */}
-						<div id="education-section">
-							<EducationSection
-								education={education}
-								onAdd={handleEducationAdd}
-								onRemove={handleEducationRemove}
-								onUpdate={handleEducationUpdate}
-								onSubsectionUpdate={handleSubsectionUpdate}
-							/>
-						</div>
-
-						{/* Experience Section */}
-						<div id="experience-section">
-							<ExperienceSection
-								experiences={experiences}
-								onAdd={handleExperienceAdd}
-								onRemove={handleExperienceRemove}
-								onUpdate={handleExperienceUpdate}
-							/>
-						</div>
-
-						{/* Projects Section */}
-						<div id="projects-section">
-							<ProjectsSection
-								projects={projects}
-								onAdd={handleProjectAdd}
-								onRemove={handleProjectRemove}
-								onUpdate={handleProjectUpdate}
-							/>
-						</div>
-
-						{/* Skills Section */}
-						<div id="skills-section">
-							<SkillsSection
-								skills={skills}
-								onAdd={handleSkillAdd}
-								onRemove={handleSkillRemove}
-								onUpdate={handleSkillUpdate}
-								onReorder={handleSkillReorder}
-							/>
-						</div>
-
-						{/* Summary Section */}
-						<div id="summary-section">
-							<SummarySection summary={summary} onUpdate={handleSummaryUpdate} />
-						</div>
 					</div>
-						<aside className="space-y-6 xl:sticky xl:top-6">
-							<InfoCard className="p-6">
-								<h2 className="text-xl font-black tracking-tight text-gray-950">Profile summary</h2>
-								<div className="mt-5 divide-y divide-gray-200/70">
-									{summaryStats.map((stat) => (
-										<div key={stat.label} className="flex items-center gap-3 py-3">
-											<span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-pink/[0.08] text-brand-pink-dark">
-												<FontAwesomeIcon icon={stat.icon} className="size-4" />
-											</span>
-											<span className="min-w-0 flex-1 text-sm font-semibold text-gray-700">{stat.label}</span>
-											<span className="text-sm font-black text-gray-950">{stat.value}</span>
+						<aside className="xl:self-stretch">
+							<InfoCard className="p-6 xl:sticky xl:top-6 xl:z-10">
+									<div className="flex items-start gap-3">
+										<span className={`flex size-10 shrink-0 items-center justify-center rounded-2xl ${savingSection ? 'bg-brand-pink/[0.1] text-brand-pink-dark' : isDirty() ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+											<FontAwesomeIcon icon={savingSection ? faClockRotateLeft : isDirty() ? faPlus : faCheck} className="size-4" />
+										</span>
+										<div>
+											<p className="font-black text-gray-950">{autoSaveLabel}</p>
+											<p className="mt-1 text-sm leading-relaxed text-gray-600">
+												Changes save automatically after a short pause, and before dashboard navigation when possible.
+											</p>
 										</div>
-									))}
-								</div>
-							</InfoCard>
-
-							<InfoCard className="p-6">
-								<div className="flex items-start gap-3">
-									<span className={`flex size-10 shrink-0 items-center justify-center rounded-2xl ${savingSection ? 'bg-brand-pink/[0.1] text-brand-pink-dark' : isDirty() ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-										<FontAwesomeIcon icon={savingSection ? faClockRotateLeft : isDirty() ? faPlus : faCheck} className="size-4" />
-									</span>
-									<div>
-										<p className="font-black text-gray-950">{autoSaveLabel}</p>
-										<p className="mt-1 text-sm leading-relaxed text-gray-600">
-											Changes save automatically after a short pause, and before dashboard navigation when possible.
-										</p>
 									</div>
-								</div>
-							</InfoCard>
-
-							<InfoCard className="bg-brand-pink/[0.08] p-6">
-								<p className="flex items-center gap-2 text-sm font-black text-brand-pink-dark">
-									<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
-									Tip
-								</p>
-								<p className="mt-3 text-sm leading-relaxed text-gray-700">
-									The more complete your profile, the better your tailored r&eacute;sum&eacute;s.
-								</p>
-							</InfoCard>
+								</InfoCard>
 						</aside>
 					</div>
 				</div>

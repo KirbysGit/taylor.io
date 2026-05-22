@@ -1,38 +1,30 @@
 import React, { useState, useEffect } from 'react'
 
-// Summary Input Component - Just the textarea, optional label
-const SummaryInput = ({ summary, onUpdate, hideLabel = false }) => {
+// Summary entry — textarea only; section title lives in ProfileSectionCard or setup/resume parents.
+const SummaryInput = ({ summary, onUpdate }) => {
 	const [summaryText, setSummaryText] = useState(summary || '')
-	
-	// Sync with prop changes
+
 	useEffect(() => {
 		setSummaryText(summary || '')
 	}, [summary])
-	
+
 	const handleChange = (e) => {
 		const value = e.target.value
 		setSummaryText(value)
 		onUpdate(value)
 	}
-	
+
 	return (
-		<div className="rounded-2xl border border-brand-pink/12 bg-[#fff8ef]/45 p-4">
-			{!hideLabel && (
-				<label htmlFor="summary" className="label">
-					Professional Summary
-				</label>
-			)}
+		<div className="space-y-2">
 			<textarea
 				id="summary"
 				value={summaryText}
 				onChange={handleChange}
 				rows={8}
-				className="input resize-y"
+				className="input min-h-[10rem] w-full resize-y"
 				placeholder="e.g., Experienced software engineer with 5+ years of expertise in full-stack development. Passionate about building scalable web applications and leading cross-functional teams..."
 			/>
-			<p className="mt-2 text-right text-xs font-bold text-gray-400">
-				{summaryText.length} characters
-			</p>
+			<p className="text-right text-xs font-medium text-slate-400">{summaryText.length} characters</p>
 		</div>
 	)
 }
