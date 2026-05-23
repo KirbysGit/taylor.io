@@ -70,6 +70,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
         "jdSignalIntent": [],
         "gapSupport": [],
         "unsupportedTerms": [],
+        "fitRisk": {},
     }
 
     # if openai is off, skip the second call—the main prompt still gets padded defaults via normalize.
@@ -134,6 +135,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             "Use `alignmentContext.evidenceClassification` as the claim-strength guide: `direct_role_evidence` can lead, `transferable_behavior` can bridge, `domain_tool_evidence` is supporting context only, and `weak_lexical_overlap` should not drive the target story.",
             "Use `alignmentContext.jdSignalIntent` as the JD-priority guide: `role_responsibility` and `candidate_requirement` terms shape the resume story; `company_product_context` and `background_or_benefit` terms add context only and should not outrank stronger resume proof.",
             "Use `alignmentContext.gapSupport` to distinguish true gaps from related evidence. `conceptual` support can be used as adjacent proof, but do not call it direct same-title experience. Only `unsupported` terms belong in caution language.",
+            "Use `alignmentContext.fitRisk` as a hard caution layer. If `level` is `extreme`, do not dress the resume up as a normal target-role fit; create an honest exploratory bridge and make unsupported seniority/scope part of the caution story.",
             "When alignment is `adjacent` or `stretch`, keep rows with transferable evidence even if they lack exact JD keywords, especially rows showing coordination, pressure, communication, compliance, metrics, workflow, reporting, or response.",
             "For adjacent/stretch summaries, avoid opening as `<Target Role> with...` unless the resume directly proves that title. Open from the candidate's real background and bridge toward the target role.",
             "**`candidateAngle`:** one sentence—**professional lane + lead** for this posting; **not** a comma-packed echo of JD keywords. **`primaryStory`:** **2–4 pillars from resume JSON + evidenceRows** (frameworks, data/automation, integrations, UI surfaces the body proves); **≥ half** the phrases should be **resume-native** strengths the JD might never name. JD terms tune **scan and order** when evidenced—they are **not** the only admissible toolkit.",
@@ -187,7 +189,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             json.dumps(resume_data, ensure_ascii=False, indent=2),
             "",
             "Return exactly this shape:",
-            '{"targetStory":{"roleLane":"","readerTakeaway":"","proofExperienceIds":[],"proofProjectIds":[],"deEmphasizeExperienceIds":[],"deEmphasizeProjectIds":[],"evidenceThemes":[]},"candidateAngle":"","primaryStory":[],"secondaryStory":[],"summaryGoal":"","summaryDecision":{"action":"keep","confidence":"low","reason":"","evidence":[]},"skillsStrategy":[],"categoryStrategy":[],"sectionStrategy":{},"layoutStrategy":[],"layoutSectionOrder":[],"layoutSectionVisibility":{},"layoutRationale":[],"keepExperience":[],"dropExperience":[],"rewriteExperience":[],"keepProjects":[],"dropProjects":[],"rewriteProjects":[],"repairProjects":[],"maybeProjects":[],"selectionRationale":[],"heroProjects":[],"supportingProjects":[],"peripheralProjects":[],"heroExperience":[],"rewriteGoals":[],"avoid":[],"alignmentMode":"","alignmentGuidance":"","directEvidence":[],"transferableEvidence":[],"evidenceClassification":[],"jdSignalIntent":[],"gapSupport":[],"unsupportedTerms":[]}',
+            '{"targetStory":{"roleLane":"","readerTakeaway":"","proofExperienceIds":[],"proofProjectIds":[],"deEmphasizeExperienceIds":[],"deEmphasizeProjectIds":[],"evidenceThemes":[]},"candidateAngle":"","primaryStory":[],"secondaryStory":[],"summaryGoal":"","summaryDecision":{"action":"keep","confidence":"low","reason":"","evidence":[]},"skillsStrategy":[],"categoryStrategy":[],"sectionStrategy":{},"layoutStrategy":[],"layoutSectionOrder":[],"layoutSectionVisibility":{},"layoutRationale":[],"keepExperience":[],"dropExperience":[],"rewriteExperience":[],"keepProjects":[],"dropProjects":[],"rewriteProjects":[],"repairProjects":[],"maybeProjects":[],"selectionRationale":[],"heroProjects":[],"supportingProjects":[],"peripheralProjects":[],"heroExperience":[],"rewriteGoals":[],"avoid":[],"alignmentMode":"","alignmentGuidance":"","directEvidence":[],"transferableEvidence":[],"evidenceClassification":[],"jdSignalIntent":[],"gapSupport":[],"unsupportedTerms":[],"fitRisk":{}}',
         ]
     )
 
@@ -243,6 +245,7 @@ def inject_alignment_context(narrative: dict, alignment_context: dict) -> dict:
     out["jdSignalIntent"] = ac.get("jdSignalIntent") if isinstance(ac.get("jdSignalIntent"), list) else []
     out["gapSupport"] = ac.get("gapSupport") if isinstance(ac.get("gapSupport"), list) else []
     out["unsupportedTerms"] = ac.get("unsupportedTerms") if isinstance(ac.get("unsupportedTerms"), list) else []
+    out["fitRisk"] = ac.get("fitRisk") if isinstance(ac.get("fitRisk"), dict) else {}
     return out
 
 

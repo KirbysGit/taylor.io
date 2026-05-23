@@ -194,6 +194,73 @@ BACKGROUND_OR_BENEFIT_CUES = {
     "entry-level",
 }
 
+SENIOR_SCOPE_TARGET_TERMS = {
+    "vice president",
+    "vp",
+    "president",
+    "executive",
+    "senior executive",
+    "director",
+    "head of",
+    "chief",
+    "c-suite",
+    "people management",
+    "leadership team",
+    "strategic leadership",
+    "strategic priorities",
+    "organizational capacity",
+    "external representation",
+    "cross-functional oversight",
+    "sustainable growth",
+}
+
+SENIOR_SCOPE_TITLE_TERMS = {
+    "manager",
+    "director",
+    "lead",
+    "leader",
+    "head",
+    "chief",
+    "vp",
+    "vice president",
+    "president",
+    "founder",
+    "co-founder",
+    "owner",
+    "executive",
+}
+
+EARLY_CAREER_TITLE_TERMS = {
+    "intern",
+    "student",
+    "server",
+    "host",
+    "expo",
+    "associate",
+    "assistant",
+    "entry",
+}
+
+SENIOR_SCOPE_EVIDENCE_PHRASES = {
+    "managed a team",
+    "managed teams",
+    "people management",
+    "direct reports",
+    "hiring",
+    "performance reviews",
+    "budget",
+    "p&l",
+    "profit and loss",
+    "board",
+    "fundraising",
+    "external representation",
+    "executive leadership",
+    "leadership team",
+    "strategic priorities",
+    "organizational strategy",
+    "cross-functional oversight",
+}
+
 PRODUCT_CONTEXT_TERMS = {
     "artificial intelligence",
     "ai",
@@ -658,6 +725,139 @@ def _gap_support(
     return out[:12]
 
 
+def _senior_scope_terms_from_jd(
+    *,
+    target_role: str,
+    top_terms: list[str],
+    relevant_jd_lines: list[str] | None = None,
+) -> list[str]:
+    role = normalize_term(target_role)
+    jd_blob = normalize_term(" ".join(str(line or "") for line in (relevant_jd_lines or [])))
+    terms = []
+    for term in sorted(SENIOR_SCOPE_TARGET_TERMS, key=lambda x: (-len(x), x)):
+        if _contains_term(role, term) or _contains_term(jd_blob, term):
+            terms.append(term)
+    for raw in top_terms or []:
+        term = normalize_term(canonicalize_term(raw))
+        if term and any(_matches_term_family(term, {scope}) for scope in SENIOR_SCOPE_TARGET_TERMS):
+            terms.append(term)
+    return _dedupe_terms(terms, limit=8)
+
+
+def _dedupe_terms(items: list[str], limit: int = 8) -> list[str]:
+    out = []
+    seen = set()
+    for item in items or []:
+        term = normalize_term(item)
+        if not term or term in seen:
+            continue
+        seen.add(term)
+        out.append(term)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _resume_scope_evidence(resume_data: dict) -> dict[str, Any]:
+    rd = resume_data if isinstance(resume_data, dict) else {}
+    title_hits = []
+    early_title_hits = []
+    scope_phrase_hits = []
+
+    for section in ("experience", "projects"):
+        rows = rd.get(section)
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            title = normalize_term(str(row.get("title") or ""))
+            if section == "experience":
+                label = _row_label(row, "experience", row.get("id"))
+            else:
+                label = _row_label(row, "projects", row.get("id"))
+            if section == "experience" and any(_contains_term(title, term) for term in SENIOR_SCOPE_TITLE_TERMS):
+                title_hits.append(label)
+            if section == "experience" and any(_contains_term(title, term) for term in EARLY_CAREER_TITLE_TERMS):
+                early_title_hits.append(label)
+            text = _row_text(row, section)
+            for phrase in SENIOR_SCOPE_EVIDENCE_PHRASES:
+                if _contains_term(text, phrase):
+                    scope_phrase_hits.append(phrase)
+
+    return {
+        "seniorTitleEvidence": _dedupe_terms(title_hits, limit=4),
+        "earlyCareerTitleEvidence": _dedupe_terms(early_title_hits, limit=4),
+        "seniorScopePhraseEvidence": _dedupe_terms(scope_phrase_hits, limit=6),
+    }
+
+
+def _fit_risk(
+    *,
+    target_role: str,
+    top_terms: list[str],
+    resume_data: dict,
+    relevant_jd_lines: list[str] | None,
+    mode: str,
+    unsupported_terms: list[str],
+) -> dict[str, Any]:
+    senior_terms = _senior_scope_terms_from_jd(
+        target_role=target_role,
+        top_terms=top_terms,
+        relevant_jd_lines=relevant_jd_lines or [],
+    )
+    scope_evidence = _resume_scope_evidence(resume_data)
+    senior_evidence = (scope_evidence.get("seniorTitleEvidence") or []) + (
+        scope_evidence.get("seniorScopePhraseEvidence") or []
+    )
+    unsupported_scope = [
+        term
+        for term in _dedupe_terms(list(unsupported_terms or []) + senior_terms, limit=12)
+        if any(_matches_term_family(term, {scope}) for scope in SENIOR_SCOPE_TARGET_TERMS)
+    ][:6]
+
+    if senior_terms and not senior_evidence:
+        return {
+            "level": "extreme",
+            "kind": "seniority_scope_mismatch",
+            "reason": (
+                "The posting expects senior leadership scope, but the resume evidence is mostly individual-contributor, "
+                "early-career, service, or project work."
+            ),
+            "targetSignals": senior_terms[:6],
+            "unsupportedSeniorityTerms": unsupported_scope,
+            "resumeScopeEvidence": scope_evidence,
+            "recommendedAction": "cautious_bridge",
+            "claimGuidance": (
+                "Do not position the candidate as already operating at the target seniority. Keep the draft exploratory, "
+                "lead from real experience, and warn that core leadership scope is not evidenced."
+            ),
+        }
+
+    if mode == "stretch" and len(unsupported_terms or []) >= 5:
+        return {
+            "level": "high",
+            "kind": "limited_overlap",
+            "reason": "The posting has many unsupported role terms, so the draft should stay conservative and visibly transferable.",
+            "targetSignals": senior_terms[:6],
+            "unsupportedSeniorityTerms": unsupported_scope,
+            "resumeScopeEvidence": scope_evidence,
+            "recommendedAction": "transferable_bridge",
+            "claimGuidance": "Bridge only from evidenced work and keep unsupported expectations in review language.",
+        }
+
+    return {
+        "level": "normal",
+        "kind": "",
+        "reason": "",
+        "targetSignals": senior_terms[:6],
+        "unsupportedSeniorityTerms": unsupported_scope,
+        "resumeScopeEvidence": scope_evidence,
+        "recommendedAction": "",
+        "claimGuidance": "",
+    }
+
+
 def _classify_direct_item(
     item: dict[str, Any],
     row_text: str,
@@ -948,12 +1148,24 @@ def build_alignment_context(
     ][:8]
     if not gap_support:
         unsupported = _remove_transfer_supported_gaps(resume_gaps, transferable, top_terms)
+    fit_risk = _fit_risk(
+        target_role=target_role or str(tc.get("targetRole") or ""),
+        top_terms=top_terms,
+        resume_data=rd,
+        relevant_jd_lines=relevant_jd_lines or [],
+        mode=mode,
+        unsupported_terms=unsupported,
+    )
 
     if mode == "direct":
         guidance = "Direct fit: lead with the role title and strongest JD-overlap evidence, while preserving resume-native breadth."
     elif mode == "adjacent":
         guidance = (
             "Adjacent fit: bridge from proven evidence into the target role. Use transferable language, but do not claim the candidate already owns JD-only duties."
+        )
+    elif fit_risk.get("level") == "extreme":
+        guidance = (
+            "Large stretch: be candid about the seniority/scope mismatch. Keep the draft grounded in transferable proof and do not imply target-level leadership ownership."
         )
     else:
         guidance = (
@@ -969,6 +1181,7 @@ def build_alignment_context(
         "jdSignalIntent": jd_signal_intent,
         "gapSupport": gap_support,
         "unsupportedTerms": unsupported,
+        "fitRisk": fit_risk,
         "topJobTerms": top_terms[:8],
         "guidance": guidance,
     }

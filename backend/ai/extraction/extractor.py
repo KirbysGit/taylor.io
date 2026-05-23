@@ -97,6 +97,69 @@ def canonicalize_phrase_key(phrase):
 
 
 # --- split slash-joined tool lists (e.g. node.js/express) into parts unless the full token is a known idiom (ci/cd, ml/ai, …). --- #
+def normalize_target_role_for_extraction(targetRole):
+    text = (targetRole or "").lower().strip()
+    text = re.sub(r"\([^)]*\)", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def top_count_items(counts, limit=12):
+    if not isinstance(counts, dict):
+        return []
+    return [
+        {"term": term, "count": round(float(count), 3)}
+        for term, count in sorted(counts.items(), key=lambda item: (-float(item[1]), str(item[0])))[:limit]
+    ]
+
+
+def build_basic_extraction_debug(
+    *,
+    target_role,
+    company,
+    profile,
+    body_lines,
+    downweighted_lines,
+    title_phrase_counts,
+    body_phrase_counts,
+    downweighted_phrase_counts,
+    concrete_stack_counts,
+    capability_stack_counts,
+    title_token_counts,
+    body_token_counts,
+    downweighted_token_counts,
+    ranked_terms,
+    relevant_lines,
+    num_keywords,
+):
+    phrase_counts = {}
+    for bucket in (title_phrase_counts, body_phrase_counts, downweighted_phrase_counts):
+        for phrase, source_map in (bucket or {}).items():
+            phrase_counts[phrase] = phrase_counts.get(phrase, 0.0) + sum(float(v or 0) for v in source_map.values())
+    return {
+        "target_role": target_role,
+        "company": company,
+        "active_domains": list((profile or {}).get("activeDomains") or []),
+        "line_counts": {
+            "included_body": len(body_lines or []),
+            "downweighted": len(downweighted_lines or []),
+        },
+        "included_line_samples": list(body_lines or [])[:12],
+        "downweighted_line_samples": list(downweighted_lines or [])[:8],
+        "top_keywords": list(ranked_terms or [])[:num_keywords],
+        "relevant_jd_lines": list(relevant_lines or [])[:10],
+        "top_known_phrases": top_count_items(phrase_counts, limit=12),
+        "top_stack_terms": {
+            "concrete": top_count_items(concrete_stack_counts, limit=12),
+            "capability": top_count_items(capability_stack_counts, limit=8),
+        },
+        "top_tokens": {
+            "title": top_count_items(title_token_counts, limit=10),
+            "body": top_count_items(body_token_counts, limit=14),
+            "downweighted": top_count_items(downweighted_token_counts, limit=10),
+        },
+    }
+
+
 def iter_slashed_token_pieces(raw):
     # initialize the token.
     t = (raw or "").rstrip(".,;:").lower()
@@ -479,7 +542,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
         debug["downweightedLines"] = res.downweightedLines.copy()
 
     # 3. clean our text fields.
-    res.cleanTitle = res.targetRole.lower().strip()
+    res.cleanTitle = normalize_target_role_for_extraction(res.targetRole)
     res.cleanBody = "\n".join(res.bodyLines)
     res.cleanDownweightedBody = "\n".join(res.downweightedLines)
     
@@ -586,24 +649,43 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
         umbrellaWeak=umbrellaBodyWeakTokens,
     )
 
-    if wanna_debug:
-        debug["rankedTerms"] = rankedTerms[:numKeywords].copy()
+    # 10. get the relevant JD lines.
+    relevantLines = get_relevant_jd_lines(res.bodyLines, rankedTerms[:numKeywords])
+
+    extraction_debug = build_basic_extraction_debug(
+        target_role=targetRole,
+        company=company,
+        profile=profile,
+        body_lines=res.bodyLines,
+        downweighted_lines=res.downweightedLines,
+        title_phrase_counts=titlePhraseCounts,
+        body_phrase_counts=bodyPhraseCounts,
+        downweighted_phrase_counts=downweightedPhraseCounts,
+        concrete_stack_counts=concreteStackCounts,
+        capability_stack_counts=capabilityStackCounts,
+        title_token_counts=titleTokenCounts,
+        body_token_counts=bodyTokenCounts,
+        downweighted_token_counts=downweightedTokenCounts,
+        ranked_terms=rankedTerms,
+        relevant_lines=relevantLines,
+        num_keywords=numKeywords,
+    )
 
     if wanna_debug:
+        debug["rankedTerms"] = rankedTerms[:numKeywords].copy()
+        debug["basic"] = extraction_debug
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(debug, indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
     
     if wanna_count:
         update_aggregate_counts(rankedTerms, 20)
-    
-    # 10. get the relevant JD lines.
-    relevantLines = get_relevant_jd_lines(res.bodyLines, rankedTerms[:numKeywords])
 
     # 11. return the results.
     return {
         "keywords": rankedTerms[:numKeywords],
         "activeDomains": res.profile["activeDomains"],
         "relevantJDLines": relevantLines,
+        "debug": extraction_debug,
     }
 
 

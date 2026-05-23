@@ -79,34 +79,47 @@ function buildReviewData(tailorIntent, aiTailorResult) {
 	const explanation = aiTailorResult?.tailorExplanation || {}
 	const details = Array.isArray(explanation.details) ? explanation.details : []
 	const evidence = explanation.evidence || {}
+	const fitRisk = evidence && typeof evidence.fitRisk === 'object' && evidence.fitRisk ? evidence.fitRisk : {}
+	const isExtremeFit = String(fitRisk.level || '').toLowerCase() === 'extreme'
 	const warnings = Array.isArray(aiTailorResult?.warnings) ? aiTailorResult.warnings : []
 	const changeReasons = Array.isArray(aiTailorResult?.changeReasons) ? aiTailorResult.changeReasons : []
 	const changeReasonLines = changeReasons
 		.map((row) => (typeof row === 'string' ? row : row && typeof row.reason === 'string' ? row.reason : ''))
 		.filter((t) => String(t).trim().length > 0)
 
-	const prioritized = unique(
-		[
-			...(Array.isArray(evidence.jobPriorityTerms) ? evidence.jobPriorityTerms : []),
-			...(Array.isArray(evidence.matchedTerms) ? evidence.matchedTerms : []),
-			...getGroup(details, 'Why it changed')
-				.join(' ')
-				.replace(/^Target story:/i, '')
-				.split(/,| and |\./)
-				.map((x) => x.trim())
-				.filter((x) => x.length > 3 && x.length < 32),
-		],
-		7
-	)
+	const prioritized = isExtremeFit
+		? unique(
+				[
+					...(Array.isArray(fitRisk.unsupportedSeniorityTerms) ? fitRisk.unsupportedSeniorityTerms : []),
+					...(Array.isArray(fitRisk.targetSignals) ? fitRisk.targetSignals : []),
+					...(Array.isArray(evidence.resumeGaps) ? evidence.resumeGaps : []),
+				],
+				7
+			)
+		: unique(
+				[
+					...(Array.isArray(evidence.jobPriorityTerms) ? evidence.jobPriorityTerms : []),
+					...(Array.isArray(evidence.matchedTerms) ? evidence.matchedTerms : []),
+					...getGroup(details, 'Why it changed')
+						.join(' ')
+						.replace(/^Target story:/i, '')
+						.split(/,| and |\./)
+						.map((x) => x.trim())
+						.filter((x) => x.length > 3 && x.length < 32),
+				],
+				7
+			)
+	const fitRiskNotes = getGroup(details, 'Fit risk')
 
 	return {
 		targetLabel: `${tailorIntent?.jobTitle || 'Tailored draft'}${tailorIntent?.company ? ` - ${tailorIntent.company}` : ''}`,
 		paragraph: shortParagraph(explanation.paragraph || aiTailorResult?.summary),
 		chips: Array.isArray(explanation.chips) ? explanation.chips : [],
+		prioritizedTitle: isExtremeFit ? 'Why this is a stretch' : 'What I prioritized',
 		prioritized,
 		spotlighted: unique(getGroup(details, 'What I spotlighted'), 5),
 		trimmed: unique(getGroup(details, 'What I trimmed'), 6),
-		beforeSend: unique(getGroup(details, 'Worth checking'), 4),
+		beforeSend: unique([...(isExtremeFit ? fitRiskNotes : []), ...getGroup(details, 'Worth checking')], 4),
 		warnings,
 		changeReasonLines,
 	}
@@ -224,7 +237,7 @@ function TailorAssistPanel({
 					) : null}
 
 					{review.prioritized.length > 0 ? (
-						<ReviewSection title="What I prioritized">
+						<ReviewSection title={review.prioritizedTitle}>
 							<div className="flex flex-wrap gap-1.5">
 								{review.prioritized.map((item, i) => (
 									<span key={`${item}-${i}`} className="rounded-full border border-gray-200 bg-gray-50 px-2 py-1 text-[11px] font-semibold text-gray-700">

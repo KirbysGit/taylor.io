@@ -1,0 +1,270 @@
+{
+  "target_role": "Conversational AI Engineer (LLM & Google Cloud)",
+  "company": "Pyramid Consulting",
+  "active_domains": [
+    "ai",
+    "engineering",
+    "cloud"
+  ],
+  "line_counts": {
+    "included_body": 26,
+    "downweighted": 0
+  },
+  "included_line_samples": [
+    "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms",
+    "integrate ai/llm models into applications to enable intelligent interactions",
+    "develop and maintain backend services using python",
+    "collaborate with cross-functional teams to gather requirements and deliver scalable solutions",
+    "implement and manage api integrations with third-party systems",
+    "optimize prompts and workflows for improved ai performance and user experience",
+    "deploy and maintain applications using cloud technologies",
+    "participate in ci/cd pipeline setup and automation",
+    "ensure code quality using version control systems like git",
+    "key requirements and technology experience:",
+    "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
+    "strong proficiency in python"
+  ],
+  "downweighted_line_samples": [],
+  "top_keywords": [
+    {
+      "term": "python",
+      "score": 8.5,
+      "frequency": 4.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ]
+    },
+    {
+      "term": "artificial intelligence",
+      "score": 7.0,
+      "frequency": 6.0,
+      "sources": [
+        "bodyToken",
+        "titleToken"
+      ]
+    },
+    {
+      "term": "healthcare",
+      "score": 7.0,
+      "frequency": 2.0,
+      "sources": [
+        "knownPhrase",
+        "partOfPhrase"
+      ]
+    },
+    {
+      "term": "ci/cd",
+      "score": 6.0,
+      "frequency": 2.0,
+      "sources": [
+        "knownPhrase"
+      ]
+    },
+    {
+      "term": "javascript",
+      "score": 5.5,
+      "frequency": 4.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ]
+    },
+    {
+      "term": "azure",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ]
+    },
+    {
+      "term": "cloud",
+      "score": 5.0,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "flow",
+      "score": 5.0,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "cross functional collaboration",
+      "score": 5.0,
+      "frequency": 1.0,
+      "sources": [
+        "knownPhrase"
+      ]
+    },
+    {
+      "term": "applications",
+      "score": 4.0,
+      "frequency": 4.0,
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "conversational",
+      "score": 4.0,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken",
+        "titleToken"
+      ]
+    },
+    {
+      "term": "automation",
+      "score": 4.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ]
+    }
+  ],
+  "relevant_jd_lines": [
+    "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
+    "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms",
+    "deploy and maintain applications using cloud technologies",
+    "participate in ci/cd pipeline setup and automation",
+    "hands-on experience with cloud platforms (gcp, aws, or azure)",
+    "proven experience in developing ai-driven or conversational applications",
+    "integrate ai/llm models into applications to enable intelligent interactions",
+    "develop and maintain backend services using python",
+    "strong proficiency in python",
+    "experience with ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, etc.)"
+  ],
+  "top_known_phrases": [
+    {
+      "term": "ci/cd",
+      "count": 2.0
+    },
+    {
+      "term": "api integration",
+      "count": 1.0
+    },
+    {
+      "term": "backend services",
+      "count": 1.0
+    },
+    {
+      "term": "cross-functional teams",
+      "count": 1.0
+    },
+    {
+      "term": "healthcare",
+      "count": 1.0
+    }
+  ],
+  "top_stack_terms": {
+    "concrete": [
+      {
+        "term": "javascript",
+        "count": 2.0
+      },
+      {
+        "term": "amazon web services",
+        "count": 1.0
+      },
+      {
+        "term": "azure",
+        "count": 1.0
+      },
+      {
+        "term": "google cloud platform",
+        "count": 1.0
+      },
+      {
+        "term": "node.js",
+        "count": 1.0
+      },
+      {
+        "term": "python",
+        "count": 1.0
+      }
+    ],
+    "capability": []
+  },
+  "top_tokens": {
+    "title": [
+      {
+        "term": "artificial intelligence",
+        "count": 1.0
+      },
+      {
+        "term": "conversational",
+        "count": 1.0
+      },
+      {
+        "term": "engineer",
+        "count": 1.0
+      }
+    ],
+    "body": [
+      {
+        "term": "experience",
+        "count": 9.0
+      },
+      {
+        "term": "artificial intelligence",
+        "count": 5.0
+      },
+      {
+        "term": "applications",
+        "count": 4.0
+      },
+      {
+        "term": "ces",
+        "count": 3.0
+      },
+      {
+        "term": "cloud",
+        "count": 3.0
+      },
+      {
+        "term": "dialog",
+        "count": 3.0
+      },
+      {
+        "term": "flow",
+        "count": 3.0
+      },
+      {
+        "term": "google",
+        "count": 3.0
+      },
+      {
+        "term": "integration",
+        "count": 3.0
+      },
+      {
+        "term": "large language models",
+        "count": 3.0
+      },
+      {
+        "term": "models",
+        "count": 3.0
+      },
+      {
+        "term": "python",
+        "count": 3.0
+      },
+      {
+        "term": "skills",
+        "count": 3.0
+      },
+      {
+        "term": "amazon",
+        "count": 2.0
+      }
+    ],
+    "downweighted": []
+  }
+}

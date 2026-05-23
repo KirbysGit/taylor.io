@@ -215,7 +215,22 @@ def _detail_items_from_patch(patch, narrative_brief, gaps, flags, target_label, 
 
     alignment_mode = _clean_text(nb.get("alignmentMode"), limit=24).lower()
     alignment_guidance = _clean_text(nb.get("alignmentGuidance"), limit=220)
+    fit_risk = nb.get("fitRisk") if isinstance(nb.get("fitRisk"), dict) else {}
+    fit_risk_level = _clean_text(fit_risk.get("level"), limit=24).lower()
     transferable = nb.get("transferableEvidence") if isinstance(nb.get("transferableEvidence"), list) else []
+    if fit_risk_level in ("extreme", "high"):
+        items = []
+        reason = _clean_text(fit_risk.get("reason"), limit=240)
+        guidance = _clean_text(fit_risk.get("claimGuidance"), limit=240)
+        unsupported_scope = _dedupe_keep_order(fit_risk.get("unsupportedSeniorityTerms") or [], limit=4)
+        if reason:
+            items.append(reason)
+        if unsupported_scope:
+            items.append("Core scope not evidenced: " + _join_human(unsupported_scope) + ".")
+        if guidance:
+            items.append(guidance)
+        if items:
+            groups.append({"title": "Fit risk", "items": items[:3]})
     if alignment_mode in ("adjacent", "stretch"):
         items = []
         if alignment_guidance:
@@ -247,10 +262,27 @@ def _detail_items_from_patch(patch, narrative_brief, gaps, flags, target_label, 
         groups.append({"title": "Summary choice", "items": [item]})
 
     spotlight = []
+    planned_spotlight_ids = {
+        "experience": set(),
+        "projects": set(),
+    }
+    for key, section in (
+        ("heroExperience", "experience"),
+        ("rewriteExperience", "experience"),
+        ("heroProjects", "projects"),
+        ("rewriteProjects", "projects"),
+    ):
+        for rid in nb.get(key) or []:
+            try:
+                planned_spotlight_ids[section].add(int(rid))
+            except (TypeError, ValueError):
+                continue
     for section in ("experience", "projects"):
         entries = (patch.get(section) or []) if isinstance(patch, dict) else []
         for entry in entries:
             if not isinstance(entry, dict) or entry.get("removed"):
+                continue
+            if fit_risk_level == "extreme" and entry.get("id") not in planned_spotlight_ids.get(section, set()):
                 continue
             label = _patch_row_label(section, entry)
             if not label:
@@ -442,6 +474,8 @@ def build_tailor_explanation(
     evidence_classes = nb.get("evidenceClassification") if isinstance(nb.get("evidenceClassification"), list) else []
     jd_signal_intent = nb.get("jdSignalIntent") if isinstance(nb.get("jdSignalIntent"), list) else []
     gap_support = nb.get("gapSupport") if isinstance(nb.get("gapSupport"), list) else []
+    fit_risk = nb.get("fitRisk") if isinstance(nb.get("fitRisk"), dict) else {}
+    fit_risk_level = _clean_text(fit_risk.get("level"), limit=24).lower()
     direct_class_terms = _dedupe_keep_order(
         [
             str(term).strip()
@@ -495,17 +529,35 @@ def build_tailor_explanation(
 
     sentences = []
     target_label = f"{role} at {co}" if co else role
-    if alignment_mode in ("adjacent", "stretch"):
-        bridge_word = "stretch" if alignment_mode == "stretch" else "adjacent"
+    if fit_risk_level == "extreme":
         sentences.append(
-            f"I treated this as an {bridge_word} match for {target_label}, so I focused on transferable proof instead of pretending every JD term was already in your background."
+            f"This is a very large stretch for {target_label}, so I kept the draft cautious instead of trying to make your resume sound like it already proves that level of responsibility."
+        )
+        risk_reason = _clean_text(fit_risk.get("reason"), limit=220)
+        if risk_reason:
+            sentences.append(risk_reason)
+    elif alignment_mode in ("adjacent", "stretch"):
+        bridge_word = "stretch" if alignment_mode == "stretch" else "adjacent"
+        article = "a" if bridge_word == "stretch" else "an"
+        sentences.append(
+            f"I treated this as {article} {bridge_word} match for {target_label}, so I focused on transferable proof instead of pretending every JD term was already in your background."
         )
     elif jd_terms:
         sentences.append(f"I treated this as a {target_label} draft and made {_join_human(jd_terms)} easy to find.")
     else:
         sentences.append(f"I used the job description to shape this draft for {target_label}.")
 
-    if alignment_mode in ("adjacent", "stretch"):
+    if fit_risk_level == "extreme":
+        if bridge_class_labels:
+            sentences.append(
+                f"The usable bridge evidence is {_join_human(bridge_class_labels)}, but that should read as transferable support rather than executive-level proof."
+            )
+        unsupported_scope = _dedupe_keep_order(fit_risk.get("unsupportedSeniorityTerms") or [], limit=4)
+        if unsupported_scope:
+            sentences.append(
+                f"The main things to review before sending are {_join_human(_display_terms(unsupported_scope))}, because those are not clearly evidenced in the resume."
+            )
+    elif alignment_mode in ("adjacent", "stretch"):
         if direct_class_terms:
             sentences.append(f"The strongest direct overlap I found was {_join_human(_display_terms(direct_class_terms))}; the rest of the draft bridges from nearby evidence where your resume supports it.")
         elif bridge_class_labels:
@@ -568,6 +620,10 @@ def build_tailor_explanation(
 
     flags = qa.get("flags") if isinstance(qa.get("flags"), dict) else {}
     chips = _preference_chips(prefs, strict_truth) + _action_chips(changed_sections)
+    if fit_risk_level == "extreme":
+        chips.append(_chip("Large stretch", "caution"))
+    elif fit_risk_level == "high":
+        chips.append(_chip("High fit risk", "caution"))
     if alignment_mode in ("adjacent", "stretch"):
         chips.append(_chip("Bridge fit", "caution"))
     if gaps:
@@ -587,6 +643,7 @@ def build_tailor_explanation(
             "evidenceClassification": evidence_classes[:8],
             "jdSignalIntent": jd_signal_intent[:10],
             "gapSupport": gap_support[:10],
+            "fitRisk": fit_risk,
             "matchedTerms": matched_terms,
             "jobPriorityTerms": jd_terms,
             "resumeGaps": gaps,

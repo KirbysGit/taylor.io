@@ -15,6 +15,7 @@ from backend.ai.prompt.prompt_builder import (
 )
 from backend.ai.job_tailor_service import (
     enforce_project_quality_repairs,
+    enforce_surviving_project_quality_cleanup,
     focus_adjacent_project_selection_for_strong_retarget,
 )
 
@@ -147,6 +148,24 @@ def test_quality_repair_fallback_appends_missing_project_edit():
     assert "Made it secure n stuff" not in centi["description"]
     assert "Designed FastAPI services" in centi["description"]
     assert "Quality guard removed placeholder bullets from projects:9." in repaired["warnings"]
+
+
+def test_surviving_project_cleanup_removes_placeholder_even_when_not_opened_for_repair():
+    stage = {
+        "edits": {
+            "summarySection": {"summary": "Data Engineer with Python and SQL project experience."},
+            "removedProjectIds": [17],
+        }
+    }
+
+    repaired = enforce_surviving_project_quality_cleanup(stage, _resume_with_placeholder_project())
+    project_edits = repaired["edits"]["projects"]
+    centi = next(row for row in project_edits if row["id"] == 9)
+
+    assert "Made it secure n stuff" not in centi["description"]
+    assert "Built account aggregation" in centi["description"]
+    assert all(row.get("id") != 17 for row in project_edits)
+    assert "Quality guard removed placeholder bullets from surviving projects:9." in repaired["warnings"]
 
 
 def test_strong_adjacent_retarget_focuses_visible_projects():

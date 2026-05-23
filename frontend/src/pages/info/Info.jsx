@@ -771,6 +771,17 @@ function Info() {
 
 	const profileItems = [
 		{
+			id: 'resume-upload-section',
+			title: 'Resume upload',
+			description: 'Import education, experience, projects, and skills from a file.',
+			count: user?.attached_resume_filename ? 1 : 0,
+			status: user?.attached_resume_filename ? 'Attached' : 'Upload resume',
+			emptyStatus: 'Upload resume',
+			icon: faFileAlt,
+			bg: 'bg-brand-pink/[0.1]',
+			tone: 'text-brand-pink-dark',
+		},
+		{
 			id: 'contact-section',
 			title: 'Contact information',
 			description: 'Email, phone, location, links, and headline.',
@@ -837,9 +848,10 @@ function Info() {
 			tone: 'text-rose-700',
 		},
 	]
-	const completeCount = profileItems.filter((item) => item.count > 0).length
-	const completeness = Math.round((completeCount / profileItems.length) * 100)
-	const missingItem = profileItems.find((item) => item.count === 0)
+	const completeCount = profileItems.filter((item) => item.id !== 'resume-upload-section' && item.count > 0).length
+	const completenessDenominator = profileItems.filter((item) => item.id !== 'resume-upload-section').length
+	const completeness = Math.round((completeCount / completenessDenominator) * 100)
+	const missingItem = profileItems.find((item) => item.id !== 'resume-upload-section' && item.count === 0)
 	const summaryStats = [
 		{ label: 'Work experiences', detail: 'Roles, achievements, impact', value: experiences.length, icon: faBriefcase, bg: 'bg-brand-pink/[0.1]', tone: 'text-brand-pink-dark' },
 		{ label: 'Projects', detail: 'Key work and outcomes', value: projects.length, icon: faLayerGroup, bg: 'bg-violet-100', tone: 'text-violet-700' },
@@ -1000,59 +1012,7 @@ function Info() {
 					<div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(20rem,0.75fr)]">
 						<div className="space-y-4">
 
-						{/* Contact Section */}
-						<div id="contact-section">
-							<ContactSection contact={contact} onUpdate={handleContactUpdate} />
-						</div>
-
-						{/* Education Section */}
-						<div id="education-section">
-							<EducationSection
-								education={education}
-								onAdd={handleEducationAdd}
-								onRemove={handleEducationRemove}
-								onUpdate={handleEducationUpdate}
-								onSubsectionUpdate={handleSubsectionUpdate}
-							/>
-						</div>
-
-						{/* Experience Section */}
-						<div id="experience-section">
-							<ExperienceSection
-								experiences={experiences}
-								onAdd={handleExperienceAdd}
-								onRemove={handleExperienceRemove}
-								onUpdate={handleExperienceUpdate}
-							/>
-						</div>
-
-						{/* Projects Section */}
-						<div id="projects-section">
-							<ProjectsSection
-								projects={projects}
-								onAdd={handleProjectAdd}
-								onRemove={handleProjectRemove}
-								onUpdate={handleProjectUpdate}
-							/>
-						</div>
-
-						{/* Skills Section */}
-						<div id="skills-section">
-							<SkillsSection
-								skills={skills}
-								onAdd={handleSkillAdd}
-								onRemove={handleSkillRemove}
-								onUpdate={handleSkillUpdate}
-								onReorder={handleSkillReorder}
-							/>
-						</div>
-
-						{/* Summary Section */}
-						<div id="summary-section">
-							<SummarySection summary={summary} onUpdate={handleSummaryUpdate} />
-						</div>
-
-							<div id="resume-upload-section">
+						<div id="resume-upload-section">
 							<InfoCard className="p-5">
 								{user?.attached_resume_filename ? (
 									<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1111,7 +1071,60 @@ function Info() {
 									</div>
 								)}
 							</InfoCard>
-							</div>
+						</div>
+
+						{/* Contact Section */}
+						<div id="contact-section">
+							<ContactSection contact={contact} onUpdate={handleContactUpdate} />
+						</div>
+
+						{/* Education Section */}
+						<div id="education-section">
+							<EducationSection
+								education={education}
+								onAdd={handleEducationAdd}
+								onRemove={handleEducationRemove}
+								onUpdate={handleEducationUpdate}
+								onSubsectionUpdate={handleSubsectionUpdate}
+							/>
+						</div>
+
+						{/* Experience Section */}
+						<div id="experience-section">
+							<ExperienceSection
+								experiences={experiences}
+								onAdd={handleExperienceAdd}
+								onRemove={handleExperienceRemove}
+								onUpdate={handleExperienceUpdate}
+							/>
+						</div>
+
+						{/* Projects Section */}
+						<div id="projects-section">
+							<ProjectsSection
+								projects={projects}
+								onAdd={handleProjectAdd}
+								onRemove={handleProjectRemove}
+								onUpdate={handleProjectUpdate}
+							/>
+						</div>
+
+						{/* Skills Section */}
+						<div id="skills-section">
+							<SkillsSection
+								skills={skills}
+								onAdd={handleSkillAdd}
+								onRemove={handleSkillRemove}
+								onUpdate={handleSkillUpdate}
+								onReorder={handleSkillReorder}
+							/>
+						</div>
+
+						{/* Summary Section */}
+						<div id="summary-section">
+							<SummarySection summary={summary} onUpdate={handleSummaryUpdate} />
+						</div>
+
 					</div>
 						<aside className="xl:self-stretch">
 							<InfoCard className="p-6 xl:sticky xl:top-6 xl:z-10">

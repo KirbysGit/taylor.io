@@ -182,3 +182,103 @@ def test_gap_support_marks_related_capabilities_without_exact_terms():
     assert "frontend" not in context["unsupportedTerms"]
     assert "data analysis" not in context["unsupportedTerms"]
     assert "azure" in context["unsupportedTerms"]
+
+
+def test_executive_role_sets_extreme_fit_risk_for_early_career_resume():
+    resume_data = {
+        "experience": [
+            {
+                "id": 5,
+                "title": "Software Engineering Intern",
+                "company": "BitGo",
+                "description": "Collaborated with senior engineers on backend services and compliance dashboards.",
+            },
+            {
+                "id": 7,
+                "title": "Server",
+                "company": "Bar Louie",
+                "description": "Communicated with guests, kitchen, and bar teams in a high-pressure environment.",
+            },
+        ],
+        "projects": [
+            {
+                "id": 20,
+                "title": "SentimentTrader",
+                "description": "Built data pipelines and reporting metrics for sentiment analytics.",
+            }
+        ],
+        "skills": [],
+        "education": [],
+    }
+    tailor_context = {
+        "targetRole": "Vice President",
+        "keywords": [
+            {"term": "vice president"},
+            {"term": "external representation"},
+            {"term": "people management"},
+            {"term": "strategic leadership"},
+            {"term": "operational excellence"},
+        ],
+        "resumeHits": ["compliance", "metrics"],
+        "resumeGaps": [
+            "vice president",
+            "external representation",
+            "people management",
+            "strategic leadership",
+            "organizational capacity",
+        ],
+    }
+    jd_lines = [
+        "The Vice President is a senior executive leader responsible for mission, strategic priorities, and operational excellence.",
+        "This role combines strategic leadership, people management, cross-functional oversight, and external representation.",
+    ]
+
+    context = build_alignment_context(
+        resume_data,
+        tailor_context,
+        {"rowsPerSectionRanked": {}},
+        relevant_jd_lines=jd_lines,
+        target_role="Vice President",
+    )
+
+    assert context["fitRisk"]["level"] == "extreme"
+    assert context["fitRisk"]["kind"] == "seniority_scope_mismatch"
+    assert "vice president" in context["fitRisk"]["unsupportedSeniorityTerms"]
+    assert context["fitRisk"]["resumeScopeEvidence"]["seniorTitleEvidence"] == []
+
+
+def test_executive_fit_risk_allows_real_management_scope():
+    resume_data = {
+        "experience": [
+            {
+                "id": 3,
+                "title": "Operations Manager",
+                "company": "Acme",
+                "description": "Managed teams, budget planning, hiring, and cross-functional oversight for regional operations.",
+            }
+        ],
+        "projects": [],
+        "skills": [],
+        "education": [],
+    }
+    tailor_context = {
+        "targetRole": "Vice President",
+        "keywords": [
+            {"term": "vice president"},
+            {"term": "people management"},
+            {"term": "strategic leadership"},
+        ],
+        "resumeHits": ["people management"],
+        "resumeGaps": ["vice president", "strategic leadership"],
+    }
+
+    context = build_alignment_context(
+        resume_data,
+        tailor_context,
+        {"rowsPerSectionRanked": {}},
+        relevant_jd_lines=["Vice President role with strategic leadership and people management."],
+        target_role="Vice President",
+    )
+
+    assert context["fitRisk"]["level"] != "extreme"
+    assert context["fitRisk"]["resumeScopeEvidence"]["seniorTitleEvidence"]

@@ -1251,6 +1251,56 @@ def enforce_project_quality_repairs(stage, resume_data, narrative_brief, style_p
     return out
 
 
+def enforce_surviving_project_quality_cleanup(stage, resume_data):
+    """
+    Final deterministic cleanup: any project that survives the tailored draft should not
+    keep casual placeholder bullets, even if it was not selected as a hero/repair row.
+    """
+    if not isinstance(stage, dict) or not isinstance(resume_data, dict):
+        return stage
+    current_resume = apply_sparse_resume_edits(resume_data, stage)
+    projects = current_resume.get("projects") if isinstance(current_resume, dict) else []
+    if not isinstance(projects, list):
+        return stage
+
+    out = copy.deepcopy(stage)
+    edits = out.setdefault("edits", {})
+    project_edits = edits.get("projects")
+    if not isinstance(project_edits, list):
+        project_edits = []
+    else:
+        project_edits = copy.deepcopy(project_edits)
+
+    edit_index = {}
+    for idx, row in enumerate(project_edits):
+        if isinstance(row, dict) and isinstance(row.get("id"), int):
+            edit_index[row.get("id")] = idx
+
+    repaired = []
+    for row in projects:
+        if not isinstance(row, dict) or not isinstance(row.get("id"), int):
+            continue
+        desc = row.get("description") or ""
+        cleaned_desc, removed = _remove_placeholder_project_bullets(desc)
+        if not cleaned_desc:
+            continue
+        pid = row.get("id")
+        idx = edit_index.get(pid)
+        if idx is None:
+            project_edits.append({"id": pid, "description": cleaned_desc})
+            edit_index[pid] = len(project_edits) - 1
+        else:
+            project_edits[idx] = {**project_edits[idx], "description": cleaned_desc}
+        repaired.append({"id": pid, "removed": removed[:3]})
+
+    if not repaired:
+        return stage
+    edits["projects"] = project_edits
+    repaired_ids = ", ".join(f"projects:{x['id']}" for x in repaired)
+    out = _append_stage_warning(out, f"Quality guard removed placeholder bullets from surviving {repaired_ids}.")
+    return out
+
+
 def merge_rewrite_repair(base_stage, repair_stage):
     if not isinstance(repair_stage, dict) or not isinstance(repair_stage.get("edits"), dict):
         return base_stage
@@ -1507,6 +1557,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         out2_parsed = enforce_pass_b_skill_budget(out2_parsed, resume_mid)
     out2 = passBOnlySkills(out2_parsed) if out2_parsed is not None else None
     out = mergePassEdits(out1, out2)
+    out = enforce_surviving_project_quality_cleanup(out, resumeData)
     usage = usage_b if usage_b is not None else usage_a
     usage_repair = None
     rewrite_repair_debug = None
@@ -1537,6 +1588,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         )
         if rewrite_repair_stage is not None:
             out = merge_rewrite_repair(out, rewrite_repair_stage)
+            out = enforce_surviving_project_quality_cleanup(out, resumeData)
             final_out, diff_audit = assemble_tailor_result(
                 original_resume=resumeData,
                 stage_a=out,
@@ -1572,6 +1624,10 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         def write_debug(name, obj):
             (base / name).write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
+        write_debug(
+            "tailor_00_extraction.json",
+            ext_result.get("debug") if isinstance(ext_result, dict) else {},
+        )
         write_debug(
             "tailor_01_input.json",
             {

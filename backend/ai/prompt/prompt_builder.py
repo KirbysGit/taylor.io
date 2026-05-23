@@ -345,6 +345,7 @@ def compact_narrative_for_prompt(narrative_brief: dict | None) -> dict:
         "jdSignalIntent": list(nb.get("jdSignalIntent") or [])[:10],
         "gapSupport": list(nb.get("gapSupport") or [])[:10],
         "unsupportedTerms": list(nb.get("unsupportedTerms") or [])[:8],
+        "fitRisk": copy.deepcopy(nb.get("fitRisk") or {}),
         "avoid": list(nb.get("avoid") or [])[:4],
     }
 
@@ -1052,6 +1053,7 @@ def build_pass_a_user(payload, tailorContext, sectionDetails, relevantJDLines, n
                 "Use `evidenceClassification` from the narrative target as claim guidance: lead with `direct_role_evidence`, bridge with `transferable_behavior`, use `domain_tool_evidence` only as supporting context, and avoid making `weak_lexical_overlap` sound like direct experience.",
                 "Use `jdSignalIntent` from the narrative target as keyword priority: role responsibilities and candidate requirements should shape leads; company/product context is supporting color unless the resume directly proves that work.",
                 "Use `gapSupport`: `conceptual` gaps may support related phrasing, but only `direct` support should sound like exact experience and only `unsupported` terms should become warnings.",
+                "Use `fitRisk` as a hard caution layer. If `fitRisk.level` is `extreme`, this is not a normal target-role tailoring pass: keep claims exploratory, avoid target-level titles/seniority ownership, and do not let project/tool evidence substitute for missing leadership or scope.",
                 "Set `edits.summarySection` so it opens from the candidate's real background and transferable proof. Avoid saying they already are the target role unless the resume directly proves that title.",
                 "For rows, use transferable nouns only when the row supports them: compliance workflow, metrics visibility, automation, coordination, fast-paced communication, reporting, response, or operational dashboards.",
             ]
@@ -1179,7 +1181,8 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
             "Prioritize evidenced bridge strengths, but do not invent target-role skills; demote exact-tool noise before deleting. "
             "If `evidenceClassification` marks a row as `domain_tool_evidence` or `weak_lexical_overlap`, do not promote that wording into a direct role skill. "
             "Use `jdSignalIntent`: role responsibilities and candidate requirements lead; company/product context comes later. "
-            "Use `gapSupport` so conceptually supported terms can be reflected in flexible buckets without pretending they were exact resume terms."
+            "Use `gapSupport` so conceptually supported terms can be reflected in flexible buckets without pretending they were exact resume terms. "
+            "If `fitRisk.level` is `extreme`, keep flexible buckets honest and broad; do not rename skills as senior leadership, executive ownership, or people-management evidence unless the resume proves it."
         )
     return "\n".join(
         [

@@ -2,61 +2,46 @@
   "stage_a": {
     "edits": {
       "summarySection": {
-        "summary": "Software Engineer with a strong focus on backend development and data engineering. Proficient in Python and SQL, with a proven track record of building scalable data pipelines and backend services. Experienced in integrating React for user interfaces and optimizing workflows for real-time data processing."
+        "summary": "Proficient in developing AI-driven applications with a focus on backend services and cloud technologies. Experienced in Python and FastAPI, with a strong foundation in API development and data processing. Committed to creating scalable solutions that enhance user interactions and streamline workflows."
       },
       "experience": [
         {
           "id": 5,
-          "description": "• Developed and maintained backend services and REST APIs using Python and Django, enhancing secure workflows for financial compliance.\n• Collaborated with senior engineers to design scalable architectures and data models, ensuring robust service patterns.\n• Created interactive React dashboards that integrated with Django APIs, significantly improving operational visibility and data metrics.\n• Optimized data-processing pipelines in Python and refined PostgreSQL queries, achieving a ~40% reduction in latency and improved system performance."
+          "description": "• Developed and maintained backend services and REST APIs using Python and Django, ensuring secure workflows for financial compliance. \n• Collaborated with senior engineers to design scalable service architectures and data models, enhancing system performance. \n• Created interactive React dashboards that integrated with Django APIs, providing real-time visibility into operational metrics and backend processes. \n• Optimized data-processing pipelines in Python and PostgreSQL, achieving a ~40% reduction in latency and improving overall system scalability."
         }
       ],
       "projects": [
         {
-          "id": 20,
-          "tech_stack": [
-            "Python",
-            "SQL",
-            "FinBERT",
-            "XGBoost"
-          ],
-          "description": "• Engineered a comprehensive ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance posts per run through multi-stage ETL.\n• Leveraged NLP models (FinBERT) and feature engineering to generate 40+ predictive features per ticker, training XGBoost models with 55–70% ROC-AUC.\n• Developed modular components for data ingestion, transformation, and model inference, aligned with message-driven architectures for scalability.\n• Automated data collection and preprocessing workflows, enabling efficient real-time analytics."
-        },
-        {
           "id": 10,
           "tech_stack": [
-            "React",
             "FastAPI",
             "PostgreSQL",
-            "OpenAI API"
+            "OpenAI API",
+            "React"
           ],
-          "description": "• Created an AI-driven resume platform that automates the parsing of PDF/DOCX files into structured profile data.\n• Developed backend services using FastAPI and PostgreSQL for parsing, authentication, and export workflows.\n• Designed a real-time editing interface in React, allowing users to customize resume content seamlessly.\n• Integrated OpenAI API for automated content generation, enhancing the resume extraction and editing process."
+          "description": "• Engineered an AI-powered resume builder that automates the parsing of PDF/DOCX files into structured data, enhancing user experience. \n• Developed backend services for parsing and authentication using FastAPI and PostgreSQL, streamlining data workflows. \n• Implemented a real-time editing interface in React, allowing users to customize resumes seamlessly. \n• Integrated OpenAI API for intelligent content generation, facilitating automated resume editing and extraction."
         },
         {
           "id": 9,
           "tech_stack": [
             "FastAPI",
-            "React",
             "PostgreSQL",
+            "React",
             "Plaid API"
           ],
-          "description": "• Built a full-stack finance application that automates account aggregation and transaction tracking, providing insights through a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Developed responsive React dashboards for account management and financial analytics, enhancing user experience.\n• Implemented secure data handling practices (OAuth/JWT) to protect user financial data."
+          "description": "• Built a comprehensive personal finance application that automates account aggregation and transaction tracking, providing users with insightful financial analytics. \n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing. \n• Developed responsive React dashboards for user account management and transaction reviews, enhancing user engagement. \n• Implemented secure data handling protocols (OAuth/JWT) to protect user financial information."
         }
       ],
       "removedExperienceIds": [
-        7
-      ],
-      "removedProjectIds": [
-        12,
-        17,
-        18
+        8
       ],
       "sectionOrder": [
         "header",
+        "summary",
         "education",
         "experience",
         "projects",
-        "skills",
-        "summary"
+        "skills"
       ],
       "sectionVisibility": {
         "summary": true,
@@ -65,7 +50,10 @@
         "projects": true,
         "skills": true
       }
-    }
+    },
+    "warnings": [
+      "Selection guard kept high-fit project(s) for this JD: SecureScape – Smart Security System (python), ShelfVision - Dense Shelf Object Detection (python), SentimentTrader -  Real-Time Stock Sentiment Pipeline (python, engineering), Tizirsso Racing – Portfolio & Sponsorship Website (javascript)."
+    ]
   },
   "stage_b": {
     "edits": {
@@ -76,13 +64,8 @@
           "category": "Languages"
         },
         {
-          "id": 44,
-          "name": "SQL",
-          "category": "Languages"
-        },
-        {
-          "id": 47,
-          "name": "React",
+          "id": 46,
+          "name": "FastAPI",
           "category": "Frameworks"
         },
         {
@@ -91,23 +74,13 @@
           "category": "Frameworks"
         },
         {
-          "id": 46,
-          "name": "FastAPI",
-          "category": "Frameworks"
-        },
-        {
           "id": 51,
           "name": "PostgreSQL",
           "category": "Data Tools"
         },
         {
-          "id": 57,
-          "name": "ETL Pipelines",
-          "category": "Data Tools"
-        },
-        {
           "id": 58,
-          "name": "Backend Development",
+          "name": "AI-Driven Workflows",
           "category": "Focus Areas"
         },
         {
@@ -117,7 +90,7 @@
         },
         {
           "id": 60,
-          "name": "AI-Driven Workflows",
+          "name": "Backend Development",
           "category": "Focus Areas"
         },
         {
@@ -131,14 +104,24 @@
           "category": "Focus Areas"
         },
         {
+          "id": 43,
+          "name": "JavaScript",
+          "category": "Languages"
+        },
+        {
           "id": 42,
           "name": "Java",
           "category": "Languages"
         },
         {
-          "id": 43,
-          "name": "JavaScript",
+          "id": 44,
+          "name": "SQL",
           "category": "Languages"
+        },
+        {
+          "id": 47,
+          "name": "React",
+          "category": "Frameworks"
         },
         {
           "id": 48,
@@ -154,42 +137,56 @@
           "id": 50,
           "name": "TensorFlow Lite",
           "category": "Frameworks"
+        },
+        {
+          "id": 52,
+          "name": "MySQL",
+          "category": "Data Tools"
+        },
+        {
+          "id": 53,
+          "name": "MongoDB",
+          "category": "Data Tools"
+        },
+        {
+          "id": 54,
+          "name": "Pandas",
+          "category": "Data Tools"
+        },
+        {
+          "id": 55,
+          "name": "NumPy",
+          "category": "Data Tools"
+        },
+        {
+          "id": 56,
+          "name": "AWS (EC2)",
+          "category": "Data Tools"
+        },
+        {
+          "id": 57,
+          "name": "ETL Pipelines",
+          "category": "Data Tools"
         }
       ]
-    },
-    "warnings": [
-      "Skills guard restored 5 skill row(s) because Pass B exceeded the deletion budget."
-    ]
+    }
   },
   "rewrite_repair": {
     "edits": {
       "experience": [
         {
           "id": 5,
-          "description": "• Developed backend services and REST APIs in Python/Django to support secure workflows for financial and compliance teams.\n• Contributed to system design and architecture discussions with senior engineers, focusing on scalable service patterns and data modeling.\n• Created React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
+          "description": "• Developed backend services and REST APIs in Python/Django to support secure workflows for financial and compliance teams.\n• Collaborated with senior engineers on system design and architecture, contributing to scalable service patterns and data modeling.\n• Created React dashboards integrated with Django APIs, improving visibility into operational metrics and backend data workflows.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
         }
       ],
       "projects": [
         {
           "id": 9,
-          "tech_stack": [
-            "FastAPI",
-            "React",
-            "PostgreSQL",
-            "Plaid API"
-          ],
-          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, providing insights through a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Created responsive React dashboards for account management and financial analytics, improving user experience.\n• Implemented secure data handling practices (OAuth/JWT) to protect user financial data."
+          "description": "• Developed a personal finance application that automates account aggregation and transaction tracking, providing users with insightful financial analytics.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Created responsive React dashboards for user account management and transaction reviews, enhancing user engagement.\n• Implemented secure data handling protocols (OAuth/JWT) to protect user financial information."
         },
         {
           "id": 10,
-          "tech_stack": [
-            "React",
-            "FastAPI",
-            "PostgreSQL",
-            "OpenAI API",
-            "Tailwind CSS"
-          ],
-          "description": "• Developed an AI-powered resume platform that automates the parsing of PDF/DOCX files into structured profile data.\n• Built backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\n• Designed a real-time editing interface in React, allowing users to customize resume content.\n• Integrated OpenAI API for automated content generation, streamlining the resume extraction and editing process."
+          "description": "• Developed an AI-powered resume builder that automates the parsing of PDF/DOCX files into structured data, improving user experience.\n• Built backend services for parsing and authentication using FastAPI and PostgreSQL, streamlining data workflows.\n• Created a real-time editing interface in React, allowing users to customize resumes effectively.\n• Integrated OpenAI API for intelligent content generation, facilitating automated resume editing and extraction."
         }
       ]
     }
@@ -197,62 +194,46 @@
   "combined": {
     "edits": {
       "summarySection": {
-        "summary": "Software Engineer with a strong focus on backend development and data engineering. Proficient in Python and SQL, with a proven track record of building scalable data pipelines and backend services. Experienced in integrating React for user interfaces and optimizing workflows for real-time data processing."
+        "summary": "Proficient in developing AI-driven applications with a focus on backend services and cloud technologies. Experienced in Python and FastAPI, with a strong foundation in API development and data processing. Committed to creating scalable solutions that enhance user interactions and streamline workflows."
       },
       "experience": [
         {
           "id": 5,
-          "description": "• Developed backend services and REST APIs in Python/Django to support secure workflows for financial and compliance teams.\n• Contributed to system design and architecture discussions with senior engineers, focusing on scalable service patterns and data modeling.\n• Created React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
+          "description": "• Developed backend services and REST APIs in Python/Django to support secure workflows for financial and compliance teams.\n• Collaborated with senior engineers on system design and architecture, contributing to scalable service patterns and data modeling.\n• Created React dashboards integrated with Django APIs, improving visibility into operational metrics and backend data workflows.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
         }
       ],
       "projects": [
         {
-          "id": 20,
-          "tech_stack": [
-            "Python",
-            "SQL",
-            "FinBERT",
-            "XGBoost"
-          ],
-          "description": "• Engineered a comprehensive ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance posts per run through multi-stage ETL.\n• Leveraged NLP models (FinBERT) and feature engineering to generate 40+ predictive features per ticker, training XGBoost models with 55–70% ROC-AUC.\n• Developed modular components for data ingestion, transformation, and model inference, aligned with message-driven architectures for scalability.\n• Automated data collection and preprocessing workflows, enabling efficient real-time analytics."
-        },
-        {
           "id": 10,
           "tech_stack": [
-            "React",
             "FastAPI",
             "PostgreSQL",
             "OpenAI API",
-            "Tailwind CSS"
+            "React"
           ],
-          "description": "• Developed an AI-powered resume platform that automates the parsing of PDF/DOCX files into structured profile data.\n• Built backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\n• Designed a real-time editing interface in React, allowing users to customize resume content.\n• Integrated OpenAI API for automated content generation, streamlining the resume extraction and editing process."
+          "description": "• Developed an AI-powered resume builder that automates the parsing of PDF/DOCX files into structured data, improving user experience.\n• Built backend services for parsing and authentication using FastAPI and PostgreSQL, streamlining data workflows.\n• Created a real-time editing interface in React, allowing users to customize resumes effectively.\n• Integrated OpenAI API for intelligent content generation, facilitating automated resume editing and extraction."
         },
         {
           "id": 9,
           "tech_stack": [
             "FastAPI",
-            "React",
             "PostgreSQL",
+            "React",
             "Plaid API"
           ],
-          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, providing insights through a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Created responsive React dashboards for account management and financial analytics, improving user experience.\n• Implemented secure data handling practices (OAuth/JWT) to protect user financial data."
+          "description": "• Developed a personal finance application that automates account aggregation and transaction tracking, providing users with insightful financial analytics.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Created responsive React dashboards for user account management and transaction reviews, enhancing user engagement.\n• Implemented secure data handling protocols (OAuth/JWT) to protect user financial information."
         }
       ],
       "removedExperienceIds": [
-        7
-      ],
-      "removedProjectIds": [
-        12,
-        17,
-        18
+        8
       ],
       "sectionOrder": [
         "header",
+        "summary",
         "education",
         "experience",
         "projects",
-        "skills",
-        "summary"
+        "skills"
       ],
       "sectionVisibility": {
         "summary": true,
@@ -268,13 +249,8 @@
           "category": "Languages"
         },
         {
-          "id": 44,
-          "name": "SQL",
-          "category": "Languages"
-        },
-        {
-          "id": 47,
-          "name": "React",
+          "id": 46,
+          "name": "FastAPI",
           "category": "Frameworks"
         },
         {
@@ -283,23 +259,13 @@
           "category": "Frameworks"
         },
         {
-          "id": 46,
-          "name": "FastAPI",
-          "category": "Frameworks"
-        },
-        {
           "id": 51,
           "name": "PostgreSQL",
           "category": "Data Tools"
         },
         {
-          "id": 57,
-          "name": "ETL Pipelines",
-          "category": "Data Tools"
-        },
-        {
           "id": 58,
-          "name": "Backend Development",
+          "name": "AI-Driven Workflows",
           "category": "Focus Areas"
         },
         {
@@ -309,7 +275,7 @@
         },
         {
           "id": 60,
-          "name": "AI-Driven Workflows",
+          "name": "Backend Development",
           "category": "Focus Areas"
         },
         {
@@ -323,14 +289,24 @@
           "category": "Focus Areas"
         },
         {
+          "id": 43,
+          "name": "JavaScript",
+          "category": "Languages"
+        },
+        {
           "id": 42,
           "name": "Java",
           "category": "Languages"
         },
         {
-          "id": 43,
-          "name": "JavaScript",
+          "id": 44,
+          "name": "SQL",
           "category": "Languages"
+        },
+        {
+          "id": 47,
+          "name": "React",
+          "category": "Frameworks"
         },
         {
           "id": 48,
@@ -346,11 +322,41 @@
           "id": 50,
           "name": "TensorFlow Lite",
           "category": "Frameworks"
+        },
+        {
+          "id": 52,
+          "name": "MySQL",
+          "category": "Data Tools"
+        },
+        {
+          "id": 53,
+          "name": "MongoDB",
+          "category": "Data Tools"
+        },
+        {
+          "id": 54,
+          "name": "Pandas",
+          "category": "Data Tools"
+        },
+        {
+          "id": 55,
+          "name": "NumPy",
+          "category": "Data Tools"
+        },
+        {
+          "id": 56,
+          "name": "AWS (EC2)",
+          "category": "Data Tools"
+        },
+        {
+          "id": 57,
+          "name": "ETL Pipelines",
+          "category": "Data Tools"
         }
       ]
     },
     "warnings": [
-      "Skills guard restored 5 skill row(s) because Pass B exceeded the deletion budget.",
+      "Selection guard kept high-fit project(s) for this JD: SecureScape – Smart Security System (python), ShelfVision - Dense Shelf Object Detection (python), SentimentTrader -  Real-Time Stock Sentiment Pipeline (python, engineering), Tizirsso Racing – Portfolio & Sponsorship Website (javascript).",
       "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:9, projects:10."
     ]
   }
