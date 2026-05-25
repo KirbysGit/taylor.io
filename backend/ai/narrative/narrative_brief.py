@@ -104,6 +104,7 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
     hits = tailorContext.get("resumeHits") or []
     gaps = tailorContext.get("resumeGaps") or []
     alignment_context = tailorContext.get("alignmentContext") if isinstance(tailorContext.get("alignmentContext"), dict) else {}
+    job_strategy = tailorContext.get("jobStrategy") if isinstance(tailorContext.get("jobStrategy"), dict) else {}
     rows_ranked = sectionDetails.get("rowsPerSectionRanked") or {}
     plan_ranked_rows = hero_rank_hints_for_narrative(rows_ranked, resume_data)
 
@@ -127,19 +128,20 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
 
     user = "\n".join(
         [
+            "Use `jobStrategy` as the source of truth for fit mode, proof style, keep/drop priorities, claim boundaries, and any advisory section budget. Do not recreate a competing strategy from raw keywords.",
             "Selection plan v2: classify rows by outcome, not just emphasis. Use `keepExperience` / `dropExperience` / `rewriteExperience` and `keepProjects` / `dropProjects` / `rewriteProjects` / `repairProjects` / `maybeProjects`. Dropped rows are omitted from the tailored draft; maybe rows are space-available.",
-            "For one-page or concise mode, make real selection decisions: drop low-fit rows for this role's lane when stronger evidence exists; drop weaker rows before over-compressing the strongest evidence for the posting.",
+            "For one-page or concise mode, follow `jobStrategy.sectionBudget` as advisory: make real selection decisions and drop weaker/off-lane rows before over-compressing the strongest evidence.",
             "Every experience id should appear in exactly one of `keepExperience` or `dropExperience`. Every project id should appear in exactly one of `keepProjects`, `dropProjects`, or `maybeProjects`. `rewriteExperience`, `rewriteProjects`, and `repairProjects` are action lists drawn from kept/maybe rows.",
             "Produce one editorial plan JSON. Downstream success = a **visibly retargeted** resume for this role: different leads, order, and emphasis—not a light edit.",
-            "**Match strength matters:** use `alignmentContext.mode` to choose tone. `direct` = assert direct fit. `adjacent` = bridge honestly from proven evidence. `stretch` = conservative transfer story; do not claim the target role background as already proven.",
+            "**Match strength matters:** use `jobStrategy.fitMode` and `alignmentContext.mode` to choose tone. Direct = assert direct fit; adjacent/stretch/extreme = bridge honestly from proven evidence.",
             "Use `alignmentContext.evidenceClassification` as the claim-strength guide: `direct_role_evidence` can lead, `transferable_behavior` can bridge, `domain_tool_evidence` is supporting context only, and `weak_lexical_overlap` should not drive the target story.",
             "Use `alignmentContext.jdSignalIntent` as the JD-priority guide: `role_responsibility` and `candidate_requirement` terms shape the resume story; `company_product_context` and `background_or_benefit` terms add context only and should not outrank stronger resume proof.",
             "Use `alignmentContext.gapSupport` to distinguish true gaps from related evidence. `conceptual` support can be used as adjacent proof, but do not call it direct same-title experience. Only `unsupported` terms belong in caution language.",
-            "Use `alignmentContext.fitRisk` as a hard caution layer. If `level` is `extreme`, do not dress the resume up as a normal target-role fit; create an honest exploratory bridge and make unsupported seniority/scope part of the caution story.",
-            "When alignment is `adjacent` or `stretch`, keep rows with transferable evidence even if they lack exact JD keywords, especially rows showing coordination, pressure, communication, compliance, metrics, workflow, reporting, or response.",
+            "Use `jobStrategy.claimRules` plus `alignmentContext.fitRisk` as the caution layer. If risk is extreme, create an honest exploratory bridge instead of a normal target-role fit.",
+            "When alignment is `adjacent` or `stretch`, use `jobStrategy.keepPriorities` to decide which transferable rows deserve space even if they lack exact JD keywords.",
             "For adjacent/stretch summaries, avoid opening as `<Target Role> with...` unless the resume directly proves that title. Open from the candidate's real background and bridge toward the target role.",
             "**`candidateAngle`:** one sentence—**professional lane + lead** for this posting; **not** a comma-packed echo of JD keywords. **`primaryStory`:** **2–4 pillars from resume JSON + evidenceRows** (frameworks, data/automation, integrations, UI surfaces the body proves); **≥ half** the phrases should be **resume-native** strengths the JD might never name. JD terms tune **scan and order** when evidenced—they are **not** the only admissible toolkit.",
-            "targetStory: one compact object that downstream passes should treat as the single source of positioning truth. Include `roleLane`, `readerTakeaway`, `proofExperienceIds`, `proofProjectIds`, `deEmphasizeExperienceIds`, `deEmphasizeProjectIds`, and `evidenceThemes`. Keep it shorter than the combined legacy story fields; do not duplicate long prose.",
+            "targetStory: compact object derived from `jobStrategy.readerGoal` + best evidence. Include `roleLane`, `readerTakeaway`, proof ids, de-emphasize ids, and evidenceThemes. Keep it short.",
             "summaryGoal must guide the summary rewrite (opening, technical lead, **scan-friendly** phrasing where true)—do not copy-paste candidateAngle.",
             "summaryDecision: required object `{action, confidence, reason, evidence}`. `action` is `show`, `hide`, or `keep`. Show when the summary earns space by repositioning the candidate, connecting scattered proof, explaining a pivot, or foregrounding a role-specific thesis. Hide when a tight direct-fit draft would repeat obvious proof already visible in experience/projects/skills. Keep when evidence is mixed or the resume setup should remain unchanged.",
             "skillsStrategy: **2–6 strings** — categories/alignment → Lead → Supporting → trim last **sparingly**. Default: **selected and ordered toolkit** for this archetype+posting—not a JD keyword extract. **Supporting** = honest breadth (plausible for the role family even without verbatim JD terms). **Trim last** only for obvious noise or mismatch—not “missing from JD.” Demote before delete; **few** trims.",
@@ -171,6 +173,9 @@ def request_narrative_brief(*, payload: dict, tailorContext: dict, sectionDetail
             "",
             "resumeGaps (JD terms not evidenced—use in avoid and caution):",
             json.dumps(gaps_preview, ensure_ascii=False),
+            "",
+            "jobStrategy (source of truth for resume shape and claim boundaries):",
+            json.dumps(job_strategy, ensure_ascii=False, indent=2),
             "",
             "alignmentContext (deterministic match-strength classifier):",
             json.dumps(alignment_context, ensure_ascii=False, indent=2),

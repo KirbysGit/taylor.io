@@ -1154,6 +1154,7 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
     tc = tailorContext if isinstance(tailorContext, dict) else {}
     ats_hits = list(tc.get("resumeHits") or [])[:24]
     ats_jd_top = top_keyword_terms(tc.get("keywords") or [], limit=12)
+    job_strategy = tc.get("jobStrategy") if isinstance(tc.get("jobStrategy"), dict) else {}
     evidenced_keyword_alignment = {
         "resumeLiteralHits": ats_hits,
         "jdKeywordPriority": ats_jd_top,
@@ -1169,6 +1170,15 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
     pass_b_bundle["peripheralSkillEvidence"] = build_peripheral_skill_evidence(resumeData, peripheral_ids)
     pass_b_bundle["skillCategoryPolicy"] = build_skill_category_policy(pass_b_bundle.get("skillsRows") or [])
     pass_b_bundle["deletionBudget"] = pass_b_deletion_budget(n_skill)
+    pass_b_bundle["jobStrategySkills"] = {
+        "persona": job_strategy.get("persona"),
+        "roleArchetype": job_strategy.get("roleArchetype"),
+        "preserve": job_strategy.get("skillPreserve") or [],
+        "deprioritize": job_strategy.get("skillDeprioritize") or [],
+        "summaryGuardrails": job_strategy.get("summaryGuardrails") or [],
+        "claimRules": job_strategy.get("claimRules") or [],
+        "note": "Preserve/deprioritize only existing resume skills; never add unsupported skills from this policy.",
+    }
     budget = pass_b_bundle["deletionBudget"]
     budget_line = (
         f"**Deletion budget for this resume:** `{budget.get('skillsRowCount')}` skill rows → aim ≥ `{budget.get('minSurvivorsTarget')}` "
@@ -1194,6 +1204,7 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
             "**Preserve first:** output **one row per surviving `skillsRows` id** by default. **Semi-hit** rows (resume-evidenced, not JD-top) ⇒ **keep**, order later. **Lead** flows from JD + **`skillsStrategy`** — **not** survivor filters.",
             "Return **`edits.skills`**; optional **`_debugOmitted`** if you omit any id.",
             "Use **`skillCategoryPolicy`** to separate stable tool buckets from flexible positioning buckets. Stable buckets mostly keep their labels; flexible buckets may be renamed or reframed when the JD and resume evidence support it.",
+            "Use **`jobStrategySkills`** as the strategy contract: keep existing skills that match `preserve` when resume evidence supports them, demote `deprioritize` before deleting preserved rows, and never add unsupported skills from this policy.",
             "",
             "### Fit checklist (category labels vs JD—not per-skill names)",
             json.dumps(fitSignals, ensure_ascii=False, indent=2),
@@ -1205,7 +1216,7 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
             json.dumps(evidenced_keyword_alignment, ensure_ascii=False, indent=2),
             "",
             "### Structured skill context (read before dropping anything)",
-            "Includes **`skillsRows`**, **`resumeWideSkillEvidence`**, **`peripheralSkillEvidence`**, **`skillCategoryPolicy`**, **`deletionBudget`**, hero/supporting rows.",
+            "Includes **`skillsRows`**, **`resumeWideSkillEvidence`**, **`peripheralSkillEvidence`**, **`skillCategoryPolicy`**, **`jobStrategySkills`**, **`deletionBudget`**, hero/supporting rows.",
             json.dumps(pass_b_bundle, ensure_ascii=False, indent=2),
             "",
             "### JD excerpts",

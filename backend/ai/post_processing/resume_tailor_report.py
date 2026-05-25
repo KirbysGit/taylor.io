@@ -201,15 +201,37 @@ def _labels_from_patch(patch, section, *, removed=False, limit=4, resume_data=No
     return _dedupe_keep_order(labels, limit=limit)
 
 
-def _detail_items_from_patch(patch, narrative_brief, gaps, flags, target_label, updated_resume_data=None):
+def _detail_items_from_patch(
+    patch,
+    narrative_brief,
+    gaps,
+    flags,
+    target_label,
+    updated_resume_data=None,
+    job_strategy=None,
+):
     nb = narrative_brief if isinstance(narrative_brief, dict) else {}
+    js = job_strategy if isinstance(job_strategy, dict) else {}
     target_story = nb.get("targetStory") if isinstance(nb.get("targetStory"), dict) else {}
     groups = []
 
     why_items = []
+    strategy_goal = _clean_text(js.get("readerGoal"), limit=180)
+    proof_style = _strategy_items(js, "proofStyle", limit=6)
+    keep_priorities = _strategy_items(js, "keepPriorities", limit=5)
+    if strategy_goal or proof_style:
+        items = []
+        if strategy_goal:
+            items.append(strategy_goal)
+        if proof_style:
+            items.append("I prioritized " + _join_human(_display_terms(proof_style)) + ".")
+        groups.append({"title": "What I prioritized", "items": items[:2]})
+
     takeaway = _clean_text(target_story.get("readerTakeaway") if isinstance(target_story, dict) else "", limit=180)
     if takeaway:
         why_items.append(f"Target story: {takeaway}")
+    elif keep_priorities:
+        why_items.append("Target story: lean on " + _join_human(_display_terms(keep_priorities[:3])) + ".")
     elif target_label:
         why_items.append(f"Targeted the draft toward {target_label}.")
     themes = target_story.get("evidenceThemes") if isinstance(target_story, dict) else []
@@ -369,6 +391,9 @@ def _detail_items_from_patch(patch, narrative_brief, gaps, flags, target_label, 
         )
 
     review = []
+    claim_rules = _strategy_items(js, "claimRules", limit=2)
+    for rule in claim_rules:
+        review.append(rule)
     if gaps:
         review.append("Some JD terms were not directly evidenced: " + _join_human(gaps[:4]) + ".")
     if flags.get("suspicious_protected_skill_removals"):
@@ -424,6 +449,18 @@ def _resume_gaps_from_context(tailor_context, limit=4):
     if isinstance(ac.get("unsupportedTerms"), list):
         return _dedupe_keep_order(ac.get("unsupportedTerms") or [], limit=limit)
     return _dedupe_keep_order(tc.get("resumeGaps") or [], limit=limit)
+
+
+def _job_strategy_from_context(tailor_context):
+    tc = tailor_context if isinstance(tailor_context, dict) else {}
+    js = tc.get("jobStrategy")
+    return js if isinstance(js, dict) else {}
+
+
+def _strategy_items(job_strategy, key, limit=5):
+    if not isinstance(job_strategy, dict):
+        return []
+    return _dedupe_keep_order(job_strategy.get(key) or [], limit=limit)
 
 
 def _changed_sections_from_patch(patch):
@@ -512,6 +549,7 @@ def build_tailor_explanation(
     nb = narrative_brief if isinstance(narrative_brief, dict) else {}
     prefs = style_preferences if isinstance(style_preferences, dict) else {}
     qa = quality_audit if isinstance(quality_audit, dict) else {}
+    job_strategy = _job_strategy_from_context(tailor_context)
     role = _clean_text(target_role, limit=80) or "this role"
     co = _clean_text(company, limit=80)
     jd_terms = _display_terms(_keyword_terms_from_context(tailor_context, limit=3))
@@ -531,6 +569,9 @@ def build_tailor_explanation(
     gap_support = nb.get("gapSupport") if isinstance(nb.get("gapSupport"), list) else []
     fit_risk = nb.get("fitRisk") if isinstance(nb.get("fitRisk"), dict) else {}
     fit_risk_level = _clean_text(fit_risk.get("level"), limit=24).lower()
+    strategy_fit_mode = _clean_text(job_strategy.get("fitMode"), limit=24).lower()
+    if not alignment_mode and strategy_fit_mode:
+        alignment_mode = strategy_fit_mode
     direct_class_terms = _dedupe_keep_order(
         [
             str(term).strip()
@@ -584,6 +625,8 @@ def build_tailor_explanation(
 
     sentences = []
     target_label = f"{role} at {co}" if co else role
+    strategy_goal = _clean_text(job_strategy.get("readerGoal"), limit=180)
+    strategy_proof = _display_terms(_strategy_items(job_strategy, "proofStyle", limit=4))
     if fit_risk_level == "extreme":
         sentences.append(
             f"This is a very large stretch for {target_label}, so I kept the draft cautious instead of trying to make your resume sound like it already proves that level of responsibility."
@@ -642,6 +685,11 @@ def build_tailor_explanation(
             "I found fewer direct keyword matches in your saved profile, so I kept the rewrite closer to your existing evidence instead of forcing claims that were not there."
         )
 
+    if strategy_goal and fit_risk_level != "extreme":
+        sentences.append(strategy_goal)
+    elif strategy_proof and fit_risk_level != "extreme":
+        sentences.append("The strategy was to foreground " + _join_human(strategy_proof) + ".")
+
     trimmed = _dedupe_keep_order(trimmed_experience + trimmed_projects, limit=4)
     if trimmed:
         sentences.append(f"I trimmed {_join_human(trimmed)} because they were weaker signals for this read.")
@@ -692,9 +740,18 @@ def build_tailor_explanation(
     return {
         "paragraph": paragraph,
         "chips": chips[:10],
-        "details": _detail_items_from_patch(patch, nb, gaps, flags, target_label, updated_resume_data=updated_resume_data),
+        "details": _detail_items_from_patch(
+            patch,
+            nb,
+            gaps,
+            flags,
+            target_label,
+            updated_resume_data=updated_resume_data,
+            job_strategy=job_strategy,
+        ),
         "evidence": {
             "alignmentMode": alignment_mode,
+            "jobStrategy": job_strategy,
             "evidenceClassification": evidence_classes[:8],
             "jdSignalIntent": jd_signal_intent[:10],
             "gapSupport": gap_support[:10],

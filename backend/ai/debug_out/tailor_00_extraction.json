@@ -1,261 +1,173 @@
 {
-  "target_role": "Sales Outreach Representative",
-  "company": "Coverview",
+  "target_role": "Software Engineer",
+  "company": "Droisys",
   "active_domains": [
-    "sales",
-    "operations"
+    "engineering"
   ],
   "line_counts": {
-    "included_body": 10,
+    "included_body": 16,
     "downweighted": 0
   },
   "included_line_samples": [
-    "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next.",
-    "we're hiring a founding growth intern to support our u.s. market expansion.",
-    "run outbound outreach to msps nationwide (qualified leads provided)",
-    "book discovery calls with founders, owners, and key decision-makers",
-    "assist in developing our sales architecture and refining go-to-market messaging",
-    "who we're looking for",
-    "strong interpersonal skills — genuinely comfortable on the phone",
-    "interest in b2b sales, ai, and operational software",
-    "prior sales or outreach experience preferred",
-    "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+    "about the job",
+    "about company",
+    "droisys is an innovation technology company focused on helping companies accelerate their digital initiatives from strategy and planning through execution. we leverage deep technical expertise, agile methodologies, and data-driven intelligence to modernize systems of engagement and simplify human/tech interaction.",
+    "amazing things happen when we work in environments where everyone feels a true sense of belonging and when candidates have the requisite skills and opportunities to succeed. at droisys, we invest in our talent and support career growth, and we are always on the lookout for amazing talent who can contribute to our growth by delivering top results for our clients. join us to challenge yourself and accomplish work that matters.",
+    "full stack developer",
+    "should be open to travel to san jose, ca and las vegas, ca",
+    "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+    "collaborate with cross‑functional teams to translate business needs into scalable technical solutions.",
+    "own full feature lifecycle—from concept and architecture to deployment and optimization.",
+    "build modern, responsive web applications using react and strong server‑side skills in .net or node.js.",
+    "develop secure, high‑performance apis using rest, soap, and graphql.",
+    "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
   ],
   "downweighted_line_samples": [],
   "top_keywords": [
     {
-      "term": "sales",
-      "score": 9.0,
-      "frequency": 5.0,
+      "term": "react",
+      "score": 8.5,
+      "frequency": 2.0,
       "sources": [
         "bodyToken",
-        "titleToken"
+        "concreteStack"
       ],
-      "signalType": "role_capability",
+      "signalType": "tool_platform",
       "lineKinds": [
-        "body",
         "role"
       ],
       "linePreview": [
-        "assist in developing our sales architecture and refining go-to-market messaging",
-        "interest in b2b sales, ai, and operational software"
+        "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
       ]
     },
     {
-      "term": "outreach",
-      "score": 5.0,
-      "frequency": 4.0,
+      "term": "ci/cd",
+      "score": 8.0,
+      "frequency": 2.0,
+      "sources": [
+        "knownPhrase",
+        "partOfPhrase"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+      ]
+    },
+    {
+      "term": "postgresql",
+      "score": 7.5,
+      "frequency": 2.0,
       "sources": [
         "bodyToken",
-        "titleToken"
+        "concreteStack"
       ],
-      "signalType": "role_capability",
+      "signalType": "tool_platform",
       "lineKinds": [
         "body"
       ],
       "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)",
-        "prior sales or outreach experience preferred"
+        "manage databases across sqlserver, postgresql, and dynamodb environments."
       ]
     },
     {
-      "term": "pipeline",
-      "score": 4.0,
-      "frequency": 1.0,
+      "term": "graphql",
+      "score": 7.0,
+      "frequency": 2.0,
       "sources": [
-        "bodyToken"
+        "knownPhrase",
+        "partOfPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "develop secure, high‑performance apis using rest, soap, and graphql."
+      ]
+    },
+    {
+      "term": "microservices",
+      "score": 7.0,
+      "frequency": 2.0,
+      "sources": [
+        "knownPhrase",
+        "partOfPhrase"
       ],
       "signalType": "role_capability",
       "lineKinds": [
         "body"
       ],
       "linePreview": [
-        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
       ]
     },
     {
-      "term": "msps",
-      "score": 3.0,
+      "term": "amazon web services",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "delivery",
+      "score": 5.3,
       "frequency": 3.0,
       "sources": [
-        "bodyToken"
-      ],
-      "signalType": "context",
-      "lineKinds": [
-        "body",
-        "context"
-      ],
-      "linePreview": [
-        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next.",
-        "run outbound outreach to msps nationwide (qualified leads provided)"
-      ]
-    },
-    {
-      "term": "architecture",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
+        "bodyToken",
+        "capabilityStack"
       ],
       "signalType": "role_capability",
       "lineKinds": [
         "role"
       ],
       "linePreview": [
-        "assist in developing our sales architecture and refining go-to-market messaging"
+        "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
       ]
     },
     {
-      "term": "hiring",
-      "score": 3.0,
-      "frequency": 1.0,
+      "term": "security",
+      "score": 4.3,
+      "frequency": 2.0,
       "sources": [
-        "bodyToken"
+        "bodyToken",
+        "capabilityStack"
       ],
       "signalType": "role_capability",
       "lineKinds": [
         "body"
       ],
       "linePreview": [
-        "we're hiring a founding growth intern to support our u.s. market expansion."
+        "troubleshoot performance, security, and stability issues across the full stack."
       ]
     },
     {
-      "term": "leads",
+      "term": "solutions",
       "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)"
-      ]
-    },
-    {
-      "term": "outbound",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)"
-      ]
-    },
-    {
-      "term": "execution",
-      "score": 2.8,
-      "frequency": 1.0,
+      "frequency": 2.0,
       "sources": [
         "bodyToken"
       ],
       "signalType": "generic_fragment",
       "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
-      ]
-    },
-    {
-      "term": "performance",
-      "score": 2.8,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "context",
-      "lineKinds": [
-        "context"
-      ],
-      "linePreview": [
-        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next."
-      ]
-    },
-    {
-      "term": "operations",
-      "score": 2.3,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "context",
-      "lineKinds": [
-        "context"
-      ],
-      "linePreview": [
-        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next."
-      ]
-    },
-    {
-      "term": "artificial intelligence",
-      "score": 2.0,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
-    }
-  ],
-  "priority_keywords": [
-    {
-      "term": "sales",
-      "score": 9.0,
-      "frequency": 5.0,
-      "sources": [
-        "bodyToken",
-        "titleToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
         "body",
         "role"
       ],
       "linePreview": [
-        "assist in developing our sales architecture and refining go-to-market messaging",
-        "interest in b2b sales, ai, and operational software"
-      ]
-    },
-    {
-      "term": "outreach",
-      "score": 5.0,
-      "frequency": 4.0,
-      "sources": [
-        "bodyToken",
-        "titleToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)",
-        "prior sales or outreach experience preferred"
-      ]
-    },
-    {
-      "term": "pipeline",
-      "score": 4.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+        "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+        "collaborate with cross‑functional teams to translate business needs into scalable technical solutions."
       ]
     },
     {
@@ -267,113 +179,177 @@
       ],
       "signalType": "role_capability",
       "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "own full feature lifecycle—from concept and architecture to deployment and optimization.",
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "deployment",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "own full feature lifecycle—from concept and architecture to deployment and optimization."
+      ]
+    },
+    {
+      "term": "developer",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
         "role"
       ],
       "linePreview": [
-        "assist in developing our sales architecture and refining go-to-market messaging"
+        "full stack developer"
       ]
-    },
+    }
+  ],
+  "priority_keywords": [
     {
-      "term": "hiring",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "we're hiring a founding growth intern to support our u.s. market expansion."
-      ]
-    },
-    {
-      "term": "leads",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)"
-      ]
-    },
-    {
-      "term": "outbound",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)"
-      ]
-    },
-    {
-      "term": "artificial intelligence",
-      "score": 2.0,
+      "term": "react",
+      "score": 8.5,
       "frequency": 2.0,
       "sources": [
-        "bodyToken"
+        "bodyToken",
+        "concreteStack"
       ],
-      "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
+      ]
     },
     {
-      "term": "b2b",
-      "score": 2.0,
+      "term": "ci/cd",
+      "score": 8.0,
       "frequency": 2.0,
       "sources": [
-        "bodyToken"
+        "knownPhrase",
+        "partOfPhrase"
       ],
-      "signalType": "role_capability",
+      "signalType": "tool_platform",
       "lineKinds": [
-        "body"
+        "role"
       ],
       "linePreview": [
-        "interest in b2b sales, ai, and operational software",
-        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
       ]
     },
     {
-      "term": "founders",
-      "score": 2.0,
-      "frequency": 1.0,
+      "term": "postgresql",
+      "score": 7.5,
+      "frequency": 2.0,
       "sources": [
-        "bodyToken"
+        "bodyToken",
+        "concreteStack"
       ],
-      "signalType": "role_capability",
+      "signalType": "tool_platform",
       "lineKinds": [
         "body"
       ],
       "linePreview": [
-        "book discovery calls with founders, owners, and key decision-makers"
+        "manage databases across sqlserver, postgresql, and dynamodb environments."
       ]
     },
     {
-      "term": "representative",
-      "score": 2.0,
-      "frequency": 1.0,
+      "term": "graphql",
+      "score": 7.0,
+      "frequency": 2.0,
       "sources": [
-        "titleToken"
+        "knownPhrase",
+        "partOfPhrase"
       ],
       "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "develop secure, high‑performance apis using rest, soap, and graphql."
+      ]
     },
     {
-      "term": "book",
-      "score": 1.0,
+      "term": "microservices",
+      "score": 7.0,
+      "frequency": 2.0,
+      "sources": [
+        "knownPhrase",
+        "partOfPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "amazon web services",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "delivery",
+      "score": 5.3,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken",
+        "capabilityStack"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+      ]
+    },
+    {
+      "term": "security",
+      "score": 4.3,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "capabilityStack"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "troubleshoot performance, security, and stability issues across the full stack."
+      ]
+    },
+    {
+      "term": "architecture",
+      "score": 3.0,
       "frequency": 1.0,
       "sources": [
         "bodyToken"
@@ -383,150 +359,229 @@
         "body"
       ],
       "linePreview": [
-        "book discovery calls with founders, owners, and key decision-makers"
+        "own full feature lifecycle—from concept and architecture to deployment and optimization.",
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "deployment",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "own full feature lifecycle—from concept and architecture to deployment and optimization."
+      ]
+    },
+    {
+      "term": "developer",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "full stack developer"
+      ]
+    },
+    {
+      "term": "implement",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
       ]
     }
   ],
   "suppressed_terms": [
     {
-      "term": "msps",
-      "signalType": "context",
-      "reason": "company/product/client context; do not drive resume claims",
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "execution",
+      "term": "solutions",
       "signalType": "generic_fragment",
       "reason": "generic fragment; keep only inside stronger phrases",
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "performance",
-      "signalType": "context",
-      "reason": "company/product/client context; do not drive resume claims",
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "operations",
-      "signalType": "context",
-      "reason": "company/product/client context; do not drive resume claims",
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "where",
-      "signalType": "context",
-      "reason": "company/product/client context; do not drive resume claims",
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "service",
-      "signalType": "context",
-      "reason": "company/product/client context; do not drive resume claims",
       "sources": [
         "bodyToken"
       ]
     }
   ],
   "relevant_jd_lines": [
-    "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
-    "run outbound outreach to msps nationwide (qualified leads provided)",
-    "book discovery calls with founders, owners, and key decision-makers",
-    "assist in developing our sales architecture and refining go-to-market messaging",
-    "interest in b2b sales, ai, and operational software",
-    "prior sales or outreach experience preferred",
-    "we're hiring a founding growth intern to support our u.s. market expansion."
+    "implement ci/cd pipelines and follow devsecops best practices for continuous delivery.",
+    "own full feature lifecycle—from concept and architecture to deployment and optimization.",
+    "full stack developer",
+    "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+    "build modern, responsive web applications using react and strong server‑side skills in .net or node.js.",
+    "develop secure, high‑performance apis using rest, soap, and graphql.",
+    "work with aws cloud services, serverless components, and microservices‑based architectures.",
+    "manage databases across sqlserver, postgresql, and dynamodb environments.",
+    "troubleshoot performance, security, and stability issues across the full stack."
   ],
   "line_classification": [
     {
+      "kind": "body",
+      "line": "about the job"
+    },
+    {
+      "kind": "body",
+      "line": "about company"
+    },
+    {
+      "kind": "body",
+      "line": "droisys is an innovation technology company focused on helping companies accelerate their digital initiatives from strategy and planning through execution. we leverage deep technical expertise, agile methodologies, and data-driven intelligence to modernize systems of engagement and simplify human/tech interaction."
+    },
+    {
       "kind": "context",
-      "line": "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next."
-    },
-    {
-      "kind": "body",
-      "line": "we're hiring a founding growth intern to support our u.s. market expansion."
-    },
-    {
-      "kind": "body",
-      "line": "run outbound outreach to msps nationwide (qualified leads provided)"
-    },
-    {
-      "kind": "body",
-      "line": "book discovery calls with founders, owners, and key decision-makers"
+      "line": "amazing things happen when we work in environments where everyone feels a true sense of belonging and when candidates have the requisite skills and opportunities to succeed. at droisys, we invest in our talent and support career growth, and we are always on the lookout for amazing talent who can contribute to our growth by delivering top results for our clients. join us to challenge yourself and accomplish work that matters."
     },
     {
       "kind": "role",
-      "line": "assist in developing our sales architecture and refining go-to-market messaging"
+      "line": "full stack developer"
     },
     {
       "kind": "body",
-      "line": "who we're looking for"
+      "line": "should be open to travel to san jose, ca and las vegas, ca"
+    },
+    {
+      "kind": "role",
+      "line": "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey."
+    },
+    {
+      "kind": "body",
+      "line": "collaborate with cross‑functional teams to translate business needs into scalable technical solutions."
+    },
+    {
+      "kind": "body",
+      "line": "own full feature lifecycle—from concept and architecture to deployment and optimization."
+    },
+    {
+      "kind": "role",
+      "line": "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
+    },
+    {
+      "kind": "role",
+      "line": "develop secure, high‑performance apis using rest, soap, and graphql."
+    },
+    {
+      "kind": "role",
+      "line": "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+    },
+    {
+      "kind": "body",
+      "line": "work with aws cloud services, serverless components, and microservices‑based architectures."
+    },
+    {
+      "kind": "body",
+      "line": "manage databases across sqlserver, postgresql, and dynamodb environments."
+    },
+    {
+      "kind": "body",
+      "line": "troubleshoot performance, security, and stability issues across the full stack."
     },
     {
       "kind": "requirement",
-      "line": "strong interpersonal skills — genuinely comfortable on the phone"
-    },
-    {
-      "kind": "body",
-      "line": "interest in b2b sales, ai, and operational software"
-    },
-    {
-      "kind": "body",
-      "line": "prior sales or outreach experience preferred"
-    },
-    {
-      "kind": "body",
-      "line": "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+      "line": "bring strong communication, problem‑solving skills, and the ability to thrive in a collaborative team."
     }
   ],
-  "top_known_phrases": [],
+  "top_known_phrases": [
+    {
+      "term": "ci/cd",
+      "count": 1.0
+    },
+    {
+      "term": "graphql",
+      "count": 1.0
+    },
+    {
+      "term": "microservices",
+      "count": 1.0
+    }
+  ],
   "top_stack_terms": {
-    "concrete": [],
-    "capability": []
+    "concrete": [
+      {
+        "term": "amazon web services",
+        "count": 1.0
+      },
+      {
+        "term": "postgresql",
+        "count": 1.0
+      },
+      {
+        "term": "react",
+        "count": 1.0
+      }
+    ],
+    "capability": [
+      {
+        "term": "delivery",
+        "count": 1.0
+      },
+      {
+        "term": "security",
+        "count": 1.0
+      }
+    ]
   },
   "top_tokens": {
     "title": [
       {
-        "term": "outreach",
+        "term": "engineer",
         "count": 1.0
       },
       {
-        "term": "representative",
-        "count": 1.0
-      },
-      {
-        "term": "sales",
+        "term": "software",
         "count": 1.0
       }
     ],
     "body": [
       {
-        "term": "sales",
-        "count": 4.0
-      },
-      {
-        "term": "msps",
+        "term": "skills",
         "count": 3.0
       },
       {
-        "term": "outreach",
-        "count": 3.0
-      },
-      {
-        "term": "artificial intelligence",
+        "term": "amazing",
         "count": 2.0
       },
       {
-        "term": "b2b",
+        "term": "delivery",
+        "count": 2.0
+      },
+      {
+        "term": "end",
+        "count": 2.0
+      },
+      {
+        "term": "environments",
+        "count": 2.0
+      },
+      {
+        "term": "growth",
+        "count": 2.0
+      },
+      {
+        "term": "performance",
+        "count": 2.0
+      },
+      {
+        "term": "solutions",
+        "count": 2.0
+      },
+      {
+        "term": "stack",
         "count": 2.0
       },
       {
@@ -534,36 +589,20 @@
         "count": 2.0
       },
       {
-        "term": "where",
+        "term": "talent",
         "count": 2.0
       },
       {
-        "term": "architecture",
-        "count": 1.0
+        "term": "technical",
+        "count": 2.0
       },
       {
-        "term": "assist",
-        "count": 1.0
+        "term": "web",
+        "count": 2.0
       },
       {
-        "term": "book",
-        "count": 1.0
-      },
-      {
-        "term": "built",
-        "count": 1.0
-      },
-      {
-        "term": "businesses",
-        "count": 1.0
-      },
-      {
-        "term": "calls",
-        "count": 1.0
-      },
-      {
-        "term": "comfortable",
-        "count": 1.0
+        "term": "when",
+        "count": 2.0
       }
     ],
     "downweighted": []

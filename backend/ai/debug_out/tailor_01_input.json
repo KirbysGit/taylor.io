@@ -1,6 +1,6 @@
 {
-  "target_role": "Sales Outreach Representative",
-  "company": "Coverview",
+  "target_role": "Software Engineer",
+  "company": "Droisys",
   "style_preferences": {
     "focus": "balanced",
     "tone": "balanced",
@@ -10,7 +10,7 @@
   },
   "strict_truth": true,
   "model": "gpt-4o-mini",
-  "job_description_chars": 987,
+  "job_description_chars": 2145,
   "resume_counts": {
     "experience": 3,
     "projects": 6,
@@ -19,53 +19,132 @@
   },
   "extracted_keywords": [
     {
-      "term": "sales",
-      "score": 9.0,
-      "frequency": 5.0,
+      "term": "react",
+      "score": 8.5,
+      "frequency": 2.0,
       "sources": [
         "bodyToken",
-        "titleToken"
+        "concreteStack"
       ],
-      "signalType": "role_capability",
+      "signalType": "tool_platform",
       "lineKinds": [
-        "body",
         "role"
       ],
       "linePreview": [
-        "assist in developing our sales architecture and refining go-to-market messaging",
-        "interest in b2b sales, ai, and operational software"
+        "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
       ]
     },
     {
-      "term": "outreach",
-      "score": 5.0,
-      "frequency": 4.0,
+      "term": "ci/cd",
+      "score": 8.0,
+      "frequency": 2.0,
+      "sources": [
+        "knownPhrase",
+        "partOfPhrase"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+      ]
+    },
+    {
+      "term": "postgresql",
+      "score": 7.5,
+      "frequency": 2.0,
       "sources": [
         "bodyToken",
-        "titleToken"
+        "concreteStack"
       ],
-      "signalType": "role_capability",
+      "signalType": "tool_platform",
       "lineKinds": [
         "body"
       ],
       "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)",
-        "prior sales or outreach experience preferred"
+        "manage databases across sqlserver, postgresql, and dynamodb environments."
       ]
     },
     {
-      "term": "pipeline",
-      "score": 4.0,
-      "frequency": 1.0,
+      "term": "graphql",
+      "score": 7.0,
+      "frequency": 2.0,
       "sources": [
-        "bodyToken"
+        "knownPhrase",
+        "partOfPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "develop secure, high‑performance apis using rest, soap, and graphql."
+      ]
+    },
+    {
+      "term": "microservices",
+      "score": 7.0,
+      "frequency": 2.0,
+      "sources": [
+        "knownPhrase",
+        "partOfPhrase"
       ],
       "signalType": "role_capability",
       "lineKinds": [
         "body"
       ],
       "linePreview": [
-        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "amazon web services",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "delivery",
+      "score": 5.3,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken",
+        "capabilityStack"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+      ]
+    },
+    {
+      "term": "security",
+      "score": 4.3,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "capabilityStack"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "troubleshoot performance, security, and stability issues across the full stack."
       ]
     },
     {
@@ -77,14 +156,45 @@
       ],
       "signalType": "role_capability",
       "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "own full feature lifecycle—from concept and architecture to deployment and optimization.",
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "deployment",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "own full feature lifecycle—from concept and architecture to deployment and optimization."
+      ]
+    },
+    {
+      "term": "developer",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
         "role"
       ],
       "linePreview": [
-        "assist in developing our sales architecture and refining go-to-market messaging"
+        "full stack developer"
       ]
     },
     {
-      "term": "hiring",
+      "term": "implement",
       "score": 3.0,
       "frequency": 1.0,
       "sources": [
@@ -92,177 +202,158 @@
       ],
       "signalType": "role_capability",
       "lineKinds": [
-        "body"
+        "role"
       ],
       "linePreview": [
-        "we're hiring a founding growth intern to support our u.s. market expansion."
-      ]
-    },
-    {
-      "term": "leads",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)"
-      ]
-    },
-    {
-      "term": "outbound",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)"
-      ]
-    },
-    {
-      "term": "artificial intelligence",
-      "score": 2.0,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
-    },
-    {
-      "term": "b2b",
-      "score": 2.0,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "interest in b2b sales, ai, and operational software",
-        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
-      ]
-    },
-    {
-      "term": "founders",
-      "score": 2.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "book discovery calls with founders, owners, and key decision-makers"
-      ]
-    },
-    {
-      "term": "representative",
-      "score": 2.0,
-      "frequency": 1.0,
-      "sources": [
-        "titleToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
-    },
-    {
-      "term": "book",
-      "score": 1.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "book discovery calls with founders, owners, and key decision-makers"
+        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
       ]
     }
   ],
   "raw_extracted_keywords": [
     {
-      "term": "sales",
-      "score": 9.0,
-      "frequency": 5.0,
+      "term": "react",
+      "score": 8.5,
+      "frequency": 2.0,
       "sources": [
         "bodyToken",
-        "titleToken"
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
+      ]
+    },
+    {
+      "term": "ci/cd",
+      "score": 8.0,
+      "frequency": 2.0,
+      "sources": [
+        "knownPhrase",
+        "partOfPhrase"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+      ]
+    },
+    {
+      "term": "postgresql",
+      "score": 7.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "manage databases across sqlserver, postgresql, and dynamodb environments."
+      ]
+    },
+    {
+      "term": "graphql",
+      "score": 7.0,
+      "frequency": 2.0,
+      "sources": [
+        "knownPhrase",
+        "partOfPhrase"
       ],
       "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "develop secure, high‑performance apis using rest, soap, and graphql."
+      ]
+    },
+    {
+      "term": "microservices",
+      "score": 7.0,
+      "frequency": 2.0,
+      "sources": [
+        "knownPhrase",
+        "partOfPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "amazon web services",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "delivery",
+      "score": 5.3,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken",
+        "capabilityStack"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+      ]
+    },
+    {
+      "term": "security",
+      "score": 4.3,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "capabilityStack"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "troubleshoot performance, security, and stability issues across the full stack."
+      ]
+    },
+    {
+      "term": "solutions",
+      "score": 3.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "generic_fragment",
       "lineKinds": [
         "body",
         "role"
       ],
       "linePreview": [
-        "assist in developing our sales architecture and refining go-to-market messaging",
-        "interest in b2b sales, ai, and operational software"
-      ]
-    },
-    {
-      "term": "outreach",
-      "score": 5.0,
-      "frequency": 4.0,
-      "sources": [
-        "bodyToken",
-        "titleToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)",
-        "prior sales or outreach experience preferred"
-      ]
-    },
-    {
-      "term": "pipeline",
-      "score": 4.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
-      ]
-    },
-    {
-      "term": "msps",
-      "score": 3.0,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "context",
-      "lineKinds": [
-        "body",
-        "context"
-      ],
-      "linePreview": [
-        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next.",
-        "run outbound outreach to msps nationwide (qualified leads provided)"
+        "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+        "collaborate with cross‑functional teams to translate business needs into scalable technical solutions."
       ]
     },
     {
@@ -274,255 +365,148 @@
       ],
       "signalType": "role_capability",
       "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "own full feature lifecycle—from concept and architecture to deployment and optimization.",
+        "work with aws cloud services, serverless components, and microservices‑based architectures."
+      ]
+    },
+    {
+      "term": "deployment",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "own full feature lifecycle—from concept and architecture to deployment and optimization."
+      ]
+    },
+    {
+      "term": "developer",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
         "role"
       ],
       "linePreview": [
-        "assist in developing our sales architecture and refining go-to-market messaging"
+        "full stack developer"
       ]
-    },
-    {
-      "term": "hiring",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "we're hiring a founding growth intern to support our u.s. market expansion."
-      ]
-    },
-    {
-      "term": "leads",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)"
-      ]
-    },
-    {
-      "term": "outbound",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "run outbound outreach to msps nationwide (qualified leads provided)"
-      ]
-    },
-    {
-      "term": "execution",
-      "score": 2.8,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "generic_fragment",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
-      ]
-    },
-    {
-      "term": "performance",
-      "score": 2.8,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "context",
-      "lineKinds": [
-        "context"
-      ],
-      "linePreview": [
-        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next."
-      ]
-    },
-    {
-      "term": "operations",
-      "score": 2.3,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "context",
-      "lineKinds": [
-        "context"
-      ],
-      "linePreview": [
-        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next."
-      ]
-    },
-    {
-      "term": "artificial intelligence",
-      "score": 2.0,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
     }
   ],
   "suppressed_keywords": [
     {
-      "term": "msps",
-      "signalType": "context",
-      "reason": "company/product/client context; do not drive resume claims",
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "execution",
+      "term": "solutions",
       "signalType": "generic_fragment",
       "reason": "generic fragment; keep only inside stronger phrases",
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "performance",
-      "signalType": "context",
-      "reason": "company/product/client context; do not drive resume claims",
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "operations",
-      "signalType": "context",
-      "reason": "company/product/client context; do not drive resume claims",
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "where",
-      "signalType": "context",
-      "reason": "company/product/client context; do not drive resume claims",
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "service",
-      "signalType": "context",
-      "reason": "company/product/client context; do not drive resume claims",
       "sources": [
         "bodyToken"
       ]
     }
   ],
   "resume_hits": [
-    "sales",
-    "pipeline",
-    "architecture",
-    "artificial intelligence"
+    "react",
+    "postgresql",
+    "amazon web services",
+    "delivery",
+    "security",
+    "architecture"
   ],
   "resume_gaps": [
-    "outreach",
-    "hiring",
-    "leads",
-    "outbound",
-    "b2b",
-    "founders",
-    "representative",
-    "book"
+    "ci/cd",
+    "graphql",
+    "microservices",
+    "deployment",
+    "developer",
+    "implement"
   ],
   "alignment_context": {
     "mode": "direct",
-    "coverage": 0.5,
+    "coverage": 0.75,
     "directEvidence": [
-      {
-        "section": "experience",
-        "id": 8,
-        "label": "Hawkers Host / Expo",
-        "terms": [
-          "sales"
-        ],
-        "score": 9.2
-      },
       {
         "section": "experience",
         "id": 5,
         "label": "BitGo Software Engineering Intern",
         "terms": [
-          "pipeline",
+          "react",
+          "postgresql",
+          "amazon web services",
           "architecture"
         ],
-        "score": 7.732
+        "score": 28.152
       },
       {
         "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "id": 9,
+        "label": "Centi – Personal Finance App",
         "terms": [
-          "pipeline",
-          "architecture"
+          "react",
+          "postgresql"
         ],
-        "score": 7.732
+        "score": 17.85
       },
       {
         "section": "projects",
         "id": 10,
         "label": "Taylor.io – Resume Builder & Parser",
         "terms": [
-          "artificial intelligence"
+          "react",
+          "postgresql"
         ],
-        "score": 3.42
+        "score": 17.85
       },
       {
-        "section": "education",
-        "id": 3,
-        "label": "University of Central Florida",
+        "section": "projects",
+        "id": 18,
+        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
         "terms": [
-          "artificial intelligence"
+          "react"
         ],
-        "score": 3.42
+        "score": 9.2
+      },
+      {
+        "section": "experience",
+        "id": 8,
+        "label": "Hawkers Host / Expo",
+        "terms": [
+          "delivery"
+        ],
+        "score": 6.25
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "label": "SecureScape – Smart Security System",
+        "terms": [
+          "security"
+        ],
+        "score": 5.2
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "architecture"
+        ],
+        "score": 2.502
       },
       {
         "section": "skills",
-        "id": 60,
-        "label": "AI-Driven Workflows",
+        "id": 51,
+        "label": "PostgreSQL",
         "terms": [
-          "artificial intelligence"
-        ],
-        "score": 1
-      },
-      {
-        "section": "skills",
-        "id": 61,
-        "label": "Data Pipelines",
-        "terms": [
-          "pipeline"
-        ],
-        "score": 1
-      },
-      {
-        "section": "skills",
-        "id": 57,
-        "label": "ETL Pipelines",
-        "terms": [
-          "pipeline"
+          "postgresql"
         ],
         "score": 1
       }
@@ -730,56 +714,81 @@
     "evidenceClassification": [
       {
         "section": "experience",
-        "id": 8,
-        "label": "Hawkers Host / Expo",
+        "id": 5,
+        "label": "BitGo Software Engineering Intern",
         "terms": [
-          "sales"
+          "react",
+          "postgresql",
+          "amazon web services",
+          "architecture"
         ],
         "evidenceType": "direct_role_evidence",
         "claimStrength": "direct",
         "guidance": "Use as customer/client-facing communication or service evidence."
       },
       {
-        "section": "experience",
-        "id": 5,
-        "label": "BitGo Software Engineering Intern",
-        "terms": [
-          "pipeline",
-          "architecture"
-        ],
-        "evidenceType": "domain_tool_evidence",
-        "claimStrength": "supporting",
-        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
-      },
-      {
         "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "id": 9,
+        "label": "Centi – Personal Finance App",
         "terms": [
-          "pipeline",
-          "architecture"
+          "react",
+          "postgresql"
         ],
-        "evidenceType": "domain_tool_evidence",
-        "claimStrength": "supporting",
-        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
+        "evidenceType": "weak_lexical_overlap",
+        "claimStrength": "cautious",
+        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
       },
       {
         "section": "projects",
         "id": 10,
         "label": "Taylor.io – Resume Builder & Parser",
         "terms": [
-          "artificial intelligence"
+          "react",
+          "postgresql"
         ],
-        "evidenceType": "domain_tool_evidence",
-        "claimStrength": "supporting",
-        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
+        "evidenceType": "weak_lexical_overlap",
+        "claimStrength": "cautious",
+        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
       },
       {
-        "section": "education",
-        "id": 3,
-        "label": "University of Central Florida",
+        "section": "projects",
+        "id": 18,
+        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
         "terms": [
-          "artificial intelligence"
+          "react"
+        ],
+        "evidenceType": "weak_lexical_overlap",
+        "claimStrength": "cautious",
+        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
+      },
+      {
+        "section": "experience",
+        "id": 8,
+        "label": "Hawkers Host / Expo",
+        "terms": [
+          "delivery"
+        ],
+        "evidenceType": "direct_role_evidence",
+        "claimStrength": "direct",
+        "guidance": "Use as customer/client-facing communication or service evidence."
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "label": "SecureScape – Smart Security System",
+        "terms": [
+          "security"
+        ],
+        "evidenceType": "direct_role_evidence",
+        "claimStrength": "direct",
+        "guidance": "Use as customer/client-facing communication or service evidence."
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "architecture"
         ],
         "evidenceType": "domain_tool_evidence",
         "claimStrength": "supporting",
@@ -787,36 +796,14 @@
       },
       {
         "section": "skills",
-        "id": 60,
-        "label": "AI-Driven Workflows",
+        "id": 51,
+        "label": "PostgreSQL",
         "terms": [
-          "artificial intelligence"
+          "postgresql"
         ],
-        "evidenceType": "domain_tool_evidence",
-        "claimStrength": "supporting",
-        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
-      },
-      {
-        "section": "skills",
-        "id": 61,
-        "label": "Data Pipelines",
-        "terms": [
-          "pipeline"
-        ],
-        "evidenceType": "domain_tool_evidence",
-        "claimStrength": "supporting",
-        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
-      },
-      {
-        "section": "skills",
-        "id": 57,
-        "label": "ETL Pipelines",
-        "terms": [
-          "pipeline"
-        ],
-        "evidenceType": "domain_tool_evidence",
-        "claimStrength": "supporting",
-        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
+        "evidenceType": "weak_lexical_overlap",
+        "claimStrength": "cautious",
+        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
       },
       {
         "section": "experience",
@@ -832,12 +819,10 @@
       },
       {
         "section": "projects",
-        "id": 9,
-        "label": "Centi – Personal Finance App",
+        "id": 17,
+        "label": "ShelfVision - Dense Shelf Object Detection",
         "terms": [
-          "compliance / standards",
-          "metrics / reporting",
-          "workflow / automation"
+          "metrics / reporting"
         ],
         "evidenceType": "transferable_behavior",
         "claimStrength": "bridge",
@@ -846,35 +831,74 @@
     ],
     "jdSignalIntent": [
       {
-        "term": "sales",
+        "term": "react",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "tool_platform",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
+        ]
+      },
+      {
+        "term": "postgresql",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "tool_platform",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "manage databases across sqlserver, postgresql, and dynamodb environments."
+        ]
+      },
+      {
+        "term": "graphql",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
         "linePreview": [
-          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
-          "assist in developing our sales architecture and refining go-to-market messaging"
+          "develop secure, high‑performance apis using rest, soap, and graphql."
         ]
       },
       {
-        "term": "outreach",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "role_capability",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
-          "run outbound outreach to msps nationwide (qualified leads provided)"
-        ]
-      },
-      {
-        "term": "pipeline",
+        "term": "microservices",
         "intent": "company_product_context",
         "priority": 1,
         "signalType": "role_capability",
         "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
         "linePreview": [
-          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+          "work with aws cloud services, serverless components, and microservices‑based architectures."
+        ]
+      },
+      {
+        "term": "amazon web services",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "tool_platform",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "work with aws cloud services, serverless components, and microservices‑based architectures."
+        ]
+      },
+      {
+        "term": "delivery",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery.",
+          "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey."
+        ]
+      },
+      {
+        "term": "security",
+        "intent": "candidate_requirement",
+        "priority": 2,
+        "signalType": "role_capability",
+        "reason": "Candidate requirement: use as bridge/skills emphasis when supported by resume behavior.",
+        "linePreview": [
+          "troubleshoot performance, security, and stability issues across the full stack."
         ]
       },
       {
@@ -884,92 +908,51 @@
         "signalType": "role_capability",
         "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
         "linePreview": [
-          "assist in developing our sales architecture and refining go-to-market messaging"
+          "own full feature lifecycle—from concept and architecture to deployment and optimization."
         ]
       },
       {
-        "term": "hiring",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "role_capability",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "we're hiring a founding growth intern to support our u.s. market expansion."
-        ]
-      },
-      {
-        "term": "leads",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "role_capability",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "run outbound outreach to msps nationwide (qualified leads provided)"
-        ]
-      },
-      {
-        "term": "outbound",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "role_capability",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "run outbound outreach to msps nationwide (qualified leads provided)"
-        ]
-      },
-      {
-        "term": "artificial intelligence",
+        "term": "deployment",
         "intent": "company_product_context",
         "priority": 1,
         "signalType": "role_capability",
         "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
         "linePreview": [
-          "interest in b2b sales, ai, and operational software"
+          "own full feature lifecycle—from concept and architecture to deployment and optimization."
         ]
       },
       {
-        "term": "b2b",
+        "term": "developer",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
         "linePreview": [
-          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
-          "interest in b2b sales, ai, and operational software"
+          "full stack developer"
         ]
       },
       {
-        "term": "founders",
-        "intent": "candidate_requirement",
-        "priority": 2,
-        "signalType": "role_capability",
-        "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
-        "linePreview": [
-          "book discovery calls with founders, owners, and key decision-makers"
-        ]
-      },
-      {
-        "term": "representative",
+        "term": "implement",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": []
-      },
-      {
-        "term": "book",
-        "intent": "candidate_requirement",
-        "priority": 2,
-        "signalType": "role_capability",
-        "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
         "linePreview": [
-          "book discovery calls with founders, owners, and key decision-makers"
+          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
         ]
       }
     ],
     "gapSupport": [
       {
-        "term": "outreach",
+        "term": "ci/cd",
+        "status": "unsupported_exact",
+        "signalType": "tool_platform",
+        "supportingEvidence": [],
+        "capability": "exact tool/platform",
+        "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
+      },
+      {
+        "term": "graphql",
         "status": "unsupported",
         "signalType": "role_capability",
         "supportingEvidence": [],
@@ -977,7 +960,7 @@
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
       },
       {
-        "term": "hiring",
+        "term": "microservices",
         "status": "unsupported",
         "signalType": "role_capability",
         "supportingEvidence": [],
@@ -985,7 +968,20 @@
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
       },
       {
-        "term": "leads",
+        "term": "deployment",
+        "status": "conceptual",
+        "signalType": "role_capability",
+        "supportingEvidence": [
+          "aws",
+          "ec2",
+          "deployed",
+          "production"
+        ],
+        "capability": "cloud and deployment",
+        "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
+      },
+      {
+        "term": "developer",
         "status": "unsupported",
         "signalType": "role_capability",
         "supportingEvidence": [],
@@ -993,95 +989,20 @@
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
       },
       {
-        "term": "outbound",
+        "term": "implement",
         "status": "unsupported",
         "signalType": "role_capability",
         "supportingEvidence": [],
         "capability": "",
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "b2b",
-        "status": "unsupported",
-        "signalType": "role_capability",
-        "supportingEvidence": [],
-        "capability": "",
-        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "founders",
-        "status": "unsupported",
-        "signalType": "role_capability",
-        "supportingEvidence": [],
-        "capability": "",
-        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "representative",
-        "status": "unsupported",
-        "signalType": "role_capability",
-        "supportingEvidence": [],
-        "capability": "",
-        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "book",
-        "status": "unsupported",
-        "signalType": "role_capability",
-        "supportingEvidence": [],
-        "capability": "",
-        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "msps",
-        "status": "context_only",
-        "signalType": "context",
-        "supportingEvidence": [],
-        "capability": "company/client context",
-        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
-      },
-      {
-        "term": "performance",
-        "status": "context_only",
-        "signalType": "context",
-        "supportingEvidence": [],
-        "capability": "company/client context",
-        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
-      },
-      {
-        "term": "operations",
-        "status": "context_only",
-        "signalType": "context",
-        "supportingEvidence": [],
-        "capability": "company/client context",
-        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
-      },
-      {
-        "term": "where",
-        "status": "context_only",
-        "signalType": "context",
-        "supportingEvidence": [],
-        "capability": "company/client context",
-        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
-      },
-      {
-        "term": "service",
-        "status": "context_only",
-        "signalType": "context",
-        "supportingEvidence": [],
-        "capability": "company/client context",
-        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
       }
     ],
     "unsupportedTerms": [
-      "outreach",
-      "hiring",
-      "leads",
-      "outbound",
-      "b2b",
-      "founders",
-      "representative",
-      "book"
+      "ci/cd",
+      "graphql",
+      "microservices",
+      "developer",
+      "implement"
     ],
     "fitRisk": {
       "level": "normal",
@@ -1102,24 +1023,77 @@
       "claimGuidance": ""
     },
     "topJobTerms": [
-      "sales",
-      "outreach",
-      "pipeline",
-      "architecture",
-      "hiring",
-      "leads",
-      "outbound",
-      "artificial intelligence"
+      "react",
+      "postgresql",
+      "graphql",
+      "microservices",
+      "amazon web services",
+      "delivery",
+      "security",
+      "architecture"
     ],
     "guidance": "Direct fit: lead with the role title and strongest JD-overlap evidence, while preserving resume-native breadth."
   },
+  "job_strategy": {
+    "persona": "sales_growth",
+    "fitMode": "direct",
+    "lengthMode": "standard",
+    "readerGoal": "Prove customer-facing growth readiness through communication, revenue-adjacent impact, and truthful product interest.",
+    "proofStyle": [
+      "customer communication",
+      "people-facing work",
+      "revenue-adjacent metrics",
+      "relationship handling",
+      "domain-relevant product interest"
+    ],
+    "keepPriorities": [
+      "customer-facing roles",
+      "sales or revenue evidence",
+      "interpersonal proof",
+      "one relevant product/software project"
+    ],
+    "trimPriorities": [
+      "deep technical projects",
+      "unsupported sales ownership",
+      "non-role technical stacks"
+    ],
+    "claimRules": [
+      "Do not call the candidate a sales professional unless formal sales or outreach...",
+      "Do not claim unsupported terms directly: ci/cd, graphql, microservices, develop...",
+      "Exact tools/platforms stay as review gaps unless resume evidence exists: ci/cd."
+    ],
+    "sectionBudget": {
+      "experience": null,
+      "projects": null,
+      "skillsGroups": null,
+      "advisory": true
+    },
+    "supportedSignals": [
+      "react",
+      "postgresql",
+      "amazon web services",
+      "delivery",
+      "security",
+      "architecture"
+    ],
+    "gapSignals": [
+      "ci/cd",
+      "graphql",
+      "microservices",
+      "deployment",
+      "developer",
+      "implement"
+    ]
+  },
   "relevant_jd_lines": [
-    "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
-    "run outbound outreach to msps nationwide (qualified leads provided)",
-    "book discovery calls with founders, owners, and key decision-makers",
-    "assist in developing our sales architecture and refining go-to-market messaging",
-    "interest in b2b sales, ai, and operational software",
-    "prior sales or outreach experience preferred",
-    "we're hiring a founding growth intern to support our u.s. market expansion."
+    "implement ci/cd pipelines and follow devsecops best practices for continuous delivery.",
+    "own full feature lifecycle—from concept and architecture to deployment and optimization.",
+    "full stack developer",
+    "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+    "build modern, responsive web applications using react and strong server‑side skills in .net or node.js.",
+    "develop secure, high‑performance apis using rest, soap, and graphql.",
+    "work with aws cloud services, serverless components, and microservices‑based architectures.",
+    "manage databases across sqlserver, postgresql, and dynamodb environments.",
+    "troubleshoot performance, security, and stability issues across the full stack."
   ]
 }

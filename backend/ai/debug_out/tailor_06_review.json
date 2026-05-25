@@ -1,0 +1,1099 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Copy this file into notes after a run. Fill humanReview to score where the tailoring pipeline is likely going wrong.",
+  "run": {
+    "targetRole": "Software Engineer",
+    "company": "Droisys",
+    "model": "gpt-4o-mini",
+    "stylePreferences": {
+      "focus": "balanced",
+      "tone": "balanced",
+      "length_target": "balanced",
+      "rewrite_freedom": "balanced",
+      "custom_instructions": ""
+    },
+    "strictTruth": true,
+    "jobDescriptionChars": 2145,
+    "resumeCounts": {
+      "experience": 3,
+      "projects": 6,
+      "skills": 22,
+      "education": 1
+    }
+  },
+  "extraction": {
+    "activeDomains": [
+      "engineering"
+    ],
+    "rawTopTerms": [
+      {
+        "term": "react",
+        "signalType": "tool_platform",
+        "score": 8.5,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
+        ]
+      },
+      {
+        "term": "ci/cd",
+        "signalType": "tool_platform",
+        "score": 8.0,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+        ]
+      },
+      {
+        "term": "postgresql",
+        "signalType": "tool_platform",
+        "score": 7.5,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "manage databases across sqlserver, postgresql, and dynamodb environments."
+        ]
+      },
+      {
+        "term": "graphql",
+        "signalType": "role_capability",
+        "score": 7.0,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "develop secure, high‑performance apis using rest, soap, and graphql."
+        ]
+      },
+      {
+        "term": "microservices",
+        "signalType": "role_capability",
+        "score": 7.0,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "work with aws cloud services, serverless components, and microservices‑based architectures."
+        ]
+      },
+      {
+        "term": "amazon web services",
+        "signalType": "tool_platform",
+        "score": 5.5,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "work with aws cloud services, serverless components, and microservices‑based architectures."
+        ]
+      },
+      {
+        "term": "delivery",
+        "signalType": "role_capability",
+        "score": 5.3,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+        ]
+      },
+      {
+        "term": "security",
+        "signalType": "role_capability",
+        "score": 4.3,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "troubleshoot performance, security, and stability issues across the full stack."
+        ]
+      },
+      {
+        "term": "solutions",
+        "signalType": "generic_fragment",
+        "score": 3.0,
+        "lineKinds": [
+          "body",
+          "role"
+        ],
+        "linePreview": [
+          "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+          "collaborate with cross‑functional teams to translate business needs into scalable technical solutions."
+        ]
+      },
+      {
+        "term": "architecture",
+        "signalType": "role_capability",
+        "score": 3.0,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "own full feature lifecycle—from concept and architecture to deployment and optimization.",
+          "work with aws cloud services, serverless components, and microservices‑based architectures."
+        ]
+      },
+      {
+        "term": "deployment",
+        "signalType": "role_capability",
+        "score": 3.0,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "own full feature lifecycle—from concept and architecture to deployment and optimization."
+        ]
+      },
+      {
+        "term": "developer",
+        "signalType": "role_capability",
+        "score": 3.0,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "full stack developer"
+        ]
+      }
+    ],
+    "priorityTerms": [
+      {
+        "term": "react",
+        "signalType": "tool_platform",
+        "score": 8.5,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
+        ]
+      },
+      {
+        "term": "ci/cd",
+        "signalType": "tool_platform",
+        "score": 8.0,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+        ]
+      },
+      {
+        "term": "postgresql",
+        "signalType": "tool_platform",
+        "score": 7.5,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "manage databases across sqlserver, postgresql, and dynamodb environments."
+        ]
+      },
+      {
+        "term": "graphql",
+        "signalType": "role_capability",
+        "score": 7.0,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "develop secure, high‑performance apis using rest, soap, and graphql."
+        ]
+      },
+      {
+        "term": "microservices",
+        "signalType": "role_capability",
+        "score": 7.0,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "work with aws cloud services, serverless components, and microservices‑based architectures."
+        ]
+      },
+      {
+        "term": "amazon web services",
+        "signalType": "tool_platform",
+        "score": 5.5,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "work with aws cloud services, serverless components, and microservices‑based architectures."
+        ]
+      },
+      {
+        "term": "delivery",
+        "signalType": "role_capability",
+        "score": 5.3,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
+          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+        ]
+      },
+      {
+        "term": "security",
+        "signalType": "role_capability",
+        "score": 4.3,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "troubleshoot performance, security, and stability issues across the full stack."
+        ]
+      },
+      {
+        "term": "architecture",
+        "signalType": "role_capability",
+        "score": 3.0,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "own full feature lifecycle—from concept and architecture to deployment and optimization.",
+          "work with aws cloud services, serverless components, and microservices‑based architectures."
+        ]
+      },
+      {
+        "term": "deployment",
+        "signalType": "role_capability",
+        "score": 3.0,
+        "lineKinds": [
+          "body"
+        ],
+        "linePreview": [
+          "own full feature lifecycle—from concept and architecture to deployment and optimization."
+        ]
+      },
+      {
+        "term": "developer",
+        "signalType": "role_capability",
+        "score": 3.0,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "full stack developer"
+        ]
+      },
+      {
+        "term": "implement",
+        "signalType": "role_capability",
+        "score": 3.0,
+        "lineKinds": [
+          "role"
+        ],
+        "linePreview": [
+          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+        ]
+      }
+    ],
+    "suppressedTerms": [
+      {
+        "term": "solutions",
+        "signalType": "generic_fragment",
+        "score": null
+      }
+    ],
+    "termsBySignalType": {
+      "tool_platform": [
+        "react",
+        "ci/cd",
+        "postgresql",
+        "amazon web services"
+      ],
+      "role_capability": [
+        "graphql",
+        "microservices",
+        "delivery",
+        "security",
+        "architecture",
+        "deployment",
+        "developer",
+        "implement"
+      ]
+    },
+    "includedLineSamples": [
+      "about the job",
+      "about company",
+      "droisys is an innovation technology company focused on helping companies accelerate their digital initiatives from strategy and planning through execution. we leverage deep technical expertise, agile methodologies, and data-driven intelligence to modernize systems of engagement and simplify human/tech interaction.",
+      "amazing things happen when we work in environments where everyone feels a true sense of belonging and when candidates have the requisite skills and opportunities to succeed. at droisys, we invest in our talent and support career growth, and we are always on the lookout for amazing talent who can contribute to our growth by delivering top results for our clients. join us to challenge yourself and accomplish work that matters.",
+      "full stack developer",
+      "should be open to travel to san jose, ca and las vegas, ca"
+    ]
+  },
+  "strategy": {
+    "persona": "sales_growth",
+    "fitMode": "direct",
+    "lengthMode": "standard",
+    "readerGoal": "Prove customer-facing growth readiness through communication, revenue-adjacent impact, and truthful product interest.",
+    "proofStyle": [
+      "customer communication",
+      "people-facing work",
+      "revenue-adjacent metrics",
+      "relationship handling",
+      "domain-relevant product interest"
+    ],
+    "keepPriorities": [
+      "customer-facing roles",
+      "sales or revenue evidence",
+      "interpersonal proof",
+      "one relevant product/software project"
+    ],
+    "trimPriorities": [
+      "deep technical projects",
+      "unsupported sales ownership",
+      "non-role technical stacks"
+    ],
+    "claimRules": [
+      "Do not call the candidate a sales professional unless formal sales or outreach...",
+      "Do not claim unsupported terms directly: ci/cd, graphql, microservices, develop...",
+      "Exact tools/platforms stay as review gaps unless resume evidence exists: ci/cd."
+    ],
+    "supportedSignals": [
+      "react",
+      "postgresql",
+      "amazon web services",
+      "delivery",
+      "security",
+      "architecture"
+    ],
+    "gapSignals": [
+      "ci/cd",
+      "graphql",
+      "microservices",
+      "deployment",
+      "developer",
+      "implement"
+    ]
+  },
+  "alignment": {
+    "mode": "direct",
+    "unsupportedTerms": [
+      "ci/cd",
+      "graphql",
+      "microservices",
+      "developer",
+      "implement"
+    ],
+    "fitRisk": {
+      "level": "normal",
+      "kind": "",
+      "reason": "",
+      "targetSignals": [],
+      "unsupportedSeniorityTerms": [],
+      "resumeScopeEvidence": {
+        "seniorTitleEvidence": [],
+        "earlyCareerTitleEvidence": [
+          "bitgo software engineering intern",
+          "bar louie server",
+          "hawkers host / expo"
+        ],
+        "seniorScopePhraseEvidence": []
+      },
+      "recommendedAction": "",
+      "claimGuidance": ""
+    },
+    "gapSupport": [
+      {
+        "term": "ci/cd",
+        "status": "unsupported_exact",
+        "signalType": "tool_platform",
+        "supportingEvidence": [],
+        "capability": "exact tool/platform",
+        "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
+      },
+      {
+        "term": "graphql",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "microservices",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "deployment",
+        "status": "conceptual",
+        "signalType": "role_capability",
+        "supportingEvidence": [
+          "aws",
+          "ec2",
+          "deployed",
+          "production"
+        ],
+        "capability": "cloud and deployment",
+        "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
+      },
+      {
+        "term": "developer",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "implement",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      }
+    ],
+    "jdSignalIntent": [
+      {
+        "term": "react",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "tool_platform",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
+        ]
+      },
+      {
+        "term": "postgresql",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "tool_platform",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "manage databases across sqlserver, postgresql, and dynamodb environments."
+        ]
+      },
+      {
+        "term": "graphql",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "develop secure, high‑performance apis using rest, soap, and graphql."
+        ]
+      },
+      {
+        "term": "microservices",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "role_capability",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "work with aws cloud services, serverless components, and microservices‑based architectures."
+        ]
+      },
+      {
+        "term": "amazon web services",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "tool_platform",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "work with aws cloud services, serverless components, and microservices‑based architectures."
+        ]
+      },
+      {
+        "term": "delivery",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery.",
+          "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey."
+        ]
+      },
+      {
+        "term": "security",
+        "intent": "candidate_requirement",
+        "priority": 2,
+        "signalType": "role_capability",
+        "reason": "Candidate requirement: use as bridge/skills emphasis when supported by resume behavior.",
+        "linePreview": [
+          "troubleshoot performance, security, and stability issues across the full stack."
+        ]
+      },
+      {
+        "term": "architecture",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "role_capability",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "own full feature lifecycle—from concept and architecture to deployment and optimization."
+        ]
+      },
+      {
+        "term": "deployment",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "role_capability",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "own full feature lifecycle—from concept and architecture to deployment and optimization."
+        ]
+      },
+      {
+        "term": "developer",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "full stack developer"
+        ]
+      },
+      {
+        "term": "implement",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
+        ]
+      }
+    ]
+  },
+  "ranking": {
+    "experience": [
+      {
+        "id": 5,
+        "score": 28.152,
+        "hits": 4,
+        "matchedTerms": [
+          "react",
+          "postgresql",
+          "amazon web services",
+          "architecture"
+        ]
+      },
+      {
+        "id": 8,
+        "score": 6.25,
+        "hits": 1,
+        "matchedTerms": [
+          "delivery"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "id": 9,
+        "score": 17.85,
+        "hits": 2,
+        "matchedTerms": [
+          "react",
+          "postgresql"
+        ]
+      },
+      {
+        "id": 10,
+        "score": 17.85,
+        "hits": 2,
+        "matchedTerms": [
+          "react",
+          "postgresql"
+        ]
+      },
+      {
+        "id": 18,
+        "score": 9.2,
+        "hits": 1,
+        "matchedTerms": [
+          "react"
+        ]
+      },
+      {
+        "id": 12,
+        "score": 5.2,
+        "hits": 1,
+        "matchedTerms": [
+          "security"
+        ]
+      },
+      {
+        "id": 20,
+        "score": 2.502,
+        "hits": 1,
+        "matchedTerms": [
+          "architecture"
+        ]
+      }
+    ]
+  },
+  "selection": {
+    "narrativePlan": {
+      "keepExperience": [
+        5,
+        8
+      ],
+      "dropExperience": [
+        7
+      ],
+      "rewriteExperience": [
+        5
+      ],
+      "keepProjects": [
+        9,
+        10
+      ],
+      "dropProjects": [
+        12,
+        18,
+        20
+      ],
+      "maybeProjects": [
+        17
+      ],
+      "rewriteProjects": [
+        9,
+        10
+      ],
+      "heroExperience": [
+        5
+      ],
+      "heroProjects": [
+        9,
+        10
+      ]
+    },
+    "changedRows": {
+      "experience": [
+        {
+          "id": 5,
+          "label": "BitGo Software Engineering Intern",
+          "removed": false,
+          "fieldsChanged": [
+            "description"
+          ]
+        }
+      ],
+      "projects": [
+        {
+          "id": 9,
+          "label": "Centi – Personal Finance App",
+          "removed": false,
+          "fieldsChanged": [
+            "description"
+          ]
+        },
+        {
+          "id": 10,
+          "label": "Taylor.io – Resume Builder & Parser",
+          "removed": false,
+          "fieldsChanged": [
+            "description"
+          ]
+        }
+      ],
+      "skills": []
+    },
+    "removedRows": {
+      "experience": [
+        {
+          "id": 7,
+          "label": "Bar Louie Server",
+          "removed": true,
+          "fieldsChanged": []
+        }
+      ],
+      "projects": [
+        {
+          "id": 12,
+          "label": "SecureScape – Smart Security System",
+          "removed": true,
+          "fieldsChanged": []
+        },
+        {
+          "id": 18,
+          "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
+          "removed": true,
+          "fieldsChanged": []
+        },
+        {
+          "id": 20,
+          "label": "SentimentTrader - Real-Time Stock Sentiment Pipeline",
+          "removed": true,
+          "fieldsChanged": []
+        }
+      ],
+      "skills": [
+        {
+          "id": 52,
+          "label": "MySQL",
+          "removed": true,
+          "fieldsChanged": []
+        },
+        {
+          "id": 53,
+          "label": "MongoDB",
+          "removed": true,
+          "fieldsChanged": []
+        },
+        {
+          "id": 54,
+          "label": "Pandas",
+          "removed": true,
+          "fieldsChanged": []
+        },
+        {
+          "id": 55,
+          "label": "NumPy",
+          "removed": true,
+          "fieldsChanged": []
+        },
+        {
+          "id": 57,
+          "label": "ETL Pipelines",
+          "removed": true,
+          "fieldsChanged": []
+        }
+      ]
+    }
+  },
+  "tailorAssist": {
+    "paragraph": "I treated this as a Software Engineer at Droisys draft and made React, PostgreSQL, and amazon web services easy to find. You already had the right raw material: React, PostgreSQL, amazon web services, and delivery. I pushed that proof forward in Centi – Personal Finance App and Taylor.io – Resume Builder & Parser. Prove customer-facing growth readiness through communication, revenue-adjacent impact, and truthful product interest. I trimmed Bar Louie Server, SecureScape – Smart Security System, Tizirsso Racing – Portfolio & Sponsorship Website, and SentimentTrader - Real-Time Stock Sentiment Pipeline because they were weaker signals for this read. The biggest help here: kept the projects that best prove the role fit, reframed your experience around the job's strongest signals, and gave the summary a clearer role-specific angle. Under the hood, I changed the summary, experience, projects, and skills based on those signals.",
+    "chips": [
+      {
+        "label": "Strict truth",
+        "tone": "safe"
+      },
+      {
+        "label": "Summary updated",
+        "tone": "action"
+      },
+      {
+        "label": "Experience reframed",
+        "tone": "action"
+      },
+      {
+        "label": "Projects prioritized",
+        "tone": "action"
+      },
+      {
+        "label": "Skills reordered",
+        "tone": "action"
+      },
+      {
+        "label": "Some JD terms not evidenced",
+        "tone": "caution"
+      },
+      {
+        "label": "Review skills",
+        "tone": "caution"
+      },
+      {
+        "label": "Review rewrite strength",
+        "tone": "caution"
+      }
+    ],
+    "details": [
+      {
+        "title": "What I prioritized",
+        "items": [
+          "Prove customer-facing growth readiness through communication, revenue-adjacent impact, and truthful product interest.",
+          "I prioritized customer communication, people-facing work, revenue-adjacent metrics, relationship handling, and domain-relevant product interest."
+        ]
+      },
+      {
+        "title": "Why it changed",
+        "items": [
+          "Target story: Proven experience in building scalable web applications and APIs using React and PostgreSQL, with a strong focus on customer-centric solutions.",
+          "Main evidence themes: customer communication, API development, and data management."
+        ]
+      },
+      {
+        "title": "What I spotlighted",
+        "items": [
+          "BitGo Software Engineering Intern",
+          "Centi – Personal Finance App",
+          "Taylor.io – Resume Builder & Parser"
+        ]
+      },
+      {
+        "title": "What I trimmed",
+        "items": [
+          "Bar Louie Server",
+          "SecureScape – Smart Security System",
+          "Tizirsso Racing – Portfolio & Sponsorship Website",
+          "SentimentTrader - Real-Time Stock Sentiment Pipeline",
+          "MySQL",
+          "MongoDB",
+          "Pandas",
+          "NumPy"
+        ]
+      },
+      {
+        "title": "Related evidence",
+        "items": [
+          "deployment: related evidence includes aws, ec2, and deployed."
+        ]
+      },
+      {
+        "title": "Not directly evidenced",
+        "items": [
+          "I did not claim CI/CD because those exact tools or platforms were not in the resume."
+        ]
+      },
+      {
+        "title": "Worth checking",
+        "items": [
+          "Do not call the candidate a sales professional unless formal sales or outreach....",
+          "Do not claim unsupported terms directly: ci/cd, graphql, microservices, develop...",
+          "Some JD terms were not directly evidenced: ci/cd, graphql, microservices, and developer.",
+          "Review the skills list; a few useful-but-lower-priority skills may have been trimmed."
+        ]
+      }
+    ],
+    "jobPriorityTerms": [
+      "React",
+      "PostgreSQL",
+      "amazon web services"
+    ]
+  },
+  "warningsByCategory": {
+    "rewrite": [
+      "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:9, projects:10.",
+      "Rewrite audit: expected stronger rewrites for experience id 5, projects id 10; output looked like minor wording changes.",
+      "Rewrite audit: filler phrasing survived in projects id 9 (enhancing)."
+    ],
+    "skills": [
+      "Skills guard restored 6 skill row(s) because Pass B exceeded the deletion budget."
+    ]
+  },
+  "changeReasons": [
+    {
+      "section": "summary",
+      "reason": "Repositioned the professional summary toward Software Engineer using concrete, on-resume evidence where possible."
+    },
+    {
+      "section": "experience",
+      "id": 5,
+      "reason": "experience row 5: light wording pass; the core scope stayed the same."
+    },
+    {
+      "section": "experience",
+      "id": 7,
+      "reason": "Removed Bar Louie Server because it was less relevant for this draft."
+    },
+    {
+      "section": "projects",
+      "id": 9,
+      "reason": "project 9: revised the description and stack so the fit is easier to scan."
+    },
+    {
+      "section": "projects",
+      "id": 10,
+      "reason": "project 10: light cleanup to the description or stack."
+    },
+    {
+      "section": "projects",
+      "id": 12,
+      "reason": "Removed SecureScape – Smart Security System because stronger project evidence fit this role better."
+    },
+    {
+      "section": "projects",
+      "id": 18,
+      "reason": "Removed Tizirsso Racing – Portfolio & Sponsorship Website because stronger project evidence fit this role better."
+    },
+    {
+      "section": "projects",
+      "id": 20,
+      "reason": "Removed SentimentTrader - Real-Time Stock Sentiment Pipeline because stronger project evidence fit this role better."
+    },
+    {
+      "section": "skills",
+      "id": 52,
+      "reason": "Trimmed MySQL from the visible skills list."
+    },
+    {
+      "section": "skills",
+      "id": 53,
+      "reason": "Trimmed MongoDB from the visible skills list."
+    },
+    {
+      "section": "skills",
+      "id": 54,
+      "reason": "Trimmed Pandas from the visible skills list."
+    },
+    {
+      "section": "skills",
+      "id": 55,
+      "reason": "Trimmed NumPy from the visible skills list."
+    },
+    {
+      "section": "skills",
+      "id": 57,
+      "reason": "Trimmed ETL Pipelines from the visible skills list."
+    }
+  ],
+  "quality": {
+    "target_role": "Software Engineer",
+    "flags": {
+      "aggressive_skill_prune": false,
+      "suspicious_protected_skill_removals": true,
+      "summary_has_generic_phrase_hits": false,
+      "filler_phrase_hits": true,
+      "skills_expected_but_unchanged": false,
+      "minor_expected_rewrites": true,
+      "missing_expected_rewrites": false
+    },
+    "summary": {
+      "changed": true,
+      "after_preview": "Full-stack engineer with a proven track record in building scalable web applications and APIs using React and PostgreSQL. Experienced in developing customer-centric solutions and collaborating effectively in technical environments.",
+      "generic_phrases_matched": [],
+      "filler_phrases_matched": []
+    },
+    "rewrite_quality": {
+      "expected_experience_rewrite_ids": [
+        5
+      ],
+      "expected_project_rewrite_ids": [
+        9,
+        10
+      ],
+      "minor_rewrite_rows": [
+        {
+          "section": "experience",
+          "id": 5
+        },
+        {
+          "section": "projects",
+          "id": 10
+        }
+      ],
+      "missing_rewrite_rows": [],
+      "filler_phrase_hits": [
+        {
+          "section": "projects",
+          "id": 9,
+          "phrases": [
+            "enhancing"
+          ]
+        }
+      ]
+    },
+    "removals": {
+      "removedSkillIds": [
+        52,
+        53,
+        54,
+        55,
+        57
+      ],
+      "removedProjectIds": [
+        12,
+        18,
+        20
+      ],
+      "removedExperienceIds": [
+        7
+      ],
+      "visible_skill_count_before": 22,
+      "removed_skill_count": 5,
+      "removal_ratio_skills": 0.227,
+      "protected_skill_removals": [
+        {
+          "id": 52,
+          "name": "MySQL"
+        },
+        {
+          "id": 53,
+          "name": "MongoDB"
+        },
+        {
+          "id": 57,
+          "name": "ETL Pipelines"
+        }
+      ]
+    },
+    "narrative_heroes": {
+      "hero_project_ids": [
+        9,
+        10
+      ],
+      "hero_project_ids_with_edits": [
+        9,
+        10
+      ],
+      "hero_project_ids_not_in_patch": [],
+      "only_one_hero_touched_while_several_listed": false,
+      "hero_experience_ids": [
+        5
+      ],
+      "hero_experience_ids_with_edits": [
+        5
+      ],
+      "hero_experience_ids_not_in_patch": []
+    },
+    "stage_edits_removals": {
+      "removedSkillIds": [],
+      "removedProjectIds": [
+        12,
+        18,
+        20
+      ]
+    },
+    "rewrite_intensity": {
+      "summary_changed": true,
+      "experience_rows_touched": 1,
+      "project_rows_touched": 2,
+      "skill_rows_touched": 5,
+      "skills_section_changed": true,
+      "rows_removed_total": 9,
+      "hero_projects_edited_count": 2,
+      "hero_experience_edited_count": 1,
+      "low_intensity_hint": false
+    }
+  },
+  "humanReview": {
+    "scores_0_to_2": {
+      "extraction": null,
+      "strategy": null,
+      "selection": null,
+      "rewrite": null,
+      "summary_and_skills": null,
+      "tailor_assist": null
+    },
+    "expected": {
+      "persona": "sales_growth",
+      "must_keep": [],
+      "maybe_keep": [],
+      "should_drop": [],
+      "questionable_terms": [],
+      "summary_should_feel_like": [],
+      "biggest_concern": ""
+    },
+    "observations": {
+      "what_worked": [],
+      "what_felt_wrong": [],
+      "likely_root_causes": [],
+      "notes_for_next_rule_or_prompt": ""
+    }
+  },
+  "likelyIssueHints": [
+    "selection: service/customer experience was removed for a people-facing lane.",
+    "rewrite: audit warnings suggest weak, missing, or filler-heavy rewrites.",
+    "skills: skills pass needed repair or may not reflect the intended strategy."
+  ]
+}

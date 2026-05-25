@@ -1,0 +1,1524 @@
+[
+  {
+    "id": "droisys_full_stack_developer",
+    "role": "Full Stack Developer",
+    "company": "Droisys",
+    "settings": {
+      "length_target": "one_page",
+      "rewrite_freedom": "balanced",
+      "strict_truth": true
+    },
+    "expected": {
+      "lane": "technical",
+      "persona": "technical_engineering",
+      "roleArchetype": "full_stack_product_engineering",
+      "fitMode": [
+        "direct",
+        "adjacent"
+      ],
+      "prioritySignals": [
+        "React",
+        "backend APIs",
+        "PostgreSQL",
+        "AWS",
+        "deployment",
+        "security",
+        "architecture",
+        "full feature lifecycle"
+      ],
+      "unsupportedWarnings": [
+        "CI/CD",
+        "GraphQL",
+        "microservices"
+      ],
+      "mustKeep": {
+        "experience": [
+          {
+            "id": 5,
+            "label": "BitGo Software Engineering Intern"
+          }
+        ],
+        "projects": [
+          {
+            "id": 9,
+            "label": "Centi – Personal Finance App"
+          },
+          {
+            "id": 10,
+            "label": "Taylor.io – Resume Builder & Parser"
+          }
+        ]
+      },
+      "maybeKeep": {
+        "projects": [],
+        "experience": []
+      },
+      "shouldDrop": {
+        "experience": [
+          {
+            "id": 7,
+            "label": "Bar Louie Server"
+          }
+        ],
+        "projects": [
+          {
+            "id": 12,
+            "label": "SecureScape – Smart Security System"
+          },
+          {
+            "id": 18,
+            "label": "Tizirsso Racing – Portfolio & Sponsorship Website"
+          },
+          {
+            "id": 20,
+            "label": "SentimentTrader - Real-Time Stock Sentiment Pipeline"
+          }
+        ]
+      },
+      "skillsToPreserve": [
+        "React",
+        "PostgreSQL",
+        "AWS (EC2)",
+        "REST API Design",
+        "MySQL",
+        "MongoDB",
+        "ETL Pipelines"
+      ],
+      "skillsToDeprioritize": [
+        "Customer Service",
+        "Hospitality",
+        "PyTorch",
+        "TensorFlow Lite"
+      ],
+      "summaryTone": {
+        "shouldFeelLike": [
+          "full-stack product engineer",
+          "backend APIs",
+          "React interfaces",
+          "database-backed applications",
+          "deployment-aware"
+        ],
+        "shouldNotFeelLike": [
+          "sales/growth",
+          "data scientist",
+          "AI-first engineer",
+          "customer-facing growth"
+        ],
+        "avoidPhrases": [
+          "proven track record",
+          "dynamic professional",
+          "revenue-adjacent impact"
+        ]
+      },
+      "tailorAssistShouldMention": [
+        "full-stack delivery",
+        "React",
+        "backend APIs",
+        "cloud or AWS-adjacent deployment",
+        "databases"
+      ],
+      "tailorAssistShouldNotMention": [
+        "customer-facing growth",
+        "revenue-adjacent impact",
+        "sales"
+      ]
+    },
+    "previousRun": {
+      "score": 6,
+      "maxScore": 12,
+      "stageScores": {
+        "extraction": 2,
+        "strategy": 0,
+        "selection": 2,
+        "rewrite": 1,
+        "summarySkills": 1,
+        "tailorAssist": 0
+      },
+      "whatWentWell": [
+        "Extraction found React, PostgreSQL, AWS, APIs, CI/CD, GraphQL, microservices, security, deployment, and architecture.",
+        "Selection kept BitGo, Centi, and Taylor.io.",
+        "Unsupported exact terms like CI/CD, GraphQL, and microservices were not claimed directly."
+      ],
+      "whatWentWrong": [
+        "Strategy picked sales_growth instead of full-stack product/platform engineering.",
+        "Tailor Assist explained the draft as customer-facing growth and revenue-adjacent impact.",
+        "Skills trimming removed useful backend/database breadth like MySQL, MongoDB, and ETL Pipelines.",
+        "BitGo and Taylor.io rewrites were too light."
+      ],
+      "biggestConcern": "The system selected decent rows despite the wrong strategy, but the wrong strategy poisoned the summary, skills, and Tailor Assist explanation.",
+      "failureTags": [
+        "wrong_strategy_lane",
+        "tailor_assist_misaligned",
+        "skill_trim_wrong",
+        "rewrite_too_light"
+      ]
+    }
+  },
+  {
+    "id": "timshel_health_data_ai_lead",
+    "role": "Data & AI Lead",
+    "company": "Timshel Health",
+    "settings": {
+      "length_target": "one_page",
+      "rewrite_freedom": "balanced",
+      "strict_truth": true
+    },
+    "expected": {
+      "lane": "data_ai",
+      "persona": "data_ai",
+      "roleArchetype": "data_ai_analytics_lead_stretch",
+      "fitMode": [
+        "adjacent",
+        "stretch"
+      ],
+      "prioritySignals": [
+        "SQL",
+        "data analytics",
+        "reporting",
+        "automated dashboards",
+        "data repositories",
+        "multi-source data integration",
+        "AI workflow improvement",
+        "executive-facing insights",
+        "startup ownership",
+        "operations improvement"
+      ],
+      "unsupportedWarnings": [
+        "Claude",
+        "healthcare data",
+        "Excel",
+        "EMR systems",
+        "billing systems",
+        "CRM systems",
+        "accounting systems",
+        "true lead-level ownership"
+      ],
+      "mustKeep": {
+        "experience": [
+          {
+            "id": 5,
+            "label": "BitGo Software Engineering Intern"
+          }
+        ],
+        "projects": [
+          {
+            "id": 10,
+            "label": "Taylor.io – Resume Builder & Parser"
+          },
+          {
+            "id": 9,
+            "label": "Centi – Personal Finance App"
+          },
+          {
+            "id": 20,
+            "label": "SentimentTrader - Real-Time Stock Sentiment Pipeline"
+          }
+        ]
+      },
+      "maybeKeep": {
+        "experience": [
+          {
+            "id": 7,
+            "label": "Bar Louie Server"
+          }
+        ],
+        "projects": []
+      },
+      "shouldDrop": {
+        "experience": [
+          {
+            "id": 8,
+            "label": "Hawkers Host / Expo"
+          }
+        ],
+        "projects": [
+          {
+            "id": 12,
+            "label": "SecureScape – Smart Security System"
+          },
+          {
+            "id": 17,
+            "label": "ShelfVision - Dense Shelf Object Detection"
+          },
+          {
+            "id": 18,
+            "label": "Tizirsso Racing – Portfolio & Sponsorship Website"
+          }
+        ]
+      },
+      "skillsToPreserve": [
+        "SQL",
+        "PostgreSQL",
+        "Python",
+        "Pandas",
+        "Data Pipelines",
+        "ETL Pipelines",
+        "AI-Driven Workflows",
+        "REST API Design",
+        "Django",
+        "AWS (EC2)"
+      ],
+      "skillsToDeprioritize": [
+        "React",
+        "Node.js",
+        "PyTorch",
+        "TensorFlow Lite",
+        "MongoDB",
+        "Customer Service",
+        "Hospitality"
+      ],
+      "summaryTone": {
+        "shouldFeelLike": [
+          "data and AI builder",
+          "analytics-focused",
+          "SQL/reporting-oriented",
+          "automation-minded",
+          "startup/ownership-ready",
+          "careful about lead-level claims"
+        ],
+        "shouldNotFeelLike": [
+          "sales/growth",
+          "customer-facing growth",
+          "generic software engineer",
+          "healthcare data expert",
+          "senior data leader"
+        ],
+        "avoidPhrases": [
+          "proven leader",
+          "true partner to the CEO",
+          "customer-facing growth",
+          "revenue-adjacent impact",
+          "dynamic professional",
+          "robust"
+        ]
+      },
+      "tailorAssistShouldMention": [
+        "data infrastructure",
+        "SQL",
+        "analytics",
+        "automated reporting",
+        "dashboards",
+        "data workflows",
+        "AI-driven operations",
+        "unsupported healthcare/Claude/Excel claims"
+      ],
+      "tailorAssistShouldNotMention": [
+        "sales",
+        "customer-facing growth",
+        "revenue-adjacent impact",
+        "hospitality",
+        "formal lead ownership"
+      ]
+    },
+    "previousRun": {
+      "score": 5,
+      "maxScore": 12,
+      "stageScores": {
+        "extraction": 1,
+        "strategy": 0,
+        "selection": 2,
+        "rewrite": 1,
+        "summarySkills": 1,
+        "tailorAssist": 0
+      },
+      "whatWentWell": [
+        "Selection was the strongest part.",
+        "The pipeline correctly surfaced BitGo, Taylor.io, Centi, and SentimentTrader as the best available evidence for data workflows, AI tools, analytics, reporting-adjacent work, and product/data systems.",
+        "It correctly avoided claiming unsupported exact tools like Claude, healthcare data, and Excel."
+      ],
+      "whatWentWrong": [
+        "Strategy picked sales_growth instead of a data/AI analytics ownership stretch lane.",
+        "Tailor Assist talked about customer-facing growth and revenue-adjacent impact instead of data infrastructure, analytics, reporting, and AI operations.",
+        "Extraction caught data and AI, but missed the deeper operating model: first data hire, data repository, ROI reporting, dashboards, operations, and multi-source integrations.",
+        "Summary was directionally data/AI focused, but too confident for a Lead role.",
+        "Skills trimming removed useful bridge skills like AWS EC2 and Django."
+      ],
+      "failureTags": [
+        "wrong_strategy_lane",
+        "tailor_assist_misaligned",
+        "extraction_too_shallow",
+        "lead_claim_risk",
+        "skill_trim_wrong"
+      ],
+      "biggestConcern": "The system found the right resume evidence, but shaped and explained it through the wrong sales/growth lane instead of a data infrastructure, analytics, reporting, and AI operations lane."
+    }
+  },
+  {
+    "id": "christys_host_hostess_fine_dining",
+    "role": "Host/Hostess",
+    "company": "Christy's",
+    "settings": {
+      "length_target": "one_page",
+      "rewrite_freedom": "balanced",
+      "strict_truth": true
+    },
+    "expected": {
+      "lane": "customer_service",
+      "persona": "hospitality_customer_service",
+      "roleArchetype": "restaurant_host_guest_service",
+      "fitMode": [
+        "direct"
+      ],
+      "prioritySignals": [
+        "host experience",
+        "restaurant experience",
+        "customer service",
+        "hospitality",
+        "guest communication",
+        "phone etiquette",
+        "interpersonal skills",
+        "positive attitude",
+        "team coordination",
+        "fast-paced environment",
+        "standing for long periods",
+        "schedule flexibility"
+      ],
+      "unsupportedWarnings": [
+        "fine dining experience",
+        "phone etiquette if not directly evidenced",
+        "standing for long periods if not directly evidenced",
+        "formal hostess title if only host/expo is shown"
+      ],
+      "mustKeep": {
+        "experience": [
+          {
+            "id": 8,
+            "label": "Hawkers Host / Expo"
+          },
+          {
+            "id": 7,
+            "label": "Bar Louie Server"
+          }
+        ],
+        "projects": []
+      },
+      "maybeKeep": {
+        "experience": [
+          {
+            "id": 5,
+            "label": "BitGo Software Engineering Intern"
+          }
+        ],
+        "projects": []
+      },
+      "shouldDrop": {
+        "experience": [],
+        "projects": [
+          {
+            "id": 9,
+            "label": "Centi – Personal Finance App"
+          },
+          {
+            "id": 10,
+            "label": "Taylor.io – Resume Builder & Parser"
+          },
+          {
+            "id": 12,
+            "label": "SecureScape – Smart Security System"
+          },
+          {
+            "id": 17,
+            "label": "ShelfVision - Dense Shelf Object Detection"
+          },
+          {
+            "id": 18,
+            "label": "Tizirsso Racing – Portfolio & Sponsorship Website"
+          },
+          {
+            "id": 20,
+            "label": "SentimentTrader - Real-Time Stock Sentiment Pipeline"
+          }
+        ]
+      },
+      "skillsToPreserve": [
+        "Customer Service",
+        "Hospitality",
+        "Guest Communication",
+        "Teamwork",
+        "Interpersonal Communication",
+        "Phone Etiquette",
+        "Organization",
+        "Problem Solving",
+        "Fast-Paced Environments"
+      ],
+      "skillsToDeprioritize": [
+        "Python",
+        "React",
+        "Django",
+        "PostgreSQL",
+        "REST API Design",
+        "AI-Driven Workflows",
+        "Data Pipelines",
+        "Backend Development",
+        "Machine Learning"
+      ],
+      "summaryTone": {
+        "shouldFeelLike": [
+          "hospitality-focused",
+          "guest-facing",
+          "friendly and professional",
+          "reliable",
+          "comfortable in fast-paced restaurant environments",
+          "team-oriented"
+        ],
+        "shouldNotFeelLike": [
+          "software engineer",
+          "sales/growth",
+          "product-focused",
+          "technical",
+          "stretch fit"
+        ],
+        "avoidPhrases": [
+          "dynamic customer service professional",
+          "proven experience",
+          "customer-facing growth",
+          "revenue-adjacent impact",
+          "product interest",
+          "seamless operations"
+        ]
+      },
+      "tailorAssistShouldMention": [
+        "host and restaurant experience",
+        "guest communication",
+        "hospitality/customer service",
+        "team coordination",
+        "fast-paced service environments",
+        "phone etiquette only if supported",
+        "why technical projects were trimmed"
+      ],
+      "tailorAssistShouldNotMention": [
+        "stretch match",
+        "sales",
+        "customer-facing growth",
+        "revenue-adjacent impact",
+        "product interest",
+        "projects proving fit",
+        "software experience as the main story"
+      ]
+    },
+    "previousRun": {
+      "score": 6,
+      "maxScore": 12,
+      "stageScores": {
+        "extraction": 1,
+        "strategy": 1,
+        "selection": 1,
+        "rewrite": 2,
+        "summarySkills": 1,
+        "tailorAssist": 0
+      },
+      "whatWentWell": [
+        "The pipeline correctly identified Hawkers Host / Expo and Bar Louie Server as the core evidence.",
+        "The service experience rewrites focused on communication, coordination, high-pressure hospitality, and guest experience.",
+        "The rewrite stage was the strongest part of the run."
+      ],
+      "whatWentWrong": [
+        "The system treated a direct hospitality fit as a stretch.",
+        "Strategy used sales_growth instead of a hospitality/customer service lane.",
+        "Customer service, hospitality, and dining were suppressed as context even though they are central to the JD.",
+        "The pipeline kept too much unrelated technical material.",
+        "Centi was edited even though software projects should usually be dropped for this role.",
+        "Tailor Assist talked about customer-facing growth and product interest, which does not match the JD."
+      ],
+      "failureTags": [
+        "wrong_strategy_lane",
+        "false_stretch_fit",
+        "context_suppression_wrong",
+        "technical_material_overkept",
+        "tailor_assist_misaligned"
+      ],
+      "biggestConcern": "The system had the right service evidence, but classified the role as a stretch sales/growth case instead of a direct hospitality/customer service fit, which caused the explanation and project handling to drift."
+    }
+  },
+  {
+    "id": "lennox_product_development_engineer",
+    "role": "Product Development Engineer",
+    "company": "Lennox Industries",
+    "settings": {
+      "length_target": "one_page",
+      "rewrite_freedom": "balanced",
+      "strict_truth": true
+    },
+    "expected": {
+      "lane": "engineering",
+      "persona": "engineering_product_development",
+      "roleArchetype": "engineering_product_development_stretch",
+      "fitMode": [
+        "stretch"
+      ],
+      "prioritySignals": [
+        "product development lifecycle",
+        "testing and validation",
+        "troubleshooting",
+        "root cause analysis",
+        "engineering documentation",
+        "cross-functional engineering collaboration",
+        "product improvement",
+        "analytical problem solving",
+        "technical coursework",
+        "hands-on engineering mindset",
+        "early-career engineering fit"
+      ],
+      "unsupportedWarnings": [
+        "HVAC",
+        "airflow",
+        "residential HVAC products",
+        "CAD",
+        "thermodynamics",
+        "heat transfer",
+        "refrigeration systems",
+        "combustion processes",
+        "manufacturing",
+        "BOMs",
+        "ECNs",
+        "DOE",
+        "AHRI",
+        "UL",
+        "ETL",
+        "CSA",
+        "ANSI"
+      ],
+      "mustKeep": {
+        "experience": [
+          {
+            "id": 5,
+            "label": "BitGo Software Engineering Intern"
+          }
+        ],
+        "projects": [
+          {
+            "id": 17,
+            "label": "ShelfVision - Dense Shelf Object Detection"
+          }
+        ]
+      },
+      "maybeKeep": {
+        "experience": [
+          {
+            "id": 7,
+            "label": "Bar Louie Server"
+          }
+        ],
+        "projects": [
+          {
+            "id": 9,
+            "label": "Centi – Personal Finance App"
+          },
+          {
+            "id": 12,
+            "label": "SecureScape – Smart Security System"
+          }
+        ]
+      },
+      "shouldDrop": {
+        "experience": [
+          {
+            "id": 8,
+            "label": "Hawkers Host / Expo"
+          }
+        ],
+        "projects": [
+          {
+            "id": 10,
+            "label": "Taylor.io – Resume Builder & Parser"
+          },
+          {
+            "id": 18,
+            "label": "Tizirsso Racing – Portfolio & Sponsorship Website"
+          },
+          {
+            "id": 20,
+            "label": "SentimentTrader - Real-Time Stock Sentiment Pipeline"
+          }
+        ]
+      },
+      "skillsToPreserve": [
+        "Python",
+        "Problem Solving",
+        "Technical Documentation",
+        "Data Pipelines",
+        "TensorFlow Lite",
+        "Backend Development",
+        "Automation Systems",
+        "SQL"
+      ],
+      "skillsToDeprioritize": [
+        "Customer Service",
+        "Hospitality",
+        "React",
+        "Django",
+        "REST API Design",
+        "AI-Driven Workflows",
+        "PyTorch",
+        "Finance"
+      ],
+      "summaryTone": {
+        "shouldFeelLike": [
+          "early-career engineer",
+          "analytical problem solver",
+          "testing and troubleshooting oriented",
+          "product development adjacent",
+          "cross-functional collaborator",
+          "cautious stretch fit"
+        ],
+        "shouldNotFeelLike": [
+          "sales/growth",
+          "customer-facing growth",
+          "software-only engineer",
+          "full-stack/backend engineer",
+          "HVAC engineer",
+          "mechanical systems expert"
+        ],
+        "avoidPhrases": [
+          "customer-facing growth",
+          "revenue-adjacent impact",
+          "full-stack engineer",
+          "scalable data pipelines",
+          "REST APIs",
+          "proven HVAC experience",
+          "dynamic professional",
+          "enhancing"
+        ]
+      },
+      "tailorAssistShouldMention": [
+        "engineering product development stretch",
+        "testing and validation",
+        "troubleshooting",
+        "technical documentation",
+        "cross-functional collaboration",
+        "analytical problem solving",
+        "unsupported HVAC/CAD/thermal systems claims"
+      ],
+      "tailorAssistShouldNotMention": [
+        "sales",
+        "customer-facing growth",
+        "revenue-adjacent impact",
+        "software product interest as the main story",
+        "backend services as the main fit",
+        "HVAC experience as proven"
+      ]
+    },
+    "previousRun": {
+      "score": 4,
+      "maxScore": 12,
+      "stageScores": {
+        "extraction": 2,
+        "strategy": 0,
+        "selection": 1,
+        "rewrite": 1,
+        "summarySkills": 0,
+        "tailorAssist": 0
+      },
+      "whatWentWell": [
+        "Extraction was solid and found HVAC, airflow, testing, compliance, product lifecycle, manufacturing, and cross-functional work.",
+        "The pipeline correctly treated HVAC, airflow, residential systems, and manufacturing as unsupported instead of pretending Colin had that background.",
+        "Keeping ShelfVision made some sense as the closest product/testing-style project."
+      ],
+      "whatWentWrong": [
+        "Strategy picked sales_growth instead of an engineering product development stretch lane.",
+        "Tailor Assist said it prioritized customer-facing growth and revenue-adjacent impact, which is completely wrong for this JD.",
+        "The summary drifted into full-stack/backend/data pipeline language instead of testing, documentation, troubleshooting, and engineering process.",
+        "Bar Louie and Centi were weak fits and should not have been central.",
+        "Skills trimming removed potentially useful technical bridge evidence like TensorFlow Lite and Data Pipelines."
+      ],
+      "failureTags": [
+        "wrong_strategy_lane",
+        "tailor_assist_misaligned",
+        "software_framing_overused",
+        "summary_wrong_angle",
+        "selection_partially_wrong",
+        "skill_trim_wrong"
+      ],
+      "biggestConcern": "The system extracted the right mechanical/product engineering signals, but routed the role into a sales/growth lane and then overcorrected into generic software language instead of a cautious engineering product development stretch."
+    }
+  },
+  {
+    "id": "pti_functional_analyst",
+    "role": "Functional Analyst",
+    "company": "Professional Technology Integration, Inc.",
+    "settings": {
+      "length_target": "one_page",
+      "rewrite_freedom": "balanced",
+      "strict_truth": true
+    },
+    "expected": {
+      "lane": "ops_analysis",
+      "persona": "functional_analyst_bridge",
+      "roleArchetype": "business_systems_analysis_stretch",
+      "fitMode": [
+        "stretch"
+      ],
+      "prioritySignals": [
+        "requirements gathering",
+        "business process analysis",
+        "technical documentation",
+        "user stories",
+        "acceptance criteria",
+        "testing and UAT",
+        "stakeholder communication",
+        "process improvement",
+        "technical translation",
+        "backlog support",
+        "workflow documentation",
+        "cross-functional collaboration"
+      ],
+      "unsupportedWarnings": [
+        "10 years of business analysis experience",
+        "5 years of Agile Business Analyst experience",
+        "CBAP",
+        "PMI-PBA",
+        "PMI-ACP",
+        "Azure DevOps",
+        "BPM tools",
+        "Product and Sprint backlog ownership",
+        "UAT ownership",
+        "enterprise systems ownership",
+        "formal Functional Analyst title"
+      ],
+      "mustKeep": {
+        "experience": [
+          {
+            "id": 5,
+            "label": "BitGo Software Engineering Intern"
+          }
+        ],
+        "projects": [
+          {
+            "id": 9,
+            "label": "Centi – Personal Finance App"
+          },
+          {
+            "id": 10,
+            "label": "Taylor.io – Resume Builder & Parser"
+          }
+        ]
+      },
+      "maybeKeep": {
+        "experience": [
+          {
+            "id": 7,
+            "label": "Bar Louie Server"
+          }
+        ],
+        "projects": [
+          {
+            "id": 20,
+            "label": "SentimentTrader - Real-Time Stock Sentiment Pipeline"
+          }
+        ]
+      },
+      "shouldDrop": {
+        "experience": [
+          {
+            "id": 8,
+            "label": "Hawkers Host / Expo"
+          }
+        ],
+        "projects": [
+          {
+            "id": 12,
+            "label": "SecureScape – Smart Security System"
+          },
+          {
+            "id": 17,
+            "label": "ShelfVision - Dense Shelf Object Detection"
+          },
+          {
+            "id": 18,
+            "label": "Tizirsso Racing – Portfolio & Sponsorship Website"
+          }
+        ]
+      },
+      "skillsToPreserve": [
+        "Technical Documentation",
+        "Requirements Gathering",
+        "Process Improvement",
+        "Stakeholder Communication",
+        "Workflow Design",
+        "Testing",
+        "SQL",
+        "Data Pipelines",
+        "REST API Design",
+        "PostgreSQL",
+        "Problem Solving"
+      ],
+      "skillsToDeprioritize": [
+        "React",
+        "Frontend Development",
+        "PyTorch",
+        "TensorFlow Lite",
+        "Computer Vision",
+        "Security Systems",
+        "Hospitality",
+        "Customer Service"
+      ],
+      "summaryTone": {
+        "shouldFeelLike": [
+          "technical builder with analyst-adjacent experience",
+          "process-minded",
+          "documentation-oriented",
+          "stakeholder-aware",
+          "requirements and workflow focused",
+          "cautious stretch fit"
+        ],
+        "shouldNotFeelLike": [
+          "executive leadership",
+          "certified business analyst",
+          "senior Functional Analyst",
+          "pure software engineer",
+          "project manager",
+          "Agile expert"
+        ],
+        "avoidPhrases": [
+          "proven ability",
+          "senior leadership scope",
+          "strongest direct overlap was user",
+          "technical specifications",
+          "executive leadership",
+          "dynamic professional",
+          "enhancing",
+          "streamlining"
+        ]
+      },
+      "tailorAssistShouldMention": [
+        "functional analyst stretch",
+        "requirements and documentation",
+        "process improvement",
+        "stakeholder communication",
+        "technical translation",
+        "testing or validation support",
+        "unsupported BA certifications and seniority requirements"
+      ],
+      "tailorAssistShouldNotMention": [
+        "executive leadership",
+        "senior leadership scope",
+        "direct Functional Analyst experience",
+        "certified analyst experience",
+        "Azure DevOps as proven",
+        "BPM tools as proven",
+        "the strongest overlap was user"
+      ]
+    },
+    "previousRun": {
+      "score": 6,
+      "maxScore": 12,
+      "stageScores": {
+        "extraction": 1,
+        "strategy": 1,
+        "selection": 1,
+        "rewrite": 1,
+        "summarySkills": 1,
+        "tailorAssist": 1
+      },
+      "whatWentWell": [
+        "The pipeline correctly treated the role as a high-risk stretch instead of pretending Colin was already a senior Functional Analyst.",
+        "Selection was directionally reasonable by keeping BitGo, Bar Louie, Centi, and Taylor.io.",
+        "The kept evidence can support stakeholder communication, workflows, product thinking, user-facing systems, and process-adjacent work."
+      ],
+      "whatWentWrong": [
+        "Strategy picked executive_leadership instead of a functional analyst or business systems bridge lane.",
+        "Extraction got noisy and over-weighted weak terms like years, user, and proven.",
+        "The system missed the cleaner role shape: requirements gathering, process mapping, business systems analysis, user stories, backlog support, testing/UAT, and stakeholder documentation.",
+        "BitGo stayed too close to the original instead of being reframed around technical translation, workflows, documentation, and stakeholder-facing systems.",
+        "Summary was directionally right but too confident with phrases like proven ability and technical specifications.",
+        "Tailor Assist warned about stretch fit, but used awkward explanations like senior leadership scope and strongest direct overlap was user."
+      ],
+      "failureTags": [
+        "wrong_strategy_lane",
+        "stretch_fit_correct_but_wrong_reason",
+        "extraction_noisy_terms",
+        "rewrite_too_light",
+        "summary_overclaim_risk",
+        "tailor_assist_awkward_explanation",
+        "too_many_maybe_projects"
+      ],
+      "biggestConcern": "The system understood that this was a stretch, but routed it through executive leadership instead of a functional analyst bridge lane, causing the strategy, summary, and explanation to focus on the wrong kind of caution."
+    }
+  },
+  {
+    "id": "jkb_advisors_full_stack_engineer",
+    "role": "Full Stack Engineer",
+    "company": "JKB Advisors",
+    "settings": {
+      "length_target": "one_page",
+      "rewrite_freedom": "balanced",
+      "strict_truth": true
+    },
+    "expected": {
+      "lane": "technical",
+      "persona": "technical_engineering",
+      "roleArchetype": "full_stack_product_engineer",
+      "fitMode": [
+        "direct"
+      ],
+      "prioritySignals": [
+        "Python",
+        "Django",
+        "React",
+        "full-stack engineering",
+        "customer-facing products",
+        "internal products",
+        "end-to-end ownership",
+        "product mindset",
+        "stakeholder collaboration",
+        "system design",
+        "deployment",
+        "well-tested code",
+        "production-grade applications"
+      ],
+      "unsupportedWarnings": [
+        "TypeScript",
+        "formal system design ownership",
+        "production deployment ownership",
+        "well-tested code if not directly evidenced",
+        "1 to 5 years full-stack experience if not clearly supported"
+      ],
+      "mustKeep": {
+        "experience": [
+          {
+            "id": 5,
+            "label": "BitGo Software Engineering Intern"
+          }
+        ],
+        "projects": [
+          {
+            "id": 9,
+            "label": "Centi – Personal Finance App"
+          },
+          {
+            "id": 10,
+            "label": "Taylor.io – Resume Builder & Parser"
+          }
+        ]
+      },
+      "maybeKeep": {
+        "experience": [],
+        "projects": [
+          {
+            "id": 18,
+            "label": "Tizirsso Racing – Portfolio & Sponsorship Website"
+          },
+          {
+            "id": 12,
+            "label": "SecureScape – Smart Security System"
+          }
+        ]
+      },
+      "shouldDrop": {
+        "experience": [
+          {
+            "id": 7,
+            "label": "Bar Louie Server"
+          },
+          {
+            "id": 8,
+            "label": "Hawkers Host / Expo"
+          }
+        ],
+        "projects": [
+          {
+            "id": 17,
+            "label": "ShelfVision - Dense Shelf Object Detection"
+          },
+          {
+            "id": 20,
+            "label": "SentimentTrader - Real-Time Stock Sentiment Pipeline"
+          }
+        ]
+      },
+      "skillsToPreserve": [
+        "Python",
+        "Django",
+        "React",
+        "JavaScript",
+        "PostgreSQL",
+        "REST API Design",
+        "AWS (EC2)",
+        "Backend Development",
+        "AI-Driven Workflows",
+        "Automation Systems",
+        "SQL"
+      ],
+      "skillsToDeprioritize": [
+        "Customer Service",
+        "Hospitality",
+        "PyTorch",
+        "TensorFlow Lite",
+        "Pandas",
+        "NumPy",
+        "Computer Vision"
+      ],
+      "summaryTone": {
+        "shouldFeelLike": [
+          "full-stack product engineer",
+          "Python/Django backend builder",
+          "React interface builder",
+          "product-minded",
+          "ownership-oriented",
+          "comfortable with stakeholder collaboration",
+          "deployment-aware"
+        ],
+        "shouldNotFeelLike": [
+          "data/AI pipeline engineer",
+          "data scientist",
+          "AI-first engineer",
+          "frontend-only engineer",
+          "generic software engineer"
+        ],
+        "avoidPhrases": [
+          "data pipelines",
+          "AI automation as the main story",
+          "proven track record",
+          "dynamic professional",
+          "passionate about",
+          "customer-facing growth",
+          "revenue-adjacent impact"
+        ]
+      },
+      "tailorAssistShouldMention": [
+        "full-stack product engineering",
+        "Python/Django backend work",
+        "React interfaces",
+        "end-to-end product ownership",
+        "customer-facing and internal tools",
+        "APIs",
+        "deployment or production-adjacent experience",
+        "unsupported TypeScript"
+      ],
+      "tailorAssistShouldNotMention": [
+        "data/AI as the main lane",
+        "data pipelines as the main proof",
+        "sales",
+        "customer-facing growth",
+        "revenue-adjacent impact",
+        "AI-native as a resume claim"
+      ]
+    },
+    "previousRun": {
+      "score": 4,
+      "maxScore": 12,
+      "stageScores": {
+        "extraction": 2,
+        "strategy": 0,
+        "selection": 1,
+        "rewrite": 1,
+        "summarySkills": 0,
+        "tailorAssist": 0
+      },
+      "whatWentWell": [
+        "Extraction was strong and found Python, React, TypeScript, Django, full-stack engineering, customer-facing products, internal products, and product/engineering collaboration signals.",
+        "The pipeline correctly treated TypeScript as unsupported exact evidence instead of inventing it.",
+        "It correctly kept BitGo and Centi, and dropping service roles was reasonable."
+      ],
+      "whatWentWrong": [
+        "Strategy picked data_ai instead of full-stack product engineering.",
+        "The role was about building full-stack products from idea to launch, but the pipeline forced a data/AI narrative.",
+        "Taylor.io should likely have been a must-keep because it supports AI-native product work, full-stack ownership, backend/frontend integration, and product iteration.",
+        "Tizirsso is more of a maybe, not a stronger hero than Taylor.io.",
+        "BitGo rewrite was too light and needed stronger end-to-end ownership, product, API, and stakeholder framing.",
+        "Summary over-focused on data pipelines instead of full-stack product ownership.",
+        "Skills trimming removed useful evidence like AWS EC2, REST API Design, and AI-Driven Workflows.",
+        "Tailor Assist said it prioritized data, AI, automation, and backend evidence, which missed the actual role story."
+      ],
+      "failureTags": [
+        "wrong_strategy_lane",
+        "extraction_good_strategy_bad",
+        "selection_partially_wrong",
+        "rewrite_too_light",
+        "summary_wrong_angle",
+        "skill_trim_wrong",
+        "tailor_assist_misaligned"
+      ],
+      "biggestConcern": "The system saw the right full-stack job signals but routed them into a data/AI lane, causing the summary, skills, selection priority, and Tailor Assist explanation to drift away from full-stack product ownership."
+    }
+  },
+  {
+    "id": "primerica_financial_services_representative",
+    "role": "Financial Services Representative",
+    "company": "Primerica",
+    "settings": {
+      "length_target": "one_page",
+      "rewrite_freedom": "balanced",
+      "strict_truth": true
+    },
+    "expected": {
+      "lane": "sales_growth",
+      "persona": "financial_customer_education",
+      "roleArchetype": "financial_services_representative_transferable",
+      "fitMode": [
+        "adjacent"
+      ],
+      "prioritySignals": [
+        "customer communication",
+        "trust-building",
+        "helping people understand money",
+        "financial interest",
+        "debt and money management interest",
+        "coachable",
+        "paid training readiness",
+        "relationship-building",
+        "people-facing experience",
+        "professional communication",
+        "growth mindset"
+      ],
+      "unsupportedWarnings": [
+        "licensed financial representative",
+        "financial advising experience",
+        "debt counseling experience",
+        "formal sales experience",
+        "insurance sales",
+        "securities sales",
+        "proven financial services experience"
+      ],
+      "mustKeep": {
+        "experience": [
+          {
+            "id": 7,
+            "label": "Bar Louie Server"
+          },
+          {
+            "id": 8,
+            "label": "Hawkers Host / Expo"
+          }
+        ],
+        "projects": []
+      },
+      "maybeKeep": {
+        "experience": [
+          {
+            "id": 5,
+            "label": "BitGo Software Engineering Intern"
+          }
+        ],
+        "projects": [
+          {
+            "id": 9,
+            "label": "Centi – Personal Finance App"
+          }
+        ]
+      },
+      "shouldDrop": {
+        "experience": [],
+        "projects": [
+          {
+            "id": 10,
+            "label": "Taylor.io – Resume Builder & Parser"
+          },
+          {
+            "id": 12,
+            "label": "SecureScape – Smart Security System"
+          },
+          {
+            "id": 17,
+            "label": "ShelfVision - Dense Shelf Object Detection"
+          },
+          {
+            "id": 18,
+            "label": "Tizirsso Racing – Portfolio & Sponsorship Website"
+          },
+          {
+            "id": 20,
+            "label": "SentimentTrader - Real-Time Stock Sentiment Pipeline"
+          }
+        ]
+      },
+      "skillsToPreserve": [
+        "Customer Service",
+        "Communication",
+        "Relationship Building",
+        "Problem Solving",
+        "Teamwork",
+        "Client Interaction",
+        "Organization",
+        "Financial Interest",
+        "Product Education",
+        "Sales Support"
+      ],
+      "skillsToDeprioritize": [
+        "Python",
+        "React",
+        "Django",
+        "PostgreSQL",
+        "REST API Design",
+        "AI-Driven Workflows",
+        "Data Pipelines",
+        "Machine Learning",
+        "Backend Development"
+      ],
+      "summaryTone": {
+        "shouldFeelLike": [
+          "customer-facing",
+          "finance-interested",
+          "trustworthy",
+          "coachable",
+          "people-oriented",
+          "comfortable explaining things clearly",
+          "ready to learn through training"
+        ],
+        "shouldNotFeelLike": [
+          "full-stack engineer",
+          "technical finance developer",
+          "financial advisor",
+          "sales expert",
+          "software-first candidate"
+        ],
+        "avoidPhrases": [
+          "full-stack engineer with a focus on financial services",
+          "proven financial services experience",
+          "dynamic professional",
+          "sales professional",
+          "financial advisor",
+          "revenue-adjacent impact"
+        ]
+      },
+      "tailorAssistShouldMention": [
+        "customer-facing service experience",
+        "communication and trust-building",
+        "interest in financial wellness",
+        "coachable fit for paid training",
+        "finance-adjacent evidence from BitGo or Centi if used",
+        "why technical projects were trimmed"
+      ],
+      "tailorAssistShouldNotMention": [
+        "full-stack engineering",
+        "technical finance as the main story",
+        "Bar Louie and Hawkers as weaker signals",
+        "deep software projects as core proof",
+        "formal financial representative experience",
+        "proven sales expertise"
+      ]
+    },
+    "previousRun": {
+      "score": 3,
+      "maxScore": 12,
+      "stageScores": {
+        "extraction": 1,
+        "strategy": 1,
+        "selection": 0,
+        "rewrite": 1,
+        "summarySkills": 0,
+        "tailorAssist": 0
+      },
+      "whatWentWell": [
+        "The pipeline correctly avoided pretending the candidate was already a proven representative.",
+        "It kept finance-adjacent evidence like BitGo and Centi.",
+        "It trimmed unrelated technical projects like SecureScape, ShelfVision, and SentimentTrader, which makes sense for a non-technical financial services role."
+      ],
+      "whatWentWrong": [
+        "The pipeline over-indexed on the word financial and under-indexed on the actual job behavior.",
+        "It missed the key signals: helping people manage money, communicating clearly, learning through training, and building trust.",
+        "It dropped Bar Louie and Hawkers, which are likely the strongest proof for people-facing communication and trust-building.",
+        "The summary framed Colin as a full-stack engineer focused on financial services, which is the wrong angle.",
+        "Tailor Assist said Bar Louie and Hawkers were weaker signals, which is exactly backwards for this role."
+      ],
+      "failureTags": [
+        "selection_by_keyword_overlap",
+        "wrong_role_behavior_model",
+        "service_experience_wrongly_dropped",
+        "summary_wrong_angle",
+        "tailor_assist_misaligned",
+        "technical_finance_overweighted"
+      ],
+      "biggestConcern": "The system treated financial keyword overlap as stronger than role behavior. For no-experience-required financial representative roles, customer-facing service evidence should beat technical finance projects."
+    }
+  },
+  {
+    "id": "pyramid_conversational_ai_engineer",
+    "role": "Conversational AI Engineer",
+    "company": "Pyramid Consulting",
+    "settings": {
+      "length_target": "one_page",
+      "rewrite_freedom": "balanced",
+      "strict_truth": true
+    },
+    "expected": {
+      "lane": "data_ai",
+      "persona": "ai_backend_engineering",
+      "roleArchetype": "llm_backend_integration",
+      "fitMode": [
+        "adjacent"
+      ],
+      "prioritySignals": [
+        "Python",
+        "OpenAI",
+        "LLM integration",
+        "AI API integration",
+        "backend services",
+        "REST APIs",
+        "workflow automation",
+        "prompt and workflow optimization",
+        "cloud-adjacent deployment",
+        "JavaScript",
+        "user-facing intelligent interactions"
+      ],
+      "unsupportedWarnings": [
+        "Dialogflow",
+        "Google CES",
+        "Google Cloud Platform",
+        "Amazon Bedrock",
+        "Azure",
+        "CI/CD",
+        "Git if not listed directly",
+        "formal conversational AI platform experience"
+      ],
+      "mustKeep": {
+        "experience": [
+          {
+            "id": 5,
+            "label": "BitGo Software Engineering Intern"
+          }
+        ],
+        "projects": [
+          {
+            "id": 10,
+            "label": "Taylor.io – Resume Builder & Parser"
+          },
+          {
+            "id": 20,
+            "label": "SentimentTrader - Real-Time Stock Sentiment Pipeline"
+          }
+        ]
+      },
+      "maybeKeep": {
+        "experience": [],
+        "projects": [
+          {
+            "id": 9,
+            "label": "Centi – Personal Finance App"
+          },
+          {
+            "id": 12,
+            "label": "SecureScape – Smart Security System"
+          }
+        ]
+      },
+      "shouldDrop": {
+        "experience": [
+          {
+            "id": 7,
+            "label": "Bar Louie Server"
+          },
+          {
+            "id": 8,
+            "label": "Hawkers Host / Expo"
+          }
+        ],
+        "projects": [
+          {
+            "id": 18,
+            "label": "Tizirsso Racing – Portfolio & Sponsorship Website"
+          },
+          {
+            "id": 17,
+            "label": "ShelfVision - Dense Shelf Object Detection"
+          }
+        ]
+      },
+      "skillsToPreserve": [
+        "Python",
+        "OpenAI API",
+        "REST API Design",
+        "Backend Development",
+        "AI-Driven Workflows",
+        "Automation Systems",
+        "Data Pipelines",
+        "ETL Pipelines",
+        "AWS (EC2)",
+        "JavaScript",
+        "PostgreSQL"
+      ],
+      "skillsToDeprioritize": [
+        "Customer Service",
+        "Hospitality",
+        "React",
+        "Pure UI/UX",
+        "PyTorch",
+        "TensorFlow Lite",
+        "MongoDB",
+        "Finance"
+      ],
+      "summaryTone": {
+        "shouldFeelLike": [
+          "AI backend engineer",
+          "LLM/API integration focused",
+          "Python backend builder",
+          "workflow automation oriented",
+          "cloud-adjacent",
+          "careful about unsupported platform claims"
+        ],
+        "shouldNotFeelLike": [
+          "generic data/AI pipeline engineer",
+          "data scientist",
+          "frontend engineer",
+          "cloud platform expert",
+          "Dialogflow expert",
+          "Google Cloud specialist"
+        ],
+        "avoidPhrases": [
+          "made OpenAI, Python, and JavaScript easy to find",
+          "dynamic professional",
+          "proven expertise",
+          "Conversational AI Engineer with proven experience",
+          "Google Cloud experience",
+          "Dialogflow experience",
+          "enhancing"
+        ]
+      },
+      "tailorAssistShouldMention": [
+        "LLM integration",
+        "Python backend services",
+        "OpenAI/API-backed workflows",
+        "REST APIs",
+        "automation systems",
+        "cloud-adjacent deployment evidence",
+        "unsupported Dialogflow/GCP/Bedrock/Azure claims"
+      ],
+      "tailorAssistShouldNotMention": [
+        "generic data/AI as the main story",
+        "only OpenAI, Python, and JavaScript as the role story",
+        "Dialogflow as proven",
+        "Google Cloud as proven",
+        "Amazon Bedrock as proven",
+        "CI/CD as proven if unsupported",
+        "sales or customer service"
+      ]
+    },
+    "previousRun": {
+      "score": 6,
+      "maxScore": 12,
+      "stageScores": {
+        "extraction": 2,
+        "strategy": 1,
+        "selection": 1,
+        "rewrite": 1,
+        "summarySkills": 0,
+        "tailorAssist": 1
+      },
+      "whatWentWell": [
+        "Extraction found the real role signals: OpenAI, Python, LLMs, Dialogflow, conversational AI, APIs, cloud, Git, and CI/CD.",
+        "The pipeline correctly flagged unsupported exact tools like Dialogflow, Google CES, Amazon Bedrock, Azure, and Google Cloud Platform instead of allowing direct claims.",
+        "The pipeline made the right basic selection call by dropping Bar Louie and Hawkers for this technical role.",
+        "Keeping BitGo, Taylor.io, and SentimentTrader was directionally reasonable."
+      ],
+      "whatWentWrong": [
+        "Strategy picked data_ai, which was close but too broad.",
+        "The role needed a more specific AI backend / LLM integration lane.",
+        "SecureScape as a hero project was questionable.",
+        "BitGo and SentimentTrader rewrites still looked like light wording changes.",
+        "Skills pruning removed important bridge skills like AWS EC2, ETL Pipelines, Automation Systems, and REST API Design.",
+        "The summary felt generic and did not clearly tell the Python backend + LLM integration + API story.",
+        "Tailor Assist was too shallow and said it made OpenAI, Python, and JavaScript easy to find instead of explaining the actual LLM integration/backend fit."
+      ],
+      "failureTags": [
+        "strategy_too_broad",
+        "needs_specific_ai_backend_lane",
+        "selection_partially_wrong",
+        "rewrite_too_light",
+        "skill_trim_wrong",
+        "summary_generic",
+        "tailor_assist_too_shallow"
+      ],
+      "biggestConcern": "The system understood this was an AI role, but not the more precise story of Python backend services, OpenAI/LLM integration, APIs, workflow automation, and cloud-adjacent deployment. It should preserve supported bridge skills when exact JD platforms are unsupported."
+    }
+  }
+]

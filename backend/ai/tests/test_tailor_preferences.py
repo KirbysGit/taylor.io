@@ -139,16 +139,25 @@ def test_pass_a_and_pass_b_prompts_include_preferences_and_strict_truth():
         "custom_instructions": "Emphasize backend APIs.",
     }
     payload = _payload(prefs)
+    tailor_context = _tailor_context()
+    tailor_context["jobStrategy"] = {
+        "persona": "technical_engineering",
+        "roleArchetype": "full_stack_product_engineering",
+        "skillPreserve": ["REST API Design", "AWS EC2"],
+        "skillDeprioritize": ["Customer Service"],
+        "summaryGuardrails": ["Do not overclaim unsupported tools."],
+        "claimRules": ["Never add TypeScript unless it appears in resume evidence."],
+    }
     pass_a = build_pass_a_user(
         payload,
-        _tailor_context(),
+        tailor_context,
         _section_details(),
         ["Build backend APIs."],
         narrativeBrief=_narrative(),
     )
     pass_b = build_pass_b_user(
         payload,
-        _tailor_context(),
+        tailor_context,
         ["Build backend APIs."],
         _narrative(),
         {"skillRowCount": 1},
@@ -160,6 +169,9 @@ def test_pass_a_and_pass_b_prompts_include_preferences_and_strict_truth():
     assert "strict_truth (from request): True" in pass_a
     assert "length_target: one_page" in pass_b
     assert "rewrite_freedom: strong" in pass_b
+    assert "jobStrategySkills" in pass_b
+    assert "REST API Design" in pass_b
+    assert "AWS EC2" in pass_b
 
 
 def test_narrative_prompt_includes_preferences(monkeypatch):
@@ -179,6 +191,18 @@ def test_narrative_prompt_includes_preferences(monkeypatch):
     monkeypatch.setattr(narrative_module, "is_openai_enabled", lambda: True)
     monkeypatch.setattr(narrative_module, "ai_chat_completion", fake_chat_completion)
 
+    tailor_context = _tailor_context()
+    tailor_context["jobStrategy"] = {
+        "persona": "technical_engineering",
+        "fitMode": "direct",
+        "readerGoal": "Show backend API and data workflow evidence.",
+        "proofStyle": ["systems and APIs", "data workflows"],
+        "keepPriorities": ["technical experience"],
+        "trimPriorities": ["off-lane rows"],
+        "claimRules": ["Do not claim unsupported tools."],
+        "sectionBudget": {"experience": None, "projects": None, "skillsGroups": None, "advisory": True},
+    }
+
     narrative_module.request_narrative_brief(
         payload=_payload(
             {
@@ -189,13 +213,15 @@ def test_narrative_prompt_includes_preferences(monkeypatch):
                 "custom_instructions": "Emphasize backend APIs.",
             }
         ),
-        tailorContext=_tailor_context(),
+        tailorContext=tailor_context,
         sectionDetails=_section_details(),
     )
 
     assert "length_target: one_page" in captured["user_prompt"]
     assert "rewrite_freedom: strong" in captured["user_prompt"]
     assert "custom_instructions: Emphasize backend APIs." in captured["user_prompt"]
+    assert "jobStrategy" in captured["user_prompt"]
+    assert "technical_engineering" in captured["user_prompt"]
 
 
 def test_tailor_explanation_uses_real_preferences_and_patch_sections():
@@ -251,3 +277,35 @@ def test_tailor_explanation_adds_gap_caution_without_claiming_match():
     labels = [chip["label"] for chip in explanation["chips"]]
     assert "Some JD terms not evidenced" in labels
     assert "Kubernetes" in explanation["evidence"]["resumeGaps"]
+
+
+def test_tailor_explanation_uses_job_strategy_when_present():
+    ctx = _tailor_context()
+    ctx["jobStrategy"] = {
+        "persona": "sales_growth",
+        "fitMode": "adjacent",
+        "readerGoal": "Prove customer-facing growth readiness through communication and revenue-adjacent impact.",
+        "proofStyle": ["customer communication", "revenue-adjacent metrics"],
+        "keepPriorities": ["customer-facing roles", "one relevant product/software project"],
+        "trimPriorities": ["deep technical projects"],
+        "claimRules": ["Do not call the candidate a sales professional unless formal sales or outreach is directly evidenced."],
+        "sectionBudget": {"experience": None, "projects": None, "skillsGroups": None, "advisory": True},
+    }
+
+    explanation = build_tailor_explanation(
+        patch={"experience": [{"id": 1, "fieldsChanged": {"description": {"before": "Old", "after": "New"}}}]},
+        narrative_brief={"alignmentMode": "adjacent"},
+        target_role="Sales Outreach Representative",
+        company="Coverview",
+        style_preferences={},
+        strict_truth=True,
+        tailor_context=ctx,
+        quality_audit={"flags": {}},
+    )
+
+    assert "customer-facing growth readiness" in explanation["paragraph"]
+    assert explanation["evidence"]["jobStrategy"]["persona"] == "sales_growth"
+    detail_titles = [group["title"] for group in explanation["details"]]
+    assert "What I prioritized" in detail_titles
+    assert "Worth checking" in detail_titles
+    assert "sales professional" in " ".join(" ".join(group["items"]) for group in explanation["details"])

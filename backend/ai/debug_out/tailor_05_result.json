@@ -1,8 +1,8 @@
 {
   "final": {
-    "summary": "Tailoring log for: Sales Outreach Representative.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- sectionVisibility: structure or presentation updated.\n- Experience id 5: removed from resume.\n- Experience id 7: removed from resume.\n- Experience id 8: moderate update to bullets and/or line items.\n- Project id 9: light edit to one part of the project (minor).\n- Skills id 58: minor name/category touch-up.\n- Skills id 59: minor name/category touch-up.",
+    "summary": "Tailoring log for: Software Engineer.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- Experience id 5: small text tweak (minor).\n- Experience id 7: removed from resume.\n- Project id 9: moderate description/stack revision.\n- Project id 10: light edit to one part of the project (minor).\n- Project id 12: removed from resume.\n- Project id 18: removed from resume.\n- Project id 20: removed from resume.\n- Skills id 52: row removed.\n- Skills id 53: row removed.\n- Skills id 54: row removed.\n- Skills id 55: row removed.\n- Skills id 57: row removed.",
     "tailorExplanation": {
-      "paragraph": "I treated this as a Sales Outreach Representative at Coverview draft and made sales, pipeline, and architecture easy to find. You already had the right raw material: sales, pipeline, architecture, and artificial intelligence. I pushed that proof forward in Centi – Personal Finance App. I trimmed BitGo Software Engineering Intern and Bar Louie Server because they were weaker signals for this read. The biggest help here: kept the projects that best prove the role fit, reframed your experience around the job's strongest signals, and gave the summary a clearer role-specific angle. Under the hood, I changed the summary, experience, projects, skills, and which sections show based on those signals.",
+      "paragraph": "I treated this as a Software Engineer at Droisys draft and made React, PostgreSQL, and amazon web services easy to find. You already had the right raw material: React, PostgreSQL, amazon web services, and delivery. I pushed that proof forward in Centi – Personal Finance App and Taylor.io – Resume Builder & Parser. Prove customer-facing growth readiness through communication, revenue-adjacent impact, and truthful product interest. I trimmed Bar Louie Server, SecureScape – Smart Security System, Tizirsso Racing – Portfolio & Sponsorship Website, and SentimentTrader - Real-Time Stock Sentiment Pipeline because they were weaker signals for this read. The biggest help here: kept the projects that best prove the role fit, reframed your experience around the job's strongest signals, and gave the summary a clearer role-specific angle. Under the hood, I changed the summary, experience, projects, and skills based on those signals.",
       "chips": [
         {
           "label": "Strict truth",
@@ -27,98 +27,205 @@
         {
           "label": "Some JD terms not evidenced",
           "tone": "caution"
+        },
+        {
+          "label": "Review skills",
+          "tone": "caution"
+        },
+        {
+          "label": "Review rewrite strength",
+          "tone": "caution"
         }
       ],
       "details": [
         {
+          "title": "What I prioritized",
+          "items": [
+            "Prove customer-facing growth readiness through communication, revenue-adjacent impact, and truthful product interest.",
+            "I prioritized customer communication, people-facing work, revenue-adjacent metrics, relationship handling, and domain-relevant product interest."
+          ]
+        },
+        {
           "title": "Why it changed",
           "items": [
-            "Target story: Candidate with proven sales support experience and skills, ready to contribute to outreach and pipeline development.",
-            "Main evidence themes: communication, sales support, and customer interaction."
+            "Target story: Proven experience in building scalable web applications and APIs using React and PostgreSQL, with a strong focus on customer-centric solutions.",
+            "Main evidence themes: customer communication, API development, and data management."
           ]
         },
         {
           "title": "What I spotlighted",
           "items": [
-            "Hawkers Host / Expo",
-            "Centi – Personal Finance App"
+            "BitGo Software Engineering Intern",
+            "Centi – Personal Finance App",
+            "Taylor.io – Resume Builder & Parser"
           ]
         },
         {
           "title": "What I trimmed",
           "items": [
-            "BitGo Software Engineering Intern",
-            "Bar Louie Server"
+            "Bar Louie Server",
+            "SecureScape – Smart Security System",
+            "Tizirsso Racing – Portfolio & Sponsorship Website",
+            "SentimentTrader - Real-Time Stock Sentiment Pipeline",
+            "MySQL",
+            "MongoDB",
+            "Pandas",
+            "NumPy"
           ]
         },
         {
-          "title": "Company context",
+          "title": "Related evidence",
           "items": [
-            "msps, performance, operations, and where looked like job/company context, so I kept it out of the main resume claims."
+            "deployment: related evidence includes aws, ec2, and deployed."
+          ]
+        },
+        {
+          "title": "Not directly evidenced",
+          "items": [
+            "I did not claim CI/CD because those exact tools or platforms were not in the resume."
           ]
         },
         {
           "title": "Worth checking",
           "items": [
-            "Some JD terms were not directly evidenced: outreach, hiring, leads, and outbound."
+            "Do not call the candidate a sales professional unless formal sales or outreach....",
+            "Do not claim unsupported terms directly: ci/cd, graphql, microservices, develop...",
+            "Some JD terms were not directly evidenced: ci/cd, graphql, microservices, and developer.",
+            "Review the skills list; a few useful-but-lower-priority skills may have been trimmed."
           ]
         }
       ],
       "evidence": {
         "alignmentMode": "direct",
+        "jobStrategy": {
+          "persona": "sales_growth",
+          "fitMode": "direct",
+          "lengthMode": "standard",
+          "readerGoal": "Prove customer-facing growth readiness through communication, revenue-adjacent impact, and truthful product interest.",
+          "proofStyle": [
+            "customer communication",
+            "people-facing work",
+            "revenue-adjacent metrics",
+            "relationship handling",
+            "domain-relevant product interest"
+          ],
+          "keepPriorities": [
+            "customer-facing roles",
+            "sales or revenue evidence",
+            "interpersonal proof",
+            "one relevant product/software project"
+          ],
+          "trimPriorities": [
+            "deep technical projects",
+            "unsupported sales ownership",
+            "non-role technical stacks"
+          ],
+          "claimRules": [
+            "Do not call the candidate a sales professional unless formal sales or outreach...",
+            "Do not claim unsupported terms directly: ci/cd, graphql, microservices, develop...",
+            "Exact tools/platforms stay as review gaps unless resume evidence exists: ci/cd."
+          ],
+          "sectionBudget": {
+            "experience": null,
+            "projects": null,
+            "skillsGroups": null,
+            "advisory": true
+          },
+          "supportedSignals": [
+            "react",
+            "postgresql",
+            "amazon web services",
+            "delivery",
+            "security",
+            "architecture"
+          ],
+          "gapSignals": [
+            "ci/cd",
+            "graphql",
+            "microservices",
+            "deployment",
+            "developer",
+            "implement"
+          ]
+        },
         "evidenceClassification": [
           {
             "section": "experience",
-            "id": 8,
-            "label": "Hawkers Host / Expo",
+            "id": 5,
+            "label": "BitGo Software Engineering Intern",
             "terms": [
-              "sales"
+              "react",
+              "postgresql",
+              "amazon web services",
+              "architecture"
             ],
             "evidenceType": "direct_role_evidence",
             "claimStrength": "direct",
             "guidance": "Use as customer/client-facing communication or service evidence."
           },
           {
-            "section": "experience",
-            "id": 5,
-            "label": "BitGo Software Engineering Intern",
-            "terms": [
-              "pipeline",
-              "architecture"
-            ],
-            "evidenceType": "domain_tool_evidence",
-            "claimStrength": "supporting",
-            "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
-          },
-          {
             "section": "projects",
-            "id": 20,
-            "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+            "id": 9,
+            "label": "Centi – Personal Finance App",
             "terms": [
-              "pipeline",
-              "architecture"
+              "react",
+              "postgresql"
             ],
-            "evidenceType": "domain_tool_evidence",
-            "claimStrength": "supporting",
-            "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
+            "evidenceType": "weak_lexical_overlap",
+            "claimStrength": "cautious",
+            "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
           },
           {
             "section": "projects",
             "id": 10,
             "label": "Taylor.io – Resume Builder & Parser",
             "terms": [
-              "artificial intelligence"
+              "react",
+              "postgresql"
             ],
-            "evidenceType": "domain_tool_evidence",
-            "claimStrength": "supporting",
-            "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
+            "evidenceType": "weak_lexical_overlap",
+            "claimStrength": "cautious",
+            "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
           },
           {
-            "section": "education",
-            "id": 3,
-            "label": "University of Central Florida",
+            "section": "projects",
+            "id": 18,
+            "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
             "terms": [
-              "artificial intelligence"
+              "react"
+            ],
+            "evidenceType": "weak_lexical_overlap",
+            "claimStrength": "cautious",
+            "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
+          },
+          {
+            "section": "experience",
+            "id": 8,
+            "label": "Hawkers Host / Expo",
+            "terms": [
+              "delivery"
+            ],
+            "evidenceType": "direct_role_evidence",
+            "claimStrength": "direct",
+            "guidance": "Use as customer/client-facing communication or service evidence."
+          },
+          {
+            "section": "projects",
+            "id": 12,
+            "label": "SecureScape – Smart Security System",
+            "terms": [
+              "security"
+            ],
+            "evidenceType": "direct_role_evidence",
+            "claimStrength": "direct",
+            "guidance": "Use as customer/client-facing communication or service evidence."
+          },
+          {
+            "section": "projects",
+            "id": 20,
+            "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+            "terms": [
+              "architecture"
             ],
             "evidenceType": "domain_tool_evidence",
             "claimStrength": "supporting",
@@ -126,69 +233,86 @@
           },
           {
             "section": "skills",
-            "id": 60,
-            "label": "AI-Driven Workflows",
+            "id": 51,
+            "label": "PostgreSQL",
             "terms": [
-              "artificial intelligence"
+              "postgresql"
             ],
-            "evidenceType": "domain_tool_evidence",
-            "claimStrength": "supporting",
-            "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
-          },
-          {
-            "section": "skills",
-            "id": 61,
-            "label": "Data Pipelines",
-            "terms": [
-              "pipeline"
-            ],
-            "evidenceType": "domain_tool_evidence",
-            "claimStrength": "supporting",
-            "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
-          },
-          {
-            "section": "skills",
-            "id": 57,
-            "label": "ETL Pipelines",
-            "terms": [
-              "pipeline"
-            ],
-            "evidenceType": "domain_tool_evidence",
-            "claimStrength": "supporting",
-            "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
+            "evidenceType": "weak_lexical_overlap",
+            "claimStrength": "cautious",
+            "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
           }
         ],
         "jdSignalIntent": [
           {
-            "term": "sales",
+            "term": "react",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "signalType": "tool_platform",
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
+            ]
+          },
+          {
+            "term": "postgresql",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "signalType": "tool_platform",
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "manage databases across sqlserver, postgresql, and dynamodb environments."
+            ]
+          },
+          {
+            "term": "graphql",
             "intent": "role_responsibility",
             "priority": 3,
             "signalType": "role_capability",
             "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
             "linePreview": [
-              "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
-              "assist in developing our sales architecture and refining go-to-market messaging"
+              "develop secure, high‑performance apis using rest, soap, and graphql."
             ]
           },
           {
-            "term": "outreach",
-            "intent": "role_responsibility",
-            "priority": 3,
-            "signalType": "role_capability",
-            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-            "linePreview": [
-              "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
-              "run outbound outreach to msps nationwide (qualified leads provided)"
-            ]
-          },
-          {
-            "term": "pipeline",
+            "term": "microservices",
             "intent": "company_product_context",
             "priority": 1,
             "signalType": "role_capability",
             "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
             "linePreview": [
-              "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+              "work with aws cloud services, serverless components, and microservices‑based architectures."
+            ]
+          },
+          {
+            "term": "amazon web services",
+            "intent": "company_product_context",
+            "priority": 1,
+            "signalType": "tool_platform",
+            "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+            "linePreview": [
+              "work with aws cloud services, serverless components, and microservices‑based architectures."
+            ]
+          },
+          {
+            "term": "delivery",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "signalType": "role_capability",
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "implement ci/cd pipelines and follow devsecops best practices for continuous delivery.",
+              "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey."
+            ]
+          },
+          {
+            "term": "security",
+            "intent": "candidate_requirement",
+            "priority": 2,
+            "signalType": "role_capability",
+            "reason": "Candidate requirement: use as bridge/skills emphasis when supported by resume behavior.",
+            "linePreview": [
+              "troubleshoot performance, security, and stability issues across the full stack."
             ]
           },
           {
@@ -198,74 +322,41 @@
             "signalType": "role_capability",
             "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
             "linePreview": [
-              "assist in developing our sales architecture and refining go-to-market messaging"
+              "own full feature lifecycle—from concept and architecture to deployment and optimization."
             ]
           },
           {
-            "term": "hiring",
-            "intent": "role_responsibility",
-            "priority": 3,
-            "signalType": "role_capability",
-            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-            "linePreview": [
-              "we're hiring a founding growth intern to support our u.s. market expansion."
-            ]
-          },
-          {
-            "term": "leads",
-            "intent": "role_responsibility",
-            "priority": 3,
-            "signalType": "role_capability",
-            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-            "linePreview": [
-              "run outbound outreach to msps nationwide (qualified leads provided)"
-            ]
-          },
-          {
-            "term": "outbound",
-            "intent": "role_responsibility",
-            "priority": 3,
-            "signalType": "role_capability",
-            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-            "linePreview": [
-              "run outbound outreach to msps nationwide (qualified leads provided)"
-            ]
-          },
-          {
-            "term": "artificial intelligence",
+            "term": "deployment",
             "intent": "company_product_context",
             "priority": 1,
             "signalType": "role_capability",
             "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
             "linePreview": [
-              "interest in b2b sales, ai, and operational software"
+              "own full feature lifecycle—from concept and architecture to deployment and optimization."
             ]
           },
           {
-            "term": "b2b",
+            "term": "developer",
             "intent": "role_responsibility",
             "priority": 3,
             "signalType": "role_capability",
             "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
             "linePreview": [
-              "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
-              "interest in b2b sales, ai, and operational software"
-            ]
-          },
-          {
-            "term": "founders",
-            "intent": "candidate_requirement",
-            "priority": 2,
-            "signalType": "role_capability",
-            "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
-            "linePreview": [
-              "book discovery calls with founders, owners, and key decision-makers"
+              "full stack developer"
             ]
           }
         ],
         "gapSupport": [
           {
-            "term": "outreach",
+            "term": "ci/cd",
+            "status": "unsupported_exact",
+            "signalType": "tool_platform",
+            "supportingEvidence": [],
+            "capability": "exact tool/platform",
+            "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
+          },
+          {
+            "term": "graphql",
             "status": "unsupported",
             "signalType": "role_capability",
             "supportingEvidence": [],
@@ -273,7 +364,7 @@
             "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
           },
           {
-            "term": "hiring",
+            "term": "microservices",
             "status": "unsupported",
             "signalType": "role_capability",
             "supportingEvidence": [],
@@ -281,7 +372,20 @@
             "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
           },
           {
-            "term": "leads",
+            "term": "deployment",
+            "status": "conceptual",
+            "signalType": "role_capability",
+            "supportingEvidence": [
+              "aws",
+              "ec2",
+              "deployed",
+              "production"
+            ],
+            "capability": "cloud and deployment",
+            "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
+          },
+          {
+            "term": "developer",
             "status": "unsupported",
             "signalType": "role_capability",
             "supportingEvidence": [],
@@ -289,60 +393,12 @@
             "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
           },
           {
-            "term": "outbound",
+            "term": "implement",
             "status": "unsupported",
             "signalType": "role_capability",
             "supportingEvidence": [],
             "capability": "",
             "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-          },
-          {
-            "term": "b2b",
-            "status": "unsupported",
-            "signalType": "role_capability",
-            "supportingEvidence": [],
-            "capability": "",
-            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-          },
-          {
-            "term": "founders",
-            "status": "unsupported",
-            "signalType": "role_capability",
-            "supportingEvidence": [],
-            "capability": "",
-            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-          },
-          {
-            "term": "representative",
-            "status": "unsupported",
-            "signalType": "role_capability",
-            "supportingEvidence": [],
-            "capability": "",
-            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-          },
-          {
-            "term": "book",
-            "status": "unsupported",
-            "signalType": "role_capability",
-            "supportingEvidence": [],
-            "capability": "",
-            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-          },
-          {
-            "term": "msps",
-            "status": "context_only",
-            "signalType": "context",
-            "supportingEvidence": [],
-            "capability": "company/client context",
-            "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
-          },
-          {
-            "term": "performance",
-            "status": "context_only",
-            "signalType": "context",
-            "supportingEvidence": [],
-            "capability": "company/client context",
-            "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
           }
         ],
         "fitRisk": {
@@ -364,35 +420,34 @@
           "claimGuidance": ""
         },
         "matchedTerms": [
-          "sales",
-          "pipeline",
-          "architecture",
-          "artificial intelligence"
+          "React",
+          "PostgreSQL",
+          "amazon web services",
+          "delivery"
         ],
         "jobPriorityTerms": [
-          "sales",
-          "pipeline",
-          "architecture"
+          "React",
+          "PostgreSQL",
+          "amazon web services"
         ],
         "resumeGaps": [
-          "outreach",
-          "hiring",
-          "leads",
-          "outbound"
+          "ci/cd",
+          "graphql",
+          "microservices",
+          "developer"
         ],
         "changedSections": [
           "summary",
           "experience",
           "projects",
-          "skills",
-          "section visibility"
+          "skills"
         ],
         "mainMoves": [
           "kept the projects that best prove the role fit",
           "reframed your experience around the job's strongest signals",
           "gave the summary a clearer role-specific angle"
         ],
-        "layoutChanged": "summary/section visibility",
+        "layoutChanged": "",
         "preferencesUsed": [
           "strict_truth"
         ]
@@ -448,10 +503,21 @@
       ],
       "experience": [
         {
+          "id": 5,
+          "title": "Software Engineering Intern",
+          "company": "BitGo",
+          "description": "• Developed and maintained backend services and REST APIs using Python and Django, supporting secure workflows for financial compliance.\n• Optimized data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency and improving system scalability.\n• Collaborated with senior engineers to design scalable architectures, contributing to system performance and data modeling.\n• Created dynamic React dashboards that integrated with Django APIs, significantly improving operational visibility and data insights.",
+          "start_date": "2024-05-01",
+          "end_date": "2025-06-01",
+          "current": false,
+          "location": "Remote",
+          "skills": "Python, Django, React, PostgreSQL, AWS EC2"
+        },
+        {
           "id": 8,
           "title": "Host / Expo",
           "company": "Hawkers",
-          "description": "• Managed ~35% of store sales as a Host at Hawkers, driving revenue through effective customer engagement and service.\n• Ensured accurate order fulfillment by collaborating closely with kitchen and delivery teams.\n• Fostered strong customer relationships to promote repeat business and enhance overall satisfaction.",
+          "description": "• Attention to detail in every order for consistent quality.\n• Clear communication with customers, kitchen, and delivery teams.\n• Direct impact on business revenue - managing ~35% of store sales.",
           "start_date": "2022-05-01",
           "end_date": "2022-08-01",
           "current": false,
@@ -463,7 +529,7 @@
         {
           "id": 9,
           "title": "Centi – Personal Finance App",
-          "description": "• Built and deployed a full-stack finance application that automates account aggregation, transaction tracking, and spending insights across a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and normalized data storage.\n• Developed responsive React dashboards and authentication flows for account management, transaction review, and financial analytics.\n• Implemented authentication and secure data handling (OAuth/JWT), ensuring protected access to financial data and user account workflows.",
+          "description": "• Engineered a full-stack finance application that automates account aggregation and transaction tracking, providing users with comprehensive spending insights.\n• Designed responsive React dashboards and secure authentication flows, enhancing user experience in financial management.\n• Developed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing and data normalization.\n• Implemented OAuth/JWT for secure data handling, safeguarding user access to sensitive financial information.",
           "tech_stack": [
             "FastAPI",
             "React",
@@ -475,25 +541,13 @@
         {
           "id": 10,
           "title": "Taylor.io – Resume Builder & Parser",
-          "description": "• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.\n• Implemented backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\n• Created a live editing and preview experience in React, enabling users to customize resume content in real time through  a clean, guided interface.\n• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and  editing workflows.",
+          "description": "• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.\n• Developed backend services for parsing and authentication workflows using FastAPI and PostgreSQL.\n• Created a live editing and preview experience in React, enabling users to customize resume content in real time through a clean, guided interface.\n• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and editing workflows.",
           "tech_stack": [
             "React",
             "FastAPI",
             "PostgreSQL",
             "OpenAI API",
             "Tailwind CSS"
-          ],
-          "url": ""
-        },
-        {
-          "id": 12,
-          "title": "SecureScape – Smart Security System",
-          "description": "• Developed the Flutter mobile app with core controls including alarm toggling, lighting, photo capture, and recording  access.\n• Built the Python backend and communication layer for device coordination, enabling reliable messaging and near real time alerts (<3.5s).",
-          "tech_stack": [
-            "Python",
-            "Flutter",
-            "Arduino C++",
-            "TensorFlow Lite"
           ],
           "url": ""
         },
@@ -509,37 +563,63 @@
             "NumPy"
           ],
           "url": ""
-        },
-        {
-          "id": 18,
-          "title": "Tizirsso Racing – Portfolio & Sponsorship Website",
-          "description": "• Built a custom motorsport portfolio site translating brand identity and racing history into a polished, mobile-first  experience.\n• Developed interactive UI sections including an animated hero, editorial about page, career timeline, team history,  championship highlights, and image galleries with lightbox support.",
-          "tech_stack": [
-            "Next.js",
-            "React",
-            "Vercel",
-            "Framer"
-          ],
-          "url": "https://tizianorosso.com/"
-        },
-        {
-          "id": 20,
-          "title": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-          "description": "• Designed and implemented an end-to-end production-style ML data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.\n• Applied NLP models (FinBERT) and feature engineering to build 40+ predictive features per ticker; trained XGBoost models achieving 55–70% ROC-AUC.\n• Built modular components for data ingestion, transformation, model inference, and distributed-style batching, aligned with message-driven architectures.\n• Automated end-to-end data collection, preprocessing, and model inference workflows, enabling scalable real-time analytics.",
-          "tech_stack": [
-            "Python",
-            "SQL",
-            "FinBERT",
-            "XGBoost"
-          ],
-          "url": ""
         }
       ],
       "skills": [
         {
+          "id": 47,
+          "name": "React",
+          "category": "Frameworks"
+        },
+        {
+          "id": 51,
+          "name": "PostgreSQL",
+          "category": "Data Tools"
+        },
+        {
+          "id": 46,
+          "name": "FastAPI",
+          "category": "Frameworks"
+        },
+        {
+          "id": 45,
+          "name": "Django",
+          "category": "Frameworks"
+        },
+        {
           "id": 41,
           "name": "Python",
           "category": "Languages"
+        },
+        {
+          "id": 56,
+          "name": "AWS (EC2)",
+          "category": "Data Tools"
+        },
+        {
+          "id": 62,
+          "name": "REST API Design",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 58,
+          "name": "Backend Development",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 59,
+          "name": "Automation Systems",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 60,
+          "name": "AI-Driven Workflows",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 61,
+          "name": "Data Pipelines",
+          "category": "Focus Areas"
         },
         {
           "id": 42,
@@ -557,21 +637,6 @@
           "category": "Languages"
         },
         {
-          "id": 45,
-          "name": "Django",
-          "category": "Frameworks"
-        },
-        {
-          "id": 46,
-          "name": "FastAPI",
-          "category": "Frameworks"
-        },
-        {
-          "id": 47,
-          "name": "React",
-          "category": "Frameworks"
-        },
-        {
           "id": 48,
           "name": "Node.js",
           "category": "Frameworks"
@@ -585,74 +650,14 @@
           "id": 50,
           "name": "TensorFlow Lite",
           "category": "Frameworks"
-        },
-        {
-          "id": 51,
-          "name": "PostgreSQL",
-          "category": "Data Tools"
-        },
-        {
-          "id": 52,
-          "name": "MySQL",
-          "category": "Data Tools"
-        },
-        {
-          "id": 53,
-          "name": "MongoDB",
-          "category": "Data Tools"
-        },
-        {
-          "id": 54,
-          "name": "Pandas",
-          "category": "Data Tools"
-        },
-        {
-          "id": 55,
-          "name": "NumPy",
-          "category": "Data Tools"
-        },
-        {
-          "id": 56,
-          "name": "AWS (EC2)",
-          "category": "Data Tools"
-        },
-        {
-          "id": 57,
-          "name": "ETL Pipelines",
-          "category": "Data Tools"
-        },
-        {
-          "id": 58,
-          "name": "Customer Engagement",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 59,
-          "name": "Sales Support",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 60,
-          "name": "AI-Driven Workflows",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 61,
-          "name": "Data Pipelines",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 62,
-          "name": "REST API Design",
-          "category": "Focus Areas"
         }
       ],
       "hiddenSkills": [],
       "summary": {
-        "summary": "Sales professional with proven experience in customer communication and support, adept at driving revenue through effective outreach and relationship management. Skilled in managing customer interactions and ensuring satisfaction, ready to contribute to pipeline development and sales architecture."
+        "summary": "Full-stack engineer with a proven track record in building scalable web applications and APIs using React and PostgreSQL. Experienced in developing customer-centric solutions and collaborating effectively in technical environments."
       },
       "sectionVisibility": {
-        "summary": true,
+        "summary": false,
         "education": true,
         "experience": true,
         "projects": true,
@@ -677,40 +682,17 @@
     "patchDiff": {
       "summary": {
         "before": "Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications.",
-        "after": "Sales professional with proven experience in customer communication and support, adept at driving revenue through effective outreach and relationship management. Skilled in managing customer interactions and ensuring satisfaction, ready to contribute to pipeline development and sales architecture."
-      },
-      "sectionVisibility": {
-        "before": {
-          "summary": false,
-          "education": true,
-          "experience": true,
-          "projects": true,
-          "skills": true
-        },
-        "after": {
-          "summary": true,
-          "education": true,
-          "experience": true,
-          "projects": true,
-          "skills": true
-        }
+        "after": "Full-stack engineer with a proven track record in building scalable web applications and APIs using React and PostgreSQL. Experienced in developing customer-centric solutions and collaborating effectively in technical environments."
       },
       "experience": [
         {
           "id": 5,
-          "removed": true,
-          "before": {
-            "id": 5,
-            "title": "Software Engineering Intern",
-            "company": "BitGo",
-            "description": "• Built and maintained backend services and REST APIs in Python/Django supporting secure internal workflows for financial and compliance teams.\n• Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.\n• Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, improving system scalability and reducing latency by ~40%.",
-            "start_date": "2024-05-01",
-            "end_date": "2025-06-01",
-            "current": false,
-            "location": "Remote",
-            "skills": "Python, Django, React, PostgreSQL, AWS EC2"
-          },
-          "after": null
+          "fieldsChanged": {
+            "description": {
+              "before": "• Built and maintained backend services and REST APIs in Python/Django supporting secure internal workflows for financial and compliance teams.\n• Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.\n• Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, improving system scalability and reducing latency by ~40%.",
+              "after": "• Developed and maintained backend services and REST APIs using Python and Django, supporting secure workflows for financial compliance.\n• Optimized data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency and improving system scalability.\n• Collaborated with senior engineers to design scalable architectures, contributing to system performance and data modeling.\n• Created dynamic React dashboards that integrated with Django APIs, significantly improving operational visibility and data insights."
+            }
+          }
         },
         {
           "id": 7,
@@ -727,15 +709,6 @@
             "skills": ""
           },
           "after": null
-        },
-        {
-          "id": 8,
-          "fieldsChanged": {
-            "description": {
-              "before": "• Attention to detail in every order for consistent quality.\n• Clear communication with customers, kitchen, and delivery teams.\n• Direct impact on business revenue - managing ~35% of store sales.",
-              "after": "• Managed ~35% of store sales as a Host at Hawkers, driving revenue through effective customer engagement and service.\n• Ensured accurate order fulfillment by collaborating closely with kitchen and delivery teams.\n• Fostered strong customer relationships to promote repeat business and enhance overall satisfaction."
-            }
-          }
         }
       ],
       "projects": [
@@ -744,45 +717,133 @@
           "fieldsChanged": {
             "description": {
               "before": "• Built and deployed a full-stack finance application that automates account aggregation, transaction tracking, and spending insights across a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and normalized data storage.\n• Developed responsive React dashboards and authentication flows for account management, transaction review, and financial analytics.\n• Implemented authentication and secure data handling (OAuth/JWT), ensuring protected access to financial data and user account workflows.\n• Made it secure n stuff.",
-              "after": "• Built and deployed a full-stack finance application that automates account aggregation, transaction tracking, and spending insights across a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and normalized data storage.\n• Developed responsive React dashboards and authentication flows for account management, transaction review, and financial analytics.\n• Implemented authentication and secure data handling (OAuth/JWT), ensuring protected access to financial data and user account workflows."
-            }
-          }
-        }
-      ],
-      "skills": [
-        {
-          "id": 58,
-          "fieldsChanged": {
-            "name": {
-              "before": "Backend Development",
-              "after": "Customer Engagement"
+              "after": "• Engineered a full-stack finance application that automates account aggregation and transaction tracking, providing users with comprehensive spending insights.\n• Designed responsive React dashboards and secure authentication flows, enhancing user experience in financial management.\n• Developed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing and data normalization.\n• Implemented OAuth/JWT for secure data handling, safeguarding user access to sensitive financial information."
             }
           }
         },
         {
-          "id": 59,
+          "id": 10,
           "fieldsChanged": {
-            "name": {
-              "before": "Automation Systems",
-              "after": "Sales Support"
+            "description": {
+              "before": "• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.\n• Implemented backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\n• Created a live editing and preview experience in React, enabling users to customize resume content in real time through  a clean, guided interface.\n• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and  editing workflows.",
+              "after": "• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.\n• Developed backend services for parsing and authentication workflows using FastAPI and PostgreSQL.\n• Created a live editing and preview experience in React, enabling users to customize resume content in real time through a clean, guided interface.\n• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and editing workflows."
             }
           }
+        },
+        {
+          "id": 12,
+          "removed": true,
+          "before": {
+            "id": 12,
+            "title": "SecureScape – Smart Security System",
+            "description": "• Developed the Flutter mobile app with core controls including alarm toggling, lighting, photo capture, and recording  access.\n• Built the Python backend and communication layer for device coordination, enabling reliable messaging and near real time alerts (<3.5s).",
+            "tech_stack": [
+              "Python",
+              "Flutter",
+              "Arduino C++",
+              "TensorFlow Lite"
+            ],
+            "url": ""
+          },
+          "after": null
+        },
+        {
+          "id": 18,
+          "removed": true,
+          "before": {
+            "id": 18,
+            "title": "Tizirsso Racing – Portfolio & Sponsorship Website",
+            "description": "• Built a custom motorsport portfolio site translating brand identity and racing history into a polished, mobile-first  experience.\n• Developed interactive UI sections including an animated hero, editorial about page, career timeline, team history,  championship highlights, and image galleries with lightbox support.",
+            "tech_stack": [
+              "Next.js",
+              "React",
+              "Vercel",
+              "Framer"
+            ],
+            "url": "https://tizianorosso.com/"
+          },
+          "after": null
+        },
+        {
+          "id": 20,
+          "removed": true,
+          "before": {
+            "id": 20,
+            "title": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+            "description": "• Designed and implemented an end-to-end production-style ML data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.\n• Applied NLP models (FinBERT) and feature engineering to build 40+ predictive features per ticker; trained XGBoost models achieving 55–70% ROC-AUC.\n• Built modular components for data ingestion, transformation, model inference, and distributed-style batching, aligned with message-driven architectures.\n• Automated end-to-end data collection, preprocessing, and model inference workflows, enabling scalable real-time analytics.",
+            "tech_stack": [
+              "Python",
+              "SQL",
+              "FinBERT",
+              "XGBoost"
+            ],
+            "url": ""
+          },
+          "after": null
+        }
+      ],
+      "skills": [
+        {
+          "id": 52,
+          "removed": true,
+          "before": {
+            "id": 52,
+            "name": "MySQL",
+            "category": "Data Tools"
+          },
+          "after": null
+        },
+        {
+          "id": 53,
+          "removed": true,
+          "before": {
+            "id": 53,
+            "name": "MongoDB",
+            "category": "Data Tools"
+          },
+          "after": null
+        },
+        {
+          "id": 54,
+          "removed": true,
+          "before": {
+            "id": 54,
+            "name": "Pandas",
+            "category": "Data Tools"
+          },
+          "after": null
+        },
+        {
+          "id": 55,
+          "removed": true,
+          "before": {
+            "id": 55,
+            "name": "NumPy",
+            "category": "Data Tools"
+          },
+          "after": null
+        },
+        {
+          "id": 57,
+          "removed": true,
+          "before": {
+            "id": 57,
+            "name": "ETL Pipelines",
+            "category": "Data Tools"
+          },
+          "after": null
         }
       ]
     },
     "changeReasons": [
       {
         "section": "summary",
-        "reason": "Repositioned the professional summary toward Sales Outreach Representative using concrete, on-resume evidence where possible."
-      },
-      {
-        "section": "layout",
-        "reason": "Adjusted the resume layout (section visibility) so the strongest evidence is easier to find."
+        "reason": "Repositioned the professional summary toward Software Engineer using concrete, on-resume evidence where possible."
       },
       {
         "section": "experience",
         "id": 5,
-        "reason": "Removed BitGo Software Engineering Intern because it was less relevant for this draft."
+        "reason": "experience row 5: light wording pass; the core scope stayed the same."
       },
       {
         "section": "experience",
@@ -790,40 +851,72 @@
         "reason": "Removed Bar Louie Server because it was less relevant for this draft."
       },
       {
-        "section": "experience",
-        "id": 8,
-        "reason": "experience row 8: updated the bullets to foreground the role-relevant work."
+        "section": "projects",
+        "id": 9,
+        "reason": "project 9: revised the description and stack so the fit is easier to scan."
       },
       {
         "section": "projects",
-        "id": 9,
-        "reason": "project 9: light cleanup to the description or stack."
+        "id": 10,
+        "reason": "project 10: light cleanup to the description or stack."
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "reason": "Removed SecureScape – Smart Security System because stronger project evidence fit this role better."
+      },
+      {
+        "section": "projects",
+        "id": 18,
+        "reason": "Removed Tizirsso Racing – Portfolio & Sponsorship Website because stronger project evidence fit this role better."
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "reason": "Removed SentimentTrader - Real-Time Stock Sentiment Pipeline because stronger project evidence fit this role better."
       },
       {
         "section": "skills",
-        "id": 58,
-        "reason": "skill row 58: label or category cleanup."
+        "id": 52,
+        "reason": "Trimmed MySQL from the visible skills list."
       },
       {
         "section": "skills",
-        "id": 59,
-        "reason": "skill row 59: label or category cleanup."
+        "id": 53,
+        "reason": "Trimmed MongoDB from the visible skills list."
+      },
+      {
+        "section": "skills",
+        "id": 54,
+        "reason": "Trimmed Pandas from the visible skills list."
+      },
+      {
+        "section": "skills",
+        "id": 55,
+        "reason": "Trimmed NumPy from the visible skills list."
+      },
+      {
+        "section": "skills",
+        "id": 57,
+        "reason": "Trimmed ETL Pipelines from the visible skills list."
       }
     ],
     "warnings": [
-      "Quality guard removed placeholder bullets from projects:9.",
-      "Rewrite repair pass strengthened weak tailored rows: experience:8."
+      "Skills guard restored 6 skill row(s) because Pass B exceeded the deletion budget.",
+      "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:9, projects:10.",
+      "Rewrite audit: expected stronger rewrites for experience id 5, projects id 10; output looked like minor wording changes.",
+      "Rewrite audit: filler phrasing survived in projects id 9 (enhancing)."
     ]
   },
   "audit": {
     "v": 1,
     "step": "diff_audit",
-    "target_role": "Sales Outreach Representative",
+    "target_role": "Software Engineer",
     "plan_hero_fit": {
       "segment": {
         "has_ranked_experience": true,
         "has_project_plan": true,
-        "narrative_had_project_heroes": false,
+        "narrative_had_project_heroes": true,
         "narrative_had_experience_heroes": true
       },
       "hero_slot_gap": {
@@ -834,25 +927,30 @@
         "k": 2,
         "plan_len": 2,
         "top_k_ids": [
-          8,
-          5
+          5,
+          8
         ],
         "hero_ids": [
-          8
+          5
         ],
         "in_top_k": 1,
         "ratio": 1.0
       },
       "projects": {
         "k": 4,
-        "plan_len": 2,
+        "plan_len": 5,
         "top_k_ids": [
-          20,
+          9,
+          10,
+          18,
+          12
+        ],
+        "hero_ids": [
+          9,
           10
         ],
-        "hero_ids": [],
-        "in_top_k": 0,
-        "ratio": null
+        "in_top_k": 2,
+        "ratio": 1.0
       },
       "inversion_pair_count": 0,
       "inversion_by_section": {
@@ -891,28 +989,23 @@
           62
         ],
         "after": [
-          41,
-          42,
-          43,
-          44,
-          45,
-          46,
           47,
-          48,
-          49,
-          50,
           51,
-          52,
-          53,
-          54,
-          55,
+          46,
+          45,
+          41,
           56,
-          57,
+          62,
           58,
           59,
           60,
           61,
-          62
+          42,
+          43,
+          44,
+          48,
+          49,
+          50
         ]
       }
     },
@@ -926,101 +1019,152 @@
       "section_keys": [
         "experience",
         "projects",
-        "sectionVisibility",
         "skills",
         "summary"
       ],
       "row_counts": {
-        "experience": 3,
-        "projects": 1,
-        "skills": 2
+        "experience": 2,
+        "projects": 5,
+        "skills": 5
       }
     },
     "warnings": {
-      "total": 2,
+      "total": 4,
       "from_rewrite": [
-        "Quality guard removed placeholder bullets from projects:9.",
-        "Rewrite repair pass strengthened weak tailored rows: experience:8."
+        "Skills guard restored 6 skill row(s) because Pass B exceeded the deletion budget.",
+        "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:9, projects:10."
       ],
       "narrative_omission": []
     },
-    "change_reasons_count": 8,
+    "change_reasons_count": 13,
     "text": {
       "rewrite_note_chars": 0,
       "rewrite_note_preview": "",
-      "merged_summary_preview": "Tailoring log for: Sales Outreach Representative.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- sectionVisibility: structure or presentation updated.\n- Experience id 5: removed from resume.\n- Experience id 7: removed from resume.\n- Experience id 8: moderate update to bullets and/or line items.\n- Project id 9: light edit to one part of the project (minor).\n- Skills id 58: minor name/category touch-up.\n- Skills id 59: minor name/category touch-up."
+      "merged_summary_preview": "Tailoring log for: Software Engineer.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- Experience id 5: small text tweak (minor).\n- Experience id 7: removed from resume.\n- Project id 9: moderate description/stack revision.\n- Project id 10: light edit to one part of the project (minor).\n- Project id 12: removed from resume.\n- Project id 18: removed from resume.\n- Project id 20: removed from resume.\n- Skills id 52: row removed.\n- Skills id 53: row re…"
     },
     "quality": {
-      "target_role": "Sales Outreach Representative",
+      "target_role": "Software Engineer",
       "flags": {
         "aggressive_skill_prune": false,
-        "suspicious_protected_skill_removals": false,
+        "suspicious_protected_skill_removals": true,
         "summary_has_generic_phrase_hits": false,
-        "filler_phrase_hits": false,
+        "filler_phrase_hits": true,
         "skills_expected_but_unchanged": false,
-        "minor_expected_rewrites": false,
+        "minor_expected_rewrites": true,
         "missing_expected_rewrites": false
       },
       "summary": {
         "changed": true,
-        "after_preview": "Sales professional with proven experience in customer communication and support, adept at driving revenue through effective outreach and relationship management. Skilled in managing customer interactions and ensuring satisfaction, ready to contribute to pipeline development and …",
+        "after_preview": "Full-stack engineer with a proven track record in building scalable web applications and APIs using React and PostgreSQL. Experienced in developing customer-centric solutions and collaborating effectively in technical environments.",
         "generic_phrases_matched": [],
         "filler_phrases_matched": []
       },
       "rewrite_quality": {
         "expected_experience_rewrite_ids": [
-          8
+          5
         ],
-        "expected_project_rewrite_ids": [],
-        "minor_rewrite_rows": [],
+        "expected_project_rewrite_ids": [
+          9,
+          10
+        ],
+        "minor_rewrite_rows": [
+          {
+            "section": "experience",
+            "id": 5
+          },
+          {
+            "section": "projects",
+            "id": 10
+          }
+        ],
         "missing_rewrite_rows": [],
-        "filler_phrase_hits": []
+        "filler_phrase_hits": [
+          {
+            "section": "projects",
+            "id": 9,
+            "phrases": [
+              "enhancing"
+            ]
+          }
+        ]
       },
       "removals": {
-        "removedSkillIds": [],
-        "removedProjectIds": [],
+        "removedSkillIds": [
+          52,
+          53,
+          54,
+          55,
+          57
+        ],
+        "removedProjectIds": [
+          12,
+          18,
+          20
+        ],
         "removedExperienceIds": [
-          5,
           7
         ],
         "visible_skill_count_before": 22,
-        "removed_skill_count": 0,
-        "removal_ratio_skills": 0.0,
-        "protected_skill_removals": []
+        "removed_skill_count": 5,
+        "removal_ratio_skills": 0.227,
+        "protected_skill_removals": [
+          {
+            "id": 52,
+            "name": "MySQL"
+          },
+          {
+            "id": 53,
+            "name": "MongoDB"
+          },
+          {
+            "id": 57,
+            "name": "ETL Pipelines"
+          }
+        ]
       },
       "narrative_heroes": {
-        "hero_project_ids": [],
-        "hero_project_ids_with_edits": [],
+        "hero_project_ids": [
+          9,
+          10
+        ],
+        "hero_project_ids_with_edits": [
+          9,
+          10
+        ],
         "hero_project_ids_not_in_patch": [],
         "only_one_hero_touched_while_several_listed": false,
         "hero_experience_ids": [
-          8
+          5
         ],
         "hero_experience_ids_with_edits": [
-          8
+          5
         ],
         "hero_experience_ids_not_in_patch": []
       },
       "stage_edits_removals": {
         "removedSkillIds": [],
-        "removedProjectIds": []
+        "removedProjectIds": [
+          12,
+          18,
+          20
+        ]
       },
       "rewrite_intensity": {
         "summary_changed": true,
         "experience_rows_touched": 1,
-        "project_rows_touched": 1,
-        "skill_rows_touched": 2,
+        "project_rows_touched": 2,
+        "skill_rows_touched": 5,
         "skills_section_changed": true,
-        "rows_removed_total": 2,
-        "hero_projects_edited_count": 0,
+        "rows_removed_total": 9,
+        "hero_projects_edited_count": 2,
         "hero_experience_edited_count": 1,
         "low_intensity_hint": false
       }
     },
     "llm_usage_pass1": {
-      "completion_tokens": 330,
-      "prompt_tokens": 9549,
-      "total_tokens": 9879,
+      "completion_tokens": 469,
+      "prompt_tokens": 9571,
+      "total_tokens": 10040,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0
@@ -1033,9 +1177,9 @@
       }
     },
     "llm_usage_pass2": {
-      "completion_tokens": 618,
-      "prompt_tokens": 8755,
-      "total_tokens": 9373,
+      "completion_tokens": 323,
+      "prompt_tokens": 8621,
+      "total_tokens": 8944,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0
@@ -1048,9 +1192,9 @@
       }
     },
     "llm_usage_rewrite_pass": {
-      "completion_tokens": 618,
-      "prompt_tokens": 8755,
-      "total_tokens": 9373,
+      "completion_tokens": 323,
+      "prompt_tokens": 8621,
+      "total_tokens": 8944,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0
@@ -1063,9 +1207,9 @@
       }
     },
     "llm_usage_repair_pass": {
-      "completion_tokens": 94,
-      "prompt_tokens": 922,
-      "total_tokens": 1016,
+      "completion_tokens": 397,
+      "prompt_tokens": 1811,
+      "total_tokens": 2208,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0

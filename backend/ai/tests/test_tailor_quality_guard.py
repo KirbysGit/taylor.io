@@ -14,7 +14,9 @@ from backend.ai.prompt.prompt_builder import (
     project_quality_repair_ids_for_narrative,
 )
 from backend.ai.job_tailor_service import (
+    apply_strategy_selection_guard,
     enforce_project_quality_repairs,
+    enforce_strategy_skill_preserve,
     enforce_surviving_project_quality_cleanup,
     focus_adjacent_project_selection_for_strong_retarget,
 )
@@ -192,3 +194,75 @@ def test_strong_adjacent_retarget_focuses_visible_projects():
     assert updated["keepProjects"] == [17, 9, 20]
     assert updated["maybeProjects"] == []
     assert set(updated["dropProjects"]) == {10, 12, 18}
+
+
+def test_strategy_skill_preserve_restores_existing_supported_rows():
+    resume_mid = {
+        "skills": [
+            {"id": 1, "name": "AWS (EC2)", "category": "Data Tools"},
+            {"id": 2, "name": "REST API Design", "category": "Focus Areas"},
+            {"id": 3, "name": "Python", "category": "Languages"},
+        ]
+    }
+    stage = {"edits": {"skills": [{"id": 3, "name": "Python", "category": "Languages"}]}}
+    tailor_context = {"jobStrategy": {"skillPreserve": ["AWS EC2", "REST API Design"]}}
+
+    repaired = enforce_strategy_skill_preserve(stage, resume_mid, tailor_context)
+    repaired_ids = [row["id"] for row in repaired["edits"]["skills"]]
+
+    assert repaired_ids == [3, 1, 2]
+    assert any("Strategy skills guard restored 2 preserved skill row(s)" in w for w in repaired["warnings"])
+
+
+def test_strategy_skill_preserve_does_not_restore_deprioritized_rows():
+    resume_mid = {
+        "skills": [
+            {"id": 1, "name": "Python", "category": "Languages"},
+            {"id": 2, "name": "Customer Service", "category": "Focus Areas"},
+        ]
+    }
+    stage = {"edits": {"skills": [{"id": 1, "name": "Python", "category": "Languages"}]}}
+    tailor_context = {"jobStrategy": {"skillPreserve": [], "skillDeprioritize": ["Customer Service"]}}
+
+    repaired = enforce_strategy_skill_preserve(stage, resume_mid, tailor_context)
+
+    assert repaired is stage
+
+
+def test_strategy_selection_guard_keeps_service_rows_for_customer_archetype():
+    narrative = {
+        "dropExperience": [7, 8],
+        "keepExperience": [5],
+        "rewriteExperience": [],
+        "selectionRationale": [],
+    }
+    resume_data = {
+        "experience": [
+            {"id": 5, "title": "Software Engineering Intern", "company": "BitGo"},
+            {
+                "id": 7,
+                "title": "Server",
+                "company": "Bar Louie",
+                "description": "Served guests and coordinated with kitchen and bar teams.",
+            },
+            {
+                "id": 8,
+                "title": "Host / Expo",
+                "company": "Hawkers",
+                "description": "Managed customer communication and delivery team coordination.",
+            },
+        ]
+    }
+    tailor_context = {
+        "jobStrategy": {
+            "persona": "sales_growth",
+            "roleArchetype": "financial_customer_education",
+        }
+    }
+
+    updated, debug = apply_strategy_selection_guard(narrative, resume_data, tailor_context)
+
+    assert debug["strategySelectionGuard"] is True
+    assert updated["dropExperience"] == []
+    assert updated["keepExperience"] == [5, 7, 8]
+    assert updated["rewriteExperience"] == [7, 8]

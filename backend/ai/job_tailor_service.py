@@ -16,9 +16,11 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 # in use.
+from .debugging import build_tailor_review_snapshot
 from .extraction import extract_keywords
 from .processing import build_tailor_context
 from .planning import build_alignment_context, build_tailor_plan
+from .strategy import build_job_strategy
 from .narrative import request_narrative_brief
 from fastapi import HTTPException
 
@@ -782,6 +784,118 @@ def protect_transferable_experience_for_bridge(narrative_brief):
     return updated, {"bridgeExperienceGuard": True, "promotedExperienceIds": promoted_ids}
 
 
+def _strategy_wants_service_experience(job_strategy):
+    if not isinstance(job_strategy, dict):
+        return False
+    archetype = str(job_strategy.get("roleArchetype") or "").strip().lower()
+    persona = str(job_strategy.get("persona") or "").strip().lower()
+    if archetype in {
+        "sales_growth_outreach",
+        "financial_customer_education",
+        "hospitality_customer_service",
+    }:
+        return True
+    if persona == "sales_growth":
+        return True
+    if persona == "operations_admin":
+        blob = " ".join(
+            str(x or "")
+            for x in (
+                list(job_strategy.get("proofStyle") or [])
+                + list(job_strategy.get("keepPriorities") or [])
+                + list(job_strategy.get("skillPreserve") or [])
+            )
+        ).lower()
+        return any(cue in blob for cue in ("communication", "coordination", "customer", "service", "client"))
+    return False
+
+
+def _is_service_experience_row(row):
+    text = _row_text(row)
+    if not text:
+        return False
+    cues = {
+        "bar",
+        "customer",
+        "delivery",
+        "expo",
+        "guest",
+        "hospitality",
+        "host",
+        "interpersonal",
+        "kitchen",
+        "phone",
+        "restaurant",
+        "sales",
+        "server",
+        "service",
+        "store",
+        "team",
+    }
+    return any(re.search(r"(?<![a-z0-9])" + re.escape(cue) + r"(?![a-z0-9])", text) for cue in cues)
+
+
+def apply_strategy_selection_guard(narrative_brief, resume_data, tailor_context):
+    if not isinstance(narrative_brief, dict):
+        return narrative_brief, None
+    tc = tailor_context if isinstance(tailor_context, dict) else {}
+    job_strategy = tc.get("jobStrategy") if isinstance(tc.get("jobStrategy"), dict) else {}
+    if not _strategy_wants_service_experience(job_strategy):
+        return narrative_brief, None
+
+    dropped = _int_id_list(narrative_brief.get("dropExperience"))
+    if not dropped:
+        return narrative_brief, None
+    experience_rows = (resume_data or {}).get("experience") if isinstance(resume_data, dict) else []
+    if not isinstance(experience_rows, list):
+        return narrative_brief, None
+
+    row_by_id = {_row_id(row): row for row in experience_rows if isinstance(row, dict)}
+    promoted = []
+    for rid in dropped:
+        row = row_by_id.get(rid)
+        if not row or not _is_service_experience_row(row):
+            continue
+        promoted.append(
+            {
+                "id": rid,
+                "label": str(row.get("title") or row.get("company") or f"experience {rid}").strip(),
+            }
+        )
+        if len(promoted) >= 2:
+            break
+    if not promoted:
+        return narrative_brief, None
+
+    promoted_ids = [item["id"] for item in promoted]
+    updated = copy.deepcopy(narrative_brief)
+    updated["dropExperience"] = [rid for rid in _int_id_list(updated.get("dropExperience")) if rid not in promoted_ids]
+    keep = _int_id_list(updated.get("keepExperience"))
+    for rid in promoted_ids:
+        if rid not in keep:
+            keep.append(rid)
+    updated["keepExperience"] = keep
+    rewrite = _int_id_list(updated.get("rewriteExperience"))
+    for rid in promoted_ids:
+        if rid not in rewrite and len(rewrite) < 3:
+            rewrite.append(rid)
+    updated["rewriteExperience"] = rewrite
+
+    rationale = list(updated.get("selectionRationale") or [])
+    archetype = str(job_strategy.get("roleArchetype") or job_strategy.get("persona") or "this strategy").strip()
+    for item in promoted:
+        rationale.append(
+            f"Strategy guard kept {item['label']} because {archetype} needs people-facing or coordination evidence."
+        )
+    updated["selectionRationale"] = list(dict.fromkeys([x for x in rationale if isinstance(x, str) and x.strip()]))[:8]
+    return updated, {
+        "strategySelectionGuard": True,
+        "roleArchetype": job_strategy.get("roleArchetype"),
+        "promotedExperienceIds": promoted_ids,
+        "reason": "protected service/customer-facing experience for this strategy",
+    }
+
+
 def focus_adjacent_project_selection_for_strong_retarget(narrative_brief, payload):
     """
     Strong adjacent/stretch retargets need visible selection, not just rewritten heroes.
@@ -1052,6 +1166,98 @@ def enforce_pass_b_skill_budget(stage, resume_mid):
     return _append_stage_warning(
         out,
         f"Skills guard restored {len(repaired) - len(skills)} skill row(s) because Pass B exceeded the deletion budget.",
+    )
+
+
+def _skill_policy_text(row):
+    if not isinstance(row, dict):
+        return ""
+    parts = []
+    for key in ("name", "category", "label", "description", "skills"):
+        value = row.get(key)
+        if isinstance(value, list):
+            parts.extend(str(x) for x in value if str(x).strip())
+        elif isinstance(value, str) and value.strip():
+            parts.append(value)
+    return " ".join(parts)
+
+
+def _skill_policy_norm(value):
+    text = str(value or "").lower()
+    text = text.replace("&", " and ")
+    return re.sub(r"[^a-z0-9+#]+", " ", text).strip()
+
+
+def _skill_policy_aliases(term):
+    aliases = set(get_term_aliases(str(term or "").lower()) or set())
+    raw = str(term or "").strip()
+    if raw:
+        aliases.add(raw)
+    norm = _skill_policy_norm(raw)
+    if norm in {"aws ec2", "amazon web services ec2"}:
+        aliases.update({"aws", "ec2", "aws ec2", "amazon web services"})
+    if norm in {"rest api design", "rest apis", "rest api"}:
+        aliases.update({"rest api", "rest APIs", "api design", "REST API Design"})
+    if norm in {"api integrations", "api integration"}:
+        aliases.update({"api integration", "api integrations", "rest api", "third-party api"})
+    if norm in {"etl pipelines", "etl pipeline"}:
+        aliases.update({"etl", "etl pipeline", "etl pipelines", "data pipelines"})
+    if norm in {"data pipelines", "data pipeline"}:
+        aliases.update({"data pipeline", "data pipelines", "etl pipelines"})
+    return aliases
+
+
+def _skill_row_matches_policy(row, terms):
+    haystack = f" {_skill_policy_norm(_skill_policy_text(row))} "
+    if not haystack.strip():
+        return False
+    for term in terms or []:
+        for alias in _skill_policy_aliases(term):
+            needle = _skill_policy_norm(alias)
+            if needle and f" {needle} " in haystack:
+                return True
+    return False
+
+
+def enforce_strategy_skill_preserve(stage, resume_mid, tailor_context):
+    if not isinstance(stage, dict) or not isinstance(stage.get("edits"), dict):
+        return stage
+    skills = (stage.get("edits") or {}).get("skills")
+    original = resume_mid.get("skills") if isinstance(resume_mid, dict) else []
+    if not isinstance(skills, list) or not isinstance(original, list):
+        return stage
+    tc = tailor_context if isinstance(tailor_context, dict) else {}
+    strategy = tc.get("jobStrategy") if isinstance(tc.get("jobStrategy"), dict) else {}
+    preserve_terms = strategy.get("skillPreserve") if isinstance(strategy.get("skillPreserve"), list) else []
+    if not preserve_terms:
+        return stage
+
+    original_rows = [row for row in original if isinstance(row, dict) and row.get("id") is not None]
+    seen = {_row_id(row) for row in skills if isinstance(row, dict)}
+    restored = []
+    for row in original_rows:
+        rid = _row_id(row)
+        if rid in seen:
+            continue
+        if not _skill_row_matches_policy(row, preserve_terms):
+            continue
+        restored.append(row)
+        seen.add(rid)
+
+    if not restored:
+        return stage
+
+    out = dict(stage)
+    edits = dict(stage.get("edits") or {})
+    edits["skills"] = list(skills) + restored
+    out["edits"] = edits
+    restored_names = [str(row.get("name") or row.get("label") or row.get("category") or row.get("id")) for row in restored]
+    preview = ", ".join(restored_names[:4])
+    if len(restored_names) > 4:
+        preview += f", +{len(restored_names) - 4} more"
+    return _append_stage_warning(
+        out,
+        f"Strategy skills guard restored {len(restored)} preserved skill row(s): {preview}.",
     )
 
 
@@ -1527,6 +1733,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         relevant_jd_lines=relevantJDLines,
         target_role=payload.get("target_role") or "",
     )
+    tailorContext["jobStrategy"] = build_job_strategy(payload, tailorContext, sectionDetails)
 
     # narrative spine: one brief for both passes; not recomputed after pass 1.
     narrative_brief, usage_narr, narrative_char_meta = request_narrative_brief(
@@ -1538,6 +1745,12 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     )
     narrative_bridge_guard = None
     narrative_brief, narrative_bridge_guard = protect_transferable_experience_for_bridge(narrative_brief)
+    narrative_strategy_guard = None
+    narrative_brief, narrative_strategy_guard = apply_strategy_selection_guard(
+        narrative_brief,
+        resumeData,
+        tailorContext,
+    )
     narrative_retarget_guard = None
     narrative_brief, narrative_retarget_guard = focus_adjacent_project_selection_for_strong_retarget(
         narrative_brief,
@@ -1597,6 +1810,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         )
         out2_parsed = parse_pass_b_completion(text_b)
         out2_parsed = enforce_pass_b_skill_budget(out2_parsed, resume_mid)
+        out2_parsed = enforce_strategy_skill_preserve(out2_parsed, resume_mid, tailorContext)
     out2 = passBOnlySkills(out2_parsed) if out2_parsed is not None else None
     out = mergePassEdits(out1, out2)
     out = enforce_surviving_project_quality_cleanup(out, resumeData)
@@ -1691,6 +1905,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
                 "resume_hits": tailorContext.get("resumeHits"),
                 "resume_gaps": tailorContext.get("resumeGaps"),
                 "alignment_context": tailorContext.get("alignmentContext"),
+                "job_strategy": tailorContext.get("jobStrategy"),
                 "relevant_jd_lines": relevantJDLines,
             },
         )
@@ -1701,6 +1916,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
                 "narrative": narrative_brief,
                 "selection_guard": narrative_selection_guard or {"onePageSelectionGuard": False},
                 "bridge_guard": narrative_bridge_guard or {"bridgeExperienceGuard": False},
+                "strategy_guard": narrative_strategy_guard or {"strategySelectionGuard": False},
                 "retarget_guard": narrative_retarget_guard or {"strongAdjacentProjectFocus": False},
                 "quality_guard": narrative_quality_guard,
             },
@@ -1750,6 +1966,19 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
                 "final": final_out,
                 "audit": diff_audit,
             },
+        )
+        write_debug(
+            "tailor_06_review.json",
+            build_tailor_review_snapshot(
+                payload=payload,
+                ext_result=ext_result,
+                tailor_context=tailorContext,
+                section_details=sectionDetails,
+                narrative_brief=narrative_brief,
+                final_out=final_out,
+                diff_audit=diff_audit,
+                model=get_openai_model(),
+            ),
         )
         text_meta = (diff_audit or {}).get("text") or {}
         rw_chars = text_meta.get("rewrite_note_chars")
