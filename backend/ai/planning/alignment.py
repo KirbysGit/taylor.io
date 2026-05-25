@@ -575,8 +575,14 @@ def _term_lines(term: str, relevant_jd_lines: list[str]) -> list[str]:
     return lines
 
 
-def _jd_signal_intent(top_terms: list[str], target_role: str = "", relevant_jd_lines: list[str] | None = None) -> list[dict[str, Any]]:
+def _jd_signal_intent(
+    top_terms: list[str],
+    target_role: str = "",
+    relevant_jd_lines: list[str] | None = None,
+    keyword_meta: dict[str, dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     role = normalize_term(target_role)
+    keyword_meta = keyword_meta or {}
     out = []
     seen = set()
     for raw in top_terms[:12]:
@@ -584,6 +590,8 @@ def _jd_signal_intent(top_terms: list[str], target_role: str = "", relevant_jd_l
         if not term or term in seen:
             continue
         seen.add(term)
+        meta = keyword_meta.get(term) or keyword_meta.get(normalize_term(raw)) or {}
+        signal_type = str(meta.get("signalType") or "").strip()
         lines = _term_lines(term, relevant_jd_lines or [])
         blob = normalize_term(" ".join(lines))
         in_role_title = _contains_term(role, term)
@@ -595,7 +603,15 @@ def _jd_signal_intent(top_terms: list[str], target_role: str = "", relevant_jd_l
             cue in blob for cue in ("sales pipeline", "lead pipeline", "prospect pipeline", "outreach pipeline")
         )
 
-        if in_role_title or sales_pipeline or (has_role_action and not (has_product_context and term in PRODUCT_CONTEXT_TERMS)):
+        if signal_type == "context":
+            intent = "company_product_context"
+            priority = 1
+            reason = "Company/client context: useful for awareness, but should not become a resume claim unless the resume proves it."
+        elif signal_type == "generic_fragment":
+            intent = "background_or_benefit"
+            priority = 0
+            reason = "Generic fragment: avoid using this as a standalone resume signal."
+        elif in_role_title or sales_pipeline or (has_role_action and not (has_product_context and term in PRODUCT_CONTEXT_TERMS)):
             intent = "role_responsibility"
             priority = 3
             reason = "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it."
@@ -621,6 +637,7 @@ def _jd_signal_intent(top_terms: list[str], target_role: str = "", relevant_jd_l
                 "term": term,
                 "intent": intent,
                 "priority": priority,
+                "signalType": signal_type or "role_capability",
                 "reason": reason,
                 "linePreview": lines[:2],
             }
@@ -671,9 +688,11 @@ def _gap_support(
     gaps: list[str],
     resume_hits: list[str],
     resume_data: dict,
+    keyword_meta: dict[str, dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     resume_blob = _resume_text(resume_data)
     hit_set = {canonicalize_term(t) for t in resume_hits or [] if str(t or "").strip()}
+    keyword_meta = keyword_meta or {}
     out = []
     seen = set()
     for raw in gaps or []:
@@ -681,14 +700,41 @@ def _gap_support(
         if not term or term in seen:
             continue
         seen.add(term)
+        meta = keyword_meta.get(term) or keyword_meta.get(normalize_term(raw)) or {}
+        signal_type = str(meta.get("signalType") or "").strip()
         if term in hit_set:
             out.append(
                 {
                     "term": term,
                     "status": "direct",
+                    "signalType": signal_type or "role_capability",
                     "supportingEvidence": [term],
                     "capability": "direct match",
                     "claimGuidance": "Directly evidenced by resume wording.",
+                }
+            )
+            continue
+        if signal_type == "context":
+            out.append(
+                {
+                    "term": term,
+                    "status": "context_only",
+                    "signalType": signal_type,
+                    "supportingEvidence": [],
+                    "capability": "company/client context",
+                    "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence.",
+                }
+            )
+            continue
+        if signal_type == "tool_platform":
+            out.append(
+                {
+                    "term": term,
+                    "status": "unsupported_exact",
+                    "signalType": signal_type,
+                    "supportingEvidence": [],
+                    "capability": "exact tool/platform",
+                    "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume.",
                 }
             )
             continue
@@ -704,6 +750,7 @@ def _gap_support(
             item = {
                 "term": term,
                 "status": "conceptual",
+                "signalType": signal_type or "role_capability",
                 "supportingEvidence": evidence[:6],
                 "capability": cluster.get("name") or "related capability",
                 "claimGuidance": cluster.get("guidance") or "Use as related evidence, not as direct same-title experience.",
@@ -717,6 +764,7 @@ def _gap_support(
                 {
                     "term": term,
                     "status": "unsupported",
+                    "signalType": signal_type or "role_capability",
                     "supportingEvidence": [],
                     "capability": "",
                     "claimGuidance": "Do not claim this directly; mention only as a gap or omit.",
@@ -1115,6 +1163,8 @@ def build_alignment_context(
     tc = tailor_context if isinstance(tailor_context, dict) else {}
     rd = resume_data if isinstance(resume_data, dict) else {}
     keywords = tc.get("keywords") if isinstance(tc.get("keywords"), list) else []
+    priority_keywords = tc.get("priorityKeywords") if isinstance(tc.get("priorityKeywords"), list) else keywords
+    keyword_meta = {}
     top_terms = []
     for entry in keywords[:12]:
         if not isinstance(entry, dict):
@@ -1122,6 +1172,14 @@ def build_alignment_context(
         term = canonicalize_term(entry.get("term") or "")
         if term and term not in top_terms:
             top_terms.append(term)
+        if term:
+            keyword_meta[term] = entry
+    for entry in priority_keywords[:16]:
+        if not isinstance(entry, dict):
+            continue
+        term = canonicalize_term(entry.get("term") or "")
+        if term and term not in keyword_meta:
+            keyword_meta[term] = entry
     resume_hits = [canonicalize_term(t) for t in (tc.get("resumeHits") or []) if str(t or "").strip()]
     resume_gaps = [canonicalize_term(t) for t in (tc.get("resumeGaps") or []) if str(t or "").strip()]
     rows_ranked = (section_details or {}).get("rowsPerSectionRanked") or {}
@@ -1132,6 +1190,7 @@ def build_alignment_context(
         top_terms,
         target_role=target_role or str(tc.get("targetRole") or ""),
         relevant_jd_lines=relevant_jd_lines or [],
+        keyword_meta=keyword_meta,
     )
     evidence_classification = _evidence_classification(
         direct_evidence=direct,
@@ -1140,11 +1199,32 @@ def build_alignment_context(
         top_terms=top_terms,
         jd_signal_intent=jd_signal_intent,
     )
-    gap_support = _gap_support(resume_gaps, resume_hits, rd)
+    gap_support = _gap_support(resume_gaps, resume_hits, rd, keyword_meta=keyword_meta)
+    supported_terms = {str((item or {}).get("term") or "") for item in gap_support if isinstance(item, dict)}
+    for item in tc.get("suppressedKeywords") or []:
+        if not isinstance(item, dict):
+            continue
+        term = normalize_term(canonicalize_term(item.get("term") or ""))
+        signal_type = str(item.get("signalType") or "").strip()
+        if not term or term in supported_terms or signal_type not in ("context",):
+            continue
+        gap_support.append(
+            {
+                "term": term,
+                "status": "context_only",
+                "signalType": signal_type,
+                "supportingEvidence": [],
+                "capability": "company/client context",
+                "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence.",
+            }
+        )
+        supported_terms.add(term)
     unsupported = [
         str(item.get("term") or "")
         for item in gap_support
-        if isinstance(item, dict) and item.get("status") == "unsupported" and str(item.get("term") or "").strip()
+        if isinstance(item, dict)
+        and item.get("status") in ("unsupported", "unsupported_exact", "context_only")
+        and str(item.get("term") or "").strip()
     ][:8]
     if not gap_support:
         unsupported = _remove_transfer_supported_gaps(resume_gaps, transferable, top_terms)

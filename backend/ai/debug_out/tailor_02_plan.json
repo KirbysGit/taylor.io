@@ -2,81 +2,58 @@
   "section_details": {
     "sectionScoresRanked": [
       [
+        "experience",
+        3
+      ],
+      [
         "projects",
-        7
+        3
       ],
       [
         "skills",
-        5
+        3
       ],
       [
         "education",
-        1
-      ],
-      [
-        "experience",
         1
       ]
     ],
     "rowsPerSectionRanked": {
       "experience": [
         {
-          "id": 5,
+          "id": 8,
           "hits": 1,
           "score": 9.2,
           "matchedTerms": [
-            "python"
+            "sales"
+          ]
+        },
+        {
+          "id": 5,
+          "hits": 2,
+          "score": 7.732,
+          "matchedTerms": [
+            "pipeline",
+            "architecture"
           ]
         }
       ],
       "projects": [
         {
-          "id": 9,
+          "id": 20,
           "hits": 2,
-          "score": 10.6,
+          "score": 7.732,
           "matchedTerms": [
-            "flow",
-            "applications"
+            "pipeline",
+            "architecture"
           ]
         },
         {
           "id": 10,
           "hits": 1,
-          "score": 9.78,
+          "score": 3.42,
           "matchedTerms": [
             "artificial intelligence"
-          ]
-        },
-        {
-          "id": 12,
-          "hits": 1,
-          "score": 9.2,
-          "matchedTerms": [
-            "python"
-          ]
-        },
-        {
-          "id": 17,
-          "hits": 1,
-          "score": 9.2,
-          "matchedTerms": [
-            "python"
-          ]
-        },
-        {
-          "id": 20,
-          "hits": 1,
-          "score": 9.2,
-          "matchedTerms": [
-            "python"
-          ]
-        },
-        {
-          "id": 18,
-          "hits": 1,
-          "score": 6.5,
-          "matchedTerms": [
-            "javascript"
           ]
         }
       ],
@@ -85,48 +62,29 @@
           "hits": 2,
           "rows": [
             {
-              "id": 59,
-              "hits": 1,
-              "matchedTerms": [
-                "automation"
-              ]
-            },
-            {
               "id": 60,
               "hits": 1,
               "matchedTerms": [
                 "artificial intelligence"
               ]
-            }
-          ]
-        },
-        "languages": {
-          "hits": 2,
-          "rows": [
-            {
-              "id": 41,
-              "hits": 1,
-              "matchedTerms": [
-                "python"
-              ]
             },
             {
-              "id": 43,
+              "id": 61,
               "hits": 1,
               "matchedTerms": [
-                "javascript"
+                "pipeline"
               ]
             }
           ]
         },
-        "frameworks": {
+        "data tools": {
           "hits": 1,
           "rows": [
             {
-              "id": 48,
+              "id": 57,
               "hits": 1,
               "matchedTerms": [
-                "javascript"
+                "pipeline"
               ]
             }
           ]
@@ -136,7 +94,7 @@
         {
           "id": 3,
           "hits": 1,
-          "score": 9.78,
+          "score": 3.42,
           "matchedTerms": [
             "artificial intelligence"
           ]
@@ -145,189 +103,182 @@
     },
     "gapsPerSection": {
       "experience": [
-        "healthcare",
-        "ci/cd",
-        "azure",
-        "cloud",
-        "flow",
-        "cross functional collaboration",
-        "conversational"
+        "outreach",
+        "hiring",
+        "leads",
+        "outbound",
+        "b2b",
+        "founders",
+        "representative",
+        "book"
       ],
       "projects": [
-        "healthcare",
-        "ci/cd",
-        "azure",
-        "cloud",
-        "cross functional collaboration",
-        "conversational"
+        "outreach",
+        "hiring",
+        "leads",
+        "outbound",
+        "b2b",
+        "founders",
+        "representative",
+        "book"
       ],
       "skills": [
-        "healthcare",
-        "ci/cd",
-        "azure",
-        "cloud",
-        "flow",
-        "cross functional collaboration",
-        "conversational"
+        "outreach",
+        "hiring",
+        "leads",
+        "outbound",
+        "b2b",
+        "founders",
+        "representative",
+        "book"
       ],
       "education": [
-        "healthcare",
-        "ci/cd",
-        "azure",
-        "cloud",
-        "flow",
-        "cross functional collaboration",
-        "conversational"
+        "outreach",
+        "hiring",
+        "leads",
+        "outbound",
+        "b2b",
+        "founders",
+        "representative",
+        "book"
       ]
     }
   },
   "narrative": {
-    "candidateAngle": "Conversational AI Engineer specializing in LLM integrations and cloud-based solutions, leveraging Python and AI technologies.",
+    "candidateAngle": "Sales outreach representative with a background in customer-facing roles and experience in sales support.",
     "targetStory": {
-      "roleLane": "Conversational AI Engineer focused on LLM and cloud integration",
-      "readerTakeaway": "Proven experience in developing AI-driven applications with Python and cloud technologies, emphasizing backend services and API integrations.",
+      "roleLane": "Sales Outreach Representative",
+      "readerTakeaway": "Candidate with proven sales support experience and skills, ready to contribute to outreach and pipeline development.",
       "proofExperienceIds": [
-        5
-      ],
-      "proofProjectIds": [
-        10,
-        9
-      ],
-      "deEmphasizeExperienceIds": [
-        7,
         8
       ],
-      "deEmphasizeProjectIds": [
-        12,
-        17,
-        20,
-        18
+      "proofProjectIds": [],
+      "deEmphasizeExperienceIds": [
+        5,
+        7
       ],
+      "deEmphasizeProjectIds": [],
       "evidenceThemes": [
-        "AI integration",
-        "backend services",
-        "cloud deployment",
-        "API development"
+        "communication",
+        "sales support",
+        "customer interaction"
       ]
     },
     "primaryStory": [
-      "Developed AI-powered applications using Python and FastAPI, integrating OpenAI API for enhanced functionality",
-      "Built scalable backend services and REST APIs for financial applications, emphasizing secure data handling",
-      "Designed and deployed full-stack applications with cloud technologies, ensuring reliable performance and user experience"
+      "Proven sales support experience in high-pressure environments (e.g. Hawkers, Bar Louie)",
+      "skills demonstrated through customer interactions and team coordination",
+      "Experience in pipeline development and operational support through technical roles"
     ],
-    "secondaryStory": [
-      "Experience with real-time data processing and analytics pipelines, showcasing automation and workflow optimization"
-    ],
-    "summaryGoal": "Highlight experience in AI-driven application development and backend services, emphasizing Python and cloud technologies while integrating relevant JD terms.",
+    "secondaryStory": [],
+    "summaryGoal": "Highlight sales support experience and communication skills; connect to outreach and pipeline development without overstating technical roles.",
     "summaryDecision": {
       "action": "keep",
-      "confidence": "medium",
-      "reason": "The summary connects the candidate's experience with the target role, emphasizing relevant skills and projects.",
+      "confidence": "low",
+      "reason": "Summary connects scattered proof but may not add significant value given the strong experience evidence.",
       "evidence": [
-        "AI-powered applications",
-        "backend services",
-        "cloud technologies"
+        "communication",
+        "sales support",
+        "customer interaction"
       ]
     },
     "skillsStrategy": [
-      "Categories: Languages, Frameworks, Data Tools, Focus Areas",
-      "Lead: Python, FastAPI, AI integration, cloud technologies",
-      "Supporting: PostgreSQL, React, automation, API development",
-      "Trim last sparingly—only duplicates, narrative avoid, or clearly different‑realm fluff; keep same‑role‑family breadth (demote trailing, do not slash for JD keyword fit)."
+      "Categories: Sales, Communication, Customer Service",
+      "Lead: Sales, Communication, Customer Interaction",
+      "Supporting: Team Coordination, Customer Support, Outreach",
+      "Trim last sparingly—only if clearly off-topic."
     ],
     "categoryStrategy": [],
     "sectionStrategy": {
-      "summary": "Show summary to connect experience with target role",
-      "experience": "Focus on hero experience with relevant skills",
-      "projects": "Highlight hero projects with a focus on AI and backend development",
-      "skills": "Organize skills to reflect core competencies for the role",
+      "summary": "Keep to connect proof; emphasize sales and communication skills",
+      "experience": "Focus on sales support roles; lead with Hawkers",
+      "projects": "No hero projects; supporting reference only if needed",
+      "skills": "Sales and communication-focused toolkit",
       "education": "Light—credentials frozen; trim highlights only if they sharpen scan."
     },
     "layoutStrategy": [],
-    "layoutSectionOrder": [
-      "header",
-      "summary",
-      "education",
-      "experience",
-      "projects",
-      "skills"
-    ],
+    "layoutSectionOrder": [],
     "layoutSectionVisibility": {
-      "experience": true,
-      "education": true,
-      "summary": true,
       "projects": true,
-      "skills": true
+      "summary": true,
+      "education": true,
+      "skills": true,
+      "experience": true
     },
-    "layoutRationale": [
-      "Summary connects candidate's experience to the target role",
-      "Experience and projects highlight relevant skills and achievements"
-    ],
+    "layoutRationale": [],
     "keepExperience": [
-      5,
-      7
-    ],
-    "dropExperience": [
       8
     ],
-    "rewriteExperience": [
+    "dropExperience": [
       5,
       7
     ],
-    "keepProjects": [
-      10,
-      9
+    "rewriteExperience": [
+      8
     ],
-    "dropProjects": [
+    "keepProjects": [],
+    "dropProjects": [],
+    "rewriteProjects": [],
+    "repairProjects": [],
+    "maybeProjects": [
+      9,
+      10,
       12,
       17,
-      20,
-      18
+      18,
+      20
     ],
-    "rewriteProjects": [
-      10,
-      9
-    ],
-    "repairProjects": [],
-    "maybeProjects": [],
-    "selectionRationale": [
-      "Focused on the strongest evidence that aligns with the target role",
-      "Dropped lower-fit experiences and projects to streamline the narrative",
-      "Bridge guard kept Bar Louie Server because this adjacent-role draft needs transferable coordination or pace evidence, not only exact keyword matches."
-    ],
-    "heroProjects": [
-      10,
-      9
-    ],
+    "selectionRationale": [],
+    "heroProjects": [],
     "supportingProjects": [],
     "peripheralProjects": [
+      9,
+      10,
       12,
       17,
-      20,
-      18
+      18,
+      20
     ],
     "heroExperience": [
-      5
+      8
     ],
     "rewriteGoals": [
-      "Land BitGo: Emphasize backend services and API development for financial applications",
-      "Land Taylor.io: Highlight AI integration and real-time data processing capabilities"
+      "Land hero experience: lead with the role’s primary signal (services/APIs/pipelines/data) on each line; leave an evidence-backed impression of scope—full bullet-block rewrites when facts allow.",
+      "Land hero projects: foreground systems, integrations, consumers; state the impression the row should leave for this job—full-row rewrites when detail supports it."
     ],
     "avoid": [
-      "No claims of direct experience with healthcare or unsupported technologies like Azure."
+      "No unsupported claims regarding outreach, leads, or B2B sales experience."
     ],
-    "alignmentMode": "adjacent",
-    "alignmentGuidance": "Adjacent fit: bridge from proven evidence into the target role. Use transferable language, but do not claim the candidate already owns JD-only duties.",
+    "alignmentMode": "direct",
+    "alignmentGuidance": "Direct fit: lead with the role title and strongest JD-overlap evidence, while preserving resume-native breadth.",
     "directEvidence": [
       {
-        "section": "projects",
-        "id": 9,
-        "label": "Centi – Personal Finance App",
+        "section": "experience",
+        "id": 8,
+        "label": "Hawkers Host / Expo",
         "terms": [
-          "flow",
-          "applications"
+          "sales"
         ],
-        "score": 10.6
+        "score": 9.2
+      },
+      {
+        "section": "experience",
+        "id": 5,
+        "label": "BitGo Software Engineering Intern",
+        "terms": [
+          "pipeline",
+          "architecture"
+        ],
+        "score": 7.732
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "pipeline",
+          "architecture"
+        ],
+        "score": 7.732
       },
       {
         "section": "projects",
@@ -336,7 +287,7 @@
         "terms": [
           "artificial intelligence"
         ],
-        "score": 9.78
+        "score": 3.42
       },
       {
         "section": "education",
@@ -345,52 +296,34 @@
         "terms": [
           "artificial intelligence"
         ],
-        "score": 9.78
+        "score": 3.42
       },
       {
-        "section": "experience",
-        "id": 5,
-        "label": "BitGo Software Engineering Intern",
+        "section": "skills",
+        "id": 60,
+        "label": "AI-Driven Workflows",
         "terms": [
-          "python"
+          "artificial intelligence"
         ],
-        "score": 9.2
+        "score": 1
       },
       {
-        "section": "projects",
-        "id": 12,
-        "label": "SecureScape – Smart Security System",
+        "section": "skills",
+        "id": 61,
+        "label": "Data Pipelines",
         "terms": [
-          "python"
+          "pipeline"
         ],
-        "score": 9.2
+        "score": 1
       },
       {
-        "section": "projects",
-        "id": 17,
-        "label": "ShelfVision - Dense Shelf Object Detection",
+        "section": "skills",
+        "id": 57,
+        "label": "ETL Pipelines",
         "terms": [
-          "python"
+          "pipeline"
         ],
-        "score": 9.2
-      },
-      {
-        "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-        "terms": [
-          "python"
-        ],
-        "score": 9.2
-      },
-      {
-        "section": "projects",
-        "id": 18,
-        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
-        "terms": [
-          "javascript"
-        ],
-        "score": 6.5
+        "score": 1
       }
     ],
     "transferableEvidence": [
@@ -595,16 +528,39 @@
     ],
     "evidenceClassification": [
       {
-        "section": "projects",
-        "id": 9,
-        "label": "Centi – Personal Finance App",
+        "section": "experience",
+        "id": 8,
+        "label": "Hawkers Host / Expo",
         "terms": [
-          "flow",
-          "applications"
+          "sales"
         ],
         "evidenceType": "direct_role_evidence",
         "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "guidance": "Use as customer/client-facing communication or service evidence."
+      },
+      {
+        "section": "experience",
+        "id": 5,
+        "label": "BitGo Software Engineering Intern",
+        "terms": [
+          "pipeline",
+          "architecture"
+        ],
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "pipeline",
+          "architecture"
+        ],
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
         "section": "projects",
@@ -613,9 +569,9 @@
         "terms": [
           "artificial intelligence"
         ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
         "section": "education",
@@ -624,64 +580,42 @@
         "terms": [
           "artificial intelligence"
         ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
-        "section": "experience",
-        "id": 5,
-        "label": "BitGo Software Engineering Intern",
+        "section": "skills",
+        "id": 60,
+        "label": "AI-Driven Workflows",
         "terms": [
-          "python"
+          "artificial intelligence"
         ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
-        "section": "projects",
-        "id": 12,
-        "label": "SecureScape – Smart Security System",
+        "section": "skills",
+        "id": 61,
+        "label": "Data Pipelines",
         "terms": [
-          "python"
+          "pipeline"
         ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
-        "section": "projects",
-        "id": 17,
-        "label": "ShelfVision - Dense Shelf Object Detection",
+        "section": "skills",
+        "id": 57,
+        "label": "ETL Pipelines",
         "terms": [
-          "python"
+          "pipeline"
         ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
-      },
-      {
-        "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-        "terms": [
-          "python"
-        ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
-      },
-      {
-        "section": "projects",
-        "id": 18,
-        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
-        "terms": [
-          "javascript"
-        ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
         "section": "experience",
@@ -696,11 +630,13 @@
         "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
       },
       {
-        "section": "experience",
-        "id": 8,
-        "label": "Hawkers Host / Expo",
+        "section": "projects",
+        "id": 9,
+        "label": "Centi – Personal Finance App",
         "terms": [
-          "coordination / communication"
+          "compliance / standards",
+          "metrics / reporting",
+          "workflow / automation"
         ],
         "evidenceType": "transferable_behavior",
         "claimStrength": "bridge",
@@ -709,193 +645,242 @@
     ],
     "jdSignalIntent": [
       {
-        "term": "python",
+        "term": "sales",
         "intent": "role_responsibility",
         "priority": 3,
+        "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
         "linePreview": [
-          "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-          "develop and maintain backend services using python"
+          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
+          "assist in developing our sales architecture and refining go-to-market messaging"
+        ]
+      },
+      {
+        "term": "outreach",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
+          "run outbound outreach to msps nationwide (qualified leads provided)"
+        ]
+      },
+      {
+        "term": "pipeline",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "role_capability",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+        ]
+      },
+      {
+        "term": "architecture",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "role_capability",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "assist in developing our sales architecture and refining go-to-market messaging"
+        ]
+      },
+      {
+        "term": "hiring",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "we're hiring a founding growth intern to support our u.s. market expansion."
+        ]
+      },
+      {
+        "term": "leads",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "run outbound outreach to msps nationwide (qualified leads provided)"
+        ]
+      },
+      {
+        "term": "outbound",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "run outbound outreach to msps nationwide (qualified leads provided)"
         ]
       },
       {
         "term": "artificial intelligence",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-          "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms"
-        ]
-      },
-      {
-        "term": "healthcare",
-        "intent": "candidate_requirement",
-        "priority": 2,
-        "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
-        "linePreview": []
-      },
-      {
-        "term": "ci/cd",
-        "intent": "candidate_requirement",
-        "priority": 2,
-        "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
-        "linePreview": [
-          "participate in ci/cd pipeline setup and automation"
-        ]
-      },
-      {
-        "term": "javascript",
-        "intent": "candidate_requirement",
-        "priority": 2,
-        "reason": "Candidate requirement: use as bridge/skills emphasis when supported by resume behavior.",
-        "linePreview": [
-          "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform"
-        ]
-      },
-      {
-        "term": "azure",
         "intent": "company_product_context",
         "priority": 1,
+        "signalType": "role_capability",
         "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
         "linePreview": [
-          "hands-on experience with cloud platforms (gcp, aws, or azure)"
+          "interest in b2b sales, ai, and operational software"
         ]
       },
       {
-        "term": "cloud",
+        "term": "b2b",
         "intent": "role_responsibility",
         "priority": 3,
+        "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
         "linePreview": [
-          "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-          "deploy and maintain applications using cloud technologies"
+          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
+          "interest in b2b sales, ai, and operational software"
         ]
       },
       {
-        "term": "flow",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-          "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms"
-        ]
-      },
-      {
-        "term": "cross functional collaboration",
+        "term": "founders",
         "intent": "candidate_requirement",
         "priority": 2,
+        "signalType": "role_capability",
         "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+        "linePreview": [
+          "book discovery calls with founders, owners, and key decision-makers"
+        ]
+      },
+      {
+        "term": "representative",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
         "linePreview": []
       },
       {
-        "term": "applications",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "deploy and maintain applications using cloud technologies",
-          "proven experience in developing ai-driven or conversational applications"
-        ]
-      },
-      {
-        "term": "conversational",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms",
-          "proven experience in developing ai-driven or conversational applications"
-        ]
-      },
-      {
-        "term": "automation",
+        "term": "book",
         "intent": "candidate_requirement",
         "priority": 2,
+        "signalType": "role_capability",
         "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
         "linePreview": [
-          "participate in ci/cd pipeline setup and automation"
+          "book discovery calls with founders, owners, and key decision-makers"
         ]
       }
     ],
     "gapSupport": [
       {
-        "term": "healthcare",
+        "term": "outreach",
         "status": "unsupported",
+        "signalType": "role_capability",
         "supportingEvidence": [],
         "capability": "",
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
       },
       {
-        "term": "ci/cd",
-        "status": "conceptual",
-        "supportingEvidence": [
-          "aws",
-          "ec2",
-          "deployed",
-          "production"
-        ],
-        "capability": "cloud and deployment",
-        "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
-      },
-      {
-        "term": "azure",
-        "status": "conceptual",
-        "supportingEvidence": [
-          "aws",
-          "ec2",
-          "deployed",
-          "production"
-        ],
-        "capability": "cloud and deployment",
-        "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
-      },
-      {
-        "term": "cloud",
-        "status": "conceptual",
-        "supportingEvidence": [
-          "aws",
-          "ec2",
-          "deployed",
-          "production"
-        ],
-        "capability": "cloud and deployment",
-        "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
-      },
-      {
-        "term": "flow",
+        "term": "hiring",
         "status": "unsupported",
+        "signalType": "role_capability",
         "supportingEvidence": [],
         "capability": "",
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
       },
       {
-        "term": "cross functional collaboration",
-        "status": "conceptual",
-        "supportingEvidence": [
-          "teams",
-          "workflows",
-          "architecture",
-          "collaborated",
-          "coordination",
-          "requirements"
-        ],
-        "capability": "coordination and ownership",
-        "claimGuidance": "Use as related ownership or coordination evidence; avoid implying formal management unless the title or bullets prove it."
-      },
-      {
-        "term": "conversational",
+        "term": "leads",
         "status": "unsupported",
+        "signalType": "role_capability",
         "supportingEvidence": [],
         "capability": "",
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "outbound",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "b2b",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "founders",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "representative",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "book",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "msps",
+        "status": "context_only",
+        "signalType": "context",
+        "supportingEvidence": [],
+        "capability": "company/client context",
+        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
+      },
+      {
+        "term": "performance",
+        "status": "context_only",
+        "signalType": "context",
+        "supportingEvidence": [],
+        "capability": "company/client context",
+        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
+      },
+      {
+        "term": "operations",
+        "status": "context_only",
+        "signalType": "context",
+        "supportingEvidence": [],
+        "capability": "company/client context",
+        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
+      },
+      {
+        "term": "where",
+        "status": "context_only",
+        "signalType": "context",
+        "supportingEvidence": [],
+        "capability": "company/client context",
+        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
+      },
+      {
+        "term": "service",
+        "status": "context_only",
+        "signalType": "context",
+        "supportingEvidence": [],
+        "capability": "company/client context",
+        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
       }
     ],
     "unsupportedTerms": [
-      "healthcare",
-      "flow",
-      "conversational"
+      "outreach",
+      "hiring",
+      "leads",
+      "outbound",
+      "b2b",
+      "founders",
+      "representative",
+      "book"
     ],
     "fitRisk": {
       "level": "normal",
@@ -920,18 +905,19 @@
     "onePageSelectionGuard": false
   },
   "bridge_guard": {
-    "bridgeExperienceGuard": true,
-    "promotedExperienceIds": [
-      7
-    ]
+    "bridgeExperienceGuard": false
   },
   "retarget_guard": {
     "strongAdjacentProjectFocus": false
   },
   "quality_guard": {
-    "weakBulletRepair": false,
-    "repairProjectIds": [],
-    "repairProjectTitles": [],
-    "reason": "No surviving project rows needed placeholder-bullet cleanup."
+    "weakBulletRepair": true,
+    "repairProjectIds": [
+      9
+    ],
+    "repairProjectTitles": [
+      "Centi – Personal Finance App"
+    ],
+    "reason": "Opened surviving project row(s) for cleanup because they contain placeholder or thin bullets."
   }
 }

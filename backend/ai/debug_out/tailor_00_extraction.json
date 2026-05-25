@@ -1,268 +1,569 @@
 {
-  "target_role": "Conversational AI Engineer (LLM & Google Cloud)",
-  "company": "Pyramid Consulting",
+  "target_role": "Sales Outreach Representative",
+  "company": "Coverview",
   "active_domains": [
-    "ai",
-    "engineering",
-    "cloud"
+    "sales",
+    "operations"
   ],
   "line_counts": {
-    "included_body": 26,
+    "included_body": 10,
     "downweighted": 0
   },
   "included_line_samples": [
-    "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms",
-    "integrate ai/llm models into applications to enable intelligent interactions",
-    "develop and maintain backend services using python",
-    "collaborate with cross-functional teams to gather requirements and deliver scalable solutions",
-    "implement and manage api integrations with third-party systems",
-    "optimize prompts and workflows for improved ai performance and user experience",
-    "deploy and maintain applications using cloud technologies",
-    "participate in ci/cd pipeline setup and automation",
-    "ensure code quality using version control systems like git",
-    "key requirements and technology experience:",
-    "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-    "strong proficiency in python"
+    "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next.",
+    "we're hiring a founding growth intern to support our u.s. market expansion.",
+    "run outbound outreach to msps nationwide (qualified leads provided)",
+    "book discovery calls with founders, owners, and key decision-makers",
+    "assist in developing our sales architecture and refining go-to-market messaging",
+    "who we're looking for",
+    "strong interpersonal skills — genuinely comfortable on the phone",
+    "interest in b2b sales, ai, and operational software",
+    "prior sales or outreach experience preferred",
+    "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
   ],
   "downweighted_line_samples": [],
   "top_keywords": [
     {
-      "term": "python",
-      "score": 8.5,
+      "term": "sales",
+      "score": 9.0,
+      "frequency": 5.0,
+      "sources": [
+        "bodyToken",
+        "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body",
+        "role"
+      ],
+      "linePreview": [
+        "assist in developing our sales architecture and refining go-to-market messaging",
+        "interest in b2b sales, ai, and operational software"
+      ]
+    },
+    {
+      "term": "outreach",
+      "score": 5.0,
       "frequency": 4.0,
       "sources": [
         "bodyToken",
-        "concreteStack"
+        "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)",
+        "prior sales or outreach experience preferred"
+      ]
+    },
+    {
+      "term": "pipeline",
+      "score": 4.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+      ]
+    },
+    {
+      "term": "msps",
+      "score": 3.0,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "context",
+      "lineKinds": [
+        "body",
+        "context"
+      ],
+      "linePreview": [
+        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next.",
+        "run outbound outreach to msps nationwide (qualified leads provided)"
+      ]
+    },
+    {
+      "term": "architecture",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "assist in developing our sales architecture and refining go-to-market messaging"
+      ]
+    },
+    {
+      "term": "hiring",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "we're hiring a founding growth intern to support our u.s. market expansion."
+      ]
+    },
+    {
+      "term": "leads",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)"
+      ]
+    },
+    {
+      "term": "outbound",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)"
+      ]
+    },
+    {
+      "term": "execution",
+      "score": 2.8,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "generic_fragment",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+      ]
+    },
+    {
+      "term": "performance",
+      "score": 2.8,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "context",
+      "lineKinds": [
+        "context"
+      ],
+      "linePreview": [
+        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next."
+      ]
+    },
+    {
+      "term": "operations",
+      "score": 2.3,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "context",
+      "lineKinds": [
+        "context"
+      ],
+      "linePreview": [
+        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next."
       ]
     },
     {
       "term": "artificial intelligence",
-      "score": 7.0,
-      "frequency": 6.0,
+      "score": 2.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [],
+      "linePreview": []
+    }
+  ],
+  "priority_keywords": [
+    {
+      "term": "sales",
+      "score": 9.0,
+      "frequency": 5.0,
       "sources": [
         "bodyToken",
         "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body",
+        "role"
+      ],
+      "linePreview": [
+        "assist in developing our sales architecture and refining go-to-market messaging",
+        "interest in b2b sales, ai, and operational software"
       ]
     },
     {
-      "term": "healthcare",
-      "score": 7.0,
-      "frequency": 2.0,
-      "sources": [
-        "knownPhrase",
-        "partOfPhrase"
-      ]
-    },
-    {
-      "term": "ci/cd",
-      "score": 6.0,
-      "frequency": 2.0,
-      "sources": [
-        "knownPhrase"
-      ]
-    },
-    {
-      "term": "javascript",
-      "score": 5.5,
+      "term": "outreach",
+      "score": 5.0,
       "frequency": 4.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ]
-    },
-    {
-      "term": "azure",
-      "score": 5.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ]
-    },
-    {
-      "term": "cloud",
-      "score": 5.0,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "flow",
-      "score": 5.0,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "cross functional collaboration",
-      "score": 5.0,
-      "frequency": 1.0,
-      "sources": [
-        "knownPhrase"
-      ]
-    },
-    {
-      "term": "applications",
-      "score": 4.0,
-      "frequency": 4.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "conversational",
-      "score": 4.0,
-      "frequency": 3.0,
       "sources": [
         "bodyToken",
         "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)",
+        "prior sales or outreach experience preferred"
       ]
     },
     {
-      "term": "automation",
+      "term": "pipeline",
       "score": 4.0,
       "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+      ]
+    },
+    {
+      "term": "architecture",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "assist in developing our sales architecture and refining go-to-market messaging"
+      ]
+    },
+    {
+      "term": "hiring",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "we're hiring a founding growth intern to support our u.s. market expansion."
+      ]
+    },
+    {
+      "term": "leads",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)"
+      ]
+    },
+    {
+      "term": "outbound",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)"
+      ]
+    },
+    {
+      "term": "artificial intelligence",
+      "score": 2.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [],
+      "linePreview": []
+    },
+    {
+      "term": "b2b",
+      "score": 2.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "interest in b2b sales, ai, and operational software",
+        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+      ]
+    },
+    {
+      "term": "founders",
+      "score": 2.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "book discovery calls with founders, owners, and key decision-makers"
+      ]
+    },
+    {
+      "term": "representative",
+      "score": 2.0,
+      "frequency": 1.0,
+      "sources": [
+        "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [],
+      "linePreview": []
+    },
+    {
+      "term": "book",
+      "score": 1.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "book discovery calls with founders, owners, and key decision-makers"
+      ]
+    }
+  ],
+  "suppressed_terms": [
+    {
+      "term": "msps",
+      "signalType": "context",
+      "reason": "company/product/client context; do not drive resume claims",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "execution",
+      "signalType": "generic_fragment",
+      "reason": "generic fragment; keep only inside stronger phrases",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "performance",
+      "signalType": "context",
+      "reason": "company/product/client context; do not drive resume claims",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "operations",
+      "signalType": "context",
+      "reason": "company/product/client context; do not drive resume claims",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "where",
+      "signalType": "context",
+      "reason": "company/product/client context; do not drive resume claims",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "service",
+      "signalType": "context",
+      "reason": "company/product/client context; do not drive resume claims",
       "sources": [
         "bodyToken"
       ]
     }
   ],
   "relevant_jd_lines": [
-    "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-    "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms",
-    "deploy and maintain applications using cloud technologies",
-    "participate in ci/cd pipeline setup and automation",
-    "hands-on experience with cloud platforms (gcp, aws, or azure)",
-    "proven experience in developing ai-driven or conversational applications",
-    "integrate ai/llm models into applications to enable intelligent interactions",
-    "develop and maintain backend services using python",
-    "strong proficiency in python",
-    "experience with ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, etc.)"
+    "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
+    "run outbound outreach to msps nationwide (qualified leads provided)",
+    "book discovery calls with founders, owners, and key decision-makers",
+    "assist in developing our sales architecture and refining go-to-market messaging",
+    "interest in b2b sales, ai, and operational software",
+    "prior sales or outreach experience preferred",
+    "we're hiring a founding growth intern to support our u.s. market expansion."
   ],
-  "top_known_phrases": [
+  "line_classification": [
     {
-      "term": "ci/cd",
-      "count": 2.0
+      "kind": "context",
+      "line": "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next."
     },
     {
-      "term": "api integration",
-      "count": 1.0
+      "kind": "body",
+      "line": "we're hiring a founding growth intern to support our u.s. market expansion."
     },
     {
-      "term": "backend services",
-      "count": 1.0
+      "kind": "body",
+      "line": "run outbound outreach to msps nationwide (qualified leads provided)"
     },
     {
-      "term": "cross-functional teams",
-      "count": 1.0
+      "kind": "body",
+      "line": "book discovery calls with founders, owners, and key decision-makers"
     },
     {
-      "term": "healthcare",
-      "count": 1.0
+      "kind": "role",
+      "line": "assist in developing our sales architecture and refining go-to-market messaging"
+    },
+    {
+      "kind": "body",
+      "line": "who we're looking for"
+    },
+    {
+      "kind": "requirement",
+      "line": "strong interpersonal skills — genuinely comfortable on the phone"
+    },
+    {
+      "kind": "body",
+      "line": "interest in b2b sales, ai, and operational software"
+    },
+    {
+      "kind": "body",
+      "line": "prior sales or outreach experience preferred"
+    },
+    {
+      "kind": "body",
+      "line": "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
     }
   ],
+  "top_known_phrases": [],
   "top_stack_terms": {
-    "concrete": [
-      {
-        "term": "javascript",
-        "count": 2.0
-      },
-      {
-        "term": "amazon web services",
-        "count": 1.0
-      },
-      {
-        "term": "azure",
-        "count": 1.0
-      },
-      {
-        "term": "google cloud platform",
-        "count": 1.0
-      },
-      {
-        "term": "node.js",
-        "count": 1.0
-      },
-      {
-        "term": "python",
-        "count": 1.0
-      }
-    ],
+    "concrete": [],
     "capability": []
   },
   "top_tokens": {
     "title": [
       {
-        "term": "artificial intelligence",
+        "term": "outreach",
         "count": 1.0
       },
       {
-        "term": "conversational",
+        "term": "representative",
         "count": 1.0
       },
       {
-        "term": "engineer",
+        "term": "sales",
         "count": 1.0
       }
     ],
     "body": [
       {
-        "term": "experience",
-        "count": 9.0
-      },
-      {
-        "term": "artificial intelligence",
-        "count": 5.0
-      },
-      {
-        "term": "applications",
+        "term": "sales",
         "count": 4.0
       },
       {
-        "term": "ces",
+        "term": "msps",
         "count": 3.0
       },
       {
-        "term": "cloud",
+        "term": "outreach",
         "count": 3.0
       },
       {
-        "term": "dialog",
-        "count": 3.0
-      },
-      {
-        "term": "flow",
-        "count": 3.0
-      },
-      {
-        "term": "google",
-        "count": 3.0
-      },
-      {
-        "term": "integration",
-        "count": 3.0
-      },
-      {
-        "term": "large language models",
-        "count": 3.0
-      },
-      {
-        "term": "models",
-        "count": 3.0
-      },
-      {
-        "term": "python",
-        "count": 3.0
-      },
-      {
-        "term": "skills",
-        "count": 3.0
-      },
-      {
-        "term": "amazon",
+        "term": "artificial intelligence",
         "count": 2.0
+      },
+      {
+        "term": "b2b",
+        "count": 2.0
+      },
+      {
+        "term": "strong",
+        "count": 2.0
+      },
+      {
+        "term": "where",
+        "count": 2.0
+      },
+      {
+        "term": "architecture",
+        "count": 1.0
+      },
+      {
+        "term": "assist",
+        "count": 1.0
+      },
+      {
+        "term": "book",
+        "count": 1.0
+      },
+      {
+        "term": "built",
+        "count": 1.0
+      },
+      {
+        "term": "businesses",
+        "count": 1.0
+      },
+      {
+        "term": "calls",
+        "count": 1.0
+      },
+      {
+        "term": "comfortable",
+        "count": 1.0
       }
     ],
     "downweighted": []

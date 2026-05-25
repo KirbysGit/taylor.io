@@ -707,6 +707,39 @@ def protect_transferable_experience_for_bridge(narrative_brief):
     if not isinstance(transferable, list):
         return narrative_brief, None
 
+    signal_blob = " ".join(
+        str(x or "")
+        for x in (
+            list(narrative_brief.get("primaryStory") or [])
+            + list(narrative_brief.get("secondaryStory") or [])
+            + list(narrative_brief.get("skillsStrategy") or [])
+            + [str(narrative_brief.get("candidateAngle") or "")]
+            + [
+                str((item or {}).get("term") or "")
+                for item in (narrative_brief.get("jdSignalIntent") or [])
+                if isinstance(item, dict)
+            ]
+        )
+    ).lower()
+    service_bridge_cues = {
+        "account",
+        "client",
+        "customer",
+        "guest",
+        "hospitality",
+        "interpersonal",
+        "operations",
+        "outreach",
+        "phone",
+        "relationship",
+        "restaurant",
+        "sales",
+        "scheduling",
+        "service",
+    }
+    if not any(cue in signal_blob for cue in service_bridge_cues):
+        return narrative_brief, None
+
     promoted = []
     for item in transferable:
         if not isinstance(item, dict) or item.get("section") != "experience":
@@ -1467,6 +1500,8 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     
     # get the keywords and active domains from our extraction result.
     keywords = ext_result["keywords"]
+    rawKeywords = ext_result.get("rawKeywords") or keywords
+    suppressedKeywords = ext_result.get("suppressedKeywords") or []
     activeDomains = ext_result["activeDomains"]
     relevantJDLines = ext_result["relevantJDLines"]
 
@@ -1474,7 +1509,14 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     resumeData = payload["resume_data"] if isinstance(payload["resume_data"], dict) else {}
 
     # build the tailor context.
-    tailorContext = build_tailor_context(targetRole=payload["target_role"], activeDomains=activeDomains, keywords=keywords, resumeData=resumeData)
+    tailorContext = build_tailor_context(
+        targetRole=payload["target_role"],
+        activeDomains=activeDomains,
+        keywords=keywords,
+        rawKeywords=rawKeywords,
+        suppressedKeywords=suppressedKeywords,
+        resumeData=resumeData,
+    )
 
     # get what we want to focus on per section and row.
     sectionDetails = build_tailor_plan(resumeData=resumeData, tailorContext=tailorContext)
@@ -1644,6 +1686,8 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
                     "education": len(resumeData.get("education") or []) if isinstance(resumeData, dict) else 0,
                 },
                 "extracted_keywords": keywords,
+                "raw_extracted_keywords": rawKeywords,
+                "suppressed_keywords": suppressedKeywords,
                 "resume_hits": tailorContext.get("resumeHits"),
                 "resume_gaps": tailorContext.get("resumeGaps"),
                 "alignment_context": tailorContext.get("alignmentContext"),

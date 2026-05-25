@@ -45,6 +45,127 @@ class ExtractionResult:
 
 # ===== helpers ===== #
 
+PRESERVED_SIGNAL_PHRASES = {
+    "ai integration",
+    "ai-driven applications",
+    "amazon bedrock",
+    "api integration",
+    "api integrations",
+    "backend services",
+    "cloud platform",
+    "cloud platforms",
+    "conversational ai",
+    "conversational applications",
+    "dialog flow",
+    "dialog flows",
+    "dialogflow",
+    "google ces",
+    "google cloud",
+    "google cloud platform",
+    "large language models",
+    "llm models",
+    "openai",
+    "prompt engineering",
+    "third-party systems",
+    "version control",
+}
+
+SIGNAL_CANONICAL = {
+    "ai": "artificial intelligence",
+    "api integrations": "api integration",
+    "aws": "amazon web services",
+    "ci/cd": "ci/cd",
+    "ci cd": "ci/cd",
+    "conversational applications": "conversational ai",
+    "dialog flow": "dialogflow",
+    "dialog flows": "dialogflow",
+    "gcp": "google cloud platform",
+    "google cloud": "google cloud platform",
+    "llm": "large language models",
+    "llm models": "large language models",
+    "open ai": "openai",
+    "version control": "git",
+}
+
+TOOL_PLATFORM_TERMS = {
+    "amazon bedrock",
+    "amazon web services",
+    "anthropic claude",
+    "azure",
+    "ci/cd",
+    "dialogflow",
+    "docker",
+    "fastapi",
+    "git",
+    "google ces",
+    "google cloud platform",
+    "java",
+    "javascript",
+    "kafka",
+    "kubernetes",
+    "langchain",
+    "langgraph",
+    "node.js",
+    "openai",
+    "postgresql",
+    "python",
+    "react",
+    "sql",
+    "typescript",
+}
+
+CONTEXT_TERMS = {
+    "healthcare",
+    "health care",
+    "managed service providers",
+    "msp",
+    "msps",
+    "natural gas",
+    "utilities",
+    "utility",
+}
+
+GENERIC_FRAGMENT_TERMS = {
+    "application",
+    "applications",
+    "cloud platform",
+    "cloud platforms",
+    "experience",
+    "flow",
+    "model",
+    "models",
+    "platform",
+    "platforms",
+    "solution",
+    "solutions",
+}
+
+NOISE_SIGNAL_TERMS = {
+    "contract",
+    "pay",
+    "pay range",
+    "recruiter",
+    "remote",
+}
+
+CONTEXT_LINE_CUES = {
+    "client is",
+    "client is a",
+    "client is a leading",
+    "company is",
+    "industry",
+    "our client",
+    "serving",
+    "who we are",
+}
+
+ROLE_CAPABILITY_SOURCE_KEYS = {
+    "knownPhrase",
+    "titlePhrase",
+    "concreteStack",
+    "capabilityStack",
+}
+
 # --- normalize the header. --- #
 def normalize_header(line: str) -> str:
     clean = re.sub(r"[^a-z0-9& ]+", " ", (line or "").lower()).strip()
@@ -80,9 +201,13 @@ def canonicalize_token(token):
     if not term:
         return term
     low = term.lower()
+    if low in SIGNAL_CANONICAL:
+        return SIGNAL_CANONICAL[low]
     if low in globalPhraseCanonical:
         return globalPhraseCanonical[low]
     with_space = low.replace("/", " ")
+    if with_space in SIGNAL_CANONICAL:
+        return SIGNAL_CANONICAL[with_space]
     if with_space in globalPhraseCanonical:
         return globalPhraseCanonical[with_space]
     return low
@@ -93,7 +218,128 @@ def canonicalize_phrase_key(phrase):
     if not phrase:
         return phrase
     low = phrase.strip().lower()
+    if low in SIGNAL_CANONICAL:
+        return SIGNAL_CANONICAL[low]
     return globalPhraseCanonical.get(low, low)
+
+
+def classify_jd_line(line: str) -> str:
+    low = normalize_header(line)
+    if is_footer_or_link_line(low):
+        return "noise"
+    if any(snippet in low for snippet in wrapperSuppressLineSubstrings):
+        return "noise"
+    if any(cue in low for cue in CONTEXT_LINE_CUES):
+        return "context"
+    if any(cue in low for cue in ("benefit", "benefits", "pay range", "401", "insurance", "sick leave")):
+        return "noise"
+    if any(cue in low for cue in ("responsibilities", "what you", "develop", "build", "maintain", "design", "implement")):
+        return "role"
+    if any(cue in low for cue in ("requirements", "skills", "experience with", "proficiency", "familiarity")):
+        return "requirement"
+    return "body"
+
+
+def term_lines(term: str, lines: list[str]) -> list[str]:
+    if not term:
+        return []
+    pattern = r"(?<![a-z0-9])" + re.escape(term.lower()) + r"(?![a-z0-9])"
+    aliases = {term.lower()}
+    if term == "dialogflow":
+        aliases.update({"dialog flow", "dialog flows"})
+    elif term == "google cloud platform":
+        aliases.update({"gcp", "google cloud"})
+    elif term == "amazon web services":
+        aliases.update({"aws"})
+    elif term == "large language models":
+        aliases.update({"llm", "llm models"})
+    elif term == "ci/cd":
+        aliases.update({"ci cd"})
+    out = []
+    for line in lines or []:
+        low = str(line or "").lower()
+        if re.search(pattern, low) or any(alias and alias in low for alias in aliases):
+            out.append(line)
+    return out
+
+
+def signal_type_for_term(term: str, source_map: dict | None = None, lines: list[str] | None = None) -> str:
+    t = canonicalize_phrase_key(term)
+    source_map = source_map or {}
+    line_blob = " ".join(lines or []).lower()
+    line_kinds = {classify_jd_line(line) for line in (lines or [])}
+
+    if t in NOISE_SIGNAL_TERMS or line_kinds == {"noise"}:
+        return "noise"
+    if t in CONTEXT_TERMS or (line_kinds and line_kinds <= {"context", "noise"}):
+        return "context"
+    if t in TOOL_PLATFORM_TERMS:
+        return "tool_platform"
+    if t in GENERIC_FRAGMENT_TERMS:
+        return "generic_fragment"
+    if t in {"cloud"} and "cloud platform" in line_blob and not any(k in source_map for k in ROLE_CAPABILITY_SOURCE_KEYS):
+        return "generic_fragment"
+    if any(k in source_map for k in ROLE_CAPABILITY_SOURCE_KEYS):
+        return "role_capability"
+    return "generic_fragment" if t in globalWeakTokens else "role_capability"
+
+
+def annotate_ranked_terms(ranked_terms: list[dict], body_lines: list[str], downweighted_lines: list[str]) -> list[dict]:
+    all_lines = list(body_lines or []) + list(downweighted_lines or [])
+    annotated = []
+    for entry in ranked_terms or []:
+        if not isinstance(entry, dict):
+            continue
+        term = canonicalize_phrase_key(entry.get("term") or "")
+        if not term:
+            continue
+        lines = term_lines(term, all_lines)
+        signal_type = signal_type_for_term(term, entry.get("sourceMap") or {}, lines)
+        annotated.append(
+            {
+                **entry,
+                "term": term,
+                "signalType": signal_type,
+                "lineKinds": sorted({classify_jd_line(line) for line in lines}),
+                "linePreview": lines[:2],
+            }
+        )
+    return annotated
+
+
+def build_priority_keywords(annotated_terms: list[dict], limit: int) -> tuple[list[dict], list[dict]]:
+    priority = []
+    suppressed = []
+    seen = set()
+    for entry in annotated_terms or []:
+        term = str((entry or {}).get("term") or "").strip()
+        if not term or term in seen:
+            continue
+        seen.add(term)
+        signal_type = entry.get("signalType") or "role_capability"
+        reason = ""
+        if signal_type == "generic_fragment":
+            reason = "generic fragment; keep only inside stronger phrases"
+        elif signal_type == "noise":
+            reason = "job-post boilerplate/noise"
+        elif signal_type == "context":
+            reason = "company/product/client context; do not drive resume claims"
+        if reason:
+            suppressed.append({"term": term, "signalType": signal_type, "reason": reason, "sources": entry.get("sources") or []})
+            continue
+        priority.append(entry)
+        if len(priority) >= limit:
+            break
+    return priority, suppressed
+
+
+def compact_term_entries(entries: list[dict]) -> list[dict]:
+    out = []
+    for entry in entries or []:
+        if not isinstance(entry, dict):
+            continue
+        out.append({k: v for k, v in entry.items() if k != "sourceMap"})
+    return out
 
 
 # --- split slash-joined tool lists (e.g. node.js/express) into parts unless the full token is a known idiom (ci/cd, ml/ai, …). --- #
@@ -128,6 +374,8 @@ def build_basic_extraction_debug(
     body_token_counts,
     downweighted_token_counts,
     ranked_terms,
+    priority_terms=None,
+    suppressed_terms=None,
     relevant_lines,
     num_keywords,
 ):
@@ -146,7 +394,13 @@ def build_basic_extraction_debug(
         "included_line_samples": list(body_lines or [])[:12],
         "downweighted_line_samples": list(downweighted_lines or [])[:8],
         "top_keywords": list(ranked_terms or [])[:num_keywords],
+        "priority_keywords": list(priority_terms or [])[:num_keywords],
+        "suppressed_terms": list(suppressed_terms or [])[:16],
         "relevant_jd_lines": list(relevant_lines or [])[:10],
+        "line_classification": [
+            {"kind": classify_jd_line(line), "line": line}
+            for line in list(body_lines or [])[:20]
+        ],
         "top_known_phrases": top_count_items(phrase_counts, limit=12),
         "top_stack_terms": {
             "concrete": top_count_items(concrete_stack_counts, limit=12),
@@ -422,6 +676,7 @@ def score_terms(termSources, boostWords, weakTokens, umbrellaWeak=None):
     # initialize scored list.
     scored = []
     umbrellaW = umbrellaWeak or frozenset()
+    preservedCanonical = {canonicalize_phrase_key(p) for p in PRESERVED_SIGNAL_PHRASES}
 
     for term, sourceMap in termSources.items():
         # get frequency of term.
@@ -447,6 +702,10 @@ def score_terms(termSources, boostWords, weakTokens, umbrellaWeak=None):
             score += 0.75
         if "capabilityStack" in sourceMap:
             score += 0.3
+        if term in TOOL_PLATFORM_TERMS:
+            score += 2.0
+        if term in PRESERVED_SIGNAL_PHRASES or term in preservedCanonical:
+            score += 2.0
 
         # check if term has a strong source.
         strongSource = any(key in sourceMap for key in ("titlePhrase", "knownPhrase", "concreteStack", "titleToken"))
@@ -467,6 +726,7 @@ def score_terms(termSources, boostWords, weakTokens, umbrellaWeak=None):
             "score": round(score, 3),
             "frequency": round(frequency, 3),
             "sources": sorted(sourceMap.keys()),
+            "sourceMap": dict(sourceMap),
         })
         
     # return scored listed sorted by score (desc), frequency (desc), term (asc).
@@ -547,9 +807,13 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
     res.cleanDownweightedBody = "\n".join(res.downweightedLines)
     
     # 4. extract known phrases / keywords.
-    titlePhraseCounts, res.cleanTitle = count_phrases(res.cleanTitle, "titlePhrase", res.profile["phrases"], 1.0)
-    bodyPhraseCounts, res.cleanBody = count_phrases(res.cleanBody, "knownPhrase", res.profile["phrases"], 1.0)
-    downweightedPhraseCounts, res.cleanDownweightedBody = count_phrases(res.cleanDownweightedBody, "knownPhraseDownweighted", res.profile["phrases"], downweightFactor)
+    extraction_phrases = sorted(
+        set(res.profile["phrases"] or []) | PRESERVED_SIGNAL_PHRASES,
+        key=lambda phrase: (-len(str(phrase)), str(phrase)),
+    )
+    titlePhraseCounts, res.cleanTitle = count_phrases(res.cleanTitle, "titlePhrase", extraction_phrases, 1.0)
+    bodyPhraseCounts, res.cleanBody = count_phrases(res.cleanBody, "knownPhrase", extraction_phrases, 1.0)
+    downweightedPhraseCounts, res.cleanDownweightedBody = count_phrases(res.cleanDownweightedBody, "knownPhraseDownweighted", extraction_phrases, downweightFactor)
 
     # 5. merge into our termSources.
 
@@ -577,6 +841,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
         debug["cleanTitle"] = res.cleanTitle
         debug["cleanBody"] = res.cleanBody
         debug["cleanDownweightedBody"] = res.cleanDownweightedBody
+        debug["extractionPhrases"] = extraction_phrases
         debug["titlePhraseCounts"] = titlePhraseCounts
         debug["bodyPhraseCounts"] = bodyPhraseCounts
         debug["downweightedPhraseCounts"] = downweightedPhraseCounts
@@ -644,13 +909,17 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
 
     # 9. score our term sources.
 
-    rankedTerms = score_terms(
+    rankedTermsRaw = score_terms(
         res.termSources, res.profile["boostWords"], res.profile["weakTokens"],
         umbrellaWeak=umbrellaBodyWeakTokens,
     )
+    rankedTerms = annotate_ranked_terms(rankedTermsRaw, res.bodyLines, res.downweightedLines)
+    priorityTerms, suppressedTerms = build_priority_keywords(rankedTerms, numKeywords)
+    rankedTermsCompact = compact_term_entries(rankedTerms)
+    priorityTermsCompact = compact_term_entries(priorityTerms)
 
     # 10. get the relevant JD lines.
-    relevantLines = get_relevant_jd_lines(res.bodyLines, rankedTerms[:numKeywords])
+    relevantLines = get_relevant_jd_lines(res.bodyLines, priorityTerms[:numKeywords] or rankedTerms[:numKeywords])
 
     extraction_debug = build_basic_extraction_debug(
         target_role=targetRole,
@@ -666,23 +935,29 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
         title_token_counts=titleTokenCounts,
         body_token_counts=bodyTokenCounts,
         downweighted_token_counts=downweightedTokenCounts,
-        ranked_terms=rankedTerms,
+        ranked_terms=rankedTermsCompact,
+        priority_terms=priorityTermsCompact,
+        suppressed_terms=suppressedTerms,
         relevant_lines=relevantLines,
         num_keywords=numKeywords,
     )
 
     if wanna_debug:
-        debug["rankedTerms"] = rankedTerms[:numKeywords].copy()
+        debug["rankedTerms"] = rankedTermsCompact[:numKeywords].copy()
+        debug["priorityTerms"] = priorityTermsCompact.copy()
+        debug["suppressedTerms"] = suppressedTerms.copy()
         debug["basic"] = extraction_debug
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(debug, indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
     
     if wanna_count:
-        update_aggregate_counts(rankedTerms, 20)
+        update_aggregate_counts(rankedTermsCompact, 20)
 
     # 11. return the results.
     return {
-        "keywords": rankedTerms[:numKeywords],
+        "keywords": priorityTermsCompact[:numKeywords],
+        "rawKeywords": rankedTermsCompact[:numKeywords],
+        "suppressedKeywords": suppressedTerms,
         "activeDomains": res.profile["activeDomains"],
         "relevantJDLines": relevantLines,
         "debug": extraction_debug,

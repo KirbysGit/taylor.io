@@ -49,17 +49,23 @@ def _display_term(term):
         "ec2": "EC2",
         "etl": "ETL",
         "fastapi": "FastAPI",
+        "gcp": "GCP",
         "javascript": "JavaScript",
         "jwt": "JWT",
         "mongodb": "MongoDB",
         "mysql": "MySQL",
         "nlp": "NLP",
         "node.js": "Node.js",
+        "openai": "OpenAI",
         "postgresql": "PostgreSQL",
         "python": "Python",
         "react": "React",
         "rest": "REST",
         "sql": "SQL",
+        "ci/cd": "CI/CD",
+        "google cloud platform": "Google Cloud Platform",
+        "amazon bedrock": "Amazon Bedrock",
+        "dialogflow": "Dialogflow",
     }
     return known.get(text.lower(), text)
 
@@ -321,15 +327,46 @@ def _detail_items_from_patch(patch, narrative_brief, gaps, flags, target_label, 
 
     gap_support = nb.get("gapSupport") if isinstance(nb.get("gapSupport"), list) else []
     conceptual = []
+    unsupported_exact = []
+    context_only = []
     for item in gap_support:
-        if not isinstance(item, dict) or item.get("status") != "conceptual":
+        if not isinstance(item, dict):
             continue
         term = _clean_text(item.get("term"), limit=60)
+        if item.get("status") == "unsupported_exact" and term:
+            unsupported_exact.append(term)
+            continue
+        if item.get("status") == "context_only" and term:
+            context_only.append(term)
+            continue
+        if item.get("status") != "conceptual":
+            continue
         evidence = _dedupe_keep_order(item.get("supportingEvidence") or [], limit=3)
         if term and evidence:
             conceptual.append(f"{term}: related evidence includes {_join_human(evidence)}.")
     if conceptual:
         groups.append({"title": "Related evidence", "items": conceptual[:3]})
+    if unsupported_exact:
+        groups.append(
+            {
+                "title": "Not directly evidenced",
+                "items": [
+                    "I did not claim "
+                    + _join_human(_display_terms(_dedupe_keep_order(unsupported_exact, limit=5)))
+                    + " because those exact tools or platforms were not in the resume."
+                ],
+            }
+        )
+    if context_only:
+        groups.append(
+            {
+                "title": "Company context",
+                "items": [
+                    _join_human(_display_terms(_dedupe_keep_order(context_only, limit=4)))
+                    + " looked like job/company context, so I kept it out of the main resume claims."
+                ],
+            }
+        )
 
     review = []
     if gaps:
@@ -348,13 +385,31 @@ def _detail_items_from_patch(patch, narrative_brief, gaps, flags, target_label, 
 
 def _keyword_terms_from_context(tailor_context, limit=3):
     tc = tailor_context if isinstance(tailor_context, dict) else {}
+    ac = tc.get("alignmentContext") if isinstance(tc.get("alignmentContext"), dict) else {}
+    unsupported = {str(x or "").strip().lower() for x in (ac.get("unsupportedTerms") or []) if str(x or "").strip()}
+    hits = {str(x or "").strip().lower() for x in (tc.get("resumeHits") or []) if str(x or "").strip()}
     terms = []
     for entry in tc.get("keywords") or []:
         if not isinstance(entry, dict):
             continue
         term = entry.get("term")
-        if isinstance(term, str) and term.strip():
-            terms.append(term)
+        if not isinstance(term, str) or not term.strip():
+            continue
+        low = term.strip().lower()
+        signal_type = str(entry.get("signalType") or "").strip().lower()
+        if low in unsupported or signal_type in ("context", "generic_fragment", "noise"):
+            continue
+        if hits and low not in hits:
+            continue
+        terms.append(term)
+    if not terms:
+        for entry in tc.get("keywords") or []:
+            if not isinstance(entry, dict):
+                continue
+            term = entry.get("term")
+            signal_type = str(entry.get("signalType") or "").strip().lower()
+            if isinstance(term, str) and term.strip() and signal_type not in ("context", "generic_fragment", "noise"):
+                terms.append(term)
     return _dedupe_keep_order(terms, limit=limit)
 
 

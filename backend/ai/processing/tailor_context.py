@@ -153,7 +153,7 @@ def is_in_resume(term, resumeStr):
 # --- builds the tailor context. --- #
 # input -> target role (str), keywords (list), resume data (dict)
 # output -> tailor context (dict)
-def build_tailor_context(targetRole, activeDomains, keywords, resumeData):
+def build_tailor_context(targetRole, activeDomains, keywords, resumeData, rawKeywords=None, suppressedKeywords=None):
 
     # grab keywords & resume data.
     resumeData = resumeData if isinstance(resumeData, dict) else {}
@@ -167,6 +167,8 @@ def build_tailor_context(targetRole, activeDomains, keywords, resumeData):
     # initialize hits & gaps.
     resumeHits = []
     resumeGaps = []
+    claimableKeywords = []
+    unsupportedExactKeywords = []
     seen = set()
 
     for entry in keywords:
@@ -182,16 +184,29 @@ def build_tailor_context(targetRole, activeDomains, keywords, resumeData):
         seen.add(canon)
 
         # checks all alias variants against resume str.
-        if is_in_resume(term, resumeStr):
+        hit = is_in_resume(term, resumeStr)
+        signalType = str(entry.get("signalType") or "").strip()
+        if hit:
             resumeHits.append(canon)
         else:
             resumeGaps.append(canon)
+            if signalType == "tool_platform":
+                unsupportedExactKeywords.append({**entry, "term": canon})
+
+        # Exact tools/platforms should shape the draft only when the resume proves them.
+        # They still stay in resumeGaps/unsupportedExactKeywords for review language.
+        if hit or signalType != "tool_platform":
+            claimableKeywords.append(entry)
 
     # return the tailor context.
     return {
         "targetRole": (targetRole or "").strip() or None,
         "activeDomains": activeDomains,
-        "keywords": keywords,
+        "keywords": claimableKeywords,
+        "priorityKeywords": keywords,
+        "rawKeywords": rawKeywords if isinstance(rawKeywords, list) else list(keywords or []),
+        "suppressedKeywords": suppressedKeywords if isinstance(suppressedKeywords, list) else [],
+        "unsupportedExactKeywords": unsupportedExactKeywords,
         "resumeHits": resumeHits,
         "resumeGaps": resumeGaps,
         "resumeSections": resumeSections,

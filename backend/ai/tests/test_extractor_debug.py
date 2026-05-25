@@ -35,6 +35,24 @@ Support systems development team members in understanding application data requi
 """
 
 
+CONVERSATIONAL_AI_JD = """
+About the job
+Key Responsibilities:
+Design and develop conversational AI solutions using Google CES, Dialog flow, or similar platforms.
+Integrate AI/LLM models into applications to enable intelligent interactions.
+Develop and maintain backend services using Python.
+Implement and manage API integrations with third-party systems.
+Optimize prompts and workflows for improved AI performance and user experience.
+Participate in CI/CD pipeline setup and automation.
+Ensure code quality using version control systems like Git.
+
+Key Requirements and Technology Experience:
+Key skills: Python, AI integration and LLM models (Dialog flow, Google CES, Amazon Bedrock, OpenAI, API, JavaScript, Cloud Platform).
+Hands-on experience with cloud platforms (GCP, AWS, or Azure).
+Our client is a leading Healthcare Industry.
+"""
+
+
 def test_extractor_does_not_fall_back_to_job_metadata_after_company_intro():
     result = extract_keywords(TECO_STYLE_JD, "Data Engineer (Tampa)", 12, company="TECO Peoples Gas")
     terms = [item["term"] for item in result["keywords"]]
@@ -60,3 +78,28 @@ def test_extractor_returns_basic_debug_snapshot():
     assert debug["included_line_samples"]
     assert "top_known_phrases" in debug
     assert "top_stack_terms" in debug
+
+
+def test_conversational_ai_extractor_preserves_exact_tools_and_filters_fragments():
+    result = extract_keywords(
+        CONVERSATIONAL_AI_JD,
+        "Conversational AI Engineer (LLM & Google Cloud)",
+        12,
+        company="Pyramid Consulting",
+    )
+    priority_terms = [item["term"] for item in result["keywords"]]
+    raw_terms = [item["term"] for item in result["rawKeywords"]]
+    suppressed = {item["term"]: item for item in result["suppressedKeywords"]}
+
+    assert "flow" not in priority_terms
+    assert "applications" not in priority_terms
+    assert "healthcare" not in priority_terms
+    assert "dialogflow" in priority_terms or "dialogflow" in raw_terms
+    assert "google ces" in priority_terms or "google ces" in raw_terms
+    assert "amazon bedrock" in priority_terms or "amazon bedrock" in raw_terms
+    assert "openai" in priority_terms or "openai" in raw_terms
+    assert "ci/cd" in priority_terms
+    assert "git" in priority_terms or "git" in raw_terms
+    assert suppressed["healthcare"]["signalType"] == "context"
+    assert result["debug"]["priority_keywords"] == result["keywords"]
+    assert result["debug"]["suppressed_terms"]

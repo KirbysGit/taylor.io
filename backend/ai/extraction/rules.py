@@ -302,6 +302,7 @@ concreteStackTerms = {
     "opensearch", "power bi", "salesforce", "posthog", "aws", "amazon web services", "gcp", "google cloud platform",
     "azure", "docker", "kubernetes",
     "gke", "rag", "llm", "mlops", "tensorflow", "pytorch", "pyspark", "scikit-learn", "transformers", "langchain", "langgraph",
+    "openai", "amazon bedrock", "dialogflow", "google ces", "git",
     "express",
     "webex", "calabrio", "dialogflow", "ci/cd", "linux", "vue.js", "angular", "html", "css", "gpu", "cuda",
     "javascript", "nodejs",

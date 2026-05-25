@@ -9,6 +9,9 @@ if "openai" not in sys.modules:
 
 
 from backend.ai.planning.alignment import build_alignment_context
+from backend.ai.planning.build_plan import build_tailor_plan
+from backend.ai.post_processing.resume_tailor_report import build_tailor_explanation
+from backend.ai.processing.tailor_context import build_tailor_context
 
 
 def test_client_role_downgrades_product_account_keyword_overlap():
@@ -282,3 +285,215 @@ def test_executive_fit_risk_allows_real_management_scope():
 
     assert context["fitRisk"]["level"] != "extreme"
     assert context["fitRisk"]["resumeScopeEvidence"]["seniorTitleEvidence"]
+
+
+def test_tool_platform_gaps_are_not_conceptually_claimed_as_exact_tools():
+    resume_data = {
+        "experience": [
+            {
+                "id": 5,
+                "title": "Software Engineering Intern",
+                "company": "BitGo",
+                "description": "Built Python APIs and deployed internal services on AWS EC2.",
+                "skills": "Python, AWS EC2",
+            }
+        ],
+        "projects": [],
+        "skills": [],
+        "education": [],
+    }
+    tailor_context = {
+        "targetRole": "Conversational AI Engineer",
+        "keywords": [
+            {"term": "python", "signalType": "tool_platform"},
+            {"term": "google cloud platform", "signalType": "tool_platform"},
+            {"term": "dialogflow", "signalType": "tool_platform"},
+            {"term": "backend services", "signalType": "role_capability"},
+        ],
+        "resumeHits": ["python"],
+        "resumeGaps": ["google cloud platform", "dialogflow", "backend services"],
+    }
+
+    context = build_alignment_context(resume_data, tailor_context, {"rowsPerSectionRanked": {}})
+    support = {item["term"]: item for item in context["gapSupport"]}
+
+    assert support["google cloud platform"]["status"] == "unsupported_exact"
+    assert support["dialogflow"]["status"] == "unsupported_exact"
+    assert "google cloud platform" in context["unsupportedTerms"]
+    assert "dialogflow" in context["unsupportedTerms"]
+
+
+def test_openai_project_ranks_above_generic_application_overlap():
+    resume_data = {
+        "experience": [],
+        "projects": [
+            {
+                "id": 9,
+                "title": "Centi",
+                "description": "Built a finance application with account aggregation and dashboards.",
+                "tech_stack": ["FastAPI", "React", "PostgreSQL"],
+            },
+            {
+                "id": 10,
+                "title": "Taylor.io",
+                "description": "Integrated OpenAI API for structured parsing, content generation, and AI-assisted editing workflows.",
+                "tech_stack": ["FastAPI", "React", "PostgreSQL", "OpenAI API"],
+            },
+        ],
+        "skills": [],
+        "education": [],
+    }
+    keywords = [
+        {"term": "openai", "score": 8.0, "signalType": "tool_platform"},
+        {"term": "api integration", "score": 6.0, "signalType": "role_capability"},
+        {"term": "backend services", "score": 5.0, "signalType": "role_capability"},
+    ]
+    tailor_context = build_tailor_context(
+        "Conversational AI Engineer",
+        ["ai", "engineering"],
+        keywords,
+        resume_data,
+        rawKeywords=keywords + [{"term": "applications", "signalType": "generic_fragment"}],
+        suppressedKeywords=[{"term": "applications", "signalType": "generic_fragment", "reason": "generic fragment"}],
+    )
+    plan = build_tailor_plan(resumeData=resume_data, tailorContext=tailor_context)
+    rows = plan["rowsPerSectionRanked"]["projects"]
+
+    assert rows[0]["id"] == 10
+    assert "openai" in rows[0]["matchedTerms"]
+    assert all("applications" not in row["matchedTerms"] for row in rows)
+
+
+def test_tailor_context_keeps_unsupported_exact_tools_as_gaps_not_prompt_keywords():
+    resume_data = {
+        "projects": [
+            {
+                "id": 10,
+                "title": "Taylor.io",
+                "description": "Integrated OpenAI API for structured parsing and content generation.",
+                "tech_stack": ["OpenAI API", "FastAPI"],
+            }
+        ],
+        "experience": [],
+        "skills": [],
+        "education": [],
+    }
+    keywords = [
+        {"term": "openai", "signalType": "tool_platform"},
+        {"term": "dialogflow", "signalType": "tool_platform"},
+        {"term": "backend services", "signalType": "role_capability"},
+    ]
+
+    context = build_tailor_context("Conversational AI Engineer", ["ai"], keywords, resume_data)
+    prompt_terms = [item["term"] for item in context["keywords"]]
+
+    assert "openai" in prompt_terms
+    assert "dialogflow" not in prompt_terms
+    assert "dialogflow" in context["resumeGaps"]
+    assert [item["term"] for item in context["unsupportedExactKeywords"]] == ["dialogflow"]
+
+
+def test_data_engineer_terms_rank_pipeline_projects_above_unrelated_frontend():
+    resume_data = {
+        "experience": [],
+        "projects": [
+            {
+                "id": 18,
+                "title": "Portfolio Site",
+                "description": "Built a responsive marketing website with galleries and animations.",
+                "tech_stack": ["React", "Next.js"],
+            },
+            {
+                "id": 20,
+                "title": "SentimentTrader",
+                "description": "Built multi-stage ETL pipelines with SQL, feature engineering, model inference, and analytics.",
+                "tech_stack": ["Python", "SQL", "XGBoost"],
+            },
+            {
+                "id": 9,
+                "title": "Centi",
+                "description": "Designed PostgreSQL schemas and FastAPI services for normalized transaction processing.",
+                "tech_stack": ["FastAPI", "PostgreSQL", "React"],
+            },
+        ],
+        "skills": [],
+        "education": [],
+    }
+    keywords = [
+        {"term": "data pipelines", "score": 8.0, "signalType": "role_capability"},
+        {"term": "sql", "score": 7.0, "signalType": "tool_platform"},
+        {"term": "python", "score": 7.0, "signalType": "tool_platform"},
+        {"term": "react", "score": 2.0, "signalType": "tool_platform"},
+    ]
+    tailor_context = build_tailor_context("Data Engineer", ["data"], keywords, resume_data)
+    rows = build_tailor_plan(resumeData=resume_data, tailorContext=tailor_context)["rowsPerSectionRanked"]["projects"]
+    ranked_ids = [row["id"] for row in rows]
+
+    assert ranked_ids.index(20) < ranked_ids.index(18)
+    assert ranked_ids.index(9) < ranked_ids.index(18)
+
+
+def test_tailor_explanation_uses_filtered_priority_terms_and_warns_on_exact_gaps():
+    tailor_context = {
+        "keywords": [
+            {"term": "python", "signalType": "tool_platform"},
+            {"term": "openai", "signalType": "tool_platform"},
+            {"term": "backend services", "signalType": "role_capability"},
+        ],
+        "resumeHits": ["python", "openai", "backend services"],
+        "resumeGaps": ["dialogflow"],
+        "alignmentContext": {
+            "unsupportedTerms": ["dialogflow"],
+        },
+    }
+    narrative = {
+        "alignmentMode": "direct",
+        "evidenceClassification": [
+            {
+                "section": "projects",
+                "id": 10,
+                "label": "Taylor.io",
+                "terms": ["openai"],
+                "evidenceType": "direct_role_evidence",
+            }
+        ],
+        "gapSupport": [
+            {
+                "term": "dialogflow",
+                "status": "unsupported_exact",
+                "signalType": "tool_platform",
+                "supportingEvidence": [],
+            },
+            {
+                "term": "healthcare",
+                "status": "context_only",
+                "signalType": "context",
+                "supportingEvidence": [],
+            },
+        ],
+    }
+    patch = {
+        "projects": [
+            {
+                "id": 10,
+                "fieldsChanged": {
+                    "description": {"before": "Old", "after": "Integrated OpenAI API for parsing workflows."}
+                },
+            }
+        ]
+    }
+
+    explanation = build_tailor_explanation(
+        patch=patch,
+        narrative_brief=narrative,
+        target_role="Conversational AI Engineer",
+        company="Pyramid Consulting",
+        tailor_context=tailor_context,
+        quality_audit={"flags": {}},
+    )
+
+    assert explanation["evidence"]["jobPriorityTerms"] == ["Python", "OpenAI", "backend services"]
+    detail_titles = [item["title"] for item in explanation["details"]]
+    assert "Not directly evidenced" in detail_titles
+    assert "Company context" in detail_titles
+    assert "Dialogflow" in " ".join(" ".join(item["items"]) for item in explanation["details"])

@@ -1,6 +1,6 @@
 {
-  "target_role": "Conversational AI Engineer (LLM & Google Cloud)",
-  "company": "Pyramid Consulting",
+  "target_role": "Sales Outreach Representative",
+  "company": "Coverview",
   "style_preferences": {
     "focus": "balanced",
     "tone": "balanced",
@@ -10,7 +10,7 @@
   },
   "strict_truth": true,
   "model": "gpt-4o-mini",
-  "job_description_chars": 3132,
+  "job_description_chars": 987,
   "resume_counts": {
     "experience": 3,
     "projects": 6,
@@ -19,137 +19,467 @@
   },
   "extracted_keywords": [
     {
-      "term": "python",
-      "score": 8.5,
+      "term": "sales",
+      "score": 9.0,
+      "frequency": 5.0,
+      "sources": [
+        "bodyToken",
+        "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body",
+        "role"
+      ],
+      "linePreview": [
+        "assist in developing our sales architecture and refining go-to-market messaging",
+        "interest in b2b sales, ai, and operational software"
+      ]
+    },
+    {
+      "term": "outreach",
+      "score": 5.0,
       "frequency": 4.0,
       "sources": [
         "bodyToken",
-        "concreteStack"
+        "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)",
+        "prior sales or outreach experience preferred"
+      ]
+    },
+    {
+      "term": "pipeline",
+      "score": 4.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+      ]
+    },
+    {
+      "term": "architecture",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "assist in developing our sales architecture and refining go-to-market messaging"
+      ]
+    },
+    {
+      "term": "hiring",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "we're hiring a founding growth intern to support our u.s. market expansion."
+      ]
+    },
+    {
+      "term": "leads",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)"
+      ]
+    },
+    {
+      "term": "outbound",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)"
       ]
     },
     {
       "term": "artificial intelligence",
-      "score": 7.0,
-      "frequency": 6.0,
+      "score": 2.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [],
+      "linePreview": []
+    },
+    {
+      "term": "b2b",
+      "score": 2.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "interest in b2b sales, ai, and operational software",
+        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+      ]
+    },
+    {
+      "term": "founders",
+      "score": 2.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "book discovery calls with founders, owners, and key decision-makers"
+      ]
+    },
+    {
+      "term": "representative",
+      "score": 2.0,
+      "frequency": 1.0,
+      "sources": [
+        "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [],
+      "linePreview": []
+    },
+    {
+      "term": "book",
+      "score": 1.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "book discovery calls with founders, owners, and key decision-makers"
+      ]
+    }
+  ],
+  "raw_extracted_keywords": [
+    {
+      "term": "sales",
+      "score": 9.0,
+      "frequency": 5.0,
       "sources": [
         "bodyToken",
         "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body",
+        "role"
+      ],
+      "linePreview": [
+        "assist in developing our sales architecture and refining go-to-market messaging",
+        "interest in b2b sales, ai, and operational software"
       ]
     },
     {
-      "term": "healthcare",
-      "score": 7.0,
-      "frequency": 2.0,
-      "sources": [
-        "knownPhrase",
-        "partOfPhrase"
-      ]
-    },
-    {
-      "term": "ci/cd",
-      "score": 6.0,
-      "frequency": 2.0,
-      "sources": [
-        "knownPhrase"
-      ]
-    },
-    {
-      "term": "javascript",
-      "score": 5.5,
+      "term": "outreach",
+      "score": 5.0,
       "frequency": 4.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ]
-    },
-    {
-      "term": "azure",
-      "score": 5.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ]
-    },
-    {
-      "term": "cloud",
-      "score": 5.0,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "flow",
-      "score": 5.0,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "cross functional collaboration",
-      "score": 5.0,
-      "frequency": 1.0,
-      "sources": [
-        "knownPhrase"
-      ]
-    },
-    {
-      "term": "applications",
-      "score": 4.0,
-      "frequency": 4.0,
-      "sources": [
-        "bodyToken"
-      ]
-    },
-    {
-      "term": "conversational",
-      "score": 4.0,
-      "frequency": 3.0,
       "sources": [
         "bodyToken",
         "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)",
+        "prior sales or outreach experience preferred"
       ]
     },
     {
-      "term": "automation",
+      "term": "pipeline",
       "score": 4.0,
       "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+      ]
+    },
+    {
+      "term": "msps",
+      "score": 3.0,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "context",
+      "lineKinds": [
+        "body",
+        "context"
+      ],
+      "linePreview": [
+        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next.",
+        "run outbound outreach to msps nationwide (qualified leads provided)"
+      ]
+    },
+    {
+      "term": "architecture",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "assist in developing our sales architecture and refining go-to-market messaging"
+      ]
+    },
+    {
+      "term": "hiring",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "we're hiring a founding growth intern to support our u.s. market expansion."
+      ]
+    },
+    {
+      "term": "leads",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)"
+      ]
+    },
+    {
+      "term": "outbound",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "run outbound outreach to msps nationwide (qualified leads provided)"
+      ]
+    },
+    {
+      "term": "execution",
+      "score": 2.8,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "generic_fragment",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+      ]
+    },
+    {
+      "term": "performance",
+      "score": 2.8,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "context",
+      "lineKinds": [
+        "context"
+      ],
+      "linePreview": [
+        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next."
+      ]
+    },
+    {
+      "term": "operations",
+      "score": 2.3,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "context",
+      "lineKinds": [
+        "context"
+      ],
+      "linePreview": [
+        "coverview is an ai platform built for managed service providers (msps) serving small businesses across the united states. we give msps deeper visibility into their operations — what's driving performance, where margin is leaking, and where to focus next."
+      ]
+    },
+    {
+      "term": "artificial intelligence",
+      "score": 2.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [],
+      "linePreview": []
+    }
+  ],
+  "suppressed_keywords": [
+    {
+      "term": "msps",
+      "signalType": "context",
+      "reason": "company/product/client context; do not drive resume claims",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "execution",
+      "signalType": "generic_fragment",
+      "reason": "generic fragment; keep only inside stronger phrases",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "performance",
+      "signalType": "context",
+      "reason": "company/product/client context; do not drive resume claims",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "operations",
+      "signalType": "context",
+      "reason": "company/product/client context; do not drive resume claims",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "where",
+      "signalType": "context",
+      "reason": "company/product/client context; do not drive resume claims",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "service",
+      "signalType": "context",
+      "reason": "company/product/client context; do not drive resume claims",
       "sources": [
         "bodyToken"
       ]
     }
   ],
   "resume_hits": [
-    "python",
-    "artificial intelligence",
-    "javascript",
-    "applications",
-    "automation"
+    "sales",
+    "pipeline",
+    "architecture",
+    "artificial intelligence"
   ],
   "resume_gaps": [
-    "healthcare",
-    "ci/cd",
-    "azure",
-    "cloud",
-    "flow",
-    "cross functional collaboration",
-    "conversational"
+    "outreach",
+    "hiring",
+    "leads",
+    "outbound",
+    "b2b",
+    "founders",
+    "representative",
+    "book"
   ],
   "alignment_context": {
-    "mode": "adjacent",
-    "coverage": 0.375,
+    "mode": "direct",
+    "coverage": 0.5,
     "directEvidence": [
       {
-        "section": "projects",
-        "id": 9,
-        "label": "Centi – Personal Finance App",
+        "section": "experience",
+        "id": 8,
+        "label": "Hawkers Host / Expo",
         "terms": [
-          "flow",
-          "applications"
+          "sales"
         ],
-        "score": 10.6
+        "score": 9.2
+      },
+      {
+        "section": "experience",
+        "id": 5,
+        "label": "BitGo Software Engineering Intern",
+        "terms": [
+          "pipeline",
+          "architecture"
+        ],
+        "score": 7.732
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "pipeline",
+          "architecture"
+        ],
+        "score": 7.732
       },
       {
         "section": "projects",
@@ -158,7 +488,7 @@
         "terms": [
           "artificial intelligence"
         ],
-        "score": 9.78
+        "score": 3.42
       },
       {
         "section": "education",
@@ -167,52 +497,34 @@
         "terms": [
           "artificial intelligence"
         ],
-        "score": 9.78
+        "score": 3.42
       },
       {
-        "section": "experience",
-        "id": 5,
-        "label": "BitGo Software Engineering Intern",
+        "section": "skills",
+        "id": 60,
+        "label": "AI-Driven Workflows",
         "terms": [
-          "python"
+          "artificial intelligence"
         ],
-        "score": 9.2
+        "score": 1
       },
       {
-        "section": "projects",
-        "id": 12,
-        "label": "SecureScape – Smart Security System",
+        "section": "skills",
+        "id": 61,
+        "label": "Data Pipelines",
         "terms": [
-          "python"
+          "pipeline"
         ],
-        "score": 9.2
+        "score": 1
       },
       {
-        "section": "projects",
-        "id": 17,
-        "label": "ShelfVision - Dense Shelf Object Detection",
+        "section": "skills",
+        "id": 57,
+        "label": "ETL Pipelines",
         "terms": [
-          "python"
+          "pipeline"
         ],
-        "score": 9.2
-      },
-      {
-        "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-        "terms": [
-          "python"
-        ],
-        "score": 9.2
-      },
-      {
-        "section": "projects",
-        "id": 18,
-        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
-        "terms": [
-          "javascript"
-        ],
-        "score": 6.5
+        "score": 1
       }
     ],
     "transferableEvidence": [
@@ -417,16 +729,39 @@
     ],
     "evidenceClassification": [
       {
-        "section": "projects",
-        "id": 9,
-        "label": "Centi – Personal Finance App",
+        "section": "experience",
+        "id": 8,
+        "label": "Hawkers Host / Expo",
         "terms": [
-          "flow",
-          "applications"
+          "sales"
         ],
         "evidenceType": "direct_role_evidence",
         "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "guidance": "Use as customer/client-facing communication or service evidence."
+      },
+      {
+        "section": "experience",
+        "id": 5,
+        "label": "BitGo Software Engineering Intern",
+        "terms": [
+          "pipeline",
+          "architecture"
+        ],
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "pipeline",
+          "architecture"
+        ],
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
         "section": "projects",
@@ -435,9 +770,9 @@
         "terms": [
           "artificial intelligence"
         ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
         "section": "education",
@@ -446,64 +781,42 @@
         "terms": [
           "artificial intelligence"
         ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
-        "section": "experience",
-        "id": 5,
-        "label": "BitGo Software Engineering Intern",
+        "section": "skills",
+        "id": 60,
+        "label": "AI-Driven Workflows",
         "terms": [
-          "python"
+          "artificial intelligence"
         ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
-        "section": "projects",
-        "id": 12,
-        "label": "SecureScape – Smart Security System",
+        "section": "skills",
+        "id": 61,
+        "label": "Data Pipelines",
         "terms": [
-          "python"
+          "pipeline"
         ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
-        "section": "projects",
-        "id": 17,
-        "label": "ShelfVision - Dense Shelf Object Detection",
+        "section": "skills",
+        "id": 57,
+        "label": "ETL Pipelines",
         "terms": [
-          "python"
+          "pipeline"
         ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
-      },
-      {
-        "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-        "terms": [
-          "python"
-        ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
-      },
-      {
-        "section": "projects",
-        "id": 18,
-        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
-        "terms": [
-          "javascript"
-        ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Can be used as direct role-fit evidence when rewriting this row."
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
       },
       {
         "section": "experience",
@@ -518,11 +831,13 @@
         "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
       },
       {
-        "section": "experience",
-        "id": 8,
-        "label": "Hawkers Host / Expo",
+        "section": "projects",
+        "id": 9,
+        "label": "Centi – Personal Finance App",
         "terms": [
-          "coordination / communication"
+          "compliance / standards",
+          "metrics / reporting",
+          "workflow / automation"
         ],
         "evidenceType": "transferable_behavior",
         "claimStrength": "bridge",
@@ -531,193 +846,242 @@
     ],
     "jdSignalIntent": [
       {
-        "term": "python",
+        "term": "sales",
         "intent": "role_responsibility",
         "priority": 3,
+        "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
         "linePreview": [
-          "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-          "develop and maintain backend services using python"
+          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
+          "assist in developing our sales architecture and refining go-to-market messaging"
+        ]
+      },
+      {
+        "term": "outreach",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
+          "run outbound outreach to msps nationwide (qualified leads provided)"
+        ]
+      },
+      {
+        "term": "pipeline",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "role_capability",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles."
+        ]
+      },
+      {
+        "term": "architecture",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "role_capability",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "assist in developing our sales architecture and refining go-to-market messaging"
+        ]
+      },
+      {
+        "term": "hiring",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "we're hiring a founding growth intern to support our u.s. market expansion."
+        ]
+      },
+      {
+        "term": "leads",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "run outbound outreach to msps nationwide (qualified leads provided)"
+        ]
+      },
+      {
+        "term": "outbound",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "run outbound outreach to msps nationwide (qualified leads provided)"
         ]
       },
       {
         "term": "artificial intelligence",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-          "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms"
-        ]
-      },
-      {
-        "term": "healthcare",
-        "intent": "candidate_requirement",
-        "priority": 2,
-        "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
-        "linePreview": []
-      },
-      {
-        "term": "ci/cd",
-        "intent": "candidate_requirement",
-        "priority": 2,
-        "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
-        "linePreview": [
-          "participate in ci/cd pipeline setup and automation"
-        ]
-      },
-      {
-        "term": "javascript",
-        "intent": "candidate_requirement",
-        "priority": 2,
-        "reason": "Candidate requirement: use as bridge/skills emphasis when supported by resume behavior.",
-        "linePreview": [
-          "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform"
-        ]
-      },
-      {
-        "term": "azure",
         "intent": "company_product_context",
         "priority": 1,
+        "signalType": "role_capability",
         "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
         "linePreview": [
-          "hands-on experience with cloud platforms (gcp, aws, or azure)"
+          "interest in b2b sales, ai, and operational software"
         ]
       },
       {
-        "term": "cloud",
+        "term": "b2b",
         "intent": "role_responsibility",
         "priority": 3,
+        "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
         "linePreview": [
-          "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-          "deploy and maintain applications using cloud technologies"
+          "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
+          "interest in b2b sales, ai, and operational software"
         ]
       },
       {
-        "term": "flow",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-          "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms"
-        ]
-      },
-      {
-        "term": "cross functional collaboration",
+        "term": "founders",
         "intent": "candidate_requirement",
         "priority": 2,
+        "signalType": "role_capability",
         "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+        "linePreview": [
+          "book discovery calls with founders, owners, and key decision-makers"
+        ]
+      },
+      {
+        "term": "representative",
+        "intent": "role_responsibility",
+        "priority": 3,
+        "signalType": "role_capability",
+        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
         "linePreview": []
       },
       {
-        "term": "applications",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "deploy and maintain applications using cloud technologies",
-          "proven experience in developing ai-driven or conversational applications"
-        ]
-      },
-      {
-        "term": "conversational",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms",
-          "proven experience in developing ai-driven or conversational applications"
-        ]
-      },
-      {
-        "term": "automation",
+        "term": "book",
         "intent": "candidate_requirement",
         "priority": 2,
+        "signalType": "role_capability",
         "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
         "linePreview": [
-          "participate in ci/cd pipeline setup and automation"
+          "book discovery calls with founders, owners, and key decision-makers"
         ]
       }
     ],
     "gapSupport": [
       {
-        "term": "healthcare",
+        "term": "outreach",
         "status": "unsupported",
+        "signalType": "role_capability",
         "supportingEvidence": [],
         "capability": "",
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
       },
       {
-        "term": "ci/cd",
-        "status": "conceptual",
-        "supportingEvidence": [
-          "aws",
-          "ec2",
-          "deployed",
-          "production"
-        ],
-        "capability": "cloud and deployment",
-        "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
-      },
-      {
-        "term": "azure",
-        "status": "conceptual",
-        "supportingEvidence": [
-          "aws",
-          "ec2",
-          "deployed",
-          "production"
-        ],
-        "capability": "cloud and deployment",
-        "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
-      },
-      {
-        "term": "cloud",
-        "status": "conceptual",
-        "supportingEvidence": [
-          "aws",
-          "ec2",
-          "deployed",
-          "production"
-        ],
-        "capability": "cloud and deployment",
-        "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
-      },
-      {
-        "term": "flow",
+        "term": "hiring",
         "status": "unsupported",
+        "signalType": "role_capability",
         "supportingEvidence": [],
         "capability": "",
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
       },
       {
-        "term": "cross functional collaboration",
-        "status": "conceptual",
-        "supportingEvidence": [
-          "teams",
-          "workflows",
-          "architecture",
-          "collaborated",
-          "coordination",
-          "requirements"
-        ],
-        "capability": "coordination and ownership",
-        "claimGuidance": "Use as related ownership or coordination evidence; avoid implying formal management unless the title or bullets prove it."
-      },
-      {
-        "term": "conversational",
+        "term": "leads",
         "status": "unsupported",
+        "signalType": "role_capability",
         "supportingEvidence": [],
         "capability": "",
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "outbound",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "b2b",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "founders",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "representative",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "book",
+        "status": "unsupported",
+        "signalType": "role_capability",
+        "supportingEvidence": [],
+        "capability": "",
+        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "msps",
+        "status": "context_only",
+        "signalType": "context",
+        "supportingEvidence": [],
+        "capability": "company/client context",
+        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
+      },
+      {
+        "term": "performance",
+        "status": "context_only",
+        "signalType": "context",
+        "supportingEvidence": [],
+        "capability": "company/client context",
+        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
+      },
+      {
+        "term": "operations",
+        "status": "context_only",
+        "signalType": "context",
+        "supportingEvidence": [],
+        "capability": "company/client context",
+        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
+      },
+      {
+        "term": "where",
+        "status": "context_only",
+        "signalType": "context",
+        "supportingEvidence": [],
+        "capability": "company/client context",
+        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
+      },
+      {
+        "term": "service",
+        "status": "context_only",
+        "signalType": "context",
+        "supportingEvidence": [],
+        "capability": "company/client context",
+        "claimGuidance": "Use only as context if helpful; do not make it a resume claim without direct evidence."
       }
     ],
     "unsupportedTerms": [
-      "healthcare",
-      "flow",
-      "conversational"
+      "outreach",
+      "hiring",
+      "leads",
+      "outbound",
+      "b2b",
+      "founders",
+      "representative",
+      "book"
     ],
     "fitRisk": {
       "level": "normal",
@@ -738,27 +1102,24 @@
       "claimGuidance": ""
     },
     "topJobTerms": [
-      "python",
-      "artificial intelligence",
-      "healthcare",
-      "ci/cd",
-      "javascript",
-      "azure",
-      "cloud",
-      "flow"
+      "sales",
+      "outreach",
+      "pipeline",
+      "architecture",
+      "hiring",
+      "leads",
+      "outbound",
+      "artificial intelligence"
     ],
-    "guidance": "Adjacent fit: bridge from proven evidence into the target role. Use transferable language, but do not claim the candidate already owns JD-only duties."
+    "guidance": "Direct fit: lead with the role title and strongest JD-overlap evidence, while preserving resume-native breadth."
   },
   "relevant_jd_lines": [
-    "key skills: python, ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, api, javascript, cloud platform",
-    "design and develop conversational ai solutions using google ces, dialog flow, or similar platforms",
-    "deploy and maintain applications using cloud technologies",
-    "participate in ci/cd pipeline setup and automation",
-    "hands-on experience with cloud platforms (gcp, aws, or azure)",
-    "proven experience in developing ai-driven or conversational applications",
-    "integrate ai/llm models into applications to enable intelligent interactions",
-    "develop and maintain backend services using python",
-    "strong proficiency in python",
-    "experience with ai integration and llm models (dialog flow, google ces, amazon bedrock, openai, etc.)"
+    "why it's worth your time: you'll work directly with the founder, watch your outreach convert into real pipeline, and gain hands-on exposure to b2b sales execution. strong performers will be considered for full-time roles.",
+    "run outbound outreach to msps nationwide (qualified leads provided)",
+    "book discovery calls with founders, owners, and key decision-makers",
+    "assist in developing our sales architecture and refining go-to-market messaging",
+    "interest in b2b sales, ai, and operational software",
+    "prior sales or outreach experience preferred",
+    "we're hiring a founding growth intern to support our u.s. market expansion."
   ]
 }
