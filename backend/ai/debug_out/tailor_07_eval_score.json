@@ -1,0 +1,478 @@
+{
+  "schemaVersion": 1,
+  "rubricVersion": 2,
+  "scoreWeights": {
+    "strategy": 25,
+    "selection": 30,
+    "skills": 15,
+    "warningsClaims": 10,
+    "tailorAssist": 15,
+    "summaryTone": 5
+  },
+  "caseId": "primerica_financial_services_representative",
+  "role": "Financial Services Representative",
+  "company": "Primerica",
+  "scoredAtUtc": "2026-05-26T03:48:30.106103+00:00",
+  "totalScore": 77.17,
+  "grade": "usable",
+  "sections": {
+    "strategy": {
+      "score": 25.0,
+      "max": 25,
+      "checks": [
+        {
+          "name": "lane",
+          "expected": "sales_customer",
+          "actual": "sales_customer",
+          "passed": true,
+          "points": 8.0
+        },
+        {
+          "name": "persona",
+          "expected": "sales_growth",
+          "actual": "sales_growth",
+          "passed": true,
+          "points": 7.0
+        },
+        {
+          "name": "roleArchetype",
+          "expected": "financial_customer_education",
+          "actual": "financial_customer_education",
+          "passed": true,
+          "points": 10.0
+        }
+      ],
+      "issues": []
+    },
+    "selection": {
+      "score": 30.0,
+      "max": 30,
+      "checks": [
+        {
+          "name": "mustKeep",
+          "item": "Bar Louie Server",
+          "passed": true,
+          "points": 9.0
+        },
+        {
+          "name": "mustKeep",
+          "item": "Hawkers Host / Expo",
+          "passed": true,
+          "points": 9.0
+        },
+        {
+          "name": "shouldDrop",
+          "item": "Taylor.io – Resume Builder & Parser",
+          "passed": true,
+          "points": 2.4
+        },
+        {
+          "name": "shouldDrop",
+          "item": "SecureScape – Smart Security System",
+          "passed": true,
+          "points": 2.4
+        },
+        {
+          "name": "shouldDrop",
+          "item": "ShelfVision - Dense Shelf Object Detection",
+          "passed": true,
+          "points": 2.4
+        },
+        {
+          "name": "shouldDrop",
+          "item": "Tizirsso Racing – Portfolio & Sponsorship Website",
+          "passed": true,
+          "points": 2.4
+        },
+        {
+          "name": "shouldDrop",
+          "item": "SentimentTrader - Real-Time Stock Sentiment Pipeline",
+          "passed": true,
+          "points": 2.4
+        }
+      ],
+      "issues": []
+    },
+    "skills": {
+      "score": 9.0,
+      "max": 15,
+      "checks": [
+        {
+          "name": "skillsToPreserve",
+          "item": "Customer Service",
+          "passed": true,
+          "points": 1.0
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Communication",
+          "passed": true,
+          "points": 1.0
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Relationship Building",
+          "passed": true,
+          "points": 1.0
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Problem Solving",
+          "passed": true,
+          "points": 1.0
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Teamwork",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Client Interaction",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Organization",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Financial Interest",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Product Education",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Sales Support",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "skillsToDeprioritize",
+          "item": "Python",
+          "passed": true,
+          "points": 0.56
+        },
+        {
+          "name": "skillsToDeprioritize",
+          "item": "React",
+          "passed": true,
+          "points": 0.56
+        },
+        {
+          "name": "skillsToDeprioritize",
+          "item": "Django",
+          "passed": true,
+          "points": 0.56
+        },
+        {
+          "name": "skillsToDeprioritize",
+          "item": "PostgreSQL",
+          "passed": true,
+          "points": 0.56
+        },
+        {
+          "name": "skillsToDeprioritize",
+          "item": "REST API Design",
+          "passed": true,
+          "points": 0.56
+        },
+        {
+          "name": "skillsToDeprioritize",
+          "item": "AI-Driven Workflows",
+          "passed": true,
+          "points": 0.56
+        },
+        {
+          "name": "skillsToDeprioritize",
+          "item": "Data Pipelines",
+          "passed": true,
+          "points": 0.56
+        },
+        {
+          "name": "skillsToDeprioritize",
+          "item": "Machine Learning",
+          "passed": true,
+          "points": 0.56
+        },
+        {
+          "name": "skillsToDeprioritize",
+          "item": "Backend Development",
+          "passed": true,
+          "points": 0.56
+        }
+      ],
+      "issues": [
+        "Preserve skill not surfaced: Teamwork.",
+        "Preserve skill not surfaced: Client Interaction.",
+        "Preserve skill not surfaced: Organization.",
+        "Preserve skill not surfaced: Financial Interest.",
+        "Preserve skill not surfaced: Product Education.",
+        "Preserve skill not surfaced: Sales Support."
+      ]
+    },
+    "warningsClaims": {
+      "score": 3.0,
+      "max": 10,
+      "checks": [
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "licensed financial representative",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "financial advising experience",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "debt counseling experience",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "formal sales experience",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "insurance sales",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "securities sales",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "proven financial services experience",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "licensed financial representative",
+          "passed": true,
+          "points": 0.43
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "financial advising experience",
+          "passed": true,
+          "points": 0.43
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "debt counseling experience",
+          "passed": true,
+          "points": 0.43
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "formal sales experience",
+          "passed": true,
+          "points": 0.43
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "insurance sales",
+          "passed": true,
+          "points": 0.43
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "securities sales",
+          "passed": true,
+          "points": 0.43
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "proven financial services experience",
+          "passed": true,
+          "points": 0.43
+        }
+      ],
+      "issues": [
+        "Unsupported warning not surfaced: licensed financial representative.",
+        "Unsupported warning not surfaced: financial advising experience.",
+        "Unsupported warning not surfaced: debt counseling experience.",
+        "Unsupported warning not surfaced: formal sales experience.",
+        "Unsupported warning not surfaced: insurance sales.",
+        "Unsupported warning not surfaced: securities sales.",
+        "Unsupported warning not surfaced: proven financial services experience."
+      ]
+    },
+    "tailorAssist": {
+      "score": 6.0,
+      "max": 15,
+      "checks": [
+        {
+          "name": "tailorAssistShouldMention",
+          "item": "customer-facing service experience",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "tailorAssistShouldMention",
+          "item": "communication and trust-building",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "tailorAssistShouldMention",
+          "item": "interest in financial wellness",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "tailorAssistShouldMention",
+          "item": "coachable fit for paid training",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "tailorAssistShouldMention",
+          "item": "finance-adjacent evidence from BitGo or Centi if used",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "tailorAssistShouldMention",
+          "item": "why technical projects were trimmed",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "tailorAssistShouldNotMention",
+          "item": "full-stack engineering",
+          "passed": true,
+          "points": 1.0
+        },
+        {
+          "name": "tailorAssistShouldNotMention",
+          "item": "technical finance as the main story",
+          "passed": true,
+          "points": 1.0
+        },
+        {
+          "name": "tailorAssistShouldNotMention",
+          "item": "Bar Louie and Hawkers as weaker signals",
+          "passed": true,
+          "points": 1.0
+        },
+        {
+          "name": "tailorAssistShouldNotMention",
+          "item": "deep software projects as core proof",
+          "passed": true,
+          "points": 1.0
+        },
+        {
+          "name": "tailorAssistShouldNotMention",
+          "item": "formal financial representative experience",
+          "passed": true,
+          "points": 1.0
+        },
+        {
+          "name": "tailorAssistShouldNotMention",
+          "item": "proven sales expertise",
+          "passed": true,
+          "points": 1.0
+        }
+      ],
+      "issues": [
+        "Tailor Assist missing expected idea: customer-facing service experience.",
+        "Tailor Assist missing expected idea: communication and trust-building.",
+        "Tailor Assist missing expected idea: interest in financial wellness.",
+        "Tailor Assist missing expected idea: coachable fit for paid training.",
+        "Tailor Assist missing expected idea: finance-adjacent evidence from BitGo or Centi if used.",
+        "Tailor Assist missing expected idea: why technical projects were trimmed."
+      ]
+    },
+    "summaryTone": {
+      "score": 4.17,
+      "max": 5,
+      "checks": [
+        {
+          "name": "avoidPhrases",
+          "item": "full-stack engineer with a focus on financial services",
+          "passed": true,
+          "points": 0.83
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "proven financial services experience",
+          "passed": true,
+          "points": 0.83
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "dynamic professional",
+          "passed": true,
+          "points": 0.83
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "sales professional",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "financial advisor",
+          "passed": true,
+          "points": 0.83
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "revenue-adjacent impact",
+          "passed": true,
+          "points": 0.83
+        }
+      ],
+      "issues": [
+        "Avoid phrase appears in available text: sales professional."
+      ]
+    }
+  },
+  "topIssues": [
+    "Preserve skill not surfaced: Teamwork.",
+    "Preserve skill not surfaced: Client Interaction.",
+    "Preserve skill not surfaced: Organization.",
+    "Preserve skill not surfaced: Financial Interest.",
+    "Preserve skill not surfaced: Product Education.",
+    "Preserve skill not surfaced: Sales Support.",
+    "Unsupported warning not surfaced: licensed financial representative.",
+    "Unsupported warning not surfaced: financial advising experience.",
+    "Unsupported warning not surfaced: debt counseling experience.",
+    "Unsupported warning not surfaced: formal sales experience.",
+    "Unsupported warning not surfaced: insurance sales.",
+    "Unsupported warning not surfaced: securities sales."
+  ],
+  "humanReview": {
+    "humanScore_0_to_10": null,
+    "humanNotes": "",
+    "resumeFeelsSendable": null
+  },
+  "inputs": {
+    "fixture": "backend\\ai\\debug_out\\tailor_eval.json",
+    "review": "backend\\ai\\debug_out\\tailor_06_review.json"
+  }
+}

@@ -146,6 +146,7 @@ def test_conversational_ai_strategy_keeps_unsupported_tools_as_claim_rules():
     assert "openai" in [item.lower() for item in strategy["supportedSignals"]]
     assert any("dialogflow" in item.lower() for item in strategy["claimRules"])
     assert any("rest api" in item.lower() for item in strategy["skillPreserve"])
+    assert any("api integration" in item.lower() for item in strategy["skillReframeTargets"])
 
 
 def test_compliance_word_does_not_override_technical_role_signal():
@@ -212,6 +213,8 @@ def test_functional_analyst_routes_to_analyst_bridge_not_executive():
     assert strategy["persona"] == "operations_admin"
     assert strategy["roleArchetype"] == "functional_analyst_bridge"
     assert any("requirements" in item.lower() for item in strategy["proofStyle"])
+    assert "SQL" in strategy["skillPreserve"]
+    assert any("requirements" in item.lower() for item in strategy["skillReframeTargets"])
     assert any("cbap" in item.lower() for item in strategy["claimRules"])
 
 
@@ -257,6 +260,7 @@ def test_hospitality_role_routes_to_hospitality_customer_service():
     assert strategy["lane"] == "hospitality"
     assert strategy["roleArchetype"] == "hospitality_customer_service"
     assert any("guest" in item.lower() for item in strategy["proofStyle"])
+    assert any("guest" in item.lower() for item in strategy["skillReframeTargets"])
     assert any("software projects" in item.lower() for item in strategy["trimPriorities"])
 
 

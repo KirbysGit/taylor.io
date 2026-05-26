@@ -144,6 +144,7 @@ def test_pass_a_and_pass_b_prompts_include_preferences_and_strict_truth():
         "persona": "technical_engineering",
         "roleArchetype": "full_stack_product_engineering",
         "skillPreserve": ["REST API Design", "AWS EC2"],
+        "skillReframeTargets": ["Backend/API Development"],
         "skillDeprioritize": ["Customer Service"],
         "summaryGuardrails": ["Do not overclaim unsupported tools."],
         "claimRules": ["Never add TypeScript unless it appears in resume evidence."],
@@ -172,6 +173,8 @@ def test_pass_a_and_pass_b_prompts_include_preferences_and_strict_truth():
     assert "jobStrategySkills" in pass_b
     assert "REST API Design" in pass_b
     assert "AWS EC2" in pass_b
+    assert "reframeTargets" in pass_b
+    assert "Backend/API Development" in pass_b
 
 
 def test_narrative_prompt_includes_preferences(monkeypatch):
@@ -289,6 +292,7 @@ def test_tailor_explanation_uses_job_strategy_when_present():
         "keepPriorities": ["customer-facing roles", "one relevant product/software project"],
         "trimPriorities": ["deep technical projects"],
         "claimRules": ["Do not call the candidate a sales professional unless formal sales or outreach is directly evidenced."],
+        "gapSignals": ["outreach"],
         "sectionBudget": {"experience": None, "projects": None, "skillsGroups": None, "advisory": True},
     }
 
@@ -307,5 +311,46 @@ def test_tailor_explanation_uses_job_strategy_when_present():
     assert explanation["evidence"]["jobStrategy"]["persona"] == "sales_growth"
     detail_titles = [group["title"] for group in explanation["details"]]
     assert "What I prioritized" in detail_titles
-    assert "Worth checking" in detail_titles
+    assert "Before you send" in detail_titles
     assert "sales professional" in " ".join(" ".join(group["items"]) for group in explanation["details"])
+
+
+def test_tailor_explanation_surfaces_unsupported_terms_without_promoting_them():
+    ctx = _tailor_context()
+    ctx["resumeGaps"] = ["Dialogflow"]
+    ctx["alignmentContext"] = {"unsupportedTerms": ["Dialogflow"]}
+    ctx["jobStrategy"] = {
+        "persona": "data_ai",
+        "roleArchetype": "ai_backend_integration",
+        "readerGoal": "Show Python backend and LLM integration proof.",
+        "proofStyle": ["Python backend services", "OpenAI API"],
+        "claimRules": [
+            "Exact tools/platforms stay as review gaps unless resume evidence exists: Dialogflow, Google Cloud Platform."
+        ],
+        "gapSignals": ["Dialogflow", "Google Cloud Platform"],
+    }
+    narrative = {
+        "gapSupport": [
+            {"term": "Dialogflow", "status": "unsupported_exact", "signalType": "tool_platform"},
+            {"term": "healthcare", "status": "context_only", "signalType": "context"},
+        ]
+    }
+
+    explanation = build_tailor_explanation(
+        patch={},
+        narrative_brief=narrative,
+        target_role="Conversational AI Engineer",
+        company="Pyramid",
+        style_preferences={},
+        strict_truth=True,
+        tailor_context=ctx,
+        quality_audit={"flags": {}},
+    )
+
+    details = " ".join(" ".join(group["items"]) for group in explanation["details"])
+    titles = [group["title"] for group in explanation["details"]]
+    assert "Not directly evidenced" in titles
+    assert "Before you send" in titles
+    assert "I did not claim Dialogflow" in details
+    assert "not exact ownership of Dialogflow" in details
+    assert "Company context" in titles

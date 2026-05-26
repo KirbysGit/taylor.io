@@ -1,6 +1,6 @@
 {
-  "target_role": "Software Engineer",
-  "company": "Droisys",
+  "target_role": "Financial Services Representative",
+  "company": "Primerica",
   "style_preferences": {
     "focus": "balanced",
     "tone": "balanced",
@@ -10,7 +10,7 @@
   },
   "strict_truth": true,
   "model": "gpt-4o-mini",
-  "job_description_chars": 2145,
+  "job_description_chars": 393,
   "resume_counts": {
     "experience": 3,
     "projects": 6,
@@ -19,496 +19,114 @@
   },
   "extracted_keywords": [
     {
-      "term": "react",
-      "score": 8.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
-      ]
-    },
-    {
-      "term": "ci/cd",
-      "score": 8.0,
-      "frequency": 2.0,
-      "sources": [
-        "knownPhrase",
-        "partOfPhrase"
-      ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
-      ]
-    },
-    {
-      "term": "postgresql",
-      "score": 7.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "manage databases across sqlserver, postgresql, and dynamodb environments."
-      ]
-    },
-    {
-      "term": "graphql",
-      "score": 7.0,
-      "frequency": 2.0,
-      "sources": [
-        "knownPhrase",
-        "partOfPhrase"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "develop secure, high‑performance apis using rest, soap, and graphql."
-      ]
-    },
-    {
-      "term": "microservices",
-      "score": 7.0,
-      "frequency": 2.0,
-      "sources": [
-        "knownPhrase",
-        "partOfPhrase"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "work with aws cloud services, serverless components, and microservices‑based architectures."
-      ]
-    },
-    {
-      "term": "amazon web services",
-      "score": 5.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "work with aws cloud services, serverless components, and microservices‑based architectures."
-      ]
-    },
-    {
-      "term": "delivery",
-      "score": 5.3,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken",
-        "capabilityStack"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
-        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
-      ]
-    },
-    {
-      "term": "security",
-      "score": 4.3,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "capabilityStack"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "troubleshoot performance, security, and stability issues across the full stack."
-      ]
-    },
-    {
-      "term": "architecture",
-      "score": 3.0,
+      "term": "financial",
+      "score": 2.0,
       "frequency": 1.0,
       "sources": [
-        "bodyToken"
+        "titleToken"
       ],
       "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "own full feature lifecycle—from concept and architecture to deployment and optimization.",
-        "work with aws cloud services, serverless components, and microservices‑based architectures."
-      ]
+      "lineKinds": [],
+      "linePreview": []
     },
     {
-      "term": "deployment",
-      "score": 3.0,
+      "term": "representative",
+      "score": 2.0,
       "frequency": 1.0,
       "sources": [
-        "bodyToken"
+        "titleToken"
       ],
       "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "own full feature lifecycle—from concept and architecture to deployment and optimization."
-      ]
+      "lineKinds": [],
+      "linePreview": []
     },
     {
-      "term": "developer",
-      "score": 3.0,
+      "term": "services",
+      "score": 2.0,
       "frequency": 1.0,
       "sources": [
-        "bodyToken"
+        "titleToken"
       ],
       "signalType": "role_capability",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "full stack developer"
-      ]
-    },
-    {
-      "term": "implement",
-      "score": 3.0,
-      "frequency": 1.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
-      ]
+      "lineKinds": [],
+      "linePreview": []
     }
   ],
   "raw_extracted_keywords": [
     {
-      "term": "react",
-      "score": 8.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
-      ]
-    },
-    {
-      "term": "ci/cd",
-      "score": 8.0,
-      "frequency": 2.0,
-      "sources": [
-        "knownPhrase",
-        "partOfPhrase"
-      ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
-      ]
-    },
-    {
-      "term": "postgresql",
-      "score": 7.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "manage databases across sqlserver, postgresql, and dynamodb environments."
-      ]
-    },
-    {
-      "term": "graphql",
-      "score": 7.0,
-      "frequency": 2.0,
-      "sources": [
-        "knownPhrase",
-        "partOfPhrase"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "develop secure, high‑performance apis using rest, soap, and graphql."
-      ]
-    },
-    {
-      "term": "microservices",
-      "score": 7.0,
-      "frequency": 2.0,
-      "sources": [
-        "knownPhrase",
-        "partOfPhrase"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "work with aws cloud services, serverless components, and microservices‑based architectures."
-      ]
-    },
-    {
-      "term": "amazon web services",
-      "score": 5.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "work with aws cloud services, serverless components, and microservices‑based architectures."
-      ]
-    },
-    {
-      "term": "delivery",
-      "score": 5.3,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken",
-        "capabilityStack"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
-        "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
-      ]
-    },
-    {
-      "term": "security",
-      "score": 4.3,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "capabilityStack"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "troubleshoot performance, security, and stability issues across the full stack."
-      ]
-    },
-    {
-      "term": "solutions",
-      "score": 3.0,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken"
-      ],
-      "signalType": "generic_fragment",
-      "lineKinds": [
-        "body",
-        "role"
-      ],
-      "linePreview": [
-        "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
-        "collaborate with cross‑functional teams to translate business needs into scalable technical solutions."
-      ]
-    },
-    {
-      "term": "architecture",
-      "score": 3.0,
+      "term": "financial",
+      "score": 2.0,
       "frequency": 1.0,
       "sources": [
-        "bodyToken"
+        "titleToken"
       ],
       "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "own full feature lifecycle—from concept and architecture to deployment and optimization.",
-        "work with aws cloud services, serverless components, and microservices‑based architectures."
-      ]
+      "lineKinds": [],
+      "linePreview": []
     },
     {
-      "term": "deployment",
-      "score": 3.0,
+      "term": "representative",
+      "score": 2.0,
       "frequency": 1.0,
       "sources": [
-        "bodyToken"
+        "titleToken"
       ],
       "signalType": "role_capability",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "own full feature lifecycle—from concept and architecture to deployment and optimization."
-      ]
+      "lineKinds": [],
+      "linePreview": []
     },
     {
-      "term": "developer",
-      "score": 3.0,
+      "term": "services",
+      "score": 2.0,
       "frequency": 1.0,
       "sources": [
-        "bodyToken"
+        "titleToken"
       ],
       "signalType": "role_capability",
-      "lineKinds": [
-        "role"
-      ],
-      "linePreview": [
-        "full stack developer"
-      ]
+      "lineKinds": [],
+      "linePreview": []
     }
   ],
-  "suppressed_keywords": [
-    {
-      "term": "solutions",
-      "signalType": "generic_fragment",
-      "reason": "generic fragment; keep only inside stronger phrases",
-      "sources": [
-        "bodyToken"
-      ]
-    }
-  ],
+  "suppressed_keywords": [],
   "resume_hits": [
-    "react",
-    "postgresql",
-    "amazon web services",
-    "delivery",
-    "security",
-    "architecture"
+    "financial",
+    "services"
   ],
   "resume_gaps": [
-    "ci/cd",
-    "graphql",
-    "microservices",
-    "deployment",
-    "developer",
-    "implement"
+    "representative"
   ],
   "alignment_context": {
     "mode": "direct",
-    "coverage": 0.75,
+    "coverage": 0.667,
     "directEvidence": [
       {
         "section": "experience",
         "id": 5,
         "label": "BitGo Software Engineering Intern",
         "terms": [
-          "react",
-          "postgresql",
-          "amazon web services",
-          "architecture"
+          "financial",
+          "services"
         ],
-        "score": 28.152
+        "score": 6.3
       },
       {
         "section": "projects",
         "id": 9,
         "label": "Centi – Personal Finance App",
         "terms": [
-          "react",
-          "postgresql"
+          "financial",
+          "services"
         ],
-        "score": 17.85
+        "score": 6.3
       },
       {
         "section": "projects",
         "id": 10,
         "label": "Taylor.io – Resume Builder & Parser",
         "terms": [
-          "react",
-          "postgresql"
+          "services"
         ],
-        "score": 17.85
-      },
-      {
-        "section": "projects",
-        "id": 18,
-        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
-        "terms": [
-          "react"
-        ],
-        "score": 9.2
-      },
-      {
-        "section": "experience",
-        "id": 8,
-        "label": "Hawkers Host / Expo",
-        "terms": [
-          "delivery"
-        ],
-        "score": 6.25
-      },
-      {
-        "section": "projects",
-        "id": 12,
-        "label": "SecureScape – Smart Security System",
-        "terms": [
-          "security"
-        ],
-        "score": 5.2
-      },
-      {
-        "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-        "terms": [
-          "architecture"
-        ],
-        "score": 2.502
-      },
-      {
-        "section": "skills",
-        "id": 51,
-        "label": "PostgreSQL",
-        "terms": [
-          "postgresql"
-        ],
-        "score": 1
+        "score": 3.1
       }
     ],
     "transferableEvidence": [
@@ -717,10 +335,8 @@
         "id": 5,
         "label": "BitGo Software Engineering Intern",
         "terms": [
-          "react",
-          "postgresql",
-          "amazon web services",
-          "architecture"
+          "financial",
+          "services"
         ],
         "evidenceType": "direct_role_evidence",
         "claimStrength": "direct",
@@ -731,8 +347,8 @@
         "id": 9,
         "label": "Centi – Personal Finance App",
         "terms": [
-          "react",
-          "postgresql"
+          "financial",
+          "services"
         ],
         "evidenceType": "weak_lexical_overlap",
         "claimStrength": "cautious",
@@ -743,63 +359,7 @@
         "id": 10,
         "label": "Taylor.io – Resume Builder & Parser",
         "terms": [
-          "react",
-          "postgresql"
-        ],
-        "evidenceType": "weak_lexical_overlap",
-        "claimStrength": "cautious",
-        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
-      },
-      {
-        "section": "projects",
-        "id": 18,
-        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
-        "terms": [
-          "react"
-        ],
-        "evidenceType": "weak_lexical_overlap",
-        "claimStrength": "cautious",
-        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
-      },
-      {
-        "section": "experience",
-        "id": 8,
-        "label": "Hawkers Host / Expo",
-        "terms": [
-          "delivery"
-        ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Use as customer/client-facing communication or service evidence."
-      },
-      {
-        "section": "projects",
-        "id": 12,
-        "label": "SecureScape – Smart Security System",
-        "terms": [
-          "security"
-        ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Use as customer/client-facing communication or service evidence."
-      },
-      {
-        "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-        "terms": [
-          "architecture"
-        ],
-        "evidenceType": "domain_tool_evidence",
-        "claimStrength": "supporting",
-        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
-      },
-      {
-        "section": "skills",
-        "id": 51,
-        "label": "PostgreSQL",
-        "terms": [
-          "postgresql"
+          "services"
         ],
         "evidenceType": "weak_lexical_overlap",
         "claimStrength": "cautious",
@@ -818,6 +378,30 @@
         "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
       },
       {
+        "section": "experience",
+        "id": 8,
+        "label": "Hawkers Host / Expo",
+        "terms": [
+          "coordination / communication"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "label": "SecureScape – Smart Security System",
+        "terms": [
+          "compliance / standards",
+          "coordination / communication",
+          "pace / issue response"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
         "section": "projects",
         "id": 17,
         "label": "ShelfVision - Dense Shelf Object Detection",
@@ -827,169 +411,60 @@
         "evidenceType": "transferable_behavior",
         "claimStrength": "bridge",
         "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 18,
+        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
+        "terms": [
+          "coordination / communication"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "metrics / reporting",
+          "workflow / automation"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
       }
     ],
     "jdSignalIntent": [
       {
-        "term": "react",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "tool_platform",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
-        ]
-      },
-      {
-        "term": "postgresql",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "tool_platform",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "manage databases across sqlserver, postgresql, and dynamodb environments."
-        ]
-      },
-      {
-        "term": "graphql",
+        "term": "financial",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "develop secure, high‑performance apis using rest, soap, and graphql."
-        ]
+        "linePreview": []
       },
       {
-        "term": "microservices",
-        "intent": "company_product_context",
-        "priority": 1,
-        "signalType": "role_capability",
-        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-        "linePreview": [
-          "work with aws cloud services, serverless components, and microservices‑based architectures."
-        ]
-      },
-      {
-        "term": "amazon web services",
-        "intent": "company_product_context",
-        "priority": 1,
-        "signalType": "tool_platform",
-        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-        "linePreview": [
-          "work with aws cloud services, serverless components, and microservices‑based architectures."
-        ]
-      },
-      {
-        "term": "delivery",
+        "term": "representative",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery.",
-          "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey."
-        ]
+        "linePreview": []
       },
       {
-        "term": "security",
-        "intent": "candidate_requirement",
-        "priority": 2,
-        "signalType": "role_capability",
-        "reason": "Candidate requirement: use as bridge/skills emphasis when supported by resume behavior.",
-        "linePreview": [
-          "troubleshoot performance, security, and stability issues across the full stack."
-        ]
-      },
-      {
-        "term": "architecture",
-        "intent": "company_product_context",
-        "priority": 1,
-        "signalType": "role_capability",
-        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-        "linePreview": [
-          "own full feature lifecycle—from concept and architecture to deployment and optimization."
-        ]
-      },
-      {
-        "term": "deployment",
-        "intent": "company_product_context",
-        "priority": 1,
-        "signalType": "role_capability",
-        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-        "linePreview": [
-          "own full feature lifecycle—from concept and architecture to deployment and optimization."
-        ]
-      },
-      {
-        "term": "developer",
+        "term": "services",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "full stack developer"
-        ]
-      },
-      {
-        "term": "implement",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "role_capability",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
-        ]
+        "linePreview": []
       }
     ],
     "gapSupport": [
       {
-        "term": "ci/cd",
-        "status": "unsupported_exact",
-        "signalType": "tool_platform",
-        "supportingEvidence": [],
-        "capability": "exact tool/platform",
-        "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
-      },
-      {
-        "term": "graphql",
-        "status": "unsupported",
-        "signalType": "role_capability",
-        "supportingEvidence": [],
-        "capability": "",
-        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "microservices",
-        "status": "unsupported",
-        "signalType": "role_capability",
-        "supportingEvidence": [],
-        "capability": "",
-        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "deployment",
-        "status": "conceptual",
-        "signalType": "role_capability",
-        "supportingEvidence": [
-          "aws",
-          "ec2",
-          "deployed",
-          "production"
-        ],
-        "capability": "cloud and deployment",
-        "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
-      },
-      {
-        "term": "developer",
-        "status": "unsupported",
-        "signalType": "role_capability",
-        "supportingEvidence": [],
-        "capability": "",
-        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "implement",
+        "term": "representative",
         "status": "unsupported",
         "signalType": "role_capability",
         "supportingEvidence": [],
@@ -998,11 +473,7 @@
       }
     ],
     "unsupportedTerms": [
-      "ci/cd",
-      "graphql",
-      "microservices",
-      "developer",
-      "implement"
+      "representative"
     ],
     "fitRisk": {
       "level": "normal",
@@ -1023,44 +494,77 @@
       "claimGuidance": ""
     },
     "topJobTerms": [
-      "react",
-      "postgresql",
-      "graphql",
-      "microservices",
-      "amazon web services",
-      "delivery",
-      "security",
-      "architecture"
+      "financial",
+      "representative",
+      "services"
     ],
     "guidance": "Direct fit: lead with the role title and strongest JD-overlap evidence, while preserving resume-native breadth."
   },
   "job_strategy": {
+    "lane": "sales_customer",
     "persona": "sales_growth",
+    "roleArchetype": "financial_customer_education",
     "fitMode": "direct",
     "lengthMode": "standard",
-    "readerGoal": "Prove customer-facing growth readiness through communication, revenue-adjacent impact, and truthful product interest.",
+    "readerGoal": "Frame customer-facing communication, trust-building, finance interest, coachability, and service reliability for financial education or representative work.",
     "proofStyle": [
       "customer communication",
+      "trust-building",
+      "finance interest",
+      "coachability",
+      "service reliability",
       "people-facing work",
       "revenue-adjacent metrics",
       "relationship handling",
       "domain-relevant product interest"
     ],
     "keepPriorities": [
+      "service/customer-facing roles",
+      "finance-adjacent evidence",
+      "communication rows",
+      "training/learning readiness",
       "customer-facing roles",
       "sales or revenue evidence",
       "interpersonal proof",
       "one relevant product/software project"
     ],
     "trimPriorities": [
+      "deep technical finance projects",
+      "software engineer positioning",
+      "unsupported representative ownership",
       "deep technical projects",
       "unsupported sales ownership",
       "non-role technical stacks"
     ],
     "claimRules": [
-      "Do not call the candidate a sales professional unless formal sales or outreach...",
-      "Do not claim unsupported terms directly: ci/cd, graphql, microservices, develop...",
-      "Exact tools/platforms stay as review gaps unless resume evidence exists: ci/cd."
+      "Do not write the summary as a full-stack engineer applying to finance.",
+      "Do not claim proven representative or advisory experience unless evidenced.",
+      "Do not call the candidate a sales professional unless formal sales or outreach....",
+      "Do not claim unsupported terms directly: representative."
+    ],
+    "skillPreserve": [
+      "Communication",
+      "Customer Service",
+      "Problem Solving",
+      "Reliability"
+    ],
+    "skillReframeTargets": [
+      "Relationship Building",
+      "Customer Trust",
+      "Financial Interest",
+      "Product Education",
+      "Coachability"
+    ],
+    "skillDeprioritize": [
+      "Python",
+      "SQL",
+      "React",
+      "APIs",
+      "ML",
+      "data pipelines"
+    ],
+    "summaryGuardrails": [
+      "Sound customer-facing and finance-interested, not like a technical finance engi..."
     ],
     "sectionBudget": {
       "experience": null,
@@ -1069,31 +573,12 @@
       "advisory": true
     },
     "supportedSignals": [
-      "react",
-      "postgresql",
-      "amazon web services",
-      "delivery",
-      "security",
-      "architecture"
+      "financial",
+      "services"
     ],
     "gapSignals": [
-      "ci/cd",
-      "graphql",
-      "microservices",
-      "deployment",
-      "developer",
-      "implement"
+      "representative"
     ]
   },
-  "relevant_jd_lines": [
-    "implement ci/cd pipelines and follow devsecops best practices for continuous delivery.",
-    "own full feature lifecycle—from concept and architecture to deployment and optimization.",
-    "full stack developer",
-    "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey.",
-    "build modern, responsive web applications using react and strong server‑side skills in .net or node.js.",
-    "develop secure, high‑performance apis using rest, soap, and graphql.",
-    "work with aws cloud services, serverless components, and microservices‑based architectures.",
-    "manage databases across sqlserver, postgresql, and dynamodb environments.",
-    "troubleshoot performance, security, and stability issues across the full stack."
-  ]
+  "relevant_jd_lines": []
 }

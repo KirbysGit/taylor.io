@@ -322,6 +322,7 @@ def build_tailor_review_snapshot(
             "trimPriorities": strategy.get("trimPriorities") or [],
             "claimRules": strategy.get("claimRules") or [],
             "skillPreserve": strategy.get("skillPreserve") or [],
+            "skillReframeTargets": strategy.get("skillReframeTargets") or [],
             "skillDeprioritize": strategy.get("skillDeprioritize") or [],
             "summaryGuardrails": strategy.get("summaryGuardrails") or [],
             "supportedSignals": strategy.get("supportedSignals") or [],

@@ -682,6 +682,122 @@ def repair_narrative_project_selection(narrative_brief, resume_data, section_det
     return updated, debug_payload
 
 
+def _archetype_project_budget(job_strategy):
+    if not isinstance(job_strategy, dict):
+        return None
+    archetype = str(job_strategy.get("roleArchetype") or "").strip().lower()
+    budgets = {
+        "hospitality_customer_service": 0,
+        "financial_customer_education": 1,
+        "sales_growth_outreach": 1,
+        "functional_analyst_bridge": 2,
+        "engineering_product_development_stretch": 2,
+        "full_stack_product_engineering": 3,
+        "ai_backend_integration": 3,
+        "data_ai_analytics_ownership_stretch": 3,
+    }
+    return budgets.get(archetype)
+
+
+def apply_archetype_project_pruning_guard(narrative_brief, resume_data, tailor_context, section_details):
+    """Apply max project counts implied by the strategy archetype before Pass A sees rows."""
+    if not isinstance(narrative_brief, dict) or not isinstance(resume_data, dict):
+        return narrative_brief, None
+    tc = tailor_context if isinstance(tailor_context, dict) else {}
+    job_strategy = tc.get("jobStrategy") if isinstance(tc.get("jobStrategy"), dict) else {}
+    budget = _archetype_project_budget(job_strategy)
+    if budget is None:
+        return narrative_brief, None
+
+    projects = [row for row in (resume_data.get("projects") or []) if isinstance(row, dict)]
+    valid_ids = [_row_id(row) for row in projects if isinstance(_row_id(row), int)]
+    valid_ids = [pid for pid in valid_ids if isinstance(pid, int)]
+    if not valid_ids:
+        return narrative_brief, None
+
+    existing_keep = _int_id_list(narrative_brief.get("keepProjects"))
+    existing_maybe = _int_id_list(narrative_brief.get("maybeProjects"))
+    existing_drop = _int_id_list(narrative_brief.get("dropProjects"))
+    existing_visible = [pid for pid in dict.fromkeys(existing_keep + existing_maybe) if pid in valid_ids]
+    if not existing_visible:
+        existing_visible = [pid for pid in valid_ids if pid not in set(existing_drop)]
+    if len(existing_visible) <= budget and not existing_maybe:
+        return narrative_brief, None
+
+    plan_scores = _project_scores_from_plan(section_details)
+    order_index = {pid: idx for idx, pid in enumerate(valid_ids)}
+    ranked_ids = sorted(
+        valid_ids,
+        key=lambda pid: (
+            -(float((plan_scores.get(pid) or {}).get("score") or 0)),
+            -(int((plan_scores.get(pid) or {}).get("hits") or 0)),
+            0 if pid in existing_keep else 1,
+            order_index.get(pid, 9999),
+        ),
+    )
+
+    if budget <= 0:
+        selected = []
+    else:
+        selected = ranked_ids[: min(budget, len(ranked_ids))]
+    selected_set = set(selected)
+    dropped = [pid for pid in valid_ids if pid not in selected_set]
+
+    if set(selected) == set(existing_keep) and not existing_maybe and set(dropped) == set(existing_drop):
+        return narrative_brief, None
+
+    updated = copy.deepcopy(narrative_brief)
+    updated["keepProjects"] = selected
+    updated["maybeProjects"] = []
+    updated["dropProjects"] = dropped
+    updated["heroProjects"] = [pid for pid in _int_id_list(updated.get("heroProjects")) if pid in selected_set] or selected[:budget]
+    updated["rewriteProjects"] = [pid for pid in _int_id_list(updated.get("rewriteProjects")) if pid in selected_set] or selected[:budget]
+    updated["repairProjects"] = [pid for pid in _int_id_list(updated.get("repairProjects")) if pid in selected_set]
+    updated["supportingProjects"] = [pid for pid in _int_id_list(updated.get("supportingProjects")) if pid in selected_set]
+    updated["peripheralProjects"] = dropped
+    if budget == 0:
+        visibility = dict(updated.get("layoutSectionVisibility") or {})
+        visibility["projects"] = False
+        updated["layoutSectionVisibility"] = visibility
+
+    titles = _project_title_by_id(resume_data)
+    rationale = list(updated.get("selectionRationale") or [])
+    archetype = str(job_strategy.get("roleArchetype") or "this role").strip() or "this role"
+    if selected:
+        rationale.append(
+            f"Archetype pruning kept {len(selected)} project(s) for {archetype} so the draft stays focused: "
+            + ", ".join(titles.get(pid, f"Project {pid}") for pid in selected[:3])
+            + "."
+        )
+    else:
+        rationale.append(f"Archetype pruning removed projects for {archetype} because experience is stronger evidence for this role.")
+    if dropped:
+        rationale.append(
+            "Archetype pruning moved lower-priority projects out of the visible draft: "
+            + ", ".join(titles.get(pid, f"Project {pid}") for pid in dropped[:4])
+            + "."
+        )
+    updated["selectionRationale"] = list(dict.fromkeys([x for x in rationale if isinstance(x, str) and x.strip()]))[:10]
+
+    return updated, {
+        "archetypeProjectPruning": True,
+        "roleArchetype": job_strategy.get("roleArchetype"),
+        "projectBudget": budget,
+        "oldKeepProjectIds": existing_keep,
+        "oldMaybeProjectIds": existing_maybe,
+        "oldDropProjectIds": existing_drop,
+        "newKeepProjectIds": selected,
+        "newDropProjectIds": dropped,
+        "projectScores": {
+            str(pid): {
+                **(plan_scores.get(pid) or {"score": 0, "hits": 0, "matchedTerms": []}),
+                "title": titles.get(pid, f"Project {pid}"),
+            }
+            for pid in valid_ids
+        },
+    }
+
+
 def _append_stage_warning(stage, warning):
     if not warning:
         return stage
@@ -1029,6 +1145,11 @@ def protect_high_fit_project_drops(stage, resume_data, tailor_context, payload=N
     all_ids = [_row_id(row) for row in projects or [] if isinstance(row, dict)]
     drop_set = {x for x in drop_ids}
     kept_ids = [pid for pid in all_ids if pid not in drop_set]
+    tc = tailor_context if isinstance(tailor_context, dict) else {}
+    strategy = tc.get("jobStrategy") if isinstance(tc.get("jobStrategy"), dict) else {}
+    project_budget = _archetype_project_budget(strategy)
+    if project_budget is not None and len(kept_ids) >= project_budget:
+        return stage
     scored = {pid: _project_fit_score(by_id.get(pid), priority_terms) for pid in all_ids}
     kept_scores = [scored.get(pid, {}).get("score", 0) for pid in kept_ids]
     best_kept = max(kept_scores or [0])
@@ -1756,6 +1877,13 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         narrative_brief,
         payload,
     )
+    narrative_archetype_pruning_guard = None
+    narrative_brief, narrative_archetype_pruning_guard = apply_archetype_project_pruning_guard(
+        narrative_brief,
+        resumeData,
+        tailorContext,
+        sectionDetails,
+    )
     narrative_quality_guard = project_quality_repair_debug(
         resumeData,
         narrative_brief,
@@ -1918,6 +2046,8 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
                 "bridge_guard": narrative_bridge_guard or {"bridgeExperienceGuard": False},
                 "strategy_guard": narrative_strategy_guard or {"strategySelectionGuard": False},
                 "retarget_guard": narrative_retarget_guard or {"strongAdjacentProjectFocus": False},
+                "archetype_pruning_guard": narrative_archetype_pruning_guard
+                or {"archetypeProjectPruning": False},
                 "quality_guard": narrative_quality_guard,
             },
         )

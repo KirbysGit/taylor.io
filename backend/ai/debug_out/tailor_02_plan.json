@@ -3,18 +3,18 @@
     "sectionScoresRanked": [
       [
         "projects",
-        7
-      ],
-      [
-        "experience",
-        5
-      ],
-      [
-        "skills",
         3
       ],
       [
+        "experience",
+        2
+      ],
+      [
         "education",
+        0
+      ],
+      [
+        "skills",
         0
       ]
     ],
@@ -22,21 +22,11 @@
       "experience": [
         {
           "id": 5,
-          "hits": 4,
-          "score": 28.152,
+          "hits": 2,
+          "score": 6.3,
           "matchedTerms": [
-            "react",
-            "postgresql",
-            "amazon web services",
-            "architecture"
-          ]
-        },
-        {
-          "id": 8,
-          "hits": 1,
-          "score": 6.25,
-          "matchedTerms": [
-            "delivery"
+            "financial",
+            "services"
           ]
         }
       ],
@@ -44,230 +34,165 @@
         {
           "id": 9,
           "hits": 2,
-          "score": 17.85,
+          "score": 6.3,
           "matchedTerms": [
-            "react",
-            "postgresql"
+            "financial",
+            "services"
           ]
         },
         {
           "id": 10,
-          "hits": 2,
-          "score": 17.85,
-          "matchedTerms": [
-            "react",
-            "postgresql"
-          ]
-        },
-        {
-          "id": 18,
           "hits": 1,
-          "score": 9.2,
+          "score": 3.1,
           "matchedTerms": [
-            "react"
-          ]
-        },
-        {
-          "id": 12,
-          "hits": 1,
-          "score": 5.2,
-          "matchedTerms": [
-            "security"
-          ]
-        },
-        {
-          "id": 20,
-          "hits": 1,
-          "score": 2.502,
-          "matchedTerms": [
-            "architecture"
+            "services"
           ]
         }
       ],
-      "skills": {
-        "data tools": {
-          "hits": 2,
-          "rows": [
-            {
-              "id": 51,
-              "hits": 1,
-              "matchedTerms": [
-                "postgresql"
-              ]
-            },
-            {
-              "id": 56,
-              "hits": 1,
-              "matchedTerms": [
-                "amazon web services"
-              ]
-            }
-          ]
-        },
-        "frameworks": {
-          "hits": 1,
-          "rows": [
-            {
-              "id": 47,
-              "hits": 1,
-              "matchedTerms": [
-                "react"
-              ]
-            }
-          ]
-        }
-      },
+      "skills": {},
       "education": []
     },
     "gapsPerSection": {
       "experience": [
-        "ci/cd",
-        "graphql",
-        "microservices",
-        "deployment",
-        "developer",
-        "implement"
+        "representative"
       ],
       "projects": [
-        "ci/cd",
-        "graphql",
-        "microservices",
-        "deployment",
-        "developer",
-        "implement"
+        "representative"
       ],
       "skills": [
-        "ci/cd",
-        "graphql",
-        "microservices",
-        "deployment",
-        "developer",
-        "implement"
+        "representative"
       ],
       "education": [
-        "ci/cd",
-        "graphql",
-        "microservices",
-        "deployment",
-        "developer",
-        "implement"
+        "representative"
       ]
     }
   },
   "narrative": {
-    "candidateAngle": "Full Stack Developer focused on building scalable web applications and APIs, leveraging React and PostgreSQL.",
+    "candidateAngle": "Customer-focused professional with a background in financial services and technology, emphasizing relationship building and communication skills.",
     "targetStory": {
-      "roleLane": "Full Stack Developer",
-      "readerTakeaway": "Proven experience in building scalable web applications and APIs using React and PostgreSQL, with a strong focus on customer-centric solutions.",
+      "roleLane": "financial_customer_education",
+      "readerTakeaway": "Demonstrated ability in customer-facing roles with a focus on financial services, showcasing and relationship-building skills.",
       "proofExperienceIds": [
         5,
-        8
-      ],
-      "proofProjectIds": [
-        9,
-        10
-      ],
-      "deEmphasizeExperienceIds": [
         7
       ],
+      "proofProjectIds": [
+        9
+      ],
+      "deEmphasizeExperienceIds": [
+        8
+      ],
       "deEmphasizeProjectIds": [
-        12,
-        18,
-        20
+        10
       ],
       "evidenceThemes": [
         "customer communication",
-        "API development",
-        "data management"
+        "trust-building",
+        "finance interest",
+        "service reliability"
       ]
     },
     "primaryStory": [
-      "Built and maintained backend services and REST APIs in Python/Django, enhancing secure workflows",
-      "Developed responsive React dashboards integrated with backend services, improving operational visibility",
-      "Designed full-stack applications with FastAPI and PostgreSQL, ensuring secure data handling and user authentication",
-      "Collaborated on system architecture and design, contributing to scalable service patterns"
+      "Experience in financial services through internship at BitGo, focusing on backend services and customer communication.",
+      "Development of a personal finance app (Centi) that enhances user engagement and financial literacy.",
+      "Strong customer service skills demonstrated in roles at Bar Louie and Hawkers, emphasizing communication and coordination."
     ],
     "secondaryStory": [
-      "Experience in customer-facing roles, enhancing communication and service delivery",
-      "Proven ability to thrive in high-pressure environments, adapting to dynamic team needs"
+      "Experience in building user-friendly applications that promote financial education and trust."
     ],
-    "summaryGoal": "Highlight experience in building scalable web applications and APIs with React and PostgreSQL; emphasize customer-centric solutions and collaboration in technical environments.",
+    "summaryGoal": "Highlight customer-facing experience in financial services and technical skills, emphasizing communication and relationship-building in a finance context.",
     "summaryDecision": {
       "action": "keep",
-      "confidence": "low",
-      "reason": "No confident summary visibility change was needed from the available evidence.",
+      "confidence": "medium",
+      "reason": "The summary connects the candidate's technical background with customer service experience relevant to the role.",
       "evidence": [
-        "customer communication",
-        "API development",
-        "data management"
+        "Experience at BitGo in financial services",
+        "Customer service roles at Bar Louie and Hawkers"
       ]
     },
     "skillsStrategy": [
-      "Categories: Languages, Frameworks, Data Tools, Focus Areas",
-      "Lead: React, PostgreSQL, Python, Django, FastAPI",
-      "Supporting: AWS, REST API Design, Automation Systems, ETL Pipelines",
-      "Trim last sparingly—remove any non-role relevant skills"
+      "Categories: Communication, Customer Service, Financial Interest, Relationship Building, Coachability",
+      "Trim last: Technical skills not directly relevant to customer-facing roles."
     ],
     "categoryStrategy": [],
     "sectionStrategy": {
-      "summary": "Rewrite to emphasize full-stack development and customer-centric solutions",
-      "experience": "Focus on hero roles with strong evidence of relevant skills",
-      "projects": "Highlight key projects demonstrating technical capabilities and customer impact",
-      "skills": "Organize by toolkit relevance and evidence breadth",
+      "summary": "Rewrite to emphasize customer-facing and financial service skills",
+      "experience": "Focus on hero experience with strong leads",
+      "projects": "Highlight relevant projects that support financial education",
+      "skills": "Order skills to prioritize customer service and communication.",
       "education": "Light—credentials frozen; trim highlights only if they sharpen scan."
     },
     "layoutStrategy": [],
-    "layoutSectionOrder": [],
-    "layoutSectionVisibility": {},
-    "layoutRationale": [],
+    "layoutSectionOrder": [
+      "header",
+      "education",
+      "experience",
+      "projects",
+      "skills",
+      "summary"
+    ],
+    "layoutSectionVisibility": {
+      "projects": true,
+      "summary": true,
+      "skills": true,
+      "education": true,
+      "experience": true
+    },
+    "layoutRationale": [
+      "Prioritize sections that showcase customer service and financial experience for the role."
+    ],
     "keepExperience": [
       5,
+      7,
       8
     ],
-    "dropExperience": [
-      7
-    ],
+    "dropExperience": [],
     "rewriteExperience": [
-      5
+      5,
+      7,
+      8
     ],
     "keepProjects": [
-      9,
-      10
+      9
     ],
     "dropProjects": [
+      10,
       12,
+      17,
       18,
       20
     ],
     "rewriteProjects": [
-      9,
-      10
+      9
     ],
     "repairProjects": [],
-    "maybeProjects": [
-      17
+    "maybeProjects": [],
+    "selectionRationale": [
+      "Strategy guard kept Host / Expo because financial_customer_education needs people-facing or coordination evidence.",
+      "Archetype pruning kept 1 project(s) for financial_customer_education so the draft stays focused: Centi – Personal Finance App.",
+      "Archetype pruning moved lower-priority projects out of the visible draft: Taylor.io – Resume Builder & Parser, SecureScape – Smart Security System, ShelfVision - Dense Shelf Object Detection, Tizirsso Racing – Portfolio & Sponsorship Website."
     ],
-    "selectionRationale": [],
     "heroProjects": [
-      9,
-      10
+      9
     ],
     "supportingProjects": [],
     "peripheralProjects": [
+      10,
       12,
       17,
       18,
       20
     ],
     "heroExperience": [
-      5
+      5,
+      7
     ],
     "rewriteGoals": [
-      "Land BitGo: emphasize backend services and API development with a focus on customer workflows",
-      "Land Centi: highlight full-stack development and secure data handling in the finance application"
+      "Land BitGo: Emphasize customer communication and financial service contributions.",
+      "Land Bar Louie: Highlight adaptability and communication in high-pressure environments."
     ],
     "avoid": [
-      "No unsupported claims regarding CI/CD, GraphQL, or microservices without evidence."
+      "Do not claim direct experience as a financial representative without evidence."
     ],
     "alignmentMode": "direct",
     "alignmentGuidance": "Direct fit: lead with the role title and strongest JD-overlap evidence, while preserving resume-native breadth.",
@@ -277,77 +202,29 @@
         "id": 5,
         "label": "BitGo Software Engineering Intern",
         "terms": [
-          "react",
-          "postgresql",
-          "amazon web services",
-          "architecture"
+          "financial",
+          "services"
         ],
-        "score": 28.152
+        "score": 6.3
       },
       {
         "section": "projects",
         "id": 9,
         "label": "Centi – Personal Finance App",
         "terms": [
-          "react",
-          "postgresql"
+          "financial",
+          "services"
         ],
-        "score": 17.85
+        "score": 6.3
       },
       {
         "section": "projects",
         "id": 10,
         "label": "Taylor.io – Resume Builder & Parser",
         "terms": [
-          "react",
-          "postgresql"
+          "services"
         ],
-        "score": 17.85
-      },
-      {
-        "section": "projects",
-        "id": 18,
-        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
-        "terms": [
-          "react"
-        ],
-        "score": 9.2
-      },
-      {
-        "section": "experience",
-        "id": 8,
-        "label": "Hawkers Host / Expo",
-        "terms": [
-          "delivery"
-        ],
-        "score": 6.25
-      },
-      {
-        "section": "projects",
-        "id": 12,
-        "label": "SecureScape – Smart Security System",
-        "terms": [
-          "security"
-        ],
-        "score": 5.2
-      },
-      {
-        "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-        "terms": [
-          "architecture"
-        ],
-        "score": 2.502
-      },
-      {
-        "section": "skills",
-        "id": 51,
-        "label": "PostgreSQL",
-        "terms": [
-          "postgresql"
-        ],
-        "score": 1
+        "score": 3.1
       }
     ],
     "transferableEvidence": [
@@ -556,10 +433,8 @@
         "id": 5,
         "label": "BitGo Software Engineering Intern",
         "terms": [
-          "react",
-          "postgresql",
-          "amazon web services",
-          "architecture"
+          "financial",
+          "services"
         ],
         "evidenceType": "direct_role_evidence",
         "claimStrength": "direct",
@@ -570,8 +445,8 @@
         "id": 9,
         "label": "Centi – Personal Finance App",
         "terms": [
-          "react",
-          "postgresql"
+          "financial",
+          "services"
         ],
         "evidenceType": "weak_lexical_overlap",
         "claimStrength": "cautious",
@@ -582,63 +457,7 @@
         "id": 10,
         "label": "Taylor.io – Resume Builder & Parser",
         "terms": [
-          "react",
-          "postgresql"
-        ],
-        "evidenceType": "weak_lexical_overlap",
-        "claimStrength": "cautious",
-        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
-      },
-      {
-        "section": "projects",
-        "id": 18,
-        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
-        "terms": [
-          "react"
-        ],
-        "evidenceType": "weak_lexical_overlap",
-        "claimStrength": "cautious",
-        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
-      },
-      {
-        "section": "experience",
-        "id": 8,
-        "label": "Hawkers Host / Expo",
-        "terms": [
-          "delivery"
-        ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Use as customer/client-facing communication or service evidence."
-      },
-      {
-        "section": "projects",
-        "id": 12,
-        "label": "SecureScape – Smart Security System",
-        "terms": [
-          "security"
-        ],
-        "evidenceType": "direct_role_evidence",
-        "claimStrength": "direct",
-        "guidance": "Use as customer/client-facing communication or service evidence."
-      },
-      {
-        "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-        "terms": [
-          "architecture"
-        ],
-        "evidenceType": "domain_tool_evidence",
-        "claimStrength": "supporting",
-        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
-      },
-      {
-        "section": "skills",
-        "id": 51,
-        "label": "PostgreSQL",
-        "terms": [
-          "postgresql"
+          "services"
         ],
         "evidenceType": "weak_lexical_overlap",
         "claimStrength": "cautious",
@@ -657,6 +476,30 @@
         "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
       },
       {
+        "section": "experience",
+        "id": 8,
+        "label": "Hawkers Host / Expo",
+        "terms": [
+          "coordination / communication"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "label": "SecureScape – Smart Security System",
+        "terms": [
+          "compliance / standards",
+          "coordination / communication",
+          "pace / issue response"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
         "section": "projects",
         "id": 17,
         "label": "ShelfVision - Dense Shelf Object Detection",
@@ -666,169 +509,60 @@
         "evidenceType": "transferable_behavior",
         "claimStrength": "bridge",
         "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 18,
+        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
+        "terms": [
+          "coordination / communication"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "metrics / reporting",
+          "workflow / automation"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
       }
     ],
     "jdSignalIntent": [
       {
-        "term": "react",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "tool_platform",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "build modern, responsive web applications using react and strong server‑side skills in .net or node.js."
-        ]
-      },
-      {
-        "term": "postgresql",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "tool_platform",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "manage databases across sqlserver, postgresql, and dynamodb environments."
-        ]
-      },
-      {
-        "term": "graphql",
+        "term": "financial",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "develop secure, high‑performance apis using rest, soap, and graphql."
-        ]
+        "linePreview": []
       },
       {
-        "term": "microservices",
-        "intent": "company_product_context",
-        "priority": 1,
-        "signalType": "role_capability",
-        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-        "linePreview": [
-          "work with aws cloud services, serverless components, and microservices‑based architectures."
-        ]
-      },
-      {
-        "term": "amazon web services",
-        "intent": "company_product_context",
-        "priority": 1,
-        "signalType": "tool_platform",
-        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-        "linePreview": [
-          "work with aws cloud services, serverless components, and microservices‑based architectures."
-        ]
-      },
-      {
-        "term": "delivery",
+        "term": "representative",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery.",
-          "design, development, and delivery of end‑to‑end web solutions that elevate the customer journey."
-        ]
+        "linePreview": []
       },
       {
-        "term": "security",
-        "intent": "candidate_requirement",
-        "priority": 2,
-        "signalType": "role_capability",
-        "reason": "Candidate requirement: use as bridge/skills emphasis when supported by resume behavior.",
-        "linePreview": [
-          "troubleshoot performance, security, and stability issues across the full stack."
-        ]
-      },
-      {
-        "term": "architecture",
-        "intent": "company_product_context",
-        "priority": 1,
-        "signalType": "role_capability",
-        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-        "linePreview": [
-          "own full feature lifecycle—from concept and architecture to deployment and optimization."
-        ]
-      },
-      {
-        "term": "deployment",
-        "intent": "company_product_context",
-        "priority": 1,
-        "signalType": "role_capability",
-        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-        "linePreview": [
-          "own full feature lifecycle—from concept and architecture to deployment and optimization."
-        ]
-      },
-      {
-        "term": "developer",
+        "term": "services",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "full stack developer"
-        ]
-      },
-      {
-        "term": "implement",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "role_capability",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": [
-          "implement ci/cd pipelines and follow devsecops best practices for continuous delivery."
-        ]
+        "linePreview": []
       }
     ],
     "gapSupport": [
       {
-        "term": "ci/cd",
-        "status": "unsupported_exact",
-        "signalType": "tool_platform",
-        "supportingEvidence": [],
-        "capability": "exact tool/platform",
-        "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
-      },
-      {
-        "term": "graphql",
-        "status": "unsupported",
-        "signalType": "role_capability",
-        "supportingEvidence": [],
-        "capability": "",
-        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "microservices",
-        "status": "unsupported",
-        "signalType": "role_capability",
-        "supportingEvidence": [],
-        "capability": "",
-        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "deployment",
-        "status": "conceptual",
-        "signalType": "role_capability",
-        "supportingEvidence": [
-          "aws",
-          "ec2",
-          "deployed",
-          "production"
-        ],
-        "capability": "cloud and deployment",
-        "claimGuidance": "Use as related deployment/cloud evidence only for providers or deployment work actually present; do not name missing platforms."
-      },
-      {
-        "term": "developer",
-        "status": "unsupported",
-        "signalType": "role_capability",
-        "supportingEvidence": [],
-        "capability": "",
-        "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
-      },
-      {
-        "term": "implement",
+        "term": "representative",
         "status": "unsupported",
         "signalType": "role_capability",
         "supportingEvidence": [],
@@ -837,11 +571,7 @@
       }
     ],
     "unsupportedTerms": [
-      "ci/cd",
-      "graphql",
-      "microservices",
-      "developer",
-      "implement"
+      "representative"
     ],
     "fitRisk": {
       "level": "normal",
@@ -868,8 +598,86 @@
   "bridge_guard": {
     "bridgeExperienceGuard": false
   },
+  "strategy_guard": {
+    "strategySelectionGuard": true,
+    "roleArchetype": "financial_customer_education",
+    "promotedExperienceIds": [
+      8
+    ],
+    "reason": "protected service/customer-facing experience for this strategy"
+  },
   "retarget_guard": {
     "strongAdjacentProjectFocus": false
+  },
+  "archetype_pruning_guard": {
+    "archetypeProjectPruning": true,
+    "roleArchetype": "financial_customer_education",
+    "projectBudget": 1,
+    "oldKeepProjectIds": [
+      9
+    ],
+    "oldMaybeProjectIds": [
+      12,
+      17,
+      18,
+      20
+    ],
+    "oldDropProjectIds": [
+      10
+    ],
+    "newKeepProjectIds": [
+      9
+    ],
+    "newDropProjectIds": [
+      10,
+      12,
+      17,
+      18,
+      20
+    ],
+    "projectScores": {
+      "9": {
+        "score": 6.3,
+        "hits": 2,
+        "matchedTerms": [
+          "financial",
+          "services"
+        ],
+        "title": "Centi – Personal Finance App"
+      },
+      "10": {
+        "score": 3.1,
+        "hits": 1,
+        "matchedTerms": [
+          "services"
+        ],
+        "title": "Taylor.io – Resume Builder & Parser"
+      },
+      "12": {
+        "score": 0,
+        "hits": 0,
+        "matchedTerms": [],
+        "title": "SecureScape – Smart Security System"
+      },
+      "17": {
+        "score": 0,
+        "hits": 0,
+        "matchedTerms": [],
+        "title": "ShelfVision - Dense Shelf Object Detection"
+      },
+      "18": {
+        "score": 0,
+        "hits": 0,
+        "matchedTerms": [],
+        "title": "Tizirsso Racing – Portfolio & Sponsorship Website"
+      },
+      "20": {
+        "score": 0,
+        "hits": 0,
+        "matchedTerms": [],
+        "title": "SentimentTrader -  Real-Time Stock Sentiment Pipeline"
+      }
+    }
   },
   "quality_guard": {
     "weakBulletRepair": false,

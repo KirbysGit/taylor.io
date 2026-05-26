@@ -14,6 +14,7 @@ from backend.ai.prompt.prompt_builder import (
     project_quality_repair_ids_for_narrative,
 )
 from backend.ai.job_tailor_service import (
+    apply_archetype_project_pruning_guard,
     apply_strategy_selection_guard,
     enforce_project_quality_repairs,
     enforce_strategy_skill_preserve,
@@ -266,3 +267,104 @@ def test_strategy_selection_guard_keeps_service_rows_for_customer_archetype():
     assert updated["dropExperience"] == []
     assert updated["keepExperience"] == [5, 7, 8]
     assert updated["rewriteExperience"] == [7, 8]
+
+
+def _resume_with_many_projects():
+    return {
+        "projects": [
+            {"id": 9, "title": "Centi"},
+            {"id": 10, "title": "Taylor.io"},
+            {"id": 12, "title": "SecureScape"},
+            {"id": 17, "title": "ShelfVision"},
+        ],
+        "experience": [
+            {"id": 7, "title": "Server", "description": "Served guests."},
+            {"id": 8, "title": "Host", "description": "Welcomed guests."},
+        ],
+    }
+
+
+def _project_section_scores():
+    return {
+        "rowsPerSectionRanked": {
+            "projects": [
+                {"id": 10, "score": 9, "hits": 3, "matchedTerms": ["openai"]},
+                {"id": 9, "score": 7, "hits": 2, "matchedTerms": ["postgresql"]},
+                {"id": 17, "score": 5, "hits": 1, "matchedTerms": ["metrics"]},
+                {"id": 12, "score": 1, "hits": 0, "matchedTerms": []},
+            ]
+        }
+    }
+
+
+def test_archetype_pruning_drops_all_projects_for_hospitality():
+    narrative = {
+        "keepProjects": [9, 10],
+        "maybeProjects": [12, 17],
+        "dropProjects": [],
+        "heroProjects": [9],
+        "rewriteProjects": [9],
+    }
+    tailor_context = {"jobStrategy": {"roleArchetype": "hospitality_customer_service"}}
+
+    updated, debug = apply_archetype_project_pruning_guard(
+        narrative,
+        _resume_with_many_projects(),
+        tailor_context,
+        _project_section_scores(),
+    )
+
+    assert debug["archetypeProjectPruning"] is True
+    assert updated["keepProjects"] == []
+    assert updated["maybeProjects"] == []
+    assert set(updated["dropProjects"]) == {9, 10, 12, 17}
+    assert updated["layoutSectionVisibility"]["projects"] is False
+
+
+def test_archetype_pruning_limits_financial_customer_project_to_one():
+    narrative = {"keepProjects": [9, 10], "maybeProjects": [12, 17], "dropProjects": []}
+    tailor_context = {"jobStrategy": {"roleArchetype": "financial_customer_education"}}
+
+    updated, debug = apply_archetype_project_pruning_guard(
+        narrative,
+        _resume_with_many_projects(),
+        tailor_context,
+        _project_section_scores(),
+    )
+
+    assert debug["projectBudget"] == 1
+    assert updated["keepProjects"] == [10]
+    assert set(updated["dropProjects"]) == {9, 12, 17}
+    assert updated["maybeProjects"] == []
+
+
+def test_archetype_pruning_limits_functional_analyst_to_two_projects():
+    narrative = {"keepProjects": [9, 10, 12], "maybeProjects": [17], "dropProjects": []}
+    tailor_context = {"jobStrategy": {"roleArchetype": "functional_analyst_bridge"}}
+
+    updated, debug = apply_archetype_project_pruning_guard(
+        narrative,
+        _resume_with_many_projects(),
+        tailor_context,
+        _project_section_scores(),
+    )
+
+    assert debug["projectBudget"] == 2
+    assert updated["keepProjects"] == [10, 9]
+    assert set(updated["dropProjects"]) == {12, 17}
+
+
+def test_archetype_pruning_allows_three_technical_projects():
+    narrative = {"keepProjects": [9, 10, 12, 17], "maybeProjects": [], "dropProjects": []}
+    tailor_context = {"jobStrategy": {"roleArchetype": "full_stack_product_engineering"}}
+
+    updated, debug = apply_archetype_project_pruning_guard(
+        narrative,
+        _resume_with_many_projects(),
+        tailor_context,
+        _project_section_scores(),
+    )
+
+    assert debug["projectBudget"] == 3
+    assert updated["keepProjects"] == [10, 9, 17]
+    assert updated["dropProjects"] == [12]

@@ -368,14 +368,18 @@ def _detail_items_from_patch(
             conceptual.append(f"{term}: related evidence includes {_join_human(evidence)}.")
     if conceptual:
         groups.append({"title": "Related evidence", "items": conceptual[:3]})
-    if unsupported_exact:
+    unsupported_review_terms = _dedupe_keep_order(
+        list(unsupported_exact or []) + list(gaps or []) + _strategy_items(js, "gapSignals", limit=6),
+        limit=6,
+    )
+    if unsupported_review_terms:
         groups.append(
             {
                 "title": "Not directly evidenced",
                 "items": [
                     "I did not claim "
-                    + _join_human(_display_terms(_dedupe_keep_order(unsupported_exact, limit=5)))
-                    + " because those exact tools or platforms were not in the resume."
+                    + _join_human(_display_terms(unsupported_review_terms))
+                    + " because I could not verify that exact experience in the resume."
                 ],
             }
         )
@@ -391,9 +395,9 @@ def _detail_items_from_patch(
         )
 
     review = []
-    claim_rules = _strategy_items(js, "claimRules", limit=2)
+    claim_rules = _strategy_long_items(js, "claimRules", limit=3, item_limit=220)
     for rule in claim_rules:
-        review.append(rule)
+        review.append(_friendly_claim_rule(rule))
     if gaps:
         review.append("Some JD terms were not directly evidenced: " + _join_human(gaps[:4]) + ".")
     if flags.get("suspicious_protected_skill_removals"):
@@ -403,7 +407,7 @@ def _detail_items_from_patch(
     if flags.get("filler_phrase_hits"):
         review.append("Some generic phrasing may still be worth tightening.")
     if review:
-        groups.append({"title": "Worth checking", "items": review[:4]})
+        groups.append({"title": "Before you send", "items": review[:5]})
 
     return groups
 
@@ -461,6 +465,41 @@ def _strategy_items(job_strategy, key, limit=5):
     if not isinstance(job_strategy, dict):
         return []
     return _dedupe_keep_order(job_strategy.get(key) or [], limit=limit)
+
+
+def _strategy_long_items(job_strategy, key, limit=5, item_limit=180):
+    if not isinstance(job_strategy, dict):
+        return []
+    out = []
+    seen = set()
+    for item in job_strategy.get(key) or []:
+        text = _clean_text(item, limit=item_limit)
+        if not text:
+            continue
+        marker = text.lower()
+        if marker in seen:
+            continue
+        seen.add(marker)
+        out.append(text)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _friendly_claim_rule(rule):
+    text = _clean_text(rule, limit=180)
+    lower = text.lower()
+    prefix = "do not claim unsupported terms directly:"
+    if lower.startswith(prefix):
+        terms = text[len(prefix) :].strip(" .")
+        if terms:
+            return f"I treated {terms} as review items, not resume claims, because I could not verify them in the resume."
+    prefix = "exact tools/platforms stay as review gaps unless resume evidence exists:"
+    if lower.startswith(prefix):
+        terms = text[len(prefix) :].strip(" .")
+        if terms:
+            return f"Related evidence can support the broader story, but not exact ownership of {terms}."
+    return text
 
 
 def _changed_sections_from_patch(patch):

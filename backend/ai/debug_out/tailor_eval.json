@@ -9,13 +9,9 @@
       "strict_truth": true
     },
     "expected": {
-      "lane": "technical",
       "persona": "technical_engineering",
       "roleArchetype": "full_stack_product_engineering",
-      "fitMode": [
-        "direct",
-        "adjacent"
-      ],
+      "fitMode": "direct",
       "prioritySignals": [
         "React",
         "backend APIs",
@@ -50,8 +46,8 @@
         ]
       },
       "maybeKeep": {
-        "projects": [],
-        "experience": []
+        "experience": [],
+        "projects": []
       },
       "shouldDrop": {
         "experience": [
@@ -121,7 +117,100 @@
         "customer-facing growth",
         "revenue-adjacent impact",
         "sales"
-      ]
+      ],
+      "lane": "technical",
+      "lengthMode": "one_page",
+      "jobStrategy": {
+        "lane": "technical",
+        "persona": "technical_engineering",
+        "roleArchetype": "full_stack_product_engineering",
+        "fitMode": "direct",
+        "lengthMode": "one_page",
+        "readerGoal": "Show end-to-end product engineering with Python/Django or FastAPI backends, React UI, APIs, databases, deployment, and product judgment.",
+        "proofStyle": [
+          "full-stack product delivery",
+          "Python/Django backend work",
+          "React UI",
+          "REST APIs",
+          "database-backed apps",
+          "production-minded delivery",
+          "systems and APIs",
+          "stack evidence",
+          "shipped projects",
+          "architecture",
+          "production impact",
+          "metrics"
+        ],
+        "keepPriorities": [
+          "professional engineering experience",
+          "full-stack product projects",
+          "backend/frontend integration",
+          "database and API evidence",
+          "technical experience",
+          "high-fit engineering projects",
+          "evidenced stack terms",
+          "measurable outcomes"
+        ],
+        "trimPriorities": [
+          "service rows",
+          "ML-only projects when product value is weak",
+          "design-only project details",
+          "service rows unless communication matters",
+          "unsupported tools",
+          "off-lane projects"
+        ],
+        "claimRules": [
+          "Do not claim TypeScript, on-call, CI/CD, GraphQL, microservices, or production....",
+          "Do not claim tools, platforms, or production scope unless the resume proves the..."
+        ],
+        "skillPreserve": [
+          "Python",
+          "Django",
+          "FastAPI",
+          "React",
+          "PostgreSQL",
+          "SQL",
+          "JavaScript",
+          "AWS EC2",
+          "REST API Design",
+          "Node.js",
+          "MongoDB",
+          "MySQL"
+        ],
+        "skillDeprioritize": [
+          "service skills",
+          "computer vision",
+          "generic data science"
+        ],
+        "summaryGuardrails": [
+          "Do not make this data/AI-first.",
+          "Avoid frontend-only or AI/ML-first positioning."
+        ],
+        "sectionBudget": {
+          "experience": 2,
+          "projects": 3,
+          "skillsGroups": 3,
+          "advisory": true
+        },
+        "supportedSignals": [
+          "React",
+          "PostgreSQL",
+          "AWS",
+          "REST APIs",
+          "deployment",
+          "security",
+          "architecture"
+        ],
+        "gapSignals": [
+          "CI/CD",
+          "GraphQL",
+          "microservices",
+          ".NET",
+          "SOAP",
+          "DynamoDB",
+          "SQLServer"
+        ]
+      }
     },
     "previousRun": {
       "score": 6,
@@ -146,12 +235,7 @@
         "BitGo and Taylor.io rewrites were too light."
       ],
       "biggestConcern": "The system selected decent rows despite the wrong strategy, but the wrong strategy poisoned the summary, skills, and Tailor Assist explanation.",
-      "failureTags": [
-        "wrong_strategy_lane",
-        "tailor_assist_misaligned",
-        "skill_trim_wrong",
-        "rewrite_too_light"
-      ]
+      "failureTags": []
     }
   },
   {
@@ -164,13 +248,9 @@
       "strict_truth": true
     },
     "expected": {
-      "lane": "data_ai",
       "persona": "data_ai",
-      "roleArchetype": "data_ai_analytics_lead_stretch",
-      "fitMode": [
-        "adjacent",
-        "stretch"
-      ],
+      "roleArchetype": "data_ai_analytics_ownership_stretch",
+      "fitMode": "adjacent",
       "prioritySignals": [
         "SQL",
         "data analytics",
@@ -308,7 +388,93 @@
         "revenue-adjacent impact",
         "hospitality",
         "formal lead ownership"
-      ]
+      ],
+      "lane": "data_ai",
+      "lengthMode": "one_page",
+      "jobStrategy": {
+        "lane": "data_ai",
+        "persona": "data_ai",
+        "roleArchetype": "data_ai_analytics_ownership_stretch",
+        "fitMode": "adjacent",
+        "lengthMode": "one_page",
+        "readerGoal": "Frame data, analytics, reporting, dashboards, and AI workflow ownership while staying cautious about lead-level or domain-specific claims.",
+        "proofStyle": [
+          "SQL and analytics",
+          "dashboards and reporting",
+          "data repositories",
+          "automation",
+          "AI workflow improvement",
+          "executive-facing insights",
+          "Python and SQL",
+          "pipelines",
+          "data modeling",
+          "analytics",
+          "AI/ML workflows"
+        ],
+        "keepPriorities": [
+          "data workflow projects",
+          "dashboard/reporting evidence",
+          "AI/API workflow evidence",
+          "measurable analytics rows",
+          "data-heavy projects",
+          "pipeline or ETL evidence",
+          "Python/SQL rows",
+          "AI/API evidence when supported"
+        ],
+        "trimPriorities": [
+          "service roles",
+          "unrelated frontend-only work",
+          "unsupported healthcare or lead ownership",
+          "generic frontend-only rows",
+          "service rows unless communication matters",
+          "unsupported cloud or AI tools"
+        ],
+        "claimRules": [
+          "Do not claim healthcare data, Claude, Excel, or true lead-level ownership unles...",
+          "Unsupported exact AI, cloud, or data platforms belong in cautions, not resume c..."
+        ],
+        "skillPreserve": [
+          "SQL",
+          "PostgreSQL",
+          "Django",
+          "AWS EC2",
+          "ETL Pipelines",
+          "Data Pipelines",
+          "AI-Driven Workflows",
+          "REST API Design"
+        ],
+        "skillDeprioritize": [
+          "hospitality/service skills",
+          "visual-design-only skills"
+        ],
+        "summaryGuardrails": [
+          "Use ownership language cautiously for lead roles.",
+          "Avoid unsupported healthcare or executive authority claims."
+        ],
+        "sectionBudget": {
+          "experience": 2,
+          "projects": 3,
+          "skillsGroups": 3,
+          "advisory": true
+        },
+        "supportedSignals": [
+          "SQL",
+          "data analytics",
+          "reporting",
+          "dashboards",
+          "AI workflow improvement"
+        ],
+        "gapSignals": [
+          "Claude",
+          "healthcare data",
+          "Excel",
+          "EMR systems",
+          "billing systems",
+          "CRM systems",
+          "accounting systems",
+          "true lead-level ownership"
+        ]
+      }
     },
     "previousRun": {
       "score": 5,
@@ -353,12 +519,9 @@
       "strict_truth": true
     },
     "expected": {
-      "lane": "customer_service",
-      "persona": "hospitality_customer_service",
-      "roleArchetype": "restaurant_host_guest_service",
-      "fitMode": [
-        "direct"
-      ],
+      "persona": "sales_growth",
+      "roleArchetype": "hospitality_customer_service",
+      "fitMode": "direct",
       "prioritySignals": [
         "host experience",
         "restaurant experience",
@@ -494,7 +657,90 @@
         "product interest",
         "projects proving fit",
         "software experience as the main story"
-      ]
+      ],
+      "lane": "hospitality",
+      "lengthMode": "one_page",
+      "jobStrategy": {
+        "lane": "hospitality",
+        "persona": "sales_growth",
+        "roleArchetype": "hospitality_customer_service",
+        "fitMode": "direct",
+        "lengthMode": "one_page",
+        "readerGoal": "Show direct hospitality fit through guest communication, phone etiquette, teamwork, pace, professionalism, and service reliability.",
+        "proofStyle": [
+          "guest communication",
+          "hospitality service",
+          "phone etiquette",
+          "team coordination",
+          "fast-paced reliability",
+          "customer communication",
+          "people-facing work",
+          "revenue-adjacent metrics",
+          "relationship handling",
+          "domain-relevant product interest"
+        ],
+        "keepPriorities": [
+          "host/server experience",
+          "guest-facing communication",
+          "restaurant teamwork",
+          "availability and professionalism evidence",
+          "customer-facing roles",
+          "sales or revenue evidence",
+          "interpersonal proof",
+          "one relevant product/software project"
+        ],
+        "trimPriorities": [
+          "software projects",
+          "technical frameworks",
+          "product/project explanations",
+          "deep technical projects",
+          "unsupported sales ownership",
+          "non-role technical stacks"
+        ],
+        "claimRules": [
+          "Do not treat software projects as proof for a host or hospitality role unless e...",
+          "Do not call the candidate a sales professional unless formal sales or outreach...."
+        ],
+        "skillPreserve": [
+          "Customer Service",
+          "Communication",
+          "Teamwork",
+          "Problem Solving",
+          "Reliability",
+          "Hospitality"
+        ],
+        "skillDeprioritize": [
+          "Python",
+          "SQL",
+          "React",
+          "APIs",
+          "ML",
+          "data pipelines"
+        ],
+        "summaryGuardrails": [
+          "Avoid dynamic/proven filler.",
+          "Keep the summary hospitality/service focused."
+        ],
+        "sectionBudget": {
+          "experience": 2,
+          "projects": 1,
+          "skillsGroups": 3,
+          "advisory": true
+        },
+        "supportedSignals": [
+          "host experience",
+          "restaurant experience",
+          "customer service",
+          "hospitality",
+          "guest communication"
+        ],
+        "gapSignals": [
+          "fine dining experience",
+          "phone etiquette if not directly evidenced",
+          "standing for long periods if not directly evidenced",
+          "formal hostess title if only host/expo is shown"
+        ]
+      }
     },
     "previousRun": {
       "score": 6,
@@ -540,12 +786,9 @@
       "strict_truth": true
     },
     "expected": {
-      "lane": "engineering",
-      "persona": "engineering_product_development",
+      "persona": "general_adjacent",
       "roleArchetype": "engineering_product_development_stretch",
-      "fitMode": [
-        "stretch"
-      ],
+      "fitMode": "stretch",
       "prioritySignals": [
         "product development lifecycle",
         "testing and validation",
@@ -696,7 +939,89 @@
         "software product interest as the main story",
         "backend services as the main fit",
         "HVAC experience as proven"
-      ]
+      ],
+      "lane": "engineering_product",
+      "lengthMode": "one_page",
+      "jobStrategy": {
+        "lane": "engineering_product",
+        "persona": "general_adjacent",
+        "roleArchetype": "engineering_product_development_stretch",
+        "fitMode": "stretch",
+        "lengthMode": "one_page",
+        "readerGoal": "Use engineering problem-solving, testing mindset, documentation, and cross-functional collaboration as a cautious bridge into physical product development.",
+        "proofStyle": [
+          "engineering problem-solving",
+          "testing/debugging mindset",
+          "documentation",
+          "product iteration",
+          "cross-functional collaboration",
+          "direct evidence first",
+          "transferable proof",
+          "measurable outcomes",
+          "claim caution"
+        ],
+        "keepPriorities": [
+          "testing or benchmarking evidence",
+          "engineering coursework",
+          "cross-functional technical work",
+          "documentation/process evidence",
+          "strongest supported rows",
+          "transferable evidence",
+          "role-adjacent metrics"
+        ],
+        "trimPriorities": [
+          "software architecture depth",
+          "sales/customer-growth framing",
+          "unsupported mechanical/HVAC claims",
+          "unsupported title claims",
+          "off-lane rows",
+          "keyword-only overlap"
+        ],
+        "claimRules": [
+          "Do not claim HVAC, CAD, thermodynamics, airflow, manufacturing, or lab testing....",
+          "Do not treat weak keyword overlap as direct experience."
+        ],
+        "skillPreserve": [
+          "Engineering",
+          "Testing",
+          "Documentation",
+          "Python",
+          "Data Pipelines",
+          "TensorFlow Lite"
+        ],
+        "skillDeprioritize": [
+          "sales skills",
+          "deep web stack details",
+          "unsupported mechanical tools"
+        ],
+        "summaryGuardrails": [
+          "Do not write a full-stack/backend/data-pipeline summary.",
+          "Make the stretch clear and honest."
+        ],
+        "sectionBudget": {
+          "experience": 2,
+          "projects": 3,
+          "skillsGroups": 3,
+          "advisory": true
+        },
+        "supportedSignals": [
+          "engineering problem-solving",
+          "testing mindset",
+          "technical documentation",
+          "cross-functional collaboration",
+          "product iteration"
+        ],
+        "gapSignals": [
+          "HVAC",
+          "airflow",
+          "residential HVAC products",
+          "CAD",
+          "thermodynamics",
+          "manufacturing",
+          "BOMs",
+          "ECNs"
+        ]
+      }
     },
     "previousRun": {
       "score": 4,
@@ -742,12 +1067,9 @@
       "strict_truth": true
     },
     "expected": {
-      "lane": "ops_analysis",
-      "persona": "functional_analyst_bridge",
-      "roleArchetype": "business_systems_analysis_stretch",
-      "fitMode": [
-        "stretch"
-      ],
+      "persona": "operations_admin",
+      "roleArchetype": "functional_analyst_bridge",
+      "fitMode": "stretch",
       "prioritySignals": [
         "requirements gathering",
         "business process analysis",
@@ -897,7 +1219,94 @@
         "Azure DevOps as proven",
         "BPM tools as proven",
         "the strongest overlap was user"
-      ]
+      ],
+      "lane": "business_analysis",
+      "lengthMode": "one_page",
+      "jobStrategy": {
+        "lane": "business_analysis",
+        "persona": "operations_admin",
+        "roleArchetype": "functional_analyst_bridge",
+        "fitMode": "stretch",
+        "lengthMode": "one_page",
+        "readerGoal": "Bridge software-building evidence into requirements, process, documentation, testing, and stakeholder-facing systems analysis without claiming senior BA credentials.",
+        "proofStyle": [
+          "requirements translation",
+          "stakeholder communication",
+          "process improvement",
+          "documentation",
+          "testing/UAT",
+          "technical workflows",
+          "coordination",
+          "compliance",
+          "metrics and reporting",
+          "workflow optimization",
+          "fast-paced execution"
+        ],
+        "keepPriorities": [
+          "stakeholder/process evidence",
+          "user-facing workflow projects",
+          "technical documentation or structured data projects",
+          "communication rows when useful",
+          "coordination evidence",
+          "compliance or reporting rows",
+          "metrics work",
+          "process/workflow examples"
+        ],
+        "trimPriorities": [
+          "deep frontend polish",
+          "ML/framework depth",
+          "unsupported BA certifications or enterprise tooling",
+          "deep stack details",
+          "unsupported scheduling/resource ownership",
+          "low-fit projects"
+        ],
+        "claimRules": [
+          "Do not claim 5-10 years of BA experience, CBAP/PMI, BPM tools, Azure DevOps, or...",
+          "Use workflow and reporting language only where the resume supports the underlyi..."
+        ],
+        "skillPreserve": [
+          "Requirements Gathering",
+          "Technical Documentation",
+          "Process Improvement",
+          "User Stories",
+          "Stakeholder Communication",
+          "Testing/UAT",
+          "SQL",
+          "REST APIs"
+        ],
+        "skillDeprioritize": [
+          "React polish",
+          "ML frameworks",
+          "computer vision",
+          "restaurant/service skills"
+        ],
+        "summaryGuardrails": [
+          "Do not call the candidate a senior certified business analyst.",
+          "Position as a technical builder with adjacent process experience."
+        ],
+        "sectionBudget": {
+          "experience": 2,
+          "projects": 3,
+          "skillsGroups": 3,
+          "advisory": true
+        },
+        "supportedSignals": [
+          "requirements translation",
+          "stakeholder communication",
+          "process improvement",
+          "documentation",
+          "technical workflows"
+        ],
+        "gapSignals": [
+          "10 years of business analysis experience",
+          "5 years of Agile Business Analyst experience",
+          "CBAP",
+          "PMI-PBA",
+          "PMI-ACP",
+          "Azure DevOps",
+          "BPM tools"
+        ]
+      }
     },
     "previousRun": {
       "score": 6,
@@ -945,12 +1354,9 @@
       "strict_truth": true
     },
     "expected": {
-      "lane": "technical",
       "persona": "technical_engineering",
-      "roleArchetype": "full_stack_product_engineer",
-      "fitMode": [
-        "direct"
-      ],
+      "roleArchetype": "full_stack_product_engineering",
+      "fitMode": "direct",
       "prioritySignals": [
         "Python",
         "Django",
@@ -1092,7 +1498,97 @@
         "customer-facing growth",
         "revenue-adjacent impact",
         "AI-native as a resume claim"
-      ]
+      ],
+      "lane": "technical",
+      "lengthMode": "one_page",
+      "jobStrategy": {
+        "lane": "technical",
+        "persona": "technical_engineering",
+        "roleArchetype": "full_stack_product_engineering",
+        "fitMode": "direct",
+        "lengthMode": "one_page",
+        "readerGoal": "Show end-to-end product engineering with Python/Django or FastAPI backends, React UI, APIs, databases, deployment, and product judgment.",
+        "proofStyle": [
+          "full-stack product delivery",
+          "Python/Django backend work",
+          "React UI",
+          "REST APIs",
+          "database-backed apps",
+          "production-minded delivery",
+          "systems and APIs",
+          "stack evidence",
+          "shipped projects",
+          "architecture",
+          "production impact",
+          "metrics"
+        ],
+        "keepPriorities": [
+          "professional engineering experience",
+          "full-stack product projects",
+          "backend/frontend integration",
+          "database and API evidence",
+          "technical experience",
+          "high-fit engineering projects",
+          "evidenced stack terms",
+          "measurable outcomes"
+        ],
+        "trimPriorities": [
+          "service rows",
+          "ML-only projects when product value is weak",
+          "design-only project details",
+          "service rows unless communication matters",
+          "unsupported tools",
+          "off-lane projects"
+        ],
+        "claimRules": [
+          "Do not claim TypeScript, on-call, CI/CD, GraphQL, microservices, or production....",
+          "Do not claim tools, platforms, or production scope unless the resume proves the..."
+        ],
+        "skillPreserve": [
+          "Python",
+          "Django",
+          "FastAPI",
+          "React",
+          "PostgreSQL",
+          "SQL",
+          "JavaScript",
+          "AWS EC2",
+          "REST API Design",
+          "Node.js",
+          "MongoDB",
+          "MySQL"
+        ],
+        "skillDeprioritize": [
+          "service skills",
+          "computer vision",
+          "generic data science"
+        ],
+        "summaryGuardrails": [
+          "Do not make this data/AI-first.",
+          "Avoid frontend-only or AI/ML-first positioning."
+        ],
+        "sectionBudget": {
+          "experience": 2,
+          "projects": 3,
+          "skillsGroups": 3,
+          "advisory": true
+        },
+        "supportedSignals": [
+          "Python",
+          "Django",
+          "React",
+          "full-stack engineering",
+          "APIs",
+          "product mindset",
+          "deployment"
+        ],
+        "gapSignals": [
+          "TypeScript",
+          "formal system design ownership",
+          "production deployment ownership",
+          "well-tested code if not directly evidenced"
+        ]
+      }
     },
     "previousRun": {
       "score": 4,
@@ -1142,12 +1638,9 @@
       "strict_truth": true
     },
     "expected": {
-      "lane": "sales_growth",
-      "persona": "financial_customer_education",
-      "roleArchetype": "financial_services_representative_transferable",
-      "fitMode": [
-        "adjacent"
-      ],
+      "persona": "sales_growth",
+      "roleArchetype": "financial_customer_education",
+      "fitMode": "adjacent",
       "prioritySignals": [
         "customer communication",
         "trust-building",
@@ -1286,7 +1779,90 @@
         "deep software projects as core proof",
         "formal financial representative experience",
         "proven sales expertise"
-      ]
+      ],
+      "lane": "sales_customer",
+      "lengthMode": "one_page",
+      "jobStrategy": {
+        "lane": "sales_customer",
+        "persona": "sales_growth",
+        "roleArchetype": "financial_customer_education",
+        "fitMode": "adjacent",
+        "lengthMode": "one_page",
+        "readerGoal": "Frame customer-facing communication, trust-building, finance interest, coachability, and service reliability for financial education or representative work.",
+        "proofStyle": [
+          "customer communication",
+          "trust-building",
+          "finance interest",
+          "coachability",
+          "service reliability",
+          "people-facing work",
+          "revenue-adjacent metrics",
+          "relationship handling",
+          "domain-relevant product interest"
+        ],
+        "keepPriorities": [
+          "service/customer-facing roles",
+          "finance-adjacent evidence",
+          "communication rows",
+          "training/learning readiness",
+          "customer-facing roles",
+          "sales or revenue evidence",
+          "interpersonal proof",
+          "one relevant product/software project"
+        ],
+        "trimPriorities": [
+          "deep technical finance projects",
+          "software engineer positioning",
+          "unsupported representative ownership",
+          "deep technical projects",
+          "unsupported sales ownership",
+          "non-role technical stacks"
+        ],
+        "claimRules": [
+          "Do not write the summary as a full-stack engineer applying to finance.",
+          "Do not claim proven representative or advisory experience unless evidenced.",
+          "Do not call the candidate a sales professional unless formal sales or outreach...."
+        ],
+        "skillPreserve": [
+          "Communication",
+          "Customer Service",
+          "Relationship Building",
+          "Finance",
+          "Problem Solving",
+          "Reliability"
+        ],
+        "skillDeprioritize": [
+          "Python",
+          "SQL",
+          "React",
+          "APIs",
+          "ML",
+          "data pipelines"
+        ],
+        "summaryGuardrails": [
+          "Sound customer-facing and finance-interested, not like a technical finance engi..."
+        ],
+        "sectionBudget": {
+          "experience": 2,
+          "projects": 1,
+          "skillsGroups": 3,
+          "advisory": true
+        },
+        "supportedSignals": [
+          "customer communication",
+          "trust-building",
+          "finance interest",
+          "coachable",
+          "people-facing experience"
+        ],
+        "gapSignals": [
+          "licensed financial representative",
+          "financial advising experience",
+          "formal sales experience",
+          "insurance sales",
+          "securities sales"
+        ]
+      }
     },
     "previousRun": {
       "score": 3,
@@ -1332,12 +1908,9 @@
       "strict_truth": true
     },
     "expected": {
-      "lane": "data_ai",
-      "persona": "ai_backend_engineering",
-      "roleArchetype": "llm_backend_integration",
-      "fitMode": [
-        "adjacent"
-      ],
+      "persona": "data_ai",
+      "roleArchetype": "ai_backend_integration",
+      "fitMode": "adjacent",
       "prioritySignals": [
         "Python",
         "OpenAI",
@@ -1481,7 +2054,93 @@
         "Amazon Bedrock as proven",
         "CI/CD as proven if unsupported",
         "sales or customer service"
-      ]
+      ],
+      "lane": "technical_ai",
+      "lengthMode": "one_page",
+      "jobStrategy": {
+        "lane": "technical_ai",
+        "persona": "data_ai",
+        "roleArchetype": "ai_backend_integration",
+        "fitMode": "adjacent",
+        "lengthMode": "one_page",
+        "readerGoal": "Show Python backend, OpenAI/LLM integration, API workflows, and cloud-adjacent deployment without claiming unsupported AI platforms.",
+        "proofStyle": [
+          "Python backend services",
+          "OpenAI or LLM integration",
+          "API integrations",
+          "cloud-adjacent deployment",
+          "automation workflows",
+          "Python and SQL",
+          "pipelines",
+          "data modeling",
+          "analytics",
+          "AI/ML workflows",
+          "automation"
+        ],
+        "keepPriorities": [
+          "OpenAI/API evidence",
+          "Python backend services",
+          "API integration rows",
+          "automation or workflow projects",
+          "data-heavy projects",
+          "pipeline or ETL evidence",
+          "Python/SQL rows",
+          "AI/API evidence when supported"
+        ],
+        "trimPriorities": [
+          "service rows",
+          "unrelated frontend-only projects",
+          "unsupported exact AI platforms",
+          "generic frontend-only rows",
+          "service rows unless communication matters",
+          "unsupported cloud or AI tools"
+        ],
+        "claimRules": [
+          "Do not claim Dialogflow, Google CES, Amazon Bedrock, GCP, Azure, or CI/CD unles...",
+          "Unsupported exact AI, cloud, or data platforms belong in cautions, not resume c..."
+        ],
+        "skillPreserve": [
+          "AWS EC2",
+          "REST API Design",
+          "Automation Systems",
+          "ETL Pipelines",
+          "OpenAI API",
+          "Python",
+          "FastAPI",
+          "Django"
+        ],
+        "skillDeprioritize": [
+          "hospitality/service skills",
+          "unrelated design-only skills"
+        ],
+        "summaryGuardrails": [
+          "Do not write a generic AI expert summary.",
+          "Name only AI/cloud tools the resume proves."
+        ],
+        "sectionBudget": {
+          "experience": 2,
+          "projects": 3,
+          "skillsGroups": 3,
+          "advisory": true
+        },
+        "supportedSignals": [
+          "Python",
+          "OpenAI",
+          "LLM integration",
+          "backend services",
+          "REST APIs",
+          "workflow automation"
+        ],
+        "gapSignals": [
+          "Dialogflow",
+          "Google CES",
+          "Google Cloud Platform",
+          "Amazon Bedrock",
+          "Azure",
+          "CI/CD",
+          "formal conversational AI platform experience"
+        ]
+      }
     },
     "previousRun": {
       "score": 6,

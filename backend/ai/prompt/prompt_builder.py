@@ -1174,10 +1174,11 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
         "persona": job_strategy.get("persona"),
         "roleArchetype": job_strategy.get("roleArchetype"),
         "preserve": job_strategy.get("skillPreserve") or [],
+        "reframeTargets": job_strategy.get("skillReframeTargets") or [],
         "deprioritize": job_strategy.get("skillDeprioritize") or [],
         "summaryGuardrails": job_strategy.get("summaryGuardrails") or [],
         "claimRules": job_strategy.get("claimRules") or [],
-        "note": "Preserve/deprioritize only existing resume skills; never add unsupported skills from this policy.",
+        "note": "preserve is for existing hard skills/tools that should survive when present; reframeTargets are flexible Focus Areas-style wording targets that still require resume support.",
     }
     budget = pass_b_bundle["deletionBudget"]
     budget_line = (
@@ -1204,7 +1205,7 @@ def build_pass_b_user(payload, tailorContext, relevantJDLines, narrativeBrief, f
             "**Preserve first:** output **one row per surviving `skillsRows` id** by default. **Semi-hit** rows (resume-evidenced, not JD-top) ⇒ **keep**, order later. **Lead** flows from JD + **`skillsStrategy`** — **not** survivor filters.",
             "Return **`edits.skills`**; optional **`_debugOmitted`** if you omit any id.",
             "Use **`skillCategoryPolicy`** to separate stable tool buckets from flexible positioning buckets. Stable buckets mostly keep their labels; flexible buckets may be renamed or reframed when the JD and resume evidence support it.",
-            "Use **`jobStrategySkills`** as the strategy contract: keep existing skills that match `preserve` when resume evidence supports them, demote `deprioritize` before deleting preserved rows, and never add unsupported skills from this policy.",
+            "Use **`jobStrategySkills`** as the strategy contract: keep existing hard skills/tools that match `preserve`, use `reframeTargets` only for flexible Focus Areas-style wording when resume evidence supports it, demote `deprioritize` before deleting preserved rows, and never invent unsupported hard tools.",
             "",
             "### Fit checklist (category labels vs JD—not per-skill names)",
             json.dumps(fitSignals, ensure_ascii=False, indent=2),
