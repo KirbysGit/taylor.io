@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "rubricVersion": 2,
+  "rubricVersion": 3,
   "scoreWeights": {
     "strategy": 25,
     "selection": 30,
@@ -9,12 +9,12 @@
     "tailorAssist": 15,
     "summaryTone": 5
   },
-  "caseId": "primerica_financial_services_representative",
-  "role": "Financial Services Representative",
-  "company": "Primerica",
-  "scoredAtUtc": "2026-05-26T03:48:30.106103+00:00",
-  "totalScore": 77.17,
-  "grade": "usable",
+  "caseId": "lennox_product_development_engineer",
+  "role": "Product Development Engineer",
+  "company": "Lennox Industries",
+  "scoredAtUtc": "2026-05-26T18:42:10.160364+00:00",
+  "totalScore": 86.0,
+  "grade": "strong",
   "sections": {
     "strategy": {
       "score": 25.0,
@@ -22,22 +22,22 @@
       "checks": [
         {
           "name": "lane",
-          "expected": "sales_customer",
-          "actual": "sales_customer",
+          "expected": "engineering_product",
+          "actual": "engineering_product",
           "passed": true,
           "points": 8.0
         },
         {
           "name": "persona",
-          "expected": "sales_growth",
-          "actual": "sales_growth",
+          "expected": "general_adjacent",
+          "actual": "general_adjacent",
           "passed": true,
           "points": 7.0
         },
         {
           "name": "roleArchetype",
-          "expected": "financial_customer_education",
-          "actual": "financial_customer_education",
+          "expected": "engineering_product_development_stretch",
+          "actual": "engineering_product_development_stretch",
           "passed": true,
           "points": 10.0
         }
@@ -50,421 +50,794 @@
       "checks": [
         {
           "name": "mustKeep",
-          "item": "Bar Louie Server",
+          "item": "BitGo Software Engineering Intern",
           "passed": true,
           "points": 9.0
         },
         {
           "name": "mustKeep",
-          "item": "Hawkers Host / Expo",
+          "item": "ShelfVision - Dense Shelf Object Detection",
           "passed": true,
           "points": 9.0
         },
         {
           "name": "shouldDrop",
+          "item": "Hawkers Host / Expo",
+          "passed": true,
+          "points": 3.0
+        },
+        {
+          "name": "shouldDrop",
           "item": "Taylor.io – Resume Builder & Parser",
           "passed": true,
-          "points": 2.4
-        },
-        {
-          "name": "shouldDrop",
-          "item": "SecureScape – Smart Security System",
-          "passed": true,
-          "points": 2.4
-        },
-        {
-          "name": "shouldDrop",
-          "item": "ShelfVision - Dense Shelf Object Detection",
-          "passed": true,
-          "points": 2.4
+          "points": 3.0
         },
         {
           "name": "shouldDrop",
           "item": "Tizirsso Racing – Portfolio & Sponsorship Website",
           "passed": true,
-          "points": 2.4
+          "points": 3.0
         },
         {
           "name": "shouldDrop",
           "item": "SentimentTrader - Real-Time Stock Sentiment Pipeline",
           "passed": true,
-          "points": 2.4
+          "points": 3.0
         }
       ],
       "issues": []
     },
     "skills": {
-      "score": 9.0,
+      "score": 13.86,
       "max": 15,
       "checks": [
         {
           "name": "skillsToPreserve",
-          "item": "Customer Service",
+          "item": "Python",
           "passed": true,
-          "points": 1.0
-        },
-        {
-          "name": "skillsToPreserve",
-          "item": "Communication",
-          "passed": true,
-          "points": 1.0
-        },
-        {
-          "name": "skillsToPreserve",
-          "item": "Relationship Building",
-          "passed": true,
-          "points": 1.0
+          "points": 1.14
         },
         {
           "name": "skillsToPreserve",
           "item": "Problem Solving",
           "passed": true,
-          "points": 1.0
+          "points": 1.14
         },
         {
           "name": "skillsToPreserve",
-          "item": "Teamwork",
+          "item": "Data Pipelines",
+          "passed": true,
+          "points": 1.14
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "TensorFlow Lite",
+          "passed": true,
+          "points": 1.14
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Backend Development",
+          "passed": true,
+          "points": 1.14
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "Automation Systems",
+          "passed": true,
+          "points": 1.14
+        },
+        {
+          "name": "skillsToPreserve",
+          "item": "SQL",
           "passed": false,
           "points": 0.0
         },
         {
-          "name": "skillsToPreserve",
-          "item": "Client Interaction",
-          "passed": false,
-          "points": 0.0
-        },
-        {
-          "name": "skillsToPreserve",
-          "item": "Organization",
-          "passed": false,
-          "points": 0.0
-        },
-        {
-          "name": "skillsToPreserve",
-          "item": "Financial Interest",
-          "passed": false,
-          "points": 0.0
-        },
-        {
-          "name": "skillsToPreserve",
-          "item": "Product Education",
-          "passed": false,
-          "points": 0.0
-        },
-        {
-          "name": "skillsToPreserve",
-          "item": "Sales Support",
-          "passed": false,
-          "points": 0.0
+          "name": "skillsToSuggestOrReframe",
+          "item": "Technical Documentation",
+          "passed": true,
+          "points": 4.0
         },
         {
           "name": "skillsToDeprioritize",
-          "item": "Python",
+          "item": "Customer Service",
           "passed": true,
-          "points": 0.56
+          "points": 0.38
+        },
+        {
+          "name": "skillsToDeprioritize",
+          "item": "Hospitality",
+          "passed": true,
+          "points": 0.38
         },
         {
           "name": "skillsToDeprioritize",
           "item": "React",
           "passed": true,
-          "points": 0.56
+          "points": 0.38
         },
         {
           "name": "skillsToDeprioritize",
           "item": "Django",
           "passed": true,
-          "points": 0.56
-        },
-        {
-          "name": "skillsToDeprioritize",
-          "item": "PostgreSQL",
-          "passed": true,
-          "points": 0.56
+          "points": 0.38
         },
         {
           "name": "skillsToDeprioritize",
           "item": "REST API Design",
           "passed": true,
-          "points": 0.56
+          "points": 0.38
         },
         {
           "name": "skillsToDeprioritize",
           "item": "AI-Driven Workflows",
           "passed": true,
-          "points": 0.56
+          "points": 0.38
         },
         {
           "name": "skillsToDeprioritize",
-          "item": "Data Pipelines",
+          "item": "PyTorch",
           "passed": true,
-          "points": 0.56
+          "points": 0.38
         },
         {
           "name": "skillsToDeprioritize",
-          "item": "Machine Learning",
+          "item": "Finance",
           "passed": true,
-          "points": 0.56
-        },
-        {
-          "name": "skillsToDeprioritize",
-          "item": "Backend Development",
-          "passed": true,
-          "points": 0.56
+          "points": 0.38
         }
       ],
       "issues": [
-        "Preserve skill not surfaced: Teamwork.",
-        "Preserve skill not surfaced: Client Interaction.",
-        "Preserve skill not surfaced: Organization.",
-        "Preserve skill not surfaced: Financial Interest.",
-        "Preserve skill not surfaced: Product Education.",
-        "Preserve skill not surfaced: Sales Support."
+        "Preserve skill not surfaced: SQL."
       ]
     },
     "warningsClaims": {
-      "score": 3.0,
+      "score": 5.47,
       "max": 10,
       "checks": [
         {
           "name": "unsupportedWarningsSurfaced",
-          "item": "licensed financial representative",
+          "item": "HVAC",
+          "passed": true,
+          "points": 0.41
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "airflow",
+          "passed": true,
+          "points": 0.41
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "residential HVAC products",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "unsupportedWarningsSurfaced",
-          "item": "financial advising experience",
+          "item": "CAD",
+          "passed": true,
+          "points": 0.41
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "thermodynamics",
+          "passed": true,
+          "points": 0.41
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "heat transfer",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "unsupportedWarningsSurfaced",
-          "item": "debt counseling experience",
+          "item": "refrigeration systems",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "unsupportedWarningsSurfaced",
-          "item": "formal sales experience",
+          "item": "combustion processes",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "unsupportedWarningsSurfaced",
-          "item": "insurance sales",
+          "item": "manufacturing",
+          "passed": true,
+          "points": 0.41
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "BOMs",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "unsupportedWarningsSurfaced",
-          "item": "securities sales",
+          "item": "ECNs",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "unsupportedWarningsSurfaced",
-          "item": "proven financial services experience",
+          "item": "DOE",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "AHRI",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "UL",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "ETL",
+          "passed": true,
+          "points": 0.41
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "CSA",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "unsupportedWarningsSurfaced",
+          "item": "ANSI",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "unsupportedWarningsNotClaimed",
-          "item": "licensed financial representative",
+          "item": "HVAC",
           "passed": true,
-          "points": 0.43
+          "points": 0.18
         },
         {
           "name": "unsupportedWarningsNotClaimed",
-          "item": "financial advising experience",
+          "item": "airflow",
           "passed": true,
-          "points": 0.43
+          "points": 0.18
         },
         {
           "name": "unsupportedWarningsNotClaimed",
-          "item": "debt counseling experience",
+          "item": "residential HVAC products",
           "passed": true,
-          "points": 0.43
+          "points": 0.18
         },
         {
           "name": "unsupportedWarningsNotClaimed",
-          "item": "formal sales experience",
+          "item": "CAD",
           "passed": true,
-          "points": 0.43
+          "points": 0.18
         },
         {
           "name": "unsupportedWarningsNotClaimed",
-          "item": "insurance sales",
+          "item": "thermodynamics",
           "passed": true,
-          "points": 0.43
+          "points": 0.18
         },
         {
           "name": "unsupportedWarningsNotClaimed",
-          "item": "securities sales",
+          "item": "heat transfer",
           "passed": true,
-          "points": 0.43
+          "points": 0.18
         },
         {
           "name": "unsupportedWarningsNotClaimed",
-          "item": "proven financial services experience",
+          "item": "refrigeration systems",
           "passed": true,
-          "points": 0.43
+          "points": 0.18
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "combustion processes",
+          "passed": true,
+          "points": 0.18
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "manufacturing",
+          "passed": true,
+          "points": 0.18
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "BOMs",
+          "passed": true,
+          "points": 0.18
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "ECNs",
+          "passed": true,
+          "points": 0.18
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "DOE",
+          "passed": true,
+          "points": 0.18
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "AHRI",
+          "passed": true,
+          "points": 0.18
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "UL",
+          "passed": true,
+          "points": 0.18
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "ETL",
+          "passed": true,
+          "points": 0.18
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "CSA",
+          "passed": true,
+          "points": 0.18
+        },
+        {
+          "name": "unsupportedWarningsNotClaimed",
+          "item": "ANSI",
+          "passed": true,
+          "points": 0.18
         }
       ],
       "issues": [
-        "Unsupported warning not surfaced: licensed financial representative.",
-        "Unsupported warning not surfaced: financial advising experience.",
-        "Unsupported warning not surfaced: debt counseling experience.",
-        "Unsupported warning not surfaced: formal sales experience.",
-        "Unsupported warning not surfaced: insurance sales.",
-        "Unsupported warning not surfaced: securities sales.",
-        "Unsupported warning not surfaced: proven financial services experience."
+        "Unsupported warning not surfaced: residential HVAC products.",
+        "Unsupported warning not surfaced: heat transfer.",
+        "Unsupported warning not surfaced: refrigeration systems.",
+        "Unsupported warning not surfaced: combustion processes.",
+        "Unsupported warning not surfaced: BOMs.",
+        "Unsupported warning not surfaced: ECNs.",
+        "Unsupported warning not surfaced: DOE.",
+        "Unsupported warning not surfaced: AHRI.",
+        "Unsupported warning not surfaced: UL.",
+        "Unsupported warning not surfaced: CSA.",
+        "Unsupported warning not surfaced: ANSI."
       ]
     },
     "tailorAssist": {
-      "score": 6.0,
+      "score": 7.29,
       "max": 15,
       "checks": [
         {
           "name": "tailorAssistShouldMention",
-          "item": "customer-facing service experience",
+          "item": "engineering product development stretch",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "tailorAssistShouldMention",
-          "item": "communication and trust-building",
+          "item": "testing and validation",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "tailorAssistShouldMention",
-          "item": "interest in financial wellness",
+          "item": "troubleshooting",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "tailorAssistShouldMention",
-          "item": "coachable fit for paid training",
+          "item": "technical documentation",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "tailorAssistShouldMention",
-          "item": "finance-adjacent evidence from BitGo or Centi if used",
+          "item": "cross-functional collaboration",
+          "passed": true,
+          "points": 1.29
+        },
+        {
+          "name": "tailorAssistShouldMention",
+          "item": "analytical problem solving",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "tailorAssistShouldMention",
-          "item": "why technical projects were trimmed",
+          "item": "unsupported HVAC/CAD/thermal systems claims",
           "passed": false,
           "points": 0.0
         },
         {
           "name": "tailorAssistShouldNotMention",
-          "item": "full-stack engineering",
+          "item": "sales",
           "passed": true,
           "points": 1.0
         },
         {
           "name": "tailorAssistShouldNotMention",
-          "item": "technical finance as the main story",
+          "item": "customer-facing growth",
           "passed": true,
           "points": 1.0
         },
         {
           "name": "tailorAssistShouldNotMention",
-          "item": "Bar Louie and Hawkers as weaker signals",
+          "item": "revenue-adjacent impact",
           "passed": true,
           "points": 1.0
         },
         {
           "name": "tailorAssistShouldNotMention",
-          "item": "deep software projects as core proof",
+          "item": "software product interest as the main story",
           "passed": true,
           "points": 1.0
         },
         {
           "name": "tailorAssistShouldNotMention",
-          "item": "formal financial representative experience",
+          "item": "backend services as the main fit",
           "passed": true,
           "points": 1.0
         },
         {
           "name": "tailorAssistShouldNotMention",
-          "item": "proven sales expertise",
+          "item": "HVAC experience as proven",
           "passed": true,
           "points": 1.0
         }
       ],
       "issues": [
-        "Tailor Assist missing expected idea: customer-facing service experience.",
-        "Tailor Assist missing expected idea: communication and trust-building.",
-        "Tailor Assist missing expected idea: interest in financial wellness.",
-        "Tailor Assist missing expected idea: coachable fit for paid training.",
-        "Tailor Assist missing expected idea: finance-adjacent evidence from BitGo or Centi if used.",
-        "Tailor Assist missing expected idea: why technical projects were trimmed."
+        "Tailor Assist missing expected idea: engineering product development stretch.",
+        "Tailor Assist missing expected idea: testing and validation.",
+        "Tailor Assist missing expected idea: troubleshooting.",
+        "Tailor Assist missing expected idea: technical documentation.",
+        "Tailor Assist missing expected idea: analytical problem solving.",
+        "Tailor Assist missing expected idea: unsupported HVAC/CAD/thermal systems claims."
       ]
     },
     "summaryTone": {
-      "score": 4.17,
+      "score": 4.38,
       "max": 5,
       "checks": [
         {
           "name": "avoidPhrases",
-          "item": "full-stack engineer with a focus on financial services",
+          "item": "customer-facing growth",
           "passed": true,
-          "points": 0.83
-        },
-        {
-          "name": "avoidPhrases",
-          "item": "proven financial services experience",
-          "passed": true,
-          "points": 0.83
-        },
-        {
-          "name": "avoidPhrases",
-          "item": "dynamic professional",
-          "passed": true,
-          "points": 0.83
-        },
-        {
-          "name": "avoidPhrases",
-          "item": "sales professional",
-          "passed": false,
-          "points": 0.0
-        },
-        {
-          "name": "avoidPhrases",
-          "item": "financial advisor",
-          "passed": true,
-          "points": 0.83
+          "points": 0.62
         },
         {
           "name": "avoidPhrases",
           "item": "revenue-adjacent impact",
           "passed": true,
-          "points": 0.83
+          "points": 0.62
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "full-stack engineer",
+          "passed": true,
+          "points": 0.62
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "scalable data pipelines",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "REST APIs",
+          "passed": true,
+          "points": 0.62
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "proven HVAC experience",
+          "passed": true,
+          "points": 0.62
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "dynamic professional",
+          "passed": true,
+          "points": 0.62
+        },
+        {
+          "name": "avoidPhrases",
+          "item": "enhancing",
+          "passed": true,
+          "points": 0.62
         }
       ],
       "issues": [
-        "Avoid phrase appears in available text: sales professional."
+        "Avoid phrase appears in available text: scalable data pipelines."
+      ]
+    }
+  },
+  "diagnostics": {
+    "extraction": {
+      "score": 11.37,
+      "max": 20,
+      "checks": [
+        {
+          "name": "priorityShouldInclude",
+          "item": "HVAC",
+          "passed": true,
+          "points": 0.38
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "airflow",
+          "passed": true,
+          "points": 0.38
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "testing",
+          "passed": true,
+          "points": 0.38
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "validation",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "compliance",
+          "passed": true,
+          "points": 0.38
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "manufacturing",
+          "passed": true,
+          "points": 0.38
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "product lifecycle",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "troubleshooting",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "root cause analysis",
+          "passed": true,
+          "points": 0.38
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "engineering documentation",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "CAD",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "thermodynamics",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "priorityShouldInclude",
+          "item": "heat transfer",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "priorityShouldExclude",
+          "item": "product",
+          "passed": true,
+          "points": 0.8
+        },
+        {
+          "name": "priorityShouldExclude",
+          "item": "development",
+          "passed": true,
+          "points": 0.8
+        },
+        {
+          "name": "priorityShouldExclude",
+          "item": "engineering",
+          "passed": true,
+          "points": 0.8
+        },
+        {
+          "name": "priorityShouldExclude",
+          "item": "activities",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "priorityShouldExclude",
+          "item": "residential",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "contextTerms",
+          "item": "Lennox",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "contextTerms",
+          "item": "Carrollton",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "contextTerms",
+          "item": "salary",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "contextTerms",
+          "item": "benefits",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "contextTerms",
+          "item": "company culture",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "contextTerms",
+          "item": "residential HVAC",
+          "passed": true,
+          "points": 0.67
+        },
+        {
+          "name": "unsupportedExactTools",
+          "item": "CAD",
+          "passed": true,
+          "points": 0.44
+        },
+        {
+          "name": "unsupportedExactTools",
+          "item": "DOE",
+          "passed": true,
+          "points": 0.44
+        },
+        {
+          "name": "unsupportedExactTools",
+          "item": "AHRI",
+          "passed": true,
+          "points": 0.44
+        },
+        {
+          "name": "unsupportedExactTools",
+          "item": "UL",
+          "passed": true,
+          "points": 0.44
+        },
+        {
+          "name": "unsupportedExactTools",
+          "item": "ETL",
+          "passed": true,
+          "points": 0.44
+        },
+        {
+          "name": "unsupportedExactTools",
+          "item": "CSA",
+          "passed": true,
+          "points": 0.44
+        },
+        {
+          "name": "unsupportedExactTools",
+          "item": "ANSI",
+          "passed": true,
+          "points": 0.44
+        },
+        {
+          "name": "unsupportedExactTools",
+          "item": "BOMs",
+          "passed": true,
+          "points": 0.44
+        },
+        {
+          "name": "unsupportedExactTools",
+          "item": "ECNs",
+          "passed": true,
+          "points": 0.44
+        },
+        {
+          "name": "genericSuppressed",
+          "item": "product",
+          "passed": true,
+          "points": 0.5
+        },
+        {
+          "name": "genericSuppressed",
+          "item": "development",
+          "passed": true,
+          "points": 0.5
+        },
+        {
+          "name": "genericSuppressed",
+          "item": "engineering",
+          "passed": true,
+          "points": 0.5
+        },
+        {
+          "name": "genericSuppressed",
+          "item": "design",
+          "passed": true,
+          "points": 0.5
+        },
+        {
+          "name": "genericSuppressed",
+          "item": "activities",
+          "passed": false,
+          "points": 0.0
+        },
+        {
+          "name": "genericSuppressed",
+          "item": "products",
+          "passed": false,
+          "points": 0.0
+        }
+      ],
+      "issues": [
+        "Extraction missing expected priority term: validation.",
+        "Extraction missing expected priority term: product lifecycle.",
+        "Extraction missing expected priority term: troubleshooting.",
+        "Extraction missing expected priority term: engineering documentation.",
+        "Extraction missing expected priority term: CAD.",
+        "Extraction missing expected priority term: thermodynamics.",
+        "Extraction missing expected priority term: heat transfer.",
+        "Extraction promoted excluded/noise term: activities.",
+        "Extraction promoted excluded/noise term: residential.",
+        "Extraction did not treat context term as context/non-priority: Lennox.",
+        "Extraction did not treat context term as context/non-priority: Carrollton.",
+        "Extraction did not treat context term as context/non-priority: salary.",
+        "Extraction did not treat context term as context/non-priority: benefits.",
+        "Extraction did not treat context term as context/non-priority: company culture.",
+        "Extraction promoted generic fragment instead of suppressing it: activities.",
+        "Extraction promoted generic fragment instead of suppressing it: products."
       ]
     }
   },
   "topIssues": [
-    "Preserve skill not surfaced: Teamwork.",
-    "Preserve skill not surfaced: Client Interaction.",
-    "Preserve skill not surfaced: Organization.",
-    "Preserve skill not surfaced: Financial Interest.",
-    "Preserve skill not surfaced: Product Education.",
-    "Preserve skill not surfaced: Sales Support.",
-    "Unsupported warning not surfaced: licensed financial representative.",
-    "Unsupported warning not surfaced: financial advising experience.",
-    "Unsupported warning not surfaced: debt counseling experience.",
-    "Unsupported warning not surfaced: formal sales experience.",
-    "Unsupported warning not surfaced: insurance sales.",
-    "Unsupported warning not surfaced: securities sales."
+    "Preserve skill not surfaced: SQL.",
+    "Unsupported warning not surfaced: residential HVAC products.",
+    "Unsupported warning not surfaced: heat transfer.",
+    "Unsupported warning not surfaced: refrigeration systems.",
+    "Unsupported warning not surfaced: combustion processes.",
+    "Unsupported warning not surfaced: BOMs.",
+    "Unsupported warning not surfaced: ECNs.",
+    "Unsupported warning not surfaced: DOE.",
+    "Unsupported warning not surfaced: AHRI.",
+    "Unsupported warning not surfaced: UL.",
+    "Unsupported warning not surfaced: CSA.",
+    "Unsupported warning not surfaced: ANSI."
   ],
   "humanReview": {
     "humanScore_0_to_10": null,
@@ -473,6 +846,7 @@
   },
   "inputs": {
     "fixture": "backend\\ai\\debug_out\\tailor_eval.json",
-    "review": "backend\\ai\\debug_out\\tailor_06_review.json"
+    "review": "backend\\ai\\debug_out\\tailor_06_review.json",
+    "extraction": "backend\\ai\\debug_out\\tailor_00_extraction.json"
   }
 }

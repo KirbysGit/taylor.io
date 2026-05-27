@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from .resume_patch_shared import asDict, listById, summaryInner
 
 
@@ -209,6 +211,7 @@ def _detail_items_from_patch(
     target_label,
     updated_resume_data=None,
     job_strategy=None,
+    not_directly_evidenced_terms=None,
 ):
     nb = narrative_brief if isinstance(narrative_brief, dict) else {}
     js = job_strategy if isinstance(job_strategy, dict) else {}
@@ -369,8 +372,11 @@ def _detail_items_from_patch(
     if conceptual:
         groups.append({"title": "Related evidence", "items": conceptual[:3]})
     unsupported_review_terms = _dedupe_keep_order(
-        list(unsupported_exact or []) + list(gaps or []) + _strategy_items(js, "gapSignals", limit=6),
-        limit=6,
+        list(unsupported_exact or [])
+        + list(not_directly_evidenced_terms or [])
+        + list(gaps or [])
+        + _strategy_items(js, "gapSignals", limit=8),
+        limit=8,
     )
     if unsupported_review_terms:
         groups.append(
@@ -486,6 +492,91 @@ def _strategy_long_items(job_strategy, key, limit=5, item_limit=180):
     return out
 
 
+def _claim_rule_terms(rule):
+    text = _clean_text(rule, limit=240)
+    lower = text.lower()
+    term_part = ""
+    for prefix in (
+        "do not claim unsupported terms directly:",
+        "exact tools/platforms stay as review gaps unless resume evidence exists:",
+    ):
+        if lower.startswith(prefix):
+            term_part = text[len(prefix) :]
+            break
+    if not term_part and lower.startswith("do not claim "):
+        term_part = text[len("do not claim ") :]
+    if term_part:
+        term_part = re.split(
+            r"\bunless\b|\bwithout\b|\bwhere\b|\bwhen\b|\bbecause\b",
+            term_part,
+            maxsplit=1,
+            flags=re.IGNORECASE,
+        )[0]
+    if not term_part:
+        return []
+    out = []
+    normalized = re.sub(r"\s+(?:or|and)\s+", ", ", term_part.strip(" ."), flags=re.IGNORECASE)
+    for chunk in normalized.split(","):
+        cleaned = chunk.strip(" .")
+        cleaned = re.sub(r"^(?:or|and)\s+", "", cleaned, flags=re.IGNORECASE).strip()
+        cleaned = re.sub(r"^(?:unsupported|exact)\s+", "", cleaned, flags=re.IGNORECASE).strip()
+        if cleaned:
+            out.append(cleaned)
+    return _dedupe_keep_order(out, limit=8)
+
+
+def _term_from_signal_item(item):
+    if isinstance(item, dict):
+        return str(item.get("term") or item.get("keyword") or item.get("phrase") or "").strip()
+    return str(item or "").strip()
+
+
+def _not_directly_evidenced_terms(tailor_context, job_strategy, narrative_brief, gaps, limit=8):
+    tc = tailor_context if isinstance(tailor_context, dict) else {}
+    js = job_strategy if isinstance(job_strategy, dict) else {}
+    nb = narrative_brief if isinstance(narrative_brief, dict) else {}
+    alignment = tc.get("alignmentContext") if isinstance(tc.get("alignmentContext"), dict) else {}
+    terms = []
+    terms.extend(gaps or [])
+    terms.extend(alignment.get("unsupportedTerms") or [])
+    terms.extend(js.get("gapSignals") or [])
+    for item in (alignment.get("gapSupport") or []) + (nb.get("gapSupport") or []):
+        if isinstance(item, dict) and item.get("term") and str(item.get("status") or "").lower() != "conceptual":
+            terms.append(item.get("term"))
+    for item in tc.get("unsupportedExactKeywords") or []:
+        if isinstance(item, dict) and item.get("term"):
+            terms.append(item.get("term"))
+    for item in tc.get("unsupportedClaimSensitiveRequirements") or []:
+        if isinstance(item, dict) and item.get("term"):
+            terms.append(item.get("term"))
+    for rule in js.get("claimRules") or []:
+        terms.extend(_claim_rule_terms(rule))
+    resume_hits = {str(x or "").strip().lower() for x in (tc.get("resumeHits") or []) if str(x or "").strip()}
+    for item in (
+        list(tc.get("keywords") or [])
+        + list(tc.get("rawKeywords") or [])
+        + list(tc.get("priorityKeywords") or [])
+        + list(tc.get("suppressedKeywords") or [])
+    ):
+        if not isinstance(item, dict) or not item.get("term"):
+            continue
+        signal_type = str(item.get("signalType") or item.get("signal_type") or "").strip().lower()
+        term = str(item.get("term") or "").strip()
+        if signal_type in ("tool_platform", "context") and term.lower() not in resume_hits:
+            terms.append(term)
+    for item in alignment.get("jdSignalIntent") or []:
+        if not isinstance(item, dict):
+            continue
+        term = _term_from_signal_item(item)
+        signal_type = str(item.get("signalType") or item.get("signal_type") or "").strip().lower()
+        status = str(item.get("status") or item.get("supportLevel") or "").strip().lower()
+        if term and term.lower() not in resume_hits and (
+            signal_type in ("tool_platform", "context") or status in ("unsupported_exact", "context_only")
+        ):
+            terms.append(term)
+    return _dedupe_keep_order(terms, limit=limit)
+
+
 def _friendly_claim_rule(rule):
     text = _clean_text(rule, limit=180)
     lower = text.lower()
@@ -499,6 +590,14 @@ def _friendly_claim_rule(rule):
         terms = text[len(prefix) :].strip(" .")
         if terms:
             return f"Related evidence can support the broader story, but not exact ownership of {terms}."
+    if lower.startswith("do not claim "):
+        terms = _claim_rule_terms(text)
+        if terms:
+            return (
+                "I did not claim "
+                + _join_human(_display_terms(terms[:4]))
+                + " because that exact evidence was not in the resume."
+            )
     return text
 
 
@@ -776,6 +875,13 @@ def build_tailor_explanation(
         chips.append(_chip("Review rewrite strength", "caution"))
 
     paragraph = " ".join(s for s in sentences if s).strip()
+    not_directly_evidenced_terms = _not_directly_evidenced_terms(
+        tailor_context,
+        job_strategy,
+        nb,
+        gaps,
+        limit=12,
+    )
     return {
         "paragraph": paragraph,
         "chips": chips[:10],
@@ -787,6 +893,7 @@ def build_tailor_explanation(
             target_label,
             updated_resume_data=updated_resume_data,
             job_strategy=job_strategy,
+            not_directly_evidenced_terms=not_directly_evidenced_terms,
         ),
         "evidence": {
             "alignmentMode": alignment_mode,
@@ -798,6 +905,7 @@ def build_tailor_explanation(
             "matchedTerms": matched_terms,
             "jobPriorityTerms": jd_terms,
             "resumeGaps": gaps,
+            "notDirectlyEvidencedTerms": not_directly_evidenced_terms,
             "changedSections": changed_sections,
             "mainMoves": moves,
             "layoutChanged": _layout_phrase(patch),

@@ -699,6 +699,58 @@ def _archetype_project_budget(job_strategy):
     return budgets.get(archetype)
 
 
+def _text_has_any(text, terms):
+    return any(re.search(r"(?<![a-z0-9])" + re.escape(term) + r"(?![a-z0-9])", text) for term in terms)
+
+
+def _archetype_project_bonus(row, job_strategy):
+    if not isinstance(row, dict) or not isinstance(job_strategy, dict):
+        return {"bonus": 0.0, "reasons": []}
+    archetype = str(job_strategy.get("roleArchetype") or "").strip().lower()
+    text = _row_text(row)
+    if not text:
+        return {"bonus": 0.0, "reasons": []}
+
+    bonus = 0.0
+    reasons = []
+
+    def add(points, label, terms):
+        nonlocal bonus
+        if _text_has_any(text, terms):
+            bonus += points
+            reasons.append(label)
+
+    if archetype == "full_stack_product_engineering":
+        category_terms = {
+            "frontend/ui": {"react", "next.js", "frontend", "interface", "dashboard", "ui"},
+            "backend/api": {"backend", "api", "apis", "rest", "fastapi", "django", "services"},
+            "database": {"postgresql", "postgres", "sql", "mysql", "mongodb", "database", "schema"},
+            "product workflow": {"user", "workflow", "editing", "preview", "account", "auth", "product", "platform"},
+            "ai-native/openai": {"openai", "llm", "ai-powered", "ai-driven", "ai-native", "ai driven", "content generation"},
+        }
+        matched_categories = {
+            label for label, terms in category_terms.items() if _text_has_any(text, terms)
+        }
+        add(1.25, "frontend/ui", category_terms["frontend/ui"])
+        add(1.5, "backend/api", category_terms["backend/api"])
+        add(1.25, "database", category_terms["database"])
+        add(1.25, "product workflow", category_terms["product workflow"])
+        add(1.75, "ai-native/openai", category_terms["ai-native/openai"])
+        if {"frontend/ui", "backend/api", "database", "product workflow"}.issubset(matched_categories):
+            bonus += 2.0
+            reasons.append("full-stack product bundle")
+        if "ai-native/openai" in matched_categories and {"backend/api", "product workflow"}.issubset(matched_categories):
+            bonus += 2.0
+            reasons.append("ai-native product bundle")
+    elif archetype == "ai_backend_integration":
+        add(3.0, "openai/llm", {"openai", "llm", "ai-powered", "ai-driven", "ai-native", "ai driven", "content generation"})
+        add(2.0, "backend/api", {"backend", "api", "apis", "rest", "fastapi", "django", "services"})
+        add(1.25, "python", {"python", "fastapi", "django"})
+        add(1.0, "workflow automation", {"workflow", "automation", "automated", "parsing", "generation"})
+        add(0.5, "database", {"postgresql", "postgres", "sql", "database"})
+    return {"bonus": round(bonus, 3), "reasons": reasons}
+
+
 def apply_archetype_project_pruning_guard(narrative_brief, resume_data, tailor_context, section_details):
     """Apply max project counts implied by the strategy archetype before Pass A sees rows."""
     if not isinstance(narrative_brief, dict) or not isinstance(resume_data, dict):
@@ -721,15 +773,20 @@ def apply_archetype_project_pruning_guard(narrative_brief, resume_data, tailor_c
     existing_visible = [pid for pid in dict.fromkeys(existing_keep + existing_maybe) if pid in valid_ids]
     if not existing_visible:
         existing_visible = [pid for pid in valid_ids if pid not in set(existing_drop)]
-    if len(existing_visible) <= budget and not existing_maybe:
+    if len(existing_visible) <= budget and not existing_maybe and not existing_drop:
         return narrative_brief, None
 
     plan_scores = _project_scores_from_plan(section_details)
+    by_id = {_row_id(row): row for row in projects if isinstance(_row_id(row), int)}
+    bonus_scores = {pid: _archetype_project_bonus(by_id.get(pid), job_strategy) for pid in valid_ids}
     order_index = {pid: idx for idx, pid in enumerate(valid_ids)}
     ranked_ids = sorted(
         valid_ids,
         key=lambda pid: (
-            -(float((plan_scores.get(pid) or {}).get("score") or 0)),
+            -(
+                float((plan_scores.get(pid) or {}).get("score") or 0)
+                + float((bonus_scores.get(pid) or {}).get("bonus") or 0)
+            ),
             -(int((plan_scores.get(pid) or {}).get("hits") or 0)),
             0 if pid in existing_keep else 1,
             order_index.get(pid, 9999),
@@ -791,6 +848,8 @@ def apply_archetype_project_pruning_guard(narrative_brief, resume_data, tailor_c
         "projectScores": {
             str(pid): {
                 **(plan_scores.get(pid) or {"score": 0, "hits": 0, "matchedTerms": []}),
+                "archetypeBonus": (bonus_scores.get(pid) or {}).get("bonus", 0),
+                "archetypeBonusReasons": (bonus_scores.get(pid) or {}).get("reasons", []),
                 "title": titles.get(pid, f"Project {pid}"),
             }
             for pid in valid_ids
@@ -1829,6 +1888,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
     keywords = ext_result["keywords"]
     rawKeywords = ext_result.get("rawKeywords") or keywords
     suppressedKeywords = ext_result.get("suppressedKeywords") or []
+    claimSensitiveRequirements = ext_result.get("claimSensitiveRequirements") or []
     activeDomains = ext_result["activeDomains"]
     relevantJDLines = ext_result["relevantJDLines"]
 
@@ -1842,6 +1902,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
         keywords=keywords,
         rawKeywords=rawKeywords,
         suppressedKeywords=suppressedKeywords,
+        claimSensitiveRequirements=claimSensitiveRequirements,
         resumeData=resumeData,
     )
 
@@ -2030,6 +2091,7 @@ def tailor_resume(JobTailorSuggestRequest: JobTailorSuggestRequest, user_id):
                 "extracted_keywords": keywords,
                 "raw_extracted_keywords": rawKeywords,
                 "suppressed_keywords": suppressedKeywords,
+                "claim_sensitive_requirements": claimSensitiveRequirements,
                 "resume_hits": tailorContext.get("resumeHits"),
                 "resume_gaps": tailorContext.get("resumeGaps"),
                 "alignment_context": tailorContext.get("alignmentContext"),

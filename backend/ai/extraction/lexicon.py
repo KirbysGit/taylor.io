@@ -21,6 +21,7 @@ titleAnchorHints = {
         "hospitality manager",
     },
     "sales": {"account executive", "sales manager", "business development", "account manager"},
+    "hospitality": {"host", "hostess", "server", "restaurant", "hospitality", "fine dining"},
     "marketing": {"marketing manager", "assistant marketing manager", "demand generation", "brand manager", "content manager"},
     "finance": {"financial analyst", "controller", "accounting manager", "treasury"},
     "legal": {"legal counsel", "paralegal", "compliance manager"},
@@ -156,6 +157,7 @@ globalWeakTokens = {
     "management", "metrics", "operations", "ownership", "partners", "passion", "performance", "personal",
     "platform", "product", "professional", "related", "relationship", "relationships", "skills", "software", "strong",
     "system", "systems", "support", "team", "technical", "tools", "training", "understanding", "vision", "web", "workflow",
+    "activities", "products",
     "hands-on",
     "engineering",
 }
@@ -236,6 +238,8 @@ globalPhrases = [
     "business management", "business ownership", "cash flow forecasting", "profit loss statements", "profit and loss statements",
     "organizational turnaround", "operational turnaround", "financially measurable results", "managing teams",
     "face-to-face interaction", "sales presentations", "customer service", "training and development", "sales operations",
+    "guest communication", "guest service", "phone etiquette", "fine dining", "standing for long periods",
+    "restaurant service", "front of house", "reservations",
     "forward deployed software engineer", "forward deployed engineer", "customer-facing engineering", "customer-facing",
     "production environments", "cloud infrastructure", "supply chain", "defense",
     "customer solution delivery", "technical lead",
@@ -896,6 +900,23 @@ domainDicts = {
             "assistant store manager": 3,
         },
         "weakTokens": {"associate"},
+    },
+    "hospitality": {
+        "aliases": {
+            "host", "hostess", "server", "restaurant", "hospitality", "fine dining", "guest",
+            "guests", "guest service", "guest communication", "phone etiquette", "reservations",
+            "front of house", "foh", "dining room", "customer service",
+        },
+        "phrases": [
+            "customer service", "guest communication", "guest service", "phone etiquette", "fine dining",
+            "standing for long periods", "restaurant service", "front of house", "dining room",
+            "reservation management",
+        ],
+        "boostWords": {
+            "host": 3, "hostess": 3, "restaurant": 3, "hospitality": 3, "guest": 2, "guests": 2,
+            "reservations": 3, "dining": 2, "service": 2, "phone": 2, "professionalism": 1,
+        },
+        "weakTokens": set(),
     },
     "brokerage": {
         "aliases": {

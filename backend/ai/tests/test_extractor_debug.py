@@ -9,6 +9,7 @@ if "openai" not in sys.modules:
 
 
 from backend.ai.extraction.extractor import extract_keywords
+from backend.ai.processing.tailor_context import build_tailor_context
 
 
 TECO_STYLE_JD = """
@@ -50,6 +51,38 @@ Key Requirements and Technology Experience:
 Key skills: Python, AI integration and LLM models (Dialog flow, Google CES, Amazon Bedrock, OpenAI, API, JavaScript, Cloud Platform).
 Hands-on experience with cloud platforms (GCP, AWS, or Azure).
 Our client is a leading Healthcare Industry.
+"""
+
+
+LENNOX_PRODUCT_JD = """
+Responsibilities:
+Support the design and development of residential HVAC products including gas furnaces, air handlers, and evaporator coils.
+Participate in laboratory testing and evaluation of HVAC systems for airflow, heating/cooling performance, sound, reliability, safety, and efficiency.
+Learn and apply engineering principles related to thermodynamics, heat transfer, refrigeration systems, and combustion processes.
+"""
+
+
+HOST_JD = """
+Responsibilities:
+Welcome guests in a fine dining restaurant.
+Manage reservations and seating while using strong phone etiquette.
+Must be comfortable standing for long periods.
+"""
+
+
+HEALTHCARE_DATA_JD = """
+Responsibilities:
+Build reporting across EMR systems, billing systems, CRM systems, and accounting systems.
+Integrate healthcare operations data into dashboards.
+"""
+
+
+FULL_STACK_OWNERSHIP_JD = """
+Responsibilities:
+Drive formal system design ownership and production deployment ownership.
+Write well-tested code in Python, Django, React, and TypeScript.
+Requirements:
+1 to 5 years full-stack experience.
 """
 
 
@@ -103,3 +136,54 @@ def test_conversational_ai_extractor_preserves_exact_tools_and_filters_fragments
     assert suppressed["healthcare"]["signalType"] == "context"
     assert result["debug"]["priority_keywords"] == result["keywords"]
     assert result["debug"]["suppressed_terms"]
+
+
+def test_extractor_returns_claim_sensitive_domain_requirements():
+    result = extract_keywords(LENNOX_PRODUCT_JD, "Product Development Engineer", 12, company="Lennox")
+    terms = {item["term"] for item in result["claimSensitiveRequirements"]}
+
+    assert "residential hvac products" in terms
+    assert "heat transfer" in terms
+    assert "refrigeration systems" in terms
+    assert "combustion processes" in terms
+    assert result["debug"]["claim_sensitive_requirements"] == result["claimSensitiveRequirements"]
+
+
+def test_extractor_returns_claim_sensitive_hospitality_requirements():
+    result = extract_keywords(HOST_JD, "Host/Hostess", 12, company="Christy's")
+    terms = {item["term"] for item in result["claimSensitiveRequirements"]}
+
+    assert "fine dining experience" in terms or "fine dining" in terms
+    assert "phone etiquette" in terms
+    assert "standing for long periods" in terms
+    assert "hospitality" in result["activeDomains"]
+
+
+def test_extractor_returns_claim_sensitive_systems_and_seniority_requirements():
+    health = extract_keywords(HEALTHCARE_DATA_JD, "Data & AI Lead", 12, company="Timshel Health")
+    health_terms = {item["term"] for item in health["claimSensitiveRequirements"]}
+
+    assert {"emr systems", "billing systems", "crm systems", "accounting systems"} <= health_terms
+
+    full_stack = extract_keywords(FULL_STACK_OWNERSHIP_JD, "Full Stack Engineer", 12, company="JKB Advisors")
+    full_stack_terms = {item["term"] for item in full_stack["claimSensitiveRequirements"]}
+
+    assert "formal system design ownership" in full_stack_terms
+    assert "production deployment ownership" in full_stack_terms
+    assert "well-tested code" in full_stack_terms
+    assert any("1 to 5 years" in term and "experience" in term for term in full_stack_terms)
+
+
+def test_claim_sensitive_requirements_flow_into_tailor_context_as_warnings_not_keywords():
+    claim_sensitive = [{"term": "fine dining experience", "reason": "hospitality", "signalType": "claim_sensitive_requirement"}]
+    context = build_tailor_context(
+        "Host/Hostess",
+        ["hospitality"],
+        [{"term": "customer service", "signalType": "role_capability"}],
+        {"experience": [], "projects": [], "skills": [], "education": []},
+        claimSensitiveRequirements=claim_sensitive,
+    )
+
+    assert context["claimSensitiveRequirements"] == claim_sensitive
+    assert [item["term"] for item in context["unsupportedClaimSensitiveRequirements"]] == ["fine dining experience"]
+    assert "fine dining experience" not in [item["term"] for item in context["keywords"]]

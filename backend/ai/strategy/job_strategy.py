@@ -40,7 +40,7 @@ def _joined_signal_text(payload: dict, tailor_context: dict, alignment_context: 
         value = payload.get(key) if isinstance(payload, dict) else ""
         if isinstance(value, str):
             parts.append(value)
-    for key in ("keywords", "priorityKeywords", "rawKeywords"):
+    for key in ("keywords", "priorityKeywords", "rawKeywords", "claimSensitiveRequirements"):
         for entry in tailor_context.get(key) or []:
             if isinstance(entry, dict):
                 parts.append(str(entry.get("term") or ""))
@@ -635,6 +635,13 @@ def _unsupported_claim_rules(alignment_context: dict, tailor_context: dict) -> l
     exact = _norm_list(exact, limit=4)
     if exact:
         rules.append("Exact tools/platforms stay as review gaps unless resume evidence exists: " + ", ".join(exact) + ".")
+    claim_sensitive = []
+    for item in tailor_context.get("unsupportedClaimSensitiveRequirements") or []:
+        if isinstance(item, dict):
+            claim_sensitive.append(item.get("term"))
+    claim_sensitive = _norm_list(claim_sensitive, limit=6)
+    if claim_sensitive:
+        rules.append("Do not claim " + ", ".join(claim_sensitive) + " unless directly evidenced.")
     fit_risk = alignment_context.get("fitRisk") if isinstance(alignment_context.get("fitRisk"), dict) else {}
     level = _clean(fit_risk.get("level"), limit=24).lower()
     guidance = _clean(fit_risk.get("claimGuidance"), limit=160)
@@ -667,7 +674,12 @@ def _merge_strategy_defaults(persona_defaults: dict[str, Any], archetype_default
 
 def _strategy_matches(persona: str, tailor_context: dict) -> dict[str, list[str]]:
     hits = _norm_list(tailor_context.get("resumeHits") or [], limit=8)
-    gaps = _norm_list(tailor_context.get("resumeGaps") or [], limit=8)
+    claim_sensitive = [
+        item.get("term")
+        for item in (tailor_context.get("unsupportedClaimSensitiveRequirements") or [])
+        if isinstance(item, dict)
+    ]
+    gaps = _norm_list(list(tailor_context.get("resumeGaps") or []) + claim_sensitive, limit=12)
     return {
         "supportedSignals": hits,
         "gapSignals": gaps,

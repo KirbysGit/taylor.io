@@ -319,15 +319,24 @@ def test_tailor_explanation_surfaces_unsupported_terms_without_promoting_them():
     ctx = _tailor_context()
     ctx["resumeGaps"] = ["Dialogflow"]
     ctx["alignmentContext"] = {"unsupportedTerms": ["Dialogflow"]}
+    ctx["rawKeywords"] = [
+        {"term": "healthcare", "signalType": "context"},
+        {"term": "Google CES", "signalType": "tool_platform"},
+    ]
+    ctx["unsupportedClaimSensitiveRequirements"] = [
+        {"term": "EMR systems", "signalType": "claim_sensitive_requirement"},
+        {"term": "billing systems", "signalType": "claim_sensitive_requirement"},
+    ]
     ctx["jobStrategy"] = {
         "persona": "data_ai",
         "roleArchetype": "ai_backend_integration",
         "readerGoal": "Show Python backend and LLM integration proof.",
         "proofStyle": ["Python backend services", "OpenAI API"],
         "claimRules": [
-            "Exact tools/platforms stay as review gaps unless resume evidence exists: Dialogflow, Google Cloud Platform."
+            "Exact tools/platforms stay as review gaps unless resume evidence exists: Dialogflow, Google Cloud Platform.",
+            "Do not claim production deployment ownership unless directly evidenced.",
         ],
-        "gapSignals": ["Dialogflow", "Google Cloud Platform"],
+        "gapSignals": ["Dialogflow", "Google Cloud Platform", "production deployment ownership"],
     }
     narrative = {
         "gapSupport": [
@@ -354,3 +363,7 @@ def test_tailor_explanation_surfaces_unsupported_terms_without_promoting_them():
     assert "I did not claim Dialogflow" in details
     assert "not exact ownership of Dialogflow" in details
     assert "Company context" in titles
+    assert "production deployment ownership" in explanation["evidence"]["notDirectlyEvidencedTerms"]
+    assert "EMR systems" in explanation["evidence"]["notDirectlyEvidencedTerms"]
+    assert "billing systems" in explanation["evidence"]["notDirectlyEvidencedTerms"]
+    assert "Google CES" in explanation["evidence"]["notDirectlyEvidencedTerms"]

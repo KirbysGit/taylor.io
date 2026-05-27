@@ -76,7 +76,10 @@ def test_review_snapshot_includes_copy_paste_scorecard_and_issue_hints():
             "paragraph": "I focused on customer-facing evidence.",
             "chips": [{"label": "Bridge fit"}],
             "details": [{"title": "What I prioritized", "items": ["Customer communication."]}],
-            "evidence": {"jobPriorityTerms": ["sales"]},
+            "evidence": {
+                "jobPriorityTerms": ["sales"],
+                "notDirectlyEvidencedTerms": ["outreach"],
+            },
         },
         "patchDiff": {
             "experience": [{"id": 7, "removed": True, "before": {"company": "Bar Louie", "title": "Server"}, "after": None}],
@@ -104,5 +107,6 @@ def test_review_snapshot_includes_copy_paste_scorecard_and_issue_hints():
     assert snapshot["humanReview"]["expected"]["role_archetype"] == "sales_growth_outreach"
     assert snapshot["humanReview"]["scores_0_to_2"]["selection"] is None
     assert snapshot["selection"]["removedRows"]["experience"][0]["label"] == "Bar Louie Server"
+    assert snapshot["tailorAssist"]["notDirectlyEvidencedTerms"] == ["outreach"]
     assert snapshot["warningsByCategory"]["rewrite"]
     assert any("selection:" in hint for hint in snapshot["likelyIssueHints"])

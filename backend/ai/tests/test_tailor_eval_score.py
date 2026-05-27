@@ -13,7 +13,9 @@ if "openai" not in sys.modules:
 from backend.ai.evaluation.score_tailor_run import (
     load_eval_case,
     main,
+    score_extraction_diagnostic,
     score_selection,
+    score_skills,
     score_strategy,
     score_tailor_assist,
     score_tailor_run,
@@ -40,11 +42,19 @@ def _case():
                 "projects": [{"id": 20, "label": "SentimentTrader"}],
             },
             "skillsToPreserve": ["REST API Design", "AWS (EC2)"],
+            "skillsToSuggestOrReframe": ["Backend/API Development"],
             "skillsToDeprioritize": ["Customer Service"],
             "unsupportedWarnings": ["GraphQL", "CI/CD"],
             "tailorAssistShouldMention": ["backend APIs", "React"],
             "tailorAssistShouldNotMention": ["customer-facing growth"],
             "summaryTone": {"avoidPhrases": ["dynamic professional"]},
+            "expectedExtraction": {
+                "priorityShouldInclude": ["React", "backend APIs", "GraphQL"],
+                "priorityShouldExclude": ["benefits"],
+                "contextTerms": ["healthcare"],
+                "unsupportedExactTools": ["GraphQL"],
+                "genericSuppressed": ["solutions"],
+            },
         },
     }
 
@@ -57,6 +67,7 @@ def _review():
             "roleArchetype": "full_stack_product_engineering",
             "claimRules": ["Do not claim GraphQL or CI/CD unless evidenced."],
             "skillPreserve": ["REST API Design", "AWS EC2", "React"],
+            "skillReframeTargets": ["Backend/API Development"],
             "supportedSignals": ["React", "backend APIs"],
             "gapSignals": ["GraphQL"],
         },
@@ -86,6 +97,26 @@ def _review():
         },
         "changeReasons": [],
         "quality": {},
+    }
+
+
+def _extraction():
+    return {
+        "priority_keywords": [
+            {"term": "React", "signalType": "tool_platform"},
+            {"term": "backend APIs", "signalType": "role_capability"},
+            {"term": "GraphQL", "signalType": "tool_platform"},
+        ],
+        "top_keywords": [
+            {"term": "React", "signalType": "tool_platform"},
+            {"term": "healthcare", "signalType": "context"},
+        ],
+        "suppressed_terms": [
+            {"term": "solutions", "signalType": "generic_fragment"},
+            {"term": "benefits", "signalType": "noise"},
+        ],
+        "top_known_phrases": [{"term": "backend APIs"}],
+        "top_stack_terms": {"concrete": [{"term": "GraphQL"}], "capability": []},
     }
 
 
@@ -126,11 +157,48 @@ def test_selection_requires_should_drop_rows_to_be_explicitly_dropped():
     assert any("was not explicitly dropped" in issue for issue in section["issues"])
 
 
+def test_skills_score_splits_preserve_reframe_and_deprioritize():
+    section = score_skills(_case(), _review())
+
+    assert section["score"] == 15
+    assert not section["issues"]
+
+
+def test_skills_score_keeps_v2_fixture_compatibility_without_reframe_targets():
+    case = _case()
+    case["expected"].pop("skillsToSuggestOrReframe")
+
+    section = score_skills(case, _review())
+
+    assert section["score"] == 15
+    assert not section["issues"]
+
+
 def test_warnings_score_surfaces_unsupported_terms_and_avoids_claiming_them():
     section = score_warnings(_case(), _review())
 
     assert section["score"] == 10
     assert not section["issues"]
+
+
+def test_extraction_diagnostic_scores_expected_terms_and_suppression():
+    section = score_extraction_diagnostic(_case(), _extraction())
+
+    assert section["score"] == 20
+    assert not section["issues"]
+
+
+def test_extraction_diagnostic_surfaces_missing_priority_terms():
+    extraction = _extraction()
+    extraction["priority_keywords"] = [{"term": "React", "signalType": "tool_platform"}]
+    extraction["top_keywords"] = []
+    extraction["top_known_phrases"] = []
+    extraction["top_stack_terms"] = {"concrete": [], "capability": []}
+
+    section = score_extraction_diagnostic(_case(), extraction)
+
+    assert section["score"] < 20
+    assert any("missing expected priority term" in issue.lower() for issue in section["issues"])
 
 
 def test_tailor_assist_scores_positive_and_negative_language():
@@ -145,8 +213,9 @@ def test_score_tailor_run_returns_total_and_human_review_stub():
 
     assert result["totalScore"] == 100
     assert result["grade"] == "strong"
-    assert result["rubricVersion"] == 2
+    assert result["rubricVersion"] == 3
     assert result["scoreWeights"]["selection"] == 30
+    assert result["diagnostics"]["extraction"]["score"] == 0
     assert result["humanReview"]["humanScore_0_to_10"] is None
 
 
@@ -164,7 +233,8 @@ def test_write_debug_score_writes_latest_and_history():
     assert saved["caseId"] == "demo_full_stack"
     assert history_rows[0]["caseId"] == "demo_full_stack"
     assert history_rows[0]["totalScore"] == 100
-    assert history_rows[0]["rubricVersion"] == 2
+    assert history_rows[0]["rubricVersion"] == 3
+    assert "diagnosticScores" in history_rows[0]
 
 
 def test_cli_smoke_prints_and_saves_score(capsys, monkeypatch):
@@ -174,7 +244,9 @@ def test_cli_smoke_prints_and_saves_score(capsys, monkeypatch):
         fixture = tmp_path / "tailor_eval.json"
         review = tmp_path / "tailor_06_review.json"
         fixture.write_text(json.dumps([_case()]), encoding="utf-8")
+        extraction = tmp_path / "tailor_00_extraction.json"
         review.write_text(json.dumps(_review()), encoding="utf-8")
+        extraction.write_text(json.dumps(_extraction()), encoding="utf-8")
         monkeypatch.chdir(tmp_path)
 
         code = main(
@@ -185,6 +257,8 @@ def test_cli_smoke_prints_and_saves_score(capsys, monkeypatch):
                 str(fixture),
                 "--review",
                 str(review),
+                "--extraction",
+                str(extraction),
                 "--save-run",
                 "unit_test_run",
             ]

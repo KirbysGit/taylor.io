@@ -1,109 +1,678 @@
 {
-  "target_role": "Financial Services Representative",
-  "company": "Primerica",
+  "target_role": "Data Engineer",
+  "company": "Mayzax Solutions",
   "active_domains": [
-    "finance"
+    "data",
+    "engineering"
   ],
   "line_counts": {
-    "included_body": 0,
+    "included_body": 36,
     "downweighted": 0
   },
-  "included_line_samples": [],
+  "included_line_samples": [
+    "company: mayzax solutions",
+    "location: remote (based in usa)",
+    "employment type: full-time",
+    "experience level: entry-level / junior",
+    "work authorization: open to all eligible candidates (opt/cpt/h-1b transfers welcome)",
+    "about mayzax solutions",
+    "mayzax solutions is a fast-growing technology and consulting firm delivering data, cloud, and automation solutions to clients across the u.s. we help organizations turn raw data into powerful insights using modern engineering practices.",
+    "position overview",
+    "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors.",
+    "assist in building and maintaining etl/elt pipelines for data ingestion and transformation.",
+    "write clean and efficient python and sql scripts for data processing.",
+    "support the development of data warehouses and data lakes."
+  ],
   "downweighted_line_samples": [],
   "top_keywords": [
     {
-      "term": "financial",
-      "score": 2.0,
-      "frequency": 1.0,
+      "term": "data",
+      "score": 17.0,
+      "frequency": 16.0,
       "sources": [
+        "bodyToken",
+        "partOfPhrase",
         "titleToken"
       ],
       "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
+      "lineKinds": [
+        "body",
+        "requirement",
+        "role"
+      ],
+      "linePreview": [
+        "mayzax solutions is a fast-growing technology and consulting firm delivering data, cloud, and automation solutions to clients across the u.s. we help organizations turn raw data into powerful insights using modern engineering practices.",
+        "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors."
+      ]
     },
     {
-      "term": "representative",
-      "score": 2.0,
-      "frequency": 1.0,
+      "term": "sql",
+      "score": 10.5,
+      "frequency": 4.0,
       "sources": [
-        "titleToken"
+        "bodyToken",
+        "concreteStack"
       ],
-      "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body",
+        "requirement"
+      ],
+      "linePreview": [
+        "write clean and efficient python and sql scripts for data processing.",
+        "sql"
+      ]
     },
     {
-      "term": "services",
-      "score": 2.0,
+      "term": "git",
+      "score": 10.5,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack",
+        "knownPhrase"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "requirement"
+      ],
+      "linePreview": [
+        "experience with git/github version control."
+      ]
+    },
+    {
+      "term": "google cloud platform",
+      "score": 9.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+      ]
+    },
+    {
+      "term": "amazon web services",
+      "score": 7.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+      ]
+    },
+    {
+      "term": "azure",
+      "score": 7.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+      ]
+    },
+    {
+      "term": "postgresql",
+      "score": 7.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "requirement"
+      ],
+      "linePreview": [
+        "familiarity with databases (mysql, postgresql, sql server)."
+      ]
+    },
+    {
+      "term": "python",
+      "score": 7.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "write clean and efficient python and sql scripts for data processing.",
+        "python"
+      ]
+    },
+    {
+      "term": "kafka",
+      "score": 6.0,
       "frequency": 1.0,
       "sources": [
-        "titleToken"
+        "bodyToken"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "exposure to tools like airflow, dbt, spark, or kafka."
+      ]
+    },
+    {
+      "term": "airflow",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
       ],
       "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "exposure to tools like airflow, dbt, spark, or kafka."
+      ]
+    },
+    {
+      "term": "mysql",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "requirement"
+      ],
+      "linePreview": [
+        "familiarity with databases (mysql, postgresql, sql server)."
+      ]
+    },
+    {
+      "term": "data engineering",
+      "score": 5.0,
+      "frequency": 3.0,
+      "sources": [
+        "knownPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body",
+        "role"
+      ],
+      "linePreview": [
+        "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors.",
+        "bachelor’s degree in computer science, data engineering, it, or a related field."
+      ]
     }
   ],
   "priority_keywords": [
     {
-      "term": "financial",
-      "score": 2.0,
-      "frequency": 1.0,
+      "term": "data",
+      "score": 17.0,
+      "frequency": 16.0,
       "sources": [
+        "bodyToken",
+        "partOfPhrase",
         "titleToken"
       ],
       "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
+      "lineKinds": [
+        "body",
+        "requirement",
+        "role"
+      ],
+      "linePreview": [
+        "mayzax solutions is a fast-growing technology and consulting firm delivering data, cloud, and automation solutions to clients across the u.s. we help organizations turn raw data into powerful insights using modern engineering practices.",
+        "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors."
+      ]
     },
     {
-      "term": "representative",
-      "score": 2.0,
-      "frequency": 1.0,
+      "term": "sql",
+      "score": 10.5,
+      "frequency": 4.0,
       "sources": [
-        "titleToken"
+        "bodyToken",
+        "concreteStack"
       ],
-      "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body",
+        "requirement"
+      ],
+      "linePreview": [
+        "write clean and efficient python and sql scripts for data processing.",
+        "sql"
+      ]
     },
     {
-      "term": "services",
-      "score": 2.0,
+      "term": "git",
+      "score": 10.5,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack",
+        "knownPhrase"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "requirement"
+      ],
+      "linePreview": [
+        "experience with git/github version control."
+      ]
+    },
+    {
+      "term": "google cloud platform",
+      "score": 9.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+      ]
+    },
+    {
+      "term": "amazon web services",
+      "score": 7.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+      ]
+    },
+    {
+      "term": "azure",
+      "score": 7.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+      ]
+    },
+    {
+      "term": "postgresql",
+      "score": 7.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "requirement"
+      ],
+      "linePreview": [
+        "familiarity with databases (mysql, postgresql, sql server)."
+      ]
+    },
+    {
+      "term": "python",
+      "score": 7.0,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "write clean and efficient python and sql scripts for data processing.",
+        "python"
+      ]
+    },
+    {
+      "term": "kafka",
+      "score": 6.0,
       "frequency": 1.0,
       "sources": [
-        "titleToken"
+        "bodyToken"
+      ],
+      "signalType": "tool_platform",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "exposure to tools like airflow, dbt, spark, or kafka."
+      ]
+    },
+    {
+      "term": "airflow",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
       ],
       "signalType": "role_capability",
-      "lineKinds": [],
-      "linePreview": []
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "exposure to tools like airflow, dbt, spark, or kafka."
+      ]
+    },
+    {
+      "term": "mysql",
+      "score": 5.5,
+      "frequency": 2.0,
+      "sources": [
+        "bodyToken",
+        "concreteStack"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "requirement"
+      ],
+      "linePreview": [
+        "familiarity with databases (mysql, postgresql, sql server)."
+      ]
+    },
+    {
+      "term": "data engineering",
+      "score": 5.0,
+      "frequency": 3.0,
+      "sources": [
+        "knownPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body",
+        "role"
+      ],
+      "linePreview": [
+        "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors.",
+        "bachelor’s degree in computer science, data engineering, it, or a related field."
+      ]
     }
   ],
   "suppressed_terms": [],
-  "relevant_jd_lines": [],
-  "line_classification": [],
-  "top_known_phrases": [],
+  "claim_sensitive_requirements": [
+    {
+      "term": "certification support",
+      "reason": "credential/license requirement",
+      "sourceLine": "growth-focused culture with certification support.",
+      "signalType": "claim_sensitive_requirement"
+    }
+  ],
+  "relevant_jd_lines": [
+    "write clean and efficient python and sql scripts for data processing.",
+    "familiarity with databases (mysql, postgresql, sql server).",
+    "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors.",
+    "bachelor’s degree in computer science, data engineering, it, or a related field.",
+    "exposure to tools like airflow, dbt, spark, or kafka.",
+    "internship or academic project related to data engineering or software development.",
+    "mayzax solutions is a fast-growing technology and consulting firm delivering data, cloud, and automation solutions to clients across the u.s. we help organizations turn raw data into powerful insights using modern engineering practices.",
+    "assist in building and maintaining etl/elt pipelines for data ingestion and transformation.",
+    "support the development of data warehouses and data lakes.",
+    "help monitor data workflows and troubleshoot pipeline issues."
+  ],
+  "line_classification": [
+    {
+      "kind": "body",
+      "line": "company: mayzax solutions"
+    },
+    {
+      "kind": "body",
+      "line": "location: remote (based in usa)"
+    },
+    {
+      "kind": "body",
+      "line": "employment type: full-time"
+    },
+    {
+      "kind": "body",
+      "line": "experience level: entry-level / junior"
+    },
+    {
+      "kind": "body",
+      "line": "work authorization: open to all eligible candidates (opt/cpt/h-1b transfers welcome)"
+    },
+    {
+      "kind": "body",
+      "line": "about mayzax solutions"
+    },
+    {
+      "kind": "body",
+      "line": "mayzax solutions is a fast-growing technology and consulting firm delivering data, cloud, and automation solutions to clients across the u.s. we help organizations turn raw data into powerful insights using modern engineering practices."
+    },
+    {
+      "kind": "body",
+      "line": "position overview"
+    },
+    {
+      "kind": "body",
+      "line": "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors."
+    },
+    {
+      "kind": "role",
+      "line": "assist in building and maintaining etl/elt pipelines for data ingestion and transformation."
+    },
+    {
+      "kind": "body",
+      "line": "write clean and efficient python and sql scripts for data processing."
+    },
+    {
+      "kind": "role",
+      "line": "support the development of data warehouses and data lakes."
+    },
+    {
+      "kind": "body",
+      "line": "help monitor data workflows and troubleshoot pipeline issues."
+    },
+    {
+      "kind": "role",
+      "line": "work closely with senior engineers to implement best practices for data quality, governance, and performance."
+    },
+    {
+      "kind": "body",
+      "line": "collaborate with analysts and cross-functional teams to ensure availability of reliable datasets."
+    },
+    {
+      "kind": "body",
+      "line": "document processes, workflows, and system updates."
+    },
+    {
+      "kind": "requirement",
+      "line": "required skills & qualifications"
+    },
+    {
+      "kind": "body",
+      "line": "bachelor’s degree in computer science, data engineering, it, or a related field."
+    },
+    {
+      "kind": "body",
+      "line": "strong foundation in:"
+    },
+    {
+      "kind": "body",
+      "line": "python"
+    }
+  ],
+  "top_known_phrases": [
+    {
+      "term": "data engineering",
+      "count": 3.0
+    },
+    {
+      "term": "cloud platforms",
+      "count": 1.0
+    },
+    {
+      "term": "cross-functional teams",
+      "count": 1.0
+    },
+    {
+      "term": "data ingestion",
+      "count": 1.0
+    },
+    {
+      "term": "data integration",
+      "count": 1.0
+    },
+    {
+      "term": "data quality",
+      "count": 1.0
+    },
+    {
+      "term": "elt pipelines",
+      "count": 1.0
+    },
+    {
+      "term": "version control",
+      "count": 1.0
+    }
+  ],
   "top_stack_terms": {
-    "concrete": [],
+    "concrete": [
+      {
+        "term": "airflow",
+        "count": 1.0
+      },
+      {
+        "term": "amazon web services",
+        "count": 1.0
+      },
+      {
+        "term": "azure",
+        "count": 1.0
+      },
+      {
+        "term": "git",
+        "count": 1.0
+      },
+      {
+        "term": "google cloud platform",
+        "count": 1.0
+      },
+      {
+        "term": "mysql",
+        "count": 1.0
+      },
+      {
+        "term": "postgresql",
+        "count": 1.0
+      },
+      {
+        "term": "spark",
+        "count": 1.0
+      },
+      {
+        "term": "sql",
+        "count": 1.0
+      }
+    ],
     "capability": []
   },
   "top_tokens": {
     "title": [
       {
-        "term": "financial",
+        "term": "data",
         "count": 1.0
       },
       {
-        "term": "representative",
-        "count": 1.0
-      },
-      {
-        "term": "services",
+        "term": "engineer",
         "count": 1.0
       }
     ],
-    "body": [],
+    "body": [
+      {
+        "term": "data",
+        "count": 9.0
+      },
+      {
+        "term": "tools",
+        "count": 4.0
+      },
+      {
+        "term": "modern",
+        "count": 3.0
+      },
+      {
+        "term": "sql",
+        "count": 3.0
+      },
+      {
+        "term": "business intelligence",
+        "count": 2.0
+      },
+      {
+        "term": "cloud",
+        "count": 2.0
+      },
+      {
+        "term": "development",
+        "count": 2.0
+      },
+      {
+        "term": "engineering",
+        "count": 2.0
+      },
+      {
+        "term": "engineers",
+        "count": 2.0
+      },
+      {
+        "term": "entry-level",
+        "count": 2.0
+      },
+      {
+        "term": "etl",
+        "count": 2.0
+      },
+      {
+        "term": "experience",
+        "count": 2.0
+      },
+      {
+        "term": "help",
+        "count": 2.0
+      },
+      {
+        "term": "join",
+        "count": 2.0
+      }
+    ],
     "downweighted": []
   }
 }

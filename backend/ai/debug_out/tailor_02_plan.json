@@ -2,144 +2,305 @@
   "section_details": {
     "sectionScoresRanked": [
       [
+        "skills",
+        15
+      ],
+      [
         "projects",
-        3
+        11
       ],
       [
         "experience",
-        2
+        5
       ],
       [
         "education",
-        0
-      ],
-      [
-        "skills",
-        0
+        1
       ]
     ],
     "rowsPerSectionRanked": {
       "experience": [
         {
           "id": 5,
-          "hits": 2,
-          "score": 6.3,
+          "hits": 5,
+          "score": 45.22,
           "matchedTerms": [
-            "financial",
-            "services"
+            "data",
+            "sql",
+            "amazon web services",
+            "postgresql",
+            "python"
           ]
         }
       ],
       "projects": [
         {
           "id": 9,
-          "hits": 2,
-          "score": 6.3,
+          "hits": 3,
+          "score": 26.9,
           "matchedTerms": [
-            "financial",
-            "services"
+            "data",
+            "sql",
+            "postgresql"
           ]
         },
         {
           "id": 10,
-          "hits": 1,
-          "score": 3.1,
+          "hits": 3,
+          "score": 26.9,
           "matchedTerms": [
-            "services"
+            "data",
+            "sql",
+            "postgresql"
+          ]
+        },
+        {
+          "id": 20,
+          "hits": 3,
+          "score": 26.35,
+          "matchedTerms": [
+            "data",
+            "sql",
+            "python"
+          ]
+        },
+        {
+          "id": 12,
+          "hits": 1,
+          "score": 8.0,
+          "matchedTerms": [
+            "python"
+          ]
+        },
+        {
+          "id": 17,
+          "hits": 1,
+          "score": 8.0,
+          "matchedTerms": [
+            "python"
           ]
         }
       ],
-      "skills": {},
-      "education": []
+      "skills": {
+        "data tools": {
+          "hits": 12,
+          "rows": [
+            {
+              "id": 51,
+              "hits": 3,
+              "matchedTerms": [
+                "data",
+                "sql",
+                "postgresql"
+              ]
+            },
+            {
+              "id": 52,
+              "hits": 3,
+              "matchedTerms": [
+                "data",
+                "sql",
+                "mysql"
+              ]
+            },
+            {
+              "id": 56,
+              "hits": 2,
+              "matchedTerms": [
+                "data",
+                "amazon web services"
+              ]
+            },
+            {
+              "id": 53,
+              "hits": 1,
+              "matchedTerms": [
+                "data"
+              ]
+            },
+            {
+              "id": 54,
+              "hits": 1,
+              "matchedTerms": [
+                "data"
+              ]
+            },
+            {
+              "id": 55,
+              "hits": 1,
+              "matchedTerms": [
+                "data"
+              ]
+            },
+            {
+              "id": 57,
+              "hits": 1,
+              "matchedTerms": [
+                "data"
+              ]
+            }
+          ]
+        },
+        "languages": {
+          "hits": 2,
+          "rows": [
+            {
+              "id": 41,
+              "hits": 1,
+              "matchedTerms": [
+                "python"
+              ]
+            },
+            {
+              "id": 44,
+              "hits": 1,
+              "matchedTerms": [
+                "sql"
+              ]
+            }
+          ]
+        },
+        "focus areas": {
+          "hits": 1,
+          "rows": [
+            {
+              "id": 61,
+              "hits": 1,
+              "matchedTerms": [
+                "data"
+              ]
+            }
+          ]
+        }
+      },
+      "education": [
+        {
+          "id": 3,
+          "hits": 1,
+          "score": 9.2,
+          "matchedTerms": [
+            "data"
+          ]
+        }
+      ]
     },
     "gapsPerSection": {
       "experience": [
-        "representative"
+        "git",
+        "google cloud platform",
+        "azure",
+        "kafka",
+        "airflow",
+        "data engineering"
       ],
       "projects": [
-        "representative"
+        "git",
+        "google cloud platform",
+        "azure",
+        "kafka",
+        "airflow",
+        "data engineering"
       ],
       "skills": [
-        "representative"
+        "git",
+        "google cloud platform",
+        "azure",
+        "kafka",
+        "airflow",
+        "data engineering"
       ],
       "education": [
-        "representative"
+        "git",
+        "google cloud platform",
+        "azure",
+        "kafka",
+        "airflow",
+        "data engineering"
       ]
     }
   },
   "narrative": {
-    "candidateAngle": "Customer-focused professional with a background in financial services and technology, emphasizing relationship building and communication skills.",
+    "candidateAngle": "Entry-level Data Engineer focused on building efficient data pipelines and backend services using Python and SQL.",
     "targetStory": {
-      "roleLane": "financial_customer_education",
-      "readerTakeaway": "Demonstrated ability in customer-facing roles with a focus on financial services, showcasing and relationship-building skills.",
+      "roleLane": "Data Engineer",
+      "readerTakeaway": "Proven experience in building data pipelines and backend services, with strong skills in Python, SQL, and PostgreSQL.",
       "proofExperienceIds": [
-        5,
-        7
+        5
       ],
       "proofProjectIds": [
-        9
+        9,
+        10,
+        20
       ],
       "deEmphasizeExperienceIds": [
+        7,
         8
       ],
       "deEmphasizeProjectIds": [
-        10
+        12,
+        17,
+        18
       ],
       "evidenceThemes": [
-        "customer communication",
-        "trust-building",
-        "finance interest",
-        "service reliability"
+        "data processing",
+        "ETL pipelines",
+        "backend services",
+        "data integration"
       ]
     },
     "primaryStory": [
-      "Experience in financial services through internship at BitGo, focusing on backend services and customer communication.",
-      "Development of a personal finance app (Centi) that enhances user engagement and financial literacy.",
-      "Strong customer service skills demonstrated in roles at Bar Louie and Hawkers, emphasizing communication and coordination."
+      "Experience building and maintaining ETL pipelines and data workflows in Python and SQL",
+      "Proficient in PostgreSQL for data storage and processing",
+      "Hands-on project work with real-time data analytics and financial applications",
+      "Strong foundation in backend development with REST APIs and data integration"
     ],
     "secondaryStory": [
-      "Experience in building user-friendly applications that promote financial education and trust."
+      "Exposure to cloud platforms (AWS) and willingness to learn new tools",
+      "Collaboration with cross-functional teams to ensure data quality and availability"
     ],
-    "summaryGoal": "Highlight customer-facing experience in financial services and technical skills, emphasizing communication and relationship-building in a finance context.",
+    "summaryGoal": "Highlight experience in data engineering through proven projects and internships, emphasizing skills in Python, SQL, and PostgreSQL while aligning with the role's requirements.",
     "summaryDecision": {
-      "action": "keep",
+      "action": "show",
       "confidence": "medium",
-      "reason": "The summary connects the candidate's technical background with customer service experience relevant to the role.",
+      "reason": "The summary can connect the candidate's experience to the role's requirements and highlight relevant skills.",
       "evidence": [
-        "Experience at BitGo in financial services",
-        "Customer service roles at Bar Louie and Hawkers"
+        "Experience with ETL pipelines and data processing",
+        "Proficiency in Python and SQL",
+        "Hands-on project experience with PostgreSQL"
       ]
     },
     "skillsStrategy": [
-      "Categories: Communication, Customer Service, Financial Interest, Relationship Building, Coachability",
-      "Trim last: Technical skills not directly relevant to customer-facing roles."
+      "Lead: Python, SQL, PostgreSQL; prioritize evidenced skills relevant to the role.",
+      "Supporting: FastAPI, AWS, React; keep tools that support the role without being primary.",
+      "Trim last: remove non-relevant frameworks and tools not evidenced in the resume."
     ],
     "categoryStrategy": [],
     "sectionStrategy": {
-      "summary": "Rewrite to emphasize customer-facing and financial service skills",
-      "experience": "Focus on hero experience with strong leads",
-      "projects": "Highlight relevant projects that support financial education",
-      "skills": "Order skills to prioritize customer service and communication.",
+      "summary": "Rewrite to emphasize data engineering skills and relevant experience.",
+      "experience": "Focus on hero experience with clear data engineering responsibilities.",
+      "projects": "Highlight hero projects that showcase data processing and pipeline work.",
+      "skills": "Organize skills to reflect data engineering tools and languages.",
       "education": "Light—credentials frozen; trim highlights only if they sharpen scan."
     },
     "layoutStrategy": [],
     "layoutSectionOrder": [
       "header",
+      "summary",
       "education",
       "experience",
       "projects",
-      "skills",
-      "summary"
+      "skills"
     ],
     "layoutSectionVisibility": {
-      "projects": true,
       "summary": true,
       "skills": true,
       "education": true,
-      "experience": true
+      "experience": true,
+      "projects": true
     },
     "layoutRationale": [
-      "Prioritize sections that showcase customer service and financial experience for the role."
+      "Show summary to connect experience to the role's requirements.",
+      "Maintain order to prioritize sections that highlight relevant experience and skills."
     ],
     "keepExperience": [
       5,
@@ -168,8 +329,9 @@
     "repairProjects": [],
     "maybeProjects": [],
     "selectionRationale": [
-      "Strategy guard kept Host / Expo because financial_customer_education needs people-facing or coordination evidence.",
-      "Archetype pruning kept 1 project(s) for financial_customer_education so the draft stays focused: Centi – Personal Finance App.",
+      "Strategy guard kept Server because sales_growth_outreach needs people-facing or coordination evidence.",
+      "Strategy guard kept Host / Expo because sales_growth_outreach needs people-facing or coordination evidence.",
+      "Archetype pruning kept 1 project(s) for sales_growth_outreach so the draft stays focused: Centi – Personal Finance App.",
       "Archetype pruning moved lower-priority projects out of the visible draft: Taylor.io – Resume Builder & Parser, SecureScape – Smart Security System, ShelfVision - Dense Shelf Object Detection, Tizirsso Racing – Portfolio & Sponsorship Website."
     ],
     "heroProjects": [
@@ -184,15 +346,15 @@
       20
     ],
     "heroExperience": [
-      5,
-      7
+      5
     ],
     "rewriteGoals": [
-      "Land BitGo: Emphasize customer communication and financial service contributions.",
-      "Land Bar Louie: Highlight adaptability and communication in high-pressure environments."
+      "Land BitGo: emphasize backend services and data processing contributions.",
+      "Land Centi: highlight full-stack finance application and ETL processes.",
+      "Land SentimentTrader: focus on real-time data pipeline and analytics."
     ],
     "avoid": [
-      "Do not claim direct experience as a financial representative without evidence."
+      "Do not claim unsupported tools like Git, GCP, Azure, Kafka, or Airflow."
     ],
     "alignmentMode": "direct",
     "alignmentGuidance": "Direct fit: lead with the role title and strongest JD-overlap evidence, while preserving resume-native breadth.",
@@ -202,29 +364,84 @@
         "id": 5,
         "label": "BitGo Software Engineering Intern",
         "terms": [
-          "financial",
-          "services"
+          "data",
+          "sql",
+          "amazon web services",
+          "postgresql",
+          "python"
         ],
-        "score": 6.3
+        "score": 45.22
       },
       {
         "section": "projects",
         "id": 9,
         "label": "Centi – Personal Finance App",
         "terms": [
-          "financial",
-          "services"
+          "data",
+          "sql",
+          "postgresql"
         ],
-        "score": 6.3
+        "score": 26.9
       },
       {
         "section": "projects",
         "id": 10,
         "label": "Taylor.io – Resume Builder & Parser",
         "terms": [
-          "services"
+          "data",
+          "sql",
+          "postgresql"
         ],
-        "score": 3.1
+        "score": 26.9
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "data",
+          "sql",
+          "python"
+        ],
+        "score": 26.35
+      },
+      {
+        "section": "education",
+        "id": 3,
+        "label": "University of Central Florida",
+        "terms": [
+          "data"
+        ],
+        "score": 9.2
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "label": "SecureScape – Smart Security System",
+        "terms": [
+          "python"
+        ],
+        "score": 8.0
+      },
+      {
+        "section": "projects",
+        "id": 17,
+        "label": "ShelfVision - Dense Shelf Object Detection",
+        "terms": [
+          "python"
+        ],
+        "score": 8.0
+      },
+      {
+        "section": "skills",
+        "id": 51,
+        "label": "PostgreSQL",
+        "terms": [
+          "data",
+          "sql",
+          "postgresql"
+        ],
+        "score": 3
       }
     ],
     "transferableEvidence": [
@@ -433,8 +650,11 @@
         "id": 5,
         "label": "BitGo Software Engineering Intern",
         "terms": [
-          "financial",
-          "services"
+          "data",
+          "sql",
+          "amazon web services",
+          "postgresql",
+          "python"
         ],
         "evidenceType": "direct_role_evidence",
         "claimStrength": "direct",
@@ -445,8 +665,9 @@
         "id": 9,
         "label": "Centi – Personal Finance App",
         "terms": [
-          "financial",
-          "services"
+          "data",
+          "sql",
+          "postgresql"
         ],
         "evidenceType": "weak_lexical_overlap",
         "claimStrength": "cautious",
@@ -457,7 +678,68 @@
         "id": 10,
         "label": "Taylor.io – Resume Builder & Parser",
         "terms": [
-          "services"
+          "data",
+          "sql",
+          "postgresql"
+        ],
+        "evidenceType": "weak_lexical_overlap",
+        "claimStrength": "cautious",
+        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
+      },
+      {
+        "section": "projects",
+        "id": 20,
+        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
+        "terms": [
+          "data",
+          "sql",
+          "python"
+        ],
+        "evidenceType": "weak_lexical_overlap",
+        "claimStrength": "cautious",
+        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
+      },
+      {
+        "section": "education",
+        "id": 3,
+        "label": "University of Central Florida",
+        "terms": [
+          "data"
+        ],
+        "evidenceType": "weak_lexical_overlap",
+        "claimStrength": "cautious",
+        "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
+      },
+      {
+        "section": "projects",
+        "id": 12,
+        "label": "SecureScape – Smart Security System",
+        "terms": [
+          "python"
+        ],
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
+      },
+      {
+        "section": "projects",
+        "id": 17,
+        "label": "ShelfVision - Dense Shelf Object Detection",
+        "terms": [
+          "python"
+        ],
+        "evidenceType": "domain_tool_evidence",
+        "claimStrength": "supporting",
+        "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
+      },
+      {
+        "section": "skills",
+        "id": 51,
+        "label": "PostgreSQL",
+        "terms": [
+          "data",
+          "sql",
+          "postgresql"
         ],
         "evidenceType": "weak_lexical_overlap",
         "claimStrength": "cautious",
@@ -485,93 +767,154 @@
         "evidenceType": "transferable_behavior",
         "claimStrength": "bridge",
         "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
-      },
-      {
-        "section": "projects",
-        "id": 12,
-        "label": "SecureScape – Smart Security System",
-        "terms": [
-          "compliance / standards",
-          "coordination / communication",
-          "pace / issue response"
-        ],
-        "evidenceType": "transferable_behavior",
-        "claimStrength": "bridge",
-        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
-      },
-      {
-        "section": "projects",
-        "id": 17,
-        "label": "ShelfVision - Dense Shelf Object Detection",
-        "terms": [
-          "metrics / reporting"
-        ],
-        "evidenceType": "transferable_behavior",
-        "claimStrength": "bridge",
-        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
-      },
-      {
-        "section": "projects",
-        "id": 18,
-        "label": "Tizirsso Racing – Portfolio & Sponsorship Website",
-        "terms": [
-          "coordination / communication"
-        ],
-        "evidenceType": "transferable_behavior",
-        "claimStrength": "bridge",
-        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
-      },
-      {
-        "section": "projects",
-        "id": 20,
-        "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-        "terms": [
-          "metrics / reporting",
-          "workflow / automation"
-        ],
-        "evidenceType": "transferable_behavior",
-        "claimStrength": "bridge",
-        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
       }
     ],
     "jdSignalIntent": [
       {
-        "term": "financial",
+        "term": "data",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+        "linePreview": [
+          "write clean and efficient python and sql scripts for data processing.",
+          "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors."
+        ]
+      },
+      {
+        "term": "sql",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "tool_platform",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "write clean and efficient python and sql scripts for data processing.",
+          "familiarity with databases (mysql, postgresql, sql server)."
+        ]
+      },
+      {
+        "term": "amazon web services",
+        "intent": "candidate_requirement",
+        "priority": 2,
+        "signalType": "tool_platform",
+        "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
         "linePreview": []
       },
       {
-        "term": "representative",
-        "intent": "role_responsibility",
-        "priority": 3,
-        "signalType": "role_capability",
-        "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": []
+        "term": "postgresql",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "tool_platform",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "familiarity with databases (mysql, postgresql, sql server)."
+        ]
       },
       {
-        "term": "services",
+        "term": "python",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "tool_platform",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "write clean and efficient python and sql scripts for data processing."
+        ]
+      },
+      {
+        "term": "airflow",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "role_capability",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "exposure to tools like airflow, dbt, spark, or kafka."
+        ]
+      },
+      {
+        "term": "mysql",
+        "intent": "company_product_context",
+        "priority": 1,
+        "signalType": "role_capability",
+        "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
+        "linePreview": [
+          "familiarity with databases (mysql, postgresql, sql server)."
+        ]
+      },
+      {
+        "term": "data engineering",
         "intent": "role_responsibility",
         "priority": 3,
         "signalType": "role_capability",
         "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
-        "linePreview": []
+        "linePreview": [
+          "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors.",
+          "bachelor’s degree in computer science, data engineering, it, or a related field."
+        ]
       }
     ],
     "gapSupport": [
       {
-        "term": "representative",
+        "term": "git",
+        "status": "unsupported_exact",
+        "signalType": "tool_platform",
+        "supportingEvidence": [],
+        "capability": "exact tool/platform",
+        "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
+      },
+      {
+        "term": "google cloud platform",
+        "status": "unsupported_exact",
+        "signalType": "tool_platform",
+        "supportingEvidence": [],
+        "capability": "exact tool/platform",
+        "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
+      },
+      {
+        "term": "azure",
+        "status": "unsupported_exact",
+        "signalType": "tool_platform",
+        "supportingEvidence": [],
+        "capability": "exact tool/platform",
+        "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
+      },
+      {
+        "term": "kafka",
+        "status": "unsupported_exact",
+        "signalType": "tool_platform",
+        "supportingEvidence": [],
+        "capability": "exact tool/platform",
+        "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
+      },
+      {
+        "term": "airflow",
         "status": "unsupported",
         "signalType": "role_capability",
         "supportingEvidence": [],
         "capability": "",
         "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+      },
+      {
+        "term": "data engineering",
+        "status": "conceptual",
+        "signalType": "role_capability",
+        "supportingEvidence": [
+          "etl",
+          "sql",
+          "schemas",
+          "pipeline",
+          "ingestion",
+          "pipelines"
+        ],
+        "capability": "data systems",
+        "claimGuidance": "Use as related data-focused development evidence; avoid claiming a formal data engineer title unless the resume directly supports it."
       }
     ],
     "unsupportedTerms": [
-      "representative"
+      "git",
+      "google cloud platform",
+      "azure",
+      "kafka",
+      "airflow"
     ],
     "fitRisk": {
       "level": "normal",
@@ -600,8 +943,9 @@
   },
   "strategy_guard": {
     "strategySelectionGuard": true,
-    "roleArchetype": "financial_customer_education",
+    "roleArchetype": "sales_growth_outreach",
     "promotedExperienceIds": [
+      7,
       8
     ],
     "reason": "protected service/customer-facing experience for this strategy"
@@ -611,19 +955,18 @@
   },
   "archetype_pruning_guard": {
     "archetypeProjectPruning": true,
-    "roleArchetype": "financial_customer_education",
+    "roleArchetype": "sales_growth_outreach",
     "projectBudget": 1,
     "oldKeepProjectIds": [
-      9
-    ],
-    "oldMaybeProjectIds": [
-      12,
-      17,
-      18,
+      9,
+      10,
       20
     ],
+    "oldMaybeProjectIds": [],
     "oldDropProjectIds": [
-      10
+      12,
+      17,
+      18
     ],
     "newKeepProjectIds": [
       9
@@ -637,44 +980,67 @@
     ],
     "projectScores": {
       "9": {
-        "score": 6.3,
-        "hits": 2,
+        "score": 26.9,
+        "hits": 3,
         "matchedTerms": [
-          "financial",
-          "services"
+          "data",
+          "sql",
+          "postgresql"
         ],
+        "archetypeBonus": 0.0,
+        "archetypeBonusReasons": [],
         "title": "Centi – Personal Finance App"
       },
       "10": {
-        "score": 3.1,
-        "hits": 1,
+        "score": 26.9,
+        "hits": 3,
         "matchedTerms": [
-          "services"
+          "data",
+          "sql",
+          "postgresql"
         ],
+        "archetypeBonus": 0.0,
+        "archetypeBonusReasons": [],
         "title": "Taylor.io – Resume Builder & Parser"
       },
       "12": {
-        "score": 0,
-        "hits": 0,
-        "matchedTerms": [],
+        "score": 8.0,
+        "hits": 1,
+        "matchedTerms": [
+          "python"
+        ],
+        "archetypeBonus": 0.0,
+        "archetypeBonusReasons": [],
         "title": "SecureScape – Smart Security System"
       },
       "17": {
-        "score": 0,
-        "hits": 0,
-        "matchedTerms": [],
+        "score": 8.0,
+        "hits": 1,
+        "matchedTerms": [
+          "python"
+        ],
+        "archetypeBonus": 0.0,
+        "archetypeBonusReasons": [],
         "title": "ShelfVision - Dense Shelf Object Detection"
       },
       "18": {
         "score": 0,
         "hits": 0,
         "matchedTerms": [],
+        "archetypeBonus": 0.0,
+        "archetypeBonusReasons": [],
         "title": "Tizirsso Racing – Portfolio & Sponsorship Website"
       },
       "20": {
-        "score": 0,
-        "hits": 0,
-        "matchedTerms": [],
+        "score": 26.35,
+        "hits": 3,
+        "matchedTerms": [
+          "data",
+          "sql",
+          "python"
+        ],
+        "archetypeBonus": 0.0,
+        "archetypeBonusReasons": [],
         "title": "SentimentTrader -  Real-Time Stock Sentiment Pipeline"
       }
     }

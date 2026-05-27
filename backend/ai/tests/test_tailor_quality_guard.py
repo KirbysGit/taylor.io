@@ -368,3 +368,86 @@ def test_archetype_pruning_allows_three_technical_projects():
     assert debug["projectBudget"] == 3
     assert updated["keepProjects"] == [10, 9, 17]
     assert updated["dropProjects"] == [12]
+
+
+def test_full_stack_product_pruning_boosts_ai_native_full_stack_project():
+    resume_data = {
+        "projects": [
+            {
+                "id": 9,
+                "title": "Centi",
+                "description": "React dashboards with FastAPI services, PostgreSQL schemas, user account workflows, and auth.",
+                "tech_stack": ["React", "FastAPI", "PostgreSQL"],
+            },
+            {
+                "id": 10,
+                "title": "Taylor.io",
+                "description": "React editing interface with FastAPI backend services, PostgreSQL storage, OpenAI API content generation, and user preview workflows.",
+                "tech_stack": ["React", "FastAPI", "PostgreSQL", "OpenAI API"],
+            },
+            {
+                "id": 18,
+                "title": "Tizirsso",
+                "description": "Next.js and React portfolio UI with animated sections.",
+                "tech_stack": ["Next.js", "React"],
+            },
+            {
+                "id": 20,
+                "title": "SentimentTrader",
+                "description": "Python and SQL sentiment pipeline for analytics.",
+                "tech_stack": ["Python", "SQL"],
+            },
+        ]
+    }
+    section_details = {
+        "rowsPerSectionRanked": {
+            "projects": [
+                {"id": 9, "score": 5, "hits": 2, "matchedTerms": ["React"]},
+                {"id": 10, "score": 3, "hits": 2, "matchedTerms": ["React"]},
+                {"id": 18, "score": 6, "hits": 2, "matchedTerms": ["React"]},
+                {"id": 20, "score": 6, "hits": 2, "matchedTerms": ["SQL"]},
+            ]
+        }
+    }
+    narrative = {"keepProjects": [9, 18, 20], "maybeProjects": [], "dropProjects": [10]}
+    tailor_context = {"jobStrategy": {"roleArchetype": "full_stack_product_engineering"}}
+
+    updated, debug = apply_archetype_project_pruning_guard(narrative, resume_data, tailor_context, section_details)
+
+    assert 10 in updated["keepProjects"]
+    assert updated["keepProjects"][0] == 10
+    assert debug["projectScores"]["10"]["archetypeBonus"] > debug["projectScores"]["18"]["archetypeBonus"]
+
+
+def test_ai_backend_pruning_prefers_openai_api_project_over_generic_full_stack():
+    resume_data = {
+        "projects": [
+            {
+                "id": 9,
+                "title": "Centi",
+                "description": "React dashboard with FastAPI backend and PostgreSQL account workflows.",
+                "tech_stack": ["React", "FastAPI", "PostgreSQL"],
+            },
+            {
+                "id": 10,
+                "title": "Taylor.io",
+                "description": "FastAPI backend with OpenAI API content generation, parsing workflows, React editing, and PostgreSQL storage.",
+                "tech_stack": ["FastAPI", "OpenAI API", "React", "PostgreSQL"],
+            },
+        ]
+    }
+    section_details = {
+        "rowsPerSectionRanked": {
+            "projects": [
+                {"id": 9, "score": 5, "hits": 2, "matchedTerms": ["FastAPI"]},
+                {"id": 10, "score": 5, "hits": 2, "matchedTerms": ["FastAPI"]},
+            ]
+        }
+    }
+    narrative = {"keepProjects": [9], "maybeProjects": [10], "dropProjects": []}
+    tailor_context = {"jobStrategy": {"roleArchetype": "ai_backend_integration"}}
+
+    updated, debug = apply_archetype_project_pruning_guard(narrative, resume_data, tailor_context, section_details)
+
+    assert updated["keepProjects"][0] == 10
+    assert debug["projectScores"]["10"]["archetypeBonus"] > debug["projectScores"]["9"]["archetypeBonus"]

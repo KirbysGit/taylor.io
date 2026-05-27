@@ -10,10 +10,11 @@ from typing import Any
 
 DEFAULT_FIXTURE = Path("backend/ai/debug_out/tailor_eval.json")
 DEFAULT_REVIEW = Path("backend/ai/debug_out/tailor_06_review.json")
+DEFAULT_EXTRACTION = Path("backend/ai/debug_out/tailor_00_extraction.json")
 DEFAULT_RUNS_DIR = Path("backend/ai/evaluation/runs")
 DEFAULT_LATEST_SCORE = Path("backend/ai/debug_out/tailor_07_eval_score.json")
 DEFAULT_HISTORY_LOG = Path("backend/ai/debug_out/tailor_eval_scores.jsonl")
-RUBRIC_VERSION = 2
+RUBRIC_VERSION = 3
 SCORE_WEIGHTS = {
     "strategy": 25,
     "selection": 30,
@@ -77,6 +78,26 @@ def _section(name: str, score: float, max_score: float, checks: list[dict[str, A
 
 def _as_list(value: Any) -> list:
     return value if isinstance(value, list) else []
+
+
+def _compact_terms(entries: Any) -> list[str]:
+    out: list[str] = []
+    if isinstance(entries, dict):
+        for value in entries.values():
+            out.extend(_compact_terms(value))
+        return out
+    if not isinstance(entries, list):
+        return out
+    for entry in entries:
+        if isinstance(entry, dict):
+            term = entry.get("term") or entry.get("label") or entry.get("name")
+            if term:
+                out.append(str(term))
+            else:
+                out.extend(_compact_terms(entry))
+        elif isinstance(entry, str):
+            out.append(entry)
+    return _dedupe(out)
 
 
 def _case_rows(case: dict[str, Any], key: str, section: str) -> list[dict[str, Any]]:
@@ -281,8 +302,14 @@ def score_skills(case: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]
     selection = review.get("selection") if isinstance(review.get("selection"), dict) else {}
     skills_blob = {
         "skillPreserve": strategy.get("skillPreserve") or [],
+        "skillReframeTargets": strategy.get("skillReframeTargets") or [],
         "changedSkills": ((selection.get("changedRows") or {}).get("skills") or []),
         "warnings": review.get("warningsByCategory") or {},
+        "tailorAssist": review.get("tailorAssist") or {},
+    }
+    reframe_blob = {
+        "skillReframeTargets": strategy.get("skillReframeTargets") or [],
+        "changedSkills": ((selection.get("changedRows") or {}).get("skills") or []),
         "tailorAssist": review.get("tailorAssist") or {},
     }
     prominent_blob = {
@@ -290,15 +317,25 @@ def score_skills(case: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]
         "jobPriorityTerms": ((review.get("tailorAssist") or {}).get("jobPriorityTerms") or []),
     }
     preserve = _as_list(expected.get("skillsToPreserve"))
+    reframe = _as_list(expected.get("skillsToSuggestOrReframe"))
     deprioritize = _as_list(expected.get("skillsToDeprioritize"))
     score = 0.0
     checks: list[dict[str, Any]] = []
     issues: list[str] = []
 
+    if reframe:
+        preserve_points = 8
+        reframe_points = 4
+        deprioritize_points = 3
+    else:
+        preserve_points = 10
+        reframe_points = 0
+        deprioritize_points = 5
+
     pts, cks, iss = _score_fraction(
         name="skillsToPreserve",
         items=preserve,
-        max_score=10,
+        max_score=preserve_points,
         predicate=lambda term: _contains(skills_blob, term),
         missing_message=lambda term: f"Preserve skill not surfaced: {term}.",
     )
@@ -306,10 +343,22 @@ def score_skills(case: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]
     checks.extend(cks)
     issues.extend(iss)
 
+    if reframe_points:
+        pts, cks, iss = _score_fraction(
+            name="skillsToSuggestOrReframe",
+            items=reframe,
+            max_score=reframe_points,
+            predicate=lambda term: _contains(reframe_blob, term),
+            missing_message=lambda term: f"Reframe target not surfaced: {term}.",
+        )
+        score += pts
+        checks.extend(cks)
+        issues.extend(iss)
+
     pts, cks, iss = _score_fraction(
         name="skillsToDeprioritize",
         items=deprioritize,
-        max_score=5,
+        max_score=deprioritize_points,
         predicate=lambda term: not _contains(prominent_blob, term),
         missing_message=lambda term: f"Deprioritized skill still prominent: {term}.",
     )
@@ -411,6 +460,158 @@ def score_summary_tone(case: dict[str, Any], review: dict[str, Any]) -> dict[str
     return _section("Summary Tone", score, SCORE_WEIGHTS["summaryTone"], checks, issues)
 
 
+def _entry_signal_type(entry: Any) -> str:
+    if not isinstance(entry, dict):
+        return ""
+    return str(entry.get("signalType") or entry.get("signal_type") or "").strip().lower()
+
+
+def _extraction_entries(extraction: dict[str, Any], *keys: str) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for key in keys:
+        value = extraction.get(key)
+        if isinstance(value, list):
+            out.extend(entry for entry in value if isinstance(entry, dict))
+    return out
+
+
+def _extraction_terms_by_signal(extraction: dict[str, Any], signal_type: str) -> list[str]:
+    wanted = str(signal_type or "").strip().lower()
+    terms: list[str] = []
+    for entry in _extraction_entries(
+        extraction,
+        "priority_keywords",
+        "top_keywords",
+        "suppressed_terms",
+        "priorityTerms",
+        "rawTopTerms",
+        "suppressedTerms",
+    ):
+        if _entry_signal_type(entry) == wanted and entry.get("term"):
+            terms.append(str(entry.get("term")))
+    by_signal = extraction.get("termsBySignalType")
+    if isinstance(by_signal, dict):
+        terms.extend(str(term) for term in _as_list(by_signal.get(signal_type)))
+    return _dedupe(terms)
+
+
+def _extraction_blobs(extraction: dict[str, Any]) -> dict[str, Any]:
+    debug = extraction if isinstance(extraction, dict) else {}
+    priority_entries = _extraction_entries(debug, "priority_keywords", "priorityTerms")
+    top_entries = _extraction_entries(debug, "top_keywords", "rawTopTerms")
+    suppressed_entries = _extraction_entries(debug, "suppressed_terms", "suppressedTerms")
+    stack_terms = _compact_terms(debug.get("top_stack_terms") or {})
+    known_phrases = _compact_terms(debug.get("top_known_phrases") or [])
+    return {
+        "priorityTerms": _compact_terms(priority_entries),
+        "topTerms": _compact_terms(top_entries),
+        "suppressedTerms": _compact_terms(suppressed_entries),
+        "knownPhrases": known_phrases,
+        "stackTerms": stack_terms,
+        "contextTerms": _extraction_terms_by_signal(debug, "context"),
+        "toolPlatformTerms": _extraction_terms_by_signal(debug, "tool_platform"),
+        "genericTerms": _extraction_terms_by_signal(debug, "generic_fragment"),
+        "all": debug,
+    }
+
+
+def score_extraction_diagnostic(case: dict[str, Any], extraction: dict[str, Any] | None) -> dict[str, Any]:
+    expected = case.get("expected") if isinstance(case.get("expected"), dict) else {}
+    expected_extraction = expected.get("expectedExtraction") if isinstance(expected.get("expectedExtraction"), dict) else {}
+    if not expected_extraction:
+        return _section(
+            "Extraction Diagnostic",
+            20,
+            20,
+            [{"name": "expectedExtraction", "passed": True, "points": 20, "note": "no expectations"}],
+            [],
+        )
+    if not isinstance(extraction, dict) or not extraction:
+        return _section(
+            "Extraction Diagnostic",
+            0,
+            20,
+            [{"name": "extractionPresent", "passed": False, "points": 0}],
+            ["Extraction debug was not available; pass --extraction or rerun tailoring."],
+        )
+
+    blobs = _extraction_blobs(extraction)
+    priority_blob = {"priorityTerms": blobs["priorityTerms"]}
+    include_blob = {
+        "priorityTerms": blobs["priorityTerms"],
+        "topTerms": blobs["topTerms"],
+        "knownPhrases": blobs["knownPhrases"],
+        "stackTerms": blobs["stackTerms"],
+    }
+    context_blob = {
+        "contextTerms": blobs["contextTerms"],
+        "suppressedTerms": blobs["suppressedTerms"],
+        "downweightedLineSamples": extraction.get("downweighted_line_samples") or extraction.get("downweightedLineSamples") or [],
+        "lineClassification": extraction.get("line_classification") or extraction.get("lineClassification") or [],
+    }
+    tool_blob = {
+        "toolPlatformTerms": blobs["toolPlatformTerms"],
+        "all": blobs["all"],
+    }
+    suppressed_blob = {
+        "suppressedTerms": blobs["suppressedTerms"],
+        "genericTerms": blobs["genericTerms"],
+    }
+
+    score = 0.0
+    checks: list[dict[str, Any]] = []
+    issues: list[str] = []
+    specs = [
+        (
+            "priorityShouldInclude",
+            _as_list(expected_extraction.get("priorityShouldInclude")),
+            5,
+            lambda term: _contains(include_blob, term),
+            lambda term: f"Extraction missing expected priority term: {term}.",
+        ),
+        (
+            "priorityShouldExclude",
+            _as_list(expected_extraction.get("priorityShouldExclude")),
+            4,
+            lambda term: not _contains(priority_blob, term),
+            lambda term: f"Extraction promoted excluded/noise term: {term}.",
+        ),
+        (
+            "contextTerms",
+            _as_list(expected_extraction.get("contextTerms")),
+            4,
+            lambda term: _contains(context_blob, term) and not _contains(priority_blob, term),
+            lambda term: f"Extraction did not treat context term as context/non-priority: {term}.",
+        ),
+        (
+            "unsupportedExactTools",
+            _as_list(expected_extraction.get("unsupportedExactTools")),
+            4,
+            lambda term: _contains(tool_blob, term),
+            lambda term: f"Extraction did not preserve unsupported exact tool/platform: {term}.",
+        ),
+        (
+            "genericSuppressed",
+            _as_list(expected_extraction.get("genericSuppressed")),
+            3,
+            lambda term: _contains(suppressed_blob, term) or not _contains(priority_blob, term),
+            lambda term: f"Extraction promoted generic fragment instead of suppressing it: {term}.",
+        ),
+    ]
+    for name, items, max_score, predicate, missing_message in specs:
+        pts, cks, iss = _score_fraction(
+            name=name,
+            items=items,
+            max_score=max_score,
+            predicate=predicate,
+            missing_message=missing_message,
+        )
+        score += pts
+        checks.extend(cks)
+        issues.extend(iss)
+    return _section("Extraction Diagnostic", score, 20, checks, issues)
+
+
 def grade_for_score(score: float) -> str:
     if score >= 85:
         return "strong"
@@ -421,7 +622,7 @@ def grade_for_score(score: float) -> str:
     return "not usable"
 
 
-def score_tailor_run(case: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]:
+def score_tailor_run(case: dict[str, Any], review: dict[str, Any], extraction: dict[str, Any] | None = None) -> dict[str, Any]:
     sections = {
         "strategy": score_strategy(case, review),
         "selection": score_selection(case, review),
@@ -429,6 +630,10 @@ def score_tailor_run(case: dict[str, Any], review: dict[str, Any]) -> dict[str, 
         "warningsClaims": score_warnings(case, review),
         "tailorAssist": score_tailor_assist(case, review),
         "summaryTone": score_summary_tone(case, review),
+    }
+    extraction_debug = extraction if isinstance(extraction, dict) else review.get("extraction")
+    diagnostics = {
+        "extraction": score_extraction_diagnostic(case, extraction_debug if isinstance(extraction_debug, dict) else None)
     }
     total = round(sum(section["score"] for section in sections.values()), 2)
     top_issues = []
@@ -445,6 +650,7 @@ def score_tailor_run(case: dict[str, Any], review: dict[str, Any]) -> dict[str, 
         "totalScore": total,
         "grade": grade_for_score(total),
         "sections": sections,
+        "diagnostics": diagnostics,
         "topIssues": _dedupe(top_issues, limit=12),
         "humanReview": {
             "humanScore_0_to_10": None,
@@ -470,11 +676,23 @@ def format_score_report(result: dict[str, Any]) -> str:
     for key, label in labels:
         section = sections.get(key) if isinstance(sections.get(key), dict) else {}
         lines.append(f"{label}: {section.get('score', 0)}/{section.get('max', 0)}")
+    diagnostics = result.get("diagnostics") if isinstance(result.get("diagnostics"), dict) else {}
+    extraction = diagnostics.get("extraction") if isinstance(diagnostics.get("extraction"), dict) else {}
+    if extraction:
+        lines.append(f"Extraction Diagnostic: {extraction.get('score', 0)}/{extraction.get('max', 0)}")
     issues = result.get("topIssues") if isinstance(result.get("topIssues"), list) else []
+    diagnostic_issues = []
+    if extraction:
+        diagnostic_issues.extend(extraction.get("issues") or [])
     if issues:
         lines.append("")
         lines.append("Top issues:")
         for issue in issues[:8]:
+            lines.append(f"- {issue}")
+    if diagnostic_issues:
+        lines.append("")
+        lines.append("Diagnostic issues:")
+        for issue in diagnostic_issues[:6]:
             lines.append(f"- {issue}")
     return "\n".join(lines)
 
@@ -500,6 +718,15 @@ def _section_score_summary(result: dict[str, Any]) -> dict[str, float]:
     return out
 
 
+def _diagnostic_score_summary(result: dict[str, Any]) -> dict[str, float]:
+    diagnostics = result.get("diagnostics") if isinstance(result.get("diagnostics"), dict) else {}
+    out: dict[str, float] = {}
+    for key, section in diagnostics.items():
+        if isinstance(section, dict):
+            out[key] = float(section.get("score") or 0)
+    return out
+
+
 def write_debug_score(
     result: dict[str, Any],
     *,
@@ -518,6 +745,7 @@ def write_debug_score(
         "totalScore": result.get("totalScore"),
         "grade": result.get("grade"),
         "sectionScores": _section_score_summary(result),
+        "diagnosticScores": _diagnostic_score_summary(result),
         "topIssues": (result.get("topIssues") or [])[:5],
         "inputs": result.get("inputs") or {},
     }
@@ -531,6 +759,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--case", required=True, help="Eval case id from tailor_eval.json")
     parser.add_argument("--fixture", default=str(DEFAULT_FIXTURE), help="Path to tailor_eval.json")
     parser.add_argument("--review", default=str(DEFAULT_REVIEW), help="Path to tailor_06_review.json")
+    parser.add_argument("--extraction", default=str(DEFAULT_EXTRACTION), help="Path to tailor_00_extraction.json")
     parser.add_argument("--save-run", default="", help="Optional run label to save JSON score output")
     parser.add_argument(
         "--no-debug-write",
@@ -541,12 +770,15 @@ def main(argv: list[str] | None = None) -> int:
 
     fixture_path = Path(args.fixture)
     review_path = Path(args.review)
+    extraction_path = Path(args.extraction)
     case = load_eval_case(fixture_path, args.case)
     review = load_json(review_path)
-    result = score_tailor_run(case, review)
+    extraction = load_json(extraction_path) if extraction_path.is_file() else None
+    result = score_tailor_run(case, review, extraction)
     result["inputs"] = {
         "fixture": str(fixture_path),
         "review": str(review_path),
+        "extraction": str(extraction_path) if extraction_path.is_file() else None,
     }
     print(format_score_report(result))
     if not args.no_debug_write:

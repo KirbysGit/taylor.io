@@ -153,7 +153,15 @@ def is_in_resume(term, resumeStr):
 # --- builds the tailor context. --- #
 # input -> target role (str), keywords (list), resume data (dict)
 # output -> tailor context (dict)
-def build_tailor_context(targetRole, activeDomains, keywords, resumeData, rawKeywords=None, suppressedKeywords=None):
+def build_tailor_context(
+    targetRole,
+    activeDomains,
+    keywords,
+    resumeData,
+    rawKeywords=None,
+    suppressedKeywords=None,
+    claimSensitiveRequirements=None,
+):
 
     # grab keywords & resume data.
     resumeData = resumeData if isinstance(resumeData, dict) else {}
@@ -169,6 +177,7 @@ def build_tailor_context(targetRole, activeDomains, keywords, resumeData, rawKey
     resumeGaps = []
     claimableKeywords = []
     unsupportedExactKeywords = []
+    unsupportedClaimSensitiveRequirements = []
     seen = set()
 
     for entry in keywords:
@@ -198,6 +207,14 @@ def build_tailor_context(targetRole, activeDomains, keywords, resumeData, rawKey
         if hit or signalType != "tool_platform":
             claimableKeywords.append(entry)
 
+    for item in claimSensitiveRequirements or []:
+        if not isinstance(item, dict) or not item.get("term"):
+            continue
+        term = str(item.get("term") or "").strip()
+        canon = canonicalize_term(term)
+        if not is_in_resume(term, resumeStr):
+            unsupportedClaimSensitiveRequirements.append({**item, "term": canon})
+
     # return the tailor context.
     return {
         "targetRole": (targetRole or "").strip() or None,
@@ -206,6 +223,8 @@ def build_tailor_context(targetRole, activeDomains, keywords, resumeData, rawKey
         "priorityKeywords": keywords,
         "rawKeywords": rawKeywords if isinstance(rawKeywords, list) else list(keywords or []),
         "suppressedKeywords": suppressedKeywords if isinstance(suppressedKeywords, list) else [],
+        "claimSensitiveRequirements": claimSensitiveRequirements if isinstance(claimSensitiveRequirements, list) else [],
+        "unsupportedClaimSensitiveRequirements": unsupportedClaimSensitiveRequirements,
         "unsupportedExactKeywords": unsupportedExactKeywords,
         "resumeHits": resumeHits,
         "resumeGaps": resumeGaps,

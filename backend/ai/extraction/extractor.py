@@ -16,6 +16,7 @@ from .rules import (
     downweightFactor, concreteStackTerms, roleCapabilityStackTerms,
     hardNoiseTokens, benefitNoiseTokens, keywordTrashTokens,
     umbrellaBodyWeakTokens,
+    claimSensitivePhraseRules, claimSensitiveRegexRules,
 )
 from .lexicon import (
     globalStopWords, globalAllowShortTokens, globalPhraseCanonical, globalWeakTokens,
@@ -128,14 +129,17 @@ CONTEXT_TERMS = {
 GENERIC_FRAGMENT_TERMS = {
     "application",
     "applications",
+    "activities",
     "cloud platform",
     "cloud platforms",
+    "engineer",
     "experience",
     "flow",
     "model",
     "models",
     "platform",
     "platforms",
+    "products",
     "solution",
     "solutions",
 }
@@ -263,6 +267,65 @@ def term_lines(term: str, lines: list[str]) -> list[str]:
     return out
 
 
+def _claim_sensitive_term(term: str) -> str:
+    text = canonicalize_phrase_key(term)
+    text = re.sub(r"\s+", " ", str(text or "").strip().lower())
+    if text.endswith(" if not directly evidenced"):
+        text = text[: -len(" if not directly evidenced")].strip()
+    return text
+
+
+def _clean_claim_regex_match(text: str) -> str:
+    term = re.sub(r"\s+", " ", str(text or "").strip(" .,:;").lower())
+    term = re.sub(r"\b(?:preferred|required|minimum|must have)\b$", "", term).strip()
+    return term
+
+
+def extract_claim_sensitive_requirements(lines: list[str], limit: int = 16) -> list[dict]:
+    out = []
+    seen = set()
+
+    def add(term, reason, source_line):
+        clean = _claim_sensitive_term(term)
+        if not clean or clean in seen:
+            return
+        seen.add(clean)
+        out.append(
+            {
+                "term": clean,
+                "reason": reason,
+                "sourceLine": str(source_line or "").strip(),
+                "signalType": "claim_sensitive_requirement",
+            }
+        )
+
+    for line in lines or []:
+        low = re.sub(r"\s+", " ", str(line or "").strip().lower())
+        if not low:
+            continue
+        for phrase, reason in claimSensitivePhraseRules.items():
+            pattern = r"(?<![a-z0-9])" + re.escape(str(phrase).lower()) + r"(?![a-z0-9])"
+            if re.search(pattern, low):
+                add(phrase, reason, line)
+        if "crm" in low and re.search(r"\bcrm\b", low):
+            add("CRM systems", "domain-specific systems requirement", line)
+        if "emr" in low and re.search(r"\bemr\b", low):
+            add("EMR systems", "domain-specific systems requirement", line)
+        if "ehr" in low and re.search(r"\behr\b", low):
+            add("EHR systems", "domain-specific systems requirement", line)
+        for rule in claimSensitiveRegexRules:
+            pattern = rule.get("pattern") if isinstance(rule, dict) else None
+            reason = rule.get("reason") if isinstance(rule, dict) else "claim-sensitive requirement"
+            if not pattern:
+                continue
+            for match in re.finditer(pattern, low, flags=re.IGNORECASE):
+                term = _clean_claim_regex_match(match.group(0))
+                add(term, reason, line)
+        if len(out) >= limit:
+            break
+    return out[:limit]
+
+
 def signal_type_for_term(term: str, source_map: dict | None = None, lines: list[str] | None = None) -> str:
     t = canonicalize_phrase_key(term)
     source_map = source_map or {}
@@ -275,6 +338,8 @@ def signal_type_for_term(term: str, source_map: dict | None = None, lines: list[
         return "context"
     if t in TOOL_PLATFORM_TERMS:
         return "tool_platform"
+    if t == "engineer" and any(k in source_map for k in ("titlePhrase", "titleToken")):
+        return "role_capability"
     if t in GENERIC_FRAGMENT_TERMS:
         return "generic_fragment"
     if t in {"cloud"} and "cloud platform" in line_blob and not any(k in source_map for k in ROLE_CAPABILITY_SOURCE_KEYS):
@@ -378,6 +443,7 @@ def build_basic_extraction_debug(
     suppressed_terms=None,
     relevant_lines,
     num_keywords,
+    claim_sensitive_requirements=None,
 ):
     phrase_counts = {}
     for bucket in (title_phrase_counts, body_phrase_counts, downweighted_phrase_counts):
@@ -396,6 +462,7 @@ def build_basic_extraction_debug(
         "top_keywords": list(ranked_terms or [])[:num_keywords],
         "priority_keywords": list(priority_terms or [])[:num_keywords],
         "suppressed_terms": list(suppressed_terms or [])[:16],
+        "claim_sensitive_requirements": list(claim_sensitive_requirements or [])[:16],
         "relevant_jd_lines": list(relevant_lines or [])[:10],
         "line_classification": [
             {"kind": classify_jd_line(line), "line": line}
@@ -917,6 +984,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
     priorityTerms, suppressedTerms = build_priority_keywords(rankedTerms, numKeywords)
     rankedTermsCompact = compact_term_entries(rankedTerms)
     priorityTermsCompact = compact_term_entries(priorityTerms)
+    claimSensitiveRequirements = extract_claim_sensitive_requirements(res.bodyLines + res.downweightedLines)
 
     # 10. get the relevant JD lines.
     relevantLines = get_relevant_jd_lines(res.bodyLines, priorityTerms[:numKeywords] or rankedTerms[:numKeywords])
@@ -938,6 +1006,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
         ranked_terms=rankedTermsCompact,
         priority_terms=priorityTermsCompact,
         suppressed_terms=suppressedTerms,
+        claim_sensitive_requirements=claimSensitiveRequirements,
         relevant_lines=relevantLines,
         num_keywords=numKeywords,
     )
@@ -946,6 +1015,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
         debug["rankedTerms"] = rankedTermsCompact[:numKeywords].copy()
         debug["priorityTerms"] = priorityTermsCompact.copy()
         debug["suppressedTerms"] = suppressedTerms.copy()
+        debug["claimSensitiveRequirements"] = claimSensitiveRequirements.copy()
         debug["basic"] = extraction_debug
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(debug, indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
@@ -958,6 +1028,7 @@ def extract_keywords(jobDescription, targetRole, numKeywords, company=""):
         "keywords": priorityTermsCompact[:numKeywords],
         "rawKeywords": rankedTermsCompact[:numKeywords],
         "suppressedKeywords": suppressedTerms,
+        "claimSensitiveRequirements": claimSensitiveRequirements,
         "activeDomains": res.profile["activeDomains"],
         "relevantJDLines": relevantLines,
         "debug": extraction_debug,

@@ -307,6 +307,10 @@ def build_tailor_review_snapshot(
             "rawTopTerms": _terms(ext_result.get("rawKeywords") or ((ext_result.get("debug") or {}).get("top_keywords")), limit=14),
             "priorityTerms": _terms(ext_result.get("keywords") or ((ext_result.get("debug") or {}).get("priority_keywords")), limit=14),
             "suppressedTerms": _terms(ext_result.get("suppressedKeywords") or ((ext_result.get("debug") or {}).get("suppressed_terms")), limit=12),
+            "claimSensitiveRequirements": _terms(
+                ext_result.get("claimSensitiveRequirements") or ((ext_result.get("debug") or {}).get("claim_sensitive_requirements")),
+                limit=12,
+            ),
             "termsBySignalType": _terms_by_signal(ext_result.get("keywords") or [], limit=8),
             "includedLineSamples": ((ext_result.get("debug") or {}).get("included_line_samples") or [])[:6],
         },
@@ -345,6 +349,7 @@ def build_tailor_review_snapshot(
             "chips": explanation.get("chips") or [],
             "details": explanation.get("details") or [],
             "jobPriorityTerms": ((explanation.get("evidence") or {}).get("jobPriorityTerms") or []),
+            "notDirectlyEvidencedTerms": ((explanation.get("evidence") or {}).get("notDirectlyEvidencedTerms") or []),
         },
         "warningsByCategory": _warning_buckets(final_out.get("warnings") or []),
         "changeReasons": final_out.get("changeReasons") or [],

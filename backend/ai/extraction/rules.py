@@ -56,6 +56,45 @@ roleSectionHeaders = {
     "you might be the right person for the job if you",
 }
 
+# Exact/regex requirements that should become caution language unless resume evidence proves them.
+# These are not priority keywords; they are "do not imply this accidentally" signals.
+claimSensitivePhraseRules = {
+    "fine dining experience": "hospitality-specific experience requirement",
+    "fine dining": "hospitality-specific experience requirement",
+    "phone etiquette": "hospitality-specific service requirement",
+    "standing for long periods": "physical service-role requirement",
+    "reservations": "hospitality-specific service requirement",
+    "guest service": "hospitality-specific service requirement",
+    "licensed financial representative": "credential/title requirement",
+    "formal system design ownership": "ownership/seniority requirement",
+    "production deployment ownership": "ownership/seniority requirement",
+    "well-tested code": "quality practice requirement",
+    "residential hvac products": "domain-specific experience requirement",
+    "heat transfer": "domain-specific technical requirement",
+    "refrigeration systems": "domain-specific technical requirement",
+    "combustion processes": "domain-specific technical requirement",
+    "emr systems": "domain-specific systems requirement",
+    "ehr systems": "domain-specific systems requirement",
+    "billing systems": "domain-specific systems requirement",
+    "crm systems": "domain-specific systems requirement",
+    "accounting systems": "domain-specific systems requirement",
+}
+
+claimSensitiveRegexRules = (
+    {
+        "pattern": r"\b\d+\+?\s*(?:to\s*\d+)?\s+years?\s+(?:of\s+)?(?:[a-z0-9+#./-]+\s+){0,6}experience\b",
+        "reason": "seniority/years-of-experience requirement",
+    },
+    {
+        "pattern": r"\b(?:licensed|certified|certification|required license|license required)\b(?:\s+[a-z0-9+#./-]+){0,4}",
+        "reason": "credential/license requirement",
+    },
+    {
+        "pattern": r"\b(?:formal system design|system design ownership|production deployment|deployment ownership|own production|on-call|on call)\b(?:\s+[a-z0-9+#./-]+){0,4}",
+        "reason": "ownership/seniority requirement",
+    },
+)
+
 # section title prefixes: not core role content (benefits, apply, about company); used to classify lines.
 nonRoleSectionHeaders = {
     "who we are",

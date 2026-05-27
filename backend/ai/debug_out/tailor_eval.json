@@ -210,6 +210,50 @@
           "DynamoDB",
           "SQLServer"
         ]
+      },
+      "expectedExtraction": {
+        "priorityShouldInclude": [
+          "React",
+          "PostgreSQL",
+          "AWS",
+          "REST APIs",
+          "full stack developer",
+          "deployment",
+          "security",
+          "architecture",
+          "end-to-end web solutions"
+        ],
+        "priorityShouldExclude": [
+          "belonging",
+          "career growth",
+          "top results",
+          "travel",
+          "talent"
+        ],
+        "contextTerms": [
+          "innovation technology company",
+          "Agile methodologies",
+          "San Jose",
+          "Las Vegas",
+          "belonging"
+        ],
+        "unsupportedExactTools": [
+          "CI/CD",
+          "GraphQL",
+          "SOAP",
+          "microservices",
+          "SQL Server",
+          "DynamoDB",
+          "DevSecOps",
+          "Node.js"
+        ],
+        "genericSuppressed": [
+          "solutions",
+          "systems",
+          "delivery",
+          "developer",
+          "implement"
+        ]
       }
     },
     "previousRun": {
@@ -474,6 +518,52 @@
           "accounting systems",
           "true lead-level ownership"
         ]
+      },
+      "expectedExtraction": {
+        "priorityShouldInclude": [
+          "SQL",
+          "data analytics",
+          "data repository",
+          "automated reporting",
+          "dashboards",
+          "ROI reporting",
+          "multi-source data integration",
+          "AI workflow improvement",
+          "executive-facing insights",
+          "operations improvement"
+        ],
+        "priorityShouldExclude": [
+          "hiring",
+          "CEO",
+          "practices",
+          "Timshel",
+          "East of Eden",
+          "thou mayest"
+        ],
+        "contextTerms": [
+          "healthcare",
+          "direct primary care",
+          "DPC practices",
+          "CEO",
+          "Bay Area",
+          "travel"
+        ],
+        "unsupportedExactTools": [
+          "Claude",
+          "Perplexity",
+          "Excel",
+          "EMR",
+          "billing systems",
+          "CRM",
+          "accounting systems"
+        ],
+        "genericSuppressed": [
+          "lead",
+          "function",
+          "hiring",
+          "practices",
+          "company"
+        ]
       }
     },
     "previousRun": {
@@ -596,13 +686,7 @@
       "skillsToPreserve": [
         "Customer Service",
         "Hospitality",
-        "Guest Communication",
-        "Teamwork",
-        "Interpersonal Communication",
-        "Phone Etiquette",
-        "Organization",
-        "Problem Solving",
-        "Fast-Paced Environments"
+        "Problem Solving"
       ],
       "skillsToDeprioritize": [
         "Python",
@@ -740,7 +824,53 @@
           "standing for long periods if not directly evidenced",
           "formal hostess title if only host/expo is shown"
         ]
-      }
+      },
+      "expectedExtraction": {
+        "priorityShouldInclude": [
+          "host",
+          "restaurant",
+          "customer service",
+          "hospitality",
+          "guest communication",
+          "phone etiquette",
+          "interpersonal skills",
+          "positive attitude",
+          "schedule flexibility",
+          "standing for long periods"
+        ],
+        "priorityShouldExclude": [
+          "high",
+          "good",
+          "diploma",
+          "GED",
+          "Coral",
+          "Gables"
+        ],
+        "contextTerms": [
+          "fine dining",
+          "classic steakhouse",
+          "Coral Gables",
+          "Tuesday through Saturday",
+          "20-25 hours"
+        ],
+        "unsupportedExactTools": [],
+        "genericSuppressed": [
+          "high",
+          "good",
+          "long",
+          "periods",
+          "diploma",
+          "GED"
+        ]
+      },
+      "skillsToSuggestOrReframe": [
+        "Guest Communication",
+        "Teamwork",
+        "Interpersonal Communication",
+        "Phone Etiquette",
+        "Organization",
+        "Fast-Paced Environments"
+      ]
     },
     "previousRun": {
       "score": 6,
@@ -878,7 +1008,6 @@
       "skillsToPreserve": [
         "Python",
         "Problem Solving",
-        "Technical Documentation",
         "Data Pipelines",
         "TensorFlow Lite",
         "Backend Development",
@@ -1021,7 +1150,61 @@
           "BOMs",
           "ECNs"
         ]
-      }
+      },
+      "expectedExtraction": {
+        "priorityShouldInclude": [
+          "HVAC",
+          "airflow",
+          "testing",
+          "validation",
+          "compliance",
+          "manufacturing",
+          "product lifecycle",
+          "troubleshooting",
+          "root cause analysis",
+          "engineering documentation",
+          "CAD",
+          "thermodynamics",
+          "heat transfer"
+        ],
+        "priorityShouldExclude": [
+          "product",
+          "development",
+          "engineering",
+          "activities",
+          "residential"
+        ],
+        "contextTerms": [
+          "Lennox",
+          "Carrollton",
+          "salary",
+          "benefits",
+          "company culture",
+          "residential HVAC"
+        ],
+        "unsupportedExactTools": [
+          "CAD",
+          "DOE",
+          "AHRI",
+          "UL",
+          "ETL",
+          "CSA",
+          "ANSI",
+          "BOMs",
+          "ECNs"
+        ],
+        "genericSuppressed": [
+          "product",
+          "development",
+          "engineering",
+          "design",
+          "activities",
+          "products"
+        ]
+      },
+      "skillsToSuggestOrReframe": [
+        "Technical Documentation"
+      ]
     },
     "previousRun": {
       "score": 4,
@@ -1152,11 +1335,6 @@
         ]
       },
       "skillsToPreserve": [
-        "Technical Documentation",
-        "Requirements Gathering",
-        "Process Improvement",
-        "Stakeholder Communication",
-        "Workflow Design",
         "Testing",
         "SQL",
         "Data Pipelines",
@@ -1306,7 +1484,66 @@
           "Azure DevOps",
           "BPM tools"
         ]
-      }
+      },
+      "expectedExtraction": {
+        "priorityShouldInclude": [
+          "requirements gathering",
+          "user stories",
+          "acceptance criteria",
+          "UAT",
+          "process flows",
+          "data flow diagrams",
+          "product backlog",
+          "Sprint backlogs",
+          "Scrum",
+          "Azure DevOps",
+          "BPM tools",
+          "enterprise data management",
+          "testing"
+        ],
+        "priorityShouldExclude": [
+          "years",
+          "user",
+          "proven",
+          "concepts",
+          "business",
+          "solutions"
+        ],
+        "contextTerms": [
+          "Mechanicsville",
+          "hybrid",
+          "local candidates",
+          "contract",
+          "salary",
+          "deadline"
+        ],
+        "unsupportedExactTools": [
+          "Azure DevOps",
+          "BPM tools",
+          "CBAP",
+          "PMI-PBA",
+          "PMI-ACP",
+          "Microsoft Office",
+          "Visio",
+          "Project Server",
+          "ALM"
+        ],
+        "genericSuppressed": [
+          "years",
+          "user",
+          "proven",
+          "concepts",
+          "business",
+          "solutions"
+        ]
+      },
+      "skillsToSuggestOrReframe": [
+        "Technical Documentation",
+        "Requirements Gathering",
+        "Process Improvement",
+        "Stakeholder Communication",
+        "Workflow Design"
+      ]
     },
     "previousRun": {
       "score": 6,
@@ -1588,6 +1825,47 @@
           "production deployment ownership",
           "well-tested code if not directly evidenced"
         ]
+      },
+      "expectedExtraction": {
+        "priorityShouldInclude": [
+          "Python",
+          "Django",
+          "React",
+          "TypeScript",
+          "full stack engineer",
+          "customer-facing products",
+          "internal products",
+          "system design",
+          "deployment",
+          "product mindset",
+          "well-tested code",
+          "production-grade applications"
+        ],
+        "priorityShouldExclude": [
+          "AI-native",
+          "company",
+          "passionate",
+          "amazing",
+          "belonging"
+        ],
+        "contextTerms": [
+          "AI-native company",
+          "stakeholders",
+          "career growth",
+          "collaborative team"
+        ],
+        "unsupportedExactTools": [
+          "TypeScript",
+          "design tools",
+          "well-tested code if not evidenced"
+        ],
+        "genericSuppressed": [
+          "applications",
+          "engineer",
+          "products",
+          "contribute",
+          "stack"
+        ]
       }
     },
     "previousRun": {
@@ -1718,14 +1996,7 @@
       "skillsToPreserve": [
         "Customer Service",
         "Communication",
-        "Relationship Building",
-        "Problem Solving",
-        "Teamwork",
-        "Client Interaction",
-        "Organization",
-        "Financial Interest",
-        "Product Education",
-        "Sales Support"
+        "Problem Solving"
       ],
       "skillsToDeprioritize": [
         "Python",
@@ -1862,7 +2133,49 @@
           "insurance sales",
           "securities sales"
         ]
-      }
+      },
+      "expectedExtraction": {
+        "priorityShouldInclude": [
+          "financial freedom",
+          "helping people",
+          "money management",
+          "debt",
+          "communication",
+          "training",
+          "growth",
+          "customer trust",
+          "work from home",
+          "learn and grow"
+        ],
+        "priorityShouldExclude": [
+          "financial",
+          "services",
+          "representative"
+        ],
+        "contextTerms": [
+          "paid training",
+          "work from home",
+          "schedule an interview",
+          "no experience needed"
+        ],
+        "unsupportedExactTools": [],
+        "genericSuppressed": [
+          "financial",
+          "services",
+          "representative",
+          "success",
+          "career"
+        ]
+      },
+      "skillsToSuggestOrReframe": [
+        "Relationship Building",
+        "Teamwork",
+        "Client Interaction",
+        "Organization",
+        "Financial Interest",
+        "Product Education",
+        "Sales Support"
+      ]
     },
     "previousRun": {
       "score": 3,
@@ -2139,6 +2452,48 @@
           "Azure",
           "CI/CD",
           "formal conversational AI platform experience"
+        ]
+      },
+      "expectedExtraction": {
+        "priorityShouldInclude": [
+          "Python",
+          "OpenAI",
+          "LLMs",
+          "conversational AI",
+          "backend services",
+          "API integrations",
+          "prompt optimization",
+          "workflow optimization",
+          "JavaScript",
+          "cloud platform"
+        ],
+        "priorityShouldExclude": [
+          "healthcare",
+          "flow",
+          "platform",
+          "solutions"
+        ],
+        "contextTerms": [
+          "Google Cloud",
+          "cloud platform",
+          "cross-functional teams"
+        ],
+        "unsupportedExactTools": [
+          "Dialogflow",
+          "Google CES",
+          "Google Cloud Platform",
+          "GCP",
+          "Amazon Bedrock",
+          "Azure",
+          "CI/CD",
+          "Git"
+        ],
+        "genericSuppressed": [
+          "flow",
+          "platform",
+          "solutions",
+          "systems",
+          "experience"
         ]
       }
     },
