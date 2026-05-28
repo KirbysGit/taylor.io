@@ -1,85 +1,61 @@
 // components/ProtectedRoute.jsx
 
-// protected route component that checks authentication and setup completion before allowing access.
-
-// imports.
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
+import { getCurrentUser } from '@/api/services/auth'
 
-// ----------- helper function -----------
-
-// function to check if user has completed setup.
-function checkSetupCompleted() {
+function setupCompletedForUser(user) {
+	const userId = user?.id
+	if (!userId) return false
 	try {
-		const userData = localStorage.getItem('user')
-		if (!userData) return false
-		
-		const user = JSON.parse(userData)
-		const userId = user?.id
-		
-		if (!userId) return false
-		
 		return localStorage.getItem(`setupCompleted_${userId}`) === 'true'
-	} catch (error) {
+	} catch {
 		return false
 	}
 }
 
-// ----------- main component -----------
+function LoadingGate() {
+	return (
+		<div className="min-h-screen flex items-center justify-center bg-cream">
+			<div className="text-center">
+				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-pink mx-auto mb-4"></div>
+				<p className="text-gray-600">Loading...</p>
+			</div>
+		</div>
+	)
+}
 
 function ProtectedRoute({ children, requireSetup = false }) {
-	const [isAuthenticated, setIsAuthenticated] = useState(null) // null = checking, true = authenticated, false = not authenticated
-	const [setupCompleted, setSetupCompleted] = useState(null) // null = checking, true = completed, false = not completed
+	const [state, setState] = useState({ status: 'checking', user: null })
 	const location = useLocation()
 
-	// check authentication and setup completion on mount.
 	useEffect(() => {
-		// check if token exists in localStorage.
-		const token = localStorage.getItem('token')
-		const user = localStorage.getItem('user')
-
-		// if both token and user exist, user is authenticated.
-		if (token && user) {
-			setIsAuthenticated(true)
-			
-			// if this route requires setup completion, check it.
-			if (requireSetup) {
-				setSetupCompleted(checkSetupCompleted())
-			} else {
-				setSetupCompleted(true) // don't care about setup for routes that don't require it
+		let cancelled = false
+		;(async () => {
+			try {
+				const response = await getCurrentUser()
+				const user = response.data || response
+				if (cancelled) return
+				localStorage.setItem('user', JSON.stringify(user))
+				setState({ status: 'authenticated', user })
+			} catch (error) {
+				if (cancelled) return
+				setState({
+					status: error?.response?.status === 403 ? 'unverified' : 'unauthenticated',
+					user: null,
+				})
 			}
-		} else {
-			setIsAuthenticated(false)
-			setSetupCompleted(false)
+		})()
+		return () => {
+			cancelled = true
 		}
-	}, [requireSetup, location.pathname])
+	}, [location.pathname])
 
-	// while checking, show loading spinner.
-	if (isAuthenticated === null || (requireSetup && setupCompleted === null)) {
-		return (
-			<div className="min-h-screen flex items-center justify-center bg-cream">
-				<div className="text-center">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-pink mx-auto mb-4"></div>
-					<p className="text-gray-600">Loading...</p>
-				</div>
-			</div>
-		)
-	}
-
-	// if not authenticated, redirect to auth page.
-	if (!isAuthenticated) {
-		return <Navigate to="/auth" replace />
-	}
-
-	// if authenticated but setup is required and not completed, redirect to setup.
-	if (requireSetup && !setupCompleted) {
-		return <Navigate to="/setup" replace />
-	}
-
-	// if authenticated (and setup completed if required), render the protected component.
+	if (state.status === 'checking') return <LoadingGate />
+	if (state.status === 'unverified') return <Navigate to="/auth?mode=login&unverified=1" replace />
+	if (state.status === 'unauthenticated') return <Navigate to="/auth?mode=login" replace />
+	if (requireSetup && !setupCompletedForUser(state.user)) return <Navigate to="/setup" replace />
 	return children
 }
 
-// export.
 export default ProtectedRoute
-

@@ -13,6 +13,7 @@ import {
 	faWandMagicSparkles,
 } from '@fortawesome/free-solid-svg-icons'
 import DashboardShell from '@/components/DashboardShell'
+import { logoutUser } from '@/api/services/auth'
 
 const buildOptions = [
 	{
@@ -94,9 +95,8 @@ function BuildOptionCard({ option, onSelect }) {
 export default function ResumeCreate() {
 	const navigate = useNavigate()
 
-	const handleLogout = () => {
-		localStorage.removeItem('token')
-		localStorage.removeItem('user')
+	const handleLogout = async () => {
+		await logoutUser()
 		navigate('/')
 	}
 

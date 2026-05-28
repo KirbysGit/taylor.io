@@ -69,6 +69,31 @@ PRESERVED_SIGNAL_PHRASES = {
     "prompt engineering",
     "third-party systems",
     "version control",
+    "data ingestion",
+    "data transformation",
+    "data warehouses",
+    "data lakes",
+    "data quality",
+    "data governance",
+    "data workflows",
+    "schematic capture",
+    "pcb layout",
+    "pcb design tools",
+    "circuit board design",
+    "component selection",
+    "bill of materials",
+    "assembly drawings",
+    "fab drawings",
+    "drill drawings",
+    "manufacturing packages",
+    "high speed routing",
+    "controlled impedance",
+    "civil engineering structures",
+    "design and construction",
+    "project design documents",
+    "technical submittals",
+    "corrective action",
+    "criteria or specifications",
 }
 
 SIGNAL_CANONICAL = {
@@ -86,6 +111,12 @@ SIGNAL_CANONICAL = {
     "llm models": "large language models",
     "open ai": "openai",
     "version control": "git",
+    "etl/elt pipelines": "etl pipelines",
+    "printed circuit board": "pcb",
+    "printed circuit boards": "pcb",
+    "bill of materials": "bom",
+    "boms": "bom",
+    "cadence orcad": "orcad",
 }
 
 TOOL_PLATFORM_TERMS = {
@@ -113,6 +144,28 @@ TOOL_PLATFORM_TERMS = {
     "react",
     "sql",
     "typescript",
+    "airflow",
+    "apache spark",
+    "css",
+    "dbt",
+    "html",
+    "mysql",
+    "power bi",
+    "spark",
+    "sql server",
+    "tableau",
+    "altium",
+    "cadence allegro",
+    "kicad",
+    "orcad",
+    "pads",
+    "ltspice",
+    "ti tina",
+    "verilog",
+    "vhdl",
+    "fpga",
+    "oscilloscopes",
+    "dvm",
 }
 
 CONTEXT_TERMS = {
@@ -140,8 +193,41 @@ GENERIC_FRAGMENT_TERMS = {
     "platform",
     "platforms",
     "products",
+    "degree",
+    "education",
+    "bachelor",
+    "higher",
+    "below",
+    "position",
+    "student",
     "solution",
     "solutions",
+}
+
+QUALIFICATION_REQUIREMENT_TERMS = {
+    "abet",
+    "degree",
+    "education",
+    "bachelor",
+    "transcript",
+    "transcripts",
+    "us citizenship",
+    "u.s. citizenship",
+    "citizenship",
+}
+
+QUALIFICATION_LINE_CUES = {
+    "degree",
+    "transcript",
+    "transcripts",
+    "citizenship",
+    "authorized to work",
+    "work authorization",
+    "eligible for consideration",
+    "who may apply",
+    "to qualify",
+    "in order to qualify",
+    "abet",
 }
 
 NOISE_SIGNAL_TERMS = {
@@ -237,6 +323,8 @@ def classify_jd_line(line: str) -> str:
         return "context"
     if any(cue in low for cue in ("benefit", "benefits", "pay range", "401", "insurance", "sick leave")):
         return "noise"
+    if any(cue in low for cue in QUALIFICATION_LINE_CUES):
+        return "qualification_requirement"
     if any(cue in low for cue in ("responsibilities", "what you", "develop", "build", "maintain", "design", "implement")):
         return "role"
     if any(cue in low for cue in ("requirements", "skills", "experience with", "proficiency", "familiarity")):
@@ -247,7 +335,6 @@ def classify_jd_line(line: str) -> str:
 def term_lines(term: str, lines: list[str]) -> list[str]:
     if not term:
         return []
-    pattern = r"(?<![a-z0-9])" + re.escape(term.lower()) + r"(?![a-z0-9])"
     aliases = {term.lower()}
     if term == "dialogflow":
         aliases.update({"dialog flow", "dialog flows"})
@@ -262,7 +349,7 @@ def term_lines(term: str, lines: list[str]) -> list[str]:
     out = []
     for line in lines or []:
         low = str(line or "").lower()
-        if re.search(pattern, low) or any(alias and alias in low for alias in aliases):
+        if any(re.search(r"(?<![a-z0-9])" + re.escape(alias) + r"(?![a-z0-9])", low) for alias in aliases if alias):
             out.append(line)
     return out
 
@@ -334,6 +421,8 @@ def signal_type_for_term(term: str, source_map: dict | None = None, lines: list[
 
     if t in NOISE_SIGNAL_TERMS or line_kinds == {"noise"}:
         return "noise"
+    if t in QUALIFICATION_REQUIREMENT_TERMS or (line_kinds and line_kinds <= {"qualification_requirement", "noise"}):
+        return "qualification_requirement"
     if t in CONTEXT_TERMS or (line_kinds and line_kinds <= {"context", "noise"}):
         return "context"
     if t in TOOL_PLATFORM_TERMS:
@@ -389,6 +478,8 @@ def build_priority_keywords(annotated_terms: list[dict], limit: int) -> tuple[li
             reason = "job-post boilerplate/noise"
         elif signal_type == "context":
             reason = "company/product/client context; do not drive resume claims"
+        elif signal_type == "qualification_requirement":
+            reason = "eligibility/credential requirement; warn if unsupported, but do not drive tailoring"
         if reason:
             suppressed.append({"term": term, "signalType": signal_type, "reason": reason, "sources": entry.get("sources") or []})
             continue

@@ -31,15 +31,6 @@ export function useResumePreviewBootstrap({
 		// set the flag.
 		hasFetchedProfileRef.current = true
 
-		// check if we have a token for authentication.
-		const token = localStorage.getItem('token')
-		
-		// if we don't have a token, navigate to the auth page.
-		if (!token) {
-			navigate('/auth')
-			return
-		}
-
 		// try to fetch the current user.
 		try {
 			const fetchCurrentUser = async () => {

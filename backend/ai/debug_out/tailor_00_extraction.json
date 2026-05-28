@@ -1,615 +1,602 @@
 {
-  "target_role": "Data Engineer",
-  "company": "Mayzax Solutions",
+  "target_role": "Civil Engineer",
+  "company": "Army Civilian Careers",
   "active_domains": [
-    "data",
+    "construction",
     "engineering"
   ],
   "line_counts": {
-    "included_body": 36,
+    "included_body": 8,
     "downweighted": 0
   },
   "included_line_samples": [
-    "company: mayzax solutions",
-    "location: remote (based in usa)",
-    "employment type: full-time",
-    "experience level: entry-level / junior",
-    "work authorization: open to all eligible candidates (opt/cpt/h-1b transfers welcome)",
-    "about mayzax solutions",
-    "mayzax solutions is a fast-growing technology and consulting firm delivering data, cloud, and automation solutions to clients across the u.s. we help organizations turn raw data into powerful insights using modern engineering practices.",
-    "position overview",
-    "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors.",
-    "assist in building and maintaining etl/elt pipelines for data ingestion and transformation.",
-    "write clean and efficient python and sql scripts for data processing.",
-    "support the development of data warehouses and data lakes."
+    "assist in the design and construction of civil engineering structures or systems using established criteria or specifications.",
+    "monitor civil engineering projects and resources.",
+    "identify civil engineering problems and recommend corrective action.",
+    "review technical civil engineering project design documents and submittals.",
+    "*must be a us citizen",
+    "who may apply: to be eligible for consideration you must meet the definition of as defined below:",
+    "bachelor's degree (or higher degree) in engineering. to be acceptable, the program must: (1) lead to a bachelor's degree (or higher degree) in a school of engineering with at least one program accredited by the accreditation board for engineering and technology (abet); or (2) include differential and integral calculus and courses (more advanced than first-year physics and chemistry) in five of the following seven areas of engineering science or physics: (a) statics, dynamics; (b) strength of materials (stress-strain relationships); (c) fluid mechanics, hydraulics; (d) thermodynamics; (e) electrical fields and circuits; (f) nature and properties of materials (relating particle and aggregate structure to properties); and (g) any other comparable area of fundamental engineering science or physics, such as optics, heat transfer, soil mechanics, or electronics. (degree must be completed by june 2026.)",
+    "in order to qualify, you must meet the education and/or experience requirements described below. experience refers to paid and unpaid experience, including volunteer work done through national service programs (e.g., peace corps, americorps) and other organizations (e.g., professional; philanthropic; religious; spiritual; community; student; social). you will receive credit for all qualifying experience, including volunteer experience. your resume must clearly describe your relevant experience; if qualifying based on education, your transcripts will be required as part of your application. additional information about transcripts is in this document."
   ],
   "downweighted_line_samples": [],
   "top_keywords": [
     {
-      "term": "data",
-      "score": 17.0,
-      "frequency": 16.0,
+      "term": "civil engineering structures",
+      "score": 5.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "partOfPhrase",
-        "titleToken"
+        "knownPhrase"
       ],
       "signalType": "role_capability",
       "lineKinds": [
-        "body",
-        "requirement",
         "role"
       ],
       "linePreview": [
-        "mayzax solutions is a fast-growing technology and consulting firm delivering data, cloud, and automation solutions to clients across the u.s. we help organizations turn raw data into powerful insights using modern engineering practices.",
-        "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors."
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
       ]
     },
     {
-      "term": "sql",
-      "score": 10.5,
-      "frequency": 4.0,
+      "term": "corrective action",
+      "score": 5.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "body",
-        "requirement"
-      ],
-      "linePreview": [
-        "write clean and efficient python and sql scripts for data processing.",
-        "sql"
-      ]
-    },
-    {
-      "term": "git",
-      "score": 10.5,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack",
         "knownPhrase"
       ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "requirement"
-      ],
-      "linePreview": [
-        "experience with git/github version control."
-      ]
-    },
-    {
-      "term": "google cloud platform",
-      "score": 9.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "tool_platform",
+      "signalType": "role_capability",
       "lineKinds": [
         "body"
       ],
       "linePreview": [
-        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+        "identify civil engineering problems and recommend corrective action."
       ]
     },
     {
-      "term": "amazon web services",
-      "score": 7.5,
-      "frequency": 2.0,
+      "term": "criteria or specifications",
+      "score": 5.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "concreteStack"
+        "knownPhrase"
       ],
-      "signalType": "tool_platform",
+      "signalType": "role_capability",
       "lineKinds": [
-        "body"
+        "role"
       ],
       "linePreview": [
-        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
       ]
     },
     {
-      "term": "azure",
-      "score": 7.5,
-      "frequency": 2.0,
+      "term": "design and construction",
+      "score": 5.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "concreteStack"
+        "knownPhrase"
       ],
-      "signalType": "tool_platform",
+      "signalType": "role_capability",
       "lineKinds": [
-        "body"
+        "role"
       ],
       "linePreview": [
-        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
       ]
     },
     {
-      "term": "postgresql",
-      "score": 7.5,
-      "frequency": 2.0,
+      "term": "project design documents",
+      "score": 5.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "concreteStack"
+        "knownPhrase"
       ],
-      "signalType": "tool_platform",
+      "signalType": "role_capability",
       "lineKinds": [
-        "requirement"
+        "role"
       ],
       "linePreview": [
-        "familiarity with databases (mysql, postgresql, sql server)."
+        "review technical civil engineering project design documents and submittals."
       ]
     },
     {
-      "term": "python",
-      "score": 7.0,
-      "frequency": 2.0,
+      "term": "construction",
+      "score": 4.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken"
+        "partOfPhrase"
       ],
-      "signalType": "tool_platform",
+      "signalType": "role_capability",
       "lineKinds": [
-        "body"
+        "role"
       ],
       "linePreview": [
-        "write clean and efficient python and sql scripts for data processing.",
-        "python"
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
       ]
     },
     {
-      "term": "kafka",
-      "score": 6.0,
+      "term": "submittals",
+      "score": 4.0,
       "frequency": 1.0,
       "sources": [
         "bodyToken"
       ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "exposure to tools like airflow, dbt, spark, or kafka."
-      ]
-    },
-    {
-      "term": "airflow",
-      "score": 5.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
       "signalType": "role_capability",
       "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "exposure to tools like airflow, dbt, spark, or kafka."
-      ]
-    },
-    {
-      "term": "mysql",
-      "score": 5.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "requirement"
-      ],
-      "linePreview": [
-        "familiarity with databases (mysql, postgresql, sql server)."
-      ]
-    },
-    {
-      "term": "data engineering",
-      "score": 5.0,
-      "frequency": 3.0,
-      "sources": [
-        "knownPhrase"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body",
         "role"
       ],
       "linePreview": [
-        "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors.",
-        "bachelor’s degree in computer science, data engineering, it, or a related field."
+        "review technical civil engineering project design documents and submittals."
+      ]
+    },
+    {
+      "term": "physics",
+      "score": 3.0,
+      "frequency": 3.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "qualification_requirement",
+      "lineKinds": [
+        "qualification_requirement"
+      ],
+      "linePreview": [
+        "bachelor's degree (or higher degree) in engineering. to be acceptable, the program must: (1) lead to a bachelor's degree (or higher degree) in a school of engineering with at least one program accredited by the accreditation board for engineering and technology (abet); or (2) include differential and integral calculus and courses (more advanced than first-year physics and chemistry) in five of the following seven areas of engineering science or physics: (a) statics, dynamics; (b) strength of materials (stress-strain relationships); (c) fluid mechanics, hydraulics; (d) thermodynamics; (e) electrical fields and circuits; (f) nature and properties of materials (relating particle and aggregate structure to properties); and (g) any other comparable area of fundamental engineering science or physics, such as optics, heat transfer, soil mechanics, or electronics. (degree must be completed by june 2026.)"
+      ]
+    },
+    {
+      "term": "corrective",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "partOfPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "identify civil engineering problems and recommend corrective action."
+      ]
+    },
+    {
+      "term": "criteria",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "partOfPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
+      ]
+    },
+    {
+      "term": "electronics",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "qualification_requirement",
+      "lineKinds": [
+        "qualification_requirement"
+      ],
+      "linePreview": [
+        "bachelor's degree (or higher degree) in engineering. to be acceptable, the program must: (1) lead to a bachelor's degree (or higher degree) in a school of engineering with at least one program accredited by the accreditation board for engineering and technology (abet); or (2) include differential and integral calculus and courses (more advanced than first-year physics and chemistry) in five of the following seven areas of engineering science or physics: (a) statics, dynamics; (b) strength of materials (stress-strain relationships); (c) fluid mechanics, hydraulics; (d) thermodynamics; (e) electrical fields and circuits; (f) nature and properties of materials (relating particle and aggregate structure to properties); and (g) any other comparable area of fundamental engineering science or physics, such as optics, heat transfer, soil mechanics, or electronics. (degree must be completed by june 2026.)"
+      ]
+    },
+    {
+      "term": "lead",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "bodyToken"
+      ],
+      "signalType": "qualification_requirement",
+      "lineKinds": [
+        "qualification_requirement"
+      ],
+      "linePreview": [
+        "bachelor's degree (or higher degree) in engineering. to be acceptable, the program must: (1) lead to a bachelor's degree (or higher degree) in a school of engineering with at least one program accredited by the accreditation board for engineering and technology (abet); or (2) include differential and integral calculus and courses (more advanced than first-year physics and chemistry) in five of the following seven areas of engineering science or physics: (a) statics, dynamics; (b) strength of materials (stress-strain relationships); (c) fluid mechanics, hydraulics; (d) thermodynamics; (e) electrical fields and circuits; (f) nature and properties of materials (relating particle and aggregate structure to properties); and (g) any other comparable area of fundamental engineering science or physics, such as optics, heat transfer, soil mechanics, or electronics. (degree must be completed by june 2026.)"
       ]
     }
   ],
   "priority_keywords": [
     {
-      "term": "data",
-      "score": 17.0,
-      "frequency": 16.0,
+      "term": "civil engineering structures",
+      "score": 5.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "partOfPhrase",
-        "titleToken"
+        "knownPhrase"
       ],
       "signalType": "role_capability",
       "lineKinds": [
-        "body",
-        "requirement",
         "role"
       ],
       "linePreview": [
-        "mayzax solutions is a fast-growing technology and consulting firm delivering data, cloud, and automation solutions to clients across the u.s. we help organizations turn raw data into powerful insights using modern engineering practices.",
-        "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors."
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
       ]
     },
     {
-      "term": "sql",
-      "score": 10.5,
-      "frequency": 4.0,
+      "term": "corrective action",
+      "score": 5.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "body",
-        "requirement"
-      ],
-      "linePreview": [
-        "write clean and efficient python and sql scripts for data processing.",
-        "sql"
-      ]
-    },
-    {
-      "term": "git",
-      "score": 10.5,
-      "frequency": 3.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack",
         "knownPhrase"
       ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "requirement"
-      ],
-      "linePreview": [
-        "experience with git/github version control."
-      ]
-    },
-    {
-      "term": "google cloud platform",
-      "score": 9.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "tool_platform",
+      "signalType": "role_capability",
       "lineKinds": [
         "body"
       ],
       "linePreview": [
-        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+        "identify civil engineering problems and recommend corrective action."
       ]
     },
     {
-      "term": "amazon web services",
-      "score": 7.5,
-      "frequency": 2.0,
+      "term": "criteria or specifications",
+      "score": 5.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "concreteStack"
+        "knownPhrase"
       ],
-      "signalType": "tool_platform",
+      "signalType": "role_capability",
       "lineKinds": [
-        "body"
+        "role"
       ],
       "linePreview": [
-        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
       ]
     },
     {
-      "term": "azure",
-      "score": 7.5,
-      "frequency": 2.0,
+      "term": "design and construction",
+      "score": 5.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "concreteStack"
+        "knownPhrase"
       ],
-      "signalType": "tool_platform",
+      "signalType": "role_capability",
       "lineKinds": [
-        "body"
+        "role"
       ],
       "linePreview": [
-        "basic understanding of cloud platforms (aws/azure/gcp) or willingness to learn."
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
       ]
     },
     {
-      "term": "postgresql",
-      "score": 7.5,
-      "frequency": 2.0,
+      "term": "project design documents",
+      "score": 5.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken",
-        "concreteStack"
+        "knownPhrase"
       ],
-      "signalType": "tool_platform",
+      "signalType": "role_capability",
       "lineKinds": [
-        "requirement"
+        "role"
       ],
       "linePreview": [
-        "familiarity with databases (mysql, postgresql, sql server)."
+        "review technical civil engineering project design documents and submittals."
       ]
     },
     {
-      "term": "python",
-      "score": 7.0,
-      "frequency": 2.0,
+      "term": "construction",
+      "score": 4.0,
+      "frequency": 1.0,
       "sources": [
-        "bodyToken"
+        "partOfPhrase"
       ],
-      "signalType": "tool_platform",
+      "signalType": "role_capability",
       "lineKinds": [
-        "body"
+        "role"
       ],
       "linePreview": [
-        "write clean and efficient python and sql scripts for data processing.",
-        "python"
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
       ]
     },
     {
-      "term": "kafka",
-      "score": 6.0,
+      "term": "submittals",
+      "score": 4.0,
       "frequency": 1.0,
       "sources": [
         "bodyToken"
       ],
-      "signalType": "tool_platform",
-      "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "exposure to tools like airflow, dbt, spark, or kafka."
-      ]
-    },
-    {
-      "term": "airflow",
-      "score": 5.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
       "signalType": "role_capability",
       "lineKinds": [
-        "body"
-      ],
-      "linePreview": [
-        "exposure to tools like airflow, dbt, spark, or kafka."
-      ]
-    },
-    {
-      "term": "mysql",
-      "score": 5.5,
-      "frequency": 2.0,
-      "sources": [
-        "bodyToken",
-        "concreteStack"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "requirement"
-      ],
-      "linePreview": [
-        "familiarity with databases (mysql, postgresql, sql server)."
-      ]
-    },
-    {
-      "term": "data engineering",
-      "score": 5.0,
-      "frequency": 3.0,
-      "sources": [
-        "knownPhrase"
-      ],
-      "signalType": "role_capability",
-      "lineKinds": [
-        "body",
         "role"
       ],
       "linePreview": [
-        "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors.",
-        "bachelor’s degree in computer science, data engineering, it, or a related field."
+        "review technical civil engineering project design documents and submittals."
+      ]
+    },
+    {
+      "term": "corrective",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "partOfPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "identify civil engineering problems and recommend corrective action."
+      ]
+    },
+    {
+      "term": "criteria",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "partOfPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
+      ]
+    },
+    {
+      "term": "specifications",
+      "score": 3.0,
+      "frequency": 1.0,
+      "sources": [
+        "partOfPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "role"
+      ],
+      "linePreview": [
+        "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
+      ]
+    },
+    {
+      "term": "engineer",
+      "score": 2.0,
+      "frequency": 1.0,
+      "sources": [
+        "titleToken"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [],
+      "linePreview": []
+    },
+    {
+      "term": "action",
+      "score": 1.0,
+      "frequency": 1.0,
+      "sources": [
+        "partOfPhrase"
+      ],
+      "signalType": "role_capability",
+      "lineKinds": [
+        "body"
+      ],
+      "linePreview": [
+        "identify civil engineering problems and recommend corrective action."
       ]
     }
   ],
-  "suppressed_terms": [],
+  "suppressed_terms": [
+    {
+      "term": "physics",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "electronics",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "lead",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "engineering",
+      "signalType": "generic_fragment",
+      "reason": "generic fragment; keep only inside stronger phrases",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "materials",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "mechanics",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "meet",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "properties",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "qualifying",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "science",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "volunteer",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "service",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "degree",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "abet",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "accreditation",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    },
+    {
+      "term": "accredited",
+      "signalType": "qualification_requirement",
+      "reason": "eligibility/credential requirement; warn if unsupported, but do not drive tailoring",
+      "sources": [
+        "bodyToken"
+      ]
+    }
+  ],
   "claim_sensitive_requirements": [
     {
-      "term": "certification support",
-      "reason": "credential/license requirement",
-      "sourceLine": "growth-focused culture with certification support.",
+      "term": "heat transfer",
+      "reason": "domain-specific technical requirement",
+      "sourceLine": "bachelor's degree (or higher degree) in engineering. to be acceptable, the program must: (1) lead to a bachelor's degree (or higher degree) in a school of engineering with at least one program accredited by the accreditation board for engineering and technology (abet); or (2) include differential and integral calculus and courses (more advanced than first-year physics and chemistry) in five of the following seven areas of engineering science or physics: (a) statics, dynamics; (b) strength of materials (stress-strain relationships); (c) fluid mechanics, hydraulics; (d) thermodynamics; (e) electrical fields and circuits; (f) nature and properties of materials (relating particle and aggregate structure to properties); and (g) any other comparable area of fundamental engineering science or physics, such as optics, heat transfer, soil mechanics, or electronics. (degree must be completed by june 2026.)",
+      "signalType": "claim_sensitive_requirement"
+    },
+    {
+      "term": "abet",
+      "reason": "education/accreditation requirement",
+      "sourceLine": "bachelor's degree (or higher degree) in engineering. to be acceptable, the program must: (1) lead to a bachelor's degree (or higher degree) in a school of engineering with at least one program accredited by the accreditation board for engineering and technology (abet); or (2) include differential and integral calculus and courses (more advanced than first-year physics and chemistry) in five of the following seven areas of engineering science or physics: (a) statics, dynamics; (b) strength of materials (stress-strain relationships); (c) fluid mechanics, hydraulics; (d) thermodynamics; (e) electrical fields and circuits; (f) nature and properties of materials (relating particle and aggregate structure to properties); and (g) any other comparable area of fundamental engineering science or physics, such as optics, heat transfer, soil mechanics, or electronics. (degree must be completed by june 2026.)",
+      "signalType": "claim_sensitive_requirement"
+    },
+    {
+      "term": "transcripts",
+      "reason": "application/qualification requirement",
+      "sourceLine": "in order to qualify, you must meet the education and/or experience requirements described below. experience refers to paid and unpaid experience, including volunteer work done through national service programs (e.g., peace corps, americorps) and other organizations (e.g., professional; philanthropic; religious; spiritual; community; student; social). you will receive credit for all qualifying experience, including volunteer experience. your resume must clearly describe your relevant experience; if qualifying based on education, your transcripts will be required as part of your application. additional information about transcripts is in this document.",
       "signalType": "claim_sensitive_requirement"
     }
   ],
   "relevant_jd_lines": [
-    "write clean and efficient python and sql scripts for data processing.",
-    "familiarity with databases (mysql, postgresql, sql server).",
-    "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors.",
-    "bachelor’s degree in computer science, data engineering, it, or a related field.",
-    "exposure to tools like airflow, dbt, spark, or kafka.",
-    "internship or academic project related to data engineering or software development.",
-    "mayzax solutions is a fast-growing technology and consulting firm delivering data, cloud, and automation solutions to clients across the u.s. we help organizations turn raw data into powerful insights using modern engineering practices.",
-    "assist in building and maintaining etl/elt pipelines for data ingestion and transformation.",
-    "support the development of data warehouses and data lakes.",
-    "help monitor data workflows and troubleshoot pipeline issues."
+    "assist in the design and construction of civil engineering structures or systems using established criteria or specifications.",
+    "identify civil engineering problems and recommend corrective action.",
+    "review technical civil engineering project design documents and submittals."
   ],
   "line_classification": [
     {
-      "kind": "body",
-      "line": "company: mayzax solutions"
+      "kind": "role",
+      "line": "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
     },
     {
       "kind": "body",
-      "line": "location: remote (based in usa)"
+      "line": "monitor civil engineering projects and resources."
     },
     {
       "kind": "body",
-      "line": "employment type: full-time"
-    },
-    {
-      "kind": "body",
-      "line": "experience level: entry-level / junior"
-    },
-    {
-      "kind": "body",
-      "line": "work authorization: open to all eligible candidates (opt/cpt/h-1b transfers welcome)"
-    },
-    {
-      "kind": "body",
-      "line": "about mayzax solutions"
-    },
-    {
-      "kind": "body",
-      "line": "mayzax solutions is a fast-growing technology and consulting firm delivering data, cloud, and automation solutions to clients across the u.s. we help organizations turn raw data into powerful insights using modern engineering practices."
-    },
-    {
-      "kind": "body",
-      "line": "position overview"
-    },
-    {
-      "kind": "body",
-      "line": "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors."
+      "line": "identify civil engineering problems and recommend corrective action."
     },
     {
       "kind": "role",
-      "line": "assist in building and maintaining etl/elt pipelines for data ingestion and transformation."
+      "line": "review technical civil engineering project design documents and submittals."
     },
     {
       "kind": "body",
-      "line": "write clean and efficient python and sql scripts for data processing."
+      "line": "*must be a us citizen"
     },
     {
-      "kind": "role",
-      "line": "support the development of data warehouses and data lakes."
+      "kind": "qualification_requirement",
+      "line": "who may apply: to be eligible for consideration you must meet the definition of as defined below:"
     },
     {
-      "kind": "body",
-      "line": "help monitor data workflows and troubleshoot pipeline issues."
+      "kind": "qualification_requirement",
+      "line": "bachelor's degree (or higher degree) in engineering. to be acceptable, the program must: (1) lead to a bachelor's degree (or higher degree) in a school of engineering with at least one program accredited by the accreditation board for engineering and technology (abet); or (2) include differential and integral calculus and courses (more advanced than first-year physics and chemistry) in five of the following seven areas of engineering science or physics: (a) statics, dynamics; (b) strength of materials (stress-strain relationships); (c) fluid mechanics, hydraulics; (d) thermodynamics; (e) electrical fields and circuits; (f) nature and properties of materials (relating particle and aggregate structure to properties); and (g) any other comparable area of fundamental engineering science or physics, such as optics, heat transfer, soil mechanics, or electronics. (degree must be completed by june 2026.)"
     },
     {
-      "kind": "role",
-      "line": "work closely with senior engineers to implement best practices for data quality, governance, and performance."
-    },
-    {
-      "kind": "body",
-      "line": "collaborate with analysts and cross-functional teams to ensure availability of reliable datasets."
-    },
-    {
-      "kind": "body",
-      "line": "document processes, workflows, and system updates."
-    },
-    {
-      "kind": "requirement",
-      "line": "required skills & qualifications"
-    },
-    {
-      "kind": "body",
-      "line": "bachelor’s degree in computer science, data engineering, it, or a related field."
-    },
-    {
-      "kind": "body",
-      "line": "strong foundation in:"
-    },
-    {
-      "kind": "body",
-      "line": "python"
+      "kind": "qualification_requirement",
+      "line": "in order to qualify, you must meet the education and/or experience requirements described below. experience refers to paid and unpaid experience, including volunteer work done through national service programs (e.g., peace corps, americorps) and other organizations (e.g., professional; philanthropic; religious; spiritual; community; student; social). you will receive credit for all qualifying experience, including volunteer experience. your resume must clearly describe your relevant experience; if qualifying based on education, your transcripts will be required as part of your application. additional information about transcripts is in this document."
     }
   ],
   "top_known_phrases": [
     {
-      "term": "data engineering",
-      "count": 3.0
-    },
-    {
-      "term": "cloud platforms",
+      "term": "civil engineering structures",
       "count": 1.0
     },
     {
-      "term": "cross-functional teams",
+      "term": "corrective action",
       "count": 1.0
     },
     {
-      "term": "data ingestion",
+      "term": "criteria or specifications",
       "count": 1.0
     },
     {
-      "term": "data integration",
+      "term": "design and construction",
       "count": 1.0
     },
     {
-      "term": "data quality",
-      "count": 1.0
-    },
-    {
-      "term": "elt pipelines",
-      "count": 1.0
-    },
-    {
-      "term": "version control",
+      "term": "project design documents",
       "count": 1.0
     }
   ],
   "top_stack_terms": {
-    "concrete": [
-      {
-        "term": "airflow",
-        "count": 1.0
-      },
-      {
-        "term": "amazon web services",
-        "count": 1.0
-      },
-      {
-        "term": "azure",
-        "count": 1.0
-      },
-      {
-        "term": "git",
-        "count": 1.0
-      },
-      {
-        "term": "google cloud platform",
-        "count": 1.0
-      },
-      {
-        "term": "mysql",
-        "count": 1.0
-      },
-      {
-        "term": "postgresql",
-        "count": 1.0
-      },
-      {
-        "term": "spark",
-        "count": 1.0
-      },
-      {
-        "term": "sql",
-        "count": 1.0
-      }
-    ],
+    "concrete": [],
     "capability": []
   },
   "top_tokens": {
     "title": [
-      {
-        "term": "data",
-        "count": 1.0
-      },
       {
         "term": "engineer",
         "count": 1.0
@@ -617,59 +604,59 @@
     ],
     "body": [
       {
-        "term": "data",
-        "count": 9.0
-      },
-      {
-        "term": "tools",
-        "count": 4.0
-      },
-      {
-        "term": "modern",
-        "count": 3.0
-      },
-      {
-        "term": "sql",
-        "count": 3.0
-      },
-      {
-        "term": "business intelligence",
-        "count": 2.0
-      },
-      {
-        "term": "cloud",
-        "count": 2.0
-      },
-      {
-        "term": "development",
-        "count": 2.0
-      },
-      {
         "term": "engineering",
-        "count": 2.0
-      },
-      {
-        "term": "engineers",
-        "count": 2.0
-      },
-      {
-        "term": "entry-level",
-        "count": 2.0
-      },
-      {
-        "term": "etl",
-        "count": 2.0
+        "count": 8.0
       },
       {
         "term": "experience",
+        "count": 6.0
+      },
+      {
+        "term": "degree",
+        "count": 5.0
+      },
+      {
+        "term": "physics",
+        "count": 3.0
+      },
+      {
+        "term": "bachelor",
         "count": 2.0
       },
       {
-        "term": "help",
+        "term": "education",
         "count": 2.0
       },
       {
-        "term": "join",
+        "term": "materials",
+        "count": 2.0
+      },
+      {
+        "term": "mechanics",
+        "count": 2.0
+      },
+      {
+        "term": "meet",
+        "count": 2.0
+      },
+      {
+        "term": "program",
+        "count": 2.0
+      },
+      {
+        "term": "properties",
+        "count": 2.0
+      },
+      {
+        "term": "qualifying",
+        "count": 2.0
+      },
+      {
+        "term": "science",
+        "count": 2.0
+      },
+      {
+        "term": "volunteer",
         "count": 2.0
       }
     ],

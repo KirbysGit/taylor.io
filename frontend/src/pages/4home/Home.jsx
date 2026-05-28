@@ -29,6 +29,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import DashboardShell from '@/components/DashboardShell'
 import { getMyProfile, listSavedResumes, deleteSavedResume } from '@/api/services/profile'
+import { logoutUser } from '@/api/services/auth'
 
 const dataRows = [
 	{
@@ -591,26 +592,15 @@ function Home() {
 
 	useEffect(() => {
 		const fetchDashboard = async () => {
-			const token = localStorage.getItem('token')
 			const userData = localStorage.getItem('user')
 
-			if (!token || !userData) {
-				navigate('/auth')
-				return
-			}
-
 			try {
-				const storedUser = JSON.parse(userData)
-				setUser(storedUser)
+				if (userData) setUser(JSON.parse(userData))
 
-				try {
-					const response = await getMyProfile()
-					const profileData = response.data || response
-					setProfile(profileData)
-					if (profileData?.user) setUser(profileData.user)
-				} catch {
-					setProfile(null)
-				}
+				const response = await getMyProfile()
+				const profileData = response.data || response
+				setProfile(profileData)
+				if (profileData?.user) setUser(profileData.user)
 			} catch {
 				navigate('/auth')
 				return
@@ -626,9 +616,8 @@ function Home() {
 		if (user) fetchSavedResumes()
 	}, [user, fetchSavedResumes])
 
-	const handleLogout = () => {
-		localStorage.removeItem('token')
-		localStorage.removeItem('user')
+	const handleLogout = async () => {
+		await logoutUser()
 		navigate('/')
 	}
 

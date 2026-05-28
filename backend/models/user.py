@@ -1,7 +1,7 @@
 # models / user.py
 
 # imports.
-from sqlalchemy import Column, Integer, String, JSON, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, JSON, DateTime
 from sqlalchemy.orm import relationship
 from .base import Base
 
@@ -15,6 +15,12 @@ class User(Base):
     last_name = Column(String(100), nullable=False)                         # last name.
     email = Column(String(255), unique=True, nullable=False, index=True)    # email.
     password_hash = Column(String(255), nullable=False)                     # password.
+    email_verified = Column(Boolean, nullable=False, default=False)
+    email_verified_at = Column(DateTime, nullable=True)
+    email_verification_token_hash = Column(String(255), nullable=True)
+    email_verification_expires_at = Column(DateTime, nullable=True)
+    password_reset_token_hash = Column(String(255), nullable=True)
+    password_reset_expires_at = Column(DateTime, nullable=True)
 
     # attached resume metadata (Info page: "Attached Resume" banner)
     attached_resume_filename = Column(String(255), nullable=True)
@@ -38,4 +44,3 @@ class User(Base):
 
     # saved resume previews (snapshots for later)
     saved_resumes = relationship("SavedResume", back_populates="user", cascade="all, delete-orphan")
-

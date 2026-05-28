@@ -93,11 +93,7 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 
 			const response = await registerUser(userData)
 
-			if (response.data.user) {
-				localStorage.setItem('user', JSON.stringify(response.data.user))
-			}
-
-			onSignUpSuccess(response.data.user || response.data)
+			onSignUpSuccess(response.data || response)
 		} catch (err) {
 			setFormError(
 				err.response?.data?.detail || err.response?.data?.message || 'Sign up failed. Please try again.',
@@ -230,22 +226,6 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 						<p className="mx-auto mt-1.5 max-w-[22rem] text-sm leading-relaxed text-gray-600">
 							Save your experience, choose the role, and generate a r&eacute;sum&eacute; that fits.
 						</p>
-					</div>
-
-					<button
-						type="button"
-						disabled
-						className="auth-oauth-button mb-3 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white/92 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-[0_8px_18px_rgba(24,24,27,0.08)] disabled:cursor-not-allowed disabled:opacity-70"
-						title="Google sign-in coming soon"
-					>
-						<span className="text-lg font-black text-[#4285f4]">G</span>
-						Continue with Google
-					</button>
-
-					<div className="auth-oauth-divider mb-3 flex items-center gap-4 text-xs text-gray-400">
-						<span className="h-px flex-1 bg-gray-200" />
-						<span>or</span>
-						<span className="h-px flex-1 bg-gray-200" />
 					</div>
 
 					<form onSubmit={handleSubmit} className="auth-form space-y-3.5" noValidate>

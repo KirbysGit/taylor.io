@@ -19,6 +19,7 @@ import {
 	faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import DashboardShell from '@/components/DashboardShell'
+import { logoutUser } from '@/api/services/auth'
 import { deleteSavedResume, listSavedResumes, updateSavedResume } from '@/api/services/profile'
 
 const STATUS_META = {
@@ -348,9 +349,8 @@ export default function ResumesHub() {
 	const [editingResume, setEditingResume] = useState(null)
 	const [isSavingDetails, setIsSavingDetails] = useState(false)
 
-	const handleLogout = useCallback(() => {
-		localStorage.removeItem('token')
-		localStorage.removeItem('user')
+	const handleLogout = useCallback(async () => {
+		await logoutUser()
 		navigate('/')
 	}, [navigate])
 
@@ -367,14 +367,8 @@ export default function ResumesHub() {
 	}, [])
 
 	useEffect(() => {
-		const token = localStorage.getItem('token')
-		const userData = localStorage.getItem('user')
-		if (!token || !userData) {
-			navigate('/auth')
-			return
-		}
 		fetchSavedResumes()
-	}, [fetchSavedResumes, navigate])
+	}, [fetchSavedResumes])
 
 	const stats = useMemo(() => {
 		const items = savedResumes.items

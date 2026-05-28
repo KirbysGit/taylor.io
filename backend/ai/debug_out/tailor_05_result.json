@@ -1,8 +1,8 @@
 {
   "final": {
-    "summary": "Tailoring log for: Data Engineer.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- sectionVisibility: structure or presentation updated.\n- Experience id 5: moderate update to bullets and/or line items.\n- Project id 9: moderate description/stack revision.\n- Project id 10: removed from resume.\n- Project id 12: removed from resume.\n- Project id 17: removed from resume.\n- Project id 18: removed from resume.\n- Project id 20: removed from resume.\n- Skills id 55: row removed.\n- Skills id 56: row removed.\n- Skills id 58: minor name/category touch-up.\n- Skills id 60: row removed.\n- Skills id 61: row removed.\n- Skills id 62: row removed.",
+    "summary": "Tailoring log for: Civil Engineer.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- Project id 21: light edit to one part of the project (minor).\n- Skills id 76: minor name/category touch-up.\n- Skills id 77: minor name/category touch-up.\n- Skills id 78: minor name/category touch-up.\n- Skills id 79: minor name/category touch-up.",
     "tailorExplanation": {
-      "paragraph": "I treated this as a Data Engineer at Mayzax Solutions draft and made data, SQL, and amazon web services easy to find. You already had the right raw material: data, SQL, amazon web services, and PostgreSQL. I pushed that proof forward in Centi – Personal Finance App. Prove people-facing sales readiness through communication, outreach-adjacent service work, revenue-adjacent impact, and truthful product interest. I trimmed Taylor.io – Resume Builder & Parser, SecureScape – Smart Security System, and ShelfVision - Dense Shelf Object Detection because they were weaker signals for this read. The biggest help here: kept the projects that best prove the role fit, reframed your experience around the job's strongest signals, and gave the summary a clearer role-specific angle. Under the hood, I changed the summary, experience, projects, skills, and which sections show based on those signals.",
+      "paragraph": "I treated this as a stretch match for Civil Engineer at Army Civilian Careers, so I focused on transferable proof instead of pretending every JD term was already in your background. The strongest direct overlap I found was engineer; the rest of the draft bridges from nearby evidence where your resume supports it. Use the strongest supported evidence to create an honest transferable fit story. The biggest help here: kept the projects that best prove the role fit, gave the summary a clearer role-specific angle, and moved the most relevant skills higher. Under the hood, I changed the summary, projects, and skills based on those signals.",
       "chips": [
         {
           "label": "Strict truth",
@@ -10,10 +10,6 @@
         },
         {
           "label": "Summary updated",
-          "tone": "action"
-        },
-        {
-          "label": "Experience reframed",
           "tone": "action"
         },
         {
@@ -25,15 +21,15 @@
           "tone": "action"
         },
         {
+          "label": "High fit risk",
+          "tone": "caution"
+        },
+        {
+          "label": "Bridge fit",
+          "tone": "caution"
+        },
+        {
           "label": "Some JD terms not evidenced",
-          "tone": "caution"
-        },
-        {
-          "label": "Review skills",
-          "tone": "caution"
-        },
-        {
-          "label": "Review rewrite strength",
           "tone": "caution"
         }
       ],
@@ -41,371 +37,240 @@
         {
           "title": "What I prioritized",
           "items": [
-            "Prove people-facing sales readiness through communication, outreach-adjacent service work, revenue-adjacent impact, and truthful product interest.",
-            "I prioritized customer communication, people-facing work, revenue-adjacent metrics, relationship handling, sales readiness, and domain-relevant product interest."
+            "Use the strongest supported evidence to create an honest transferable fit story.",
+            "I prioritized direct evidence first, transferable proof, measurable outcomes, and claim caution."
           ]
         },
         {
           "title": "Why it changed",
           "items": [
-            "Target story: Proven experience in building data pipelines and backend services, with strong skills in Python, SQL, and PostgreSQL.",
-            "Main evidence themes: data processing, ETL pipelines, and backend services."
+            "Target story: Open with concrete proof from the resume; no new facts; honor every avoid line."
           ]
         },
         {
-          "title": "Summary choice",
+          "title": "Fit risk",
           "items": [
-            "I showed the professional summary because the summary can connect the candidate's experience to the role's requirements and highlight relevant skills."
+            "The posting has many unsupported role terms, so the draft should stay conservative and visibly transferable.",
+            "Bridge only from evidenced work and keep unsupported expectations in review language."
+          ]
+        },
+        {
+          "title": "Fit read",
+          "items": [
+            "Stretch fit: be transparent and conservative. Frame transferable strengths, keep useful non-keyword evidence, and explicitly avoid unsupported target-role claims.",
+            "Transferable evidence I considered: BitGo Software Engineering Intern and Centi – Personal Finance App."
           ]
         },
         {
           "title": "What I spotlighted",
           "items": [
-            "BitGo Software Engineering Intern",
             "Centi – Personal Finance App"
-          ]
-        },
-        {
-          "title": "What I trimmed",
-          "items": [
-            "Taylor.io – Resume Builder & Parser",
-            "SecureScape – Smart Security System",
-            "ShelfVision - Dense Shelf Object Detection",
-            "Tizirsso Racing – Portfolio & Sponsorship Website",
-            "SentimentTrader - Real-Time Stock Sentiment Pipeline",
-            "NumPy",
-            "AWS (EC2)",
-            "AI-Driven Workflows"
-          ]
-        },
-        {
-          "title": "Related evidence",
-          "items": [
-            "data engineering: related evidence includes etl, sql, and schemas."
           ]
         },
         {
           "title": "Not directly evidenced",
           "items": [
-            "I did not claim git, Google Cloud Platform, azure, kafka, airflow, data engineering, certification support, and kaf because I could not verify that exact experience in the resume."
+            "I did not claim civil engineering structures, corrective action, criteria or specifications, design and construction, project design documents, construction, submittals, and corrective because I could not verify that exact experience in the resume."
           ]
         },
         {
           "title": "Before you send",
           "items": [
-            "Do not call the candidate a sales professional unless formal sales or outreach....",
-            "I treated git, google cloud platform, azure, kaf as review items, not resume claims, because I could not verify them in the resume.",
-            "Related evidence can support the broader story, but not exact ownership of git, g.",
-            "Some JD terms were not directly evidenced: git, google cloud platform, azure, and kafka.",
-            "Review the skills list; a few useful-but-lower-priority skills may have been trimmed."
+            "Do not treat weak keyword overlap as direct experience.",
+            "I treated civil engineering structures, correcti as review items, not resume claims, because I could not verify them in the resume.",
+            "I did not claim heat transfer, abet, and transcripts because that exact evidence was not in the resume.",
+            "Some JD terms were not directly evidenced: civil engineering structures, corrective action, criteria or specifications, and design and construction."
           ]
         }
       ],
       "evidence": {
-        "alignmentMode": "direct",
+        "alignmentMode": "stretch",
         "jobStrategy": {
-          "lane": "sales_customer",
-          "persona": "sales_growth",
-          "roleArchetype": "sales_growth_outreach",
-          "fitMode": "direct",
+          "lane": "general_adjacent",
+          "persona": "general_adjacent",
+          "roleArchetype": "general_adjacent",
+          "fitMode": "stretch",
           "lengthMode": "standard",
-          "readerGoal": "Prove people-facing sales readiness through communication, outreach-adjacent service work, revenue-adjacent impact, and truthful product interest.",
+          "readerGoal": "Use the strongest supported evidence to create an honest transferable fit story.",
           "proofStyle": [
-            "customer communication",
-            "people-facing work",
-            "revenue-adjacent metrics",
-            "relationship handling",
-            "sales readiness",
-            "domain-relevant product interest"
+            "direct evidence first",
+            "transferable proof",
+            "measurable outcomes",
+            "claim caution"
           ],
           "keepPriorities": [
-            "customer-facing roles",
-            "sales or revenue evidence",
-            "interpersonal proof",
-            "one relevant product/software project"
+            "strongest supported rows",
+            "transferable evidence",
+            "role-adjacent metrics"
           ],
           "trimPriorities": [
-            "deep technical projects",
-            "unsupported sales ownership",
-            "non-role technical stacks"
+            "unsupported title claims",
+            "off-lane rows",
+            "keyword-only overlap"
           ],
           "claimRules": [
-            "Do not call the candidate a sales professional unless formal sales or outreach....",
-            "Do not claim unsupported terms directly: git, google cloud platform, azure, kaf...",
-            "Exact tools/platforms stay as review gaps unless resume evidence exists: git, g...",
-            "Do not claim certification support unless directly evidenced."
+            "Do not treat weak keyword overlap as direct experience.",
+            "Do not claim unsupported terms directly: civil engineering structures, correcti...",
+            "Do not claim heat transfer, abet, transcripts unless directly evidenced.",
+            "Bridge only from evidenced work and keep unsupported expectations in review lan..."
           ],
-          "skillPreserve": [
-            "Customer Service",
-            "Communication",
-            "Teamwork",
-            "Problem Solving",
-            "Reliability"
-          ],
-          "skillReframeTargets": [
-            "Relationship Building",
-            "Sales Support",
-            "Customer Engagement",
-            "Goal-Oriented Communication",
-            "Outreach Readiness"
-          ],
-          "skillDeprioritize": [
-            "Python",
-            "SQL",
-            "React",
-            "APIs",
-            "ML",
-            "data pipelines",
-            "security tools"
-          ],
-          "summaryGuardrails": [
-            "Do not make technical projects sound like sales proof.",
-            "Use coachable/readiness language instead of expert claims."
-          ],
+          "skillPreserve": [],
+          "skillReframeTargets": [],
+          "skillDeprioritize": [],
+          "summaryGuardrails": [],
           "sectionBudget": {
             "experience": null,
             "projects": null,
             "skillsGroups": null,
             "advisory": true
           },
-          "supportedSignals": [
-            "data",
-            "sql",
-            "amazon web services",
-            "postgresql",
-            "python",
-            "mysql"
-          ],
+          "supportedSignals": [],
           "gapSignals": [
-            "git",
-            "google cloud platform",
-            "azure",
-            "kafka",
-            "airflow",
-            "data engineering",
-            "certification support"
+            "civil engineering structures",
+            "corrective action",
+            "criteria or specifications",
+            "design and construction",
+            "project design documents",
+            "construction",
+            "submittals",
+            "corrective",
+            "criteria",
+            "specifications",
+            "engineer",
+            "action"
           ]
         },
         "evidenceClassification": [
           {
             "section": "experience",
-            "id": 5,
+            "id": 9,
             "label": "BitGo Software Engineering Intern",
             "terms": [
-              "data",
-              "sql",
-              "amazon web services",
-              "postgresql",
-              "python"
+              "engineer"
             ],
             "evidenceType": "direct_role_evidence",
             "claimStrength": "direct",
-            "guidance": "Use as customer/client-facing communication or service evidence."
+            "guidance": "Can be used as direct role-fit evidence when rewriting this row."
           },
           {
             "section": "projects",
-            "id": 9,
+            "id": 21,
             "label": "Centi – Personal Finance App",
             "terms": [
-              "data",
-              "sql",
-              "postgresql"
+              "compliance / standards",
+              "metrics / reporting",
+              "workflow / automation"
             ],
-            "evidenceType": "weak_lexical_overlap",
-            "claimStrength": "cautious",
-            "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
-          },
-          {
-            "section": "projects",
-            "id": 10,
-            "label": "Taylor.io – Resume Builder & Parser",
-            "terms": [
-              "data",
-              "sql",
-              "postgresql"
-            ],
-            "evidenceType": "weak_lexical_overlap",
-            "claimStrength": "cautious",
-            "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
-          },
-          {
-            "section": "projects",
-            "id": 20,
-            "label": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-            "terms": [
-              "data",
-              "sql",
-              "python"
-            ],
-            "evidenceType": "weak_lexical_overlap",
-            "claimStrength": "cautious",
-            "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
-          },
-          {
-            "section": "education",
-            "id": 3,
-            "label": "University of Central Florida",
-            "terms": [
-              "data"
-            ],
-            "evidenceType": "weak_lexical_overlap",
-            "claimStrength": "cautious",
-            "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
-          },
-          {
-            "section": "projects",
-            "id": 12,
-            "label": "SecureScape – Smart Security System",
-            "terms": [
-              "python"
-            ],
-            "evidenceType": "domain_tool_evidence",
-            "claimStrength": "supporting",
-            "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
-          },
-          {
-            "section": "projects",
-            "id": 17,
-            "label": "ShelfVision - Dense Shelf Object Detection",
-            "terms": [
-              "python"
-            ],
-            "evidenceType": "domain_tool_evidence",
-            "claimStrength": "supporting",
-            "guidance": "Matched term is company/product context; use as supporting domain fluency, not direct role responsibility."
-          },
-          {
-            "section": "skills",
-            "id": 51,
-            "label": "PostgreSQL",
-            "terms": [
-              "data",
-              "sql",
-              "postgresql"
-            ],
-            "evidenceType": "weak_lexical_overlap",
-            "claimStrength": "cautious",
-            "guidance": "Same-word overlap is weak here; use only as support and avoid direct role claims."
+            "evidenceType": "transferable_behavior",
+            "claimStrength": "bridge",
+            "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
           }
         ],
         "jdSignalIntent": [
           {
-            "term": "data",
+            "term": "civil engineering structures",
             "intent": "role_responsibility",
             "priority": 3,
             "signalType": "role_capability",
             "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
             "linePreview": [
-              "write clean and efficient python and sql scripts for data processing.",
-              "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors."
+              "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
             ]
           },
           {
-            "term": "sql",
-            "intent": "company_product_context",
-            "priority": 1,
-            "signalType": "tool_platform",
-            "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-            "linePreview": [
-              "write clean and efficient python and sql scripts for data processing.",
-              "familiarity with databases (mysql, postgresql, sql server)."
-            ]
-          },
-          {
-            "term": "amazon web services",
+            "term": "corrective action",
             "intent": "candidate_requirement",
             "priority": 2,
-            "signalType": "tool_platform",
+            "signalType": "role_capability",
             "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
-            "linePreview": []
-          },
-          {
-            "term": "postgresql",
-            "intent": "company_product_context",
-            "priority": 1,
-            "signalType": "tool_platform",
-            "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
             "linePreview": [
-              "familiarity with databases (mysql, postgresql, sql server)."
+              "identify civil engineering problems and recommend corrective action."
             ]
           },
           {
-            "term": "python",
-            "intent": "company_product_context",
-            "priority": 1,
-            "signalType": "tool_platform",
-            "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-            "linePreview": [
-              "write clean and efficient python and sql scripts for data processing."
-            ]
-          },
-          {
-            "term": "airflow",
-            "intent": "company_product_context",
-            "priority": 1,
-            "signalType": "role_capability",
-            "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-            "linePreview": [
-              "exposure to tools like airflow, dbt, spark, or kafka."
-            ]
-          },
-          {
-            "term": "mysql",
-            "intent": "company_product_context",
-            "priority": 1,
-            "signalType": "role_capability",
-            "reason": "Company/product context: useful for wording and domain awareness, but should not drive hero selection by itself.",
-            "linePreview": [
-              "familiarity with databases (mysql, postgresql, sql server)."
-            ]
-          },
-          {
-            "term": "data engineering",
+            "term": "criteria or specifications",
             "intent": "role_responsibility",
             "priority": 3,
             "signalType": "role_capability",
             "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
             "linePreview": [
-              "we are seeking a motivated entry-level data engineer to join our engineering team. this is an excellent opportunity for recent graduates or early-career professionals who want to start their career in data engineering, work with modern cloud tools, and grow under senior technical mentors.",
-              "bachelor’s degree in computer science, data engineering, it, or a related field."
+              "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
+            ]
+          },
+          {
+            "term": "design and construction",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "signalType": "role_capability",
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
+            ]
+          },
+          {
+            "term": "project design documents",
+            "intent": "candidate_requirement",
+            "priority": 2,
+            "signalType": "role_capability",
+            "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+            "linePreview": [
+              "review technical civil engineering project design documents and submittals."
+            ]
+          },
+          {
+            "term": "construction",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "signalType": "role_capability",
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
+            ]
+          },
+          {
+            "term": "submittals",
+            "intent": "candidate_requirement",
+            "priority": 2,
+            "signalType": "role_capability",
+            "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+            "linePreview": [
+              "review technical civil engineering project design documents and submittals."
+            ]
+          },
+          {
+            "term": "corrective",
+            "intent": "candidate_requirement",
+            "priority": 2,
+            "signalType": "role_capability",
+            "reason": "Inferred from keyword rank; use with evidence classification rather than as a standalone claim.",
+            "linePreview": [
+              "identify civil engineering problems and recommend corrective action."
+            ]
+          },
+          {
+            "term": "criteria",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "signalType": "role_capability",
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
+            ]
+          },
+          {
+            "term": "specifications",
+            "intent": "role_responsibility",
+            "priority": 3,
+            "signalType": "role_capability",
+            "reason": "Role/action signal: use this to shape hero selection and lead bullets when resume evidence supports it.",
+            "linePreview": [
+              "assist in the design and construction of civil engineering structures or systems using established criteria or specifications."
             ]
           }
         ],
         "gapSupport": [
           {
-            "term": "git",
-            "status": "unsupported_exact",
-            "signalType": "tool_platform",
-            "supportingEvidence": [],
-            "capability": "exact tool/platform",
-            "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
-          },
-          {
-            "term": "google cloud platform",
-            "status": "unsupported_exact",
-            "signalType": "tool_platform",
-            "supportingEvidence": [],
-            "capability": "exact tool/platform",
-            "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
-          },
-          {
-            "term": "azure",
-            "status": "unsupported_exact",
-            "signalType": "tool_platform",
-            "supportingEvidence": [],
-            "capability": "exact tool/platform",
-            "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
-          },
-          {
-            "term": "kafka",
-            "status": "unsupported_exact",
-            "signalType": "tool_platform",
-            "supportingEvidence": [],
-            "capability": "exact tool/platform",
-            "claimGuidance": "Do not name this exact tool or platform unless it appears in the resume."
-          },
-          {
-            "term": "airflow",
+            "term": "civil engineering structures",
             "status": "unsupported",
             "signalType": "role_capability",
             "supportingEvidence": [],
@@ -413,80 +278,131 @@
             "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
           },
           {
-            "term": "data engineering",
-            "status": "conceptual",
+            "term": "corrective action",
+            "status": "unsupported",
             "signalType": "role_capability",
-            "supportingEvidence": [
-              "etl",
-              "sql",
-              "schemas",
-              "pipeline",
-              "ingestion",
-              "pipelines"
-            ],
-            "capability": "data systems",
-            "claimGuidance": "Use as related data-focused development evidence; avoid claiming a formal data engineer title unless the resume directly supports it."
+            "supportingEvidence": [],
+            "capability": "",
+            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+          },
+          {
+            "term": "criteria or specifications",
+            "status": "unsupported",
+            "signalType": "role_capability",
+            "supportingEvidence": [],
+            "capability": "",
+            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+          },
+          {
+            "term": "design and construction",
+            "status": "unsupported",
+            "signalType": "role_capability",
+            "supportingEvidence": [],
+            "capability": "",
+            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+          },
+          {
+            "term": "project design documents",
+            "status": "unsupported",
+            "signalType": "role_capability",
+            "supportingEvidence": [],
+            "capability": "",
+            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+          },
+          {
+            "term": "construction",
+            "status": "unsupported",
+            "signalType": "role_capability",
+            "supportingEvidence": [],
+            "capability": "",
+            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+          },
+          {
+            "term": "submittals",
+            "status": "unsupported",
+            "signalType": "role_capability",
+            "supportingEvidence": [],
+            "capability": "",
+            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+          },
+          {
+            "term": "corrective",
+            "status": "unsupported",
+            "signalType": "role_capability",
+            "supportingEvidence": [],
+            "capability": "",
+            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+          },
+          {
+            "term": "criteria",
+            "status": "unsupported",
+            "signalType": "role_capability",
+            "supportingEvidence": [],
+            "capability": "",
+            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
+          },
+          {
+            "term": "specifications",
+            "status": "unsupported",
+            "signalType": "role_capability",
+            "supportingEvidence": [],
+            "capability": "",
+            "claimGuidance": "Do not claim this directly; mention only as a gap or omit."
           }
         ],
         "fitRisk": {
-          "level": "normal",
-          "kind": "",
-          "reason": "",
+          "level": "high",
+          "kind": "limited_overlap",
+          "reason": "The posting has many unsupported role terms, so the draft should stay conservative and visibly transferable.",
           "targetSignals": [],
           "unsupportedSeniorityTerms": [],
           "resumeScopeEvidence": {
             "seniorTitleEvidence": [],
             "earlyCareerTitleEvidence": [
-              "bitgo software engineering intern",
-              "bar louie server",
-              "hawkers host / expo"
+              "bitgo software engineering intern"
             ],
             "seniorScopePhraseEvidence": []
           },
-          "recommendedAction": "",
-          "claimGuidance": ""
+          "recommendedAction": "transferable_bridge",
+          "claimGuidance": "Bridge only from evidenced work and keep unsupported expectations in review language."
         },
-        "matchedTerms": [
-          "data",
-          "SQL",
-          "amazon web services",
-          "PostgreSQL"
-        ],
+        "matchedTerms": [],
         "jobPriorityTerms": [
-          "data",
-          "SQL",
-          "amazon web services"
+          "criteria",
+          "specifications",
+          "engineer"
         ],
         "resumeGaps": [
-          "git",
-          "google cloud platform",
-          "azure",
-          "kafka"
+          "civil engineering structures",
+          "corrective action",
+          "criteria or specifications",
+          "design and construction"
         ],
         "notDirectlyEvidencedTerms": [
-          "git",
-          "google cloud platform",
-          "azure",
-          "kafka",
-          "airflow",
-          "data engineering",
-          "certification support",
-          "kaf",
-          "g"
+          "civil engineering structures",
+          "corrective action",
+          "criteria or specifications",
+          "design and construction",
+          "project design documents",
+          "construction",
+          "submittals",
+          "corrective",
+          "criteria",
+          "specifications",
+          "engineer",
+          "action"
         ],
         "changedSections": [
           "summary",
-          "experience",
           "projects",
-          "skills",
-          "section visibility"
+          "skills"
         ],
         "mainMoves": [
           "kept the projects that best prove the role fit",
-          "reframed your experience around the job's strongest signals",
-          "gave the summary a clearer role-specific angle"
+          "gave the summary a clearer role-specific angle",
+          "moved the most relevant skills higher"
         ],
-        "layoutChanged": "summary/section visibility",
+        "layoutChanged": "",
         "preferencesUsed": [
           "strict_truth"
         ]
@@ -494,15 +410,15 @@
     },
     "updatedResumeData": {
       "header": {
-        "first_name": "Colin",
-        "last_name": "Kirby",
-        "email": "kirbycolin26@gmail.com",
+        "first_name": "C",
+        "last_name": "K",
+        "email": "co201115@ucf.edu",
         "phone": "407-876-8172",
-        "location": "Orlando, FL",
+        "location": "",
         "linkedin": "https://linkedin.com/in/colinwkirby/",
         "github": "https://github.com/KirbysGit",
-        "portfolio": "https://colinkirby.dev",
-        "tagline": "Software Engineer * _Working Harder Than You_",
+        "portfolio": "",
+        "tagline": "",
         "visibility": {
           "showEmail": true,
           "showPhone": true,
@@ -523,67 +439,41 @@
       },
       "education": [
         {
-          "id": 3,
+          "id": 4,
           "school": "University of Central Florida",
-          "degree": "Bachelors of Science",
-          "discipline": "Computer Engineering",
-          "location": "Orlando, FL",
+          "degree": "Bachelor of Science",
+          "discipline": "",
+          "location": "",
           "start_date": "2021-08-01",
           "end_date": "2025-05-01",
           "current": false,
-          "gpa": "3.7 / 4.0",
-          "minor": "Finance",
-          "subsections": {
-            "Relevant Coursework": "Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design",
-            "Honors & Awards": "Dean’s List 2021, President’s Honor Roll 2023 – 2025, Pegasus Gold Scholarship",
-            "Clubs & Extracurriculars": "AI @ UCF, Knight Hacks, SHPE @ UCF"
-          }
+          "gpa": "3.78 / 4.0",
+          "minor": "",
+          "subsections": {}
         }
       ],
       "experience": [
         {
-          "id": 5,
+          "id": 9,
           "title": "Software Engineering Intern",
           "company": "BitGo",
-          "description": "• Built REST APIs in Python/Django to support secure data workflows for financial compliance, improving operational efficiency.\n• Collaborated with senior engineers on system design and architecture, contributing to scalable service patterns and data modeling.\n• Developed React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency.",
+          "description": "• Built and maintained backend services and REST APIs in Python/Django, supporting secure internal workflows for\n• financial and compliance teams.\n• Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and\n• operational metrics.\n• Collaborated with senior engineers on system design and architecture, contributing to scalable service patterns and\n• data modeling.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency.",
           "start_date": "2024-05-01",
           "end_date": "2025-06-01",
           "current": false,
-          "location": "Remote",
-          "skills": "Python, Django, React, PostgreSQL, AWS EC2"
-        },
-        {
-          "id": 7,
-          "title": "Server",
-          "company": "Bar Louie",
-          "description": "• Adapting to high-pressure situations and thriving under stress.\n• Effective communication with guests, kitchen, and bar teams.\n• Working seamlessly in fast-paced collaborative environments.",
-          "start_date": "2023-10-01",
-          "end_date": "",
-          "current": false,
-          "location": "Orlando, FL",
-          "skills": ""
-        },
-        {
-          "id": 8,
-          "title": "Host / Expo",
-          "company": "Hawkers",
-          "description": "• Attention to detail in every order for consistent quality.\n• Clear communication with customers, kitchen, and delivery teams.\n• Direct impact on business revenue - managing ~35% of store sales.",
-          "start_date": "2022-05-01",
-          "end_date": "2022-08-01",
-          "current": false,
-          "location": "Windermere, FL",
+          "location": "",
           "skills": ""
         }
       ],
       "projects": [
         {
-          "id": 9,
+          "id": 21,
           "title": "Centi – Personal Finance App",
-          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, providing insights through a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Created responsive React interfaces for user account management and financial analytics, improving user engagement.\n• Implemented secure data handling protocols (OAuth/JWT) to protect sensitive financial information.",
+          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, delivering comprehensive spending insights to users.\n• Engineered FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing and normalized data storage.\n• Created responsive React dashboards for account management and financial analytics, significantly improving user engagement.\n• Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data.",
           "tech_stack": [
             "FastAPI",
-            "React",
             "PostgreSQL",
+            "React",
             "Plaid API"
           ],
           "url": "https://centi.dev"
@@ -591,97 +481,97 @@
       ],
       "skills": [
         {
-          "id": 41,
+          "id": 63,
           "name": "Python",
           "category": "Languages"
         },
         {
-          "id": 44,
+          "id": 64,
           "name": "SQL",
           "category": "Languages"
         },
         {
-          "id": 51,
-          "name": "PostgreSQL",
-          "category": "Data Tools"
-        },
-        {
-          "id": 52,
-          "name": "MySQL",
-          "category": "Data Tools"
-        },
-        {
-          "id": 57,
-          "name": "ETL Pipelines",
-          "category": "Data Tools"
-        },
-        {
-          "id": 46,
-          "name": "FastAPI",
-          "category": "Frameworks"
-        },
-        {
-          "id": 45,
-          "name": "Django",
-          "category": "Frameworks"
-        },
-        {
-          "id": 58,
-          "name": "Data Pipelines",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 59,
-          "name": "Automation Systems",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 42,
+          "id": 65,
           "name": "Java",
           "category": "Languages"
         },
         {
-          "id": 43,
+          "id": 66,
           "name": "JavaScript",
           "category": "Languages"
         },
         {
-          "id": 47,
+          "id": 67,
+          "name": "FastAPI",
+          "category": "Frameworks"
+        },
+        {
+          "id": 68,
+          "name": "Django",
+          "category": "Frameworks"
+        },
+        {
+          "id": 69,
           "name": "React",
           "category": "Frameworks"
         },
         {
-          "id": 48,
+          "id": 70,
           "name": "Node.js",
           "category": "Frameworks"
         },
         {
-          "id": 49,
+          "id": 71,
           "name": "PyTorch",
           "category": "Frameworks"
         },
         {
-          "id": 50,
+          "id": 72,
           "name": "TensorFlow Lite",
           "category": "Frameworks"
         },
         {
-          "id": 53,
-          "name": "MongoDB",
+          "id": 73,
+          "name": "PostgreSQL",
           "category": "Data Tools"
         },
         {
-          "id": 54,
-          "name": "Pandas",
+          "id": 74,
+          "name": "ETL Pipelines",
           "category": "Data Tools"
+        },
+        {
+          "id": 75,
+          "name": "MySQL",
+          "category": "Data Tools"
+        },
+        {
+          "id": 76,
+          "name": "Engineering Design and Construction",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 77,
+          "name": "Project Documentation",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 78,
+          "name": "Workflow Automation",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 79,
+          "name": "Data Management",
+          "category": "Focus Areas"
         }
       ],
       "hiddenSkills": [],
       "summary": {
-        "summary": "Data Engineer with proven expertise in building scalable data pipelines and backend services. Proficient in Python, SQL, and PostgreSQL, with hands-on experience in developing ETL processes and optimizing data workflows. Committed to transforming complex data into actionable insights through innovative engineering practices."
+        "summary": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflows to enhance operational efficiency."
       },
       "sectionVisibility": {
-        "summary": true,
+        "summary": false,
         "education": true,
         "experience": true,
         "projects": true,
@@ -705,319 +595,124 @@
     },
     "patchDiff": {
       "summary": {
-        "before": "Full-stack engineer specializing in scalable data pipelines, platforms, and backend services. Skilled in React, Python, and Java, with strong database and API expertise. Passionate about turning complex data into reliable, user-focused applications.",
-        "after": "Data Engineer with proven expertise in building scalable data pipelines and backend services. Proficient in Python, SQL, and PostgreSQL, with hands-on experience in developing ETL processes and optimizing data workflows. Committed to transforming complex data into actionable insights through innovative engineering practices."
+        "before": "Backend developer specializing in Python and FastAPI, with proven expertise in building scalable backend services and data pipelines. Experienced in system architecture and API development, leveraging SQL for data access and reporting.",
+        "after": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflows to enhance operational efficiency."
       },
-      "sectionVisibility": {
-        "before": {
-          "summary": false,
-          "education": true,
-          "experience": true,
-          "projects": true,
-          "skills": true
-        },
-        "after": {
-          "summary": true,
-          "education": true,
-          "experience": true,
-          "projects": true,
-          "skills": true
-        }
-      },
-      "experience": [
-        {
-          "id": 5,
-          "fieldsChanged": {
-            "description": {
-              "before": "• Built and maintained backend services and REST APIs in Python/Django supporting secure internal workflows for financial and compliance teams.\n• Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service patterns and data modeling.\n• Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, improving system scalability and reducing latency by ~40%.",
-              "after": "• Built REST APIs in Python/Django to support secure data workflows for financial compliance, improving operational efficiency.\n• Collaborated with senior engineers on system design and architecture, contributing to scalable service patterns and data modeling.\n• Developed React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
-            }
-          }
-        }
-      ],
       "projects": [
         {
-          "id": 9,
+          "id": 21,
           "fieldsChanged": {
             "description": {
-              "before": "• Built and deployed a full-stack finance application that automates account aggregation, transaction tracking, and spending insights across a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and normalized data storage.\n• Developed responsive React dashboards and authentication flows for account management, transaction review, and financial analytics.\n• Implemented authentication and secure data handling (OAuth/JWT), ensuring protected access to financial data and user account workflows.\n• Made it secure n stuff.",
-              "after": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, providing insights through a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Created responsive React interfaces for user account management and financial analytics, improving user engagement.\n• Implemented secure data handling protocols (OAuth/JWT) to protect sensitive financial information."
+              "before": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, providing\n• users with comprehensive spending insights.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and\n• normalized data storage.\n• Created responsive React dashboards for account management and financial analytics, improving user engagement.\n• Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data.",
+              "after": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, delivering comprehensive spending insights to users.\n• Engineered FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing and normalized data storage.\n• Created responsive React dashboards for account management and financial analytics, significantly improving user engagement.\n• Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data."
             }
           }
-        },
-        {
-          "id": 10,
-          "removed": true,
-          "before": {
-            "id": 10,
-            "title": "Taylor.io – Resume Builder & Parser",
-            "description": "• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.\n• Implemented backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.\n• Created a live editing and preview experience in React, enabling users to customize resume content in real time through  a clean, guided interface.\n• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and  editing workflows.",
-            "tech_stack": [
-              "React",
-              "FastAPI",
-              "PostgreSQL",
-              "OpenAI API",
-              "Tailwind CSS"
-            ],
-            "url": ""
-          },
-          "after": null
-        },
-        {
-          "id": 12,
-          "removed": true,
-          "before": {
-            "id": 12,
-            "title": "SecureScape – Smart Security System",
-            "description": "• Developed the Flutter mobile app with core controls including alarm toggling, lighting, photo capture, and recording  access.\n• Built the Python backend and communication layer for device coordination, enabling reliable messaging and near real time alerts (<3.5s).",
-            "tech_stack": [
-              "Python",
-              "Flutter",
-              "Arduino C++",
-              "TensorFlow Lite"
-            ],
-            "url": ""
-          },
-          "after": null
-        },
-        {
-          "id": 17,
-          "removed": true,
-          "before": {
-            "id": 17,
-            "title": "ShelfVision - Dense Shelf Object Detection",
-            "description": "• Detects products in crowded retail shelf photos using ResNet-50 and FPN features.\n• Handles overlapping items with smart anchor matching and IoU-based detection algorithms.\n• Benchmarked on SKU-110K dataset with comprehensive metrics and YOLOv5 comparisons.",
-            "tech_stack": [
-              "Python",
-              "PyTorch",
-              "OpenCV",
-              "scikit-learn",
-              "NumPy"
-            ],
-            "url": ""
-          },
-          "after": null
-        },
-        {
-          "id": 18,
-          "removed": true,
-          "before": {
-            "id": 18,
-            "title": "Tizirsso Racing – Portfolio & Sponsorship Website",
-            "description": "• Built a custom motorsport portfolio site translating brand identity and racing history into a polished, mobile-first  experience.\n• Developed interactive UI sections including an animated hero, editorial about page, career timeline, team history,  championship highlights, and image galleries with lightbox support.",
-            "tech_stack": [
-              "Next.js",
-              "React",
-              "Vercel",
-              "Framer"
-            ],
-            "url": "https://tizianorosso.com/"
-          },
-          "after": null
-        },
-        {
-          "id": 20,
-          "removed": true,
-          "before": {
-            "id": 20,
-            "title": "SentimentTrader -  Real-Time Stock Sentiment Pipeline",
-            "description": "• Designed and implemented an end-to-end production-style ML data pipeline for real-time sentiment analytics, processing 1K+ Reddit finance posts per run via multi-stage ETL.\n• Applied NLP models (FinBERT) and feature engineering to build 40+ predictive features per ticker; trained XGBoost models achieving 55–70% ROC-AUC.\n• Built modular components for data ingestion, transformation, model inference, and distributed-style batching, aligned with message-driven architectures.\n• Automated end-to-end data collection, preprocessing, and model inference workflows, enabling scalable real-time analytics.",
-            "tech_stack": [
-              "Python",
-              "SQL",
-              "FinBERT",
-              "XGBoost"
-            ],
-            "url": ""
-          },
-          "after": null
         }
       ],
       "skills": [
         {
-          "id": 55,
-          "removed": true,
-          "before": {
-            "id": 55,
-            "name": "NumPy",
-            "category": "Data Tools"
-          },
-          "after": null
-        },
-        {
-          "id": 56,
-          "removed": true,
-          "before": {
-            "id": 56,
-            "name": "AWS (EC2)",
-            "category": "Data Tools"
-          },
-          "after": null
-        },
-        {
-          "id": 58,
+          "id": 76,
           "fieldsChanged": {
             "name": {
               "before": "Backend Development",
-              "after": "Data Pipelines"
+              "after": "Engineering Design and Construction"
             }
           }
         },
         {
-          "id": 60,
-          "removed": true,
-          "before": {
-            "id": 60,
-            "name": "AI-Driven Workflows",
-            "category": "Focus Areas"
-          },
-          "after": null
+          "id": 77,
+          "fieldsChanged": {
+            "name": {
+              "before": "Data Pipelines",
+              "after": "Project Documentation"
+            }
+          }
         },
         {
-          "id": 61,
-          "removed": true,
-          "before": {
-            "id": 61,
-            "name": "Data Pipelines",
-            "category": "Focus Areas"
-          },
-          "after": null
+          "id": 78,
+          "fieldsChanged": {
+            "name": {
+              "before": "REST API Design",
+              "after": "Workflow Automation"
+            }
+          }
         },
         {
-          "id": 62,
-          "removed": true,
-          "before": {
-            "id": 62,
-            "name": "REST API Design",
-            "category": "Focus Areas"
-          },
-          "after": null
+          "id": 79,
+          "fieldsChanged": {
+            "name": {
+              "before": "Automation Systems",
+              "after": "Data Management"
+            }
+          }
         }
       ]
     },
     "changeReasons": [
       {
         "section": "summary",
-        "reason": "Repositioned the professional summary toward Data Engineer using concrete, on-resume evidence where possible."
-      },
-      {
-        "section": "layout",
-        "reason": "Adjusted the resume layout (section visibility) so the strongest evidence is easier to find."
-      },
-      {
-        "section": "experience",
-        "id": 5,
-        "reason": "experience row 5: updated the bullets to foreground the role-relevant work."
+        "reason": "Repositioned the professional summary toward Civil Engineer using concrete, on-resume evidence where possible."
       },
       {
         "section": "projects",
-        "id": 9,
-        "reason": "project 9: revised the description and stack so the fit is easier to scan."
-      },
-      {
-        "section": "projects",
-        "id": 10,
-        "reason": "Removed Taylor.io – Resume Builder & Parser because stronger project evidence fit this role better."
-      },
-      {
-        "section": "projects",
-        "id": 12,
-        "reason": "Removed SecureScape – Smart Security System because stronger project evidence fit this role better."
-      },
-      {
-        "section": "projects",
-        "id": 17,
-        "reason": "Removed ShelfVision - Dense Shelf Object Detection because stronger project evidence fit this role better."
-      },
-      {
-        "section": "projects",
-        "id": 18,
-        "reason": "Removed Tizirsso Racing – Portfolio & Sponsorship Website because stronger project evidence fit this role better."
-      },
-      {
-        "section": "projects",
-        "id": 20,
-        "reason": "Removed SentimentTrader - Real-Time Stock Sentiment Pipeline because stronger project evidence fit this role better."
+        "id": 21,
+        "reason": "project 21: light cleanup to the description or stack."
       },
       {
         "section": "skills",
-        "id": 55,
-        "reason": "Trimmed NumPy from the visible skills list."
+        "id": 76,
+        "reason": "skill row 76: label or category cleanup."
       },
       {
         "section": "skills",
-        "id": 56,
-        "reason": "Trimmed AWS (EC2) from the visible skills list."
+        "id": 77,
+        "reason": "skill row 77: label or category cleanup."
       },
       {
         "section": "skills",
-        "id": 58,
-        "reason": "skill row 58: label or category cleanup."
+        "id": 78,
+        "reason": "skill row 78: label or category cleanup."
       },
       {
         "section": "skills",
-        "id": 60,
-        "reason": "Trimmed AI-Driven Workflows from the visible skills list."
-      },
-      {
-        "section": "skills",
-        "id": 61,
-        "reason": "Trimmed Data Pipelines from the visible skills list."
-      },
-      {
-        "section": "skills",
-        "id": 62,
-        "reason": "Trimmed REST API Design from the visible skills list."
+        "id": 79,
+        "reason": "skill row 79: label or category cleanup."
       }
     ],
-    "warnings": [
-      "Skills guard restored 8 skill row(s) because Pass B exceeded the deletion budget.",
-      "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:9.",
-      "Rewrite audit: narrative requested rewrites that did not appear in the patch: experience id 7, experience id 8.",
-      "Rewrite audit: filler phrasing survived in experience id 5 (enhancing)."
-    ]
+    "warnings": []
   },
   "audit": {
     "v": 1,
     "step": "diff_audit",
-    "target_role": "Data Engineer",
+    "target_role": "Civil Engineer",
     "plan_hero_fit": {
       "segment": {
         "has_ranked_experience": true,
-        "has_project_plan": true,
-        "narrative_had_project_heroes": true,
-        "narrative_had_experience_heroes": true
+        "has_project_plan": false,
+        "narrative_had_project_heroes": false,
+        "narrative_had_experience_heroes": false
       },
       "hero_slot_gap": {
-        "projects": 3,
-        "experience": 0
+        "projects": 0,
+        "experience": 1
       },
       "experience": {
         "k": 2,
         "plan_len": 1,
         "top_k_ids": [
-          5
+          9
         ],
-        "hero_ids": [
-          5
-        ],
-        "in_top_k": 1,
-        "ratio": 1.0
+        "hero_ids": [],
+        "in_top_k": 0,
+        "ratio": null
       },
       "projects": {
         "k": 4,
-        "plan_len": 5,
-        "top_k_ids": [
-          9,
-          10,
-          20,
-          12
-        ],
-        "hero_ids": [
-          9
-        ],
-        "in_top_k": 1,
-        "ratio": 1.0
+        "plan_len": 0,
+        "top_k_ids": [],
+        "hero_ids": [],
+        "in_top_k": 0,
+        "ratio": null
       },
       "inversion_pair_count": 0,
       "inversion_by_section": {
@@ -1032,210 +727,136 @@
       "had_updated_resume_in_stage_a": false,
       "skill_row_ids_order": {
         "before": [
-          41,
-          42,
-          43,
-          44,
-          45,
-          46,
-          47,
-          48,
-          49,
-          50,
-          51,
-          52,
-          53,
-          54,
-          55,
-          56,
-          57,
-          58,
-          59,
-          60,
-          61,
-          62
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79
         ],
         "after": [
-          41,
-          44,
-          51,
-          52,
-          57,
-          46,
-          45,
-          58,
-          59,
-          42,
-          43,
-          47,
-          48,
-          49,
-          50,
-          53,
-          54
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79
         ]
       }
     },
     "stage_a": {
       "top_level_keys": [
-        "edits",
-        "warnings"
+        "edits"
       ]
     },
     "patch": {
       "section_keys": [
-        "experience",
         "projects",
-        "sectionVisibility",
         "skills",
         "summary"
       ],
       "row_counts": {
-        "experience": 1,
-        "projects": 6,
-        "skills": 6
+        "projects": 1,
+        "skills": 4
       }
     },
     "warnings": {
-      "total": 4,
-      "from_rewrite": [
-        "Skills guard restored 8 skill row(s) because Pass B exceeded the deletion budget.",
-        "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:9."
-      ],
+      "total": 0,
+      "from_rewrite": [],
       "narrative_omission": []
     },
-    "change_reasons_count": 15,
+    "change_reasons_count": 6,
     "text": {
       "rewrite_note_chars": 0,
       "rewrite_note_preview": "",
-      "merged_summary_preview": "Tailoring log for: Data Engineer.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- sectionVisibility: structure or presentation updated.\n- Experience id 5: moderate update to bullets and/or line items.\n- Project id 9: moderate description/stack revision.\n- Project id 10: removed from resume.\n- Project id 12: removed from resume.\n- Project id 17: removed from resume.\n- Project id 18: removed from resume.\n- Project id 20: removed from resume.\n- Skill…"
+      "merged_summary_preview": "Tailoring log for: Civil Engineer.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- Project id 21: light edit to one part of the project (minor).\n- Skills id 76: minor name/category touch-up.\n- Skills id 77: minor name/category touch-up.\n- Skills id 78: minor name/category touch-up.\n- Skills id 79: minor name/category touch-up."
     },
     "quality": {
-      "target_role": "Data Engineer",
+      "target_role": "Civil Engineer",
       "flags": {
         "aggressive_skill_prune": false,
-        "suspicious_protected_skill_removals": true,
+        "suspicious_protected_skill_removals": false,
         "summary_has_generic_phrase_hits": false,
-        "filler_phrase_hits": true,
+        "filler_phrase_hits": false,
         "skills_expected_but_unchanged": false,
         "minor_expected_rewrites": false,
-        "missing_expected_rewrites": true
+        "missing_expected_rewrites": false
       },
       "summary": {
         "changed": true,
-        "after_preview": "Data Engineer with proven expertise in building scalable data pipelines and backend services. Proficient in Python, SQL, and PostgreSQL, with hands-on experience in developing ETL processes and optimizing data workflows. Committed to transforming complex data into actionable ins…",
+        "after_preview": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflow…",
         "generic_phrases_matched": [],
         "filler_phrases_matched": []
       },
       "rewrite_quality": {
-        "expected_experience_rewrite_ids": [
-          5,
-          7,
-          8
-        ],
-        "expected_project_rewrite_ids": [
-          9
-        ],
+        "expected_experience_rewrite_ids": [],
+        "expected_project_rewrite_ids": [],
         "minor_rewrite_rows": [],
-        "missing_rewrite_rows": [
-          {
-            "section": "experience",
-            "id": 7
-          },
-          {
-            "section": "experience",
-            "id": 8
-          }
-        ],
-        "filler_phrase_hits": [
-          {
-            "section": "experience",
-            "id": 5,
-            "phrases": [
-              "enhancing"
-            ]
-          }
-        ]
+        "missing_rewrite_rows": [],
+        "filler_phrase_hits": []
       },
       "removals": {
-        "removedSkillIds": [
-          55,
-          56,
-          60,
-          61,
-          62
-        ],
-        "removedProjectIds": [
-          10,
-          12,
-          17,
-          18,
-          20
-        ],
+        "removedSkillIds": [],
+        "removedProjectIds": [],
         "removedExperienceIds": [],
-        "visible_skill_count_before": 22,
-        "removed_skill_count": 5,
-        "removal_ratio_skills": 0.227,
-        "protected_skill_removals": [
-          {
-            "id": 56,
-            "name": "AWS (EC2)"
-          },
-          {
-            "id": 61,
-            "name": "Data Pipelines"
-          },
-          {
-            "id": 62,
-            "name": "REST API Design"
-          }
-        ]
+        "visible_skill_count_before": 17,
+        "removed_skill_count": 0,
+        "removal_ratio_skills": 0.0,
+        "protected_skill_removals": []
       },
       "narrative_heroes": {
-        "hero_project_ids": [
-          9
-        ],
-        "hero_project_ids_with_edits": [
-          9
-        ],
+        "hero_project_ids": [],
+        "hero_project_ids_with_edits": [],
         "hero_project_ids_not_in_patch": [],
         "only_one_hero_touched_while_several_listed": false,
-        "hero_experience_ids": [
-          5
-        ],
-        "hero_experience_ids_with_edits": [
-          5
-        ],
+        "hero_experience_ids": [],
+        "hero_experience_ids_with_edits": [],
         "hero_experience_ids_not_in_patch": []
       },
       "stage_edits_removals": {
         "removedSkillIds": [],
-        "removedProjectIds": [
-          10,
-          12,
-          17,
-          18,
-          20
-        ]
+        "removedProjectIds": []
       },
       "rewrite_intensity": {
         "summary_changed": true,
-        "experience_rows_touched": 1,
+        "experience_rows_touched": 0,
         "project_rows_touched": 1,
-        "skill_rows_touched": 6,
+        "skill_rows_touched": 4,
         "skills_section_changed": true,
-        "rows_removed_total": 10,
-        "hero_projects_edited_count": 1,
-        "hero_experience_edited_count": 1,
+        "rows_removed_total": 0,
+        "hero_projects_edited_count": 0,
+        "hero_experience_edited_count": 0,
         "low_intensity_hint": false
       }
     },
     "llm_usage_pass1": {
-      "completion_tokens": 434,
-      "prompt_tokens": 9892,
-      "total_tokens": 10326,
+      "completion_tokens": 208,
+      "prompt_tokens": 7222,
+      "total_tokens": 7430,
       "prompt_tokens_details": {
-        "cached_tokens": 1024,
+        "cached_tokens": 0,
         "audio_tokens": 0
       },
       "completion_tokens_details": {
@@ -1246,9 +867,9 @@
       }
     },
     "llm_usage_pass2": {
-      "completion_tokens": 264,
-      "prompt_tokens": 9089,
-      "total_tokens": 9353,
+      "completion_tokens": 478,
+      "prompt_tokens": 6472,
+      "total_tokens": 6950,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0
@@ -1261,24 +882,9 @@
       }
     },
     "llm_usage_rewrite_pass": {
-      "completion_tokens": 264,
-      "prompt_tokens": 9089,
-      "total_tokens": 9353,
-      "prompt_tokens_details": {
-        "cached_tokens": 0,
-        "audio_tokens": 0
-      },
-      "completion_tokens_details": {
-        "reasoning_tokens": 0,
-        "audio_tokens": 0,
-        "accepted_prediction_tokens": 0,
-        "rejected_prediction_tokens": 0
-      }
-    },
-    "llm_usage_repair_pass": {
-      "completion_tokens": 221,
-      "prompt_tokens": 1842,
-      "total_tokens": 2063,
+      "completion_tokens": 478,
+      "prompt_tokens": 6472,
+      "total_tokens": 6950,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0

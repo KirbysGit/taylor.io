@@ -16,6 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import DashboardShell from '@/components/DashboardShell'
 import { getMyProfile } from '@/api/services/profile'
+import { logoutUser } from '@/api/services/auth'
 
 function SelectTile({ id, selected, onToggle, children }) {
 	return (
@@ -135,19 +136,12 @@ export default function ResumeChoose() {
 	const [selectedExpIds, setSelectedExpIds] = useState(new Set())
 	const [selectedProjIds, setSelectedProjIds] = useState(new Set())
 
-	const handleLogout = () => {
-		localStorage.removeItem('token')
-		localStorage.removeItem('user')
+	const handleLogout = async () => {
+		await logoutUser()
 		navigate('/')
 	}
 
 	useEffect(() => {
-		const token = localStorage.getItem('token')
-		if (!token) {
-			navigate('/auth')
-			return
-		}
-
 		const fetchProfile = async () => {
 			try {
 				const res = await getMyProfile()

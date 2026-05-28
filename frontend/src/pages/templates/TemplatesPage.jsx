@@ -12,6 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import DashboardShell from '@/components/DashboardShell'
 import ThemedSelect from '@/components/inputs/ThemedSelect'
+import { logoutUser } from '@/api/services/auth'
 import { listTemplates } from '@/api/services/templates'
 import { DEFAULT_STYLE_PREFERENCES } from '@/pages/5resume/utils/resumePreviewConstants'
 import {
@@ -598,16 +599,9 @@ function TemplatesPage() {
 	const [selectedSlug, setSelectedSlug] = useState(null)
 	const [styleDraft, setStyleDraft] = useState(() => ({ ...DEFAULT_STYLE_PREFERENCES }))
 
-	const handleLogout = useCallback(() => {
-		localStorage.removeItem('token')
-		localStorage.removeItem('user')
+	const handleLogout = useCallback(async () => {
+		await logoutUser()
 		navigate('/')
-	}, [navigate])
-
-	useEffect(() => {
-		const token = localStorage.getItem('token')
-		const userData = localStorage.getItem('user')
-		if (!token || !userData) navigate('/auth')
 	}, [navigate])
 
 	useEffect(() => {

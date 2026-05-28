@@ -14,41 +14,25 @@ import { apiRequest } from '../api'
 // ---- register user ----
 
 export async function registerUser(userData) {
-	// api call to register user.
-	const response = await apiRequest('/api/auth/register', {
+	return apiRequest('/api/auth/register', {
 		method: 'POST',
 		body: JSON.stringify(userData),
 	})
-
-	// store token in localStorage.
-	if (response.data.access_token) {
-		localStorage.setItem('token', response.data.access_token)
-	}
-
-	return response
 }
 
 // ---- login user ----
 
 export async function loginUser(credentials) {
-	// api call to login user.
 	const response = await apiRequest('/api/auth/login', {
 		method: 'POST',
 		body: JSON.stringify(credentials),
 	})
-
-	// store token in localStorage.
-	if (response.data.access_token) {
-		localStorage.setItem('token', response.data.access_token)
-	}
-
 	return response
 }
 
 // ---- get current user ----
 
 export async function getCurrentUser() {
-	// api call to get current user.
 	return apiRequest('/api/auth/me', {
 		method: 'GET',
 	})
@@ -56,9 +40,34 @@ export async function getCurrentUser() {
 
 // ---- logout user ----
 
-export function logoutUser() {
-	// remove token and user from localStorage.
-	localStorage.removeItem('token')
+export async function logoutUser() {
+	try {
+		await apiRequest('/api/auth/logout', { method: 'POST' })
+	} catch {
+		// local cleanup still matters if the session already expired.
+	}
 	localStorage.removeItem('user')
+	localStorage.removeItem('token')
+}
+
+export async function resendVerification(email) {
+	return apiRequest('/api/auth/resend-verification', {
+		method: 'POST',
+		body: JSON.stringify({ email }),
+	})
+}
+
+export async function forgotPassword(email) {
+	return apiRequest('/api/auth/forgot-password', {
+		method: 'POST',
+		body: JSON.stringify({ email }),
+	})
+}
+
+export async function resetPassword(token, password) {
+	return apiRequest('/api/auth/reset-password', {
+		method: 'POST',
+		body: JSON.stringify({ token, password }),
+	})
 }
 

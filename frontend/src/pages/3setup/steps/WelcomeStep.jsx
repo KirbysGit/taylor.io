@@ -1,10 +1,11 @@
 // pages / 3setup / steps / WelcomeStep.jsx
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
 	faArrowRight,
 	faCheck,
+	faEye,
 	faFileArrowUp,
 	faKeyboard,
 	faRotate,
@@ -20,8 +21,19 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 	const [isParsing, setIsParsing] = useState(false)
 	const [parseError, setParseError] = useState('')
 	const [uploadedFile, setUploadedFile] = useState(null)
-
+	const [resumePreviewUrl, setResumePreviewUrl] = useState('')
 	const hasResume = Boolean(formData?.uploadedResumeFilename)
+	const [selectedPath, setSelectedPath] = useState(hasResume ? 'upload' : '')
+
+	useEffect(() => {
+		if (!uploadedFile) {
+			setResumePreviewUrl('')
+			return undefined
+		}
+		const url = URL.createObjectURL(uploadedFile)
+		setResumePreviewUrl(url)
+		return () => URL.revokeObjectURL(url)
+	}, [uploadedFile])
 
 	const normalizeParsedItem = (item, defaults = {}) => ({
 		...defaults,
@@ -61,6 +73,7 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 		}
 
 		setUploadedFile(file)
+		setSelectedPath('upload')
 		setParseError('')
 		setParsedData(null)
 		await handleParseResume(file)
@@ -159,17 +172,17 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 	const handleRemoveResume = async () => {
 		setUploadedFile(null)
 		setParsedData(null)
+		setSelectedPath('')
 		setParseError('')
 		if (onRemoveResume) await onRemoveResume()
 	}
 
+	const showManualOption = !hasResume && selectedPath !== 'upload'
+
 	return (
 		<div>
 			<div className="mx-auto max-w-2xl text-center">
-				<p className="mx-auto inline-flex items-center rounded-full bg-brand-pink/[0.08] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-brand-pink-dark ring-1 ring-brand-pink/12">
-					Step 1 of 3
-				</p>
-				<h2 className="mt-5 text-4xl font-black tracking-tight text-gray-950 sm:text-5xl">
+				<h2 className="text-4xl font-black tracking-tight text-gray-950 sm:text-5xl">
 					Start with what you have.
 				</h2>
 				<p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-gray-600">
@@ -177,7 +190,7 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 				</p>
 			</div>
 
-			<div className="mt-10 grid gap-5 md:grid-cols-2">
+			<div className={`mt-10 grid gap-5 ${showManualOption ? 'md:grid-cols-2' : 'mx-auto max-w-xl'}`}>
 				<section className="relative flex min-h-[27rem] flex-col overflow-hidden rounded-[1.35rem] border border-brand-pink/30 bg-white p-7 text-center shadow-[0_24px_58px_-34px_rgba(214,86,86,0.55)] transition hover:-translate-y-0.5 hover:border-brand-pink/55">
 					<div className="pointer-events-none absolute left-1/2 top-8 size-40 -translate-x-1/2 rounded-full bg-brand-pink/[0.10] blur-2xl" aria-hidden />
 					<div className="pointer-events-none absolute right-8 top-12 text-brand-pink/35" aria-hidden>
@@ -207,14 +220,17 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 								</div>
 							</div>
 							<div className="mt-4 flex flex-col gap-2 sm:flex-row">
-								<button
-									type="button"
-									onClick={handleNext}
-									className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-pink px-5 py-3 text-sm font-black text-white shadow-[0_16px_30px_-20px_rgba(214,86,86,0.9)] transition hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
-								>
-									Review imported profile
-									<FontAwesomeIcon icon={faArrowRight} className="size-3.5" />
-								</button>
+								{resumePreviewUrl ? (
+									<a
+										href={resumePreviewUrl}
+										target="_blank"
+										rel="noreferrer"
+										className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-white px-5 py-3 text-sm font-black text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+									>
+										<FontAwesomeIcon icon={faEye} className="size-3.5" />
+										View uploaded file
+									</a>
+								) : null}
 								<button
 									type="button"
 									onClick={handleRemoveResume}
@@ -261,6 +277,11 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 									</>
 								)}
 							</label>
+							{isParsing ? (
+								<div className="mt-4 overflow-hidden rounded-full bg-brand-pink/[0.10] ring-1 ring-brand-pink/15">
+									<div className="h-2 w-1/2 animate-pulse rounded-full bg-gradient-to-r from-brand-pink via-rose-400 to-violet-400" />
+								</div>
+							) : null}
 							<p className="mt-4 text-center text-sm font-semibold text-gray-500">PDF, DOC, DOCX &middot; Max 10MB</p>
 						</div>
 					)}
@@ -270,38 +291,53 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 							{parseError}
 						</div>
 					) : null}
+					{hasResume ? (
+						<button
+							type="button"
+							onClick={handleNext}
+							className="relative z-[1] mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-pink px-5 py-3 text-sm font-black text-white shadow-[0_16px_30px_-20px_rgba(214,86,86,0.9)] transition hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+						>
+							Review imported profile
+							<FontAwesomeIcon icon={faArrowRight} className="size-3.5" />
+						</button>
+					) : null}
 				</section>
 
-				<button
-					type="button"
-					onClick={handleNext}
-					disabled={isParsing}
-					className="group relative flex min-h-[27rem] flex-col overflow-hidden rounded-[1.35rem] border border-gray-200 bg-white p-7 text-center shadow-[0_24px_58px_-38px_rgba(45,30,38,0.42)] transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-[0_26px_60px_-38px_rgba(115,71,190,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60"
-				>
-					<div className="pointer-events-none absolute left-1/2 top-8 size-40 -translate-x-1/2 rounded-full bg-violet-500/[0.10] blur-2xl" aria-hidden />
-					<div className="pointer-events-none absolute left-10 top-20 text-violet-300/70" aria-hidden>
-						<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
-					</div>
-					<div className="relative z-[1] flex flex-1 flex-col items-center">
-						<span className="flex size-28 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-100 via-violet-50 to-white text-violet-700 ring-1 ring-violet-200/70">
-							<span className="flex size-16 items-center justify-center rounded-2xl bg-white text-violet-700 shadow-[0_18px_34px_-24px_rgba(115,71,190,0.65)] ring-1 ring-violet-200/70">
-								<FontAwesomeIcon icon={faKeyboard} className="size-8" />
+				{showManualOption ? (
+					<button
+						type="button"
+						onClick={() => {
+							setSelectedPath('manual')
+							handleNext()
+						}}
+						disabled={isParsing}
+						className="group relative flex min-h-[27rem] flex-col overflow-hidden rounded-[1.35rem] border border-gray-200 bg-white p-7 text-center shadow-[0_24px_58px_-38px_rgba(45,30,38,0.42)] transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-[0_26px_60px_-38px_rgba(115,71,190,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60"
+					>
+						<div className="pointer-events-none absolute left-1/2 top-8 size-40 -translate-x-1/2 rounded-full bg-violet-500/[0.10] blur-2xl" aria-hidden />
+						<div className="pointer-events-none absolute left-10 top-20 text-violet-300/70" aria-hidden>
+							<FontAwesomeIcon icon={faWandMagicSparkles} className="size-4" />
+						</div>
+						<div className="relative z-[1] flex flex-1 flex-col items-center">
+							<span className="flex size-28 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-100 via-violet-50 to-white text-violet-700 ring-1 ring-violet-200/70">
+								<span className="flex size-16 items-center justify-center rounded-2xl bg-white text-violet-700 shadow-[0_18px_34px_-24px_rgba(115,71,190,0.65)] ring-1 ring-violet-200/70">
+									<FontAwesomeIcon icon={faKeyboard} className="size-8" />
+								</span>
 							</span>
+							<h3 className="mt-6 text-2xl font-black tracking-tight text-gray-950">I will enter it myself</h3>
+							<p className="mx-auto mt-3 max-w-sm text-base leading-relaxed text-gray-600">
+								Add your experience, education, projects, and skills step by step.
+							</p>
+						</div>
+						<span className="relative z-[1] mt-5 inline-flex min-h-[3.6rem] items-center justify-center gap-3 self-center rounded-xl border border-violet-400 bg-white px-9 py-3 text-base font-black text-violet-700 shadow-sm transition group-hover:border-violet-500 group-hover:bg-violet-50">
+							Add my info
+							<FontAwesomeIcon icon={faArrowRight} className="size-3.5 transition group-hover:translate-x-0.5" />
 						</span>
-						<h3 className="mt-6 text-2xl font-black tracking-tight text-gray-950">I will enter it myself</h3>
-						<p className="mx-auto mt-3 max-w-sm text-base leading-relaxed text-gray-600">
-							Add your experience, education, projects, and skills step by step.
-						</p>
-					</div>
-					<span className="relative z-[1] mt-5 inline-flex min-h-[3.6rem] items-center justify-center gap-3 self-center rounded-xl border border-violet-400 bg-white px-9 py-3 text-base font-black text-violet-700 shadow-sm transition group-hover:border-violet-500 group-hover:bg-violet-50">
-						Add my info
-						<FontAwesomeIcon icon={faArrowRight} className="size-3.5 transition group-hover:translate-x-0.5" />
-					</span>
-					<div className="relative z-[1] mt-5 flex items-center justify-center gap-2 text-sm font-semibold text-gray-500">
-						<FontAwesomeIcon icon={faWandMagicSparkles} className="size-3 text-brand-pink" />
-						Start simple, refine as you go.
-					</div>
-				</button>
+						<div className="relative z-[1] mt-5 flex items-center justify-center gap-2 text-sm font-semibold text-gray-500">
+							<FontAwesomeIcon icon={faWandMagicSparkles} className="size-3 text-brand-pink" />
+							Start simple, refine as you go.
+						</div>
+					</button>
+				) : null}
 			</div>
 
 			<div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-semibold text-gray-500">

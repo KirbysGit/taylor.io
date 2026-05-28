@@ -1,20 +1,34 @@
 import MonthYearPicker from '../MonthYearPicker'
 import FormSection from './FormSection'
 
-function Field({ label, optional, children, compact }) {
+function Field({ label, optional, required, missing, hint, children, compact }) {
 	return (
 		<div className="min-w-0">
 			<label className={compact ? 'mb-1.5 block text-xs font-semibold text-slate-600' : 'label'}>
 				{label}
+				{required ? <span className="ml-2 rounded-full bg-brand-pink/[0.08] px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-pink-dark">Required</span> : null}
 				{optional ? <span className="font-normal text-slate-400"> (optional)</span> : null}
 			</label>
 			{children}
+			{missing ? <p className="mt-1.5 text-xs font-semibold text-red-600">{hint || `${label} is required.`}</p> : null}
 		</div>
 	)
 }
 
 function EducationEntryForm({ edu, entryId, index, onFieldChange, compact = false }) {
 	const current = edu?.current || false
+	const hasAnyEducationContent = [
+		edu?.school,
+		edu?.degree,
+		edu?.discipline,
+		edu?.field,
+		edu?.minor,
+		edu?.location,
+		edu?.gpa,
+		edu?.startDate,
+		edu?.endDate,
+	].some((value) => String(value || '').trim())
+	const missingDiscipline = hasAnyEducationContent && !String(edu?.discipline || edu?.field || '').trim()
 
 	return (
 		<div className="space-y-6">
@@ -40,12 +54,13 @@ function EducationEntryForm({ edu, entryId, index, onFieldChange, compact = fals
 							placeholder="e.g. Bachelor of Science"
 						/>
 					</Field>
-					<Field label="Field of study" compact={compact}>
+					<Field label="Field of study" required missing={missingDiscipline} hint="Add a field of study so Taylor can understand your education lane." compact={compact}>
 						<input
+							id={`education-discipline-${entryId}`}
 							type="text"
 							value={edu?.discipline || edu?.field || ''}
 							onChange={(e) => onFieldChange(index, 'discipline', e.target.value)}
-							className="input"
+							className={`input ${missingDiscipline ? 'border-red-300 bg-red-50/40 ring-2 ring-red-100 focus:ring-red-200' : ''}`}
 							placeholder="e.g. Computer Science"
 						/>
 					</Field>

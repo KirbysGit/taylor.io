@@ -12,9 +12,6 @@ async function apiRequestCore(endpoint, options = {}) {
     // construct full url for request.
     const url = `${baseURL}${endpoint}`
     
-    // get token from localStorage if it exists.
-    const token = localStorage.getItem('token')
-    
     // check if body is FormData (don't set Content-Type - browser sets it with boundary).
     const isFormData = options.body instanceof FormData
     
@@ -27,7 +24,6 @@ async function apiRequestCore(endpoint, options = {}) {
         headers: {
             // only set Content-Type for non-FormData requests.
             ...(!isFormData && { 'Content-Type': 'application/json' }),
-            ...(token && { 'Authorization': `Bearer ${token}` }),
             ...options.headers,
         },
         ...(options.body && { body: options.body }),
@@ -36,7 +32,7 @@ async function apiRequestCore(endpoint, options = {}) {
     const method = String(config.method || 'GET').toUpperCase()
     const responseType = options.responseType || 'json'
     const canDedupeGetJson = method === 'GET' && !options.body && responseType === 'json'
-    const dedupeKey = canDedupeGetJson ? `${url}::${token || ''}` : null
+    const dedupeKey = canDedupeGetJson ? `${url}` : null
 
     if (canDedupeGetJson && inFlightGetJsonRequests.has(dedupeKey)) {
         return inFlightGetJsonRequests.get(dedupeKey)
@@ -56,6 +52,9 @@ async function apiRequestCore(endpoint, options = {}) {
                 errorData = await response.json()
             } else {
                 errorData = { message: await response.text() || 'Request failed' }
+            }
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('user')
             }
             throw { response: { data: errorData, status: response.status } }
         }

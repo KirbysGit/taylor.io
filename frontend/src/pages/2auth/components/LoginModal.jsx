@@ -2,18 +2,19 @@ import { useState, useEffect, useId } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight, faEnvelope, faEye, faEyeSlash, faLock, faPenToSquare } from '@fortawesome/free-solid-svg-icons'
 import { XIcon } from '@/components/icons'
-import { loginUser } from '@/api/services/auth'
+import { loginUser, resendVerification } from '@/api/services/auth'
 
-function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
+function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess, onForgotPassword, statusMessage }) {
 	const formId = useId()
 	const errorId = `${formId}-error`
 
 	const [formData, setFormData] = useState({
 		email: '',
 		password: '',
-		rememberMe: false,
 	})
 	const [error, setError] = useState('')
+	const [unverifiedEmail, setUnverifiedEmail] = useState('')
+	const [resendStatus, setResendStatus] = useState('')
 	const [fieldErrors, setFieldErrors] = useState({})
 	const [isLoading, setIsLoading] = useState(false)
 	const [showPassword, setShowPassword] = useState(false)
@@ -72,7 +73,13 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 			}
 		} catch (err) {
 			console.error('Login failed:', err)
-			if (err.response?.data?.detail) setError(err.response.data.detail)
+			const detail = err.response?.data?.detail
+			if (detail?.code === 'email_not_verified') {
+				setUnverifiedEmail(detail.email || formData.email)
+				setError(detail.message || 'Please verify your email before signing in.')
+			}
+			else if (typeof detail === 'string') setError(detail)
+			else if (detail?.message) setError(detail.message)
 			else if (err.response?.data?.message) setError(err.response.data.message)
 			else setError('Login failed. Please check your credentials.')
 		} finally {
@@ -87,6 +94,8 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 			[name]: type === 'checkbox' ? checked : value,
 		}))
 		setError('')
+		setResendStatus('')
+		setUnverifiedEmail('')
 		setFieldErrors((prev) => {
 			if (!prev[name]) return prev
 			const next = { ...prev }
@@ -137,21 +146,11 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 						</p>
 					</div>
 
-					<button
-						type="button"
-						disabled
-						className="auth-oauth-button mb-3 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white/92 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-[0_8px_18px_rgba(24,24,27,0.08)] disabled:cursor-not-allowed disabled:opacity-70"
-						title="Google sign-in coming soon"
-					>
-						<span className="text-lg font-black text-[#4285f4]">G</span>
-						Continue with Google
-					</button>
-
-					<div className="auth-oauth-divider mb-3 flex items-center gap-4 text-xs text-gray-400">
-						<span className="h-px flex-1 bg-gray-200" />
-						<span>or</span>
-						<span className="h-px flex-1 bg-gray-200" />
-					</div>
+					{statusMessage && (
+						<div className="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" role="status">
+							{statusMessage}
+						</div>
+					)}
 
 					<form onSubmit={handleSubmit} className="auth-form space-y-3.5" noValidate>
 						<div>
@@ -216,27 +215,37 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess }) {
 							)}
 						</div>
 
-						<div className="flex flex-wrap items-center justify-between gap-3">
-							<label className="flex cursor-pointer select-none items-center gap-2 text-xs font-medium text-gray-600">
-								<input
-									type="checkbox"
-									name="rememberMe"
-									checked={formData.rememberMe}
-									onChange={handleChange}
-									className="h-4 w-4 rounded border-gray-300 text-brand-pink focus:ring-brand-pink focus:ring-offset-0"
-								/>
-								Remember me
-							</label>
-							<span className="text-xs font-medium text-gray-400" title="Coming soon">
+						<div className="flex flex-wrap items-center justify-end gap-3">
+							<button
+								type="button"
+								onClick={onForgotPassword}
+								className="text-xs font-bold text-brand-pink-dark transition hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+							>
 								Forgot password?
-							</span>
+							</button>
 						</div>
 
 						{error && (
 							<div id={errorId} className="errorMessage" role="alert">
 								{error}
+								{unverifiedEmail ? (
+									<div className="mt-2">
+										<button
+											type="button"
+											onClick={async () => {
+												setResendStatus('')
+												await resendVerification(unverifiedEmail)
+												setResendStatus('Verification email sent. Check your inbox.')
+											}}
+											className="font-bold underline underline-offset-2"
+										>
+											Resend verification email
+										</button>
+									</div>
+								) : null}
 							</div>
 						)}
+						{resendStatus ? <div className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">{resendStatus}</div> : null}
 
 						<button
 							type="submit"

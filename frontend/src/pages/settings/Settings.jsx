@@ -9,6 +9,7 @@ import {
 	faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import DashboardShell from '@/components/DashboardShell'
+import { logoutUser } from '@/api/services/auth'
 
 function SettingsCard({ className = '', children }) {
 	return (
@@ -57,9 +58,8 @@ export default function Settings() {
 	const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Your account'
 	const email = user?.email?.trim() || '—'
 
-	const handleLogout = () => {
-		localStorage.removeItem('token')
-		localStorage.removeItem('user')
+	const handleLogout = async () => {
+		await logoutUser()
 		navigate('/')
 	}
 

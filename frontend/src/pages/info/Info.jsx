@@ -29,6 +29,7 @@ import {
 	attachResume,
 	detachResume,
 } from '@/api/services/profile'
+import { logoutUser } from '@/api/services/auth'
 import { parseResumeMerge } from '@/api/services/resume'
 import { mergeParsedData } from './utils/mergeParsedData'
 import DashboardShell from '@/components/DashboardShell'
@@ -192,17 +193,13 @@ function Info() {
 	// Fetch profile data
 	useEffect(() => {
 		const fetchProfile = async () => {
-			const token = localStorage.getItem('token')
 			const userData = localStorage.getItem('user')
-			if (!token || !userData) {
-				navigate('/auth')
-				return
-			}
 
 			try {
 				const response = await getMyProfile()
 				const data = response.data || {}
-				setUser(data.user || JSON.parse(userData))
+				const cachedUser = userData ? JSON.parse(userData) : null
+				setUser(data.user || cachedUser)
 
 				// Contact - build once so state and lastSavedRef match
 				const contactData = data.contact || {}
@@ -266,7 +263,9 @@ function Info() {
 			} catch (error) {
 				console.error('Error fetching profile:', error)
 				try {
-					setUser(JSON.parse(localStorage.getItem('user') || '{}'))
+					const cachedUser = JSON.parse(localStorage.getItem('user') || 'null')
+					if (cachedUser) setUser(cachedUser)
+					else navigate('/auth')
 				} catch {
 					navigate('/auth')
 				}
@@ -278,9 +277,8 @@ function Info() {
 		fetchProfile()
 	}, [navigate])
 
-	const handleLogout = () => {
-		localStorage.removeItem('token')
-		localStorage.removeItem('user')
+	const handleLogout = async () => {
+		await logoutUser()
 		navigate('/')
 	}
 

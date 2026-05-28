@@ -15,6 +15,7 @@ import {
 import DashboardShell from '@/components/DashboardShell'
 import ThemedSelect from '@/components/inputs/ThemedSelect'
 import { RequiredAsterisk, XIcon } from '@/components/icons'
+import { logoutUser } from '@/api/services/auth'
 
 const TAILOR_FOCUS_OPTIONS = [
 	{ value: 'balanced', label: 'Balanced fit' },
@@ -376,9 +377,8 @@ function ResumeTailorSetup() {
 		})
 	}
 
-	const handleLogout = () => {
-		localStorage.removeItem('token')
-		localStorage.removeItem('user')
+	const handleLogout = async () => {
+		await logoutUser()
 		navigate('/')
 	}
 

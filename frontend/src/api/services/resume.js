@@ -30,10 +30,6 @@ export async function parseResumeMerge(file) {
 }
 
 export async function generateResumePreview(template, resumeData, style = undefined, options = {}) {
-
-	// get token from localStorage.
-	const token = localStorage.getItem('token')
-	
 	// construct url for request.
 
 	const url = `/api/resume/generator/preview`
@@ -61,10 +57,6 @@ export async function generateResumePreview(template, resumeData, style = undefi
 }
 
 export async function generateResumePDF(template, resumeData, style = undefined, options = {}) {
-
-	// get token from localStorage.
-	const token = localStorage.getItem('token')
-	
 	// construct url for request.
 	const url = `/api/resume/generator/pdf`
 	

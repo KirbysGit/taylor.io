@@ -203,8 +203,40 @@ const ExperienceInput = forwardRef(function ExperienceInput(
 		onAdd(newEntry)
 	}
 
+	function hasDescriptionContent(description) {
+		if (Array.isArray(description)) return description.some((line) => String(line || '').trim())
+		return Boolean(String(description || '').trim())
+	}
+
+	function hasEntryContent(entry) {
+		return [
+			entry?.title,
+			entry?.company,
+			entry?.location,
+			entry?.skills,
+			entry?.startDate,
+			entry?.endDate,
+			hasDescriptionContent(entry?.description) ? 'description' : '',
+		].some((value) => String(value || '').trim())
+	}
+
+	function revealMissingRequired() {
+		const index = localEntries.findIndex((entry) => hasEntryContent(entry) && !String(entry?.title || '').trim())
+		if (index < 0) return false
+		const entryId = getEntryId(localEntries[index], index)
+		setExpandedIds((prev) => new Set([...prev, entryId]))
+		window.setTimeout(() => {
+			const card = document.getElementById(`experience-card-${entryId}`)
+			const input = document.getElementById(`experience-title-${entryId}`)
+			card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+			input?.focus()
+		}, 220)
+		return true
+	}
+
 	useImperativeHandle(ref, () => ({
 		addNew: handleAddNew,
+		revealMissingRequired,
 	}))
 
 	const handleReorder = (fromIndex, toIndex) => {

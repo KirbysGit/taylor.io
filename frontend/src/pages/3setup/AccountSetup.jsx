@@ -6,7 +6,7 @@
 // allow users to edit the fields that were parsed.
 
 // imports.
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // services imports.
@@ -40,10 +40,13 @@ import SummaryStep from './steps/SummaryStep'
 function AccountSetup() {
 
 	const navigate = useNavigate()
+	const educationStepRef = useRef(null)
+	const experienceStepRef = useRef(null)
 
 	// ---- states ----
 	const [currentStep, setCurrentStep] = useState(0) 	// current step of onboarding process.
 	const [user, setUser] = useState(null)				// current user data.
+	const [stepError, setStepError] = useState('')
 
 	// form data state.
 	const [formData, setFormData] = useState({
@@ -99,7 +102,57 @@ function AccountSetup() {
 	}, [])
 
 	// handles incrementing to the next step.
+	const hasValue = (value) => String(value || '').trim().length > 0
+	const hasEducationContent = (edu) => [
+		edu?.school,
+		edu?.degree,
+		edu?.discipline,
+		edu?.field,
+		edu?.minor,
+		edu?.location,
+		edu?.gpa,
+		edu?.startDate,
+		edu?.endDate,
+	].some(hasValue)
+	const hasExperienceContent = (exp) => {
+		const description = exp?.description
+		const hasDescription = Array.isArray(description)
+			? description.some(hasValue)
+			: hasValue(description)
+		return [
+			exp?.title,
+			exp?.company,
+			exp?.location,
+			exp?.skills,
+			exp?.startDate,
+			exp?.endDate,
+			hasDescription ? 'description' : '',
+		].some(hasValue)
+	}
+
+	const validateCurrentStep = () => {
+		if (currentStep === 2) {
+			const missing = formData.education.find((edu) => hasEducationContent(edu) && !hasValue(edu?.discipline || edu?.field))
+			if (missing) {
+				setStepError('Add the missing field of study before moving on.')
+				educationStepRef.current?.revealMissingRequired?.()
+				return false
+			}
+		}
+		if (currentStep === 3) {
+			const missing = formData.experiences.find((exp) => hasExperienceContent(exp) && !hasValue(exp?.title))
+			if (missing) {
+				setStepError('Add the missing job title before moving on.')
+				experienceStepRef.current?.revealMissingRequired?.()
+				return false
+			}
+		}
+		setStepError('')
+		return true
+	}
+
 	const handleNext = () => {
+		if (!validateCurrentStep()) return
 		if (currentStep < steps.length - 1) {
 			setCurrentStep(currentStep + 1)
 		}
@@ -107,6 +160,7 @@ function AccountSetup() {
 
 	// handles decrementing to the previous step.
 	const handlePrevious = () => {
+		setStepError('')
 		if (currentStep > 0) {
 			setCurrentStep(currentStep - 1)
 		}
@@ -183,6 +237,7 @@ function AccountSetup() {
 
 	// handles adding an item to an array field.
 	const addItem = (field, item) => {
+		setStepError('')
 		setFormData(prev => ({
 			...prev,
 			[field]: [...prev[field], item]
@@ -191,6 +246,7 @@ function AccountSetup() {
 
 	// handles removing an item from an array field.
 	const removeItem = (field, index) => {
+		setStepError('')
 		setFormData(prev => ({
 			...prev,
 			[field]: prev[field].filter((_, i) => i !== index)
@@ -199,6 +255,7 @@ function AccountSetup() {
 
 	// handles updating an item in an array field.
 	const updateItem = (field, index, updatedItem) => {
+		setStepError('')
 		setFormData(prev => ({
 			...prev,
 			[field]: prev[field].map((item, i) => i === index ? updatedItem : item)
@@ -235,6 +292,7 @@ function AccountSetup() {
 			case 2: // Education
 				return (
 					<EducationStep
+						ref={educationStepRef}
 						education={formData.education}
 						onAdd={(item) => addItem('education', item)}
 						onRemove={(index) => removeItem('education', index)}
@@ -245,6 +303,7 @@ function AccountSetup() {
 			case 3: // Experience
 				return (
 					<ExperienceStep
+						ref={experienceStepRef}
 						experiences={formData.experiences}
 						onAdd={(item) => addItem('experiences', item)}
 						onRemove={(index) => removeItem('experiences', index)}
@@ -307,72 +366,80 @@ function AccountSetup() {
 	const showBottomNav = currentStep > 0 && currentStep < steps.length - 1
 
 	return (
-		<div className="h-screen bg-cream overflow-y-auto info-scrollbar">
-			<div className="min-h-full flex items-center justify-center py-12 px-4">
+		<div className="relative h-screen overflow-y-auto bg-[#fff8ef] info-scrollbar">
+			<div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
+				<div className="absolute -left-24 top-[-8rem] size-[24rem] rounded-full bg-brand-pink/[0.16] blur-3xl" />
+				<div className="absolute right-[-8rem] top-24 size-[28rem] rounded-full bg-cyan-300/[0.14] blur-3xl" />
+				<div className="absolute bottom-[-10rem] left-1/2 size-[30rem] -translate-x-1/2 rounded-full bg-violet-400/[0.12] blur-3xl" />
+			</div>
+			<div className="relative z-[1] min-h-full flex items-center justify-center py-12 px-4">
 				<div className={`w-full ${currentStep === 0 ? 'max-w-5xl' : 'max-w-2xl'}`}>
-					{/* Subtle Progress Bar - Top */}
 					<div className="mb-6">
-						<div className="w-full bg-gray-200/50 rounded-full h-1.5 overflow-hidden">
+						<div className="w-full overflow-hidden rounded-full bg-white/70 h-1.5 shadow-inner ring-1 ring-brand-pink/10">
 							<div
-								className="bg-brand-pink h-full rounded-full transition-all duration-500 ease-out"
+								className="h-full rounded-full bg-gradient-to-r from-brand-pink via-rose-400 to-violet-400 transition-all duration-500 ease-out"
 								style={{ width: `${progress}%` }}
 							></div>
 						</div>
 						<div className="flex justify-between items-center mt-2">
-							<span className="text-xs text-gray-500 font-medium">
+							<span className="text-xs font-black uppercase tracking-[0.16em] text-brand-pink-dark">
 								{steps[currentStep].title}
 							</span>
-							<span className="text-xs text-gray-500 font-medium">
+							<span className="text-xs font-semibold text-gray-500">
 								{currentStep + 1} / {steps.length}
 							</span>
 						</div>
 					</div>
 
-					{/* Main Content Card - Centered and Focused */}
 					<div
 						key={currentStep}
-						className={`bg-white-bright rounded-2xl shadow-xl animate-fadeIn ${currentStep === 0 ? 'p-6 md:p-10' : 'p-6 md:p-8'}`}
+						className={`animate-fadeIn rounded-[1.55rem] border border-brand-pink/14 bg-white/88 shadow-[0_28px_80px_-34px_rgba(120,40,40,0.34)] ring-1 ring-white/90 backdrop-blur-xl ${currentStep === 0 ? 'p-6 md:p-10' : 'p-6 md:p-8'}`}
 					>
 						{renderStepContent()}
 					</div>
 
-					{/* Bottom Navigation - Only show when not on first/last step */}
 					{showBottomNav && (
-						<div className="mt-6 flex items-center justify-center gap-4">
-							<button
-								onClick={handlePrevious}
-								className="px-5 py-2.5 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition-all flex items-center gap-2 group"
-							>
-								<ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-								Previous
-							</button>
+						<div className="mt-6">
+							{stepError ? (
+								<div className="mx-auto mb-4 max-w-xl rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700">
+									{stepError}
+								</div>
+							) : null}
+							<div className="flex items-center justify-center gap-4">
+								<button
+									onClick={handlePrevious}
+									className="px-5 py-2.5 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition-all flex items-center gap-2 group"
+								>
+									<ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+									Previous
+								</button>
 
-							{/* Step Dots Indicator */}
-							<div className="flex items-center gap-1.5">
-								{steps.slice(1, -1).map((_, index) => {
-									const stepIndex = index + 1
-									return (
-										<div
-											key={stepIndex}
-											className={`h-1.5 rounded-full transition-all duration-300 ${
-												stepIndex < currentStep
-													? 'w-6 bg-brand-pink'
-													: stepIndex === currentStep
-													? 'w-8 bg-brand-pink'
-													: 'w-1.5 bg-gray-300'
-											}`}
-										/>
-									)
-								})}
+								<div className="flex items-center gap-1.5">
+									{steps.slice(1, -1).map((_, index) => {
+										const stepIndex = index + 1
+										return (
+											<div
+												key={stepIndex}
+												className={`h-1.5 rounded-full transition-all duration-300 ${
+													stepIndex < currentStep
+														? 'w-6 bg-brand-pink'
+														: stepIndex === currentStep
+														? 'w-8 bg-brand-pink'
+														: 'w-1.5 bg-white/80 ring-1 ring-gray-200'
+												}`}
+											/>
+										)
+									})}
+								</div>
+
+								<button
+									onClick={handleNext}
+									className="px-6 py-2.5 bg-brand-pink text-white font-semibold rounded-xl hover:bg-brand-pink-dark transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group"
+								>
+									Next
+									<ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+								</button>
 							</div>
-
-							<button
-								onClick={handleNext}
-								className="px-6 py-2.5 bg-brand-pink text-white font-semibold rounded-lg hover:opacity-90 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group"
-							>
-								Next
-								<ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-							</button>
 						</div>
 					)}
 				</div>

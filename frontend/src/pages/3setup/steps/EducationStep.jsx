@@ -1,8 +1,11 @@
-import React, { useRef } from 'react'
+import React, { forwardRef, useImperativeHandle, useRef } from 'react'
 import EducationInput from '@/components/inputs/EducationInput'
 
-const EducationStep = ({ education, onAdd, onRemove, onUpdate, showSubsections = false }) => {
+const EducationStep = forwardRef(function EducationStep({ education, onAdd, onRemove, onUpdate, showSubsections = false }, ref) {
 	const educationRef = useRef(null)
+	useImperativeHandle(ref, () => ({
+		revealMissingRequired: () => educationRef.current?.revealMissingRequired?.(),
+	}))
 
 	return (
 		<div>
@@ -33,6 +36,6 @@ const EducationStep = ({ education, onAdd, onRemove, onUpdate, showSubsections =
 			/>
 		</div>
 	)
-}
+})
 
 export default EducationStep

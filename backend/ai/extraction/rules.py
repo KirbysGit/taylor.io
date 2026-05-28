@@ -78,6 +78,21 @@ claimSensitivePhraseRules = {
     "billing systems": "domain-specific systems requirement",
     "crm systems": "domain-specific systems requirement",
     "accounting systems": "domain-specific systems requirement",
+    "u.s. citizenship": "eligibility requirement",
+    "us citizenship": "eligibility requirement",
+    "abet": "education/accreditation requirement",
+    "transcripts": "application/qualification requirement",
+    "degree completed by june 2026": "education timing requirement",
+    "professional level pcb design tools": "domain-specific tool requirement",
+    "pcb design tools": "domain-specific tool requirement",
+    "schematic capture": "domain-specific technical requirement",
+    "oscilloscopes": "domain-specific test-equipment requirement",
+    "dfm": "domain-specific manufacturing requirement",
+    "dft": "domain-specific manufacturing requirement",
+    "emc": "domain-specific compliance requirement",
+    "fpga": "domain-specific hardware requirement",
+    "verilog": "domain-specific hardware requirement",
+    "vhdl": "domain-specific hardware requirement",
 }
 
 claimSensitiveRegexRules = (
@@ -86,7 +101,7 @@ claimSensitiveRegexRules = (
         "reason": "seniority/years-of-experience requirement",
     },
     {
-        "pattern": r"\b(?:licensed|certified|certification|required license|license required)\b(?:\s+[a-z0-9+#./-]+){0,4}",
+        "pattern": r"\b(?:licensed|certified|required certification|required license|license required|certification required)\b(?:\s+[a-z0-9+#./-]+){0,4}",
         "reason": "credential/license requirement",
     },
     {
@@ -198,6 +213,15 @@ hardNoiseTokens = {
     "reflectmedolls.com",
     "sanjana",
     "freedomind.us",
+    "below",
+    "deadline",
+    "handshake",
+    "higher",
+    "salary",
+    "student",
+    "transcript",
+    "transcripts",
+    "usajobs",
 }
 
 # tokens that dominate benefit/comp lines; used to penalize phrases that look like perks not skills.
@@ -346,6 +370,9 @@ concreteStackTerms = {
     "webex", "calabrio", "dialogflow", "ci/cd", "linux", "vue.js", "angular", "html", "css", "gpu", "cuda",
     "javascript", "nodejs",
     "ruby", "rails", "tailwind", "claude", "ios", "android",
+    "dbt", "tableau", "altium", "cadence allegro", "pads", "kicad", "orcad",
+    "ltspice", "ti tina", "verilog", "vhdl", "fpga", "oscilloscopes", "dvm",
+    "current probes", "network analyzers", "arbitrary wave generators",
 }
 
 # softer capability words: stack-adjacent but not a named product (workflow, compliance, etc.).
@@ -550,6 +577,19 @@ wrapperSuppressLineSubstrings = {
     "submit your application",
     "how to apply for this",
     "job search faster with premium",
+    "starting salary",
+    "pay progression",
+    "deadline to apply",
+    "apply here",
+    "must apply on both",
+    "include resume and transcript",
+    "include resume and transcripts",
+    "u.s. citizenship is required",
+    "us citizenship is required",
+    "opt/cpt",
+    "h-1b",
+    "certification support",
+    "authorized to work in the u.s.",
 }
 
 # when merging overlapping terms: if generic token overlaps a longer phrase, prefer these exact phrases.
@@ -615,6 +655,12 @@ fillerFunctionTokens = {
     "analysis",
     "eg",
     "e.g",
+    "bachelor",
+    "education",
+    "higher",
+    "below",
+    "student",
+    "position",
 }
 
 

@@ -21,6 +21,7 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     email: str
+    email_verified: bool = False
     section_labels: Optional[Dict[str, str]] = None
     attached_resume_filename: Optional[str] = None
     attached_resume_uploaded_at: Optional[datetime] = None
@@ -35,6 +36,21 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str
     user: UserResponse
+
+class AuthStatusResponse(BaseModel):
+    status: str
+    email: Optional[EmailStr] = None
+    message: Optional[str] = None
+
+class AuthUserResponse(BaseModel):
+    user: UserResponse
+
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str
 
 # --------- summary schemas ---------
 

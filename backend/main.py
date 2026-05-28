@@ -20,7 +20,7 @@ logging.basicConfig(
 from models import Base
 
 # import database.
-from database import engine
+from database import engine, ensure_auth_columns
 
 # import routers.
 from routers import auth_router, users_router, profile_router, generator_router, templates_router, ai_router
@@ -38,6 +38,9 @@ origins = [
     'http://127.0.0.1:5173',
     'http://127.0.0.1:8000',
 ]
+frontend_url = (os.getenv("FRONTEND_URL") or "").rstrip("/")
+if frontend_url and frontend_url not in origins:
+    origins.append(frontend_url)
 
 # add the middleware for CORS.
 app.add_middleware(
@@ -65,6 +68,7 @@ app.include_router(ai_router)
 async def startup_event():
     try:
         Base.metadata.create_all(bind=engine)
+        ensure_auth_columns()
         print("Database tables created successfully")
     except Exception as e:
         print(f"Error creating database tables: {e}")

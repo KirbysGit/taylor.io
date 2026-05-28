@@ -28,6 +28,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/auth/reset-password" element={<Auth />} />
+        <Route path="/auth/verify-email" element={<Auth />} />
         <Route 
           path="/setup" 
           element={

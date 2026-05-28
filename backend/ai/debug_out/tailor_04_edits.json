@@ -2,296 +2,218 @@
   "stage_a": {
     "edits": {
       "summarySection": {
-        "summary": "Data Engineer with proven expertise in building scalable data pipelines and backend services. Proficient in Python, SQL, and PostgreSQL, with hands-on experience in developing ETL processes and optimizing data workflows. Committed to transforming complex data into actionable insights through innovative engineering practices."
+        "summary": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflows to enhance operational efficiency."
       },
-      "experience": [
-        {
-          "id": 5,
-          "description": "• Developed and optimized data processing pipelines using Python and PostgreSQL, achieving a ~40% reduction in latency for backend services.\n• Built REST APIs in Python/Django to support secure data workflows for financial compliance, enhancing operational efficiency.\n• Collaborated with cross-functional teams to design scalable data models and service architectures, ensuring robust data integration and processing capabilities.\n• Created interactive dashboards with React, providing real-time visibility into data metrics and improving decision-making for stakeholders."
-        }
-      ],
       "projects": [
         {
-          "id": 9,
+          "id": 21,
           "tech_stack": [
             "FastAPI",
-            "React",
             "PostgreSQL",
+            "React",
             "Plaid API"
           ],
-          "description": "• Engineered a full-stack finance application that automates account aggregation and transaction tracking, delivering insights through a unified dashboard.\n• Designed and implemented FastAPI services and PostgreSQL schemas for seamless Plaid integrations, ensuring reliable transaction processing.\n• Developed responsive React interfaces for user account management and financial analytics, enhancing user engagement and experience.\n• Implemented secure data handling protocols (OAuth/JWT) to protect sensitive financial information and maintain compliance."
+          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, delivering comprehensive spending insights to users.\n• Engineered FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing and normalized data storage.\n• Created responsive React dashboards for account management and financial analytics, significantly improving user engagement.\n• Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data."
         }
-      ],
-      "removedProjectIds": [
-        10,
-        12,
-        17,
-        18,
-        20
-      ],
-      "sectionOrder": [
-        "header",
-        "summary",
-        "education",
-        "experience",
-        "projects",
-        "skills"
-      ],
-      "sectionVisibility": {
-        "summary": true,
-        "education": true,
-        "experience": true,
-        "projects": true,
-        "skills": true
-      }
+      ]
     }
   },
   "stage_b": {
     "edits": {
       "skills": [
         {
-          "id": 41,
+          "id": 63,
           "name": "Python",
           "category": "Languages"
         },
         {
-          "id": 44,
+          "id": 64,
           "name": "SQL",
           "category": "Languages"
         },
         {
-          "id": 51,
-          "name": "PostgreSQL",
-          "category": "Data Tools"
-        },
-        {
-          "id": 52,
-          "name": "MySQL",
-          "category": "Data Tools"
-        },
-        {
-          "id": 57,
-          "name": "ETL Pipelines",
-          "category": "Data Tools"
-        },
-        {
-          "id": 46,
-          "name": "FastAPI",
-          "category": "Frameworks"
-        },
-        {
-          "id": 45,
-          "name": "Django",
-          "category": "Frameworks"
-        },
-        {
-          "id": 58,
-          "name": "Data Pipelines",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 59,
-          "name": "Automation Systems",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 42,
+          "id": 65,
           "name": "Java",
           "category": "Languages"
         },
         {
-          "id": 43,
+          "id": 66,
           "name": "JavaScript",
           "category": "Languages"
         },
         {
-          "id": 47,
+          "id": 67,
+          "name": "FastAPI",
+          "category": "Frameworks"
+        },
+        {
+          "id": 68,
+          "name": "Django",
+          "category": "Frameworks"
+        },
+        {
+          "id": 69,
           "name": "React",
           "category": "Frameworks"
         },
         {
-          "id": 48,
+          "id": 70,
           "name": "Node.js",
           "category": "Frameworks"
         },
         {
-          "id": 49,
+          "id": 71,
           "name": "PyTorch",
           "category": "Frameworks"
         },
         {
-          "id": 50,
+          "id": 72,
           "name": "TensorFlow Lite",
           "category": "Frameworks"
         },
         {
-          "id": 53,
-          "name": "MongoDB",
+          "id": 73,
+          "name": "PostgreSQL",
           "category": "Data Tools"
         },
         {
-          "id": 54,
-          "name": "Pandas",
+          "id": 74,
+          "name": "ETL Pipelines",
           "category": "Data Tools"
-        }
-      ]
-    },
-    "warnings": [
-      "Skills guard restored 8 skill row(s) because Pass B exceeded the deletion budget."
-    ]
-  },
-  "rewrite_repair": {
-    "edits": {
-      "experience": [
+        },
         {
-          "id": 5,
-          "description": "• Built REST APIs in Python/Django to support secure data workflows for financial compliance, improving operational efficiency.\n• Collaborated with senior engineers on system design and architecture, contributing to scalable service patterns and data modeling.\n• Developed React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
-        }
-      ],
-      "projects": [
+          "id": 75,
+          "name": "MySQL",
+          "category": "Data Tools"
+        },
         {
-          "id": 9,
-          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, providing insights through a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Created responsive React interfaces for user account management and financial analytics, improving user engagement.\n• Implemented secure data handling protocols (OAuth/JWT) to protect sensitive financial information."
+          "id": 76,
+          "name": "Engineering Design and Construction",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 77,
+          "name": "Project Documentation",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 78,
+          "name": "Workflow Automation",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 79,
+          "name": "Data Management",
+          "category": "Focus Areas"
         }
       ]
     }
   },
+  "rewrite_repair": null,
   "combined": {
     "edits": {
       "summarySection": {
-        "summary": "Data Engineer with proven expertise in building scalable data pipelines and backend services. Proficient in Python, SQL, and PostgreSQL, with hands-on experience in developing ETL processes and optimizing data workflows. Committed to transforming complex data into actionable insights through innovative engineering practices."
+        "summary": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflows to enhance operational efficiency."
       },
-      "experience": [
-        {
-          "id": 5,
-          "description": "• Built REST APIs in Python/Django to support secure data workflows for financial compliance, improving operational efficiency.\n• Collaborated with senior engineers on system design and architecture, contributing to scalable service patterns and data modeling.\n• Developed React dashboards integrated with Django APIs, enhancing visibility into backend data workflows and operational metrics.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency."
-        }
-      ],
       "projects": [
         {
-          "id": 9,
+          "id": 21,
           "tech_stack": [
             "FastAPI",
-            "React",
             "PostgreSQL",
+            "React",
             "Plaid API"
           ],
-          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, providing insights through a unified dashboard.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing.\n• Created responsive React interfaces for user account management and financial analytics, improving user engagement.\n• Implemented secure data handling protocols (OAuth/JWT) to protect sensitive financial information."
+          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, delivering comprehensive spending insights to users.\n• Engineered FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing and normalized data storage.\n• Created responsive React dashboards for account management and financial analytics, significantly improving user engagement.\n• Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data."
         }
       ],
-      "removedProjectIds": [
-        10,
-        12,
-        17,
-        18,
-        20
-      ],
-      "sectionOrder": [
-        "header",
-        "summary",
-        "education",
-        "experience",
-        "projects",
-        "skills"
-      ],
-      "sectionVisibility": {
-        "summary": true,
-        "education": true,
-        "experience": true,
-        "projects": true,
-        "skills": true
-      },
       "skills": [
         {
-          "id": 41,
+          "id": 63,
           "name": "Python",
           "category": "Languages"
         },
         {
-          "id": 44,
+          "id": 64,
           "name": "SQL",
           "category": "Languages"
         },
         {
-          "id": 51,
-          "name": "PostgreSQL",
-          "category": "Data Tools"
-        },
-        {
-          "id": 52,
-          "name": "MySQL",
-          "category": "Data Tools"
-        },
-        {
-          "id": 57,
-          "name": "ETL Pipelines",
-          "category": "Data Tools"
-        },
-        {
-          "id": 46,
-          "name": "FastAPI",
-          "category": "Frameworks"
-        },
-        {
-          "id": 45,
-          "name": "Django",
-          "category": "Frameworks"
-        },
-        {
-          "id": 58,
-          "name": "Data Pipelines",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 59,
-          "name": "Automation Systems",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 42,
+          "id": 65,
           "name": "Java",
           "category": "Languages"
         },
         {
-          "id": 43,
+          "id": 66,
           "name": "JavaScript",
           "category": "Languages"
         },
         {
-          "id": 47,
+          "id": 67,
+          "name": "FastAPI",
+          "category": "Frameworks"
+        },
+        {
+          "id": 68,
+          "name": "Django",
+          "category": "Frameworks"
+        },
+        {
+          "id": 69,
           "name": "React",
           "category": "Frameworks"
         },
         {
-          "id": 48,
+          "id": 70,
           "name": "Node.js",
           "category": "Frameworks"
         },
         {
-          "id": 49,
+          "id": 71,
           "name": "PyTorch",
           "category": "Frameworks"
         },
         {
-          "id": 50,
+          "id": 72,
           "name": "TensorFlow Lite",
           "category": "Frameworks"
         },
         {
-          "id": 53,
-          "name": "MongoDB",
+          "id": 73,
+          "name": "PostgreSQL",
           "category": "Data Tools"
         },
         {
-          "id": 54,
-          "name": "Pandas",
+          "id": 74,
+          "name": "ETL Pipelines",
           "category": "Data Tools"
+        },
+        {
+          "id": 75,
+          "name": "MySQL",
+          "category": "Data Tools"
+        },
+        {
+          "id": 76,
+          "name": "Engineering Design and Construction",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 77,
+          "name": "Project Documentation",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 78,
+          "name": "Workflow Automation",
+          "category": "Focus Areas"
+        },
+        {
+          "id": 79,
+          "name": "Data Management",
+          "category": "Focus Areas"
         }
       ]
-    },
-    "warnings": [
-      "Skills guard restored 8 skill row(s) because Pass B exceeded the deletion budget.",
-      "Rewrite repair pass strengthened weak tailored rows: experience:5, projects:9."
-    ]
+    }
   }
 }
