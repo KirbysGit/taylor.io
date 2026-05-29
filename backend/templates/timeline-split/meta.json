@@ -1,0 +1,23 @@
+{
+  "displayName": "Timeline Split",
+  "family": "Split column",
+  "variantLabel": "Timeline rail",
+  "layoutProfile": "timeline_split",
+  "shortDescription": "A locked one-page split layout with a full-width masthead, left contact/skills rail, center timeline markers, and narrative sections on the right.",
+  "description": "Timeline Split is a curated one-page layout inspired by resume designs that use a central marker spine. Contact and skills stay in the left rail; profile, work experience, projects, and education render in the right narrative column for PDF and Word.",
+  "stylingMode": "locked",
+  "allowedControls": [],
+  "layoutLocked": true,
+  "capabilitiesVersion": 1,
+  "docxMaxPages": 1,
+  "tags": [
+    "Timeline",
+    "Split",
+    "One-page"
+  ],
+  "intent": "Visual split resume",
+  "previewImage": "preview.png",
+  "previewSnippets": {
+    "full": "previews/full.png"
+  }
+}

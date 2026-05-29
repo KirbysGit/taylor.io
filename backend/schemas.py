@@ -202,11 +202,14 @@ class ParsedContactInfo(BaseModel):
     linkedin: Optional[str] = None
     portfolio: Optional[str] = None
     location: Optional[str] = None
+    tagline: Optional[str] = None
 
 class ParsedEducation(BaseModel):
     school: Optional[str] = None
     degree: Optional[str] = None
     discipline: Optional[str] = None
+    field: Optional[str] = None
+    minor: Optional[str] = None
     startDate: Optional[str] = None
     endDate: Optional[str] = None
     current: bool = False
@@ -242,6 +245,7 @@ class ParsedResumeResponse(BaseModel):
     contact_info: ParsedContactInfo = ParsedContactInfo()
     summary: Optional[str] = None
     warnings: List[str] = []
+    debug: Optional[Dict] = None
 
 
 # --------- saved resume schemas ---------

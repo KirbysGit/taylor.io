@@ -15,7 +15,11 @@ from .docx_layout import (
     _add_two_column_line,
     _apply_section_title_bottom_border,
 )
-from .docx_run_style import _apply_run_resume_color, _set_line_spacing_multiple
+from .docx_run_style import (
+    _apply_run_resume_color,
+    _set_line_spacing_multiple,
+    _set_run_character_spacing,
+)
 from .docx_styles import DocxStyleConfig
 
 
@@ -23,9 +27,13 @@ from .docx_styles import DocxStyleConfig
 def _add_section_title(doc: Any, title: str, style: DocxStyleConfig) -> None:
     # Add a section heading with bottom border on the same paragraph; space_after clears content below.
     p = doc.add_paragraph()
-    run = p.add_run(title)
+    display_title = str(title or "")
+    if getattr(style, "section_title_uppercase", False):
+        display_title = display_title.upper()
+    run = p.add_run(display_title)
     run.font.size = Pt(style.section_title_font_size_pt)
     run.font.name = style.font_primary
+    _set_run_character_spacing(run, getattr(style, "section_title_letter_spacing_pt", 0) or 0)
     _apply_run_resume_color(run, style, "resume_text_color_emphasis")
     p.paragraph_format.space_before = Pt(style.section_title_space_before_pt)
     p.paragraph_format.space_after = Pt(style.section_title_space_after_pt)

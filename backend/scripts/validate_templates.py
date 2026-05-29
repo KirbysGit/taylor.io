@@ -74,6 +74,7 @@ KNOWN_TEMPLATE_PLACEHOLDERS = (
     "{contact_rail}",
     "{sections}",
     "{sidebar_sections}",
+    "{timeline_left}",
 )
 
 COMMON_TEMPLATE_PLACEHOLDERS = (
@@ -90,6 +91,10 @@ SIDEBAR_TEMPLATE_PLACEHOLDERS = (
 
 SINGLE_COLUMN_TEMPLATE_PLACEHOLDERS = (
     "{header_line}",
+)
+
+TIMELINE_TEMPLATE_PLACEHOLDERS = (
+    "{timeline_left}",
 )
 
 DOCX_STYLE_FIELDS = frozenset(DocxStyleConfig.__dataclass_fields__.keys())
@@ -314,6 +319,8 @@ class TemplateValidator:
         required = list(COMMON_TEMPLATE_PLACEHOLDERS)
         if layout_profile == "sidebar_split":
             required.extend(SIDEBAR_TEMPLATE_PLACEHOLDERS)
+        elif layout_profile == "timeline_split":
+            required.extend(TIMELINE_TEMPLATE_PLACEHOLDERS)
         else:
             required.extend(SINGLE_COLUMN_TEMPLATE_PLACEHOLDERS)
 

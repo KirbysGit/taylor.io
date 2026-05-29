@@ -5,6 +5,7 @@ import { showThemedActionToast } from '@/components/notifications/ThemedToaster'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
 	faBriefcase,
+	faBug,
 	faCheck,
 	faChevronRight,
 	faClockRotateLeft,
@@ -16,9 +17,11 @@ import {
 	faLock,
 	faPlus,
 	faStar,
+	faTrash,
 	faWandMagicSparkles,
 } from '@fortawesome/free-solid-svg-icons'
 import {
+	clearMyProfile,
 	getMyProfile,
 	upsertContact,
 	setupEducation,
@@ -161,6 +164,9 @@ function Info() {
 	const [savingSection, setSavingSection] = useState(null)
 	const [isParsingResume, setIsParsingResume] = useState(false)
 	const [parseResumeError, setParseResumeError] = useState('')
+	const [parseMergeReport, setParseMergeReport] = useState(null)
+	const [showParseDebug, setShowParseDebug] = useState(false)
+	const [showClearProfileModal, setShowClearProfileModal] = useState(false)
 
 	// last-saved snapshots for dirty check
 	const lastSavedRef = useRef(null)
@@ -652,13 +658,14 @@ function Info() {
 			const res = await parseResumeMerge(file)
 			const parsed = res.data || res
 			const existing = { contact, education, experiences, projects, skills, summary }
-			const { merged, counts } = mergeParsedData(parsed, existing)
+			const { merged, counts, details } = mergeParsedData(parsed, existing)
 			setContact(merged.contact)
 			setEducation(merged.education)
 			setExperiences(merged.experiences)
 			setProjects(merged.projects)
 			setSkills(merged.skills)
 			setSummary(merged.summary)
+			setParseMergeReport({ counts, details, debug: parsed.debug || null, warnings: parsed.warnings || [] })
 			// schedule auto-save for all merged sections (we're now dirty)
 			;['contact', 'education', 'experiences', 'projects', 'skills', 'summary'].forEach(scheduleDebouncedSave)
 			await attachResume(file.name)
@@ -671,6 +678,47 @@ function Info() {
 			toast.error('Failed to parse resume.')
 		} finally {
 			setIsParsingResume(false)
+		}
+	}
+
+	const handleClearProfile = async () => {
+		setShowClearProfileModal(false)
+		setSavingSection('reset')
+		try {
+			await clearMyProfile()
+			const blankContact = {
+				email: '',
+				phone: '',
+				github: '',
+				linkedin: '',
+				portfolio: '',
+				location: '',
+				tagline: '',
+			}
+			setContact(blankContact)
+			setEducation([])
+			setExperiences([])
+			setProjects([])
+			setSkills([])
+			setSummary('')
+			setParseMergeReport(null)
+			setParseResumeError('')
+			preResumeSnapshotRef.current = null
+			setUser(prev => prev ? { ...prev, attached_resume_filename: null, attached_resume_uploaded_at: null } : null)
+			lastSavedRef.current = {
+				contact: blankContact,
+				education: [],
+				experiences: [],
+				projects: [],
+				skills: [],
+				summary: '',
+			}
+			toast.success('Profile cleared. Ready for a fresh parser test.')
+		} catch (err) {
+			console.error('Clear profile failed:', err)
+			toast.error('Failed to clear profile.')
+		} finally {
+			setSavingSection(null)
 		}
 	}
 
@@ -1012,6 +1060,20 @@ function Info() {
 
 						<div id="resume-upload-section">
 							<InfoCard className="p-5">
+								<div className="mb-4 flex flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+									<div>
+										<p className="font-black text-gray-950">Resume import testing</p>
+										<p className="mt-1 text-sm text-gray-600">Upload a resume to see what was added, skipped, and how the parser grouped it.</p>
+									</div>
+									<button
+										type="button"
+										onClick={() => setShowClearProfileModal(true)}
+										className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+									>
+										<FontAwesomeIcon icon={faTrash} className="size-3.5" />
+										Clear profile
+									</button>
+								</div>
 								{user?.attached_resume_filename ? (
 									<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 										<div className="flex items-center gap-3">
@@ -1068,6 +1130,67 @@ function Info() {
 										)}
 									</div>
 								)}
+								{parseMergeReport ? (
+									<div className="mt-5 rounded-2xl border border-brand-pink/14 bg-white p-4 shadow-sm">
+										<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+											<div>
+												<p className="font-black text-gray-950">Last import result</p>
+												<p className="mt-1 text-sm text-gray-600">
+													Added {Object.values(parseMergeReport.counts || {}).reduce((sum, value) => sum + Number(value || 0), 0)} new item(s). Existing matches were skipped.
+												</p>
+											</div>
+											<button
+												type="button"
+												onClick={() => setShowParseDebug((prev) => !prev)}
+												className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-black text-gray-700 transition hover:border-brand-pink/25 hover:bg-brand-pink/[0.04]"
+											>
+												<FontAwesomeIcon icon={faBug} className="size-3.5" />
+												{showParseDebug ? 'Hide parser debug' : 'Show parser debug'}
+											</button>
+										</div>
+
+										<div className="mt-4 grid gap-3 sm:grid-cols-4">
+											{Object.entries(parseMergeReport.counts || {}).map(([section, count]) => (
+												<div key={section} className="rounded-xl bg-brand-pink/[0.045] px-3 py-2">
+													<p className="text-lg font-black text-gray-950">{count}</p>
+													<p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{section}</p>
+												</div>
+											))}
+										</div>
+
+										<div className="mt-4 grid gap-3 lg:grid-cols-2">
+											{Object.entries(parseMergeReport.details?.added || {}).map(([section, items]) => (
+												<div key={section} className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3">
+													<p className="text-xs font-black uppercase tracking-wide text-emerald-800">Added {section}</p>
+													<p className="mt-1 text-sm text-emerald-900">
+														{items.length ? items.slice(0, 4).join(', ') : 'None'}
+													</p>
+												</div>
+											))}
+											{Object.entries(parseMergeReport.details?.skipped || {}).some(([, items]) => items.length > 0) ? (
+												<div className="rounded-xl border border-gray-200 bg-gray-50 p-3 lg:col-span-2">
+													<p className="text-xs font-black uppercase tracking-wide text-gray-600">Already existed / skipped</p>
+													<p className="mt-1 text-sm text-gray-700">
+														{Object.entries(parseMergeReport.details.skipped)
+															.flatMap(([section, items]) => items.slice(0, 3).map((item) => `${section}: ${item}`))
+															.join(', ')}
+													</p>
+												</div>
+											) : null}
+										</div>
+
+										{showParseDebug ? (
+											<div className="mt-4 rounded-xl border border-gray-200 bg-gray-950 p-4 text-left text-xs text-gray-100">
+												<pre className="max-h-96 overflow-auto whitespace-pre-wrap break-words">
+													{JSON.stringify({
+														warnings: parseMergeReport.warnings,
+														debug: parseMergeReport.debug,
+													}, null, 2)}
+												</pre>
+											</div>
+										) : null}
+									</div>
+								) : null}
 							</InfoCard>
 						</div>
 
@@ -1142,6 +1265,34 @@ function Info() {
 					</div>
 				</div>
 			</DashboardShell>
+
+			{showClearProfileModal && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center">
+					<div className="fixed inset-0 bg-black/50" onClick={() => setShowClearProfileModal(false)} aria-hidden />
+					<div className="relative mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+						<h3 className="text-lg font-semibold text-gray-900 mb-2">Clear profile data?</h3>
+						<p className="text-sm leading-relaxed text-gray-600">
+							This removes contact details, education, experience, projects, skills, summary, and attached resume metadata from your profile. Your account stays active.
+						</p>
+						<div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+							<button
+								type="button"
+								onClick={() => setShowClearProfileModal(false)}
+								className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100"
+							>
+								Cancel
+							</button>
+							<button
+								type="button"
+								onClick={handleClearProfile}
+								className="rounded-lg border border-red-200 bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700"
+							>
+								Clear everything
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 
 			{/* Detach Resume Modal */}
 			{showDetachModal && (

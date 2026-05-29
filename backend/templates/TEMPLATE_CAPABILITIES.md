@@ -37,6 +37,7 @@ Treat `layoutProfile` as the implementation axis and `intent` / `tags` as produc
 |----------|----------|----------------------------|
 | `classic_single_column` | The resume remains one body stream with the same core header/section structure. | Prefer token and chrome changes; do not create font-only variants. |
 | `sidebar_split` | Skills/education live in a rail and summary/experience/projects live in the main column. | Use the existing sidebar HTML and DOCX table path. |
+| `timeline_split` | Contact/skills sit in a left info rail while summary, experience, projects, and education render beside a central marker spine. | Use a dedicated locked profile; PDF uses marker rows and DOCX uses a table-based split. |
 | `project_forward` | Projects deserve first-class placement and stacked metadata. | Use a dedicated profile so project ordering and DOCX treatment are explicit. |
 | `classic_single_column` variant `ats-compact` | A no-frills, scanner-friendly single-column design. | Reuse classic rendering unless structural behavior differs. |
 | Future `two_column_body` | The body itself splits into columns. | Requires a new HTML and DOCX layout path before shipping. |

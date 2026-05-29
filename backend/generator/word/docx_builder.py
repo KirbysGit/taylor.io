@@ -12,6 +12,7 @@ from ..layouts.registry import (
     LAYOUT_EARLY_CAREER,
     LAYOUT_PROJECT_FORWARD,
     LAYOUT_SIDEBAR_SPLIT,
+    LAYOUT_TIMELINE_SPLIT,
     load_layout_profile,
     resolve_docx_max_pages,
 )
@@ -29,6 +30,7 @@ from .docx_sections import (
 from .docx_sidebar_split import _build_docx_sidebar_split_document
 from .docx_project_forward import build_docx_project_forward_document
 from .docx_early_career import build_docx_early_career_document
+from .docx_timeline_split import build_docx_timeline_split_document
 
 
 # Main Docx Orchestration Function.
@@ -64,6 +66,14 @@ def build_docx(resume_data: Dict[str, Any], template_name: str = "classic", styl
             style_preferences,
             templateSlug=name,
             docxMaxPages=resolve_docx_max_pages(name, resume_data),
+        )
+    if load_layout_profile(name) == LAYOUT_TIMELINE_SPLIT:
+        return build_docx_timeline_split_document(
+            resume_data,
+            style,
+            style_preferences,
+            template_slug=name,
+            docx_max_pages=resolve_docx_max_pages(name, resume_data),
         )
 
     # Initialize Docx.

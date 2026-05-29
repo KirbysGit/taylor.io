@@ -16,11 +16,14 @@ LAYOUT_PROJECT_FORWARD = "project_forward"
 
 LAYOUT_EARLY_CAREER = "early_career"
 
+LAYOUT_TIMELINE_SPLIT = "timeline_split"
+
 SUPPORTED_DOCX_PROFILES = frozenset({
     DEFAULT_LAYOUT_PROFILE,
     LAYOUT_SIDEBAR_SPLIT,
     LAYOUT_PROJECT_FORWARD,
     LAYOUT_EARLY_CAREER,
+    LAYOUT_TIMELINE_SPLIT,
 })
 
 # --- Layout Profile Loading ---

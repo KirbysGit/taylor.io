@@ -100,6 +100,34 @@ async def get_my_profile(
     }
 
 
+@router.delete("/me", response_model=UserProfileResponse)
+async def clear_my_profile(
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    """Clear profile content for parser/testing resets without deleting the account."""
+    db.query(Contact).filter(Contact.user_id == current_user.id).delete()
+    db.query(Education).filter(Education.user_id == current_user.id).delete()
+    db.query(Experience).filter(Experience.user_id == current_user.id).delete()
+    db.query(Projects).filter(Projects.user_id == current_user.id).delete()
+    db.query(Skills).filter(Skills.user_id == current_user.id).delete()
+    db.query(Summary).filter(Summary.user_id == current_user.id).delete()
+    current_user.attached_resume_filename = None
+    current_user.attached_resume_uploaded_at = None
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return {
+        "user": UserResponse.model_validate(current_user),
+        "contact": None,
+        "education": [],
+        "experiences": [],
+        "projects": [],
+        "skills": [],
+        "summary": None,
+    }
+
+
 # update section header labels.
 @router.post("/section-labels", response_model=UserResponse)
 async def update_section_labels(
@@ -579,7 +607,8 @@ async def parse_resume_merge(
             projects=parsed_data.get("projects", []),
             contact_info=parsed_data.get("contact_info", {}),
             summary=parsed_data.get("summary", ""),
-            warnings=parsed_data.get("warnings", [])
+            warnings=parsed_data.get("warnings", []),
+            debug=parsed_data.get("debug")
         )
     except Exception as e:
         raise HTTPException(
@@ -696,7 +725,8 @@ async def parse_resume(
             projects=parsed_data.get("projects", []),
             contact_info=parsed_data.get("contact_info", {}),
             summary=parsed_data.get("summary", ""),
-            warnings=parsed_data.get("warnings", [])
+            warnings=parsed_data.get("warnings", []),
+            debug=parsed_data.get("debug")
         )
     except ImportError as e:
         raise HTTPException(

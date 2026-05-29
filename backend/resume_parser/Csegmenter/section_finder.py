@@ -11,7 +11,7 @@ SECTION_HEADERS = {
     "contact": r"(contact|contact information|contact info|personal information|personal info)",
     "education": r"(education|academic|qualifications|degrees?|educational background)",
     "experience": r"(experience|employment|work history|professional experience|work experience|employment history|career)",
-    "skills": r"(skills|technical skills|core competencies|proficiencies?|competencies|expertise)",
+    "skills": r"(skills(?:\s*&\s*extracurriculars?)?|technical skills|key competencies|core competencies|proficiencies?|competencies|expertise)",
     "projects": r"(projects|personal projects|key projects|project experience|portfolio)",
     "summary": r"(summary|professional summary|profile|objective|career objective|executive summary|about)",
 }

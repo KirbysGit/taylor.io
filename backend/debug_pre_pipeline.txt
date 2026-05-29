@@ -1,53 +1,53 @@
 === PRE-PIPELINE (RAW EXTRACTED TEXT) ===
 
 Colin Kirby
-kirbycolin26@gmail.com | 407-876-8172 | Orlando, FL | linkedin.com/in/colinwkirby/ | github.com/KirbysGit | colinkirby.dev
-Professional Summary
-Backend developer specializing in Python and FastAPI, with proven expertise in building scalable backend services
-and data pipelines. Experienced in system architecture and API development, leveraging SQL for data access and
-reporting.
-Experience
-Software Engineering Intern May 2024 - June 2025
-BitGo | Python, Django, React, PostgreSQL, AWS EC2 Remote
-Built and maintained backend services and REST APIs in Python/Django, supporting secure internal workflows for
-financial and compliance teams.
-Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and
-operational metrics.
-Collaborated with senior engineers on system design and architecture, contributing to scalable service patterns and
-data modeling.
-Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency.
-Projects
-Centi – Personal Finance App|FastAPI, PostgreSQL, React, Plaid API|https://centi.dev
-Developed a full-stack finance application that automates account aggregation and transaction tracking, providing
-users with comprehensive spending insights.
-Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and
-normalized data storage.
-Created responsive React dashboards for account management and financial analytics, improving user engagement.
-Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data.
-Taylor.io – Resume Builder & Parser|FastAPI, PostgreSQL, OpenAI API, React
-Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data
-using FastAPI and PostgreSQL.
-Developed backend services for parsing, authentication, and export workflows, enhancing user experience.
-Implemented a live editing interface in React, allowing users to customize resumes in real-time through a clean, guided
-interface.
-Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and
-editing workflows.
-SentimentTrader - Real-Time Stock Sentiment Pipeline|Python, SQL, FinBERT, XGBoost
-Designed a comprehensive ML data pipeline for real-time sentiment analysis, processing over 1,000 Reddit finance
-posts per run through a multi-stage ETL process.
-Utilized NLP models (FinBERT) to create predictive features, training XGBoost models that achieved 55–70% ROC-
-AUC.
-Developed modular components for data ingestion, transformation, and model inference, aligning with message-driven
-architectures for scalability.
-Automated workflows for data collection and preprocessing, enabling efficient real-time analytics.
-Skills
-Languages: Python, SQL, Java, JavaScript
-Frameworks: FastAPI, Django, React, Node.js, PyTorch, TensorFlow Lite
-Data Tools: PostgreSQL, ETL Pipelines, MySQL
-Focus Areas: Backend Development, Data Pipelines, REST API Design, Automation Systems
+kirbycolin26@gmail.com | github.com/KirbysGit | linkedin.com/in/colinwkirby/ | https://colinkirby.dev
 Education
-University of Central Florida (GPA: 3.78 / 4.0) August 2021 - May 2025
-Bachelor of Science in Computer Engineering, Minor in Finance Orlando, FL
+University of Central Florida (GPA 3.78 / 4.0) August 2021 – May 2025
+Bachelor of Science in Computer Engineering Orlando, FL
 Honors & Awards: Dean’s List 2021, President’s Honor Roll 2023 – 2025, Pegasus Gold Scholarship
 Clubs & Extracurriculars: AI @ UCF, Knight Hacks, SHPE @ UCF
 Relevant Coursework: Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design
+Experience
+Software Engineering Intern May 2024 – June 2025
+BitGo | Python, Django, React, PostgreSQL, AWS EC2 Remote
+• Built and maintained backend services and REST APIs in Python/Django supporting secure internal workflows for
+financial and compliance teams.
+• Collaborated with senior engineers on system design, requirements, and architecture, contributing to scalable service
+patterns and data modeling.
+• Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and
+operational metrics.
+• Optimized Python data-processing pipelines and PostgreSQL queries, improving system scalability and reducing
+latency by ~40%.
+Projects
+Centi – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev
+• Built and deployed a full-stack finance app that automates account aggregation, transaction tracking, and spending
+insights across a unified dashboard.
+• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and
+normalized data storage.
+• Developed responsive React dashboards and authentication flows for account management, transaction review, and
+financial analytics.
+• Implemented authentication and secure data handling (OAuth/JWT), ensuring protected access to financial data and
+user account workflows.
+Taylor.io – Resume Builder & Parser | React, FastAPI, PostgreSQL, OpenAI API, Tailwind CSS
+• Built an AI-powered resume platform that automates parsing of PDF/DOCX files into structured, editable profile data.
+• Implemented backend services for parsing, authentication, and export workflows using FastAPI and PostgreSQL.
+• Created a live editing and preview experience in React, enabling users to customize resume content in real time through
+a clean, guided interface.
+• Integrated OpenAI API for structured parsing and content generation, enabling automated resume extraction and
+editing workflows.
+Tizirsso Racing – Portfolio & Sponsorship Website | Next.js, React, Framer | https://tizianorosso.com
+• Built a custom motorsport portfolio site translating brand identity and racing history into a polished, mobile-first
+experience.
+• Developed interactive UI sections including an animated hero, editorial about page, career timeline, team history,
+championship highlights, and image galleries with lightbox support.
+SecureScape – Smart Security System | Python, Flutter, Arduino C++, TensorFlow Lite
+• Developed the Flutter mobile app with core controls including alarm toggling, lighting, photo capture, and recording
+access.
+• Built the Python backend and communication layer for device coordination, enabling reliable messaging and near real-
+time alerts (<3.5s).
+Skills
+Languages : Python, Java, JavaScript, SQL
+Frameworks : Django, FastAPI, React, Node.js, PyTorch, TensorFlow Lite
+Data Tools : PostgreSQL, MySQL, MongoDB, Pandas, NumPy, AWS (EC2), ETL Pipelines
+Focus Areas : Backend Development, Automation Systems, AI-Driven Workflows, Data Pipelines, REST API Design

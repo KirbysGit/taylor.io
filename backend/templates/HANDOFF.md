@@ -55,6 +55,7 @@ The current supported profiles are registered in `backend/generator/layouts/regi
 - `early_career`
 - `project_forward`
 - `sidebar_split`
+- `timeline_split`
 
 Do not ship a new layout profile until both HTML and DOCX paths exist. Unsupported
 profiles silently fall back in some runtime paths, but template authoring treats

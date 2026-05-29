@@ -40,8 +40,19 @@ const descToString = (d) => {
  */
 export function mergeParsedData(parsed, existing) {
 	const counts = { education: 0, experiences: 0, projects: 0, skills: 0 }
+	const details = {
+		added: { education: [], experiences: [], projects: [], skills: [] },
+		skipped: { education: [], experiences: [], projects: [], skills: [] },
+		contactUpdated: [],
+		summaryAdded: false,
+	}
 
 	// Contact: parsed always overwrites
+	for (const field of ['email', 'phone', 'github', 'linkedin', 'portfolio', 'location', 'tagline']) {
+		const parsedValue = parsed.contact_info?.[field]
+		const existingValue = existing.contact?.[field]
+		if (parsedValue && parsedValue !== existingValue) details.contactUpdated.push(field)
+	}
 	const contact = {
 		...existing.contact,
 		email: parsed.contact_info?.email ?? existing.contact?.email ?? '',
@@ -57,6 +68,7 @@ export function mergeParsedData(parsed, existing) {
 	let summary = existing.summary || ''
 	if (!summary.trim() && parsed.summary?.trim()) {
 		summary = parsed.summary.trim()
+		details.summaryAdded = true
 	}
 
 	// Education: dedupe with eduMatches (empty discipline = matches any)
@@ -79,6 +91,9 @@ export function mergeParsedData(parsed, existing) {
 				fromParsed: true,
 			})
 			counts.education++
+			details.added.education.push(edu.school || edu.degree || 'Education entry')
+		} else {
+			details.skipped.education.push(edu.school || edu.degree || 'Education entry')
 		}
 	}
 
@@ -102,6 +117,9 @@ export function mergeParsedData(parsed, existing) {
 				fromParsed: true,
 			})
 			counts.experiences++
+			details.added.experiences.push([exp.title, exp.company].filter(Boolean).join(' at ') || 'Experience entry')
+		} else {
+			details.skipped.experiences.push([exp.title, exp.company].filter(Boolean).join(' at ') || 'Experience entry')
 		}
 	}
 
@@ -123,6 +141,9 @@ export function mergeParsedData(parsed, existing) {
 				fromParsed: true,
 			})
 			counts.projects++
+			details.added.projects.push(proj.title || 'Project entry')
+		} else {
+			details.skipped.projects.push(proj.title || 'Project entry')
 		}
 	}
 
@@ -143,11 +164,15 @@ export function mergeParsedData(parsed, existing) {
 				fromParsed: true,
 			})
 			counts.skills++
+			details.added.skills.push(skill.name || 'Skill')
+		} else {
+			details.skipped.skills.push(skill.name || 'Skill')
 		}
 	}
 
 	return {
 		merged: { contact, education, experiences, projects, skills, summary },
 		counts,
+		details,
 	}
 }

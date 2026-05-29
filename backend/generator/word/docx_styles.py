@@ -48,6 +48,7 @@ class DocxStyleConfig:
     contact_line_height: float = 1.0  # single-ish
     contact_space_before_pt: float = 3.0  # space between name and contact line (no tagline)
     contact_space_after_pt: float = 2.0  # space after contact line (before first section)
+    resume_header_margin_bottom_pt: float = 3.0
 
     # ---- Section title ----
     section_title_font_size_pt: int = 12
@@ -57,6 +58,8 @@ class DocxStyleConfig:
     section_divider_visible: bool = True
     section_divider_color: str = "#000000"
     section_divider_width_pt: float = 0.25
+    section_title_letter_spacing_pt: float = 0.5
+    section_title_uppercase: bool = False
 
     # .section-content padding-left: 10pt
     section_content_indent_pt: float = 10.0
@@ -99,6 +102,22 @@ class DocxStyleConfig:
     # Word rail: templates/<slug>/docx_icons/<field>.png (optional); square PNG recommended
     sidebar_docx_contact_icon_size_pt: float = 9.5
     sidebar_docx_contact_icon_text_gap_pt: float = 4.5
+
+    # timeline_split Word/PDF: full-width header, left info rail, marker spine, main column.
+    timeline_left_width_in: float = 2.15
+    timeline_spine_width_in: float = 0.42
+    timeline_body_column_gap_pt: float = 18.0
+    timeline_line_width_pt: float = 0.75
+    timeline_line_color: str = "#1f2937"
+    timeline_marker_size_pt: float = 23.0
+    timeline_marker_fill: str = "#000000"
+    timeline_marker_color: str = "#ffffff"
+    timeline_section_gap_pt: float = 17.0
+    timeline_left_section_gap_pt: float = 14.0
+    # Timeline contact rail can use the same docx_icons/<field>.png convention as sidebar,
+    # but gets its own sizing tokens because this rail is not shaded or padded the same way.
+    timeline_contact_icon_size_pt: float = 10.0
+    timeline_contact_icon_text_gap_pt: float = 4.5
 
     # .highlight-title, .highlight-content: 10pt (title bold)
     highlight_font_size_pt: int = 10

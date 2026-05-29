@@ -16,6 +16,7 @@ from .layouts import (
     LAYOUT_EARLY_CAREER,
     LAYOUT_PROJECT_FORWARD,
     LAYOUT_SIDEBAR_SPLIT,
+    LAYOUT_TIMELINE_SPLIT,
     docx_export_template_slug,
     load_layout_profile,
 )
@@ -26,6 +27,7 @@ from .layouts.sidebar_split import (
 )
 from .layouts.project_forward import project_forward_body_order
 from .layouts.early_career import early_career_body_order
+from .layouts.timeline_split import timeline_main_column_order
 from .shared.template_slug import normalize_template_slug, resolve_template_folder
 
 # HTML fragment generators (preview / pdf)
@@ -84,11 +86,21 @@ def build_sections_map(
 ) -> Dict[str, str]:
     """Section key → HTML block (possibly empty string)."""
     titles = _section_titles(resume_data)
+    raw_titles = resume_data.get("sectionLabels") if isinstance(resume_data.get("sectionLabels"), dict) else {}
+    if layout_profile == LAYOUT_TIMELINE_SPLIT:
+        # The timeline template has product-specific default labels, while still
+        # honoring custom labels from the editor when the user changes them.
+        summary_label = str(raw_titles.get("summary") or "").strip()
+        experience_label = str(raw_titles.get("experience") or "").strip()
+        if not summary_label or summary_label == "Professional Summary":
+            titles["summary"] = "Profile"
+        if not experience_label or experience_label == "Experience":
+            titles["experience"] = "Work Experience"
     sections_map: Dict[str, str] = {}
     project_variant = "default"
     if layout_profile == LAYOUT_SIDEBAR_SPLIT:
         project_variant = "sidebar_main"
-    elif layout_profile == LAYOUT_PROJECT_FORWARD:
+    elif layout_profile in (LAYOUT_PROJECT_FORWARD, LAYOUT_TIMELINE_SPLIT):
         project_variant = "project_forward"
 
     summary = resume_data.get("summary")
@@ -162,6 +174,65 @@ def _sidebar_rail_education_section(resume_data: Dict[str, Any]) -> str:
     return _build_section(titles["education"], "\n".join(entries))
 
 
+def _timeline_contact_section(
+    resume_data: Dict[str, Any],
+    style_preferences: Dict[str, Any] | None = None,
+) -> str:
+    contact_html = build_contact_rail_html(
+        resume_data.get("header", {}),
+        style_preferences,
+    )
+    if not contact_html.strip():
+        return ""
+    raw_labels = resume_data.get("sectionLabels") or {}
+    title = raw_labels.get("contact") if isinstance(raw_labels, dict) else None
+    return _build_section(title.strip() if isinstance(title, str) and title.strip() else "Contact", contact_html)
+
+
+def _timeline_left_sections(
+    resume_data: Dict[str, Any],
+    style_preferences: Dict[str, Any] | None = None,
+) -> str:
+    blocks = [
+        _timeline_contact_section(resume_data, style_preferences),
+        _sidebar_rail_skills_section(resume_data),
+    ]
+    return "\n".join(block for block in blocks if block)
+
+
+def _timeline_marker_svg(section_key: str) -> str:
+    """Small inline SVG marker; CSS sizes the black bubble and white stroke."""
+    if section_key == "summary":
+        inner = '<circle cx="12" cy="8" r="3"/><path d="M6 19c1.5-4 10.5-4 12 0"/>'
+    elif section_key == "experience":
+        inner = '<rect x="5" y="8" width="14" height="10" rx="2"/><path d="M9 8V6h6v2"/><path d="M5 12h14"/>'
+    elif section_key == "education":
+        inner = '<path d="M3 9l9-4 9 4-9 4-9-4Z"/><path d="M7 11v4c3 2 7 2 10 0v-4"/>'
+    elif section_key == "projects":
+        inner = '<path d="M8 8 4 12l4 4"/><path d="m16 8 4 4-4 4"/><path d="m14 5-4 14"/>'
+    else:
+        inner = '<circle cx="12" cy="12" r="4"/>'
+    return (
+        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+        f"{inner}"
+        "</svg>"
+    )
+
+
+def _timeline_wrap_section(section_key: str, section_html: str) -> str:
+    if not section_html or not section_html.strip():
+        return ""
+    safe_key = "".join(ch for ch in str(section_key) if ch.isalnum() or ch == "-")
+    return f'''<div class="timeline-row timeline-row--{safe_key}">
+            <div class="timeline-marker" aria-hidden="true">
+                <span class="timeline-marker__bubble">{_timeline_marker_svg(section_key)}</span>
+            </div>
+            <div class="timeline-row-content">
+                {section_html}
+            </div>
+        </div>'''
+
+
 # Fills header placeholders in html content.
 def _fill_header_placeholders(
     html_content: str,
@@ -177,7 +248,7 @@ def _fill_header_placeholders(
     # Replace all placeholders w/ corresponding values if applicable.
     html_content = html_content.replace("{name}", name)
     html_content = html_content.replace("{tagline_block}", build_tagline_block(header))
-    if layout_profile == LAYOUT_SIDEBAR_SPLIT:
+    if layout_profile in (LAYOUT_SIDEBAR_SPLIT, LAYOUT_TIMELINE_SPLIT):
         html_content = html_content.replace(
             "{contact_rail}",
             build_contact_rail_html(header, style_preferences),
@@ -238,6 +309,22 @@ def fill_template(
         # Replace sidebar sections and main sections placeholders with corresponding values.
         html_content = html_content.replace("{sidebar_sections}", sidebar_html)
         html_content = html_content.replace("{sections}", "\n".join(main_sections))
+        html_content = html_content.replace("{timeline_left}", "")
+        return html_content
+
+    if layout_profile == LAYOUT_TIMELINE_SPLIT:
+        main_sections: list = []
+        for section_key in timeline_main_column_order(resume_data):
+            block = sections_map.get(section_key) or ""
+            if block:
+                main_sections.append(_timeline_wrap_section(section_key, block))
+
+        html_content = html_content.replace(
+            "{timeline_left}",
+            _timeline_left_sections(resume_data, style_preferences),
+        )
+        html_content = html_content.replace("{sidebar_sections}", "")
+        html_content = html_content.replace("{sections}", "\n".join(main_sections))
         return html_content
 
     # If layout profile is not sidebar split, build body sections.
@@ -247,6 +334,7 @@ def fill_template(
         if section_key in sections_map and sections_map[section_key]:
             sections_html.append(sections_map[section_key])
     html_content = html_content.replace("{sidebar_sections}", "")
+    html_content = html_content.replace("{timeline_left}", "")
     html_content = html_content.replace("{sections}", "\n".join(sections_html))
     return html_content
 
@@ -306,8 +394,8 @@ def convert_html_to_pdf_sync(
     style = get_styles(slug, style_preferences)
     layout_profile = load_layout_profile(slug)
 
-    # Sidebar split: page inset comes from per-column padding in CSS, not Playwright margins.
-    if layout_profile == LAYOUT_SIDEBAR_SPLIT:
+    # Split layouts draw a full Letter canvas and own their page inset in CSS.
+    if layout_profile in (LAYOUT_SIDEBAR_SPLIT, LAYOUT_TIMELINE_SPLIT):
         margin = {"top": "0", "right": "0", "bottom": "0", "left": "0"}
     else:
         margin = {

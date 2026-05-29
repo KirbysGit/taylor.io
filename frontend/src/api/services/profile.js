@@ -12,6 +12,13 @@ export async function getMyProfile() {
 	})
 }
 
+// clear profile sections without deleting the account.
+export async function clearMyProfile() {
+	return apiRequest('/api/profile/me', {
+		method: 'DELETE',
+	})
+}
+
 // create or update contact info (header section)
 export async function upsertContact(contactData) {
 	return apiRequest('/api/profile/contact', {
