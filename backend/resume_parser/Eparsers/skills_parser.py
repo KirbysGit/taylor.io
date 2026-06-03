@@ -9,10 +9,20 @@ from typing import Dict, List
 SKILL_STOPWORDS_RE = re.compile(r"(?i)^(and|or|the|a|an|with|using)$")
 CATEGORY_PATTERN = re.compile(r"^([A-Z][A-Za-z0-9\s/&+\-.]+?)\s*:\s*(.+)$")
 BULLET_SPLIT_RE = re.compile(r"[•â€¢Ã¢â‚¬Â¢\*]")
+STANDALONE_CATEGORY_RE = re.compile(
+    r"(?i)^(technical skills|personal traits|soft skills|core skills|"
+    r"professional skills|computer skills|tools|technologies|languages|"
+    r"knowledge|competencies|proficiencies)$"
+)
 
 
 def _clean_category(category_name: str) -> str:
     return re.sub(r"\s+", " ", category_name or "").strip(" -")
+
+
+def _is_standalone_category(line: str) -> bool:
+    cleaned = re.sub(r"\s+", " ", line or "").strip(" :-")
+    return bool(STANDALONE_CATEGORY_RE.match(cleaned))
 
 
 def _append_skill(skills: List[Dict[str, str]], skill: str, category: str | None = None) -> None:
@@ -74,7 +84,14 @@ def parse_skills(section_text: str) -> List[Dict[str, str]]:
                 _append_skill(skills, skill, current_category)
             continue
 
+        if _is_standalone_category(line):
+            current_category = _clean_category(line)
+            continue
+
         if current_category:
+            if line.endswith(","):
+                line = line.rstrip(",")
+            line = BULLET_SPLIT_RE.sub(",", line)
             for skill in _split_skill_items(line):
                 _append_skill(skills, skill, current_category)
             continue

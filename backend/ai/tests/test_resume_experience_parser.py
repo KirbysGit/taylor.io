@@ -163,3 +163,106 @@ def test_experience_parser_keeps_three_trailing_date_roles():
 
     assert [experience["company"] for experience in experiences] == ["Company One", "Company Two", "Company Three"]
     assert experiences[2]["current"] is True
+
+
+def test_experience_parser_supports_sidebar_title_date_company_layout():
+    parser = _load_experience_parser()
+    experiences = parser.parse_experience(
+        "\n".join([
+            "Marketing Coordinator - Contract, Part-",
+            "Time (25 - 30 hours/week)",
+            "November 2023 -",
+            "December 2023",
+            "Associated Luxury Hotels International",
+            "Supported brand campaign initiatives through media partnership",
+            "coordination, content development, and digital asset management",
+            "Social Media Marketing Manager - Full-Time",
+            "(3 Years and 3 months)",
+            "August 2022 -",
+            "December 2025",
+            "BumbleBee Skincare & Waxing",
+            "Managed social media strategy.",
+            "Communications & Marketing Officer - Full-Time",
+            "(40 hours/week)",
+            "December",
+            "2024",
+            "USF College of Nursing",
+            "Managed website strategy.",
+        ])
+    )
+
+    assert len(experiences) == 3
+    assert experiences[0]["title"] == "Marketing Coordinator - Contract, Part-Time (25 - 30 hours/week)"
+    assert experiences[0]["company"] == "Associated Luxury Hotels International"
+    assert experiences[0]["startDate"] == "2023-11"
+    assert experiences[0]["endDate"] == "2023-12"
+    assert experiences[1]["company"] == "BumbleBee Skincare & Waxing"
+    assert experiences[2]["company"] == "USF College of Nursing"
+    assert experiences[2]["startDate"] == "2024-12"
+
+
+def test_experience_parser_merges_uppercase_wrapped_description_continuations():
+    parser = _load_experience_parser()
+    experiences = parser.parse_experience(
+        "\n".join([
+            "Communications & Marketing Officer",
+            "December 2024",
+            "USF College of Nursing",
+            "Develop and execute multi-platform communication strategies across",
+            "LinkedIn, Instagram, Facebook, newsletters, email campaigns, and digital signage",
+            "Manage project workflows and communication initiatives through",
+            "Monday.com and recurring stakeholder coordination meetings",
+        ])
+    )
+
+    description = experiences[0]["description"]
+    assert "strategies across LinkedIn" in description
+    assert "through Monday.com" in description
+
+
+def test_experience_parser_handles_company_location_year_and_role_bullet():
+    parser = _load_experience_parser()
+    experiences = parser.parse_experience(
+        "\n".join([
+            "UM Counseling Services - Montevallo, AL | 2022-23",
+            "• Counseling Intern",
+            "• Conducted individual and group counseling sessions.",
+            "Crisis Center - Birmingham, AL | 2021",
+            "• Volunteer Counselor",
+            "• Provided counseling and support to clients in crisis.",
+        ])
+    )
+
+    assert len(experiences) == 2
+    assert experiences[0]["company"] == "UM Counseling Services"
+    assert experiences[0]["location"] == "Montevallo, AL"
+    assert experiences[0]["title"] == "Counseling Intern"
+    assert experiences[0]["startDate"] == "2022-01"
+    assert experiences[0]["endDate"] == "2023-01"
+    assert experiences[1]["company"] == "Crisis Center"
+    assert experiences[1]["title"] == "Volunteer Counselor"
+
+
+def test_experience_parser_handles_company_location_slash_year_and_role_bullet():
+    parser = _load_experience_parser()
+    experiences = parser.parse_experience(
+        "\n".join([
+            "NOWLIN & ASSOCIATES - Birmingham, AL / 2017",
+            "â€¢ Financial Planning Intern",
+            "â€¢ Performed various sales and financial planning functions.",
+            "UNIVERSITY PROGRAM COUNCIL - Montevallo, AL / 2015-17",
+            "â€¢ Board Member",
+            "â€¢ Planned and organized public events.",
+        ])
+    )
+
+    assert len(experiences) == 2
+    assert experiences[0]["company"] == "NOWLIN & ASSOCIATES"
+    assert experiences[0]["location"] == "Birmingham, AL"
+    assert experiences[0]["title"] == "Financial Planning Intern"
+    assert experiences[0]["startDate"] == "2017-01"
+    assert experiences[1]["company"] == "UNIVERSITY PROGRAM COUNCIL"
+    assert experiences[1]["location"] == "Montevallo, AL"
+    assert experiences[1]["title"] == "Board Member"
+    assert experiences[1]["startDate"] == "2015-01"
+    assert experiences[1]["endDate"] == "2017-01"

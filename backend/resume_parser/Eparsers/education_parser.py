@@ -29,6 +29,11 @@ MONTH_PATTERN = (
     r"Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|"
     r"Nov(?:ember)?|Dec(?:ember)?)"
 )
+SCHOOL_KEYWORD_RE = r"(?:University|College|Institute|School)"
+DEGREE_START_RE = re.compile(
+    r"(?i)\b(?:bachelor|master|associate|doctorate|ph\.?d\.?|b\.?s\.?|b\.?a\.?|m\.?s\.?|m\.?a\.?|mba)\b"
+)
+YEAR_AT_END_RE = re.compile(r"(?:\||/)\s*((?:19|20)\d{2})\s*$")
 
 
 def _extract_trailing_location(text: str) -> tuple[str, Optional[str]]:
@@ -64,6 +69,118 @@ def _strip_dates_and_locations(text: str) -> str:
     return text.strip(" ,;|-")
 
 
+def _split_combined_school_line(line: str) -> List[str]:
+    line = re.sub(r"\s+", " ", line or "").strip()
+    if not line:
+        return []
+
+    leading_school_match = re.match(rf"^(.+?\b{SCHOOL_KEYWORD_RE})\s+({SCHOOL_KEYWORD_RE}\b.+)$", line)
+    if leading_school_match:
+        return [leading_school_match.group(1).strip(), leading_school_match.group(2).strip()]
+
+    schools = re.split(r"\s{2,}|\s+\|\s+|;", line)
+    return [school.strip() for school in schools if school.strip()]
+
+
+def _split_combined_degree_line(line: str) -> List[str]:
+    line = re.sub(r"\s+", " ", line or "").strip()
+    if not line:
+        return []
+
+    starts = [match.start() for match in DEGREE_START_RE.finditer(line)]
+    if len(starts) <= 1:
+        return [line]
+
+    segments = []
+    for index, start in enumerate(starts):
+        end = starts[index + 1] if index + 1 < len(starts) else len(line)
+        segment = line[start:end].strip(" ;,")
+        if segment:
+            segments.append(segment)
+    return segments
+
+
+def _expand_combined_education_entry(entry: str) -> Optional[List[str]]:
+    lines = [line.strip() for line in entry.split("\n") if line.strip()]
+    if len(lines) < 2:
+        return None
+
+    school_candidates = _split_combined_school_line(lines[0])
+    degree_candidates = _split_combined_degree_line(lines[1])
+    if len(school_candidates) <= 1 or len(degree_candidates) <= 1:
+        return None
+
+    count = min(len(school_candidates), len(degree_candidates))
+    expanded = []
+    for index in range(count):
+        expanded.append("\n".join([school_candidates[index], degree_candidates[index]]))
+    return expanded or None
+
+
+def _split_stacked_education_entries(entry: str) -> List[str]:
+    lines = [line.strip() for line in entry.split("\n") if line.strip()]
+    if not lines:
+        return []
+
+    starts = []
+    for index, line in enumerate(lines):
+        if (
+            index == 0
+            or (
+                re.search(r'(?i)(university|college|institute|school|academy)', line)
+                and YEAR_AT_END_RE.search(line)
+            )
+        ):
+            starts.append(index)
+
+    starts = sorted(set(starts))
+    if len(starts) <= 1:
+        return [entry]
+
+    entries = []
+    for idx, start in enumerate(starts):
+        end = starts[idx + 1] if idx + 1 < len(starts) else len(lines)
+        chunk = "\n".join(lines[start:end]).strip()
+        if chunk:
+            entries.append(chunk)
+    return entries or [entry]
+
+
+def _normalize_education_lines(lines: List[str]) -> List[str]:
+    normalized = []
+    index = 0
+    while index < len(lines):
+        line = lines[index].strip()
+        next_line = lines[index + 1].strip() if index + 1 < len(lines) else ""
+
+        if (
+            next_line
+            and re.search(r"(?i)\b(university|college|institute|school)\b", line)
+            and not DEGREE_START_RE.search(next_line)
+            and len(next_line.split()) <= 3
+            and not re.search(r"(?i)\b(university|college|institute|school)\b", next_line)
+        ):
+            normalized.append(f"{line} {next_line}")
+            index += 2
+            continue
+
+        if (
+            next_line
+            and DEGREE_START_RE.search(line)
+            and not DEGREE_START_RE.search(next_line)
+            and not re.search(r"(?i)^(honors?|awards?|clubs?|organizations?|coursework|relevant)", next_line)
+            and len(next_line.split()) <= 5
+        ):
+            normalized.append(f"{line} {next_line}")
+            index += 2
+            continue
+
+        normalized.append(line)
+        index += 1
+
+    return normalized
+
+
 def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
     """Extract education information from education section text."""
     if not section_text or not section_text.strip():
@@ -72,11 +189,19 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
     education = []
     
     # split into individual entries (usually separated by blank lines).
-    entries = re.split(r'\n\s*\n', section_text)
+    rough_entries = re.split(r'\n\s*\n', section_text)
+    entries = []
+    for rough_entry in rough_entries:
+        entries.extend(_split_stacked_education_entries(rough_entry))
     
     for entry in entries:
         entry = entry.strip()
         if not entry or len(entry) < 10:
+            continue
+
+        expanded_entries = _expand_combined_education_entry(entry)
+        if expanded_entries:
+            education.extend(item for expanded in expanded_entries for item in parse_education(expanded))
             continue
         
         edu_item = {
@@ -94,7 +219,7 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
             "relevantCoursework": None,
         }
         
-        lines = [line.strip() for line in entry.split('\n') if line.strip()]
+        lines = _normalize_education_lines([line.strip() for line in entry.split('\n') if line.strip()])
         if not lines:
             continue
 
@@ -117,9 +242,30 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
                     break
             if edu_item["gpa"]:
                 break
+
+        year_at_end_match = YEAR_AT_END_RE.search(lines[0]) if lines else None
+        if year_at_end_match and not edu_item["endDate"]:
+            edu_item["endDate"] = f"{year_at_end_match.group(1)}-01"
         
         # extract school name and GPA - look for university/college patterns or first line
+        degree_line_index = next((idx for idx, line in enumerate(lines) if DEGREE_START_RE.search(line)), len(lines))
+        school_candidate_lines = [
+            re.sub(YEAR_AT_END_RE, "", line).strip(" |/")
+            for line in lines[:degree_line_index]
+            if re.search(r'(?i)(university|college|institute|school|academy)', line)
+        ]
+        if school_candidate_lines:
+            cleaned_school_lines = []
+            for school_line in school_candidate_lines:
+                school_name, school_location = _extract_trailing_location(school_line)
+                if school_location and not edu_item["location"]:
+                    edu_item["location"] = school_location
+                cleaned_school_lines.append(school_name.strip(" -"))
+            edu_item["school"] = "; ".join(cleaned_school_lines)
+
         for i, line in enumerate(lines):
+            if edu_item["school"]:
+                break
             if i == 0 or re.search(r'(?i)(university|college|institute|school|academy)', line):
                 school_name = re.sub(r'\s*\([^\)]+\)', '', line).strip()  # Remove parentheses (may contain GPA)
                 school_name = re.sub(r'\s*,?\s*[\d.]+(?:\s*/\s*[\d.]+)?\s*GPA\b', '', school_name, flags=re.IGNORECASE)
@@ -139,14 +285,14 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
         # extract degree
         degree_patterns = [
             r'(?i)(bachelor(?:\'?s)?\s+(?:of\s+)?(?:science|arts|engineering|business|technology|computer|information))',
-            r'(?i)(master(?:\'?s)?\s+(?:of\s+)?(?:science|arts|engineering|business|technology|computer|information|mba))',
+            r'(?i)(master(?:\'?s)?\s+(?:of\s+)?(?:science|arts|education|engineering|business|technology|computer|information|mba))',
             r'(?i)(ph\.?d\.?\s+(?:in\s+)?[A-Za-z\s]+)',
             r'(?i)(doctorate\s+(?:in\s+)?[A-Za-z\s]+)',
             r'(?i)(associate(?:\'?s)?\s+(?:of\s+)?(?:science|arts))',
-            r'(?i)(b\.?s\.?\s+(?:in\s+)?[A-Za-z\s]+)',
-            r'(?i)(b\.?a\.?\s+(?:in\s+)?[A-Za-z\s]+)',
-            r'(?i)(m\.?s\.?\s+(?:in\s+)?[A-Za-z\s]+)',
-            r'(?i)(m\.?a\.?\s+(?:in\s+)?[A-Za-z\s]+)',
+            r'(?i)\b(b\.?s\.?\s+(?:in\s+)?[A-Za-z\s]+)',
+            r'(?i)\b(b\.?a\.?\s+(?:in\s+)?[A-Za-z\s]+)',
+            r'(?i)\b(m\.?s\.?\s+(?:in\s+)?[A-Za-z\s]+)',
+            r'(?i)\b(m\.?a\.?\s+(?:in\s+)?[A-Za-z\s]+)',
         ]
         
         for pattern in degree_patterns:
@@ -158,11 +304,23 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
                 degree_text = re.sub(r'\s+', ' ', degree_text)
                 edu_item["degree"] = degree_text
                 break
+        if not edu_item["degree"]:
+            mba_match = re.search(r'(?i)\b(MBA|Master of Business Admin\w*)\b', entry)
+            if mba_match:
+                edu_item["degree"] = "MBA" if mba_match.group(1).lower() == "mba" else mba_match.group(1)
+        if not edu_item["degree"]:
+            degree_bullet = next((line for line in lines if DEGREE_START_RE.search(line)), None)
+            if degree_bullet:
+                degree_text = re.sub(r"^[•â€¢\-\*]\s*", "", degree_bullet).strip()
+                degree_text = re.sub(r"\s+-\s+.*$", "", degree_text)
+                edu_item["degree"] = re.sub(r"\s+", " ", degree_text)
 
         minor_match = re.search(
             r'(?i)\bminor\s+in\s+(.+?)(?=\s+expected\b|\s+' + MONTH_PATTERN + r'\s+\d{4}|\s+\d{4}\s*[-â€“â€”]|[,\n]|$)',
             entry,
         )
+        if not minor_match:
+            minor_match = re.search(r'(?i)\bminor\s+concentration\s*:?\s*(.+?)(?=\s*[-\n]|$)', entry)
         if minor_match:
             minor_text = _strip_dates_and_locations(minor_match.group(1))
             minor_text = re.sub(r'\s+', ' ', minor_text).strip(" ;,")
@@ -184,6 +342,8 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
                     degree_line_field = re.sub(r'(?i)\s*[,;]\s*minor\s+in\s+.*$', '', degree_line_field)
                     degree_line_field = re.sub(r'(?i)\s+minor\s+in\s+.*$', '', degree_line_field)
                     degree_line_field = re.sub(r'(?i)\s+expected\b.*$', '', degree_line_field)
+                    degree_line_field = re.sub(r'(?i)\s*[-–—]\s*in\s+progress\b.*$', '', degree_line_field)
+                    degree_line_field = re.sub(r'(?i)\s*[-–—]\s*(professional track|minor concentration)\s*:?.*$', '', degree_line_field)
                     degree_line_field = re.sub(r'\s*,?\s*[\d.]+(?:\s*/\s*[\d.]+)?\s*GPA\b', '', degree_line_field, flags=re.IGNORECASE)
                     degree_line_field = re.sub(r'\s*GPA\s*:?\s*[\d.]+(?:\s*/\s*[\d.]+)?', '', degree_line_field, flags=re.IGNORECASE)
                     degree_line_field = re.sub(r'\s+', ' ', degree_line_field).strip(" ;,")
@@ -279,23 +439,41 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
                 if honors_text:
                     edu_item["honorsAwards"] = honors_text
                     break
+        if not edu_item["honorsAwards"]:
+            honor_lines = []
+            for line in lines:
+                cleaned_line = re.sub(r"^\s*(?:â€¢|•|Ã¢â‚¬Â¢|[-*])\s*", "", line).strip()
+                if re.search(r"(?i)\b(dean'?s list|honou?rs? society|honou?r society|honou?rs?)\b", cleaned_line):
+                    honor_lines.append(cleaned_line)
+            if honor_lines:
+                edu_item["honorsAwards"] = "; ".join(honor_lines)
         
         # Extract clubs & extracurriculars
         clubs_patterns = [
-            r'(?i)clubs?\s*[&]?\s*extracurriculars?\s*:?\s*(.+?)(?=\n|honors|awards|coursework|relevant|$)',
-            r'(?i)clubs?\s*:?\s*(.+?)(?=\n|honors|awards|coursework|relevant|$)',
-            r'(?i)organizations?\s*:?\s*(.+?)(?=\n|honors|awards|coursework|relevant|$)',
-            r'(?i)extracurriculars?\s*:?\s*(.+?)(?=\n|honors|awards|coursework|relevant|$)',
+            r'(?im)^\s*[â€¢Ã¢â‚¬Â¢\-\*]?\s*clubs?\s*[&]?\s*extracurriculars?\s*:?\s*(.+?)(?=\n|honors|awards|coursework|relevant|$)',
+            r'(?im)^\s*[â€¢Ã¢â‚¬Â¢\-\*]?\s*clubs?\s*:?\s*(.+?)(?=\n|honors|awards|coursework|relevant|$)',
+            r'(?im)^\s*[â€¢Ã¢â‚¬Â¢\-\*]?\s*organizations?\s*:?\s*(.+?)(?=\n|honors|awards|coursework|relevant|$)',
+            r'(?im)^\s*[â€¢Ã¢â‚¬Â¢\-\*]?\s*extracurriculars?\s*:?\s*(.+?)(?=\n|honors|awards|coursework|relevant|$)',
         ]
         for pattern in clubs_patterns:
             clubs_match = re.search(pattern, entry, re.IGNORECASE | re.DOTALL)
             if clubs_match:
-                clubs_text = clubs_match.group(1).strip()
+                clubs_text = clubs_match.group(0).strip() if re.match(r"(?i)\s*clubs?\b", clubs_match.group(0)) else clubs_match.group(1).strip()
                 clubs_text = re.sub(r'\s+', ' ', clubs_text)
+                clubs_text = re.sub(r'(?i)^clubs?\s*:?\s*', '', clubs_text)
                 clubs_text = re.sub(r'^\s*[:\-]\s*', '', clubs_text)
                 if clubs_text:
                     edu_item["clubsExtracurriculars"] = clubs_text
                     break
+        if not edu_item["clubsExtracurriculars"]:
+            activity_lines = []
+            for line in lines:
+                cleaned_line = re.sub(r"^\s*(?:â€¢|•|Ã¢â‚¬Â¢|[-*])\s*", "", line).strip()
+                if re.search(r"(?i)\b(club|sorority|fraternity|society|buddies|volunteer|service)\b", cleaned_line):
+                    if not DEGREE_START_RE.search(cleaned_line) and not re.search(r"(?i)\bgpa\b|dean", cleaned_line):
+                        activity_lines.append(cleaned_line)
+            if activity_lines:
+                edu_item["clubsExtracurriculars"] = "; ".join(activity_lines)
         
         # Extract location (City, State pattern)
         location_pattern = r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?),\s*([A-Z]{2})\s*$'
@@ -306,8 +484,8 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
         
         # Extract relevant coursework
         coursework_patterns = [
-            r'(?i)relevant\s+coursework\s*:?\s*(.+?)(?=\nhonors|\nawards|\nclubs|\nextracurriculars|$)',
-            r'(?i)coursework\s*:?\s*(.+?)(?=\nhonors|\nawards|\nclubs|\nextracurriculars|$)',
+            r'(?i)relevant\s+coursework\s*:?\s*(.+?)(?=\n\s*(?:â€¢|•|Ã¢â‚¬Â¢|[-*])|\nhonors|\nawards|\nclubs|\nextracurriculars|$)',
+            r'(?i)coursework\s*:?\s*(.+?)(?=\n\s*(?:â€¢|•|Ã¢â‚¬Â¢|[-*])|\nhonors|\nawards|\nclubs|\nextracurriculars|$)',
         ]
         for pattern in coursework_patterns:
             coursework_match = re.search(pattern, entry, re.IGNORECASE | re.DOTALL)

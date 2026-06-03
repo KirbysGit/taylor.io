@@ -12,6 +12,9 @@ DATE_RE = re.compile(
     r"([A-Z][a-z]+\s+\d{4}|\d{4}|present|current)",
     re.IGNORECASE,
 )
+SINGLE_DATE_RE = re.compile(r"^[A-Z][a-z]+\s+\d{4}$", re.IGNORECASE)
+YEAR_ONLY_RE = re.compile(r"\b((?:19|20)\d{2})(?:\s*[-–—]\s*(\d{2}|(?:19|20)\d{2}))?\b")
+ORG_YEAR_LINE_RE = re.compile(r"(?:\||/)\s*(?:19|20)\d{2}(?:\s*[-–—]\s*(?:\d{2}|(?:19|20)\d{2}))?\s*$")
 DATE_RE = re.compile(
     r"([A-Z][a-z]+\s+\d{4}|\d{4})\s*(?:-|–|—|â€“|â€”|ā€“)\s*"
     r"([A-Z][a-z]+\s+\d{4}|\d{4}|present|current)",
@@ -54,6 +57,9 @@ TECH_HINT_RE = re.compile(
     r"salesforce|excel|tableau|power\s*bi"
     r")\b",
     re.IGNORECASE,
+)
+CONTINUATION_END_RE = re.compile(
+    r"(?i)\b(?:across|through|with|including|and|or|for|to|of|in|on|by|from|using|leveraging|via)$|,$"
 )
 
 MONTH_MAP = {
@@ -113,15 +119,60 @@ def _looks_like_title(text: str) -> bool:
     text = (text or "").strip()
     if not text or _is_bullet_line(text) or DATE_RE.search(text):
         return False
-    if _looks_like_location(text) or _looks_like_skills(text):
+    if text.endswith((".", ",", ";", ":")):
+        return False
+    if _looks_like_location(text):
         return False
     if TITLE_HINT_RE.search(text):
         return True
+    if _looks_like_skills(text):
+        return False
     return 1 <= len(text.split()) <= 5 and not text.isupper()
 
 
 def _has_title_hint(text: str) -> bool:
     return bool(TITLE_HINT_RE.search(text or ""))
+
+
+def _looks_like_date_fragment(text: str) -> bool:
+    return bool(re.match(r"^[A-Z][a-z]+(?:\s+\d{4})?\s*-?\s*$", (text or "").strip()))
+
+
+def _normalize_experience_lines(lines: List[str]) -> List[str]:
+    normalized = []
+    index = 0
+    while index < len(lines):
+        line = lines[index].strip()
+        next_line = lines[index + 1].strip() if index + 1 < len(lines) else ""
+
+        if line.endswith("-") and next_line and re.match(r"^[A-Z][A-Za-z]", next_line) and not _looks_like_date_fragment(next_line):
+            normalized.append(f"{line[:-1]}-{next_line}")
+            index += 2
+            continue
+
+        if (
+            normalized
+            and re.match(r"^\([^\)]{3,80}\)$", line)
+            and _looks_like_title(normalized[-1])
+        ):
+            normalized[-1] = f"{normalized[-1]} {line}"
+            index += 1
+            continue
+
+        if line.endswith("-") and next_line and _looks_like_date_fragment(next_line):
+            normalized.append(f"{line} {next_line}")
+            index += 2
+            continue
+
+        if re.match(r"^[A-Z][a-z]+$", line) and re.match(r"^\d{4}$", next_line):
+            normalized.append(f"{line} {next_line}")
+            index += 2
+            continue
+
+        normalized.append(line)
+        index += 1
+
+    return normalized
 
 
 def _normalize_date(value: str) -> Optional[str]:
@@ -130,6 +181,8 @@ def _normalize_date(value: str) -> Optional[str]:
         return None
     if re.match(r"^\d{4}$", value):
         return f"{value}-01"
+    if re.match(r"^\d{2}$", value):
+        return f"20{value}-01"
     if re.match(r"^[A-Z][a-z]+\s+\d{4}$", value, re.IGNORECASE):
         parts = value.split()
         month = MONTH_MAP.get(parts[0].lower(), "01")
@@ -139,6 +192,15 @@ def _normalize_date(value: str) -> Optional[str]:
         month = MONTH_MAP.get(parts[0].lower(), "01")
         return f"{parts[2]}-{month}"
     return value
+
+
+def _normalize_year_end(start_year: str, end_year: str | None) -> Optional[str]:
+    if not end_year:
+        return None
+    if len(end_year) == 2:
+        prefix = start_year[:2]
+        end_year = f"{prefix}{end_year}"
+    return f"{end_year}-01"
 
 
 def _split_skills(text: str) -> Optional[List[str]]:
@@ -194,6 +256,7 @@ def _extract_location_from_text(text: str) -> Tuple[str, Optional[str]]:
 
 def _parse_company_line(company_line: str) -> Tuple[Optional[str], Optional[List[str]], Optional[str]]:
     company_line = re.sub(DATE_RE, "", company_line or "").strip()
+    company_line = re.sub(r"(?:\||/)\s*(?:19|20)\d{2}(?:\s*[-–—]\s*(?:\d{2}|(?:19|20)\d{2}))?\s*$", "", company_line).strip()
     if not company_line:
         return None, None, None
 
@@ -235,6 +298,15 @@ def _parse_company_line(company_line: str) -> Tuple[Optional[str], Optional[List
     return company_name, skills, location
 
 
+def _extract_year_dates(line: str) -> Tuple[Optional[str], Optional[str], bool]:
+    match = YEAR_ONLY_RE.search(line or "")
+    if not match:
+        return None, None, False
+    start_year = match.group(1)
+    end_year = match.group(2)
+    return f"{start_year}-01", _normalize_year_end(start_year, end_year), False
+
+
 def _format_description(description_lines: List[str]) -> Optional[str]:
     if not description_lines:
         return None
@@ -247,7 +319,7 @@ def _format_description(description_lines: List[str]) -> Optional[str]:
         if (
             merged_lines
             and not _is_bullet_line(line)
-            and line[:1].islower()
+            and (line[:1].islower() or CONTINUATION_END_RE.search(merged_lines[-1].strip()))
             and not re.search(r"[.!?%)]$", merged_lines[-1].strip())
         ):
             merged_lines[-1] = f"{merged_lines[-1].rstrip()} {line}"
@@ -291,7 +363,19 @@ def _clean_bullet(text: str) -> str:
 def _entry_start_indexes(lines: List[str]) -> List[int]:
     starts = [0]
     for index, line in enumerate(lines[1:], start=1):
+        if ORG_YEAR_LINE_RE.search(line):
+            starts.append(index)
+            continue
+        if (
+            _looks_like_title(line)
+            and index + 2 < len(lines)
+            and (DATE_RE.search(lines[index + 1]) or SINGLE_DATE_RE.match(lines[index + 1]))
+            and not DATE_RE.search(lines[index + 2])
+        ):
+            starts.append(index)
         if DATE_RE.search(line) and not _is_bullet_line(line):
+            if index > 0 and _looks_like_title(lines[index - 1]):
+                continue
             line_without_date = re.sub(DATE_RE, "", line).strip(" |-\t")
             if not line_without_date and index + 2 < len(lines) and _looks_like_title(lines[index + 2]):
                 starts.append(index + 1)
@@ -309,7 +393,7 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
     if not section_text or not section_text.strip():
         return []
 
-    lines = [line.strip() for line in section_text.split("\n") if line.strip()]
+    lines = _normalize_experience_lines([line.strip() for line in section_text.split("\n") if line.strip()])
     if not lines:
         return []
 
@@ -351,6 +435,11 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
                 exp_item["current"] = True
             else:
                 exp_item["endDate"] = _normalize_date(date_match.group(2))
+        elif ORG_YEAR_LINE_RE.search(entry_lines[0]):
+            start_date, end_date, current = _extract_year_dates(entry_lines[0])
+            exp_item["startDate"] = start_date
+            exp_item["endDate"] = end_date
+            exp_item["current"] = current
 
         trailing_date_idx = date_line_idx if date_line_idx is not None and date_line_idx >= 2 else None
 
@@ -372,7 +461,16 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
         )
 
         company_line_idx = 1 if len(entry_lines) > 1 else None
-        if company_date_first or company_first_no_standard_date:
+        org_year_title_next = bool(ORG_YEAR_LINE_RE.search(entry_lines[0]) and len(entry_lines) > 1)
+        if org_year_title_next:
+            title_line = re.sub(BULLET_RE, "", entry_lines[1]).strip()
+            exp_item["title"] = title_line or None
+            company, skills, location = _parse_company_line(entry_lines[0])
+            exp_item["company"] = company
+            exp_item["skills"] = _format_skills(skills)
+            exp_item["location"] = location
+            company_line_idx = None
+        elif company_date_first or company_first_no_standard_date:
             exp_item["title"] = entry_lines[1].strip()
             company, skills, location = _parse_company_line(entry_lines[0])
             if company_first_no_standard_date:
@@ -389,6 +487,32 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
             exp_item["company"] = company
             exp_item["skills"] = _format_skills(skills)
             exp_item["location"] = location
+
+        title_date_company = bool(
+            len(entry_lines) >= 3
+            and _looks_like_title(entry_lines[0])
+            and (DATE_RE.search(entry_lines[1]) or SINGLE_DATE_RE.match(entry_lines[1]))
+            and not DATE_RE.search(entry_lines[2])
+        )
+        if title_date_company:
+            date_match = DATE_RE.search(entry_lines[1])
+            if date_match:
+                exp_item["startDate"] = _normalize_date(date_match.group(1))
+                end_date = date_match.group(2).strip().lower()
+                if end_date in {"present", "current"}:
+                    exp_item["current"] = True
+                    exp_item["endDate"] = None
+                else:
+                    exp_item["endDate"] = _normalize_date(date_match.group(2))
+            elif SINGLE_DATE_RE.match(entry_lines[1]):
+                exp_item["startDate"] = _normalize_date(entry_lines[1])
+                exp_item["endDate"] = None
+            exp_item["title"] = entry_lines[0].strip()
+            company, skills, location = _parse_company_line(entry_lines[2])
+            exp_item["company"] = company
+            exp_item["skills"] = _format_skills(skills)
+            exp_item["location"] = location
+            company_line_idx = 2
 
         if trailing_date_idx is not None and len(entry_lines) >= 3:
             company, skills, location = _parse_company_line(entry_lines[0])
@@ -407,6 +531,10 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
                 exp_item["location"] = line
 
         start_desc = 2
+        if org_year_title_next:
+            start_desc = 2
+        if title_date_company:
+            start_desc = 3
         if date_line_idx is not None and trailing_date_idx is None:
             start_desc = max(start_desc, date_line_idx + 1)
         if company_line_idx is not None:

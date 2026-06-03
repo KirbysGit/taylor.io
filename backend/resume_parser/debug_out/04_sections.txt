@@ -1,47 +1,50 @@
 === EXPERIENCE ===
-Associated Luxury Hotels International
-Marketing Coordinator - Contract, Part-Time (25 - 30 hours/week)
-Supported brand campaign initiatives through media partnership coordination, content development, and digital asset
-management
-Assisted executive marketing leadership with reporting, communications, and cross-department collaboration efforts
-November 7, 2023 - Dec 27, 2023
-BumbleBee Skincare & Waxing
-Social Media Marketing Manager - Full-Time (3 Years and 3 months)
-Managed social media strategy, content creation, and audience engagement initiatives across multiple digital platforms
-Developed branded graphics, scheduled content, and supported customer engagement through Meta Business Suite and
-email marketing tools
-August 22, 2022 - December 31, 2025
-USF College of Nursing
-Communications & Marketing Officer - Full-Time (40 hours/week)
-Lead integrated marketing and communications initiatives supporting one of Florida's top-ranked nursing programs
-across digital, executive, print, and media platforms
-Manage the College's website strategy, content updates, and webpage redesigns, contributing to 775,000+ annual website
-visits
-Develop and execute multi-platform communication strategies across LinkedIn, Instagram, Facebook, newsletters, email
-campaigns, and digital signage
-Increased Instagram reach by 300%, generating 2.5M+ views and 49.5K content interactions
-Increased Facebook reach by 300%, generating 1.1M+ views and 19.3K content interactions
-Manage executive communications for the Dean, including LinkedIn strategy, talking points, scripts, quotes, and
-institutional messaging
-Coordinate press releases, rankings communications, sponsorships, and media relations with external academic and
-healthcare organizations
-Lead branding and storytelling initiatives highlighting faculty research, institutional achievements, student success, and
-community engagement
-Monitor analytics and campaign performance metrics to optimize audience engagement and digital growth strategies
-Collaborate cross-functionally with admissions, research, enrollment, finance, student success, and university leadership
-teams
-Manage project workflows and communication initiatives through Monday.com and recurring stakeholder coordination
-meetings
-Develop and distribute monthly internal, external, and LinkedIn newsletters supporting institutional visibility and
-engagement
-December 6, 2024 - Present
-407 · 719 · 9944 · tekirby@usf.edu Website
-Taylor Kirby
-Florida State University University of South Florida
-Bachelor of Science - Marketing Master of Business Adminstration (MBA) - In Progress
+Software Engineering Intern May 2024 – June 2025
+BitGo | Python, Django, React, PostgreSQL, AWS EC2 Remote
+• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational
+workflows through a centralized web platform.
+• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows,
+backend APIs, and real-time operational tooling.
+• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to
+support scheduled jobs, logging, and live task updates.
+• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-checking time by ~3 hours per week for internal IT teams.
+
+=== PROJECTS ===
+Taylor.io – AI Resume Builder & Workflow Platform | Python, React, FastAPI, OpenAI API, Cursor
+• Built an AI-powered resume platform that stores structured user career data and generates tailored resumes based on
+specific job descriptions.
+• Developed workflows that extract relevant keywords and requirements from job postings, then use OpenAI APIs to
+generate targeted resume content from user profile data.
+• Built FastAPI backend services for resume parsing, authentication, and real-time editing using PostgreSQL and React.
+• Used AI-assisted coding workflows with tools like Cursor to rapidly prototype, iterate, and refine product features while
+maintaining production-style architecture.
+Centi – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev
+• Built a personal finance platform that aggregates bank accounts, transactions, and spending activity into one clear
+dashboard, helping users understand their finances without manually sorting through multiple apps and statements..
+• Developed transaction processing and categorization workflows using FastAPI, PostgreSQL, and Plaid APIs to organize
+messy financial data into searchable spending insights and summaries.
+• Created customizable React dashboards that let users explore spending trends, account activity, and financial patterns
+in the way that makes the most sense to them.
+SentimentTrader – Financial Sentiment & Market Analysis Pipeline | Python, SQL, FinBERT, XGBoost
+• Built an end-to-end analytics pipeline processing 1K+ finance-related Reddit posts per run through automated ETL
+workflows, combining market data and sentiment analysis to generate trading signals for users.
+• Developed preprocessing and feature engineering workflows that transform unstructured discussions, engagement
+metrics, and stock data into structured ticker-level indicators for analysis.
+• Trained and evaluated XGBoost models achieving 55–70% ROC-AUC while comparing sentiment patterns against short-term market movement.
+ShelfVision – Dense Retail Shelf Object Detector | PyTorch, ResNet-50, FPN
+• Built a retail analysis system trained on 11K+ images to detect and identify products in cluttered shelf environments.
+• Developed preprocessing and training workflows that organize image data, generate training inputs, and improve
+detection performance across different shelf layouts.
 
 === EDUCATION ===
-Strategic Communications • Digital Marketing • Executive Communications • Brand Management • Website Management
-• Social Media Strategy • Media Relations • Content Development • Analytics & Reporting • Project Management • Email
-Marketing • Public Relations • Cross-Functional Collaboration • Graphic Design • Content Strategy
-KEY COMPETENCIES
+University of Central Florida (GPA 3.78 / 4.0) August 2021 – May 2025
+Bachelor of Science in Computer Engineering Orlando, FL
+Honors & Awards: Dean's List 2021, President's Honor Roll 2023 – 2025, Pegasus Gold Scholarship
+Clubs & Extracurriculars: AI @ UCF, Knight Hacks, SHPE @ UCF
+Relevant Coursework: Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design
+
+=== SKILLS ===
+Languages : Python, SQL, JavaScript, Java
+Analysis & Data Tools : Pandas, NumPy, ETL Pipelines, XGBoost, FinBERT
+Frameworks & Technologies : FastAPI, Django, React, Node.js, PostgreSQL, MySQL
+AI Developer Tools : Cursor, Claude Code, Codex, AI-Assisted Development

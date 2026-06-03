@@ -1,84 +1,330 @@
 {
-  "createdAtUtc": "2026-05-29T03:24:05.784114+00:00",
-  "filename": "taylor.pdf",
+  "createdAtUtc": "2026-05-30T02:02:09.775928+00:00",
+  "filename": "ColinKirby_A.pdf",
   "stage01_rawText": {
-    "length": 2972,
-    "text": "PROFESSIONAL EXPERIENCE\nAssociated Luxury Hotels International\nMarketing Coordinator - Contract, Part-Time (25 - 30 hours/week)\nSupported brand campaign initiatives through media partnership coordination, content development, and digital asset\nmanagement\nAssisted executive marketing leadership with reporting, communications, and cross-department collaboration efforts\nNovember 7, 2023 - Dec 27, 2023\nBumbleBee Skincare & Waxing\nSocial Media Marketing Manager - Full-Time (3 Years and 3 months)\nManaged social media strategy, content creation, and audience engagement initiatives across multiple digital platforms\nDeveloped branded graphics, scheduled content, and supported customer engagement through Meta Business Suite and\nemail marketing tools\nAugust 22, 2022 - December 31, 2025\nUSF College of Nursing\nCommunications & Marketing Officer - Full-Time (40 hours/week)\nLead integrated marketing and communications initiatives supporting one of Florida’s top-ranked nursing programs\nacross digital, executive, print, and media platforms\nManage the College’s website strategy, content updates, and webpage redesigns, contributing to 775,000+ annual website\nvisits\nDevelop and execute multi-platform communication strategies across LinkedIn, Instagram, Facebook, newsletters, email\ncampaigns, and digital signage\nIncreased Instagram reach by 300%, generating 2.5M+ views and 49.5K content interactions\nIncreased Facebook reach by 300%, generating 1.1M+ views and 19.3K content interactions\nManage executive communications for the Dean, including LinkedIn strategy, talking points, scripts, quotes, and\ninstitutional messaging\nCoordinate press releases, rankings communications, sponsorships, and media relations with external academic and\nhealthcare organizations\nLead branding and storytelling initiatives highlighting faculty research, institutional achievements, student success, and\ncommunity engagement\nMonitor analytics and campaign performance metrics to optimize audience engagement and digital growth strategies\nCollaborate cross-functionally with admissions, research, enrollment, finance, student success, and university leadership\nteams\nManage project workflows and communication initiatives through Monday.com and recurring stakeholder coordination\nmeetings\nDevelop and distribute monthly internal, external, and LinkedIn newsletters supporting institutional visibility and\nengagement\nDecember 6, 2024 - Present\n407 · 719 · 9944 · tekirby@usf.edu Website\nTaylor Kirby\nFlorida State University University of South Florida\nBachelor of Science - Marketing Master of Business Adminstration (MBA) - In Progress\nEDUCATION\nStrategic Communications • Digital Marketing • Executive Communications • Brand Management • Website Management\n• Social Media Strategy • Media Relations • Content Development • Analytics & Reporting • Project Management • Email\nMarketing • Public Relations • Cross-Functional Collaboration • Graphic Design • Content Strategy\nKEY COMPETENCIES"
+    "length": 3937,
+    "text": "Colin Kirby\nkirbycolin26@gmail.com | github.com/KirbysGit | linkedin.com/in/colinwkirby/ | https://colinkirby.dev\nExperience\nSoftware Engineering Intern May 2024 – June 2025\nBitGo | Python, Django, React, PostgreSQL, AWS EC2 Remote\n• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational\nworkflows through a centralized web platform.\n• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows,\nbackend APIs, and real-time operational tooling.\n• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to\nsupport scheduled jobs, logging, and live task updates.\n• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-\nchecking time by ~3 hours per week for internal IT teams.\nProjects\nTaylor.io – AI Resume Builder & Workflow Platform | Python, React, FastAPI, OpenAI API, Cursor\n• Built an AI-powered resume platform that stores structured user career data and generates tailored resumes based on\nspecific job descriptions.\n• Developed workflows that extract relevant keywords and requirements from job postings, then use OpenAI APIs to\ngenerate targeted resume content from user profile data.\n• Built FastAPI backend services for resume parsing, authentication, and real-time editing using PostgreSQL and React.\n• Used AI-assisted coding workflows with tools like Cursor to rapidly prototype, iterate, and refine product features while\nmaintaining production-style architecture.\nCenti – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev\n• Built a personal finance platform that aggregates bank accounts, transactions, and spending activity into one clear\ndashboard, helping users understand their finances without manually sorting through multiple apps and statements..\n• Developed transaction processing and categorization workflows using FastAPI, PostgreSQL, and Plaid APIs to organize\nmessy financial data into searchable spending insights and summaries.\n• Created customizable React dashboards that let users explore spending trends, account activity, and financial patterns\nin the way that makes the most sense to them.\nSentimentTrader – Financial Sentiment & Market Analysis Pipeline | Python, SQL, FinBERT, XGBoost\n• Built an end-to-end analytics pipeline processing 1K+ finance-related Reddit posts per run through automated ETL\nworkflows, combining market data and sentiment analysis to generate trading signals for users.\n• Developed preprocessing and feature engineering workflows that transform unstructured discussions, engagement\nmetrics, and stock data into structured ticker-level indicators for analysis.\n• Trained and evaluated XGBoost models achieving 55–70% ROC-AUC while comparing sentiment patterns against short-\nterm market movement.\nShelfVision – Dense Retail Shelf Object Detector | PyTorch, ResNet-50, FPN\n• Built a retail analysis system trained on 11K+ images to detect and identify products in cluttered shelf environments.\n• Developed preprocessing and training workflows that organize image data, generate training inputs, and improve\ndetection performance across different shelf layouts.\nEducation\nUniversity of Central Florida (GPA 3.78 / 4.0) August 2021 – May 2025\nBachelor of Science in Computer Engineering Orlando, FL\nHonors & Awards: Dean’s List 2021, President’s Honor Roll 2023 – 2025, Pegasus Gold Scholarship\nClubs & Extracurriculars: AI @ UCF, Knight Hacks, SHPE @ UCF\nRelevant Coursework: Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design\nSkills\nLanguages : Python, SQL, JavaScript, Java\nAnalysis & Data Tools : Pandas, NumPy, ETL Pipelines, XGBoost, FinBERT\nFrameworks & Technologies : FastAPI, Django, React, Node.js, PostgreSQL, MySQL\nAI Developer Tools : Cursor, Claude Code, Codex, AI-Assisted Development"
   },
   "stage02_cleanedText": {
-    "length": 2972,
-    "text": "PROFESSIONAL EXPERIENCE\nAssociated Luxury Hotels International\nMarketing Coordinator - Contract, Part-Time (25 - 30 hours/week)\nSupported brand campaign initiatives through media partnership coordination, content development, and digital asset\nmanagement\nAssisted executive marketing leadership with reporting, communications, and cross-department collaboration efforts\nNovember 7, 2023 - Dec 27, 2023\nBumbleBee Skincare & Waxing\nSocial Media Marketing Manager - Full-Time (3 Years and 3 months)\nManaged social media strategy, content creation, and audience engagement initiatives across multiple digital platforms\nDeveloped branded graphics, scheduled content, and supported customer engagement through Meta Business Suite and\nemail marketing tools\nAugust 22, 2022 - December 31, 2025\nUSF College of Nursing\nCommunications & Marketing Officer - Full-Time (40 hours/week)\nLead integrated marketing and communications initiatives supporting one of Florida's top-ranked nursing programs\nacross digital, executive, print, and media platforms\nManage the College's website strategy, content updates, and webpage redesigns, contributing to 775,000+ annual website\nvisits\nDevelop and execute multi-platform communication strategies across LinkedIn, Instagram, Facebook, newsletters, email\ncampaigns, and digital signage\nIncreased Instagram reach by 300%, generating 2.5M+ views and 49.5K content interactions\nIncreased Facebook reach by 300%, generating 1.1M+ views and 19.3K content interactions\nManage executive communications for the Dean, including LinkedIn strategy, talking points, scripts, quotes, and\ninstitutional messaging\nCoordinate press releases, rankings communications, sponsorships, and media relations with external academic and\nhealthcare organizations\nLead branding and storytelling initiatives highlighting faculty research, institutional achievements, student success, and\ncommunity engagement\nMonitor analytics and campaign performance metrics to optimize audience engagement and digital growth strategies\nCollaborate cross-functionally with admissions, research, enrollment, finance, student success, and university leadership\nteams\nManage project workflows and communication initiatives through Monday.com and recurring stakeholder coordination\nmeetings\nDevelop and distribute monthly internal, external, and LinkedIn newsletters supporting institutional visibility and\nengagement\nDecember 6, 2024 - Present\n407 · 719 · 9944 · tekirby@usf.edu Website\nTaylor Kirby\nFlorida State University University of South Florida\nBachelor of Science - Marketing Master of Business Adminstration (MBA) - In Progress\nEDUCATION\nStrategic Communications • Digital Marketing • Executive Communications • Brand Management • Website Management\n• Social Media Strategy • Media Relations • Content Development • Analytics & Reporting • Project Management • Email\nMarketing • Public Relations • Cross-Functional Collaboration • Graphic Design • Content Strategy\nKEY COMPETENCIES"
+    "length": 3935,
+    "text": "Colin Kirby\nkirbycolin26@gmail.com | github.com/KirbysGit | linkedin.com/in/colinwkirby/ | https://colinkirby.dev\nExperience\nSoftware Engineering Intern May 2024 – June 2025\nBitGo | Python, Django, React, PostgreSQL, AWS EC2 Remote\n• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational\nworkflows through a centralized web platform.\n• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows,\nbackend APIs, and real-time operational tooling.\n• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to\nsupport scheduled jobs, logging, and live task updates.\n• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-checking time by ~3 hours per week for internal IT teams.\nProjects\nTaylor.io – AI Resume Builder & Workflow Platform | Python, React, FastAPI, OpenAI API, Cursor\n• Built an AI-powered resume platform that stores structured user career data and generates tailored resumes based on\nspecific job descriptions.\n• Developed workflows that extract relevant keywords and requirements from job postings, then use OpenAI APIs to\ngenerate targeted resume content from user profile data.\n• Built FastAPI backend services for resume parsing, authentication, and real-time editing using PostgreSQL and React.\n• Used AI-assisted coding workflows with tools like Cursor to rapidly prototype, iterate, and refine product features while\nmaintaining production-style architecture.\nCenti – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev\n• Built a personal finance platform that aggregates bank accounts, transactions, and spending activity into one clear\ndashboard, helping users understand their finances without manually sorting through multiple apps and statements..\n• Developed transaction processing and categorization workflows using FastAPI, PostgreSQL, and Plaid APIs to organize\nmessy financial data into searchable spending insights and summaries.\n• Created customizable React dashboards that let users explore spending trends, account activity, and financial patterns\nin the way that makes the most sense to them.\nSentimentTrader – Financial Sentiment & Market Analysis Pipeline | Python, SQL, FinBERT, XGBoost\n• Built an end-to-end analytics pipeline processing 1K+ finance-related Reddit posts per run through automated ETL\nworkflows, combining market data and sentiment analysis to generate trading signals for users.\n• Developed preprocessing and feature engineering workflows that transform unstructured discussions, engagement\nmetrics, and stock data into structured ticker-level indicators for analysis.\n• Trained and evaluated XGBoost models achieving 55–70% ROC-AUC while comparing sentiment patterns against short-term market movement.\nShelfVision – Dense Retail Shelf Object Detector | PyTorch, ResNet-50, FPN\n• Built a retail analysis system trained on 11K+ images to detect and identify products in cluttered shelf environments.\n• Developed preprocessing and training workflows that organize image data, generate training inputs, and improve\ndetection performance across different shelf layouts.\nEducation\nUniversity of Central Florida (GPA 3.78 / 4.0) August 2021 – May 2025\nBachelor of Science in Computer Engineering Orlando, FL\nHonors & Awards: Dean's List 2021, President's Honor Roll 2023 – 2025, Pegasus Gold Scholarship\nClubs & Extracurriculars: AI @ UCF, Knight Hacks, SHPE @ UCF\nRelevant Coursework: Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design\nSkills\nLanguages : Python, SQL, JavaScript, Java\nAnalysis & Data Tools : Pandas, NumPy, ETL Pipelines, XGBoost, FinBERT\nFrameworks & Technologies : FastAPI, Django, React, Node.js, PostgreSQL, MySQL\nAI Developer Tools : Cursor, Claude Code, Codex, AI-Assisted Development"
   },
   "stage03_sections": {
     "names": [
       "experience",
-      "education"
+      "projects",
+      "education",
+      "skills"
     ],
     "lengths": {
-      "experience": 2594,
-      "education": 343
+      "experience": 765,
+      "projects": 2367,
+      "education": 385,
+      "skills": 264
     },
     "content": {
-      "experience": "Associated Luxury Hotels International\nMarketing Coordinator - Contract, Part-Time (25 - 30 hours/week)\nSupported brand campaign initiatives through media partnership coordination, content development, and digital asset\nmanagement\nAssisted executive marketing leadership with reporting, communications, and cross-department collaboration efforts\nNovember 7, 2023 - Dec 27, 2023\nBumbleBee Skincare & Waxing\nSocial Media Marketing Manager - Full-Time (3 Years and 3 months)\nManaged social media strategy, content creation, and audience engagement initiatives across multiple digital platforms\nDeveloped branded graphics, scheduled content, and supported customer engagement through Meta Business Suite and\nemail marketing tools\nAugust 22, 2022 - December 31, 2025\nUSF College of Nursing\nCommunications & Marketing Officer - Full-Time (40 hours/week)\nLead integrated marketing and communications initiatives supporting one of Florida's top-ranked nursing programs\nacross digital, executive, print, and media platforms\nManage the College's website strategy, content updates, and webpage redesigns, contributing to 775,000+ annual website\nvisits\nDevelop and execute multi-platform communication strategies across LinkedIn, Instagram, Facebook, newsletters, email\ncampaigns, and digital signage\nIncreased Instagram reach by 300%, generating 2.5M+ views and 49.5K content interactions\nIncreased Facebook reach by 300%, generating 1.1M+ views and 19.3K content interactions\nManage executive communications for the Dean, including LinkedIn strategy, talking points, scripts, quotes, and\ninstitutional messaging\nCoordinate press releases, rankings communications, sponsorships, and media relations with external academic and\nhealthcare organizations\nLead branding and storytelling initiatives highlighting faculty research, institutional achievements, student success, and\ncommunity engagement\nMonitor analytics and campaign performance metrics to optimize audience engagement and digital growth strategies\nCollaborate cross-functionally with admissions, research, enrollment, finance, student success, and university leadership\nteams\nManage project workflows and communication initiatives through Monday.com and recurring stakeholder coordination\nmeetings\nDevelop and distribute monthly internal, external, and LinkedIn newsletters supporting institutional visibility and\nengagement\nDecember 6, 2024 - Present\n407 · 719 · 9944 · tekirby@usf.edu Website\nTaylor Kirby\nFlorida State University University of South Florida\nBachelor of Science - Marketing Master of Business Adminstration (MBA) - In Progress",
-      "education": "Strategic Communications • Digital Marketing • Executive Communications • Brand Management • Website Management\n• Social Media Strategy • Media Relations • Content Development • Analytics & Reporting • Project Management • Email\nMarketing • Public Relations • Cross-Functional Collaboration • Graphic Design • Content Strategy\nKEY COMPETENCIES"
+      "experience": "Software Engineering Intern May 2024 – June 2025\nBitGo | Python, Django, React, PostgreSQL, AWS EC2 Remote\n• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational\nworkflows through a centralized web platform.\n• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows,\nbackend APIs, and real-time operational tooling.\n• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to\nsupport scheduled jobs, logging, and live task updates.\n• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-checking time by ~3 hours per week for internal IT teams.",
+      "projects": "Taylor.io – AI Resume Builder & Workflow Platform | Python, React, FastAPI, OpenAI API, Cursor\n• Built an AI-powered resume platform that stores structured user career data and generates tailored resumes based on\nspecific job descriptions.\n• Developed workflows that extract relevant keywords and requirements from job postings, then use OpenAI APIs to\ngenerate targeted resume content from user profile data.\n• Built FastAPI backend services for resume parsing, authentication, and real-time editing using PostgreSQL and React.\n• Used AI-assisted coding workflows with tools like Cursor to rapidly prototype, iterate, and refine product features while\nmaintaining production-style architecture.\nCenti – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev\n• Built a personal finance platform that aggregates bank accounts, transactions, and spending activity into one clear\ndashboard, helping users understand their finances without manually sorting through multiple apps and statements..\n• Developed transaction processing and categorization workflows using FastAPI, PostgreSQL, and Plaid APIs to organize\nmessy financial data into searchable spending insights and summaries.\n• Created customizable React dashboards that let users explore spending trends, account activity, and financial patterns\nin the way that makes the most sense to them.\nSentimentTrader – Financial Sentiment & Market Analysis Pipeline | Python, SQL, FinBERT, XGBoost\n• Built an end-to-end analytics pipeline processing 1K+ finance-related Reddit posts per run through automated ETL\nworkflows, combining market data and sentiment analysis to generate trading signals for users.\n• Developed preprocessing and feature engineering workflows that transform unstructured discussions, engagement\nmetrics, and stock data into structured ticker-level indicators for analysis.\n• Trained and evaluated XGBoost models achieving 55–70% ROC-AUC while comparing sentiment patterns against short-term market movement.\nShelfVision – Dense Retail Shelf Object Detector | PyTorch, ResNet-50, FPN\n• Built a retail analysis system trained on 11K+ images to detect and identify products in cluttered shelf environments.\n• Developed preprocessing and training workflows that organize image data, generate training inputs, and improve\ndetection performance across different shelf layouts.",
+      "education": "University of Central Florida (GPA 3.78 / 4.0) August 2021 – May 2025\nBachelor of Science in Computer Engineering Orlando, FL\nHonors & Awards: Dean's List 2021, President's Honor Roll 2023 – 2025, Pegasus Gold Scholarship\nClubs & Extracurriculars: AI @ UCF, Knight Hacks, SHPE @ UCF\nRelevant Coursework: Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design",
+      "skills": "Languages : Python, SQL, JavaScript, Java\nAnalysis & Data Tools : Pandas, NumPy, ETL Pipelines, XGBoost, FinBERT\nFrameworks & Technologies : FastAPI, Django, React, Node.js, PostgreSQL, MySQL\nAI Developer Tools : Cursor, Claude Code, Codex, AI-Assisted Development"
     }
   },
   "stage04_parsedData": {
     "contact_info": {
-      "email": "tekirby@usf.edu",
+      "email": "kirbycolin26@gmail.com",
       "phone": null,
-      "github": null,
-      "linkedin": null,
-      "portfolio": null
+      "github": "https://github.com/KirbysGit",
+      "linkedin": "https://linkedin.com/in/colinwkirby/",
+      "portfolio": "https://colinkirby.dev"
     },
     "education": [
       {
-        "school": "Strategic Communications • Digital Marketing • Executive Communications • Brand Management • Website Management",
-        "degree": null,
-        "field": null,
+        "school": "University of Central Florida (GPA 3.78 / 4.0) August 2021 – May 2025",
+        "degree": "Bachelor of Science",
+        "field": "Computer Engineering",
         "minor": null,
-        "startDate": null,
-        "endDate": null,
+        "startDate": "2021-08",
+        "endDate": "2025-05",
         "current": false,
-        "gpa": null,
-        "honorsAwards": null,
-        "clubsExtracurriculars": null,
+        "gpa": "3.78 / 4.0",
+        "honorsAwards": "Dean's List 2021, President's Honor Roll 2023 – 2025, Pegasus Gold Scholarship",
+        "clubsExtracurriculars": "& Extracurriculars: AI @ UCF, Knight Hacks, SHPE @ UCF",
         "location": null,
-        "relevantCoursework": null
+        "relevantCoursework": "Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design"
       }
     ],
     "experiences": [
       {
-        "title": "Associated Luxury Hotels International",
-        "company": "Marketing Coordinator - Contract, Part-Time (25 - 30 hours/week)",
-        "description": "• Supported brand campaign initiatives through media partnership coordination, content development, and digital asset\n• management\n• Assisted executive marketing leadership with reporting, communications, and cross-department collaboration efforts\n• November 7, 2023 - Dec 27, 2023\n• BumbleBee Skincare & Waxing\n• Social Media Marketing Manager - Full-Time (3 Years and 3 months)\n• Managed social media strategy, content creation, and audience engagement initiatives across multiple digital platforms\n• Developed branded graphics, scheduled content, and supported customer engagement through Meta Business Suite and\n• email marketing tools\n• August 22, 2022 - December 31, 2025\n• USF College of Nursing\n• Communications & Marketing Officer - Full-Time (40 hours/week)\n• Lead integrated marketing and communications initiatives supporting one of Florida's top-ranked nursing programs\n• across digital, executive, print, and media platforms\n• Manage the College's website strategy, content updates, and webpage redesigns, contributing to 775,000+ annual website\n• visits\n• Develop and execute multi-platform communication strategies across LinkedIn, Instagram, Facebook, newsletters, email\n• campaigns, and digital signage\n• Increased Instagram reach by 300%, generating 2.5M+ views and 49.5K content interactions\n• Increased Facebook reach by 300%, generating 1.1M+ views and 19.3K content interactions\n• Manage executive communications for the Dean, including LinkedIn strategy, talking points, scripts, quotes, and\n• institutional messaging\n• Coordinate press releases, rankings communications, sponsorships, and media relations with external academic and\n• healthcare organizations\n• Lead branding and storytelling initiatives highlighting faculty research, institutional achievements, student success, and\n• community engagement\n• Monitor analytics and campaign performance metrics to optimize audience engagement and digital growth strategies\n• Collaborate cross-functionally with admissions, research, enrollment, finance, student success, and university leadership\n• teams\n• Manage project workflows and communication initiatives through Monday.com and recurring stakeholder coordination\n• meetings\n• Develop and distribute monthly internal, external, and LinkedIn newsletters supporting institutional visibility and\n• engagement",
-        "startDate": null,
-        "endDate": null,
+        "title": "Software Engineering Intern",
+        "company": "BitGo",
+        "description": "• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational workflows through a centralized web platform.\n• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows, backend APIs, and real-time operational tooling.\n• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to support scheduled jobs, logging, and live task updates.\n• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-checking time by ~3 hours per week for internal IT teams.",
+        "startDate": "2024-05",
+        "endDate": "2025-06",
         "current": false,
-        "location": null,
-        "skills": null
-      },
-      {
-        "title": "December 6,",
-        "company": "407 · 719 · 9944 · tekirby@usf.edu Website",
-        "description": "• Taylor Kirby\n• Florida State University University of South Florida\n• Bachelor of Science - Marketing Master of Business Adminstration (MBA) - In Progress",
-        "startDate": "2024-01",
-        "endDate": null,
-        "current": true,
-        "location": null,
-        "skills": null
+        "location": "Remote",
+        "skills": "Python, Django, React, PostgreSQL, AWS EC2"
       }
     ],
-    "skills": [],
-    "projects": [],
+    "skills": [
+      {
+        "name": "Python",
+        "category": "Languages"
+      },
+      {
+        "name": "SQL",
+        "category": "Languages"
+      },
+      {
+        "name": "JavaScript",
+        "category": "Languages"
+      },
+      {
+        "name": "Java",
+        "category": "Languages"
+      },
+      {
+        "name": "Pandas",
+        "category": "Analysis & Data Tools"
+      },
+      {
+        "name": "NumPy",
+        "category": "Analysis & Data Tools"
+      },
+      {
+        "name": "ETL Pipelines",
+        "category": "Analysis & Data Tools"
+      },
+      {
+        "name": "XGBoost",
+        "category": "Analysis & Data Tools"
+      },
+      {
+        "name": "FinBERT",
+        "category": "Analysis & Data Tools"
+      },
+      {
+        "name": "FastAPI",
+        "category": "Frameworks & Technologies"
+      },
+      {
+        "name": "Django",
+        "category": "Frameworks & Technologies"
+      },
+      {
+        "name": "React",
+        "category": "Frameworks & Technologies"
+      },
+      {
+        "name": "Node.js",
+        "category": "Frameworks & Technologies"
+      },
+      {
+        "name": "PostgreSQL",
+        "category": "Frameworks & Technologies"
+      },
+      {
+        "name": "MySQL",
+        "category": "Frameworks & Technologies"
+      },
+      {
+        "name": "Cursor",
+        "category": "AI Developer Tools"
+      },
+      {
+        "name": "Claude Code",
+        "category": "AI Developer Tools"
+      },
+      {
+        "name": "Codex",
+        "category": "AI Developer Tools"
+      },
+      {
+        "name": "AI-Assisted Development",
+        "category": "AI Developer Tools"
+      }
+    ],
+    "projects": [
+      {
+        "title": "Taylor.io – AI Resume Builder & Workflow Platform",
+        "description": [
+          "Built an AI-powered resume platform that stores structured user career data and generates tailored resumes based on specific job descriptions.",
+          "Developed workflows that extract relevant keywords and requirements from job postings, then use OpenAI APIs to generate targeted resume content from user profile data.",
+          "Built FastAPI backend services for resume parsing, authentication, and real-time editing using PostgreSQL and React.",
+          "Used AI-assisted coding workflows with tools like Cursor to rapidly prototype, iterate, and refine product features while maintaining production-style architecture."
+        ],
+        "techStack": [
+          "Python",
+          "React",
+          "FastAPI",
+          "OpenAI API",
+          "Cursor"
+        ],
+        "url": null
+      },
+      {
+        "title": "Centi – Personal Finance App",
+        "description": [
+          "Built a personal finance platform that aggregates bank accounts, transactions, and spending activity into one clear dashboard, helping users understand their finances without manually sorting through multiple apps and statements..",
+          "Developed transaction processing and categorization workflows using FastAPI, PostgreSQL, and Plaid APIs to organize messy financial data into searchable spending insights and summaries.",
+          "Created customizable React dashboards that let users explore spending trends, account activity, and financial patterns in the way that makes the most sense to them."
+        ],
+        "techStack": [
+          "FastAPI",
+          "React",
+          "PostgreSQL",
+          "Plaid API"
+        ],
+        "url": "https://centi.dev"
+      },
+      {
+        "title": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline",
+        "description": [
+          "Built an end-to-end analytics pipeline processing 1K+ finance-related Reddit posts per run through automated ETL workflows, combining market data and sentiment analysis to generate trading signals for users.",
+          "Developed preprocessing and feature engineering workflows that transform unstructured discussions, engagement metrics, and stock data into structured ticker-level indicators for analysis.",
+          "Trained and evaluated XGBoost models achieving 55–70% ROC-AUC while comparing sentiment patterns against short-term market movement."
+        ],
+        "techStack": [
+          "Python",
+          "SQL",
+          "FinBERT",
+          "XGBoost"
+        ],
+        "url": null
+      },
+      {
+        "title": "ShelfVision – Dense Retail Shelf Object Detector",
+        "description": [
+          "Built a retail analysis system trained on 11K+ images to detect and identify products in cluttered shelf environments.",
+          "Developed preprocessing and training workflows that organize image data, generate training inputs, and improve detection performance across different shelf layouts."
+        ],
+        "techStack": [
+          "PyTorch",
+          "ResNet-50",
+          "FPN"
+        ],
+        "url": null
+      }
+    ],
     "summary": null,
     "warnings": [],
     "parserDebug": {
       "projects": {
-        "headerCandidates": [],
-        "acceptedHeaders": [],
+        "headerCandidates": [
+          {
+            "lineNumber": 1,
+            "line": "Taylor.io – AI Resume Builder & Workflow Platform | Python, React, FastAPI, OpenAI API, Cursor",
+            "accepted": true,
+            "reason": "accepted"
+          },
+          {
+            "lineNumber": 9,
+            "line": "Centi – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev",
+            "accepted": true,
+            "reason": "accepted"
+          },
+          {
+            "lineNumber": 16,
+            "line": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline | Python, SQL, FinBERT, XGBoost",
+            "accepted": true,
+            "reason": "accepted"
+          },
+          {
+            "lineNumber": 22,
+            "line": "ShelfVision – Dense Retail Shelf Object Detector | PyTorch, ResNet-50, FPN",
+            "accepted": true,
+            "reason": "accepted"
+          }
+        ],
+        "acceptedHeaders": [
+          {
+            "lineNumber": 1,
+            "line": "Taylor.io – AI Resume Builder & Workflow Platform | Python, React, FastAPI, OpenAI API, Cursor",
+            "accepted": true,
+            "reason": "accepted"
+          },
+          {
+            "lineNumber": 9,
+            "line": "Centi – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev",
+            "accepted": true,
+            "reason": "accepted"
+          },
+          {
+            "lineNumber": 16,
+            "line": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline | Python, SQL, FinBERT, XGBoost",
+            "accepted": true,
+            "reason": "accepted"
+          },
+          {
+            "lineNumber": 22,
+            "line": "ShelfVision – Dense Retail Shelf Object Detector | PyTorch, ResNet-50, FPN",
+            "accepted": true,
+            "reason": "accepted"
+          }
+        ],
         "rejectedHeaders": [],
-        "wrappedContinuations": []
+        "wrappedContinuations": [
+          {
+            "lineNumber": 3,
+            "line": "specific job descriptions.",
+            "previousLine": "• Built an AI-powered resume platform that stores structured user career data and generates tailored resumes based on",
+            "projectTitle": "Taylor.io – AI Resume Builder & Workflow Platform"
+          },
+          {
+            "lineNumber": 5,
+            "line": "generate targeted resume content from user profile data.",
+            "previousLine": "• Developed workflows that extract relevant keywords and requirements from job postings, then use OpenAI APIs to",
+            "projectTitle": "Taylor.io – AI Resume Builder & Workflow Platform"
+          },
+          {
+            "lineNumber": 8,
+            "line": "maintaining production-style architecture.",
+            "previousLine": "• Used AI-assisted coding workflows with tools like Cursor to rapidly prototype, iterate, and refine product features while",
+            "projectTitle": "Taylor.io – AI Resume Builder & Workflow Platform"
+          },
+          {
+            "lineNumber": 11,
+            "line": "dashboard, helping users understand their finances without manually sorting through multiple apps and statements..",
+            "previousLine": "• Built a personal finance platform that aggregates bank accounts, transactions, and spending activity into one clear",
+            "projectTitle": "Centi – Personal Finance App"
+          },
+          {
+            "lineNumber": 13,
+            "line": "messy financial data into searchable spending insights and summaries.",
+            "previousLine": "• Developed transaction processing and categorization workflows using FastAPI, PostgreSQL, and Plaid APIs to organize",
+            "projectTitle": "Centi – Personal Finance App"
+          },
+          {
+            "lineNumber": 15,
+            "line": "in the way that makes the most sense to them.",
+            "previousLine": "• Created customizable React dashboards that let users explore spending trends, account activity, and financial patterns",
+            "projectTitle": "Centi – Personal Finance App"
+          },
+          {
+            "lineNumber": 18,
+            "line": "workflows, combining market data and sentiment analysis to generate trading signals for users.",
+            "previousLine": "• Built an end-to-end analytics pipeline processing 1K+ finance-related Reddit posts per run through automated ETL",
+            "projectTitle": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline"
+          },
+          {
+            "lineNumber": 20,
+            "line": "metrics, and stock data into structured ticker-level indicators for analysis.",
+            "previousLine": "• Developed preprocessing and feature engineering workflows that transform unstructured discussions, engagement",
+            "projectTitle": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline"
+          },
+          {
+            "lineNumber": 25,
+            "line": "detection performance across different shelf layouts.",
+            "previousLine": "• Developed preprocessing and training workflows that organize image data, generate training inputs, and improve",
+            "projectTitle": "ShelfVision – Dense Retail Shelf Object Detector"
+          }
+        ],
+        "projectCount": 4,
+        "projectTitles": [
+          "Taylor.io – AI Resume Builder & Workflow Platform",
+          "Centi – Personal Finance App",
+          "SentimentTrader – Financial Sentiment & Market Analysis Pipeline",
+          "ShelfVision – Dense Retail Shelf Object Detector"
+        ]
       }
     }
   }

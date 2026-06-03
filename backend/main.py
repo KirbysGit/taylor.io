@@ -5,7 +5,6 @@
 # imports.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
 import os
 import logging
 
@@ -15,12 +14,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
-
-# import our base model.
-from models import Base
-
-# import database.
-from database import engine, ensure_auth_columns
 
 # import routers.
 from routers import auth_router, users_router, profile_router, generator_router, templates_router, ai_router
@@ -62,16 +55,6 @@ app.include_router(templates_router)
 app.include_router(ai_router)
 
 # ---------------- routes startup ----------------
-
-# create tables on startup.
-@app.on_event("startup")
-async def startup_event():
-    try:
-        Base.metadata.create_all(bind=engine)
-        ensure_auth_columns()
-        print("Database tables created successfully")
-    except Exception as e:
-        print(f"Error creating database tables: {e}")
 
 # basic routes.
 @app.get("/health")
