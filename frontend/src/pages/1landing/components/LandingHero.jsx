@@ -22,7 +22,7 @@ export default function LandingHero() {
 						<p className="mx-auto mb-8 max-w-xl pt-2 text-lg font-normal leading-relaxed text-white/[0.93] md:text-xl lg:mx-0 lg:max-w-none">
 							Shape your narrative for the role you want, then ship a résumé that still sounds like you.
 						</p>
-						{/* Single-row CTAs: nowrap + shared baseline so the pair doesn’t stack or wrap awkwardly in the narrow hero column. */}
+						{/* Single-row CTAs: nowrap + shared baseline so the pair doesn't stack or wrap awkwardly in the narrow hero column. */}
 						<div className="-mx-1 flex flex-nowrap items-center justify-center gap-2.5 overflow-x-auto px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:gap-3 sm:overflow-visible sm:px-0 lg:justify-start [&::-webkit-scrollbar]:hidden">
 							<button
 								type="button"

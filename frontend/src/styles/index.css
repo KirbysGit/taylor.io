@@ -683,6 +683,23 @@
 	animation: none;
 }
 
+.landing-hero-visual {
+	max-width: min(760px, 100%);
+	transform-origin: center right;
+}
+
+@media (min-width: 1024px) {
+	.landing-hero-visual {
+		transform: scale(0.82);
+	}
+}
+
+@media (min-width: 1280px) {
+	.landing-hero-visual {
+		transform: scale(0.86);
+	}
+}
+
 .hero-resume-parallax-frame {
 	--resume-rotate-x: 0deg;
 	--resume-rotate-y: 0deg;

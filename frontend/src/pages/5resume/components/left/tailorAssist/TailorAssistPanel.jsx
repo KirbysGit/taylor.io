@@ -129,6 +129,7 @@ function TailorAssistPanel({
 	tailorIntent,
 	aiTailorResult,
 	aiTailorPhase,
+	aiTailorError,
 	tailorLayoutPreview,
 	onShowTailorFinalLayout = () => {},
 	mode = 'expanded',
@@ -211,8 +212,12 @@ function TailorAssistPanel({
 
 				{aiTailorPhase === 'error' ? (
 					<div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-red-900">
-						<p className="text-xs font-semibold">Something went wrong</p>
-						<p className="mt-1 text-xs">Try again from the tailor setup step.</p>
+						<p className="text-xs font-semibold">
+							{aiTailorError?.status === 429 ? 'Daily limit reached' : 'Something went wrong'}
+						</p>
+						<p className="mt-1 text-xs">
+							{aiTailorError?.message || 'Try again from the tailor setup step.'}
+						</p>
 					</div>
 				) : null}
 

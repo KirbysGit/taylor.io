@@ -42,5 +42,9 @@ class User(Base):
     # optional per-user section header overrides, e.g., {"education": "Academics"}
     section_labels = Column(JSON, nullable=True)
 
+    # daily tailor usage cap
+    daily_tailor_count = Column(Integer, nullable=False, default=0)
+    daily_tailor_reset_date = Column(DateTime, nullable=True)
+
     # saved resume previews (snapshots for later)
     saved_resumes = relationship("SavedResume", back_populates="user", cascade="all, delete-orphan")

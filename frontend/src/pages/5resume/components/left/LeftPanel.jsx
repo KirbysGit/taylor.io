@@ -37,6 +37,7 @@ function LeftPanel({
 	tailorIntent,
 	aiTailorResult,
 	aiTailorPhase,
+	aiTailorError,
 	tailorLayoutPreview,
 	onShowTailorFinalLayout,
 }) {
@@ -85,6 +86,7 @@ function LeftPanel({
 				tailorIntent={tailorIntent}
 				aiTailorResult={aiTailorResult}
 				aiTailorPhase={aiTailorPhase}
+				aiTailorError={aiTailorError}
 				tailorLayoutPreview={tailorLayoutPreview}
 				onShowTailorFinalLayout={onShowTailorFinalLayout}
 				mode={tailorReviewMode}

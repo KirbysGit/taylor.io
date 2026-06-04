@@ -129,7 +129,7 @@ function ResumePreview() {
 	)
 
 	// call the resume tailoring request & get new data if tailor intent is present.
-	const { aiTailorResult, aiTailorPhase, preTailorSnapshot } = useTailorJob({
+	const { aiTailorResult, aiTailorPhase, aiTailorError, preTailorSnapshot } = useTailorJob({
 		tailorIntent,
 		hasSetBaseline,
 		resumeData,
@@ -596,6 +596,7 @@ function ResumePreview() {
 					tailorIntent={tailorIntent}
 					aiTailorResult={aiTailorResult}
 					aiTailorPhase={aiTailorPhase}
+					aiTailorError={aiTailorError}
 					tailorLayoutPreview={tailorLayoutPreview}
 					onShowTailorFinalLayout={() => setTailorLayoutPreview('final')}
 				/>

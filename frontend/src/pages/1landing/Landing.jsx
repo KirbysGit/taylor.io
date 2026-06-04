@@ -13,17 +13,12 @@ export default function Landing() {
 	return (
 		<div
 			id="landing-scroll-root"
-			className="landing-scrollbar min-h-screen overflow-y-auto bg-cream"
+			className="landing-scrollbar min-h-screen overflow-y-auto"
 			style={{ height: '100vh', overflowY: 'auto' }}
 		>
-			{/*
-				Nav must sit outside the hero-only flex wrapper:
-				sticky is clipped by its parent bottom — if that parent ends at the hero,
-				the bar disappears when scrolling into cream sections below.
-				Height calc keeps hero + pink bar ~= one viewport (toolbar ~3.5rem / md ~4rem).
-			*/}
+			{/* Fixed card nav overlays content; hero runs edge-to-edge under it. */}
 			<LandingHeader />
-			<div className="flex min-h-[calc(100dvh-3.5rem)] flex-col md:min-h-[calc(100dvh-4rem)]">
+			<div className="flex min-h-[100dvh] flex-col">
 				<LandingHero />
 			</div>
 

@@ -72,24 +72,145 @@ async def _send_resend_email(*, to_email: str, subject: str, html: str) -> None:
             raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Could not send email. Please try again.")
 
 
+def _email_shell(*, logo_url: str, heading: str, body_html: str, cta_url: str, cta_label: str, footer_note: str) -> str:
+    """Shared HTML email shell — white card on cream, brand-pink CTA, logo top-left."""
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>{heading}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#fff8ef;font-family:'Inter',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fff8ef;min-height:100vh;">
+    <tr>
+      <td align="center" style="padding:40px 16px 48px;">
+
+        <!-- Card -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border-radius:20px;border:1px solid rgba(214,86,86,0.12);box-shadow:0 24px 64px -24px rgba(120,40,40,0.18);">
+
+          <!-- Logo row -->
+          <tr>
+            <td style="padding:28px 32px 20px;">
+              <img src="{logo_url}" alt="taylor" height="36" style="display:block;height:36px;width:auto;" />
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 32px;">
+              <div style="height:1px;background:linear-gradient(to right,rgba(214,86,86,0.18),rgba(214,86,86,0.06));"></div>
+            </td>
+          </tr>
+
+          <!-- Heading + body -->
+          <tr>
+            <td style="padding:32px 32px 8px;">
+              <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:700;line-height:1.15;color:#1a0f0f;letter-spacing:-0.3px;">{heading}</h1>
+              <div style="font-size:15px;line-height:1.65;color:#4b3535;">
+                {body_html}
+              </div>
+            </td>
+          </tr>
+
+          <!-- CTA button -->
+          <tr>
+            <td style="padding:24px 32px 8px;">
+              <a href="{cta_url}"
+                 style="display:inline-block;background-color:#d65656;color:#ffffff;font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:700;text-decoration:none;padding:14px 28px;border-radius:12px;letter-spacing:0.1px;">
+                {cta_label} &rarr;
+              </a>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:28px 32px 0;">
+              <div style="height:1px;background:rgba(214,86,86,0.10);"></div>
+            </td>
+          </tr>
+
+          <!-- Info rows -->
+          <tr>
+            <td style="padding:20px 32px 4px;">
+              <!-- Fallback link row -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td width="28" valign="top" style="padding-top:1px;">
+                    <div style="width:20px;height:20px;border-radius:50%;background:#fff0f0;border:1px solid rgba(214,86,86,0.22);text-align:center;line-height:20px;font-size:11px;color:#d65656;">&#128279;</div>
+                  </td>
+                  <td style="font-size:12px;color:#7a5555;line-height:1.5;">
+                    Button not working? Copy and paste this link into your browser:<br />
+                    <a href="{cta_url}" style="color:#d65656;word-break:break-all;text-decoration:none;font-size:11px;">{cta_url}</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:12px 32px 4px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td width="28" valign="top" style="padding-top:1px;">
+                    <div style="width:20px;height:20px;border-radius:50%;background:#fff0f0;border:1px solid rgba(214,86,86,0.22);text-align:center;line-height:20px;font-size:11px;color:#d65656;">&#128336;</div>
+                  </td>
+                  <td style="font-size:12px;color:#4b3535;font-weight:600;line-height:1.5;">{footer_note}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 32px 28px;">
+              <div style="height:1px;background:rgba(214,86,86,0.08);margin-bottom:20px;"></div>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="font-size:12px;color:#a07070;">
+                    &#10084; Questions? Email us at
+                    <a href="mailto:hello@trytailor.io" style="color:#d65656;text-decoration:none;">hello@trytailor.io</a>
+                  </td>
+                  <td align="right">
+                    <img src="{logo_url}" alt="taylor" height="22" style="display:block;height:22px;width:auto;opacity:0.55;" />
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2" style="padding-top:6px;font-size:11px;color:#c09090;">Build a resume that gets you hired.</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Card -->
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+
 async def _send_verification_email(user: User) -> None:
     raw_token = _new_raw_token()
     user.email_verification_token_hash = token_hash(raw_token)
     user.email_verification_expires_at = datetime.utcnow() + _verification_ttl()
     link = f"{_frontend_url()}/auth/verify-email?token={quote(raw_token)}"
+    logo_url = f"{_frontend_url()}/lg_tr_logo.png"
     logger.info("Verification link generated for %s: %s", user.email, link)
     await _send_resend_email(
         to_email=user.email,
-        subject="Verify your Taylor account",
-        html=f"""
-            <div style="font-family:Arial,sans-serif;line-height:1.55;color:#222">
-                <h2>Verify your Taylor account</h2>
-                <p>Confirm your email so you can start building tailored resumes.</p>
-                <p><a href="{link}" style="display:inline-block;background:#d65656;color:white;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:700">Verify email</a></p>
-                <p>If the button does not work, copy this link into your browser:</p>
-                <p>{link}</p>
-            </div>
-        """,
+        subject="Confirm your email — taylor",
+        html=_email_shell(
+            logo_url=logo_url,
+            heading="Confirm your email.",
+            body_html="<p style='margin:0'>Thanks for signing up for taylor! Verify your email address to continue setting up your account and start building tailored resumes that stand out.</p>",
+            cta_url=link,
+            cta_label="Verify email",
+            footer_note="This link expires in 24 hours. If you didn't create this account, you can safely ignore this email.",
+        ),
     )
 
 
@@ -98,18 +219,19 @@ async def _send_password_reset_email(user: User) -> None:
     user.password_reset_token_hash = token_hash(raw_token)
     user.password_reset_expires_at = datetime.utcnow() + _reset_ttl()
     link = f"{_frontend_url()}/auth/reset-password?token={quote(raw_token)}"
+    logo_url = f"{_frontend_url()}/lg_tr_logo.png"
     logger.info("Password reset link generated for %s: %s", user.email, link)
     await _send_resend_email(
         to_email=user.email,
-        subject="Reset your Taylor password",
-        html=f"""
-            <div style="font-family:Arial,sans-serif;line-height:1.55;color:#222">
-                <h2>Reset your Taylor password</h2>
-                <p>Use this link to set a new password. It expires soon for your security.</p>
-                <p><a href="{link}" style="display:inline-block;background:#d65656;color:white;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:700">Reset password</a></p>
-                <p>If you did not request this, you can ignore this email.</p>
-            </div>
-        """,
+        subject="Reset your password — taylor",
+        html=_email_shell(
+            logo_url=logo_url,
+            heading="Reset your password.",
+            body_html="<p style='margin:0'>We received a request to reset your taylor password. Click below to choose a new one. If you didn't request this, you can safely ignore this email.</p>",
+            cta_url=link,
+            cta_label="Reset password",
+            footer_note="This link expires in 60 minutes for your security.",
+        ),
     )
 
 

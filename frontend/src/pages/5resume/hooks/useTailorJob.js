@@ -27,6 +27,7 @@ export function useTailorJob({
 
 	// state for the ai tailor phase.
 	const [aiTailorPhase, setAiTailorPhase] = useState('idle')
+	const [aiTailorError, setAiTailorError] = useState(null)
 
 	// editor snapshot taken right before the tailored patch is applied (for original vs tailored preview).
 	const [preTailorSnapshot, setPreTailorSnapshot] = useState(null)
@@ -64,6 +65,7 @@ export function useTailorJob({
 		const requestTailor = async () => {
 			try {
 				setAiTailorPhase('requesting')
+				setAiTailorError(null)
 				setPreTailorSnapshot(null)
 
 				// try to tailor the resume.
@@ -127,7 +129,14 @@ export function useTailorJob({
 				if (isAbortError(error)) return
 				if (isCancelled || gen !== tailorGenerationRef.current) return
 				console.error('Tailor preview request failed:', error)
-				toast.error('Could not generate tailored resume yet.')
+				const status = error?.response?.status
+				const detail = error?.response?.data?.detail
+				const message =
+					status === 429
+						? (typeof detail === 'string' ? detail : "You've used all 5 tailors for today. Come back tomorrow.")
+						: 'Could not generate tailored resume. Please try again.'
+				toast.error(message)
+				setAiTailorError({ status, message })
 				setAiTailorPhase('error')
 			}
 		}
@@ -145,5 +154,5 @@ export function useTailorJob({
 	}, [tailorIntent, hasSetBaseline])
 
 	// return the ai tailor result and phase.
-	return { aiTailorResult, aiTailorPhase, preTailorSnapshot }
+	return { aiTailorResult, aiTailorPhase, aiTailorError, preTailorSnapshot }
 }
