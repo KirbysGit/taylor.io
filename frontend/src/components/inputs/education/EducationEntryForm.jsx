@@ -31,9 +31,9 @@ function EducationEntryForm({ edu, entryId, index, onFieldChange, compact = fals
 	const missingDiscipline = hasAnyEducationContent && !String(edu?.discipline || edu?.field || '').trim()
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-8">
 			<FormSection title="Basics">
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+				<div className="grid grid-cols-1 gap-5 md:grid-cols-3">
 					<Field label="School / University" compact={compact}>
 						<input
 							id={`education-school-${entryId}`}
@@ -68,7 +68,7 @@ function EducationEntryForm({ edu, entryId, index, onFieldChange, compact = fals
 			</FormSection>
 
 			<FormSection title="Details">
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+				<div className="grid grid-cols-1 gap-5 md:grid-cols-3">
 					<Field label="Minor" optional compact={compact}>
 						<input
 							type="text"
@@ -100,7 +100,7 @@ function EducationEntryForm({ edu, entryId, index, onFieldChange, compact = fals
 			</FormSection>
 
 			<FormSection title="Dates">
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:items-end">
+				<div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:items-end">
 					<Field label="Start date" compact={compact}>
 						<MonthYearPicker
 							value={edu?.startDate || edu?.start_date || ''}

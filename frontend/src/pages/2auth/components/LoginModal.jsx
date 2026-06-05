@@ -1,7 +1,7 @@
 import { useState, useEffect, useId } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight, faEnvelope, faEye, faEyeSlash, faLock, faPenToSquare } from '@fortawesome/free-solid-svg-icons'
-import { XIcon } from '@/components/icons'
+import { XIcon, ErrorIcon } from '@/components/icons'
 import { loginUser, resendVerification } from '@/api/services/auth'
 
 function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess, onForgotPassword, statusMessage }) {
@@ -81,7 +81,7 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess, onForgo
 			else if (typeof detail === 'string') setError(detail)
 			else if (detail?.message) setError(detail.message)
 			else if (err.response?.data?.message) setError(err.response.data.message)
-			else setError('Login failed. Please check your credentials.')
+			else setError('Sign in failed — double-check your email and password.')
 		} finally {
 			setIsLoading(false)
 		}
@@ -147,8 +147,25 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess, onForgo
 					</div>
 
 					{statusMessage && (
-						<div className="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" role="status">
-							{statusMessage}
+						<div className="mb-3 flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-400 px-4 py-3.5 text-sm font-semibold text-white" role="status">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								className="size-5 shrink-0 text-white"
+								aria-hidden="true"
+							>
+								<circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"
+									strokeDasharray="63" strokeDashoffset="63"
+									style={{ animation: 'draw-circle 0.4s ease-out forwards' }}
+								/>
+								<path
+									stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+									d="M7 12.5l3.5 3.5 6.5-7"
+									strokeDasharray="14" strokeDashoffset="14"
+									style={{ animation: 'draw-check 0.3s ease-out 0.35s forwards' }}
+								/>
+							</svg>
+							<span>{statusMessage}</span>
 						</div>
 					)}
 
@@ -175,7 +192,8 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess, onForgo
 							</div>
 							{fieldErrors.email && (
 								<div id={emailErrorId} className="errorMessage mt-2" role="alert">
-									{fieldErrors.email}
+									<ErrorIcon className="errorMessage-icon" />
+									<span>{fieldErrors.email}</span>
 								</div>
 							)}
 						</div>
@@ -210,7 +228,8 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess, onForgo
 							</div>
 							{fieldErrors.password && (
 								<div id={passwordErrorId} className="errorMessage mt-2" role="alert">
-									{fieldErrors.password}
+									<ErrorIcon className="errorMessage-icon" />
+									<span>{fieldErrors.password}</span>
 								</div>
 							)}
 						</div>
@@ -227,22 +246,25 @@ function LoginModal({ isOpen, onClose, onSwitchToSignUp, onLoginSuccess, onForgo
 
 						{error && (
 							<div id={errorId} className="errorMessage" role="alert">
-								{error}
-								{unverifiedEmail ? (
-									<div className="mt-2">
-										<button
-											type="button"
-											onClick={async () => {
-												setResendStatus('')
-												await resendVerification(unverifiedEmail)
-												setResendStatus('Verification email sent. Check your inbox.')
-											}}
-											className="font-bold underline underline-offset-2"
-										>
-											Resend verification email
-										</button>
-									</div>
-								) : null}
+								<ErrorIcon className="errorMessage-icon shrink-0" />
+								<span>
+									{error}
+									{unverifiedEmail ? (
+										<div className="mt-2">
+											<button
+												type="button"
+												onClick={async () => {
+													setResendStatus('')
+													await resendVerification(unverifiedEmail)
+													setResendStatus('Verification email sent. Check your inbox.')
+												}}
+												className="font-bold underline underline-offset-2"
+											>
+												Resend verification email
+											</button>
+										</div>
+									) : null}
+								</span>
 							</div>
 						)}
 						{resendStatus ? <div className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">{resendStatus}</div> : null}

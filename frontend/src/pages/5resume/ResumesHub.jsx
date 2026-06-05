@@ -402,7 +402,7 @@ export default function ResumesHub() {
 			await fetchSavedResumes()
 			toast.success('Draft deleted')
 		} catch {
-			toast.error('Failed to delete')
+			toast.error("Couldn't delete — try again.")
 		}
 	}
 
@@ -415,7 +415,7 @@ export default function ResumesHub() {
 			setOpenMenuId(null)
 			toast.success('Draft details updated')
 		} catch {
-			toast.error('Failed to update draft')
+			toast.error("Couldn't update draft — try again.")
 		} finally {
 			setIsSavingDetails(false)
 		}

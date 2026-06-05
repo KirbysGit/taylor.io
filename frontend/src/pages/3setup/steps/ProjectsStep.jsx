@@ -8,7 +8,7 @@ const ProjectsStep = ({ projects, onAdd, onRemove, onUpdate }) => {
 	return (
 		<div className="w-full">
 			<div className="mb-3">
-				<h2 className="mb-2 text-2xl font-bold text-gray-900">Showcase your projects</h2>
+				<h2 className="mb-2 font-serif text-3xl font-bold tracking-tight text-gray-950">Showcase your projects</h2>
 				<p className="text-gray-600">
 					Add projects you&apos;ve worked on. Share what you&apos;ve built and the technologies you used.
 				</p>

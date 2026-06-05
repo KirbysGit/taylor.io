@@ -63,6 +63,14 @@ export const EyeSlash = ({ className = "w-5 h-5" }) => {
     )
 }
 
+export const ErrorIcon = ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" strokeWidth={2} />
+        <line x1="12" y1="8" x2="12" y2="12" strokeWidth={2} strokeLinecap="round" />
+        <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth={2.5} strokeLinecap="round" />
+    </svg>
+)
+
 export const Checkmark = ({ className = "w-5 h-5" }) => {
     return (
         <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">

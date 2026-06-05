@@ -9,7 +9,7 @@ const SummaryStep = ({ summary, onUpdate }) => {
         <div className="w-full">
             {/* Header */}
             <div className="mb-3">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="mb-2 font-serif text-3xl font-bold tracking-tight text-gray-950">
                     Professional Summary
                 </h2>
                 <p className="text-gray-600">

@@ -106,6 +106,19 @@ idea stack :
 - with ai, make company mandatory input
     - weaken company name input
 
+- ai generated tagline from user's initial resume in account set up.
+- allowing adjust of ai speed, diff models potentially for faster model outputs
+- same sort of thing except adjusting ai depth of analysis of job description and role
+- active ui for ai, telling user whats occuring in pipeline process while the ai tailoring is progressing
+- loading state for dashboard
+- admin console for monitoring data collection.
+- what are the default settings, do we want users to be able to adjust them, how do we handle it based on different backgrounds such as a engineer probably only really wants one page, a business person might want two to three to show off experiences and potential volunteer work.
+- how do we want to aggregate the data for processing of JD's and user profiles.
+- template images need to be cleared up, we want a clear picture of what the user is going to use.
+- "tell us your goals", for job path, allowing user to set up adn target specific flows of the site.
+
+
+- breakdown video of what hte site does after initial publishing
 
 ==== STYLING ====
 

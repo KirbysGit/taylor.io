@@ -131,22 +131,63 @@ function AccountSetup() {
 	}
 
 	const validateCurrentStep = () => {
+		// Step 1 — Contact: email is always present from account, no extra validation needed.
+
+		// Step 2 — Education: if any entry has content, it must have school + degree + discipline.
 		if (currentStep === 2) {
-			const missing = formData.education.find((edu) => hasEducationContent(edu) && !hasValue(edu?.discipline || edu?.field))
-			if (missing) {
-				setStepError('Add the missing field of study before moving on.')
-				educationStepRef.current?.revealMissingRequired?.()
-				return false
+			for (const edu of formData.education) {
+				if (!hasEducationContent(edu)) continue
+				if (!hasValue(edu?.school)) {
+					setStepError('Each education entry needs a school name.')
+					educationStepRef.current?.revealMissingRequired?.()
+					return false
+				}
+				if (!hasValue(edu?.degree)) {
+					setStepError('Each education entry needs a degree (e.g. Bachelor of Science).')
+					return false
+				}
+				if (!hasValue(edu?.discipline || edu?.field)) {
+					setStepError('Each education entry needs a field of study.')
+					educationStepRef.current?.revealMissingRequired?.()
+					return false
+				}
 			}
 		}
+
+		// Step 3 — Experience: each entry with content needs a title and description.
 		if (currentStep === 3) {
-			const missing = formData.experiences.find((exp) => hasExperienceContent(exp) && !hasValue(exp?.title))
-			if (missing) {
-				setStepError('Add the missing job title before moving on.')
-				experienceStepRef.current?.revealMissingRequired?.()
-				return false
+			for (const exp of formData.experiences) {
+				if (!hasExperienceContent(exp)) continue
+				if (!hasValue(exp?.title)) {
+					setStepError('Each experience entry needs a job title.')
+					experienceStepRef.current?.revealMissingRequired?.()
+					return false
+				}
+				const desc = exp?.description
+				const hasDesc = Array.isArray(desc) ? desc.some(hasValue) : hasValue(desc)
+				if (!hasDesc) {
+					setStepError('Each experience entry needs a description of your work.')
+					return false
+				}
 			}
 		}
+
+		// Step 5 — Projects: if any project has content, it needs a name and description.
+		if (currentStep === 5) {
+			for (const proj of formData.projects) {
+				const hasContent = hasValue(proj?.title) || hasValue(proj?.description)
+				if (!hasContent) continue
+				if (!hasValue(proj?.title)) {
+					setStepError('Each project needs a name.')
+					return false
+				}
+				if (!hasValue(proj?.description)) {
+					setStepError('Each project needs a description.')
+					return false
+				}
+			}
+		}
+
 		setStepError('')
 		return true
 	}

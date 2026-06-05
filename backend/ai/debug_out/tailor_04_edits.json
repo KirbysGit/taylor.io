@@ -2,218 +2,270 @@
   "stage_a": {
     "edits": {
       "summarySection": {
-        "summary": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflows to enhance operational efficiency."
+        "summary": "Quinn Taylor is a software engineer with a strong foundation in automation and project management, demonstrating transferable skills relevant to civil engineering roles. Experienced in developing workflows and tools that enhance operational efficiency, Quinn is adept at collaborating with cross-functional teams to deliver impactful solutions."
       },
-      "projects": [
+      "experience": [
         {
-          "id": 21,
-          "tech_stack": [
-            "FastAPI",
-            "PostgreSQL",
-            "React",
-            "Plaid API"
-          ],
-          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, delivering comprehensive spending insights to users.\n• Engineered FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing and normalized data storage.\n• Created responsive React dashboards for account management and financial analytics, significantly improving user engagement.\n• Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data."
+          "id": 16,
+          "description": "• Engineered automation tools that streamlined operational workflows for IT and compliance teams, significantly enhancing task scheduling and monitoring capabilities.\n• Collaborated with design teams and engineers to develop and optimize frontend workflows and backend APIs, ensuring seamless integration and functionality.\n• Implemented task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL, facilitating efficient job scheduling and real-time updates.\n• Achieved a reduction of approximately 3 hours per week in manual task management for internal IT teams through the development of centralized scheduling and monitoring tools."
         }
-      ]
+      ],
+      "sectionOrder": [
+        "header",
+        "summary",
+        "education",
+        "experience",
+        "projects",
+        "skills"
+      ],
+      "sectionVisibility": {
+        "summary": true,
+        "education": true,
+        "experience": true,
+        "projects": true,
+        "skills": true
+      }
     }
   },
   "stage_b": {
     "edits": {
       "skills": [
         {
-          "id": 63,
+          "id": 60,
           "name": "Python",
           "category": "Languages"
         },
         {
-          "id": 64,
+          "id": 61,
           "name": "SQL",
           "category": "Languages"
         },
         {
-          "id": 65,
-          "name": "Java",
-          "category": "Languages"
-        },
-        {
-          "id": 66,
+          "id": 62,
           "name": "JavaScript",
           "category": "Languages"
         },
         {
+          "id": 63,
+          "name": "Java",
+          "category": "Languages"
+        },
+        {
+          "id": 64,
+          "name": "Pandas",
+          "category": "Analysis & Data Tools"
+        },
+        {
+          "id": 65,
+          "name": "NumPy",
+          "category": "Analysis & Data Tools"
+        },
+        {
+          "id": 66,
+          "name": "ETL Pipelines",
+          "category": "Analysis & Data Tools"
+        },
+        {
           "id": 67,
-          "name": "FastAPI",
-          "category": "Frameworks"
+          "name": "XGBoost",
+          "category": "Analysis & Data Tools"
         },
         {
           "id": 68,
-          "name": "Django",
-          "category": "Frameworks"
+          "name": "FinBERT",
+          "category": "Analysis & Data Tools"
         },
         {
           "id": 69,
-          "name": "React",
-          "category": "Frameworks"
+          "name": "FastAPI",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 70,
-          "name": "Node.js",
-          "category": "Frameworks"
+          "name": "Django",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 71,
-          "name": "PyTorch",
-          "category": "Frameworks"
+          "name": "React",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 72,
-          "name": "TensorFlow Lite",
-          "category": "Frameworks"
+          "name": "Node.js",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 73,
           "name": "PostgreSQL",
-          "category": "Data Tools"
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 74,
-          "name": "ETL Pipelines",
-          "category": "Data Tools"
+          "name": "MySQL",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 75,
-          "name": "MySQL",
-          "category": "Data Tools"
+          "name": "Cursor",
+          "category": "AI Developer Tools"
         },
         {
           "id": 76,
-          "name": "Engineering Design and Construction",
-          "category": "Focus Areas"
+          "name": "Claude Code",
+          "category": "AI Developer Tools"
         },
         {
           "id": 77,
-          "name": "Project Documentation",
-          "category": "Focus Areas"
+          "name": "Codex",
+          "category": "AI Developer Tools"
         },
         {
           "id": 78,
-          "name": "Workflow Automation",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 79,
-          "name": "Data Management",
-          "category": "Focus Areas"
+          "name": "AI-Assisted Development",
+          "category": "AI Developer Tools"
         }
       ]
     }
   },
-  "rewrite_repair": null,
+  "rewrite_repair": {
+    "edits": {
+      "experience": [
+        {
+          "id": 16,
+          "description": "• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-checking time by ~3 hours per week for internal IT teams.\n• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational workflows through a centralized web platform.\n• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to support scheduled jobs, logging, and live task updates.\n• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows, backend APIs, and real-time operational tooling."
+        }
+      ],
+      "projects": []
+    }
+  },
   "combined": {
     "edits": {
       "summarySection": {
-        "summary": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflows to enhance operational efficiency."
+        "summary": "Quinn Taylor is a software engineer with a strong foundation in automation and project management, demonstrating transferable skills relevant to civil engineering roles. Experienced in developing workflows and tools that enhance operational efficiency, Quinn is adept at collaborating with cross-functional teams to deliver impactful solutions."
       },
-      "projects": [
+      "experience": [
         {
-          "id": 21,
-          "tech_stack": [
-            "FastAPI",
-            "PostgreSQL",
-            "React",
-            "Plaid API"
-          ],
-          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, delivering comprehensive spending insights to users.\n• Engineered FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing and normalized data storage.\n• Created responsive React dashboards for account management and financial analytics, significantly improving user engagement.\n• Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data."
+          "id": 16,
+          "description": "• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-checking time by ~3 hours per week for internal IT teams.\n• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational workflows through a centralized web platform.\n• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to support scheduled jobs, logging, and live task updates.\n• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows, backend APIs, and real-time operational tooling."
         }
       ],
+      "sectionOrder": [
+        "header",
+        "summary",
+        "education",
+        "experience",
+        "projects",
+        "skills"
+      ],
+      "sectionVisibility": {
+        "summary": true,
+        "education": true,
+        "experience": true,
+        "projects": true,
+        "skills": true
+      },
       "skills": [
         {
-          "id": 63,
+          "id": 60,
           "name": "Python",
           "category": "Languages"
         },
         {
-          "id": 64,
+          "id": 61,
           "name": "SQL",
           "category": "Languages"
         },
         {
-          "id": 65,
-          "name": "Java",
-          "category": "Languages"
-        },
-        {
-          "id": 66,
+          "id": 62,
           "name": "JavaScript",
           "category": "Languages"
         },
         {
+          "id": 63,
+          "name": "Java",
+          "category": "Languages"
+        },
+        {
+          "id": 64,
+          "name": "Pandas",
+          "category": "Analysis & Data Tools"
+        },
+        {
+          "id": 65,
+          "name": "NumPy",
+          "category": "Analysis & Data Tools"
+        },
+        {
+          "id": 66,
+          "name": "ETL Pipelines",
+          "category": "Analysis & Data Tools"
+        },
+        {
           "id": 67,
-          "name": "FastAPI",
-          "category": "Frameworks"
+          "name": "XGBoost",
+          "category": "Analysis & Data Tools"
         },
         {
           "id": 68,
-          "name": "Django",
-          "category": "Frameworks"
+          "name": "FinBERT",
+          "category": "Analysis & Data Tools"
         },
         {
           "id": 69,
-          "name": "React",
-          "category": "Frameworks"
+          "name": "FastAPI",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 70,
-          "name": "Node.js",
-          "category": "Frameworks"
+          "name": "Django",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 71,
-          "name": "PyTorch",
-          "category": "Frameworks"
+          "name": "React",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 72,
-          "name": "TensorFlow Lite",
-          "category": "Frameworks"
+          "name": "Node.js",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 73,
           "name": "PostgreSQL",
-          "category": "Data Tools"
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 74,
-          "name": "ETL Pipelines",
-          "category": "Data Tools"
+          "name": "MySQL",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 75,
-          "name": "MySQL",
-          "category": "Data Tools"
+          "name": "Cursor",
+          "category": "AI Developer Tools"
         },
         {
           "id": 76,
-          "name": "Engineering Design and Construction",
-          "category": "Focus Areas"
+          "name": "Claude Code",
+          "category": "AI Developer Tools"
         },
         {
           "id": 77,
-          "name": "Project Documentation",
-          "category": "Focus Areas"
+          "name": "Codex",
+          "category": "AI Developer Tools"
         },
         {
           "id": 78,
-          "name": "Workflow Automation",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 79,
-          "name": "Data Management",
-          "category": "Focus Areas"
+          "name": "AI-Assisted Development",
+          "category": "AI Developer Tools"
         }
-      ]
-    }
+      ],
+      "projects": []
+    },
+    "warnings": [
+      "Rewrite repair pass strengthened weak tailored rows: experience:16."
+    ]
   }
 }

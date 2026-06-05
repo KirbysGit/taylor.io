@@ -16,8 +16,8 @@
     "jobDescriptionChars": 3390,
     "resumeCounts": {
       "experience": 1,
-      "projects": 1,
-      "skills": 17,
+      "projects": 4,
+      "skills": 19,
       "education": 1
     }
   },
@@ -673,7 +673,7 @@
   "ranking": {
     "experience": [
       {
-        "id": 9,
+        "id": 16,
         "score": 2.7,
         "hits": 1,
         "matchedTerms": [
@@ -686,65 +686,39 @@
   "selection": {
     "narrativePlan": {
       "keepExperience": [
-        9
+        16
       ],
       "dropExperience": [],
-      "rewriteExperience": [],
+      "rewriteExperience": [
+        16
+      ],
       "keepProjects": [],
       "dropProjects": [],
       "maybeProjects": [
-        21
+        13,
+        14,
+        15,
+        16
       ],
       "rewriteProjects": [],
-      "heroExperience": [],
+      "heroExperience": [
+        16
+      ],
       "heroProjects": []
     },
     "changedRows": {
-      "experience": [],
-      "projects": [
+      "experience": [
         {
-          "id": 21,
-          "label": "Centi – Personal Finance App",
+          "id": 16,
+          "label": "BitGo Software Engineering Intern",
           "removed": false,
           "fieldsChanged": [
             "description"
           ]
         }
       ],
-      "skills": [
-        {
-          "id": 76,
-          "label": "Backend Development",
-          "removed": false,
-          "fieldsChanged": [
-            "name"
-          ]
-        },
-        {
-          "id": 77,
-          "label": "Data Pipelines",
-          "removed": false,
-          "fieldsChanged": [
-            "name"
-          ]
-        },
-        {
-          "id": 78,
-          "label": "REST API Design",
-          "removed": false,
-          "fieldsChanged": [
-            "name"
-          ]
-        },
-        {
-          "id": 79,
-          "label": "Automation Systems",
-          "removed": false,
-          "fieldsChanged": [
-            "name"
-          ]
-        }
-      ]
+      "projects": [],
+      "skills": []
     },
     "removedRows": {
       "experience": [],
@@ -753,7 +727,7 @@
     }
   },
   "tailorAssist": {
-    "paragraph": "I treated this as a stretch match for Civil Engineer at Army Civilian Careers, so I focused on transferable proof instead of pretending every JD term was already in your background. The strongest direct overlap I found was engineer; the rest of the draft bridges from nearby evidence where your resume supports it. Use the strongest supported evidence to create an honest transferable fit story. The biggest help here: kept the projects that best prove the role fit, gave the summary a clearer role-specific angle, and moved the most relevant skills higher. Under the hood, I changed the summary, projects, and skills based on those signals.",
+    "paragraph": "I treated this as a stretch match for Civil Engineer at Army Civilian Careers, so I focused on transferable proof instead of pretending every JD term was already in your background. The strongest direct overlap I found was engineer; the rest of the draft bridges from nearby evidence where your resume supports it. Use the strongest supported evidence to create an honest transferable fit story. The biggest help here: reframed your experience around the job's strongest signals, gave the summary a clearer role-specific angle, and adjusted the layout so the strongest sections show up sooner. Under the hood, I changed the summary, experience, and which sections show based on those signals.",
     "chips": [
       {
         "label": "Strict truth",
@@ -764,11 +738,7 @@
         "tone": "action"
       },
       {
-        "label": "Projects prioritized",
-        "tone": "action"
-      },
-      {
-        "label": "Skills reordered",
+        "label": "Experience reframed",
         "tone": "action"
       },
       {
@@ -781,6 +751,14 @@
       },
       {
         "label": "Some JD terms not evidenced",
+        "tone": "caution"
+      },
+      {
+        "label": "Review skills",
+        "tone": "caution"
+      },
+      {
+        "label": "Review rewrite strength",
         "tone": "caution"
       }
     ],
@@ -795,7 +773,8 @@
       {
         "title": "Why it changed",
         "items": [
-          "Target story: Open with concrete proof from the resume; no new facts; honor every avoid line."
+          "Target story: Quinn Taylor has a background in software engineering with transferable skills in project management, automation, and technical collaboration, suitab...",
+          "Main evidence themes: workflow / automation and coordination / communication."
         ]
       },
       {
@@ -809,13 +788,13 @@
         "title": "Fit read",
         "items": [
           "Stretch fit: be transparent and conservative. Frame transferable strengths, keep useful non-keyword evidence, and explicitly avoid unsupported target-role claims.",
-          "Transferable evidence I considered: BitGo Software Engineering Intern and Centi – Personal Finance App."
+          "Transferable evidence I considered: BitGo Software Engineering Intern, Taylor.io – AI Resume Builder & Workflow Platform, and Centi – Personal Finance App."
         ]
       },
       {
         "title": "What I spotlighted",
         "items": [
-          "Centi – Personal Finance App"
+          "BitGo Software Engineering Intern"
         ]
       },
       {
@@ -830,7 +809,8 @@
           "Do not treat weak keyword overlap as direct experience.",
           "I treated civil engineering structures, correcti as review items, not resume claims, because I could not verify them in the resume.",
           "I did not claim heat transfer, abet, and transcripts because that exact evidence was not in the resume.",
-          "Some JD terms were not directly evidenced: civil engineering structures, corrective action, criteria or specifications, and design and construction."
+          "Some JD terms were not directly evidenced: civil engineering structures, corrective action, criteria or specifications, and design and construction.",
+          "A row may still be close to the original even after repair, so it is worth a quick read."
         ]
       }
     ],
@@ -854,36 +834,28 @@
       "action"
     ]
   },
-  "warningsByCategory": {},
+  "warningsByCategory": {
+    "rewrite": [
+      "Rewrite repair pass strengthened weak tailored rows: experience:16.",
+      "Rewrite audit: expected stronger rewrites for experience id 16; output looked like minor wording changes."
+    ],
+    "skills": [
+      "Skills: regrouping or reorder was expected (narrative skillsStrategy and/or multi-category skills layout), but no skill rows changed. Edit skills manually or re-run tailoring."
+    ]
+  },
   "changeReasons": [
     {
       "section": "summary",
-      "reason": "Repositioned the professional summary toward Civil Engineer using concrete, on-resume evidence where possible."
+      "reason": "Profile summary updated for Civil Engineer; audit flagged common generic phrasing in the new text (cross-functional)—tighten to concrete systems and evidence from the resume."
     },
     {
-      "section": "projects",
-      "id": 21,
-      "reason": "project 21: light cleanup to the description or stack."
+      "section": "layout",
+      "reason": "Adjusted the resume layout (section visibility) so the strongest evidence is easier to find."
     },
     {
-      "section": "skills",
-      "id": 76,
-      "reason": "skill row 76: label or category cleanup."
-    },
-    {
-      "section": "skills",
-      "id": 77,
-      "reason": "skill row 77: label or category cleanup."
-    },
-    {
-      "section": "skills",
-      "id": 78,
-      "reason": "skill row 78: label or category cleanup."
-    },
-    {
-      "section": "skills",
-      "id": 79,
-      "reason": "skill row 79: label or category cleanup."
+      "section": "experience",
+      "id": 16,
+      "reason": "experience row 16: light wording pass; the core scope stayed the same."
     }
   ],
   "quality": {
@@ -891,22 +863,31 @@
     "flags": {
       "aggressive_skill_prune": false,
       "suspicious_protected_skill_removals": false,
-      "summary_has_generic_phrase_hits": false,
+      "summary_has_generic_phrase_hits": true,
       "filler_phrase_hits": false,
-      "skills_expected_but_unchanged": false,
-      "minor_expected_rewrites": false,
+      "skills_expected_but_unchanged": true,
+      "minor_expected_rewrites": true,
       "missing_expected_rewrites": false
     },
     "summary": {
       "changed": true,
-      "after_preview": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflow…",
-      "generic_phrases_matched": [],
+      "after_preview": "Quinn Taylor is a software engineer with a strong foundation in automation and project management, demonstrating transferable skills relevant to civil engineering roles. Experienced in developing workflows and tools that enhance operational efficiency, Quinn is adept at collabor…",
+      "generic_phrases_matched": [
+        "cross-functional"
+      ],
       "filler_phrases_matched": []
     },
     "rewrite_quality": {
-      "expected_experience_rewrite_ids": [],
+      "expected_experience_rewrite_ids": [
+        16
+      ],
       "expected_project_rewrite_ids": [],
-      "minor_rewrite_rows": [],
+      "minor_rewrite_rows": [
+        {
+          "section": "experience",
+          "id": 16
+        }
+      ],
       "missing_rewrite_rows": [],
       "filler_phrase_hits": []
     },
@@ -914,7 +895,7 @@
       "removedSkillIds": [],
       "removedProjectIds": [],
       "removedExperienceIds": [],
-      "visible_skill_count_before": 17,
+      "visible_skill_count_before": 19,
       "removed_skill_count": 0,
       "removal_ratio_skills": 0.0,
       "protected_skill_removals": []
@@ -924,8 +905,12 @@
       "hero_project_ids_with_edits": [],
       "hero_project_ids_not_in_patch": [],
       "only_one_hero_touched_while_several_listed": false,
-      "hero_experience_ids": [],
-      "hero_experience_ids_with_edits": [],
+      "hero_experience_ids": [
+        16
+      ],
+      "hero_experience_ids_with_edits": [
+        16
+      ],
       "hero_experience_ids_not_in_patch": []
     },
     "stage_edits_removals": {
@@ -934,13 +919,13 @@
     },
     "rewrite_intensity": {
       "summary_changed": true,
-      "experience_rows_touched": 0,
-      "project_rows_touched": 1,
-      "skill_rows_touched": 4,
-      "skills_section_changed": true,
+      "experience_rows_touched": 1,
+      "project_rows_touched": 0,
+      "skill_rows_touched": 0,
+      "skills_section_changed": false,
       "rows_removed_total": 0,
       "hero_projects_edited_count": 0,
-      "hero_experience_edited_count": 0,
+      "hero_experience_edited_count": 1,
       "low_intensity_hint": false
     }
   },
@@ -971,5 +956,8 @@
       "notes_for_next_rule_or_prompt": ""
     }
   },
-  "likelyIssueHints": []
+  "likelyIssueHints": [
+    "rewrite: audit warnings suggest weak, missing, or filler-heavy rewrites.",
+    "skills: skills pass needed repair or may not reflect the intended strategy."
+  ]
 }

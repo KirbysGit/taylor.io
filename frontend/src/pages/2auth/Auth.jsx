@@ -15,6 +15,7 @@ import LoginModal from './components/LoginModal'
 import SignUpModal from './components/SignUpModal'
 import { forgotPassword, resendVerification, resetPassword } from '@/api/services/auth'
 import { API_BASE_URL } from '@/api/api'
+import { ErrorIcon } from '@/components/icons'
 
 // ─── shared shell ────────────────────────────────────────────────────────────
 
@@ -190,7 +191,10 @@ function ForgotPasswordPanel({ onBackToLogin }) {
 					</div>
 
 					{error ? (
-						<div className="errorMessage" role="alert">{error}</div>
+						<div className="errorMessage" role="alert">
+						<ErrorIcon className="errorMessage-icon" />
+						<span>{error}</span>
+					</div>
 					) : null}
 
 					<button
@@ -330,7 +334,10 @@ function ResetPasswordPanel({ token }) {
 				</div>
 
 				{error ? (
-					<div className="errorMessage" role="alert">{error}</div>
+					<div className="errorMessage" role="alert">
+						<ErrorIcon className="errorMessage-icon" />
+						<span>{error}</span>
+					</div>
 				) : null}
 
 				<button
@@ -408,10 +415,10 @@ function Auth() {
 	const pathname = location.pathname
 
 	const statusMessage = useMemo(() => {
-		if (searchParams.get('verified') === '1') return 'Email verified. You can sign in now.'
-		if (searchParams.get('verified') === '0') return 'This verification link expired or is invalid.'
-		if (searchParams.get('reset') === '1') return 'Password updated. You can sign in now.'
-		if (searchParams.get('unverified') === '1') return 'Please verify your email before continuing.'
+		if (searchParams.get('verified') === '1') return "Email verified! Sign in to get started."
+		if (searchParams.get('verified') === '0') return 'That verification link expired or is invalid — request a new one.'
+		if (searchParams.get('reset') === '1') return "Password updated! Sign in with your new one."
+		if (searchParams.get('unverified') === '1') return "Quick step first — verify your email, then you're in."
 		return ''
 	}, [searchParams])
 

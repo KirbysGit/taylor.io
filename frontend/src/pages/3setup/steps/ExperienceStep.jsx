@@ -10,7 +10,7 @@ const ExperienceStep = forwardRef(function ExperienceStep({ experiences, onAdd, 
 
 	return (
 		<div>
-			<h2 className="text-2xl font-bold text-gray-900 mb-2">Your Work Experience</h2>
+			<h2 className="mb-2 font-serif text-3xl font-bold tracking-tight text-gray-950">Your Work Experience</h2>
 			<p className="text-gray-600 mb-3">Tell us about your professional experience.</p>
 			<div className="smallDivider mb-6"></div>
 			<ExperienceInput 

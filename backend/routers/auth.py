@@ -69,7 +69,7 @@ async def _send_resend_email(*, to_email: str, subject: str, html: str) -> None:
         )
         if response.status_code >= 400:
             logger.error("Resend email failed: status=%s body=%s", response.status_code, response.text[:500])
-            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Could not send email. Please try again.")
+            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="We hit a snag sending your email. Try again in a moment — if it keeps happening, reach out at hello@trytaylor.io")
 
 
 def _email_shell(*, logo_url: str, heading: str, body_html: str, cta_url: str, cta_label: str, footer_note: str) -> str:
@@ -134,11 +134,15 @@ def _email_shell(*, logo_url: str, heading: str, body_html: str, cta_url: str, c
           <!-- Info rows -->
           <tr>
             <td style="padding:20px 32px 4px;">
-              <!-- Fallback link row -->
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
                   <td width="28" valign="top" style="padding-top:1px;">
-                    <div style="width:20px;height:20px;border-radius:50%;background:#fff0f0;border:1px solid rgba(214,86,86,0.22);text-align:center;line-height:20px;font-size:11px;color:#d65656;">&#128279;</div>
+                    <div style="width:20px;height:20px;border-radius:50%;background:#fff0f0;border:1px solid rgba(214,86,86,0.22);display:flex;align-items:center;justify-content:center;">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:4px auto 0;">
+                        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="#d65656" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="#d65656" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
                   </td>
                   <td style="font-size:12px;color:#7a5555;line-height:1.5;">
                     Button not working? Copy and paste this link into your browser:<br />
@@ -154,7 +158,12 @@ def _email_shell(*, logo_url: str, heading: str, body_html: str, cta_url: str, c
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
                   <td width="28" valign="top" style="padding-top:1px;">
-                    <div style="width:20px;height:20px;border-radius:50%;background:#fff0f0;border:1px solid rgba(214,86,86,0.22);text-align:center;line-height:20px;font-size:11px;color:#d65656;">&#128336;</div>
+                    <div style="width:20px;height:20px;border-radius:50%;background:#fff0f0;border:1px solid rgba(214,86,86,0.22);">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:4px auto 0;">
+                        <circle cx="12" cy="12" r="10" stroke="#d65656" stroke-width="2"/>
+                        <polyline points="12 6 12 12 16 14" stroke="#d65656" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
                   </td>
                   <td style="font-size:12px;color:#4b3535;font-weight:600;line-height:1.5;">{footer_note}</td>
                 </tr>
@@ -169,8 +178,9 @@ def _email_shell(*, logo_url: str, heading: str, body_html: str, cta_url: str, c
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
                   <td style="font-size:12px;color:#a07070;">
-                    &#10084; Questions? Email us at
-                    <a href="mailto:hello@trytailor.io" style="color:#d65656;text-decoration:none;">hello@trytailor.io</a>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#d65656" xmlns="http://www.w3.org/2000/svg" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    Questions? Email us at
+                    <a href="mailto:hello@trytaylor.io" style="color:#d65656;text-decoration:none;">hello@trytaylor.io</a>
                   </td>
                   <td align="right">
                     <img src="{logo_url}" alt="taylor" height="22" style="display:block;height:22px;width:auto;opacity:0.55;" />
@@ -254,7 +264,7 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     email = str(user_data.email).lower()
     existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="An account with that email already exists — try signing in instead.")
 
     new_user = User(
         first_name=user_data.first_name.strip(),
@@ -274,7 +284,7 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
 async def login(credentials: UserLogin, response: Response, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == str(credentials.email).lower()).first()
     if not user or not verify_password(credentials.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong email or password — double-check and try again.")
     if not user.email_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -362,10 +372,10 @@ async def forgot_password(payload: EmailRequest, db: Session = Depends(get_db)):
 @router.post("/reset-password", response_model=AuthStatusResponse)
 async def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
     if len(payload.password or "") < 8:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password must be at least 8 characters.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password must be at least 8 characters long.")
     user = _find_user_by_token_hash(db, payload.token, "password_reset_token_hash", "password_reset_expires_at")
     if not user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This reset link expired or is invalid.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This reset link has expired or already been used — request a new one.")
     user.password_hash = get_password_hash(payload.password)
     user.password_reset_token_hash = None
     user.password_reset_expires_at = None

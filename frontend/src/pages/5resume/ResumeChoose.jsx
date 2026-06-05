@@ -151,7 +151,7 @@ export default function ResumeChoose() {
 				setSelectedExpIds(new Set((data.experiences || []).map((e) => e.id)))
 				setSelectedProjIds(new Set((data.projects || []).map((p) => p.id)))
 			} catch {
-				toast.error('Failed to load profile')
+				toast.error("Couldn't load your profile — try refreshing.")
 				navigate('/resume/create')
 			} finally {
 				setIsLoading(false)

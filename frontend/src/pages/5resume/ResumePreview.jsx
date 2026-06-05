@@ -280,7 +280,7 @@ function ResumePreview() {
 
 		// if we failed to refresh the draft, show a toast error.
 		if (!ok && validateResumeData(resumeData).length === 0) {
-			toast.error('Could not refresh preview.')
+			toast.error("Preview didn't update — try refreshing the page.")
 		}
 	}
 
@@ -325,7 +325,7 @@ function ResumePreview() {
 			if (isAbortError(error)) return
 			// if we run into an error, show a toast error.
 			console.error('Download failed:', error)
-			toast.error(isWord ? 'Could not generate the Word document. Try again.' : 'Could not generate the PDF. Try again.')
+			toast.error(isWord ? 'Word export failed — try again. Still stuck? Email hello@trytaylor.io' : 'PDF export failed — try again. Still stuck? Email hello@trytaylor.io')
 			setDownloadStatus({ type: isWord ? 'word' : 'pdf', phase: 'error' })
 			window.setTimeout(() => setDownloadStatus(null), 2400)
 		} finally {

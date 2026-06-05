@@ -21,7 +21,7 @@
     "rowsPerSectionRanked": {
       "experience": [
         {
-          "id": 9,
+          "id": 16,
           "hits": 1,
           "score": 2.7,
           "matchedTerms": [
@@ -92,75 +92,115 @@
     }
   },
   "narrative": {
-    "candidateAngle": "",
+    "candidateAngle": "Software engineer with a focus on automation and project management, bringing technical skills to civil engineering contexts.",
     "targetStory": {
-      "roleLane": "",
-      "readerTakeaway": "Open with concrete proof from the resume; no new facts; honor every avoid line.",
-      "proofExperienceIds": [],
+      "roleLane": "Civil Engineer",
+      "readerTakeaway": "Quinn Taylor has a background in software engineering with transferable skills in project management, automation, and technical collaboration, suitab...",
+      "proofExperienceIds": [
+        16
+      ],
       "proofProjectIds": [],
       "deEmphasizeExperienceIds": [],
       "deEmphasizeProjectIds": [],
-      "evidenceThemes": []
+      "evidenceThemes": [
+        "workflow / automation",
+        "coordination / communication"
+      ]
     },
-    "primaryStory": [],
-    "secondaryStory": [],
-    "summaryGoal": "Open with concrete proof from the resume; no new facts; honor every avoid line.",
+    "primaryStory": [
+      "Experience in developing automation tools that streamline workflows and improve project efficiency.",
+      "Collaboration with cross-functional teams to enhance project outcomes and communication.",
+      "Technical proficiency in Python and Django, supporting backend development and process optimization."
+    ],
+    "secondaryStory": [
+      "Experience in building and managing workflows that can translate to project management in civil engineering."
+    ],
+    "summaryGoal": "Highlight software engineering experience with a focus on automation and project management, bridging to civil engineering responsibilities.",
     "summaryDecision": {
       "action": "keep",
       "confidence": "low",
-      "reason": "No confident summary visibility change was needed from the available evidence.",
-      "evidence": []
+      "reason": "Summary connects software engineering skills to civil engineering roles, but lacks strong direct evidence.",
+      "evidence": [
+        "workflow / automation",
+        "coordination / communication"
+      ]
     },
     "skillsStrategy": [
-      "When the resume proves them, bring these JD emphasis terms forward in scan order—**not** as an exclusive skill list: civil engineering structures, corrective action, criteria or specifications, design and construction, project design documents, construction.",
-      "Pipeline: categories/regroup → Lead → Supporting breadth for role archetype; trim **only** clear noise or duplicate story—preserve strong non-keyword tools that fit **this kind of role**.",
-      "Prerequisite skills only when repeated evidence supports them (e.g. JavaScript with React, SQL with PostgreSQL); do not infer neighbor tools, cloud sprawl, or advanced variants (no React→TypeScript, SQL→warehouse names, or LangChain from API use alone)."
+      "Categories: align with engineering and project management skills.",
+      "Lead: Python, Django, automation tools for workflow management.",
+      "Supporting: SQL, React, project management skills, and collaboration tools.",
+      "Trim last sparingly—only duplicates, narrative avoid, or clearly different‑realm fluff; keep same‑role‑family breadth (demote trailing, do not slash for JD keyword fit)."
     ],
     "categoryStrategy": [],
     "sectionStrategy": {
-      "summary": "Full rewrite per summaryGoal: assertive open; place evidenced JD/role terms the resume already supports; nothing avoid forbids.",
-      "experience": "Stage A: full bullet-block rewrites for every heroExperience id; non-hero jobs are not stage A targets.",
-      "projects": "Stage A: full bullet-block rewrites for every heroProjects id; supporting/peripheral are reference-only, not rewritten there.",
-      "skills": "Align categories → Lead → Supporting → trim **only obvious** clutter or mismatch; preserve archetype-credible breadth; JD orders emphasis, **not** membership roster.",
+      "summary": "Show summary to connect software engineering to civil engineering roles.",
+      "experience": "Highlight experience with automation and project management.",
+      "projects": "Focus on relevant projects that demonstrate transferable skills.",
+      "skills": "Order skills to reflect engineering and project management capabilities.",
       "education": "Light—credentials frozen; trim highlights only if they sharpen scan."
     },
     "layoutStrategy": [],
-    "layoutSectionOrder": [],
-    "layoutSectionVisibility": {},
-    "layoutRationale": [],
+    "layoutSectionOrder": [
+      "header",
+      "summary",
+      "education",
+      "experience",
+      "projects",
+      "skills"
+    ],
+    "layoutSectionVisibility": {
+      "summary": true,
+      "skills": true,
+      "experience": true,
+      "education": true,
+      "projects": true
+    },
+    "layoutRationale": [
+      "Summary connects software engineering to civil engineering, enhancing relevance.",
+      "Experience and projects showcase transferable skills and technical capabilities."
+    ],
     "keepExperience": [
-      9
+      16
     ],
     "dropExperience": [],
-    "rewriteExperience": [],
+    "rewriteExperience": [
+      16
+    ],
     "keepProjects": [],
     "dropProjects": [],
     "rewriteProjects": [],
     "repairProjects": [],
     "maybeProjects": [
-      21
+      13,
+      14,
+      15,
+      16
     ],
     "selectionRationale": [],
     "heroProjects": [],
     "supportingProjects": [],
     "peripheralProjects": [
-      21
+      13,
+      14,
+      15,
+      16
     ],
-    "heroExperience": [],
+    "heroExperience": [
+      16
+    ],
     "rewriteGoals": [
-      "Land hero experience: lead with the role’s primary signal (services/APIs/pipelines/data) on each line; leave an evidence-backed impression of scope—full bullet-block rewrites when facts allow.",
-      "Land hero projects: foreground systems, integrations, consumers; state the impression the row should leave for this job—full-row rewrites when detail supports it."
+      "Land BitGo: emphasize automation tools and project management skills relevant to civil engineering.",
+      "Land hero experience: lead with the role’s primary signal (services/APIs/pipelines/data) on each line; leave an evidence-backed impression of scope—full bullet-block rewrites when facts allow."
     ],
     "avoid": [
-      "Do not invent employers, tools, or domain experience: stay inside the resume and skill list.",
-      "Do not replace truthful project or row tech with JD keywords; reorder and rephrase for fit instead."
+      "No unsupported claims about civil engineering structures or direct engineering experience."
     ],
     "alignmentMode": "stretch",
     "alignmentGuidance": "Stretch fit: be transparent and conservative. Frame transferable strengths, keep useful non-keyword evidence, and explicitly avoid unsupported target-role claims.",
     "directEvidence": [
       {
         "section": "experience",
-        "id": 9,
+        "id": 16,
         "label": "BitGo Software Engineering Intern",
         "terms": [
           "engineer"
@@ -171,29 +211,66 @@
     "transferableEvidence": [
       {
         "section": "experience",
-        "id": 9,
+        "id": 16,
         "label": "BitGo Software Engineering Intern",
         "themes": [
           {
             "theme": "compliance / standards",
             "terms": [
-              "compliance",
-              "secure"
-            ]
-          },
-          {
-            "theme": "metrics / reporting",
-            "terms": [
-              "dashboards",
-              "metrics",
-              "visibility"
+              "compliance"
             ]
           },
           {
             "theme": "workflow / automation",
             "terms": [
-              "optimized",
-              "pipelines",
+              "automation",
+              "processing",
+              "workflows"
+            ]
+          },
+          {
+            "theme": "coordination / communication",
+            "terms": [
+              "teams"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 13,
+        "label": "Taylor.io – AI Resume Builder & Workflow Platform",
+        "themes": [
+          {
+            "theme": "workflow / automation",
+            "terms": [
+              "workflow",
+              "workflows"
+            ]
+          },
+          {
+            "theme": "coordination / communication",
+            "terms": [
+              "requirements"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 14,
+        "label": "Centi – Personal Finance App",
+        "themes": [
+          {
+            "theme": "metrics / reporting",
+            "terms": [
+              "dashboard",
+              "dashboards"
+            ]
+          },
+          {
+            "theme": "workflow / automation",
+            "terms": [
               "processing",
               "workflows"
             ]
@@ -202,27 +279,36 @@
       },
       {
         "section": "projects",
-        "id": 21,
-        "label": "Centi – Personal Finance App",
+        "id": 15,
+        "label": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline",
         "themes": [
-          {
-            "theme": "compliance / standards",
-            "terms": [
-              "secure"
-            ]
-          },
           {
             "theme": "metrics / reporting",
             "terms": [
               "analytics",
-              "dashboards",
-              "tracking"
+              "metrics"
             ]
           },
           {
             "theme": "workflow / automation",
             "terms": [
-              "processing"
+              "automated",
+              "pipeline",
+              "processing",
+              "workflows"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 16,
+        "label": "ShelfVision – Dense Retail Shelf Object Detector",
+        "themes": [
+          {
+            "theme": "workflow / automation",
+            "terms": [
+              "workflows"
             ]
           }
         ]
@@ -231,7 +317,7 @@
     "evidenceClassification": [
       {
         "section": "experience",
-        "id": 9,
+        "id": 16,
         "label": "BitGo Software Engineering Intern",
         "terms": [
           "engineer"
@@ -242,11 +328,45 @@
       },
       {
         "section": "projects",
-        "id": 21,
+        "id": 13,
+        "label": "Taylor.io – AI Resume Builder & Workflow Platform",
+        "terms": [
+          "workflow / automation",
+          "coordination / communication"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 14,
         "label": "Centi – Personal Finance App",
         "terms": [
-          "compliance / standards",
           "metrics / reporting",
+          "workflow / automation"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 15,
+        "label": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline",
+        "terms": [
+          "metrics / reporting",
+          "workflow / automation"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 16,
+        "label": "ShelfVision – Dense Retail Shelf Object Detector",
+        "terms": [
           "workflow / automation"
         ],
         "evidenceType": "transferable_behavior",
@@ -515,13 +635,9 @@
     "archetypeProjectPruning": false
   },
   "quality_guard": {
-    "weakBulletRepair": true,
-    "repairProjectIds": [
-      21
-    ],
-    "repairProjectTitles": [
-      "Centi – Personal Finance App"
-    ],
-    "reason": "Opened surviving project row(s) for cleanup because they contain placeholder or thin bullets."
+    "weakBulletRepair": false,
+    "repairProjectIds": [],
+    "repairProjectTitles": [],
+    "reason": "No surviving project rows needed placeholder-bullet cleanup."
   }
 }

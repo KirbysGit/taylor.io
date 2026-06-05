@@ -106,7 +106,7 @@ export function useSavedResumesSidecar({
 		} catch (err) {
 			// if we run into an error, show a toast error.
 			const msg = err?.response?.data?.detail || err?.message || 'Failed to save'
-			toast.error(typeof msg === 'string' ? msg : msg[0]?.msg || 'Failed on saving...')
+			toast.error(typeof msg === 'string' ? msg : msg[0]?.msg || "Couldn't save — try again.")
 			return false
 		} finally {
 			// set the saving resume flag to false.
@@ -153,7 +153,7 @@ export function useSavedResumesSidecar({
 				else setSavedResumesOpen(false)
 			} catch {
 				// if we run into an error, show a toast error.
-				toast.error(clearNavState ? 'Failed to load saved resume' : 'Failed on loading...')
+				toast.error(clearNavState ? "Couldn't load that resume — try again." : "Couldn't load — try again.")
 
 				// if we need to clear the navigation state, navigate to the preview page.
 				if (clearNavState) navigate('/resume/preview', { replace: true })
@@ -181,7 +181,7 @@ export function useSavedResumesSidecar({
 				toast.success(`${label} deleted!`)
 			} catch {
 				// if we run into an error, show a toast error.
-				toast.error('Failed on deleting...')
+				toast.error("Couldn't delete — try again.")
 			}
 		},
 		[fetchSavedResumes]

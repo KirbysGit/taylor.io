@@ -1,8 +1,8 @@
 {
   "final": {
-    "summary": "Tailoring log for: Civil Engineer.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- Project id 21: light edit to one part of the project (minor).\n- Skills id 76: minor name/category touch-up.\n- Skills id 77: minor name/category touch-up.\n- Skills id 78: minor name/category touch-up.\n- Skills id 79: minor name/category touch-up.",
+    "summary": "Tailoring log for: Civil Engineer.\n\n- Profile summary: revised (heuristic: generic-leaning phrasing present: cross-functional).\n- sectionVisibility: structure or presentation updated.\n- Experience id 16: small text tweak (minor).",
     "tailorExplanation": {
-      "paragraph": "I treated this as a stretch match for Civil Engineer at Army Civilian Careers, so I focused on transferable proof instead of pretending every JD term was already in your background. The strongest direct overlap I found was engineer; the rest of the draft bridges from nearby evidence where your resume supports it. Use the strongest supported evidence to create an honest transferable fit story. The biggest help here: kept the projects that best prove the role fit, gave the summary a clearer role-specific angle, and moved the most relevant skills higher. Under the hood, I changed the summary, projects, and skills based on those signals.",
+      "paragraph": "I treated this as a stretch match for Civil Engineer at Army Civilian Careers, so I focused on transferable proof instead of pretending every JD term was already in your background. The strongest direct overlap I found was engineer; the rest of the draft bridges from nearby evidence where your resume supports it. Use the strongest supported evidence to create an honest transferable fit story. The biggest help here: reframed your experience around the job's strongest signals, gave the summary a clearer role-specific angle, and adjusted the layout so the strongest sections show up sooner. Under the hood, I changed the summary, experience, and which sections show based on those signals.",
       "chips": [
         {
           "label": "Strict truth",
@@ -13,11 +13,7 @@
           "tone": "action"
         },
         {
-          "label": "Projects prioritized",
-          "tone": "action"
-        },
-        {
-          "label": "Skills reordered",
+          "label": "Experience reframed",
           "tone": "action"
         },
         {
@@ -30,6 +26,14 @@
         },
         {
           "label": "Some JD terms not evidenced",
+          "tone": "caution"
+        },
+        {
+          "label": "Review skills",
+          "tone": "caution"
+        },
+        {
+          "label": "Review rewrite strength",
           "tone": "caution"
         }
       ],
@@ -44,7 +48,8 @@
         {
           "title": "Why it changed",
           "items": [
-            "Target story: Open with concrete proof from the resume; no new facts; honor every avoid line."
+            "Target story: Quinn Taylor has a background in software engineering with transferable skills in project management, automation, and technical collaboration, suitab...",
+            "Main evidence themes: workflow / automation and coordination / communication."
           ]
         },
         {
@@ -58,13 +63,13 @@
           "title": "Fit read",
           "items": [
             "Stretch fit: be transparent and conservative. Frame transferable strengths, keep useful non-keyword evidence, and explicitly avoid unsupported target-role claims.",
-            "Transferable evidence I considered: BitGo Software Engineering Intern and Centi – Personal Finance App."
+            "Transferable evidence I considered: BitGo Software Engineering Intern, Taylor.io – AI Resume Builder & Workflow Platform, and Centi – Personal Finance App."
           ]
         },
         {
           "title": "What I spotlighted",
           "items": [
-            "Centi – Personal Finance App"
+            "BitGo Software Engineering Intern"
           ]
         },
         {
@@ -79,7 +84,8 @@
             "Do not treat weak keyword overlap as direct experience.",
             "I treated civil engineering structures, correcti as review items, not resume claims, because I could not verify them in the resume.",
             "I did not claim heat transfer, abet, and transcripts because that exact evidence was not in the resume.",
-            "Some JD terms were not directly evidenced: civil engineering structures, corrective action, criteria or specifications, and design and construction."
+            "Some JD terms were not directly evidenced: civil engineering structures, corrective action, criteria or specifications, and design and construction.",
+            "A row may still be close to the original even after repair, so it is worth a quick read."
           ]
         }
       ],
@@ -143,7 +149,7 @@
         "evidenceClassification": [
           {
             "section": "experience",
-            "id": 9,
+            "id": 16,
             "label": "BitGo Software Engineering Intern",
             "terms": [
               "engineer"
@@ -154,11 +160,45 @@
           },
           {
             "section": "projects",
-            "id": 21,
+            "id": 13,
+            "label": "Taylor.io – AI Resume Builder & Workflow Platform",
+            "terms": [
+              "workflow / automation",
+              "coordination / communication"
+            ],
+            "evidenceType": "transferable_behavior",
+            "claimStrength": "bridge",
+            "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+          },
+          {
+            "section": "projects",
+            "id": 14,
             "label": "Centi – Personal Finance App",
             "terms": [
-              "compliance / standards",
               "metrics / reporting",
+              "workflow / automation"
+            ],
+            "evidenceType": "transferable_behavior",
+            "claimStrength": "bridge",
+            "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+          },
+          {
+            "section": "projects",
+            "id": 15,
+            "label": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline",
+            "terms": [
+              "metrics / reporting",
+              "workflow / automation"
+            ],
+            "evidenceType": "transferable_behavior",
+            "claimStrength": "bridge",
+            "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+          },
+          {
+            "section": "projects",
+            "id": 16,
+            "label": "ShelfVision – Dense Retail Shelf Object Detector",
+            "terms": [
               "workflow / automation"
             ],
             "evidenceType": "transferable_behavior",
@@ -394,15 +434,15 @@
         ],
         "changedSections": [
           "summary",
-          "projects",
-          "skills"
+          "experience",
+          "section visibility"
         ],
         "mainMoves": [
-          "kept the projects that best prove the role fit",
+          "reframed your experience around the job's strongest signals",
           "gave the summary a clearer role-specific angle",
-          "moved the most relevant skills higher"
+          "adjusted the layout so the strongest sections show up sooner"
         ],
-        "layoutChanged": "",
+        "layoutChanged": "summary/section visibility",
         "preferencesUsed": [
           "strict_truth"
         ]
@@ -410,14 +450,14 @@
     },
     "updatedResumeData": {
       "header": {
-        "first_name": "C",
-        "last_name": "K",
-        "email": "co201115@ucf.edu",
+        "first_name": "Quinn",
+        "last_name": "Taylor",
+        "email": "colin@colinkirby.dev",
         "phone": "407-876-8172",
-        "location": "",
+        "location": "Orlando, FL",
         "linkedin": "https://linkedin.com/in/colinwkirby/",
         "github": "https://github.com/KirbysGit",
-        "portfolio": "",
+        "portfolio": "https://colinkirby.dev",
         "tagline": "",
         "visibility": {
           "showEmail": true,
@@ -439,8 +479,8 @@
       },
       "education": [
         {
-          "id": 4,
-          "school": "University of Central Florida",
+          "id": 8,
+          "school": "University of Central Florida (GPA 3.78 / 4.0) August 2021 – May 2025",
           "degree": "Bachelor of Science",
           "discipline": "",
           "location": "",
@@ -454,124 +494,170 @@
       ],
       "experience": [
         {
-          "id": 9,
+          "id": 16,
           "title": "Software Engineering Intern",
           "company": "BitGo",
-          "description": "• Built and maintained backend services and REST APIs in Python/Django, supporting secure internal workflows for\n• financial and compliance teams.\n• Developed React dashboards integrated with Django APIs, improving visibility into backend data workflows and\n• operational metrics.\n• Collaborated with senior engineers on system design and architecture, contributing to scalable service patterns and\n• data modeling.\n• Optimized Python data-processing pipelines and PostgreSQL queries, achieving a ~40% reduction in latency.",
+          "description": "• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-checking time by ~3 hours per week for internal IT teams.\n• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational workflows through a centralized web platform.\n• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to support scheduled jobs, logging, and live task updates.\n• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows, backend APIs, and real-time operational tooling.",
           "start_date": "2024-05-01",
           "end_date": "2025-06-01",
           "current": false,
-          "location": "",
-          "skills": ""
+          "location": "Remote",
+          "skills": "Python, Django, React, PostgreSQL, AWS EC2"
         }
       ],
       "projects": [
         {
-          "id": 21,
+          "id": 13,
+          "title": "Taylor.io – AI Resume Builder & Workflow Platform",
+          "description": "• Built an AI-powered resume platform that stores structured user career data and generates tailored resumes based on specific job descriptions.\n• Developed workflows that extract relevant keywords and requirements from job postings, then use OpenAI APIs to generate targeted resume content from user profile data.\n• Built FastAPI backend services for resume parsing, authentication, and real-time editing using PostgreSQL and React.\n• Used AI-assisted coding workflows with tools like Cursor to rapidly prototype, iterate, and refine product features while maintaining production-style architecture.",
+          "tech_stack": [
+            "Python",
+            "React",
+            "FastAPI",
+            "OpenAI API",
+            "Cursor"
+          ],
+          "url": ""
+        },
+        {
+          "id": 14,
           "title": "Centi – Personal Finance App",
-          "description": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, delivering comprehensive spending insights to users.\n• Engineered FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing and normalized data storage.\n• Created responsive React dashboards for account management and financial analytics, significantly improving user engagement.\n• Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data.",
+          "description": "• Built a personal finance platform that aggregates bank accounts, transactions, and spending activity into one clear dashboard, helping users understand their finances without manually sorting through multiple apps and statements..\n• Developed transaction processing and categorization workflows using FastAPI, PostgreSQL, and Plaid APIs to organize messy financial data into searchable spending insights and summaries.\n• Created customizable React dashboards that let users explore spending trends, account activity, and financial patterns in the way that makes the most sense to them.",
           "tech_stack": [
             "FastAPI",
-            "PostgreSQL",
             "React",
+            "PostgreSQL",
             "Plaid API"
           ],
           "url": "https://centi.dev"
+        },
+        {
+          "id": 15,
+          "title": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline",
+          "description": "• Built an end-to-end analytics pipeline processing 1K+ finance-related Reddit posts per run through automated ETL workflows, combining market data and sentiment analysis to generate trading signals for users.\n• Developed preprocessing and feature engineering workflows that transform unstructured discussions, engagement metrics, and stock data into structured ticker-level indicators for analysis.\n• Trained and evaluated XGBoost models achieving 55–70% ROC-AUC while comparing sentiment patterns against short-term market movement.",
+          "tech_stack": [
+            "Python",
+            "SQL",
+            "FinBERT",
+            "XGBoost"
+          ],
+          "url": ""
+        },
+        {
+          "id": 16,
+          "title": "ShelfVision – Dense Retail Shelf Object Detector",
+          "description": "• Built a retail analysis system trained on 11K+ images to detect and identify products in cluttered shelf environments.\n• Developed preprocessing and training workflows that organize image data, generate training inputs, and improve detection performance across different shelf layouts.",
+          "tech_stack": [
+            "PyTorch",
+            "ResNet-50",
+            "FPN"
+          ],
+          "url": ""
         }
       ],
       "skills": [
         {
-          "id": 63,
+          "id": 60,
           "name": "Python",
           "category": "Languages"
         },
         {
-          "id": 64,
+          "id": 61,
           "name": "SQL",
           "category": "Languages"
         },
         {
-          "id": 65,
-          "name": "Java",
-          "category": "Languages"
-        },
-        {
-          "id": 66,
+          "id": 62,
           "name": "JavaScript",
           "category": "Languages"
         },
         {
+          "id": 63,
+          "name": "Java",
+          "category": "Languages"
+        },
+        {
+          "id": 64,
+          "name": "Pandas",
+          "category": "Analysis & Data Tools"
+        },
+        {
+          "id": 65,
+          "name": "NumPy",
+          "category": "Analysis & Data Tools"
+        },
+        {
+          "id": 66,
+          "name": "ETL Pipelines",
+          "category": "Analysis & Data Tools"
+        },
+        {
           "id": 67,
-          "name": "FastAPI",
-          "category": "Frameworks"
+          "name": "XGBoost",
+          "category": "Analysis & Data Tools"
         },
         {
           "id": 68,
-          "name": "Django",
-          "category": "Frameworks"
+          "name": "FinBERT",
+          "category": "Analysis & Data Tools"
         },
         {
           "id": 69,
-          "name": "React",
-          "category": "Frameworks"
+          "name": "FastAPI",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 70,
-          "name": "Node.js",
-          "category": "Frameworks"
+          "name": "Django",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 71,
-          "name": "PyTorch",
-          "category": "Frameworks"
+          "name": "React",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 72,
-          "name": "TensorFlow Lite",
-          "category": "Frameworks"
+          "name": "Node.js",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 73,
           "name": "PostgreSQL",
-          "category": "Data Tools"
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 74,
-          "name": "ETL Pipelines",
-          "category": "Data Tools"
+          "name": "MySQL",
+          "category": "Frameworks & Technologies"
         },
         {
           "id": 75,
-          "name": "MySQL",
-          "category": "Data Tools"
+          "name": "Cursor",
+          "category": "AI Developer Tools"
         },
         {
           "id": 76,
-          "name": "Engineering Design and Construction",
-          "category": "Focus Areas"
+          "name": "Claude Code",
+          "category": "AI Developer Tools"
         },
         {
           "id": 77,
-          "name": "Project Documentation",
-          "category": "Focus Areas"
+          "name": "Codex",
+          "category": "AI Developer Tools"
         },
         {
           "id": 78,
-          "name": "Workflow Automation",
-          "category": "Focus Areas"
-        },
-        {
-          "id": 79,
-          "name": "Data Management",
-          "category": "Focus Areas"
+          "name": "AI-Assisted Development",
+          "category": "AI Developer Tools"
         }
       ],
       "hiddenSkills": [],
       "summary": {
-        "summary": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflows to enhance operational efficiency."
+        "summary": "Quinn Taylor is a software engineer with a strong foundation in automation and project management, demonstrating transferable skills relevant to civil engineering roles. Experienced in developing workflows and tools that enhance operational efficiency, Quinn is adept at collaborating with cross-functional teams to deliver impactful solutions."
       },
       "sectionVisibility": {
-        "summary": false,
+        "summary": true,
         "education": true,
         "experience": true,
         "projects": true,
@@ -595,54 +681,32 @@
     },
     "patchDiff": {
       "summary": {
-        "before": "Backend developer specializing in Python and FastAPI, with proven expertise in building scalable backend services and data pipelines. Experienced in system architecture and API development, leveraging SQL for data access and reporting.",
-        "after": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflows to enhance operational efficiency."
+        "before": "",
+        "after": "Quinn Taylor is a software engineer with a strong foundation in automation and project management, demonstrating transferable skills relevant to civil engineering roles. Experienced in developing workflows and tools that enhance operational efficiency, Quinn is adept at collaborating with cross-functional teams to deliver impactful solutions."
       },
-      "projects": [
+      "sectionVisibility": {
+        "before": {
+          "summary": false,
+          "education": true,
+          "experience": true,
+          "projects": true,
+          "skills": true
+        },
+        "after": {
+          "summary": true,
+          "education": true,
+          "experience": true,
+          "projects": true,
+          "skills": true
+        }
+      },
+      "experience": [
         {
-          "id": 21,
+          "id": 16,
           "fieldsChanged": {
             "description": {
-              "before": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, providing\n• users with comprehensive spending insights.\n• Designed FastAPI services and PostgreSQL schemas for Plaid integrations, enabling reliable transaction processing and\n• normalized data storage.\n• Created responsive React dashboards for account management and financial analytics, improving user engagement.\n• Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data.",
-              "after": "• Developed a full-stack finance application that automates account aggregation and transaction tracking, delivering comprehensive spending insights to users.\n• Engineered FastAPI services and PostgreSQL schemas for Plaid integrations, ensuring reliable transaction processing and normalized data storage.\n• Created responsive React dashboards for account management and financial analytics, significantly improving user engagement.\n• Implemented secure authentication and data handling protocols (OAuth/JWT), safeguarding user financial data."
-            }
-          }
-        }
-      ],
-      "skills": [
-        {
-          "id": 76,
-          "fieldsChanged": {
-            "name": {
-              "before": "Backend Development",
-              "after": "Engineering Design and Construction"
-            }
-          }
-        },
-        {
-          "id": 77,
-          "fieldsChanged": {
-            "name": {
-              "before": "Data Pipelines",
-              "after": "Project Documentation"
-            }
-          }
-        },
-        {
-          "id": 78,
-          "fieldsChanged": {
-            "name": {
-              "before": "REST API Design",
-              "after": "Workflow Automation"
-            }
-          }
-        },
-        {
-          "id": 79,
-          "fieldsChanged": {
-            "name": {
-              "before": "Automation Systems",
-              "after": "Data Management"
+              "before": "• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational workflows through a centralized web platform.\n• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows, backend APIs, and real-time operational tooling.\n• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to support scheduled jobs, logging, and live task updates.\n• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-checking time by ~3 hours per week for internal IT teams.",
+              "after": "• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-checking time by ~3 hours per week for internal IT teams.\n• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational workflows through a centralized web platform.\n• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to support scheduled jobs, logging, and live task updates.\n• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows, backend APIs, and real-time operational tooling."
             }
           }
         }
@@ -651,35 +715,23 @@
     "changeReasons": [
       {
         "section": "summary",
-        "reason": "Repositioned the professional summary toward Civil Engineer using concrete, on-resume evidence where possible."
+        "reason": "Profile summary updated for Civil Engineer; audit flagged common generic phrasing in the new text (cross-functional)—tighten to concrete systems and evidence from the resume."
       },
       {
-        "section": "projects",
-        "id": 21,
-        "reason": "project 21: light cleanup to the description or stack."
+        "section": "layout",
+        "reason": "Adjusted the resume layout (section visibility) so the strongest evidence is easier to find."
       },
       {
-        "section": "skills",
-        "id": 76,
-        "reason": "skill row 76: label or category cleanup."
-      },
-      {
-        "section": "skills",
-        "id": 77,
-        "reason": "skill row 77: label or category cleanup."
-      },
-      {
-        "section": "skills",
-        "id": 78,
-        "reason": "skill row 78: label or category cleanup."
-      },
-      {
-        "section": "skills",
-        "id": 79,
-        "reason": "skill row 79: label or category cleanup."
+        "section": "experience",
+        "id": 16,
+        "reason": "experience row 16: light wording pass; the core scope stayed the same."
       }
     ],
-    "warnings": []
+    "warnings": [
+      "Rewrite repair pass strengthened weak tailored rows: experience:16.",
+      "Skills: regrouping or reorder was expected (narrative skillsStrategy and/or multi-category skills layout), but no skill rows changed. Edit skills manually or re-run tailoring.",
+      "Rewrite audit: expected stronger rewrites for experience id 16; output looked like minor wording changes."
+    ]
   },
   "audit": {
     "v": 1,
@@ -690,21 +742,23 @@
         "has_ranked_experience": true,
         "has_project_plan": false,
         "narrative_had_project_heroes": false,
-        "narrative_had_experience_heroes": false
+        "narrative_had_experience_heroes": true
       },
       "hero_slot_gap": {
         "projects": 0,
-        "experience": 1
+        "experience": 0
       },
       "experience": {
         "k": 2,
         "plan_len": 1,
         "top_k_ids": [
-          9
+          16
         ],
-        "hero_ids": [],
-        "in_top_k": 0,
-        "ratio": null
+        "hero_ids": [
+          16
+        ],
+        "in_top_k": 1,
+        "ratio": 1.0
       },
       "projects": {
         "k": 4,
@@ -727,6 +781,9 @@
       "had_updated_resume_in_stage_a": false,
       "skill_row_ids_order": {
         "before": [
+          60,
+          61,
+          62,
           63,
           64,
           65,
@@ -742,10 +799,12 @@
           75,
           76,
           77,
-          78,
-          79
+          78
         ],
         "after": [
+          60,
+          61,
+          62,
           63,
           64,
           65,
@@ -761,59 +820,69 @@
           75,
           76,
           77,
-          78,
-          79
+          78
         ]
       }
     },
     "stage_a": {
       "top_level_keys": [
-        "edits"
+        "edits",
+        "warnings"
       ]
     },
     "patch": {
       "section_keys": [
-        "projects",
-        "skills",
+        "experience",
+        "sectionVisibility",
         "summary"
       ],
       "row_counts": {
-        "projects": 1,
-        "skills": 4
+        "experience": 1
       }
     },
     "warnings": {
-      "total": 0,
-      "from_rewrite": [],
+      "total": 3,
+      "from_rewrite": [
+        "Rewrite repair pass strengthened weak tailored rows: experience:16."
+      ],
       "narrative_omission": []
     },
-    "change_reasons_count": 6,
+    "change_reasons_count": 3,
     "text": {
       "rewrite_note_chars": 0,
       "rewrite_note_preview": "",
-      "merged_summary_preview": "Tailoring log for: Civil Engineer.\n\n- Profile summary: updated toward role; favor concrete systems and evidence from the resume.\n- Project id 21: light edit to one part of the project (minor).\n- Skills id 76: minor name/category touch-up.\n- Skills id 77: minor name/category touch-up.\n- Skills id 78: minor name/category touch-up.\n- Skills id 79: minor name/category touch-up."
+      "merged_summary_preview": "Tailoring log for: Civil Engineer.\n\n- Profile summary: revised (heuristic: generic-leaning phrasing present: cross-functional).\n- sectionVisibility: structure or presentation updated.\n- Experience id 16: small text tweak (minor)."
     },
     "quality": {
       "target_role": "Civil Engineer",
       "flags": {
         "aggressive_skill_prune": false,
         "suspicious_protected_skill_removals": false,
-        "summary_has_generic_phrase_hits": false,
+        "summary_has_generic_phrase_hits": true,
         "filler_phrase_hits": false,
-        "skills_expected_but_unchanged": false,
-        "minor_expected_rewrites": false,
+        "skills_expected_but_unchanged": true,
+        "minor_expected_rewrites": true,
         "missing_expected_rewrites": false
       },
       "summary": {
         "changed": true,
-        "after_preview": "Detail-oriented engineer with a strong foundation in backend development, specializing in Python and FastAPI. Proven ability to design and implement scalable systems, ensuring compliance and secure data handling. Experienced in creating metrics dashboards and optimizing workflow…",
-        "generic_phrases_matched": [],
+        "after_preview": "Quinn Taylor is a software engineer with a strong foundation in automation and project management, demonstrating transferable skills relevant to civil engineering roles. Experienced in developing workflows and tools that enhance operational efficiency, Quinn is adept at collabor…",
+        "generic_phrases_matched": [
+          "cross-functional"
+        ],
         "filler_phrases_matched": []
       },
       "rewrite_quality": {
-        "expected_experience_rewrite_ids": [],
+        "expected_experience_rewrite_ids": [
+          16
+        ],
         "expected_project_rewrite_ids": [],
-        "minor_rewrite_rows": [],
+        "minor_rewrite_rows": [
+          {
+            "section": "experience",
+            "id": 16
+          }
+        ],
         "missing_rewrite_rows": [],
         "filler_phrase_hits": []
       },
@@ -821,7 +890,7 @@
         "removedSkillIds": [],
         "removedProjectIds": [],
         "removedExperienceIds": [],
-        "visible_skill_count_before": 17,
+        "visible_skill_count_before": 19,
         "removed_skill_count": 0,
         "removal_ratio_skills": 0.0,
         "protected_skill_removals": []
@@ -831,8 +900,12 @@
         "hero_project_ids_with_edits": [],
         "hero_project_ids_not_in_patch": [],
         "only_one_hero_touched_while_several_listed": false,
-        "hero_experience_ids": [],
-        "hero_experience_ids_with_edits": [],
+        "hero_experience_ids": [
+          16
+        ],
+        "hero_experience_ids_with_edits": [
+          16
+        ],
         "hero_experience_ids_not_in_patch": []
       },
       "stage_edits_removals": {
@@ -841,20 +914,20 @@
       },
       "rewrite_intensity": {
         "summary_changed": true,
-        "experience_rows_touched": 0,
-        "project_rows_touched": 1,
-        "skill_rows_touched": 4,
-        "skills_section_changed": true,
+        "experience_rows_touched": 1,
+        "project_rows_touched": 0,
+        "skill_rows_touched": 0,
+        "skills_section_changed": false,
         "rows_removed_total": 0,
         "hero_projects_edited_count": 0,
-        "hero_experience_edited_count": 0,
+        "hero_experience_edited_count": 1,
         "low_intensity_hint": false
       }
     },
     "llm_usage_pass1": {
-      "completion_tokens": 208,
-      "prompt_tokens": 7222,
-      "total_tokens": 7430,
+      "completion_tokens": 278,
+      "prompt_tokens": 7864,
+      "total_tokens": 8142,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0
@@ -867,9 +940,9 @@
       }
     },
     "llm_usage_pass2": {
-      "completion_tokens": 478,
-      "prompt_tokens": 6472,
-      "total_tokens": 6950,
+      "completion_tokens": 558,
+      "prompt_tokens": 7999,
+      "total_tokens": 8557,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0
@@ -882,9 +955,24 @@
       }
     },
     "llm_usage_rewrite_pass": {
-      "completion_tokens": 478,
-      "prompt_tokens": 6472,
-      "total_tokens": 6950,
+      "completion_tokens": 558,
+      "prompt_tokens": 7999,
+      "total_tokens": 8557,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "audio_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "audio_tokens": 0,
+        "accepted_prediction_tokens": 0,
+        "rejected_prediction_tokens": 0
+      }
+    },
+    "llm_usage_repair_pass": {
+      "completion_tokens": 158,
+      "prompt_tokens": 987,
+      "total_tokens": 1145,
       "prompt_tokens_details": {
         "cached_tokens": 0,
         "audio_tokens": 0

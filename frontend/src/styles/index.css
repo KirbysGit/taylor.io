@@ -173,11 +173,15 @@
 	}
 
 	.errorMessage {
-		background: rgb(250, 205, 205); /* brand-pink-lighter for bg */
-		border: 1px solid rgb(238, 155, 155); /* brand-pink-light for border */
-		color: rgb(190, 70, 70); /* brand-pink-dark for text */
-		@apply px-4 py-3 rounded-lg text-[0.75rem];
-		animation: slide-down 0.3s ease-in-out;
+		background: rgb(214, 86, 86);
+		border: 1px solid rgb(195, 65, 65);
+		color: #ffffff;
+		@apply flex items-center gap-3 px-4 py-3.5 rounded-xl text-[0.8rem] font-semibold leading-snug;
+		animation: slide-down 0.25s ease-out;
+	}
+
+	.errorMessage .errorMessage-icon {
+		@apply shrink-0 size-[1.1rem];
 	}
 	
 	.passwordRequirements {
@@ -277,6 +281,14 @@
 	.skillPillRemove:hover {
 		@apply bg-red-100 text-red-600;
 	}
+}
+
+@keyframes draw-circle {
+	to { stroke-dashoffset: 0; }
+}
+
+@keyframes draw-check {
+	to { stroke-dashoffset: 0; }
 }
 
 @keyframes slide-down {

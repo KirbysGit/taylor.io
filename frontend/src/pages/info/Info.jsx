@@ -370,7 +370,7 @@ function Info() {
 			if (lastSavedRef.current) lastSavedRef.current.contact = JSON.parse(JSON.stringify(c))
 		} catch (error) {
 			console.error('Error saving contact:', error)
-			toast.error('Failed to save contact info.')
+			toast.error("Couldn't save contact info — try again.")
 		} finally {
 			setSavingSection(null)
 		}
@@ -450,7 +450,7 @@ function Info() {
 			if (lastSavedRef.current) lastSavedRef.current.education = JSON.parse(JSON.stringify(edu))
 		} catch (error) {
 			console.error('Error saving education:', error)
-			toast.error('Failed to save education.')
+			toast.error("Couldn't save education — try again.")
 		} finally {
 			setSavingSection(null)
 		}
@@ -498,7 +498,7 @@ function Info() {
 			if (lastSavedRef.current) lastSavedRef.current.experiences = JSON.parse(JSON.stringify(exp))
 		} catch (error) {
 			console.error('Error saving experiences:', error)
-			toast.error('Failed to save experiences.')
+			toast.error("Couldn't save experience — try again.")
 		} finally {
 			setSavingSection(null)
 		}
@@ -546,7 +546,7 @@ function Info() {
 			if (lastSavedRef.current) lastSavedRef.current.projects = JSON.parse(JSON.stringify(proj))
 		} catch (error) {
 			console.error('Error saving projects:', error)
-			toast.error('Failed to save projects.')
+			toast.error("Couldn't save projects — try again.")
 		} finally {
 			setSavingSection(null)
 		}
@@ -603,7 +603,7 @@ function Info() {
 			if (lastSavedRef.current) lastSavedRef.current.skills = JSON.parse(JSON.stringify(sk))
 		} catch (error) {
 			console.error('Error saving skills:', error)
-			toast.error('Failed to save skills.')
+			toast.error("Couldn't save skills — try again.")
 		} finally {
 			setSavingSection(null)
 		}
@@ -623,7 +623,7 @@ function Info() {
 			if (lastSavedRef.current) lastSavedRef.current.summary = sum
 		} catch (error) {
 			console.error('Error saving summary:', error)
-			toast.error('Failed to save summary.')
+			toast.error("Couldn't save summary — try again.")
 		} finally {
 			setSavingSection(null)
 		}
@@ -675,7 +675,7 @@ function Info() {
 		} catch (err) {
 			console.error('Resume parse failed:', err)
 			setParseResumeError(err?.response?.data?.detail || 'Failed to parse resume. Please try again.')
-			toast.error('Failed to parse resume.')
+			toast.error("Couldn't read that file — try a different PDF or Word doc.")
 		} finally {
 			setIsParsingResume(false)
 		}
@@ -716,7 +716,7 @@ function Info() {
 			toast.success('Profile cleared. Ready for a fresh parser test.')
 		} catch (err) {
 			console.error('Clear profile failed:', err)
-			toast.error('Failed to clear profile.')
+			toast.error("Couldn't clear profile — try again.")
 		} finally {
 			setSavingSection(null)
 		}
@@ -744,7 +744,7 @@ function Info() {
 			toast.success('Resume removed. Your data has been restored to before the upload.')
 		} catch (err) {
 			console.error('Detach failed:', err)
-			toast.error('Failed to detach resume.')
+			toast.error("Couldn't detach resume — try again.")
 		}
 	}
 
@@ -757,7 +757,7 @@ function Info() {
 			toast.success('Resume removed. Your data is unchanged. You can upload a new resume anytime.')
 		} catch (err) {
 			console.error('Detach failed:', err)
-			toast.error('Failed to detach resume.')
+			toast.error("Couldn't detach resume — try again.")
 		}
 	}
 

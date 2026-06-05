@@ -136,10 +136,11 @@ function validateTailorForm({ jobTitle, company, jobDescription }) {
 		errors.company = `Company must be ${companyLimits.max} characters or fewer.`
 	}
 
+	const wordCount = jd.split(/\s+/).filter(Boolean).length
 	if (!jd) {
 		errors.jobDescription = 'Job description is required.'
-	} else if (jd.length < jdLimits.min) {
-		errors.jobDescription = `Add more detail — at least ${jdLimits.min} characters (you have ${jd.length}).`
+	} else if (wordCount < 20) {
+		errors.jobDescription = `Paste the full job description — we need at least 20 words to tailor properly (you have ${wordCount}).`
 	} else if (jd.length > jdLimits.max) {
 		errors.jobDescription = `Job description must be ${jdLimits.max} characters or fewer.`
 	}
@@ -407,13 +408,13 @@ function ResumeTailorSetup() {
 	}
 
 	const handleContinue = (e) => {
-		e?.preventDefault?.()
+		if (e && typeof e.preventDefault === 'function') e.preventDefault()
 
 		const errors = validateTailorForm({ jobTitle, company, jobDescription })
 		if (Object.keys(errors).length > 0) {
 			setFieldErrors(errors)
 			toast.error(Object.values(errors)[0])
-			return
+			return false
 		}
 		setFieldErrors({})
 
@@ -576,9 +577,9 @@ function ResumeTailorSetup() {
 											: 'text-gray-500'
 								}`}
 							>
-								{jobDescription.trim().length} / {TAILOR_FIELD_LIMITS.jobDescription.max} characters
-								{jobDescription.trim().length < TAILOR_FIELD_LIMITS.jobDescription.min
-									? ` · minimum ${TAILOR_FIELD_LIMITS.jobDescription.min}`
+								{jobDescription.trim().split(/\s+/).filter(Boolean).length} words
+								{jobDescription.trim().split(/\s+/).filter(Boolean).length < 20
+									? ' · minimum 20 words'
 									: ''}
 							</p>
 							{fieldErrors.jobDescription ? (

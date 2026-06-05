@@ -1,7 +1,7 @@
 import { useState, useEffect, useId } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCreditCard, faEnvelope, faEye, faEyeSlash, faGift, faLock, faShieldHalved, faWandSparkles } from '@fortawesome/free-solid-svg-icons'
-import { RequiredAsterisk, Checkmark, XIcon } from '@/components/icons'
+import { RequiredAsterisk, Checkmark, XIcon, ErrorIcon } from '@/components/icons'
 import { registerUser } from '@/api/services/auth'
 import { AuthModalDocPreview } from './AuthModalDocPreview'
 
@@ -307,7 +307,8 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 
 						{emailError && (
 							<div id={`${formId}-email-error`} className="errorMessage" role="alert">
-								{emailError}
+								<ErrorIcon className="errorMessage-icon" />
+								<span>{emailError}</span>
 							</div>
 						)}
 
@@ -434,7 +435,8 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 
 						{formError && (
 							<div id={formErrorId} className="errorMessage" role="alert">
-								{formError}
+								<ErrorIcon className="errorMessage-icon" />
+								<span>{formError}</span>
 							</div>
 						)}
 

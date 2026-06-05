@@ -13,8 +13,8 @@
   "job_description_chars": 3390,
   "resume_counts": {
     "experience": 1,
-    "projects": 1,
-    "skills": 17,
+    "projects": 4,
+    "skills": 19,
     "education": 1
   },
   "extracted_keywords": [
@@ -548,7 +548,7 @@
     "directEvidence": [
       {
         "section": "experience",
-        "id": 9,
+        "id": 16,
         "label": "BitGo Software Engineering Intern",
         "terms": [
           "engineer"
@@ -559,29 +559,66 @@
     "transferableEvidence": [
       {
         "section": "experience",
-        "id": 9,
+        "id": 16,
         "label": "BitGo Software Engineering Intern",
         "themes": [
           {
             "theme": "compliance / standards",
             "terms": [
-              "compliance",
-              "secure"
-            ]
-          },
-          {
-            "theme": "metrics / reporting",
-            "terms": [
-              "dashboards",
-              "metrics",
-              "visibility"
+              "compliance"
             ]
           },
           {
             "theme": "workflow / automation",
             "terms": [
-              "optimized",
-              "pipelines",
+              "automation",
+              "processing",
+              "workflows"
+            ]
+          },
+          {
+            "theme": "coordination / communication",
+            "terms": [
+              "teams"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 13,
+        "label": "Taylor.io – AI Resume Builder & Workflow Platform",
+        "themes": [
+          {
+            "theme": "workflow / automation",
+            "terms": [
+              "workflow",
+              "workflows"
+            ]
+          },
+          {
+            "theme": "coordination / communication",
+            "terms": [
+              "requirements"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 14,
+        "label": "Centi – Personal Finance App",
+        "themes": [
+          {
+            "theme": "metrics / reporting",
+            "terms": [
+              "dashboard",
+              "dashboards"
+            ]
+          },
+          {
+            "theme": "workflow / automation",
+            "terms": [
               "processing",
               "workflows"
             ]
@@ -590,27 +627,36 @@
       },
       {
         "section": "projects",
-        "id": 21,
-        "label": "Centi – Personal Finance App",
+        "id": 15,
+        "label": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline",
         "themes": [
-          {
-            "theme": "compliance / standards",
-            "terms": [
-              "secure"
-            ]
-          },
           {
             "theme": "metrics / reporting",
             "terms": [
               "analytics",
-              "dashboards",
-              "tracking"
+              "metrics"
             ]
           },
           {
             "theme": "workflow / automation",
             "terms": [
-              "processing"
+              "automated",
+              "pipeline",
+              "processing",
+              "workflows"
+            ]
+          }
+        ]
+      },
+      {
+        "section": "projects",
+        "id": 16,
+        "label": "ShelfVision – Dense Retail Shelf Object Detector",
+        "themes": [
+          {
+            "theme": "workflow / automation",
+            "terms": [
+              "workflows"
             ]
           }
         ]
@@ -619,7 +665,7 @@
     "evidenceClassification": [
       {
         "section": "experience",
-        "id": 9,
+        "id": 16,
         "label": "BitGo Software Engineering Intern",
         "terms": [
           "engineer"
@@ -630,11 +676,45 @@
       },
       {
         "section": "projects",
-        "id": 21,
+        "id": 13,
+        "label": "Taylor.io – AI Resume Builder & Workflow Platform",
+        "terms": [
+          "workflow / automation",
+          "coordination / communication"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 14,
         "label": "Centi – Personal Finance App",
         "terms": [
-          "compliance / standards",
           "metrics / reporting",
+          "workflow / automation"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 15,
+        "label": "SentimentTrader – Financial Sentiment & Market Analysis Pipeline",
+        "terms": [
+          "metrics / reporting",
+          "workflow / automation"
+        ],
+        "evidenceType": "transferable_behavior",
+        "claimStrength": "bridge",
+        "guidance": "Use as transferable proof; phrase as communication, coordination, metrics, workflow, pace, or service support rather than direct target-role ownership."
+      },
+      {
+        "section": "projects",
+        "id": 16,
+        "label": "ShelfVision – Dense Retail Shelf Object Detector",
+        "terms": [
           "workflow / automation"
         ],
         "evidenceType": "transferable_behavior",

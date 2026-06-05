@@ -150,7 +150,7 @@ export function useDebouncedPreviews({
 				// if we run into an error, show a toast error.
 				console.error('Exact PDF preview failed:', error)
 				if (reqId === exactPdfRequestIdRef.current) {
-					toast.error("We're having an issue making the preview... Please try refreshing the page.")
+					toast.error("Preview failed to load — try refreshing the page.")
 				}
 			} finally {
 				// if the request id is the current request id, set the exact pdf refreshing flag to false.
