@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGripVertical, faEyeSlash, faEye, faChevronDown, faChevronUp, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faGripVertical, faEyeSlash, faEye, faChevronDown, faChevronUp, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { XIcon, Pencil } from '@/components/icons';
 import {
 	SKILL_CATEGORY_ADD_CHIP_CLASS,
@@ -47,6 +47,7 @@ const SkillsInput = forwardRef(function SkillsInput(
 	const [dragOverPillId, setDragOverPillId] = useState(null);
 	const [editingCategory, setEditingCategory] = useState(null);
 	const [editingCategoryValue, setEditingCategoryValue] = useState('');
+	const [pendingCategoryRemoval, setPendingCategoryRemoval] = useState(null);
 	const [draggedCategory, setDraggedCategory] = useState(null);
 	const [dragOverCategoryForReorder, setDragOverCategoryForReorder] = useState(null);
 	const [hiddenSectionOpen, setHiddenSectionOpen] = useState(true);
@@ -281,18 +282,46 @@ const SkillsInput = forwardRef(function SkillsInput(
 		setEditingCategoryValue('');
 	};
 
-	// handle remove category
-	const handleRemoveCategory = (categoryName) => {
+	const removeCategoryFromList = (categoryName) => {
 		// remove category from list
 		setCategories(prev => prev.filter(cat => cat !== categoryName));
-		
+		if (newSkillTarget === categoryName) {
+			setNewSkillTarget('all');
+		}
+	};
+
+	// handle remove category but keep the skills in All Skills
+	const handleKeepSkillsAndRemoveCategory = (categoryName) => {
+		removeCategoryFromList(categoryName);
+
 		// remove category from all skills (set to empty string)
 		skills.forEach((skill, index) => {
 			if (skill.category === categoryName && onUpdate) {
 				onUpdate(index, { ...skill, category: '' });
 			}
 		});
+		setPendingCategoryRemoval(null);
+	};
 
+	// handle remove category and delete its skills
+	const handleRemoveCategoryAndSkills = (categoryName) => {
+		removeCategoryFromList(categoryName);
+
+		const indexesToRemove = skills
+			.map((skill, index) => ({ skill, index }))
+			.filter(({ skill }) => skill.category === categoryName)
+			.map(({ index }) => index)
+			.sort((a, b) => b - a);
+
+		indexesToRemove.forEach((index) => {
+			onRemove(index);
+		});
+		setPendingCategoryRemoval(null);
+	};
+
+	// handle remove category
+	const handleRemoveCategory = (categoryName) => {
+		setPendingCategoryRemoval(categoryName);
 	};
 
 	// handle add new category
@@ -372,6 +401,10 @@ const SkillsInput = forwardRef(function SkillsInput(
 			uncategorizedSkills.push(skill);
 		}
 	});
+
+	const pendingCategorySkills = pendingCategoryRemoval
+		? skills.filter((skill) => skill.category === pendingCategoryRemoval)
+		: [];
 
 	return (
 		<>
@@ -756,6 +789,79 @@ const SkillsInput = forwardRef(function SkillsInput(
 					);
 				})}
 			</div>
+
+			{pendingCategoryRemoval ? (
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+					<button
+						type="button"
+						className="absolute inset-0 cursor-default bg-gray-950/35 backdrop-blur-[2px]"
+						onClick={() => setPendingCategoryRemoval(null)}
+						aria-label="Close remove skill category dialog"
+					/>
+					<div
+						role="dialog"
+						aria-modal="true"
+						aria-labelledby="remove-skill-category-title"
+						className="relative w-full max-w-lg rounded-[1.35rem] border border-brand-pink/18 bg-white p-6 shadow-[0_28px_80px_-28px_rgba(80,25,30,0.62)]"
+					>
+						<div className="flex items-start gap-4">
+							<span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-brand-pink/[0.1] text-brand-pink-dark">
+								<FontAwesomeIcon icon={faTrash} className="size-4" />
+							</span>
+							<div className="min-w-0">
+								<h2 id="remove-skill-category-title" className="text-xl font-black tracking-tight text-gray-950">
+									Remove {pendingCategoryRemoval}?
+								</h2>
+								<p className="mt-2 text-sm leading-relaxed text-gray-600">
+									This section currently has{' '}
+									<span className="font-black text-gray-900">{pendingCategorySkills.length}</span>{' '}
+									{pendingCategorySkills.length === 1 ? 'skill' : 'skills'}. Choose whether those skills should stay available in All Skills or be removed with the section.
+								</p>
+							</div>
+						</div>
+
+						{pendingCategorySkills.length > 0 ? (
+							<div className="mt-5 rounded-2xl border border-gray-200 bg-[#fff8ef]/55 p-4">
+								<p className="mb-3 text-[0.68rem] font-black uppercase tracking-[0.14em] text-gray-500">
+									Skills in this section
+								</p>
+								<div className="flex max-h-28 flex-wrap gap-2 overflow-y-auto pr-1">
+									{pendingCategorySkills.map((skill) => (
+										<span key={skill.id} className="rounded-full border border-brand-pink/14 bg-white px-3 py-1.5 text-xs font-bold text-gray-700 shadow-sm">
+											{skill.name}
+										</span>
+									))}
+								</div>
+							</div>
+						) : null}
+
+						<div className="mt-6 grid gap-3 sm:grid-cols-2">
+							<button
+								type="button"
+								onClick={() => handleKeepSkillsAndRemoveCategory(pendingCategoryRemoval)}
+								className="rounded-xl border border-brand-pink/20 bg-white px-4 py-3 text-sm font-black text-brand-pink-dark transition hover:-translate-y-0.5 hover:border-brand-pink/38 hover:bg-brand-pink/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+							>
+								Keep skills in All Skills
+							</button>
+							<button
+								type="button"
+								onClick={() => handleRemoveCategoryAndSkills(pendingCategoryRemoval)}
+								className="rounded-xl bg-brand-pink px-4 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(214,86,86,0.82)] transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+							>
+								Remove section and skills
+							</button>
+						</div>
+
+						<button
+							type="button"
+							onClick={() => setPendingCategoryRemoval(null)}
+							className="mt-3 w-full rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 transition hover:bg-gray-50 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+						>
+							Cancel
+						</button>
+					</div>
+				</div>
+			) : null}
 		</>
 	);
 });

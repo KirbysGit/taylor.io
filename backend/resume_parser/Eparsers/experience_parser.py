@@ -61,6 +61,11 @@ TECH_HINT_RE = re.compile(
 CONTINUATION_END_RE = re.compile(
     r"(?i)\b(?:across|through|with|including|and|or|for|to|of|in|on|by|from|using|leveraging|via)$|,$"
 )
+TITLE_COMPANY_DATE_RE = re.compile(
+    r"^(?P<title>.+?)\s+[–—]\s+(?P<company>.+?)\s+"
+    r"(?P<date>[A-Z][a-z]+\s+\d{4}\s*[-–—]\s*(?:[A-Z][a-z]+\s+)?(?:\d{4}|present|current))$",
+    re.IGNORECASE,
+)
 
 MONTH_MAP = {
     "january": "01",
@@ -220,6 +225,35 @@ def _format_skills(skills: Optional[List[str]]) -> Optional[str]:
         if skill:
             cleaned.append(skill)
     return ", ".join(cleaned) if cleaned else None
+
+
+def _parse_title_company_date_line(line: str) -> Optional[Dict[str, Optional[str]]]:
+    match = TITLE_COMPANY_DATE_RE.match((line or "").strip())
+    if not match:
+        return None
+
+    date_match = DATE_RE.search(match.group("date"))
+    if not date_match:
+        return None
+
+    title = match.group("title").strip(" -–—")
+    company = match.group("company").strip(" -–—")
+    if not title or not company:
+        return None
+
+    item = {
+        "title": title,
+        "company": company,
+        "startDate": _normalize_date(date_match.group(1)),
+        "endDate": None,
+        "current": False,
+    }
+    end_date = date_match.group(2).strip().lower()
+    if end_date in {"present", "current"}:
+        item["current"] = True
+    else:
+        item["endDate"] = _normalize_date(date_match.group(2))
+    return item
 
 
 def _extract_location_from_text(text: str) -> Tuple[str, Optional[str]]:
@@ -418,6 +452,13 @@ def parse_experience(section_text: str) -> List[Dict[str, Optional[str]]]:
             "location": None,
             "skills": None,
         }
+
+        title_company_date = _parse_title_company_date_line(entry_lines[0])
+        if title_company_date:
+            exp_item.update(title_company_date)
+            exp_item["description"] = _format_description(entry_lines[1:])
+            experiences.append(exp_item)
+            continue
 
         date_match = DATE_RE.search(entry_lines[0])
         date_line_idx = 0 if date_match else None

@@ -266,3 +266,21 @@ def test_experience_parser_handles_company_location_slash_year_and_role_bullet()
     assert experiences[1]["title"] == "Board Member"
     assert experiences[1]["startDate"] == "2015-01"
     assert experiences[1]["endDate"] == "2017-01"
+
+
+def test_experience_parser_handles_title_company_and_date_on_one_line():
+    parser = _load_experience_parser()
+    experiences = parser.parse_experience(
+        "\n".join([
+            "Server – Bar Louie January 2025 – Present",
+            "• Balanced a 20-30 hour schedule alongside coursework.",
+            "• Delivered customer service in a fast-paced environment.",
+        ])
+    )
+
+    assert len(experiences) == 1
+    assert experiences[0]["title"] == "Server"
+    assert experiences[0]["company"] == "Bar Louie"
+    assert experiences[0]["startDate"] == "2025-01"
+    assert experiences[0]["current"] is True
+    assert "Balanced a 20-30 hour schedule" in experiences[0]["description"]

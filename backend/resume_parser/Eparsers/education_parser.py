@@ -34,6 +34,19 @@ DEGREE_START_RE = re.compile(
     r"(?i)\b(?:bachelor|master|associate|doctorate|ph\.?d\.?|b\.?s\.?|b\.?a\.?|m\.?s\.?|m\.?a\.?|mba)\b"
 )
 YEAR_AT_END_RE = re.compile(r"(?:\||/)\s*((?:19|20)\d{2})\s*$")
+EXPECTED_GRADUATION_RE = re.compile(
+    rf"\s*(?:expected\s+graduation|expected|graduation)\s*:?\s*"
+    rf"({MONTH_PATTERN})\s+((?:19|20)\d{{2}})\s*$",
+    re.IGNORECASE,
+)
+MONTH_MAP = {
+    "january": "01", "jan": "01", "february": "02", "feb": "02",
+    "march": "03", "mar": "03", "april": "04", "apr": "04",
+    "may": "05", "june": "06", "jun": "06", "july": "07", "jul": "07",
+    "august": "08", "aug": "08", "september": "09", "sep": "09", "sept": "09",
+    "october": "10", "oct": "10", "november": "11", "nov": "11",
+    "december": "12", "dec": "12",
+}
 
 
 def _extract_trailing_location(text: str) -> tuple[str, Optional[str]]:
@@ -246,11 +259,15 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
         year_at_end_match = YEAR_AT_END_RE.search(lines[0]) if lines else None
         if year_at_end_match and not edu_item["endDate"]:
             edu_item["endDate"] = f"{year_at_end_match.group(1)}-01"
+        expected_graduation_match = EXPECTED_GRADUATION_RE.search(lines[0]) if lines else None
+        if expected_graduation_match and not edu_item["endDate"]:
+            month = MONTH_MAP.get(expected_graduation_match.group(1).lower(), "01")
+            edu_item["endDate"] = f"{expected_graduation_match.group(2)}-{month}"
         
         # extract school name and GPA - look for university/college patterns or first line
         degree_line_index = next((idx for idx, line in enumerate(lines) if DEGREE_START_RE.search(line)), len(lines))
         school_candidate_lines = [
-            re.sub(YEAR_AT_END_RE, "", line).strip(" |/")
+            EXPECTED_GRADUATION_RE.sub("", re.sub(YEAR_AT_END_RE, "", line)).strip(" |/")
             for line in lines[:degree_line_index]
             if re.search(r'(?i)(university|college|institute|school|academy)', line)
         ]
@@ -280,6 +297,14 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
                     school_name = school_name.strip()
                     if school_name:
                         edu_item["school"] = school_name
+                        break
+
+        if not edu_item["location"]:
+            for line in lines:
+                if DEGREE_START_RE.search(line):
+                    _degree_without_location, degree_location = _extract_trailing_location(line)
+                    if degree_location:
+                        edu_item["location"] = degree_location
                         break
         
         # extract degree
@@ -383,16 +408,7 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
                 start_year = month_date_match.group(2)
                 end_str = month_date_match.group(3).lower() if month_date_match.group(3) else None
                 
-                month_map = {
-                    'january': '01', 'jan': '01', 'february': '02', 'feb': '02',
-                    'march': '03', 'mar': '03', 'april': '04', 'apr': '04',
-                    'may': '05', 'june': '06', 'jun': '06', 'july': '07', 'jul': '07',
-                    'august': '08', 'aug': '08', 'september': '09', 'sep': '09', 'sept': '09',
-                    'october': '10', 'oct': '10', 'november': '11', 'nov': '11',
-                    'december': '12', 'dec': '12'
-                }
-                
-                start_month_num = month_map.get(start_month.lower(), '01')
+                start_month_num = MONTH_MAP.get(start_month.lower(), '01')
                 edu_item["startDate"] = f"{start_year}-{start_month_num}"
                 
                 if end_str in ['present', 'current']:
@@ -402,7 +418,7 @@ def parse_education(section_text: str) -> List[Dict[str, Optional[str]]]:
                     if len(end_parts) == 2:
                         end_month = end_parts[0]
                         end_year = end_parts[1]
-                        end_month_num = month_map.get(end_month.lower(), '01')
+                        end_month_num = MONTH_MAP.get(end_month.lower(), '01')
                         edu_item["endDate"] = f"{end_year}-{end_month_num}"
                     elif len(end_parts) == 1 and end_parts[0].isdigit():
                         edu_item["endDate"] = f"{end_parts[0]}-01"

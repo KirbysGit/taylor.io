@@ -64,6 +64,9 @@ def minimal_clean(text: str) -> str:
     # Merge PDF line wraps that split a hyphenated word.
     text = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1-\2", text)
 
+    # Some PDFs repeat a bullet marker on a wrapped lowercase fragment.
+    text = re.sub(r"([^\n.!?:])\n\s*-\s+([a-z][^\n]*)", r"\1 \2", text)
+
     # Normalize bullet characters to a consistent format.
     text = re.sub(r"^[\s]*[-*•∙▪▫âˆ™â–ªâ–«]\s*", "• ", text, flags=re.MULTILINE)
 
@@ -82,6 +85,15 @@ def _looks_like_skills_blob(text: str) -> bool:
 def _repair_misplaced_sections(sections: Dict[str, str]) -> Dict[str, str]:
     """Repair common PDF extraction order issues from designed/sidebar resumes."""
     repaired = dict(sections)
+
+    extracurricular_text = repaired.pop("extracurriculars", "").strip()
+    if extracurricular_text and repaired.get("education"):
+        extracurricular_items = [
+            line.strip() for line in extracurricular_text.splitlines() if line.strip()
+        ]
+        repaired["education"] = (
+            f"{repaired['education'].rstrip()}\nExtracurriculars: {'; '.join(extracurricular_items)}"
+        )
 
     education_text = repaired.get("education", "")
     if not repaired.get("skills") and _looks_like_skills_blob(education_text):

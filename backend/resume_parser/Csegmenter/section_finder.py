@@ -13,6 +13,7 @@ SECTION_HEADERS = {
     "experience": r"(experience|employment|work history|professional experience|work experience|employment history|career)",
     "skills": r"(skills(?:\s*&\s*extracurriculars?)?|technical skills|key competencies|core competencies|proficiencies?|competencies|expertise)",
     "projects": r"(projects|personal projects|key projects|project experience|portfolio)",
+    "extracurriculars": r"(extracurriculars|activities|leadership\s*&\s*activities|organizations)",
     "summary": r"(summary|professional summary|profile|objective|career objective|executive summary|about)",
 }
 
@@ -26,6 +27,8 @@ SPACED_HEADER_ALIASES = {
     "EMPLOYMENT": "experience",
     "SKILLS": "skills",
     "PROJECTS": "projects",
+    "EXTRACURRICULARS": "extracurriculars",
+    "ACTIVITIES": "extracurriculars",
     "CONTACT": "contact",
 }
 

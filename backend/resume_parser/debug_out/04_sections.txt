@@ -1,50 +1,45 @@
-=== EXPERIENCE ===
-Software Engineering Intern May 2024 – June 2025
-BitGo | Python, Django, React, PostgreSQL, AWS EC2 Remote
-• Built internal automation tools that allowed IT and compliance teams to schedule, monitor, and manage operational
-workflows through a centralized web platform.
-• Worked closely with design teams, engineers, and offshore developers to build and refine frontend workflows,
-backend APIs, and real-time operational tooling.
-• Developed task orchestration and backend processing workflows using Django, Celery, Redis, and PostgreSQL to
-support scheduled jobs, logging, and live task updates.
-• Developed centralized scheduling and monitoring tools that reduced manual task management, debugging, and log-checking time by ~3 hours per week for internal IT teams.
-
-=== PROJECTS ===
-Taylor.io – AI Resume Builder & Workflow Platform | Python, React, FastAPI, OpenAI API, Cursor
-• Built an AI-powered resume platform that stores structured user career data and generates tailored resumes based on
-specific job descriptions.
-• Developed workflows that extract relevant keywords and requirements from job postings, then use OpenAI APIs to
-generate targeted resume content from user profile data.
-• Built FastAPI backend services for resume parsing, authentication, and real-time editing using PostgreSQL and React.
-• Used AI-assisted coding workflows with tools like Cursor to rapidly prototype, iterate, and refine product features while
-maintaining production-style architecture.
-Centi – Personal Finance App | FastAPI, React, PostgreSQL, Plaid API | https://centi.dev
-• Built a personal finance platform that aggregates bank accounts, transactions, and spending activity into one clear
-dashboard, helping users understand their finances without manually sorting through multiple apps and statements..
-• Developed transaction processing and categorization workflows using FastAPI, PostgreSQL, and Plaid APIs to organize
-messy financial data into searchable spending insights and summaries.
-• Created customizable React dashboards that let users explore spending trends, account activity, and financial patterns
-in the way that makes the most sense to them.
-SentimentTrader – Financial Sentiment & Market Analysis Pipeline | Python, SQL, FinBERT, XGBoost
-• Built an end-to-end analytics pipeline processing 1K+ finance-related Reddit posts per run through automated ETL
-workflows, combining market data and sentiment analysis to generate trading signals for users.
-• Developed preprocessing and feature engineering workflows that transform unstructured discussions, engagement
-metrics, and stock data into structured ticker-level indicators for analysis.
-• Trained and evaluated XGBoost models achieving 55–70% ROC-AUC while comparing sentiment patterns against short-term market movement.
-ShelfVision – Dense Retail Shelf Object Detector | PyTorch, ResNet-50, FPN
-• Built a retail analysis system trained on 11K+ images to detect and identify products in cluttered shelf environments.
-• Developed preprocessing and training workflows that organize image data, generate training inputs, and improve
-detection performance across different shelf layouts.
-
 === EDUCATION ===
-University of Central Florida (GPA 3.78 / 4.0) August 2021 – May 2025
-Bachelor of Science in Computer Engineering Orlando, FL
-Honors & Awards: Dean's List 2021, President's Honor Roll 2023 – 2025, Pegasus Gold Scholarship
-Clubs & Extracurriculars: AI @ UCF, Knight Hacks, SHPE @ UCF
-Relevant Coursework: Massive Storage & Big Data, Enterprise Computing, Object-Oriented Software Design
+University of Central Florida Expected Graduation: December 2028
+Bachelor of Science in Electrical Engineering Orlando, FL
+Relevant Coursework: Calculus I – III, Physics I – II, Engineering Analysis & Computation, Digital Systems
+Honors & Awards: 1st Place IEEE UCF Competition, Bright Future Medallion Recipient
+Extracurriculars: Society of Hispanic Professional Engineers – SHPE September 2025 – Present; Society of Women Engineers – SWE August 2024 – Present; Institute of Electrical and Electronics Engineers – IEEE October 2024 – Present; Women in Electrical Engineering and Computer Science – WEECS August 2024 – Present
 
 === SKILLS ===
-Languages : Python, SQL, JavaScript, Java
-Analysis & Data Tools : Pandas, NumPy, ETL Pipelines, XGBoost, FinBERT
-Frameworks & Technologies : FastAPI, Django, React, Node.js, PostgreSQL, MySQL
-AI Developer Tools : Cursor, Claude Code, Codex, AI-Assisted Development
+Programming & Tools: C++, MATLAB, Verilog, Arduino, MSP430, Bluetooth Modules, Microsoft Office
+Hardware & Embedded Systems: Motor Control, Sensor Interfacing, Circuit Design & Validation, Embedded Firmware Development,
+Data Management, FPGA Simulation
+Professional Skills: Team Collaboration, Analytical Problem-Solving, Adaptability, Time Management
+Languages: English (Fluent), Spanish (Native)
+
+=== PROJECTS ===
+Custom Embedded RC Derby Car | ESP32, Control Systems, Power Electronics January 2026 – Present
+• Leading end-to-end electrical system architecture for a 3-minute competitive RC racing platform, including power distribution,
+motor control, and embedded firmware integration.
+• Designing and validating a regulated multi-rail LiPo (7.4V) power architecture to maintain stable ESP32 operation under
+transient current spikes and dynamic load conditions.
+Digital Logic Design & Verification | Verilog, FPGA Simulation January 2026 – Present
+• Designing and optimizing combinational logic circuits using Boolean algebra and Karnaugh map minimization to reduce gate
+count and propagation delay.
+• Developing comprehensive testbenches to verify functional correctness across exhaustive and edge-case input permutations.
+• Simulating and analyzing timing behavior in Vivado, validating logic transitions, propagation characteristics, and equivalence
+between SOP and POS representations.
+Remote-Joystick Controlled Car | Arduino, Bluetooth, Motors December 2024 – April 2025
+• Designed and implemented a remote-controlled car with Arduino microcontroller and Bluetooth communication.
+• Integrated circuits, motor drivers, and UI programming for IEEE showcase demos.
+• Awarded 1st place in IEEE UCF Project Competition.
+TI-RSLK Robot Maze | C/C++, Embedded Systems, Sensors September 2024 – November 2024
+• Programmed a TI-RSLK robot in C/C++ to autonomously navigate a maze using real-time sensor feedback, achieving 100%
+maze completion across multiple test runs.
+• Implemented path-planning algorithms and integrated multiple 3+ hardware modules.
+• Debugged real-time system performance in a lab environment, achieving reliable maze completion.
+Great Navel Orange Race Autonomous Boat | MSP430, MATLAB, Motor Control Jan 2025 – April 2025
+• Collaborated with a team of 4 engineering students to design and program an autonomous boat for UCF's GNOR competition.
+• Programmed MSP430 microcontroller for motor control and heading-angle navigation.
+• Simulated obstacle avoidance in MATLAB and optimized pathing for 8-minute timed pond traversal.
+
+=== EXPERIENCE ===
+Server – Bar Louie January 2025 – Present
+• Balancing a 20–30-hour per week schedule alongside a full-time course load.
+• Delivered high-quality customer service while managing 5-8 tables in a fast-paced environment.
+• Resolved issues under pressure and collaborated with team members to maintain smooth operations.

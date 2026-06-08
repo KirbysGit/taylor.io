@@ -16,8 +16,8 @@ TRAILING_DATE_RE = re.compile(
     r"\s+(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|"
     r"Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"
     r"\s+\d{4}(?:\s*[-–—]\s*(?:(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|"
-    r"Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+)?"
-    r"\d{4}|present|current)?\s*$",
+    r"Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"
+    r"\s+\d{4}|present|current))?\s*$",
     re.IGNORECASE,
 )
 TECH_HINT_RE = re.compile(
@@ -27,7 +27,10 @@ TECH_HINT_RE = re.compile(
     r"aws|ec2|vercel|firebase|supabase|tailwind|framer|"
     r"openai|api|rest|graphql|plaid|finbert|xgboost|"
     r"pytorch|tensorflow|tensorflow lite|opencv|scikit-learn|sklearn|numpy|pandas|"
-    r"flutter|dart|arduino|c\+\+|html|css"
+    r"flutter|dart|arduino|c\+\+|html|css|"
+    r"esp32|msp430|matlab|verilog|vhdl|fpga|vivado|"
+    r"embedded systems?|firmware|sensors?|motor control|control systems?|"
+    r"power electronics|circuit design|hardware"
     r")\b",
     re.IGNORECASE,
 )
@@ -88,7 +91,7 @@ def is_project_header(line: str) -> bool:
 
     parts = [part.strip() for part in stripped.split("|")]
     title = parts[0] if parts else ""
-    rest = " | ".join(parts[1:])
+    rest = _strip_trailing_project_date(" | ".join(parts[1:]))
     if not title or not rest:
         return False
     if len(title.split()) > 12:
@@ -255,7 +258,7 @@ def _header_rejection_reason(line: str) -> str:
         return "missing_title"
     if len(parts[0].split()) > 12:
         return "title_too_long"
-    if not _looks_like_tech_stack("|".join(parts[1:])):
+    if not _looks_like_tech_stack(_strip_trailing_project_date("|".join(parts[1:]))):
         return "no_tech_or_url_signal"
     return "not_project_header"
 

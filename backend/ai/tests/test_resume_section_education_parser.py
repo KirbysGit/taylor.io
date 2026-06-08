@@ -86,6 +86,26 @@ def test_segmenter_preserves_repeated_subsection_labels_inside_summary():
     assert "Writing" in sections["skills"]
 
 
+def test_segmenter_stops_projects_at_standalone_extracurriculars():
+    segmenter = _load_module("resume_parser/Csegmenter/section_finder.py", "section_finder")
+    sections = segmenter.split_into_sections(
+        "\n".join([
+            "Projects",
+            "Robot Maze | C++, Sensors",
+            "• Programmed autonomous navigation.",
+            "Extracurriculars",
+            "Institute of Electrical and Electronics Engineers",
+            "Work Experience",
+            "Server – Bar Louie January 2025 – Present",
+        ])
+    )
+
+    assert "Robot Maze" in sections["projects"]
+    assert "Institute of Electrical" not in sections["projects"]
+    assert "Institute of Electrical" in sections["extracurriculars"]
+    assert "Server" in sections["experience"]
+
+
 def test_education_parser_ignores_honors_years_and_captures_inline_gpa_coursework():
     education_parser = _load_module("resume_parser/Eparsers/education_parser.py", "education_parser")
     education = education_parser.parse_education(
@@ -231,6 +251,24 @@ def test_education_parser_handles_school_location_slash_year_and_separates_cours
     assert education[0]["endDate"] == "2018-01"
     assert education[0]["relevantCoursework"] == "Management, Marketing, Finance, Accounting"
     assert "Dean's List" in education[0]["honorsAwards"]
+
+
+def test_education_parser_handles_expected_graduation_and_degree_line_location():
+    education_parser = _load_module("resume_parser/Eparsers/education_parser.py", "education_parser")
+    education = education_parser.parse_education(
+        "\n".join([
+            "University of Central Florida Expected Graduation: December 2028",
+            "Bachelor of Science in Electrical Engineering Orlando, FL",
+            "Relevant Coursework: Calculus I - III, Digital Systems",
+        ])
+    )
+
+    assert len(education) == 1
+    assert education[0]["school"] == "University of Central Florida"
+    assert education[0]["degree"] == "Bachelor of Science"
+    assert education[0]["field"] == "Electrical Engineering"
+    assert education[0]["endDate"] == "2028-12"
+    assert education[0]["location"] == "Orlando, FL"
 
 
 def test_education_parser_splits_stacked_school_year_entries_without_blank_lines():

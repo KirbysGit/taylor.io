@@ -126,3 +126,30 @@ def test_two_line_project_header_does_not_promote_lowercase_wrapped_bullets():
     assert len(projects) == 1
     assert projects[0]["title"] == "CivicLens"
     assert "congressional representatives" in " ".join(projects[0]["description"])
+
+
+def test_projects_parser_supports_embedded_hardware_stacks_with_trailing_dates():
+    parser = _load_projects_parser()
+    projects, debug = parser.parse_projects_with_debug(
+        "\n".join([
+            "Custom Embedded RC Derby Car | ESP32, Control Systems, Power Electronics January 2026 – Present",
+            "• Designed power distribution and embedded firmware integration.",
+            "Digital Logic Design & Verification | Verilog, FPGA Simulation January 2026 – Present",
+            "• Developed testbenches and simulated timing behavior in Vivado.",
+            "TI-RSLK Robot Maze | C/C++, Embedded Systems, Sensors September 2024 – November 2024",
+            "• Programmed autonomous navigation using sensor feedback.",
+            "Great Navel Orange Race Autonomous Boat | MSP430, MATLAB, Motor Control Jan 2025 – April 2025",
+            "• Programmed motor control and heading-angle navigation.",
+        ])
+    )
+
+    assert [project["title"] for project in projects] == [
+        "Custom Embedded RC Derby Car",
+        "Digital Logic Design & Verification",
+        "TI-RSLK Robot Maze",
+        "Great Navel Orange Race Autonomous Boat",
+    ]
+    assert projects[0]["techStack"] == ["ESP32", "Control Systems", "Power Electronics"]
+    assert projects[1]["techStack"] == ["Verilog", "FPGA Simulation"]
+    assert projects[3]["techStack"] == ["MSP430", "MATLAB", "Motor Control"]
+    assert len(debug["rejectedHeaders"]) == 0
