@@ -15,6 +15,7 @@ function ExperienceEntryCard({
 	compact,
 	descriptionMode,
 	descriptionBullets,
+	invalidFields,
 	onToggle,
 	onRemove,
 	onFieldChange,
@@ -73,6 +74,7 @@ function ExperienceEntryCard({
 						onBulletChange={onBulletChange}
 						onAddBullet={onAddBullet}
 						onRemoveBullet={onRemoveBullet}
+						invalidFields={invalidFields}
 						compact={compact}
 					/>
 				</div>

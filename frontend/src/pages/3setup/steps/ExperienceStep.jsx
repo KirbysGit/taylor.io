@@ -10,15 +10,27 @@ const ExperienceStep = forwardRef(function ExperienceStep({ experiences, onAdd, 
 
 	return (
 		<div>
-			<h2 className="mb-2 font-serif text-3xl font-bold tracking-tight text-gray-950">Your Work Experience</h2>
-			<p className="text-gray-600 mb-3">Tell us about your professional experience.</p>
-			<div className="smallDivider mb-6"></div>
-			<ExperienceInput 
+			<div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+				<div>
+					<h2 className="font-serif text-3xl font-bold tracking-tight text-gray-950">Your Work Experience</h2>
+					<p className="mt-1 text-gray-600">Add roles, responsibilities, and the impact you made.</p>
+				</div>
+				<button
+					type="button"
+					onClick={() => experienceRef.current?.addNew()}
+					className="profileAddButtonPrimary shrink-0"
+				>
+					+ Add experience
+				</button>
+			</div>
+			<div className="smallDivider mb-6" />
+			<ExperienceInput
 				ref={experienceRef}
 				experiences={experiences}
 				onAdd={onAdd}
 				onRemove={onRemove}
 				onUpdate={onUpdate}
+				hideHeader
 			/>
 		</div>
 	)

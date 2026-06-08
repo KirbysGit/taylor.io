@@ -22,6 +22,7 @@ const ExperienceInput = forwardRef(function ExperienceInput(
 
 	const getEntryId = (entry, index) => String(entry?.id ?? index)
 	const [expandedIds, setExpandedIds] = useState(() => new Set())
+	const [validationErrors, setValidationErrors] = useState(() => new Map())
 	const [localEntries, setLocalEntries] = useState(entries)
 	const [descriptionModes, setDescriptionModes] = useState({})
 	const [descriptionBullets, setDescriptionBullets] = useState({})
@@ -124,6 +125,17 @@ const ExperienceInput = forwardRef(function ExperienceInput(
 
 	const handleFieldChange = (index, field, value) => {
 		const entryId = localEntries[index]?.id ?? index
+		// clear validation error for this field when user types
+		setValidationErrors((prev) => {
+			const fields = prev.get(String(entryId))
+			if (!fields || !fields.has(field)) return prev
+			const next = new Map(prev)
+			const nextFields = new Set(fields)
+			nextFields.delete(field)
+			if (nextFields.size === 0) next.delete(String(entryId))
+			else next.set(String(entryId), nextFields)
+			return next
+		})
 		const updatedEntry = { ...localEntries[index], [field]: value }
 
 		if (field === 'current' && value) {
@@ -221,17 +233,33 @@ const ExperienceInput = forwardRef(function ExperienceInput(
 	}
 
 	function revealMissingRequired() {
-		const index = localEntries.findIndex((entry) => hasEntryContent(entry) && !String(entry?.title || '').trim())
-		if (index < 0) return false
-		const entryId = getEntryId(localEntries[index], index)
-		setExpandedIds((prev) => new Set([...prev, entryId]))
-		window.setTimeout(() => {
-			const card = document.getElementById(`experience-card-${entryId}`)
-			const input = document.getElementById(`experience-title-${entryId}`)
-			card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-			input?.focus()
-		}, 220)
-		return true
+		// find first entry missing title or description
+		const index = localEntries.findIndex((entry) => {
+			if (!hasEntryContent(entry)) return false
+			const missingTitle = !String(entry?.title || '').trim()
+			const missingDesc = !hasDescriptionContent(entry?.description)
+			return missingTitle || missingDesc
+		})
+		const targetIndex = index >= 0 ? index : 0
+		const entry = localEntries[targetIndex]
+		const entryId = getEntryId(entry, targetIndex)
+
+		const missing = new Set()
+		if (!String(entry?.title || '').trim()) missing.add('title')
+		if (!hasDescriptionContent(entry?.description)) missing.add('description')
+
+		if (missing.size > 0) {
+			setValidationErrors(new Map([[entryId, missing]]))
+			setExpandedIds((prev) => new Set([...prev, entryId]))
+			window.setTimeout(() => {
+				const card = document.getElementById(`experience-card-${entryId}`)
+				const input = document.getElementById(`experience-title-${entryId}`)
+				card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+				input?.focus()
+			}, 220)
+			return true
+		}
+		return false
 	}
 
 	useImperativeHandle(ref, () => ({
@@ -298,6 +326,28 @@ const ExperienceInput = forwardRef(function ExperienceInput(
 
 			{!hasEntries ? (
 				<div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-10 text-center">
+					<svg
+						viewBox="0 0 64 64"
+						className="mx-auto mb-1.5 size-16"
+						fill="none"
+					>
+						{/* sparkles */}
+						<path d="M6 9l1.6 3.6L11 14.2l-3.4 1.6L6 19.4 4.4 15.8 1 14.2l3.4-1.6z" fill="#f9a8c5" opacity="0.8" />
+						<path d="M57 8l1.1 2.5 2.5 1.1-2.5 1.1L57 15l-1.1-2.3-2.5-1.1 2.5-1.1z" fill="#f9a8c5" opacity="0.7" />
+						<path d="M55 44l1.3 2.9 2.9 1.3-2.9 1.3L55 52.4l-1.3-2.9-2.9-1.3 2.9-1.3z" fill="#f9a8c5" opacity="0.6" />
+
+						{/* briefcase */}
+						<rect x="14" y="26" width="36" height="24" rx="4" fill="#fce7f0" stroke="#ec9bbd" strokeWidth="2" strokeLinejoin="round" />
+						<path
+							d="M25 26v-4c0-1.7 1.3-3 3-3h8c1.7 0 3 1.3 3 3v4"
+							stroke="#ec9bbd"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						/>
+						<path d="M14 36h36" stroke="#ec9bbd" strokeWidth="2" />
+						<rect x="29" y="33" width="6" height="6" rx="1.5" fill="#ec9bbd" />
+					</svg>
 					<p className="text-sm text-slate-600">No experience entries yet.</p>
 					{hideHeader ? (
 						<button type="button" onClick={handleAddNew} className="profileAddButton mt-4">
@@ -323,6 +373,7 @@ const ExperienceInput = forwardRef(function ExperienceInput(
 									compact={compact}
 									descriptionMode={descriptionModes[index] || 'paragraph'}
 									descriptionBullets={descriptionBullets[index] || ['']}
+									invalidFields={validationErrors.get(entryId)}
 									onToggle={() => {
 										if (Date.now() - lastDragEndRef.current < 150) return
 										toggleExpanded(index)

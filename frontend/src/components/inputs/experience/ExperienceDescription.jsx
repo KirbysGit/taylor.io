@@ -12,6 +12,7 @@ function ExperienceDescription({
 	onAddBullet,
 	onRemoveBullet,
 	compact = false,
+	invalid = false,
 }) {
 	const isBullets = (mode || 'paragraph') === 'bullets'
 	const bulletList = bullets || ['']
@@ -65,7 +66,7 @@ function ExperienceDescription({
 				<textarea
 					value={description || ''}
 					onChange={(e) => onDescriptionChange(e.target.value)}
-					className="input min-h-[100px] resize-y"
+					className={`input min-h-[100px] resize-y ${invalid ? 'border-red-400 bg-red-50/30 ring-2 ring-red-100 [animation:shake_0.45s_ease-in-out]' : ''}`}
 					placeholder="Describe your responsibilities and achievements..."
 				/>
 			) : (
@@ -84,7 +85,7 @@ function ExperienceDescription({
 									type="text"
 									value={bullet}
 									onChange={(e) => onBulletChange(bulletIndex, e.target.value)}
-									className="input flex-1"
+									className={`input flex-1 ${invalid && bulletIndex === 0 ? 'border-red-400 bg-red-50/30 ring-2 ring-red-100' : ''}`}
 									placeholder="Impact or responsibility..."
 								/>
 								{bulletList.length > 1 ? (

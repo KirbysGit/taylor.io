@@ -2,16 +2,16 @@ import MonthYearPicker from '../MonthYearPicker'
 import FormSection from '../education/FormSection'
 import ExperienceDescription from './ExperienceDescription'
 
-function Field({ label, optional, required, missing, hint, children, compact }) {
+const INVALID_CLASS = 'border-red-400 bg-red-50/30 ring-2 ring-red-100 [animation:shake_0.45s_ease-in-out]'
+
+function Field({ label, optional, children, compact }) {
 	return (
 		<div className="min-w-0">
 			<label className={compact ? 'mb-1.5 block text-xs font-semibold text-slate-600' : 'label'}>
 				{label}
-				{required ? <span className="ml-2 rounded-full bg-brand-pink/[0.08] px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-pink-dark">Required</span> : null}
 				{optional ? <span className="font-normal text-slate-400"> (optional)</span> : null}
 			</label>
 			{children}
-			{missing ? <p className="mt-1.5 text-xs font-semibold text-red-600">{hint || `${label} is required.`}</p> : null}
 		</div>
 	)
 }
@@ -28,35 +28,23 @@ function ExperienceEntryForm({
 	onBulletChange,
 	onAddBullet,
 	onRemoveBullet,
+	invalidFields,
 	compact = false,
 }) {
 	const current = exp?.current || false
-	const description = exp?.description
-	const hasDescription = Array.isArray(description)
-		? description.some((line) => String(line || '').trim())
-		: String(description || '').trim()
-	const hasAnyExperienceContent = [
-		exp?.title,
-		exp?.company,
-		exp?.location,
-		exp?.skills,
-		exp?.startDate,
-		exp?.endDate,
-		hasDescription ? 'description' : '',
-	].some((value) => String(value || '').trim())
-	const missingTitle = hasAnyExperienceContent && !String(exp?.title || '').trim()
+	const inv = invalidFields || new Set()
 
 	return (
 		<div className="space-y-6">
 			<FormSection title="Basics">
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-					<Field label="Job title" required missing={missingTitle} hint="Add a title so this role can be saved and tailored clearly." compact={compact}>
+					<Field label="Job title" compact={compact}>
 						<input
 							id={`experience-title-${entryId}`}
 							type="text"
 							value={exp?.title || ''}
 							onChange={(e) => onFieldChange(index, 'title', e.target.value)}
-							className={`input ${missingTitle ? 'border-red-300 bg-red-50/40 ring-2 ring-red-100 focus:ring-red-200' : ''}`}
+							className={`input ${inv.has('title') ? INVALID_CLASS : ''}`}
 							placeholder="e.g. Software Engineer"
 						/>
 					</Field>
@@ -161,6 +149,7 @@ function ExperienceEntryForm({
 				onAddBullet={() => onAddBullet(index)}
 				onRemoveBullet={(bi) => onRemoveBullet(index, bi)}
 				compact={compact}
+				invalid={inv.has('description')}
 			/>
 		</div>
 	)

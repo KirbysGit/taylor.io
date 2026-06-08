@@ -15,6 +15,7 @@ function EducationEntryCard({
 	isDragOver,
 	compact,
 	showSubsections,
+	invalidFields,
 	onToggle,
 	onRemove,
 	onFieldChange,
@@ -62,6 +63,7 @@ function EducationEntryCard({
 						entryId={entryId}
 						index={index}
 						onFieldChange={onFieldChange}
+						invalidFields={invalidFields}
 						compact={compact}
 					/>
 					{showSubsections ? (

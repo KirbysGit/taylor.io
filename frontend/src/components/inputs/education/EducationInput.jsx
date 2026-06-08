@@ -35,6 +35,7 @@ const EducationInput = forwardRef(function EducationInput(
 
 	const getEntryId = (entry, index) => String(entry?.id ?? index)
 	const [expandedIds, setExpandedIds] = useState(() => new Set())
+	const [validationErrors, setValidationErrors] = useState(() => new Map())
 	const [localEntries, setLocalEntries] = useState(entries)
 	const [draggedEntryIndex, setDraggedEntryIndex] = useState(null)
 	const [dragOverEntryIndex, setDragOverEntryIndex] = useState(null)
@@ -118,6 +119,20 @@ const EducationInput = forwardRef(function EducationInput(
 
 	const handleFieldChange = (index, field, value) => {
 		const entryId = localEntries[index]?.id ?? index
+		// clear validation error for this field when user types
+		setValidationErrors((prev) => {
+			const fields = prev.get(String(entryId))
+			if (!fields || !fields.has(field)) return prev
+			const next = new Map(prev)
+			const nextFields = new Set(fields)
+			nextFields.delete(field)
+			// also clear 'discipline' when 'field' is typed (they're aliases)
+			if (field === 'field') nextFields.delete('discipline')
+			if (field === 'discipline') nextFields.delete('field')
+			if (nextFields.size === 0) next.delete(String(entryId))
+			else next.set(String(entryId), nextFields)
+			return next
+		})
 		const updatedEntry = { ...localEntries[index], [field]: value }
 
 		if (field === 'current' && value) {
@@ -173,21 +188,48 @@ const EducationInput = forwardRef(function EducationInput(
 			entry?.gpa,
 			entry?.startDate,
 			entry?.endDate,
+			entry?.current ? 'current' : '',
 		].some((value) => String(value || '').trim())
 	}
 
 	function revealMissingRequired() {
-		const index = localEntries.findIndex((entry) => hasEntryContent(entry) && !String(entry?.discipline || entry?.field || '').trim())
-		if (index < 0) return false
-		const entryId = getEntryId(localEntries[index], index)
-		setExpandedIds((prev) => new Set([...prev, entryId]))
-		window.setTimeout(() => {
-			const card = document.getElementById(`education-card-${entryId}`)
-			const input = document.getElementById(`education-discipline-${entryId}`)
-			card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-			input?.focus()
-		}, 220)
-		return true
+		// find the first entry that has any content but is missing school, degree, or discipline
+		const index = localEntries.findIndex((entry) => {
+			if (!hasEntryContent(entry)) return false
+			const missingSchool = !String(entry?.school || '').trim()
+			const missingDegree = !String(entry?.degree || '').trim()
+			const missingDiscipline = !String(entry?.discipline || entry?.field || '').trim()
+			return missingSchool || missingDegree || missingDiscipline
+		})
+		// also catch if there are zero real entries (phantom empty entry exists locally)
+		const targetIndex = index >= 0 ? index : 0
+		const entry = localEntries[targetIndex]
+		const entryId = getEntryId(entry, targetIndex)
+
+		// build the set of missing fields for this entry
+		const missing = new Set()
+		if (!String(entry?.school || '').trim()) missing.add('school')
+		if (!String(entry?.degree || '').trim()) missing.add('degree')
+		if (!String(entry?.discipline || entry?.field || '').trim()) missing.add('discipline')
+
+		if (missing.size > 0) {
+			setValidationErrors(new Map([[entryId, missing]]))
+			setExpandedIds((prev) => new Set([...prev, entryId]))
+			window.setTimeout(() => {
+				const card = document.getElementById(`education-card-${entryId}`)
+				// focus the first missing field in order: school → degree → discipline
+				const firstField = missing.has('school')
+					? `education-school-${entryId}`
+					: missing.has('degree')
+					? `education-degree-${entryId}`
+					: `education-discipline-${entryId}`
+				const input = document.getElementById(firstField)
+				card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+				input?.focus()
+			}, 220)
+			return true
+		}
+		return false
 	}
 
 	useImperativeHandle(ref, () => ({
@@ -236,7 +278,7 @@ const EducationInput = forwardRef(function EducationInput(
 			<div>
 				<h3 className="text-lg font-bold tracking-tight text-slate-900">Education</h3>
 				<p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-600">
-					Add schools, degrees, coursework, honors, and anything else that should be available when tailoring a résumé.
+					Schools, degrees, coursework, and honors for tailoring your résumé.
 				</p>
 			</div>
 			<button type="button" onClick={handleAddNew} className="profileAddButton shrink-0">
@@ -251,6 +293,39 @@ const EducationInput = forwardRef(function EducationInput(
 
 			{!hasEntries ? (
 				<div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-10 text-center">
+					<svg
+						viewBox="0 0 64 64"
+						className="mx-auto mb-1.5 size-16"
+						fill="none"
+					>
+						{/* sparkles */}
+						<path d="M6 9l1.6 3.6L11 14.2l-3.4 1.6L6 19.4 4.4 15.8 1 14.2l3.4-1.6z" fill="#f9a8c5" opacity="0.8" />
+						<path d="M57 8l1.1 2.5 2.5 1.1-2.5 1.1L57 15l-1.1-2.3-2.5-1.1 2.5-1.1z" fill="#f9a8c5" opacity="0.7" />
+						<path d="M55 44l1.3 2.9 2.9 1.3-2.9 1.3L55 52.4l-1.3-2.9-2.9-1.3 2.9-1.3z" fill="#f9a8c5" opacity="0.6" />
+
+						{/* graduation cap */}
+						<path
+							d="M32 18L8 28l24 10 24-10-24-10z"
+							fill="#fce7f0"
+							stroke="#ec9bbd"
+							strokeWidth="2"
+							strokeLinejoin="round"
+						/>
+						<path
+							d="M18 32.5V41c0 3 6.3 5.5 14 5.5s14-2.5 14-5.5v-8.5"
+							stroke="#ec9bbd"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						/>
+						<path
+							d="M50 29v9.5"
+							stroke="#ec9bbd"
+							strokeWidth="2"
+							strokeLinecap="round"
+						/>
+						<circle cx="50" cy="40.5" r="2" fill="#ec9bbd" />
+					</svg>
 					<p className="text-sm text-slate-600">No education entries yet.</p>
 					{hideHeader ? (
 						<button type="button" onClick={handleAddNew} className="profileAddButton mt-4">
@@ -275,6 +350,7 @@ const EducationInput = forwardRef(function EducationInput(
 									isDragOver={dragOverEntryIndex === index}
 									compact={compact}
 									showSubsections={showSubsections}
+									invalidFields={validationErrors.get(entryId)}
 									onToggle={() => {
 										if (Date.now() - lastDragEndRef.current < 150) return
 										toggleExpanded(index)

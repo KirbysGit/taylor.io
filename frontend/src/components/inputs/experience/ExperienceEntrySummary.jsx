@@ -12,9 +12,6 @@ import {
 	getExperienceEntryTheme,
 	getExperienceMetaLine,
 	getExperienceSkillChips,
-	getExperienceStatus,
-	statusBadgeClass,
-	statusLabel,
 } from './experienceUtils'
 
 function ExperienceEntrySummary({
@@ -30,12 +27,10 @@ function ExperienceEntrySummary({
 }) {
 	const title = getExperienceDisplayTitle(exp)
 	const meta = getExperienceMetaLine(exp)
-	const status = getExperienceStatus(exp)
 	const theme = getExperienceEntryTheme(entryId)
 	const layout = getEntrySummaryGridClasses({ compact, isDraggable })
 	const skillChips = getExperienceSkillChips(exp)
 	const hasPills = skillChips.length > 0
-	const showStatusBadge = status !== 'complete'
 
 	return (
 		<div
@@ -60,13 +55,6 @@ function ExperienceEntrySummary({
 			<div className="row-start-1 min-w-0">
 				<div className="flex flex-wrap items-start gap-2 gap-y-1">
 					<p className="text-sm font-bold text-slate-900">{title}</p>
-					{showStatusBadge ? (
-						<span
-							className={`inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusBadgeClass(status)}`}
-						>
-							{statusLabel(status)}
-						</span>
-					) : null}
 				</div>
 				{meta ? <p className="mt-1 text-xs leading-relaxed text-slate-600">{meta}</p> : null}
 			</div>

@@ -6,7 +6,7 @@
 // allow users to edit the fields that were parsed.
 
 // imports.
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // services imports.
@@ -25,7 +25,7 @@ import {
 } from '@/pages/utils/DataFormatting'
 
 // steps imports.
-import { ChevronLeft, ChevronRight } from '@/components/icons'
+import { ChevronLeft, ChevronRight, ErrorIcon } from '@/components/icons'
 import WelcomeStep from './steps/WelcomeStep'
 import ContactStep from './steps/ContactStep'
 import EducationStep from './steps/EducationStep'
@@ -42,11 +42,33 @@ function AccountSetup() {
 	const navigate = useNavigate()
 	const educationStepRef = useRef(null)
 	const experienceStepRef = useRef(null)
+	const projectsStepRef = useRef(null)
+	const scrollContainerRef = useRef(null)
+	const errorFadeTimerRef = useRef(null)
 
 	// ---- states ----
-	const [currentStep, setCurrentStep] = useState(0) 	// current step of onboarding process.
-	const [user, setUser] = useState(null)				// current user data.
+	const [currentStep, setCurrentStep] = useState(0)
+	const [user, setUser] = useState(null)
 	const [stepError, setStepError] = useState('')
+	// displayedError stays populated during the fade-out so the element stays mounted
+	const [displayedError, setDisplayedError] = useState('')
+	const [errorVisible, setErrorVisible] = useState(false)
+	const [showSkipConfirmation, setShowSkipConfirmation] = useState(false)
+
+	// sync stepError → displayedError with instant-in / fade-out behaviour
+	useEffect(() => {
+		clearTimeout(errorFadeTimerRef.current)
+		if (stepError) {
+			setDisplayedError(stepError)
+			setErrorVisible(true)
+			// scroll the container to the top so the banner is always seen
+			scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+		} else {
+			setErrorVisible(false)
+			errorFadeTimerRef.current = setTimeout(() => setDisplayedError(''), 400)
+		}
+		return () => clearTimeout(errorFadeTimerRef.current)
+	}, [stepError])
 
 	// form data state.
 	const [formData, setFormData] = useState({
@@ -94,7 +116,18 @@ function AccountSetup() {
 		const userData = localStorage.getItem('user')
 		if (userData) {
 			try {
-				setUser(JSON.parse(userData))
+				const parsedUser = JSON.parse(userData)
+				setUser(parsedUser)
+				setFormData((prev) => {
+					if (!parsedUser?.email || String(prev.contact?.email || '').trim()) return prev
+					return {
+						...prev,
+						contact: {
+							...prev.contact,
+							email: parsedUser.email,
+						},
+					}
+				})
 			} catch (error) {
 				console.error('Error parsing user data:', error)
 			}
@@ -113,6 +146,7 @@ function AccountSetup() {
 		edu?.gpa,
 		edu?.startDate,
 		edu?.endDate,
+		edu?.current ? 'current' : '',
 	].some(hasValue)
 	const hasExperienceContent = (exp) => {
 		const description = exp?.description
@@ -130,61 +164,69 @@ function AccountSetup() {
 		].some(hasValue)
 	}
 
-	const validateCurrentStep = () => {
-		// Step 1 — Contact: email is always present from account, no extra validation needed.
-
-		// Step 2 — Education: if any entry has content, it must have school + degree + discipline.
-		if (currentStep === 2) {
-			for (const edu of formData.education) {
-				if (!hasEducationContent(edu)) continue
-				if (!hasValue(edu?.school)) {
-					setStepError('Each education entry needs a school name.')
-					educationStepRef.current?.revealMissingRequired?.()
-					return false
-				}
-				if (!hasValue(edu?.degree)) {
-					setStepError('Each education entry needs a degree (e.g. Bachelor of Science).')
-					return false
-				}
-				if (!hasValue(edu?.discipline || edu?.field)) {
-					setStepError('Each education entry needs a field of study.')
-					educationStepRef.current?.revealMissingRequired?.()
-					return false
-				}
+	const pruneEmptyEntriesForStep = (data, step = currentStep) => {
+		if (step === 2) {
+			return {
+				...data,
+				education: data.education.filter(hasEducationContent),
 			}
 		}
 
-		// Step 3 — Experience: each entry with content needs a title and description.
+		return data
+	}
+
+	const validateCurrentStep = (data = formData) => {
+		// Step 2 — Education: if any entry exists with content, it must have school + degree + discipline.
+		if (currentStep === 2) {
+			const badEntry = data.education.find((edu) => {
+				if (!hasEducationContent(edu)) return false
+				return !hasValue(edu?.school) || !hasValue(edu?.degree) || !hasValue(edu?.discipline || edu?.field)
+			})
+			if (badEntry) {
+				const missing = []
+				if (!hasValue(badEntry?.school)) missing.push('university')
+				if (!hasValue(badEntry?.degree)) missing.push('degree')
+				if (!hasValue(badEntry?.discipline || badEntry?.field)) missing.push('field of study')
+				setStepError(`Each education entry needs a ${missing.join(', ')}.`)
+				educationStepRef.current?.revealMissingRequired?.()
+				return false
+			}
+		}
+
+		// Step 3 — Experience: each entry with any content must have a title and description.
 		if (currentStep === 3) {
-			for (const exp of formData.experiences) {
-				if (!hasExperienceContent(exp)) continue
-				if (!hasValue(exp?.title)) {
-					setStepError('Each experience entry needs a job title.')
-					experienceStepRef.current?.revealMissingRequired?.()
-					return false
-				}
+			const badEntry = data.experiences.find((exp) => {
+				if (!hasExperienceContent(exp)) return false
 				const desc = exp?.description
 				const hasDesc = Array.isArray(desc) ? desc.some(hasValue) : hasValue(desc)
-				if (!hasDesc) {
-					setStepError('Each experience entry needs a description of your work.')
-					return false
-				}
+				return !hasValue(exp?.title) || !hasDesc
+			})
+			if (badEntry) {
+				const desc = badEntry?.description
+				const hasDesc = Array.isArray(desc) ? desc.some(hasValue) : hasValue(desc)
+				const missing = []
+				if (!hasValue(badEntry?.title)) missing.push('a job title')
+				if (!hasDesc) missing.push('a description')
+				setStepError(`Each experience entry needs ${missing.join(' and ')}.`)
+				experienceStepRef.current?.revealMissingRequired?.()
+				return false
 			}
 		}
 
-		// Step 5 — Projects: if any project has content, it needs a name and description.
+		// Step 5 — Projects: if any project has content, it needs a title and description.
 		if (currentStep === 5) {
-			for (const proj of formData.projects) {
+			const badEntry = data.projects.find((proj) => {
 				const hasContent = hasValue(proj?.title) || hasValue(proj?.description)
-				if (!hasContent) continue
-				if (!hasValue(proj?.title)) {
-					setStepError('Each project needs a name.')
-					return false
-				}
-				if (!hasValue(proj?.description)) {
-					setStepError('Each project needs a description.')
-					return false
-				}
+				if (!hasContent) return false
+				return !hasValue(proj?.title) || !hasValue(proj?.description)
+			})
+			if (badEntry) {
+				const missing = []
+				if (!hasValue(badEntry?.title)) missing.push('a name')
+				if (!hasValue(badEntry?.description)) missing.push('a description')
+				setStepError(`Each project needs ${missing.join(' and ')}.`)
+				projectsStepRef.current?.revealMissingRequired?.()
+				return false
 			}
 		}
 
@@ -193,7 +235,11 @@ function AccountSetup() {
 	}
 
 	const handleNext = () => {
-		if (!validateCurrentStep()) return
+		const prunedFormData = pruneEmptyEntriesForStep(formData)
+		if (!validateCurrentStep(prunedFormData)) return
+		if (prunedFormData !== formData) {
+			setFormData(prunedFormData)
+		}
 		if (currentStep < steps.length - 1) {
 			setCurrentStep(currentStep + 1)
 		}
@@ -205,6 +251,15 @@ function AccountSetup() {
 		if (currentStep > 0) {
 			setCurrentStep(currentStep - 1)
 		}
+	}
+
+	const handleSkipSetup = () => {
+		const userId = user?.id
+		if (!userId) return
+		localStorage.setItem(`setupCompleted_${userId}`, 'true')
+		localStorage.setItem(`setupSkipped_${userId}`, 'true')
+		setShowSkipConfirmation(false)
+		navigate('/home')
 	}
 
 	// handles form completion.
@@ -265,6 +320,7 @@ function AccountSetup() {
 			const userId = user?.id
 			if (userId) {
 				localStorage.setItem(`setupCompleted_${userId}`, 'true')
+				localStorage.removeItem(`setupSkipped_${userId}`)
 			}
 			
 			// redirect to home.
@@ -313,6 +369,7 @@ function AccountSetup() {
 							handleNext={handleNext}
 							formData={formData}
 							onFormDataUpdate={(mergedData) => setFormData(mergedData)}
+							onSkipSetup={() => setShowSkipConfirmation(true)}
 							onRemoveResume={async () => {
 								try { await detachResume() } catch (e) { console.warn('detachResume:', e) }
 								setFormData(prev => ({ ...prev, uploadedResumeFilename: null }))
@@ -365,6 +422,7 @@ function AccountSetup() {
 			case 5: // Projects
 				return (
 					<ProjectsStep
+						ref={projectsStepRef}
 						projects={formData.projects}
 						onAdd={(item) => addItem('projects', item)}
 						onRemove={(index) => removeItem('projects', index)}
@@ -404,21 +462,67 @@ function AccountSetup() {
 		)
 	}
 
-	const showBottomNav = currentStep > 0 && currentStep < steps.length - 1
+	const showStepNav = currentStep > 0 && currentStep < steps.length - 1
+	const previousStepTitle = steps[currentStep - 1]?.title
+	const nextStepTitle = steps[currentStep + 1]?.title
 
 	return (
-		<div className="relative h-screen overflow-y-auto bg-[#fff8ef] info-scrollbar">
+		<div ref={scrollContainerRef} className="relative h-screen overflow-y-auto bg-[#fff8ef] info-scrollbar">
 			<div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
-				<div className="absolute -left-24 top-[-8rem] size-[24rem] rounded-full bg-brand-pink/[0.16] blur-3xl" />
-				<div className="absolute right-[-8rem] top-24 size-[28rem] rounded-full bg-cyan-300/[0.14] blur-3xl" />
-				<div className="absolute bottom-[-10rem] left-1/2 size-[30rem] -translate-x-1/2 rounded-full bg-violet-400/[0.12] blur-3xl" />
+				<div className="auth-background-photo fixed inset-0" />
+				<div className="auth-corner-blotch auth-corner-blotch--top-right" />
+				<div className="auth-corner-blotch auth-corner-blotch--bottom-left" />
+				<div className="absolute left-[15%] top-[18%] size-[18rem] rounded-full bg-brand-pink/[0.12] blur-3xl" />
+				<div className="absolute right-[13%] bottom-[12%] size-[20rem] rounded-full bg-rose-300/[0.14] blur-3xl" />
 			</div>
-			<div className="relative z-[1] min-h-full flex items-center justify-center py-12 px-4">
-				<div className={`w-full ${currentStep === 0 ? 'max-w-5xl' : 'max-w-2xl'}`}>
+
+			{showStepNav ? (
+				<>
+					<button
+						type="button"
+						onClick={handlePrevious}
+						className="group fixed left-[max(4.25rem,calc((100vw-42rem)/4))] top-1/2 z-30 flex max-w-[6.5rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3 text-center outline-none transition"
+						aria-label={`Previous step: ${previousStepTitle}`}
+					>
+						<span className="flex size-12 items-center justify-center rounded-full bg-brand-pink text-white shadow-[0_18px_38px_-18px_rgba(214,86,86,0.9)] ring-4 ring-white/80 transition duration-300 group-hover:-translate-x-1.5 group-hover:scale-110 group-hover:bg-brand-pink-dark group-hover:shadow-[0_20px_48px_-15px_rgba(214,86,86,1)] group-focus-visible:ring-brand-pink/35 sm:size-14">
+							<ChevronLeft className="size-5 transition duration-300 group-hover:-translate-x-0.5" />
+						</span>
+						<span className="rounded-full border border-brand-pink/12 bg-white/88 px-3 py-1.5 shadow-sm backdrop-blur-md transition duration-300 group-hover:border-brand-pink/28 group-hover:bg-white">
+							<span className="block text-[0.62rem] font-black uppercase tracking-[0.14em] text-brand-pink-dark">Previous</span>
+							<span className="mt-0.5 block truncate text-xs font-black text-gray-950">{previousStepTitle}</span>
+						</span>
+					</button>
+
+					<button
+						type="button"
+						onClick={handleNext}
+						className="group fixed right-[max(4.25rem,calc((100vw-42rem)/4))] top-1/2 z-30 flex max-w-[6.5rem] translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3 text-center outline-none transition"
+						aria-label={`Next step: ${nextStepTitle}`}
+					>
+						<span className="flex size-12 items-center justify-center rounded-full bg-brand-pink text-white shadow-[0_18px_38px_-18px_rgba(214,86,86,0.9)] ring-4 ring-white/80 transition duration-300 group-hover:translate-x-1.5 group-hover:scale-110 group-hover:bg-brand-pink-dark group-hover:shadow-[0_20px_48px_-15px_rgba(214,86,86,1)] group-focus-visible:ring-brand-pink/35 sm:size-14">
+							<ChevronRight className="size-5 transition duration-300 group-hover:translate-x-0.5" />
+						</span>
+						<span className="rounded-full border border-brand-pink/12 bg-white/88 px-3 py-1.5 shadow-sm backdrop-blur-md transition duration-300 group-hover:border-brand-pink/28 group-hover:bg-white">
+							<span className="block text-[0.62rem] font-black uppercase tracking-[0.14em] text-brand-pink-dark">Next</span>
+							<span className="mt-0.5 block truncate text-xs font-black text-gray-950">{nextStepTitle}</span>
+						</span>
+					</button>
+				</>
+			) : null}
+
+			<div className="relative z-[1] min-h-full px-4 py-12">
+				<div
+					className={
+						currentStep === 0
+							? 'mx-auto flex min-h-full w-full max-w-5xl items-center justify-center'
+							: 'grid min-h-full w-full grid-cols-[minmax(5.5rem,1fr)_minmax(0,42rem)_minmax(5.5rem,1fr)] items-center gap-4'
+					}
+				>
+					<div className={`w-full ${currentStep === 0 ? 'max-w-5xl' : 'col-start-2 max-w-2xl'}`}>
 					<div className="mb-6">
 						<div className="w-full overflow-hidden rounded-full bg-white/70 h-1.5 shadow-inner ring-1 ring-brand-pink/10">
 							<div
-								className="h-full rounded-full bg-gradient-to-r from-brand-pink via-rose-400 to-violet-400 transition-all duration-500 ease-out"
+								className="h-full rounded-full bg-gradient-to-r from-brand-pink to-rose-400 transition-all duration-500 ease-out"
 								style={{ width: `${progress}%` }}
 							></div>
 						</div>
@@ -432,59 +536,83 @@ function AccountSetup() {
 						</div>
 					</div>
 
+					{displayedError ? (
+						<div
+							className="errorMessage mb-4 w-full"
+							style={{
+								opacity: errorVisible ? 1 : 0,
+								transition: errorVisible ? 'none' : 'opacity 0.35s ease-out',
+							}}
+							role="alert"
+							aria-live="assertive"
+						>
+							<ErrorIcon className="errorMessage-icon shrink-0" />
+							<span>{displayedError}</span>
+						</div>
+					) : null}
+
 					<div
 						key={currentStep}
-						className={`animate-fadeIn rounded-[1.55rem] border border-brand-pink/14 bg-white/88 shadow-[0_28px_80px_-34px_rgba(120,40,40,0.34)] ring-1 ring-white/90 backdrop-blur-xl ${currentStep === 0 ? 'p-6 md:p-10' : 'p-6 md:p-8'}`}
+						className={
+							currentStep === 0
+								? 'animate-fadeIn'
+								: 'animate-fadeIn rounded-[1.55rem] border border-brand-pink/14 bg-white/88 p-6 shadow-[0_28px_80px_-34px_rgba(120,40,40,0.34)] ring-1 ring-white/90 backdrop-blur-xl md:p-8'
+						}
 					>
 						{renderStepContent()}
 					</div>
+				</div>
 
-					{showBottomNav && (
-						<div className="mt-6">
-							{stepError ? (
-								<div className="mx-auto mb-4 max-w-xl rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700">
-									{stepError}
-								</div>
-							) : null}
-							<div className="flex items-center justify-center gap-4">
-								<button
-									onClick={handlePrevious}
-									className="px-5 py-2.5 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition-all flex items-center gap-2 group"
-								>
-									<ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-									Previous
-								</button>
-
-								<div className="flex items-center gap-1.5">
-									{steps.slice(1, -1).map((_, index) => {
-										const stepIndex = index + 1
-										return (
-											<div
-												key={stepIndex}
-												className={`h-1.5 rounded-full transition-all duration-300 ${
-													stepIndex < currentStep
-														? 'w-6 bg-brand-pink'
-														: stepIndex === currentStep
-														? 'w-8 bg-brand-pink'
-														: 'w-1.5 bg-white/80 ring-1 ring-gray-200'
-												}`}
-											/>
-										)
-									})}
-								</div>
-
-								<button
-									onClick={handleNext}
-									className="px-6 py-2.5 bg-brand-pink text-white font-semibold rounded-xl hover:bg-brand-pink-dark transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group"
-								>
-									Next
-									<ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-								</button>
-							</div>
-						</div>
-					)}
 				</div>
 			</div>
+
+			{showSkipConfirmation ? (
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+					<button
+						type="button"
+						className="absolute inset-0 cursor-default bg-gray-950/35 backdrop-blur-[2px]"
+						onClick={() => setShowSkipConfirmation(false)}
+						aria-label="Close skip setup confirmation"
+					/>
+					<div
+						role="dialog"
+						aria-modal="true"
+						aria-labelledby="skip-setup-title"
+						className="relative w-full max-w-md rounded-[1.4rem] border border-brand-pink/18 bg-white p-6 shadow-[0_28px_80px_-28px_rgba(80,25,30,0.62)] sm:p-7"
+					>
+						<div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-brand-pink/[0.1] text-xl font-black text-brand-pink">
+							?
+						</div>
+						<div className="mt-4 text-center">
+							<h2 id="skip-setup-title" className="font-serif text-2xl font-black tracking-tight text-gray-950">
+								Skip setup for now?
+							</h2>
+							<p className="mt-3 text-sm leading-relaxed text-gray-600">
+								You can explore Taylor now, but creating your first tailored r&eacute;sum&eacute; will be faster and smoother when your experience, education, projects, and skills are ready.
+							</p>
+						</div>
+						<div className="mt-6 space-y-3">
+							<button
+								type="button"
+								onClick={() => setShowSkipConfirmation(false)}
+								className="w-full rounded-xl bg-brand-pink px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_-16px_rgba(214,86,86,0.82)] transition hover:-translate-y-0.5 hover:bg-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+							>
+								Continue setup
+							</button>
+							<button
+								type="button"
+								onClick={handleSkipSetup}
+								className="w-full rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-bold text-gray-600 transition hover:border-brand-pink/25 hover:bg-brand-pink/[0.035] hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+							>
+								Skip for now
+							</button>
+						</div>
+						<p className="mt-4 text-center text-xs text-gray-400">
+							You can return to setup from the dashboard anytime.
+						</p>
+					</div>
+				</div>
+			) : null}
 		</div>
 	)
 }

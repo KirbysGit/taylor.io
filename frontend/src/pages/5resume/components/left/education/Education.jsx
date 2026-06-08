@@ -8,7 +8,7 @@ import { transformEducationForStep } from '@/pages/info/utils/dataTransform'
 const newId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`
 
 const EDUCATION_DESCRIPTION =
-	'Add schools, degrees, coursework, honors, and anything else that should be available when tailoring a résumé.'
+	'Schools, degrees, coursework, and honors for tailoring your résumé.'
 
 // Resume format (start_date, end_date) -> Input format (startDate, endDate, id, subsections)
 const toInputFormat = (educationData) => {

@@ -37,30 +37,35 @@ const dataRows = [
 		label: 'Experience',
 		icon: faBriefcase,
 		empty: 'No roles yet',
+		sectionId: 'experience-section',
 	},
 	{
 		key: 'education',
 		label: 'Education',
 		icon: faGraduationCap,
 		empty: 'No school yet',
+		sectionId: 'education-section',
 	},
 	{
 		key: 'projects',
 		label: 'Projects',
 		icon: faRocket,
 		empty: 'No projects yet',
+		sectionId: 'projects-section',
 	},
 	{
 		key: 'skills',
 		label: 'Skills',
 		icon: faWandMagicSparkles,
 		empty: 'No skills yet',
+		sectionId: 'skills-section',
 	},
 	{
 		key: 'summary',
 		label: 'Summary',
 		icon: faStar,
 		empty: 'No summary yet',
+		sectionId: 'summary-section',
 	},
 ]
 
@@ -207,31 +212,36 @@ function StartOptionButton({ icon, label, description, badge, onClick, featured 
 			className={[
 				'group relative flex h-full min-h-[9.25rem] flex-col overflow-hidden rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2',
 				featured
-					? 'border-brand-pink/36 bg-white shadow-[0_18px_42px_-28px_rgba(214,86,86,0.55)] hover:border-brand-pink/70 hover:shadow-[0_22px_48px_-28px_rgba(214,86,86,0.45)]'
-					: 'border-gray-200/90 bg-white shadow-[0_12px_34px_-28px_rgba(45,30,38,0.38)] hover:border-brand-pink/55 hover:shadow-[0_18px_42px_-28px_rgba(214,86,86,0.34)]',
+					? 'border-transparent bg-gradient-to-br from-[#9f3a40] via-[#c25a56] to-[#d97f7c] shadow-[0_18px_42px_-26px_rgba(80,18,22,0.55)] hover:shadow-[0_22px_48px_-26px_rgba(80,18,22,0.5)]'
+					: 'border-gray-200 bg-white shadow-[0_16px_40px_-22px_rgba(45,30,38,0.32)] ring-1 ring-black/[0.02] hover:border-brand-pink/55 hover:shadow-[0_22px_50px_-24px_rgba(214,86,86,0.32)]',
 			].join(' ')}
 		>
 			{featured ? (
-				<span className="pointer-events-none absolute -right-8 -top-8 size-28 rounded-full bg-brand-pink/[0.09] blur-xl" aria-hidden />
+				<span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_12%,rgba(255,255,255,0.18),transparent_32%),radial-gradient(circle_at_10%_92%,rgba(0,0,0,0.16),transparent_36%)]" aria-hidden />
 			) : null}
 			<div className="relative z-[1] flex items-start justify-between gap-3">
 				<span
 					className={[
 						'flex size-11 shrink-0 items-center justify-center rounded-2xl shadow-sm transition group-hover:scale-[1.03]',
-						featured ? 'bg-brand-pink text-white' : 'bg-brand-pink/[0.08] text-brand-pink-dark',
+						featured ? 'bg-white/16 text-white ring-1 ring-white/25' : 'bg-brand-pink/[0.08] text-brand-pink-dark',
 					].join(' ')}
 				>
 					<FontAwesomeIcon icon={icon} className="size-4" />
 				</span>
 				{badge ? (
-					<span className="rounded-full bg-brand-pink/[0.08] px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.12em] text-brand-pink-dark ring-1 ring-brand-pink/12">
+					<span
+						className={[
+							'rounded-full px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.12em] ring-1',
+							featured ? 'bg-white/14 text-white ring-white/22' : 'bg-brand-pink/[0.08] text-brand-pink-dark ring-brand-pink/12',
+						].join(' ')}
+					>
 						{badge}
 					</span>
 				) : null}
 			</div>
-			<h3 className="relative z-[1] mt-4 text-base font-black tracking-tight text-gray-950">{label}</h3>
-			<p className="relative z-[1] mt-1.5 flex-1 text-sm leading-relaxed text-gray-600">{description}</p>
-			<span className="relative z-[1] mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-brand-pink-dark">
+			<h3 className={`relative z-[1] mt-4 text-base font-black tracking-tight ${featured ? 'text-white' : 'text-gray-950'}`}>{label}</h3>
+			<p className={`relative z-[1] mt-1.5 flex-1 text-sm leading-relaxed ${featured ? 'text-white' : 'text-gray-600'}`}>{description}</p>
+			<span className={`relative z-[1] mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] ${featured ? 'text-white' : 'text-brand-pink-dark'}`}>
 				Start
 				<FontAwesomeIcon icon={faArrowRight} className="size-3 transition group-hover:translate-x-0.5" />
 			</span>
@@ -264,30 +274,27 @@ function PrimaryResumeCard({ onCreate, onChooseProfile, onStartFresh }) {
 	]
 
 	return (
-		<DashboardCard className="relative overflow-hidden border-brand-pink/22 bg-white px-5 pb-5 pt-6 shadow-[0_24px_62px_-34px_rgba(80,42,42,0.58)] sm:px-7 sm:pb-6 sm:pt-7">
-			<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_86%_12%,rgba(255,255,255,0.98),transparent_24%),linear-gradient(135deg,rgba(214,86,86,0.08),rgba(255,255,255,0.82)_48%,rgba(250,205,205,0.18))]" aria-hidden />
+		<DashboardCard className="relative overflow-hidden px-5 pb-5 pt-6 sm:px-7 sm:pb-6 sm:pt-7">
+			<span className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-brand-pink/[0.12] blur-3xl" aria-hidden />
+			<p className="relative z-[1] mb-3 inline-flex items-center gap-2 rounded-full bg-brand-pink/[0.08] px-3 py-1 text-[0.68rem] font-black uppercase tracking-[0.16em] text-brand-pink-dark ring-1 ring-brand-pink/12">
+				<FontAwesomeIcon icon={faWandMagicSparkles} className="size-3" />
+				Start here
+			</p>
+			<h2 className="text-3xl font-black tracking-tight text-gray-950 sm:text-[2.35rem]">Build a r&eacute;sum&eacute; for a role</h2>
+			<p className="mt-4 max-w-md text-base leading-relaxed text-gray-600">
+				Pick the path that matches what you need right now. Taylor will bring you into the editor from there.
+			</p>
 
-			<div className="relative z-[1]">
-				<p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-[0.68rem] font-black uppercase tracking-[0.16em] text-brand-pink-dark shadow-sm ring-1 ring-brand-pink/12">
-					<FontAwesomeIcon icon={faWandMagicSparkles} className="size-3" />
-					Start here
-				</p>
-				<h2 className="text-3xl font-black tracking-tight text-gray-950 sm:text-[2.35rem]">Build a r&eacute;sum&eacute; for a role</h2>
-				<p className="mt-4 max-w-md text-base leading-relaxed text-gray-700">
-					Pick the path that matches what you need right now. Taylor will bring you into the editor from there.
-				</p>
-
-				<div className="mt-6 grid gap-3 sm:grid-cols-3 lg:gap-4">
-					{startOptions.map((option) => (
-						<StartOptionButton key={option.label} {...option} />
-					))}
-				</div>
+			<div className="mt-6 grid gap-3 sm:grid-cols-3 lg:gap-4">
+				{startOptions.map((option) => (
+					<StartOptionButton key={option.label} {...option} />
+				))}
 			</div>
 		</DashboardCard>
 	)
 }
 
-function CareerDataCard({ profile, isLoading, onOpenProfile }) {
+function CareerDataCard({ profile, isLoading, onOpenProfile, onOpenSection }) {
 	const counts = useMemo(() => {
 		const summaryPresent = Boolean(profile?.summary?.summary?.trim())
 		return {
@@ -328,12 +335,26 @@ function CareerDataCard({ profile, isLoading, onOpenProfile }) {
 								<p className="font-bold text-gray-900">{row.label}</p>
 								<p className="text-xs text-gray-500">{isLoading ? 'Checking...' : ready ? `${count} saved` : row.empty}</p>
 							</div>
-							<span className="inline-flex rounded-full bg-gradient-to-r from-brand-pink/45 via-brand-pink-lighter to-brand-pink/18 p-px shadow-sm">
-								<span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-brand-pink-dark">
-									{ready ? <FontAwesomeIcon icon={faCheck} className="size-3" /> : <FontAwesomeIcon icon={faPlus} className="size-3" />}
-									{ready ? 'Ready' : 'Missing'}
+							{ready || isLoading ? (
+								<span className="inline-flex rounded-full bg-gradient-to-r from-brand-pink/45 via-brand-pink-lighter to-brand-pink/18 p-px shadow-sm">
+									<span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-brand-pink-dark">
+										<FontAwesomeIcon icon={ready ? faCheck : faCircleNotch} className={`size-3 ${isLoading ? 'animate-spin' : ''}`} />
+										{isLoading ? 'Checking' : 'Ready'}
+									</span>
 								</span>
-							</span>
+							) : (
+								<button
+									type="button"
+									onClick={() => onOpenSection(row.sectionId)}
+									className="group inline-flex rounded-full bg-gradient-to-r from-brand-pink/55 via-brand-pink-lighter to-brand-pink/24 p-px shadow-sm transition hover:from-brand-pink hover:via-brand-pink/55 hover:to-brand-pink/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+									aria-label={`Add ${row.label.toLowerCase()} to your profile`}
+								>
+									<span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-brand-pink-dark transition group-hover:bg-brand-pink/[0.045]">
+										<FontAwesomeIcon icon={faPlus} className="size-3 transition group-hover:rotate-90" />
+										Missing
+									</span>
+								</button>
+							)}
 						</div>
 					)
 				})}
@@ -573,6 +594,93 @@ function ProfileNudge({ onOpenProfile }) {
 	)
 }
 
+function SkeletonBlock({ className = '' }) {
+	return <span className={`block animate-pulse rounded-full bg-brand-pink/[0.1] ${className}`} aria-hidden />
+}
+
+function HomeLoadingState() {
+	return (
+		<div className="mx-auto max-w-7xl" role="status" aria-live="polite" aria-label="Loading your dashboard">
+			<header className="mb-7">
+				<SkeletonBlock className="h-3 w-20" />
+				<SkeletonBlock className="mt-4 h-10 w-[min(22rem,72vw)]" />
+				<SkeletonBlock className="mt-3 h-4 w-52" />
+			</header>
+
+			<div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(21rem,0.95fr)]">
+				<div className="flex flex-col gap-6">
+					<DashboardCard className="p-6 sm:p-7">
+						<SkeletonBlock className="h-6 w-24" />
+						<SkeletonBlock className="mt-5 h-9 w-[min(28rem,82%)]" />
+						<SkeletonBlock className="mt-4 h-4 w-[min(26rem,74%)]" />
+						<div className="mt-7 grid gap-3 sm:grid-cols-3 lg:gap-4">
+							{Array.from({ length: 3 }).map((_, index) => (
+								<div key={index} className="min-h-[9.25rem] rounded-2xl border border-gray-200/80 bg-white p-4">
+									<SkeletonBlock className="size-11 rounded-2xl" />
+									<SkeletonBlock className="mt-5 h-4 w-28" />
+									<SkeletonBlock className="mt-3 h-3 w-full" />
+									<SkeletonBlock className="mt-2 h-3 w-3/4" />
+								</div>
+							))}
+						</div>
+					</DashboardCard>
+
+					<DashboardCard className="p-6">
+						<div className="flex items-start justify-between gap-4">
+							<div className="flex-1">
+								<SkeletonBlock className="h-6 w-48" />
+								<SkeletonBlock className="mt-3 h-3 w-40" />
+							</div>
+							<SkeletonBlock className="h-8 w-24" />
+						</div>
+						<div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+							{Array.from({ length: 3 }).map((_, index) => (
+								<div key={index} className="h-52 animate-pulse rounded-2xl border border-gray-200/75 bg-brand-pink/[0.035]" aria-hidden />
+							))}
+						</div>
+					</DashboardCard>
+				</div>
+
+				<div className="flex flex-col gap-6">
+					<DashboardCard className="p-6">
+						<div className="flex items-start justify-between gap-4">
+							<div className="flex-1">
+								<SkeletonBlock className="h-6 w-36" />
+								<SkeletonBlock className="mt-3 h-3 w-48" />
+							</div>
+							<SkeletonBlock className="h-8 w-20" />
+						</div>
+						<div className="mt-6 divide-y divide-gray-200/70">
+							{Array.from({ length: 5 }).map((_, index) => (
+								<div key={index} className="flex items-center gap-3 py-3">
+									<SkeletonBlock className="size-9 shrink-0 rounded-xl" />
+									<div className="min-w-0 flex-1">
+										<SkeletonBlock className="h-4 w-24" />
+										<SkeletonBlock className="mt-2 h-3 w-20" />
+									</div>
+									<SkeletonBlock className="h-7 w-16" />
+								</div>
+							))}
+						</div>
+					</DashboardCard>
+
+					<DashboardCard className="p-6">
+						<SkeletonBlock className="h-6 w-36" />
+						<SkeletonBlock className="mt-3 h-3 w-56" />
+						<div className="mt-6 grid grid-cols-2 gap-3">
+							{Array.from({ length: 4 }).map((_, index) => (
+								<div key={index} className="h-[4.75rem] animate-pulse rounded-lg border border-gray-200/75 bg-brand-pink/[0.035]" aria-hidden />
+							))}
+						</div>
+						<SkeletonBlock className="mt-5 h-10 w-full rounded-xl" />
+					</DashboardCard>
+				</div>
+			</div>
+			<span className="sr-only">Loading your profile and saved resume versions.</span>
+		</div>
+	)
+}
+
 function Home() {
 	const navigate = useNavigate()
 	const [user, setUser] = useState(null)
@@ -597,7 +705,10 @@ function Home() {
 			try {
 				if (userData) setUser(JSON.parse(userData))
 
-				const response = await getMyProfile()
+				const [response] = await Promise.all([
+					getMyProfile(),
+					fetchSavedResumes(),
+				])
 				const profileData = response.data || response
 				setProfile(profileData)
 				if (profileData?.user) setUser(profileData.user)
@@ -610,11 +721,7 @@ function Home() {
 		}
 
 		fetchDashboard()
-	}, [navigate])
-
-	useEffect(() => {
-		if (user) fetchSavedResumes()
-	}, [user, fetchSavedResumes])
+	}, [navigate, fetchSavedResumes])
 
 	const handleLogout = async () => {
 		await logoutUser()
@@ -648,6 +755,14 @@ function Home() {
 
 	const greetingName = user?.first_name?.trim() || profile?.user?.first_name?.trim() || null
 
+	if (isLoading) {
+		return (
+			<DashboardShell onLogout={handleLogout}>
+				<HomeLoadingState />
+			</DashboardShell>
+		)
+	}
+
 	return (
 		<DashboardShell onLogout={handleLogout}>
 			<div className="mx-auto max-w-7xl">
@@ -655,9 +770,7 @@ function Home() {
 					<div>
 						<p className="text-xs font-black uppercase tracking-[0.2em] text-brand-pink-dark">Dashboard</p>
 						<h1 className="mt-2 text-3xl font-black tracking-tight text-gray-950 sm:text-4xl">
-							{isLoading ? (
-								'Welcome back'
-							) : greetingName ? (
+							{greetingName ? (
 								<>
 									Welcome back,{' '}
 									<span className="bg-gradient-to-r from-brand-pink to-red-600 bg-clip-text text-[1.14em] font-black leading-none text-transparent sm:text-[1.16em]">
@@ -694,8 +807,9 @@ function Home() {
 						<div className="shrink-0">
 							<CareerDataCard
 								profile={profile}
-								isLoading={isLoading}
+								isLoading={false}
 								onOpenProfile={() => navigate('/info')}
+								onOpenSection={(sectionId) => navigate(`/info#${sectionId}`)}
 							/>
 						</div>
 						<TemplatePanel onBrowse={() => navigate('/templates')} />

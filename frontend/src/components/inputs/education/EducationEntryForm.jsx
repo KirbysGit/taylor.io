@@ -1,66 +1,58 @@
 import MonthYearPicker from '../MonthYearPicker'
 import FormSection from './FormSection'
 
-function Field({ label, optional, required, missing, hint, children, compact }) {
+const INVALID_CLASS = 'border-red-400 bg-red-50/30 ring-2 ring-red-100 [animation:shake_0.45s_ease-in-out]'
+
+function Field({ label, required, children, compact }) {
 	return (
 		<div className="min-w-0">
 			<label className={compact ? 'mb-1.5 block text-xs font-semibold text-slate-600' : 'label'}>
 				{label}
-				{required ? <span className="ml-2 rounded-full bg-brand-pink/[0.08] px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-pink-dark">Required</span> : null}
-				{optional ? <span className="font-normal text-slate-400"> (optional)</span> : null}
+				{required ? <span className="ml-1 text-brand-pink">*</span> : null}
 			</label>
 			{children}
-			{missing ? <p className="mt-1.5 text-xs font-semibold text-red-600">{hint || `${label} is required.`}</p> : null}
 		</div>
 	)
 }
 
-function EducationEntryForm({ edu, entryId, index, onFieldChange, compact = false }) {
+function EducationEntryForm({ edu, entryId, index, onFieldChange, invalidFields, compact = false }) {
 	const current = edu?.current || false
-	const hasAnyEducationContent = [
-		edu?.school,
-		edu?.degree,
-		edu?.discipline,
-		edu?.field,
-		edu?.minor,
-		edu?.location,
-		edu?.gpa,
-		edu?.startDate,
-		edu?.endDate,
-	].some((value) => String(value || '').trim())
-	const missingDiscipline = hasAnyEducationContent && !String(edu?.discipline || edu?.field || '').trim()
+	const inv = invalidFields || new Set()
 
 	return (
-		<div className="space-y-8">
+		<div className="space-y-6">
 			<FormSection title="Basics">
-				<div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-					<Field label="School / University" compact={compact}>
+				{/* School — full width */}
+				<Field label="School / University" required compact={compact}>
+					<input
+						id={`education-school-${entryId}`}
+						type="text"
+						value={edu?.school || ''}
+						onChange={(e) => onFieldChange(index, 'school', e.target.value)}
+						className={`input ${inv.has('school') ? INVALID_CLASS : ''}`}
+						placeholder="e.g. University of Central Florida"
+						autoComplete="organization"
+					/>
+				</Field>
+				{/* Degree + Field of study — 2 equal columns */}
+				<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+					<Field label="Degree" required compact={compact}>
 						<input
-							id={`education-school-${entryId}`}
-							type="text"
-							value={edu?.school || ''}
-							onChange={(e) => onFieldChange(index, 'school', e.target.value)}
-							className="input"
-							placeholder="University name"
-							autoComplete="organization"
-						/>
-					</Field>
-					<Field label="Degree" compact={compact}>
-						<input
+							id={`education-degree-${entryId}`}
 							type="text"
 							value={edu?.degree || ''}
 							onChange={(e) => onFieldChange(index, 'degree', e.target.value)}
-							className="input"
+							className={`input ${inv.has('degree') ? INVALID_CLASS : ''}`}
 							placeholder="e.g. Bachelor of Science"
 						/>
 					</Field>
-					<Field label="Field of study" required missing={missingDiscipline} hint="Add a field of study so Taylor can understand your education lane." compact={compact}>
+					<Field label="Field of study" required compact={compact}>
 						<input
 							id={`education-discipline-${entryId}`}
 							type="text"
 							value={edu?.discipline || edu?.field || ''}
 							onChange={(e) => onFieldChange(index, 'discipline', e.target.value)}
-							className={`input ${missingDiscipline ? 'border-red-300 bg-red-50/40 ring-2 ring-red-100 focus:ring-red-200' : ''}`}
+							className={`input ${inv.has('discipline') ? INVALID_CLASS : ''}`}
 							placeholder="e.g. Computer Science"
 						/>
 					</Field>
@@ -68,17 +60,18 @@ function EducationEntryForm({ edu, entryId, index, onFieldChange, compact = fals
 			</FormSection>
 
 			<FormSection title="Details">
-				<div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-					<Field label="Minor" optional compact={compact}>
+				{/* Minor + Location take equal space, GPA is narrower */}
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1fr_0.55fr]">
+					<Field label="Minor" compact={compact}>
 						<input
 							type="text"
 							value={edu?.minor || ''}
 							onChange={(e) => onFieldChange(index, 'minor', e.target.value)}
 							className="input"
-							placeholder="Optional"
+							placeholder="e.g. Mathematics"
 						/>
 					</Field>
-					<Field label="Location" compact={compact}>
+					<Field label="Location" optional compact={compact}>
 						<input
 							type="text"
 							value={edu?.location || ''}
@@ -87,20 +80,20 @@ function EducationEntryForm({ edu, entryId, index, onFieldChange, compact = fals
 							placeholder="City, State"
 						/>
 					</Field>
-					<Field label="GPA" optional compact={compact}>
+					<Field label="GPA" compact={compact}>
 						<input
 							type="text"
 							value={edu?.gpa || ''}
 							onChange={(e) => onFieldChange(index, 'gpa', e.target.value)}
 							className="input"
-							placeholder="e.g. 3.7"
+							placeholder="3.7 / 4.0"
 						/>
 					</Field>
 				</div>
 			</FormSection>
 
 			<FormSection title="Dates">
-				<div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:items-end">
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-end">
 					<Field label="Start date" compact={compact}>
 						<MonthYearPicker
 							value={edu?.startDate || edu?.start_date || ''}

@@ -11,10 +11,7 @@ import { entrySummaryPaddingClass, getEntrySummaryGridClasses } from '../shared/
 import {
 	getEducationDisplayTitle,
 	getEducationMetaLine,
-	getEducationStatus,
 	presetForCategory,
-	statusBadgeClass,
-	statusLabel,
 	subsectionsToHighlightRows,
 } from './educationUtils'
 
@@ -42,7 +39,6 @@ function EducationEntrySummary({
 }) {
 	const title = getEducationDisplayTitle(edu)
 	const meta = getEducationMetaLine(edu)
-	const status = getEducationStatus(edu)
 	const theme = getEntryTheme(entryId)
 	const layout = getEntrySummaryGridClasses({ compact, isDraggable })
 	const subs = edu?.subsections || {}
@@ -78,11 +74,6 @@ function EducationEntrySummary({
 			<div className="row-start-1 min-w-0">
 				<div className="flex flex-wrap items-start gap-2 gap-y-1">
 					<p className="text-sm font-bold text-slate-900">{title}</p>
-					<span
-						className={`inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusBadgeClass(status)}`}
-					>
-						{statusLabel(status)}
-					</span>
 				</div>
 				{meta ? <p className="mt-1 text-xs leading-relaxed text-slate-600">{meta}</p> : null}
 			</div>

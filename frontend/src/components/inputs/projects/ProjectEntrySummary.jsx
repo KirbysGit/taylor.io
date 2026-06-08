@@ -11,10 +11,7 @@ import {
 	getProjectDisplayTitle,
 	getProjectEntryTheme,
 	getProjectMetaLine,
-	getProjectStatus,
 	getProjectTechChips,
-	statusBadgeClass,
-	statusLabel,
 } from './projectsUtils'
 
 function ProjectEntrySummary({
@@ -30,12 +27,10 @@ function ProjectEntrySummary({
 }) {
 	const title = getProjectDisplayTitle(proj)
 	const meta = getProjectMetaLine(proj)
-	const status = getProjectStatus(proj)
 	const theme = getProjectEntryTheme(entryId)
 	const layout = getEntrySummaryGridClasses({ compact, isDraggable })
 	const techChips = getProjectTechChips(proj)
 	const hasPills = techChips.length > 0
-	const showStatusBadge = status !== 'complete'
 
 	return (
 		<div
@@ -63,13 +58,6 @@ function ProjectEntrySummary({
 					{proj?.fromParsed ? (
 						<span className="inline-flex shrink-0 rounded-full border border-sky-200/90 bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-800">
 							Imported
-						</span>
-					) : null}
-					{showStatusBadge ? (
-						<span
-							className={`inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusBadgeClass(status)}`}
-						>
-							{statusLabel(status)}
 						</span>
 					) : null}
 				</div>

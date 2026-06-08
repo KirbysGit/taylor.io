@@ -13,7 +13,7 @@ const EducationStep = forwardRef(function EducationStep({ education, onAdd, onRe
 				<div>
 					<h2 className="font-serif text-3xl font-bold tracking-tight text-gray-950">Education</h2>
 					<p className="mt-1 text-gray-600">
-						Add schools, degrees, coursework, honors, and anything else that should be available when tailoring a résumé.
+						Schools, degrees, coursework, and honors for tailoring your résumé.
 					</p>
 				</div>
 				<button

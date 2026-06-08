@@ -2,6 +2,8 @@ import FormSection from '../education/FormSection'
 import ProjectDescription from './ProjectDescription'
 import { getTechStackString } from './projectsUtils'
 
+const INVALID_CLASS = 'border-red-400 bg-red-50/30 ring-2 ring-red-100 [animation:shake_0.45s_ease-in-out]'
+
 function Field({ label, optional, children, compact }) {
 	return (
 		<div className="min-w-0">
@@ -26,8 +28,11 @@ function ProjectEntryForm({
 	onBulletChange,
 	onAddBullet,
 	onRemoveBullet,
+	invalidFields,
 	compact = false,
 }) {
+	const inv = invalidFields || new Set()
+
 	return (
 		<div className="space-y-6">
 			<FormSection title="Basics">
@@ -37,7 +42,7 @@ function ProjectEntryForm({
 						type="text"
 						value={proj?.title || ''}
 						onChange={(e) => onFieldChange(index, 'title', e.target.value)}
-						className="input"
+						className={`input ${inv.has('title') ? INVALID_CLASS : ''}`}
 						placeholder="e.g. Personal Finance App"
 					/>
 				</Field>
@@ -53,6 +58,7 @@ function ProjectEntryForm({
 				onAddBullet={() => onAddBullet(index)}
 				onRemoveBullet={(bi) => onRemoveBullet(index, bi)}
 				compact={compact}
+				invalid={inv.has('description')}
 			/>
 
 			<FormSection title="Details">

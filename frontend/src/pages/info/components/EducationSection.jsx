@@ -18,7 +18,7 @@ const EducationSection = ({ education, onAdd, onRemove, onUpdate }) => {
 	return (
 		<ProfileSectionCard
 			title="Education"
-			description="Add schools, degrees, coursework, honors, and anything else that should be available when tailoring a résumé."
+			description="Schools, degrees, coursework, and honors for tailoring your résumé."
 			headerAction={addButton}
 			hideEyebrow
 			showAutoSaveBadge={false}

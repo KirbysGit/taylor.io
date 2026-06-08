@@ -7,16 +7,16 @@ import {
 	faCheck,
 	faEye,
 	faFileArrowUp,
-	faKeyboard,
+	faPen,
 	faRotate,
-	faWandMagicSparkles,
+	faShieldHalved,
 } from '@fortawesome/free-solid-svg-icons'
 
 import { parseResume } from '@/api/services/resume'
 import { attachResume } from '@/api/services/profile'
 import { eduMatches } from '@/pages/info/utils/mergeParsedData'
 
-const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveResume }) => {
+const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveResume, onSkipSetup }) => {
 	const [parsedData, setParsedData] = useState(null)
 	const [isParsing, setIsParsing] = useState(false)
 	const [parseError, setParseError] = useState('')
@@ -167,15 +167,15 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 	}
 
 	return (
-		<div className="mx-auto max-w-2xl">
+		<div className="mx-auto max-w-3xl">
 			{/* Header */}
-			<div className="mb-10 text-center">
-				<h2 className="font-serif text-4xl font-black tracking-tight text-gray-950 sm:text-5xl">
+			<div className="mb-9 text-center">
+				<h2 className="font-serif text-4xl font-black tracking-tight text-gray-950 sm:text-[2.85rem]">
 					Start with what you have.
 				</h2>
-				<p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-gray-500">
+				<p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-gray-500 sm:text-lg">
 					Upload a r&eacute;sum&eacute;, or answer a few quick questions.
-					You can edit everything later.
+					<span className="block">You can edit everything later.</span>
 				</p>
 			</div>
 
@@ -183,7 +183,7 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 			<div className="space-y-4">
 
 				{/* Upload card */}
-				<div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:border-brand-pink/30 hover:shadow-md">
+				<div className="group overflow-hidden rounded-[1.25rem] border border-brand-pink/12 bg-white shadow-[0_18px_42px_-30px_rgba(90,45,45,0.48)] transition duration-300 hover:-translate-y-0.5 hover:border-brand-pink/32 hover:shadow-[0_24px_52px_-30px_rgba(214,86,86,0.38)]">
 					<input
 						type="file"
 						accept=".pdf,.docx,.doc"
@@ -195,9 +195,9 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 
 					{hasResume ? (
 						/* Success state */
-						<div className="p-5">
+						<div className="p-5 sm:p-6">
 							<div className="flex items-center gap-4">
-								<div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+								<div className="flex size-16 shrink-0 items-center justify-center rounded-[1.15rem] bg-emerald-50 text-emerald-600">
 									<FontAwesomeIcon icon={faCheck} className="size-6" />
 								</div>
 								<div className="min-w-0 flex-1">
@@ -227,7 +227,7 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 									<button
 										type="button"
 										onClick={handleNext}
-										className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-pink text-white shadow-sm transition hover:bg-brand-pink-dark"
+										className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-pink/[0.11] text-brand-pink shadow-sm transition duration-300 hover:translate-x-1 hover:bg-brand-pink hover:text-white"
 										aria-label="Continue"
 									>
 										<FontAwesomeIcon icon={faArrowRight} className="size-4" />
@@ -239,9 +239,9 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 						/* Upload trigger */
 						<label
 							htmlFor="resume-upload"
-							className={`flex cursor-pointer items-center gap-4 p-5 ${isParsing ? 'pointer-events-none' : ''}`}
+							className={`flex min-h-[8rem] cursor-pointer items-center gap-5 px-6 py-5 sm:px-7 ${isParsing ? 'pointer-events-none' : ''}`}
 						>
-							<div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-brand-pink/[0.10] text-brand-pink">
+							<div className="flex size-16 shrink-0 items-center justify-center rounded-[1.15rem] bg-brand-pink/[0.10] text-brand-pink">
 								{isParsing ? (
 									<span className="flex gap-1">
 										<span className="size-1.5 animate-bounce rounded-full bg-brand-pink" style={{ animationDelay: '0ms' }} />
@@ -249,24 +249,24 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 										<span className="size-1.5 animate-bounce rounded-full bg-brand-pink" style={{ animationDelay: '260ms' }} />
 									</span>
 								) : (
-									<FontAwesomeIcon icon={faFileArrowUp} className="size-6" />
+									<FontAwesomeIcon icon={faFileArrowUp} className="size-7" />
 								)}
 							</div>
 							<div className="min-w-0 flex-1">
-								<p className="font-black text-gray-950">
+								<p className="text-lg font-black text-gray-950">
 									{isParsing ? 'Reading your file…' : 'Upload a résumé'}
 								</p>
-								<p className="mt-0.5 text-sm text-gray-500">
+								<p className="mt-1 text-sm text-gray-500 sm:text-base">
 									{isParsing ? 'This usually takes a few seconds.' : 'PDF or Word · We\'ll pull out the basics'}
 								</p>
 								{isParsing ? (
 									<div className="mt-2 overflow-hidden rounded-full bg-brand-pink/[0.10]">
-										<div className="h-1 w-1/2 animate-pulse rounded-full bg-gradient-to-r from-brand-pink via-rose-400 to-violet-400" />
+										<div className="h-1 w-1/2 animate-pulse rounded-full bg-gradient-to-r from-brand-pink to-rose-400" />
 									</div>
 								) : null}
 							</div>
 							{!isParsing ? (
-								<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-pink/[0.10] text-brand-pink transition group-hover:bg-brand-pink group-hover:text-white">
+								<div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-pink/[0.10] text-brand-pink transition duration-300 group-hover:translate-x-1 group-hover:bg-brand-pink group-hover:text-white">
 									<FontAwesomeIcon icon={faArrowRight} className="size-4" />
 								</div>
 							) : null}
@@ -289,29 +289,35 @@ const WelcomeStep = ({ user, handleNext, formData, onFormDataUpdate, onRemoveRes
 							handleNext()
 						}}
 						disabled={isParsing}
-						className="group flex w-full items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm transition hover:border-violet-200 hover:shadow-md disabled:pointer-events-none disabled:opacity-60"
+						className="group flex min-h-[8rem] w-full items-center gap-5 rounded-[1.25rem] border border-brand-pink/12 bg-white px-6 py-5 text-left shadow-[0_18px_42px_-30px_rgba(90,45,45,0.48)] transition duration-300 hover:-translate-y-0.5 hover:border-brand-pink/32 hover:shadow-[0_24px_52px_-30px_rgba(214,86,86,0.38)] disabled:pointer-events-none disabled:opacity-60 sm:px-7"
 					>
-						<div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
-							<FontAwesomeIcon icon={faKeyboard} className="size-6" />
+						<div className="flex size-16 shrink-0 items-center justify-center rounded-[1.15rem] bg-brand-pink/[0.10] text-brand-pink">
+							<FontAwesomeIcon icon={faPen} className="size-7" />
 						</div>
 						<div className="min-w-0 flex-1">
-							<p className="font-black text-gray-950">Enter my information</p>
-							<p className="mt-0.5 text-sm text-gray-500">Add experience, education, projects, and skills</p>
+							<p className="text-lg font-black text-gray-950">Enter my information</p>
+							<p className="mt-1 text-sm text-gray-500 sm:text-base">Add experience, education, projects, and skills</p>
 						</div>
-						<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600 transition group-hover:bg-violet-100">
-							<FontAwesomeIcon icon={faArrowRight} className="size-4 transition group-hover:translate-x-0.5" />
+						<div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-pink/[0.10] text-brand-pink transition duration-300 group-hover:translate-x-1 group-hover:bg-brand-pink group-hover:text-white">
+							<FontAwesomeIcon icon={faArrowRight} className="size-4" />
 						</div>
 					</button>
 				) : null}
 			</div>
 
 			{/* Footer note */}
-			<div className="mt-8 flex items-center justify-center gap-2.5 text-sm text-gray-500">
-				<span className="flex size-7 items-center justify-center rounded-full bg-amber-100 text-amber-500">
-					<FontAwesomeIcon icon={faWandMagicSparkles} className="size-3.5" />
-				</span>
-				<span className="font-medium">Nothing is final &middot; You can edit everything later</span>
+			<div className="mt-8 flex items-center justify-center gap-3 text-sm text-gray-500">
+				<FontAwesomeIcon icon={faShieldHalved} className="size-5 text-brand-pink" />
+				<span className="font-medium">Nothing is final &middot; Edit anytime</span>
 			</div>
+			<button
+				type="button"
+				onClick={onSkipSetup}
+				disabled={isParsing}
+				className="mx-auto mt-5 block rounded-lg px-3 py-2 text-sm font-bold text-gray-500 transition hover:bg-white/70 hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink disabled:pointer-events-none disabled:opacity-50"
+			>
+				Set up later
+			</button>
 		</div>
 	)
 }
