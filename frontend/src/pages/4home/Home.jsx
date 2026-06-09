@@ -326,33 +326,27 @@ function CareerDataCard({ profile, isLoading, onOpenProfile, onOpenSection }) {
 					const ready = count > 0
 					return (
 						<div key={row.key} className="flex items-center gap-3 py-3">
-							<span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-pink/60 via-brand-pink-lighter to-brand-pink/18 p-px shadow-[0_8px_18px_-14px_rgba(214,86,86,0.65)]">
-								<span className="flex size-full items-center justify-center rounded-[0.68rem] bg-white text-brand-pink-dark">
-									<FontAwesomeIcon icon={row.icon} className="size-4" />
-								</span>
+							<span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-brand-pink/20 bg-brand-pink/[0.06] text-brand-pink-dark shadow-sm">
+								<FontAwesomeIcon icon={row.icon} className="size-4" />
 							</span>
 							<div className="min-w-0 flex-1">
 								<p className="font-bold text-gray-900">{row.label}</p>
 								<p className="text-xs text-gray-500">{isLoading ? 'Checking...' : ready ? `${count} saved` : row.empty}</p>
 							</div>
 							{ready || isLoading ? (
-								<span className="inline-flex rounded-full bg-gradient-to-r from-brand-pink/45 via-brand-pink-lighter to-brand-pink/18 p-px shadow-sm">
-									<span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-brand-pink-dark">
-										<FontAwesomeIcon icon={ready ? faCheck : faCircleNotch} className={`size-3 ${isLoading ? 'animate-spin' : ''}`} />
-										{isLoading ? 'Checking' : 'Ready'}
-									</span>
+								<span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+									<FontAwesomeIcon icon={ready ? faCheck : faCircleNotch} className={`size-3 ${isLoading ? 'animate-spin' : ''}`} />
+									{isLoading ? 'Checking' : 'Ready'}
 								</span>
 							) : (
 								<button
 									type="button"
 									onClick={() => onOpenSection(row.sectionId)}
-									className="group inline-flex rounded-full bg-gradient-to-r from-brand-pink/55 via-brand-pink-lighter to-brand-pink/24 p-px shadow-sm transition hover:from-brand-pink hover:via-brand-pink/55 hover:to-brand-pink/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
+									className="group inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-bold text-gray-500 shadow-sm transition hover:border-brand-pink/30 hover:bg-brand-pink/[0.04] hover:text-brand-pink-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink focus-visible:ring-offset-2"
 									aria-label={`Add ${row.label.toLowerCase()} to your profile`}
 								>
-									<span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-brand-pink-dark transition group-hover:bg-brand-pink/[0.045]">
-										<FontAwesomeIcon icon={faPlus} className="size-3 transition group-hover:rotate-90" />
-										Missing
-									</span>
+									<FontAwesomeIcon icon={faPlus} className="size-3 transition group-hover:rotate-90" />
+									Missing
 								</button>
 							)}
 						</div>
