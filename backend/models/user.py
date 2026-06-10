@@ -42,6 +42,10 @@ class User(Base):
     # optional per-user section header overrides, e.g., {"education": "Academics"}
     section_labels = Column(JSON, nullable=True)
 
+    # onboarding: set once the user finishes (or skips) account setup. server-side
+    # source of truth — frontend must not rely on localStorage for this.
+    setup_completed = Column(Boolean, nullable=False, default=False)
+
     # daily tailor usage cap
     daily_tailor_count = Column(Integer, nullable=False, default=0)
     daily_tailor_reset_date = Column(DateTime, nullable=True)

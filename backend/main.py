@@ -16,7 +16,7 @@ logging.basicConfig(
 )
 
 # import routers.
-from routers import auth_router, users_router, profile_router, generator_router, templates_router, ai_router
+from routers import auth_router, profile_router, generator_router, templates_router, ai_router
 
 
 # ---------------- backend startup ----------------
@@ -48,7 +48,6 @@ app.add_middleware(
 
 # register modular route groups.
 app.include_router(auth_router)
-app.include_router(users_router)
 app.include_router(profile_router)
 app.include_router(generator_router)
 app.include_router(templates_router)

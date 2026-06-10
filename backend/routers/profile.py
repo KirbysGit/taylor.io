@@ -128,6 +128,21 @@ async def clear_my_profile(
     }
 
 
+# mark onboarding as finished. one-way flag: completing (or skipping) setup
+# flips it true and it stays true — profile emptiness is handled by in-app empty states.
+@router.post("/complete-setup", response_model=UserResponse)
+async def complete_setup(
+    current_user: User = Depends(get_current_user_from_token),
+    db: Session = Depends(get_db),
+):
+    if not current_user.setup_completed:
+        current_user.setup_completed = True
+        db.add(current_user)
+        db.commit()
+        db.refresh(current_user)
+    return UserResponse.model_validate(current_user)
+
+
 # update section header labels.
 @router.post("/section-labels", response_model=UserResponse)
 async def update_section_labels(

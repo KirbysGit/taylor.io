@@ -10,10 +10,16 @@
 # language.
 
 # imports.
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Depends, Response
 
-# create router.
-router = APIRouter(prefix="/api/resume/generator", tags=["generator"])
+from .auth import get_current_user_from_token
+
+# create router. every route requires a logged-in user (session cookie or bearer token).
+router = APIRouter(
+    prefix="/api/resume/generator",
+    tags=["generator"],
+    dependencies=[Depends(get_current_user_from_token)],
+)
 
 from generator.pipeline import generate_resume, generate_pdf, generate_docx
 

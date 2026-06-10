@@ -22,6 +22,7 @@ class UserResponse(BaseModel):
     last_name: str
     email: str
     email_verified: bool = False
+    setup_completed: bool = False
     section_labels: Optional[Dict[str, str]] = None
     attached_resume_filename: Optional[str] = None
     attached_resume_uploaded_at: Optional[datetime] = None
