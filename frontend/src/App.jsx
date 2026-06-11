@@ -18,6 +18,7 @@ import TemplatesPage from './pages/templates/TemplatesPage'
 import Settings from './pages/settings/Settings'
 import ProtectedRoute from './components/ProtectedRoute'
 import ThemedToaster from './components/notifications/ThemedToaster'
+import NotFound from './pages/notfound/NotFound'
 
 // ----------- main component -----------
 
@@ -110,6 +111,8 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   )

@@ -4,9 +4,30 @@
 # basically define shape and rules for data coming in and going out of our api.
 
 # imports.
-from pydantic import BaseModel, EmailStr
+import re
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List, Union, Dict
 from datetime import datetime
+
+# --------- password policy ---------
+
+# single source of truth for password strength — applied everywhere a password
+# enters the system (register + reset). mirrors the signup UI checklist.
+PASSWORD_SPECIAL_CHARS = r"!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>/?"
+
+
+def validate_password_strength(value: str) -> str:
+    if len(value) < 8:
+        raise ValueError("Password must be at least 8 characters.")
+    if len(value) > 128:
+        raise ValueError("Password must be 128 characters or fewer.")
+    if not re.search(r"[A-Z]", value):
+        raise ValueError("Password must include at least one uppercase letter.")
+    if len(re.findall(r"\d", value)) < 2:
+        raise ValueError("Password must include at least two numbers.")
+    if not re.search(f"[{PASSWORD_SPECIAL_CHARS}]", value):
+        raise ValueError("Password must include at least one special character (!@#$%…).")
+    return value
 
 # --------- user schemas ---------
 
@@ -15,6 +36,8 @@ class UserCreate(BaseModel):
     last_name: str
     email: EmailStr
     password: str
+
+    _validate_password = field_validator("password")(validate_password_strength)
 
 class UserResponse(BaseModel):
     id: int
@@ -52,6 +75,8 @@ class EmailRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     password: str
+
+    _validate_password = field_validator("password")(validate_password_strength)
 
 # --------- summary schemas ---------
 

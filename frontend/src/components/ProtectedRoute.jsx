@@ -4,16 +4,6 @@ import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { getCurrentUser } from '@/api/services/auth'
 
-function setupCompletedForUser(user) {
-	const userId = user?.id
-	if (!userId) return false
-	try {
-		return localStorage.getItem(`setupCompleted_${userId}`) === 'true'
-	} catch {
-		return false
-	}
-}
-
 function LoadingGate() {
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-cream">
@@ -54,7 +44,7 @@ function ProtectedRoute({ children, requireSetup = false }) {
 	if (state.status === 'checking') return <LoadingGate />
 	if (state.status === 'unverified') return <Navigate to="/auth?mode=login&unverified=1" replace />
 	if (state.status === 'unauthenticated') return <Navigate to="/auth?mode=login" replace />
-	if (requireSetup && !setupCompletedForUser(state.user)) return <Navigate to="/setup" replace />
+	if (requireSetup && !state.user?.setup_completed) return <Navigate to="/setup" replace />
 	return children
 }
 

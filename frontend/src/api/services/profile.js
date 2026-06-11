@@ -27,6 +27,13 @@ export async function upsertContact(contactData) {
 	})
 }
 
+// mark onboarding as finished (server-side source of truth for setup completion).
+export async function completeSetup() {
+	return apiRequest('/api/profile/complete-setup', {
+		method: 'POST',
+	})
+}
+
 // create education.
 export async function createEducation(educationData) {
 	return apiRequest('/api/profile/education', {

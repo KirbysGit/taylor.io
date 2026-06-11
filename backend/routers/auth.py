@@ -245,6 +245,33 @@ async def _send_password_reset_email(user: User) -> None:
     )
 
 
+# outbound email throttle: 60s cooldown + daily cap per user per email type
+# ("verification" or "reset"). returns True and records the send when allowed.
+# callers silently skip sending when denied — responses stay generic either way,
+# so throttling never leaks whether an account exists.
+EMAIL_SEND_COOLDOWN_SECONDS = 60
+EMAIL_SEND_DAILY_LIMIT = 5
+
+
+def _email_throttle_allows(user: User, kind: str) -> bool:
+    now = datetime.utcnow()
+    last_sent = getattr(user, f"{kind}_email_last_sent_at")
+    if last_sent and (now - last_sent).total_seconds() < EMAIL_SEND_COOLDOWN_SECONDS:
+        return False
+
+    count_date = getattr(user, f"{kind}_email_count_date")
+    count = getattr(user, f"{kind}_email_daily_count") or 0
+    if not count_date or count_date.date() != now.date():
+        count = 0
+    if count >= EMAIL_SEND_DAILY_LIMIT:
+        return False
+
+    setattr(user, f"{kind}_email_last_sent_at", now)
+    setattr(user, f"{kind}_email_daily_count", count + 1)
+    setattr(user, f"{kind}_email_count_date", now)
+    return True
+
+
 def _find_user_by_token_hash(db: Session, raw_token: str, hash_field: str, expires_field: str) -> User | None:
     hashed = token_hash(raw_token)
     candidates = db.query(User).filter(getattr(User, hash_field).isnot(None)).all()
@@ -275,6 +302,7 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     )
     db.add(new_user)
     db.flush()
+    _email_throttle_allows(new_user, "verification")  # record the send so an instant resend hits the cooldown
     await _send_verification_email(new_user)
     db.commit()
     return {"status": "verification_required", "email": new_user.email, "message": "Check your email to verify your account."}
@@ -341,7 +369,7 @@ async def me(current_user: User = Depends(get_current_user_from_token)):
 @router.post("/resend-verification", response_model=AuthStatusResponse)
 async def resend_verification(payload: EmailRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == str(payload.email).lower()).first()
-    if user and not user.email_verified:
+    if user and not user.email_verified and _email_throttle_allows(user, "verification"):
         await _send_verification_email(user)
         db.commit()
     return {"status": "ok", "email": payload.email, "message": "If the account needs verification, a new email was sent."}
@@ -363,7 +391,7 @@ async def verify_email(token: str, db: Session = Depends(get_db)):
 @router.post("/forgot-password", response_model=AuthStatusResponse)
 async def forgot_password(payload: EmailRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == str(payload.email).lower()).first()
-    if user:
+    if user and _email_throttle_allows(user, "reset"):
         await _send_password_reset_email(user)
         db.commit()
     return {"status": "ok", "message": "If an account exists, we sent a reset link."}

@@ -10,7 +10,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // services imports.
-import { setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, upsertContact, detachResume } from '@/api/services/profile'
+import { setupEducation, setupExperiences, setupProjects, setupSkills, createSummary, upsertContact, detachResume, completeSetup } from '@/api/services/profile'
 
 // utils imports.
 import { 
@@ -253,13 +253,17 @@ function AccountSetup() {
 		}
 	}
 
-	const handleSkipSetup = () => {
-		const userId = user?.id
-		if (!userId) return
-		localStorage.setItem(`setupCompleted_${userId}`, 'true')
-		localStorage.setItem(`setupSkipped_${userId}`, 'true')
-		setShowSkipConfirmation(false)
-		navigate('/home')
+	const handleSkipSetup = async () => {
+		try {
+			// mark onboarding done server-side so ProtectedRoute lets them through.
+			await completeSetup()
+			setShowSkipConfirmation(false)
+			navigate('/home')
+		} catch (error) {
+			console.error('Error skipping setup:', error)
+			setShowSkipConfirmation(false)
+			setStepError("We couldn't skip setup right now — check your connection and try again.")
+		}
 	}
 
 	// handles form completion.
@@ -315,20 +319,14 @@ function AccountSetup() {
 
 			// wait for all promises to complete.
 			await Promise.all(promises)
-			
-			// mark setup as completed in localStorage (user-specific flag).
-			const userId = user?.id
-			if (userId) {
-				localStorage.setItem(`setupCompleted_${userId}`, 'true')
-				localStorage.removeItem(`setupSkipped_${userId}`)
-			}
-			
-			// redirect to home.
+
+			// everything saved — mark onboarding done server-side, then head home.
+			await completeSetup()
 			navigate('/home')
 		} catch (error) {
 			console.error('Error saving profile data:', error)
-			// still redirect even if there's an error.
-			navigate('/home')
+			// stay on the page so the user knows nothing was lost silently.
+			setStepError("We couldn't save your profile — check your connection and try again. Your answers are still here.")
 		}
 	}
 

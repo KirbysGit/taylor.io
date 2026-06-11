@@ -95,8 +95,13 @@ function SignUpModal({ isOpen, onClose, onSwitchToLogin, onSignUpSuccess }) {
 
 			onSignUpSuccess(response.data || response)
 		} catch (err) {
+			const detail = err.response?.data?.detail
+			// pydantic 422s send detail as an array — pull out the human message.
+			const detailMessage = typeof detail === 'string'
+				? detail
+				: detail?.[0]?.msg?.replace(/^Value error, /, '')
 			setFormError(
-				err.response?.data?.detail || err.response?.data?.message || 'Sign up failed. Please try again.',
+				detailMessage || err.response?.data?.message || 'Sign up failed. Please try again.',
 			)
 		} finally {
 			setIsLoading(false)

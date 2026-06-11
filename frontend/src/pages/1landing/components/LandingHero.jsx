@@ -41,7 +41,7 @@ export default function LandingHero() {
 						</div>
 					</div>
 
-					<div className="relative flex min-h-0 min-w-0 w-full justify-center lg:justify-start">
+					<div className="landing-hero-visual relative flex min-h-0 min-w-0 w-full justify-center lg:justify-start">
 						<HeroPipelineIllustration />
 					</div>
 				</div>

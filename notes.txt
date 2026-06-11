@@ -116,6 +116,7 @@ idea stack :
 - how do we want to aggregate the data for processing of JD's and user profiles.
 - template images need to be cleared up, we want a clear picture of what the user is going to use.
 - "tell us your goals", for job path, allowing user to set up adn target specific flows of the site.
+- ai parsing of first parsed info for double checking / categorizing how to set up info.
 
 
 - breakdown video of what hte site does after initial publishing

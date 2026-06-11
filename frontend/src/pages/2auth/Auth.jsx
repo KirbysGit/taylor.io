@@ -250,14 +250,23 @@ function ResetPasswordPanel({ token }) {
 		e.preventDefault()
 		setError('')
 		if (!token) return setError('This reset link is missing a token.')
+		// mirror the signup password rules (also enforced server-side).
 		if (password.length < 8) return setError('Password must be at least 8 characters.')
+		if (!/[A-Z]/.test(password)) return setError('Password must include at least one uppercase letter.')
+		if ((password.match(/\d/g) || []).length < 2) return setError('Password must include at least two numbers.')
+		if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return setError('Password must include at least one special character (!@#$%…).')
 		if (password !== confirm) return setError('Passwords do not match.')
 		setLoading(true)
 		try {
 			await resetPassword(token, password)
 			navigate('/auth?mode=login&reset=1', { replace: true })
 		} catch (err) {
-			setError(err?.response?.data?.detail || 'This reset link has expired or is invalid.')
+			const detail = err?.response?.data?.detail
+			// pydantic 422s send detail as an array — pull out the human message.
+			const message = typeof detail === 'string'
+				? detail
+				: detail?.[0]?.msg?.replace(/^Value error, /, '')
+			setError(message || 'This reset link has expired or is invalid.')
 		} finally {
 			setLoading(false)
 		}
@@ -430,7 +439,8 @@ function Auth() {
 		const nextEmail = payload?.email || email
 		navigate(`/auth?mode=check-email${nextEmail ? `&email=${encodeURIComponent(nextEmail)}` : ''}`, { replace: true })
 	}
-	const handleLoginSuccess = () => navigate('/home')
+	// route on the server's setup flag: onboarded users land home, new users go straight to setup.
+	const handleLoginSuccess = (user) => navigate(user?.setup_completed ? '/home' : '/setup')
 
 	if (pathname === '/auth/reset-password') {
 		return <AuthShell><ResetPasswordPanel token={token} /></AuthShell>

@@ -13,7 +13,7 @@ export default function Landing() {
 	return (
 		<div
 			id="landing-scroll-root"
-			className="landing-scrollbar min-h-screen overflow-y-auto"
+			className="landing-scrollbar min-h-screen overflow-x-hidden overflow-y-auto"
 			style={{ height: '100vh', overflowY: 'auto' }}
 		>
 			{/* Fixed card nav overlays content; hero runs edge-to-edge under it. */}

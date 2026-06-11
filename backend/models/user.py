@@ -50,5 +50,14 @@ class User(Base):
     daily_tailor_count = Column(Integer, nullable=False, default=0)
     daily_tailor_reset_date = Column(DateTime, nullable=True)
 
+    # outbound email throttling (cooldown + daily cap per email type) — keeps the
+    # resend-verification / forgot-password endpoints from being used as email bombers.
+    verification_email_last_sent_at = Column(DateTime, nullable=True)
+    verification_email_daily_count = Column(Integer, nullable=False, default=0)
+    verification_email_count_date = Column(DateTime, nullable=True)
+    reset_email_last_sent_at = Column(DateTime, nullable=True)
+    reset_email_daily_count = Column(Integer, nullable=False, default=0)
+    reset_email_count_date = Column(DateTime, nullable=True)
+
     # saved resume previews (snapshots for later)
     saved_resumes = relationship("SavedResume", back_populates="user", cascade="all, delete-orphan")
